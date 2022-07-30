@@ -61,8 +61,8 @@ void CScene::BuildDefaultLightsAndMaterials()
 }
 
 
-uniform_real_distribution<> uidx(200.0, 1000.0); uniform_real_distribution<> uidz(200.0, 2300.0);
-uniform_real_distribution<> uidy(190.0, 195.0); uniform_real_distribution<> uid(0.0, 10.0);
+uniform_real_distribution<> uidx(80.0, 1500.0); uniform_real_distribution<> uidz(80.0, 1500.0);
+uniform_real_distribution<> uidy(20.0, 25.0); uniform_real_distribution<> uidR(0.0, 20.0);
 void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
@@ -80,8 +80,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pTerrainShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	CMaterialColors* pMaterialColors = new CMaterialColors();
-	pMaterialColors->m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	pMaterialColors->m_xmf4Diffuse = XMFLOAT4(0.63f, 0.9f, 0.1f, 1.0f);
+	pMaterialColors->m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	pMaterialColors->m_xmf4Diffuse = XMFLOAT4(0.63f, 0.8f, 0.1f, 1.0f);
 	pMaterialColors->m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 6.0f); //(r,g,b,a=power)
 	pMaterialColors->m_xmf4Emissive = XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f);
 
@@ -89,7 +89,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pMaterial->SetShader(pTerrainShader);
 	pMaterial->SetMaterialColors(pMaterialColors);
 
-	XMFLOAT3 xmf3Scale(16.0f, 12.0f, 16.0f);
+	XMFLOAT3 xmf3Scale(16.0f, 1.5f, 16.0f);
 	XMFLOAT3 xmf3Pos(0.0, 0.0f, 0.0);
 	XMFLOAT4 xmf4Color(0.0f, 0.2f, 0.0f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Assets/Image/Terrain/terrain-8bit.raw"), 512, 512, 16, 16, xmf3Scale, xmf4Color);
@@ -99,7 +99,6 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pTerrain->SetMaterial(pMaterial);
 
 
-	float Ty = m_pTerrain->GetPosition().y + 180.0f;
 	m_nGameObjects = 15;
 	m_ppGameObjects = new CTankObject * [m_nGameObjects];
 
@@ -109,40 +108,40 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pTree1 = new CobstacleObject();
 	pTree1->SetChild(pGameModel, true);
 	pTree1->OnInitialize();
-	pTree1->SetScale(5.0, 8.0, 5.0);
-	pTree1->SetPosition(386.7, 166.0, 732.1);
+	pTree1->SetScale(5.0, 10.0, 5.0);
+	pTree1->SetPosition(uidx(dre), uidy(dre), uidz(dre));
 	m_ppGameObjects[0] = pTree1;
 
 	CobstacleObject* pTree2 = NULL;
 	pTree2 = new CobstacleObject();
 	pTree2->SetChild(pGameModel, true);
 	pTree2->OnInitialize();
-	pTree2->SetScale(5.0, 8.0, 5.0);
-	pTree2->SetPosition(725, 166.0, 605.5);
+	pTree2->SetScale(5.0, 10.0, 5.0);
+	pTree2->SetPosition(uidx(dre), uidy(dre), uidz(dre));
 	m_ppGameObjects[1] = pTree2;
 
 	CobstacleObject* pTree3 = NULL;
 	pTree3 = new CobstacleObject();
 	pTree3->SetChild(pGameModel, true);
 	pTree3->OnInitialize();
-	pTree3->SetScale(5.0, 8.0, 5.0);
-	pTree3->SetPosition(806.6, 178.0, 245.8);
+	pTree3->SetScale(5.0, 10.0, 5.0);
+	pTree3->SetPosition(uidx(dre), uidy(dre), uidz(dre));
 	m_ppGameObjects[2] = pTree3;
 
 	CobstacleObject* pTree4 = NULL;
 	pTree4 = new CobstacleObject();
 	pTree4->SetChild(pGameModel, true);
 	pTree4->OnInitialize();
-	pTree4->SetScale(5.0, 8.0, 5.0);
-	pTree4->SetPosition(693.9, 254.5, 1180.0);
+	pTree4->SetScale(5.0, 10.0, 5.0);
+	pTree4->SetPosition(uidx(dre), uidy(dre), uidz(dre));
 	m_ppGameObjects[3] = pTree4;
 
 	CobstacleObject* pTree5 = NULL;
 	pTree5 = new CobstacleObject();
 	pTree5->SetChild(pGameModel, true);
 	pTree5->OnInitialize();
-	pTree5->SetScale(5.0, 8.0, 5.0);
-	pTree5->SetPosition(1214.5, 286.0, 621.8);
+	pTree5->SetScale(5.0, 10.0, 5.0);
+	pTree5->SetPosition(uidx(dre), uidy(dre), uidz(dre));
 	m_ppGameObjects[4] = pTree5;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -150,8 +149,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pTree6 = new CobstacleObject();
 	pTree6->SetChild(pGameModel, true);
 	pTree6->OnInitialize();
-	pTree6->SetScale(5.0, 8.0, 5.0);
-	pTree6->SetPosition(444.0, 202.0, 1567.0);
+	pTree6->SetScale(5.0, 10.0, 5.0);
+	pTree6->SetPosition(uidx(dre), uidy(dre), uidz(dre));
 	m_ppGameObjects[5] = pTree6;
 
 
@@ -159,8 +158,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pTree7 = new CobstacleObject();
 	pTree7->SetChild(pGameModel, true);
 	pTree7->OnInitialize();
-	pTree7->SetScale(5.0, 8.0, 5.0);
-	pTree7->SetPosition(1111.0, 320.0, 2173.0);
+	pTree7->SetScale(5.0, 10.0, 5.0);
+	pTree7->SetPosition(uidx(dre), uidy(dre), uidz(dre));
 	m_ppGameObjects[6] = pTree7;
 
 
@@ -168,8 +167,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pTree8 = new CobstacleObject();
 	pTree8->SetChild(pGameModel, true);
 	pTree8->OnInitialize();
-	pTree8->SetScale(5.0, 8.0, 5.0);
-	pTree8->SetPosition(1424.0, 346.0, 885.0);
+	pTree8->SetScale(5.0, 10.0, 5.0);
+	pTree8->SetPosition(uidx(dre), uidy(dre), uidz(dre));
 	m_ppGameObjects[7] = pTree8;
 
 
@@ -177,8 +176,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pTree9 = new CobstacleObject();
 	pTree9->SetChild(pGameModel, true);
 	pTree9->OnInitialize();
-	pTree9->SetScale(5.0, 8.0, 5.0);
-	pTree9->SetPosition(1288.0, 266.0, 405.0);
+	pTree9->SetScale(5.0, 10.0, 5.0);
+	pTree9->SetPosition(uidx(dre), uidy(dre), uidz(dre));
 	m_ppGameObjects[8] = pTree9;
 
 
@@ -186,8 +185,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pTree10 = new CobstacleObject();
 	pTree10->SetChild(pGameModel, true);
 	pTree10->OnInitialize();
-	pTree10->SetScale(5.0, 8.0, 5.0);
-	pTree10->SetPosition(1368.0, 266.0, 905.0);
+	pTree10->SetScale(5.0, 10.0, 5.0);
+	pTree10->SetPosition(uidx(dre), uidy(dre), uidz(dre));
 	m_ppGameObjects[9] = pTree10;
 
 	CTankObject* pGameModel2 = CTankObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/stone_largeB.bin");
@@ -196,41 +195,40 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pRock1 = new CobstacleObject();
 	pRock1->SetChild(pGameModel2, true);
 	pRock1->OnInitialize();
-	pRock1->SetScale(3.0, 3.0, 3.0);
-	pRock1->SetPosition(269.3, 198.0, 431.6);
+	pRock1->SetScale(2.0, 2.0, 2.0);
+	pRock1->SetPosition(uidx(dre), uidR(dre), uidz(dre));
 	m_ppGameObjects[10] = pRock1;
 
 	CobstacleObject* pRock2 = NULL;
 	pRock2 = new CobstacleObject();
 	pRock2->SetChild(pGameModel2, true);
 	pRock2->OnInitialize();
-	pRock2->SetScale(3.0, 3.0, 3.0);
-	pRock2->SetPosition(404.9, 80.0, 963.2);
+	pRock2->SetScale(2.0, 2.0, 2.0);
+	pRock2->SetPosition(uidx(dre), uidR(dre), uidz(dre));
 	m_ppGameObjects[11] = pRock2;
 
 	CobstacleObject* pRock3 = NULL;
 	pRock3 = new CobstacleObject();
 	pRock3->SetChild(pGameModel2, true);
 	pRock3->OnInitialize();
-	pRock3->SetScale(3.0, 3.0, 3.0);
-	pRock3->SetPosition(765.8, 210.6, 1055.5);
+	pRock3->SetScale(2.0, 2.0, 2.0);
+	pRock3->SetPosition(uidx(dre), uidR(dre), uidz(dre));
 	m_ppGameObjects[12] = pRock3;
 
 	CobstacleObject* pRock4 = NULL;
 	pRock4 = new CobstacleObject();
 	pRock4->SetChild(pGameModel2, true);
 	pRock4->OnInitialize();
-	pRock4->SetScale(3.0, 3.0, 3.0);
-	pRock4->SetPosition(1662.6, 180.0, 1392.5);
+	pRock4->SetScale(2.0, 2.0, 2.0);
+	pRock4->SetPosition(uidx(dre), uidR(dre), uidz(dre));
 	m_ppGameObjects[13] = pRock4;
 
 	CobstacleObject* pRock5 = NULL;
 	pRock5 = new CobstacleObject();
 	pRock5->SetChild(pGameModel2, true);
 	pRock5->OnInitialize();
-	pRock5->Rotate(0.0, 75.0, 0.0);
-	pRock5->SetScale(3.0, 3.0, 3.0);
-	pRock5->SetPosition(2030.6, 200.0, 1842.2);
+	pRock5->SetScale(2.0, 2.0, 2.0);
+	pRock5->SetPosition(uidx(dre), uidR(dre), uidz(dre));
 	m_ppGameObjects[14] = pRock5;
 
 
