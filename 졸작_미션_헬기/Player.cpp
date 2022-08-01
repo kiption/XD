@@ -329,7 +329,7 @@ CHelicopterPlayer::CHelicopterPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	
 	CHelicopterObject* pGameObject = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Hellicopter/Apache.bin");
 	SetChild(pGameObject, true);
-	pGameObject->Rotate(0.0f, 0.0f, 0.0f);
+	pGameObject->Rotate(0.0f, -10.0f, 0.0f);
 	pGameObject->SetScale(1.0f, 1.0, 1.0);
 	pGameObject->SetPosition(0.0, 0, 0.0);
 
@@ -347,7 +347,15 @@ void CHelicopterPlayer::OnInitialize()
 {
 	m_pMainRotorFrame = FindFrame("rotor");
 	m_pTailRotorFrame = FindFrame("black_m_7");
-	m_pSubRotorFrame = FindFrame("Rock");
+	m_pRocketFrame1 = FindFrame("rocket");
+	m_pRocketFrame2 = FindFrame("rocket_1");
+	m_pRocketFrame3 = FindFrame("rocket_2");
+	m_pRocketFrame4 = FindFrame("rocket_3");
+	m_pRocketFrame5 = FindFrame("rocket_4");
+	m_pRocketFrame6 = FindFrame("rocket_5");
+	m_pRocketFrame7 = FindFrame("rocket_6");
+	m_pRocketFrame8 = FindFrame("rocket_7");
+	m_pRocketFrame9 = FindFrame("rocket_8");
 }
 
 void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
@@ -355,7 +363,7 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 
 	if (m_pMainRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
+		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
 		m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
 	}
 	if (m_pTailRotorFrame)
@@ -364,10 +372,47 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
 	}
 
-	if (m_pSubRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
-		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+
+			m_pRocketFrame1->m_xmf4x4Transform._43 += 4.f;
+		if (m_pRocketFrame1->m_xmf4x4Transform._43 >= 300.0f)
+			m_pRocketFrame1->m_xmf4x4Transform._43 = 2.f;
+
+			m_pRocketFrame2->m_xmf4x4Transform._43 += 3.f;
+		if (m_pRocketFrame2->m_xmf4x4Transform._43 >= 300.0f)
+			m_pRocketFrame2->m_xmf4x4Transform._43 = 2.f;\
+						  
+			m_pRocketFrame3->m_xmf4x4Transform._43 += 5.f;
+		if (m_pRocketFrame3->m_xmf4x4Transform._43 >= 300.0f)
+			m_pRocketFrame3->m_xmf4x4Transform._43 = 2.f;
+
+			m_pRocketFrame4->m_xmf4x4Transform._43 += 6.f;
+		if (m_pRocketFrame4->m_xmf4x4Transform._43 >= 300.0f)
+			m_pRocketFrame4->m_xmf4x4Transform._43 = 2.f;
+
+			m_pRocketFrame5->m_xmf4x4Transform._43 += 4.f;
+		if (m_pRocketFrame5->m_xmf4x4Transform._43 >= 300.0f)
+			m_pRocketFrame5->m_xmf4x4Transform._43 = 2.f;	
+
+			m_pRocketFrame6->m_xmf4x4Transform._43 += 6.f;
+		if (m_pRocketFrame6->m_xmf4x4Transform._43 >= 300.0f)
+			m_pRocketFrame6->m_xmf4x4Transform._43 = 2.f;
+		
+			m_pRocketFrame7->m_xmf4x4Transform._43 += 3.f;
+		if (m_pRocketFrame7->m_xmf4x4Transform._43 >= 300.0f)
+			m_pRocketFrame7->m_xmf4x4Transform._43 = 2.f;	
+		
+			m_pRocketFrame8->m_xmf4x4Transform._43 += 4.f;
+		if (m_pRocketFrame8->m_xmf4x4Transform._43 >= 300.0f)
+			m_pRocketFrame8->m_xmf4x4Transform._43 = 2.f;		
+		
+		    m_pRocketFrame9->m_xmf4x4Transform._43 += 2.f;
+		if (m_pRocketFrame9->m_xmf4x4Transform._43 >= 300.0f)
+			m_pRocketFrame9->m_xmf4x4Transform._43 = 2.f;
+
+
+
+
 	}
 
 	for (int i = 0; i< BULLETS; i++)
@@ -396,6 +441,7 @@ void CHelicopterPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 	
 void CHelicopterPlayer::FireBullet(CHelicopterObject* pLockedObject)
 {
+	
 	
 	CBulletObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS; i++)
@@ -459,7 +505,7 @@ CCamera* CHelicopterPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapse
 		break;
 	case THIRD_PERSON_CAMERA:
 		SetFriction(100.5f);
-		SetGravity(XMFLOAT3(0.0f, 2.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		SetMaxVelocityXZ(25.5f);
 		SetMaxVelocityY(20.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);

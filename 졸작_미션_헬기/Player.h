@@ -97,9 +97,17 @@ public:
 	CBulletObject*					pBulletObject = NULL;
 	CHelicopterObject*				m_pPlayerObejct = NULL;
 	CHelicopterObject* m_pMainRotorFrame = NULL;
-	CHelicopterObject* m_pSubRotorFrame = NULL;
+	CHelicopterObject* m_pRocketFrame1 = NULL;
+	CHelicopterObject* m_pRocketFrame2 = NULL;
+	CHelicopterObject* m_pRocketFrame3 = NULL;
+	CHelicopterObject* m_pRocketFrame4 = NULL;
+	CHelicopterObject* m_pRocketFrame5 = NULL;
+	CHelicopterObject* m_pRocketFrame6 = NULL;
+	CHelicopterObject* m_pRocketFrame7 = NULL;
+	CHelicopterObject* m_pRocketFrame8 = NULL;
+	CHelicopterObject* m_pRocketFrame9 = NULL;
 	CHelicopterObject* m_pTailRotorFrame = NULL;
-	
+	float offsetZ;
 private:
 	virtual void OnInitialize();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = NULL);
