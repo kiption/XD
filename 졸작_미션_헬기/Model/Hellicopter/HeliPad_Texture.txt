@@ -1,0 +1,73 @@
+<Hierarchy>:
+	<Frame>: 0 uploads_files_2921409_HeliPad
+		<Transform>: 0 0 0 0 0 0 1 1 1 0 0 0 1  
+		<TransformMatrix>: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1  
+		<Children>: 3
+			<Frame>: 1 Cylinder
+				<Transform>: 0 0.470327 0 270.0198 0 0 500 500 500 -0.7071068 0 0 0.7071067  
+				<TransformMatrix>: 500 0 0 0 0 -5.960464E-05 -500 0 0 500 -5.960464E-05 0 0 0.470327 0 1  
+				<Mesh>: 120 Cylinder
+					<Bounds>: 0 0 0.0008999204 0.01371682 0.01442272 0.001801414
+					<Positions>: 0  
+					<Colors>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 1
+						<SubMesh>: 0 0  
+				</Mesh>
+				<Materials>: 1
+					<Material>: 0
+						<AlbedoColor>: 0.4150943 0.4150943 0.4150943 1
+						<EmissiveColor>: 0 0 0 1
+						<Glossiness>: 0.5
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+				</Materials>
+				<Children>: 0
+			</Frame>
+			<Frame>: 2 Cylinder.001
+				<Transform>: 2.881332 1.136178 -3.987494 270.0198 0 0 5.759259 5.759259 5.759259 -0.7071068 0 0 0.7071067  
+				<TransformMatrix>: 5.759259 0 0 0 0 -6.865571E-07 -5.759258 0 0 5.759258 -6.865571E-07 0 2.881332 1.136178 -3.987494 1  
+				<Mesh>: 796 Cylinder.001
+					<Bounds>: -0.5002958 -0.6923623 0.07770717 0.8330493 0.8826114 0.08770718
+					<Positions>: 0  
+					<Colors>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 1
+						<SubMesh>: 0 0  
+				</Mesh>
+				<Materials>: 1
+					<Material>: 0
+						<AlbedoColor>: 0.9063317 0.9063317 0.9063317 1
+						<EmissiveColor>: 0 0 0 1
+						<Glossiness>: 0.5
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+				</Materials>
+				<Children>: 0
+			</Frame>
+			<Frame>: 3 Stairs
+				<Transform>: -9.564982 0 0 270 270 0 100 100 100 -0.5000001 -0.4999999 -0.5 0.5  
+				<TransformMatrix>: 1.788139E-05 -2.980232E-06 100 0 100 -1.192093E-05 -1.490116E-05 0 1.490116E-05 100 5.960464E-06 0 -9.564982 0 0 1  
+				<Mesh>: 1592 Stairs
+					<Bounds>: -4.190952E-09 0.09564983 0.00909 0.01 0.09594984 0.00909
+					<Positions>: 0  
+					<Colors>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 1
+						<SubMesh>: 0 0  
+				</Mesh>
+				<Materials>: 1
+					<Material>: 0
+						<AlbedoColor>: 1 1 1 1
+						<EmissiveColor>: 0 0 0 1
+						<Glossiness>: 0.5
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+				</Materials>
+				<Children>: 0
+			</Frame>
+	</Frame>
+</Hierarchy>
