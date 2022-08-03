@@ -80,7 +80,7 @@ public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
-
+	bool							STOPZONE = false;
 	bool							m_gunbarrelControl = false;
 };
 
@@ -106,8 +106,11 @@ public:
 	CHelicopterObject* m_pRocketFrame7 = NULL;
 	CHelicopterObject* m_pRocketFrame8 = NULL;
 	CHelicopterObject* m_pRocketFrame9 = NULL;
-	CHelicopterObject* m_pTailRotorFrame = NULL;
-	float offsetZ;
+	CHelicopterObject* m_pMainTailRotorFrame = NULL;
+	CHelicopterObject* m_pSubTailRotorFrame = NULL;
+	float delrot = 2.0;
+
+
 private:
 	virtual void OnInitialize();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = NULL);
