@@ -388,10 +388,25 @@ void CScene::PickingToPlayer()
 	
 
 }
+
+///////////////////////////////////////////Missile Collision///////////////////////////////////////////
 void CScene::CheckObjectByBulletCollisions()
 {
+	// Check Control Point => Missile 9 : m_pRocketFrame9 
+	m_pPlayer->m_pRocketFrame9->oobb = BoundingOrientedBox(m_pPlayer->m_pRocketFrame9->GetPosition(),
+		XMFLOAT3(5.0, 5.0, 5.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
+
+	for (int i = 1; i < 15; i++)
+	{
+		if (m_ppGameObjects[i]->oobb.Intersects(m_pPlayer->m_pRocketFrame9->oobb)) {
+			m_ppGameObjects[i]->m_xmf4x4Transform._42 += 0.5f;
+			m_ppGameObjects[i-1]->m_xmf4x4Transform._41 -= 0.5f;
+			m_ppGameObjects[i%2]->m_xmf4x4Transform._41 += 0.5f;
+		}
+	}
 
 }
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CScene::CheckObjectByPlayerCollisions()
 {
@@ -410,6 +425,12 @@ void CScene::CheckObjectByPlayerCollisions()
 				m_pPlayer->m_xmf3Position.x -= 1.0f;
 			}
 		}
+
+		
+	}
+	m_pPlayer->m_pRocketFrame9->oobb= BoundingOrientedBox(m_pPlayer->m_pRocketFrame9->GetPosition(), XMFLOAT3(5.0, 5.0, 5.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
+	if (m_ppGameObjects[5]->oobb.Intersects(m_pPlayer->m_pRocketFrame9->oobb)) {
+		m_ppGameObjects[5]->m_xmf4x4Transform._42 += 0.3f;
 	}
 }
 
@@ -462,9 +483,4 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	}
 }
 
-float CScene::distanceEnermyToPlayer(CHelicopterObject* e)
-{
-	
-	return 0;
-}
 

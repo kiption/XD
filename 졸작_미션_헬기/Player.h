@@ -82,6 +82,19 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 	bool							STOPZONE = false;
 	bool							m_gunbarrelControl = false;
+public:
+	CHelicopterObject* m_pMainRotorFrame = NULL;
+	CHelicopterObject* m_pRocketFrame1 = NULL;
+	CHelicopterObject* m_pRocketFrame2 = NULL;
+	CHelicopterObject* m_pRocketFrame3 = NULL;
+	CHelicopterObject* m_pRocketFrame4 = NULL;
+	CHelicopterObject* m_pRocketFrame5 = NULL;
+	CHelicopterObject* m_pRocketFrame6 = NULL;
+	CHelicopterObject* m_pRocketFrame7 = NULL;
+	CHelicopterObject* m_pRocketFrame8 = NULL;
+	CHelicopterObject* m_pRocketFrame9 = NULL;
+	CHelicopterObject* m_pMainTailRotorFrame = NULL;
+	CHelicopterObject* m_pSubTailRotorFrame = NULL;
 };
 
 #define BULLETS					50
@@ -96,20 +109,11 @@ public:
 	float							m_fBulletEffectiveRange = 500.0f;
 	CBulletObject*					pBulletObject = NULL;
 	CHelicopterObject*				m_pPlayerObejct = NULL;
-	CHelicopterObject* m_pMainRotorFrame = NULL;
-	CHelicopterObject* m_pRocketFrame1 = NULL;
-	CHelicopterObject* m_pRocketFrame2 = NULL;
-	CHelicopterObject* m_pRocketFrame3 = NULL;
-	CHelicopterObject* m_pRocketFrame4 = NULL;
-	CHelicopterObject* m_pRocketFrame5 = NULL;
-	CHelicopterObject* m_pRocketFrame6 = NULL;
-	CHelicopterObject* m_pRocketFrame7 = NULL;
-	CHelicopterObject* m_pRocketFrame8 = NULL;
-	CHelicopterObject* m_pRocketFrame9 = NULL;
-	CHelicopterObject* m_pMainTailRotorFrame = NULL;
-	CHelicopterObject* m_pSubTailRotorFrame = NULL;
+	
 	float delrot = 2.0;
 
+	// Missile ON/OFF
+	bool m_MissileActive;
 
 private:
 	virtual void OnInitialize();

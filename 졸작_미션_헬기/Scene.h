@@ -71,7 +71,8 @@ public:
 	void CheckObjectByPlayerCollisions();
 	void PickingToPlayer();
 	CPlayer						*m_pPlayer = NULL;
-	float distanceEnermyToPlayer(CHelicopterObject* e);
+	
+
 public:
 	ID3D12RootSignature			*m_pd3dGraphicsRootSignature = NULL;
 

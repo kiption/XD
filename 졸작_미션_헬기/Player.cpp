@@ -371,49 +371,64 @@ void CHelicopterPlayer::OnInitialize()
 void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 
+	
+	if(m_MissileActive==true)
 	{
 
 		m_pRocketFrame1->m_xmf4x4Transform._43 += 4.f;
-		if (m_pRocketFrame1->m_xmf4x4Transform._43 >= 300.0f)
+		if (m_pRocketFrame1->m_xmf4x4Transform._43 >= 500.0f)
 			m_pRocketFrame1->m_xmf4x4Transform._43 = 2.f;
 
 		m_pRocketFrame2->m_xmf4x4Transform._43 += 3.f;
-		if (m_pRocketFrame2->m_xmf4x4Transform._43 >= 300.0f)
+		if (m_pRocketFrame2->m_xmf4x4Transform._43 >= 500.0f)
 			m_pRocketFrame2->m_xmf4x4Transform._43 = 2.f; 
 
 			m_pRocketFrame3->m_xmf4x4Transform._43 += 5.f;
-		if (m_pRocketFrame3->m_xmf4x4Transform._43 >= 300.0f)
+		if (m_pRocketFrame3->m_xmf4x4Transform._43 >= 500.0f)
 			m_pRocketFrame3->m_xmf4x4Transform._43 = 2.f;
 
 		m_pRocketFrame4->m_xmf4x4Transform._43 += 6.f;
-		if (m_pRocketFrame4->m_xmf4x4Transform._43 >= 300.0f)
+		if (m_pRocketFrame4->m_xmf4x4Transform._43 >= 500.0f)
 			m_pRocketFrame4->m_xmf4x4Transform._43 = 2.f;
 
 		m_pRocketFrame5->m_xmf4x4Transform._43 += 4.f;
-		if (m_pRocketFrame5->m_xmf4x4Transform._43 >= 300.0f)
+		if (m_pRocketFrame5->m_xmf4x4Transform._43 >= 500.0f)
 			m_pRocketFrame5->m_xmf4x4Transform._43 = 2.f;
 
 		m_pRocketFrame6->m_xmf4x4Transform._43 += 6.f;
-		if (m_pRocketFrame6->m_xmf4x4Transform._43 >= 300.0f)
+		if (m_pRocketFrame6->m_xmf4x4Transform._43 >= 500.0f)
 			m_pRocketFrame6->m_xmf4x4Transform._43 = 2.f;
 
 		m_pRocketFrame7->m_xmf4x4Transform._43 += 3.f;
-		if (m_pRocketFrame7->m_xmf4x4Transform._43 >= 300.0f)
+		if (m_pRocketFrame7->m_xmf4x4Transform._43 >= 500.0f)
 			m_pRocketFrame7->m_xmf4x4Transform._43 = 2.f;
 
 		m_pRocketFrame8->m_xmf4x4Transform._43 += 4.f;
-		if (m_pRocketFrame8->m_xmf4x4Transform._43 >= 300.0f)
+		if (m_pRocketFrame8->m_xmf4x4Transform._43 >= 500.0f)
 			m_pRocketFrame8->m_xmf4x4Transform._43 = 2.f;
 
 		m_pRocketFrame9->m_xmf4x4Transform._43 += 2.f;
-		if (m_pRocketFrame9->m_xmf4x4Transform._43 >= 300.0f)
+		if (m_pRocketFrame9->m_xmf4x4Transform._43 >= 500.0f) {
+			m_MissileActive = false;
 			m_pRocketFrame9->m_xmf4x4Transform._43 = 2.f;
-
-
-
+		}
 
 	}
 
+	if (m_MissileActive == false) 
+	{
+		m_pRocketFrame1->m_xmf4x4Transform._43 = -12.f;
+		m_pRocketFrame2->m_xmf4x4Transform._43 = -12.f;
+		m_pRocketFrame3->m_xmf4x4Transform._43 = -12.f;
+		m_pRocketFrame4->m_xmf4x4Transform._43 = -12.f;
+		m_pRocketFrame5->m_xmf4x4Transform._43 = -12.f;
+		m_pRocketFrame6->m_xmf4x4Transform._43 = -12.f;
+		m_pRocketFrame7->m_xmf4x4Transform._43 = -12.f;
+		m_pRocketFrame8->m_xmf4x4Transform._43 = -12.f;
+		m_pRocketFrame9->m_xmf4x4Transform._43 = -12.f;
+	}
+
+	
 	//////////////////////////////////////////////////////////////Âø·ú ¸ð¼Ç////////////////////////////////////////////////
 	if (this->GetPosition().x > 2500.0 && this->GetPosition().x < 2800.0 &&
 		this->GetPosition().z > 1800.0 && this->GetPosition().z < 2100.0) {
@@ -437,11 +452,11 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 		}
 		if (m_pSubTailRotorFrame)
 		{
-			XMMATRIX xmmtxRotate = XMMatrixRotationZ(XMConvertToRadians(180.0f * delrot) * fTimeElapsed);
+			XMMATRIX xmmtxRotate = XMMatrixRotationZ(XMConvertToRadians(360.0f * delrot) * fTimeElapsed);
 			m_pSubTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pSubTailRotorFrame->m_xmf4x4Transform);
 		}
 
-		SetGravity(XMFLOAT3(0.0f, -8.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, -1.0f, 0.0f));
 	}
 	else
 	{
@@ -458,12 +473,12 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 		}
 		if (m_pSubTailRotorFrame)
 		{
-			XMMATRIX xmmtxRotate = XMMatrixRotationZ(XMConvertToRadians(180.0f *4.0) * fTimeElapsed);
+			XMMATRIX xmmtxRotate = XMMatrixRotationZ(XMConvertToRadians(360.0f *4.0) * fTimeElapsed);
 			m_pSubTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pSubTailRotorFrame->m_xmf4x4Transform);
 		}
-			SetGravity(XMFLOAT3(0.0f, 2.0f, 0.0f));
+			SetGravity(XMFLOAT3(0.0f, 1.0f, 0.0f));
 		if (this->GetPosition().y > 600.0) {
-			SetGravity(XMFLOAT3(0.0f, -2.0f, 0.0f));
+			SetGravity(XMFLOAT3(0.0f, -1.0f, 0.0f));
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -487,7 +502,10 @@ void CHelicopterPlayer::OnPrepareRender()
 void CHelicopterPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	CHelicopterObject::Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]->m_bActive) m_ppBullets[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]->m_bActive) {
+	
+		m_ppBullets[i]->Render(pd3dCommandList, pCamera);
+	}
 }
 
 	
@@ -500,9 +518,10 @@ void CHelicopterPlayer::FireBullet(CHelicopterObject* pLockedObject)
 	{
 		if (!m_ppBullets[i]->m_bActive)
 		{
-			
+			m_MissileActive = true;
 			pBulletObject = m_ppBullets[i];
 			break;
+			
 		}
 	}
 	XMFLOAT3 PlayerHelicpoterPosition = GetLook();
