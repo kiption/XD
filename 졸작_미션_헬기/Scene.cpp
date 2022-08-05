@@ -100,7 +100,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 
 
-	m_nGameObjects = 15;
+	m_nGameObjects = 16;
 	m_ppGameObjects = new CHelicopterObject * [m_nGameObjects];
 
 	CHelicopterObject* pGameModel = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/tree.bin");
@@ -232,6 +232,15 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pRock5->SetPosition(uidx(dre), uidR(dre), uidz(dre));
 	m_ppGameObjects[14] = pRock5;
 
+	CHelicopterObject* StopZone = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Hellicopter/HELI1.bin");
+
+	CobstacleObject* pStopZone = NULL;
+	pStopZone = new CobstacleObject();
+	pStopZone->SetChild(StopZone, true);
+	pStopZone->OnInitialize();
+	pStopZone->SetScale(5000.0, 500.0, 5000.0);
+	pStopZone->SetPosition(2650.0, 5.0, 1950.0);
+	m_ppGameObjects[15] = pStopZone;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

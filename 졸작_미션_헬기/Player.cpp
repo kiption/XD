@@ -431,15 +431,21 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	
 	//////////////////////////////////////////////////////////////Âø·ú ¸ð¼Ç////////////////////////////////////////////////
 	if (this->GetPosition().x > 2500.0 && this->GetPosition().x < 2800.0 &&
-		this->GetPosition().z > 1800.0 && this->GetPosition().z < 2100.0) {
+		this->GetPosition().z > 1800.0 && this->GetPosition().z < 2100.0 && 
+		this->GetPosition().y<200.0) {
+
+	
 
 		STOPZONE = true;
 		if (this->GetPosition().y < 150.0) {
 
-			delrot -= 0.002f;
+			delrot -= 0.003f;
 			if (delrot <= 0.0)
 				delrot = 0.0f;
+
+			
 		}
+		
 		if (m_pMainRotorFrame)
 		{
 			XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * delrot) * fTimeElapsed);
@@ -456,11 +462,16 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 			m_pSubTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pSubTailRotorFrame->m_xmf4x4Transform);
 		}
 
-		SetGravity(XMFLOAT3(0.0f, -1.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, -2.0f, 0.0f));
 	}
 	else
 	{
 		STOPZONE = false;
+		if (this->GetPosition().y > 10.0) {
+			delrot += 0.002f;
+			if (delrot >= 2.0)
+				delrot = 2.0f;
+		}
 		if (m_pMainRotorFrame)
 		{
 			XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
@@ -476,9 +487,9 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 			XMMATRIX xmmtxRotate = XMMatrixRotationZ(XMConvertToRadians(360.0f *4.0) * fTimeElapsed);
 			m_pSubTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pSubTailRotorFrame->m_xmf4x4Transform);
 		}
-			SetGravity(XMFLOAT3(0.0f, 1.0f, 0.0f));
+			SetGravity(XMFLOAT3(0.0f, 2.0f, 0.0f));
 		if (this->GetPosition().y > 600.0) {
-			SetGravity(XMFLOAT3(0.0f, -1.0f, 0.0f));
+			SetGravity(XMFLOAT3(0.0f, -2.0f, 0.0f));
 		}
 	}
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
