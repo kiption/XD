@@ -95,6 +95,9 @@ public:
 	CHelicopterObject* m_pRocketFrame9 = NULL;
 	CHelicopterObject* m_pMainTailRotorFrame = NULL;
 	CHelicopterObject* m_pSubTailRotorFrame = NULL;
+
+	// Missile ON/OFF
+	bool m_MissileActive;
 };
 
 #define BULLETS					50
@@ -112,8 +115,7 @@ public:
 	
 	float delrot = 2.0;
 
-	// Missile ON/OFF
-	bool m_MissileActive;
+	
 
 private:
 	virtual void OnInitialize();

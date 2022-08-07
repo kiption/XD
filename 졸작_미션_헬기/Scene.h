@@ -98,6 +98,17 @@ public:
 	CHelicopterPlayer* m_pHelicopterPlayer=NULL;
 	CBulletObject* pBulletObject = NULL;
 	CShader* m_pShader = NULL;
+
+	static XMFLOAT3				m_pxmf3SphereVectors[20];
+
+	inline float RandF(float fMin, float fMax)
+	{
+		return(fMin + ((float)rand() / (float)RAND_MAX) * (fMax - fMin));
+	}
+	float dx=0.0;
+	float dy=0.0;
+	float dz=0.0;
+	
 protected:
 	CTerrainShader* terrainShader;
 	CShader** m_ppShaderObjcet;

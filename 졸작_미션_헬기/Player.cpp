@@ -329,8 +329,8 @@ CHelicopterPlayer::CHelicopterPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		
 		pBulletObject->SetChild(pBulletMesh, true);
 		pBulletObject->SetRotationSpeed(90.0f);
-		pBulletObject->SetMovingSpeed(300.0f);
-		pBulletObject->SetScale(7.3, 7.3, 7.3);
+		pBulletObject->SetMovingSpeed(500.0f);
+		pBulletObject->SetScale(1.3, 1.3, 1.3);
 		pBulletObject->SetActive(false);
 		m_ppBullets[i] = pBulletObject;
 

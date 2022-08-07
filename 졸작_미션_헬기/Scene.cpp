@@ -84,7 +84,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pMaterialColors->m_xmf4Diffuse = XMFLOAT4(0.53f, 0.8f, 0.1f, 1.0f);
 	pMaterialColors->m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); //(r,g,b,a=power)
 	pMaterialColors->m_xmf4Emissive = XMFLOAT4(0.2f, 0.5f, 0.2f, 1.0f);
-	
+
 	CMaterial* pMaterial = new CMaterial();
 	pMaterial->SetShader(pTerrainShader);
 	pMaterial->SetMaterialColors(pMaterialColors);
@@ -104,7 +104,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_ppGameObjects = new CHelicopterObject * [m_nGameObjects];
 
 	CHelicopterObject* pGameModel = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/tree.bin");
-
+	CHelicopterObject* pGameModel2 = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/stone_largeB.bin");
 	CobstacleObject* pTree1 = NULL;
 	pTree1 = new CobstacleObject();
 	pTree1->SetChild(pGameModel, true);
@@ -148,79 +148,79 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	CobstacleObject* pTree6 = NULL;
 	pTree6 = new CobstacleObject();
-	pTree6->SetChild(pGameModel, true);
+	pTree6->SetChild(pGameModel2, true);
 	pTree6->OnInitialize();
-	pTree6->SetScale(5.0, 10.0, 5.0);
-	pTree6->SetPosition(uidx(dre), uidy(dre), uidz(dre));
+	pTree6->SetScale(2.0, 2.0, 2.0);
+	pTree6->SetPosition(300.0, 10.0, 300.0);
 	m_ppGameObjects[5] = pTree6;
 
 
 	CobstacleObject* pTree7 = NULL;
 	pTree7 = new CobstacleObject();
-	pTree7->SetChild(pGameModel, true);
+	pTree7->SetChild(pGameModel2, true);
 	pTree7->OnInitialize();
-	pTree7->SetScale(5.0, 10.0, 5.0);
-	pTree7->SetPosition(uidx(dre), uidy(dre), uidz(dre));
+	pTree7->SetScale(0.2, 0.2, 0.2);
+	pTree7->SetPosition(300.0, 10.0, 300.0);
 	m_ppGameObjects[6] = pTree7;
 
 
 	CobstacleObject* pTree8 = NULL;
 	pTree8 = new CobstacleObject();
-	pTree8->SetChild(pGameModel, true);
+	pTree8->SetChild(pGameModel2, true);
 	pTree8->OnInitialize();
-	pTree8->SetScale(5.0, 10.0, 5.0);
-	pTree8->SetPosition(uidx(dre), uidy(dre), uidz(dre));
+	pTree8->SetScale(0.2, 0.2, 0.2);
+	pTree8->SetPosition(300.0, 10.0, 300.0);
 	m_ppGameObjects[7] = pTree8;
 
 
 	CobstacleObject* pTree9 = NULL;
 	pTree9 = new CobstacleObject();
-	pTree9->SetChild(pGameModel, true);
+	pTree9->SetChild(pGameModel2, true);
 	pTree9->OnInitialize();
-	pTree9->SetScale(5.0, 10.0, 5.0);
-	pTree9->SetPosition(uidx(dre), uidy(dre), uidz(dre));
+	pTree9->SetScale(0.2, 0.2, 0.2);
+	pTree9->SetPosition(300.0, 10.0, 300.0);
 	m_ppGameObjects[8] = pTree9;
 
 
 	CobstacleObject* pTree10 = NULL;
 	pTree10 = new CobstacleObject();
-	pTree10->SetChild(pGameModel, true);
+	pTree10->SetChild(pGameModel2, true);
 	pTree10->OnInitialize();
-	pTree10->SetScale(5.0, 10.0, 5.0);
-	pTree10->SetPosition(uidx(dre), uidy(dre), uidz(dre));
+	pTree10->SetScale(0.2, 0.2, 0.2);
+	pTree10->SetPosition(300.0, 10.0, 300.0);
 	m_ppGameObjects[9] = pTree10;
 
-	CHelicopterObject* pGameModel2 = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/stone_largeB.bin");
+	
 
 	CobstacleObject* pRock1 = NULL;
 	pRock1 = new CobstacleObject();
 	pRock1->SetChild(pGameModel2, true);
 	pRock1->OnInitialize();
-	pRock1->SetScale(2.0, 2.0, 2.0);
-	pRock1->SetPosition(uidx(dre), uidR(dre), uidz(dre));
+	pRock1->SetScale(0.2, 0.2, 0.2);
+	pRock1->SetPosition(300.0, 10.0, 300.0);
 	m_ppGameObjects[10] = pRock1;
 
 	CobstacleObject* pRock2 = NULL;
 	pRock2 = new CobstacleObject();
 	pRock2->SetChild(pGameModel2, true);
 	pRock2->OnInitialize();
-	pRock2->SetScale(2.0, 2.0, 2.0);
-	pRock2->SetPosition(uidx(dre), uidR(dre), uidz(dre));
+	pRock2->SetScale(0.2, 0.2, 0.2);
+	pRock2->SetPosition(300.0, 10.0, 300.0);
 	m_ppGameObjects[11] = pRock2;
 
 	CobstacleObject* pRock3 = NULL;
 	pRock3 = new CobstacleObject();
 	pRock3->SetChild(pGameModel2, true);
 	pRock3->OnInitialize();
-	pRock3->SetScale(2.0, 2.0, 2.0);
-	pRock3->SetPosition(uidx(dre), uidR(dre), uidz(dre));
+	pRock3->SetScale(0.2, 0.2, 0.2);
+	pRock3->SetPosition(300.0, 10.0, 300.0);
 	m_ppGameObjects[12] = pRock3;
 
 	CobstacleObject* pRock4 = NULL;
 	pRock4 = new CobstacleObject();
 	pRock4->SetChild(pGameModel2, true);
 	pRock4->OnInitialize();
-	pRock4->SetScale(2.0, 2.0, 2.0);
+	pRock4->SetScale(0.2, 0.2, 0.2);
 	pRock4->SetPosition(uidx(dre), uidR(dre), uidz(dre));
 	m_ppGameObjects[13] = pRock4;
 
@@ -228,8 +228,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pRock5 = new CobstacleObject();
 	pRock5->SetChild(pGameModel2, true);
 	pRock5->OnInitialize();
-	pRock5->SetScale(2.0, 2.0, 2.0);
-	pRock5->SetPosition(uidx(dre), uidR(dre), uidz(dre));
+	pRock5->SetScale(0.2, 0.2, 0.2);
+	pRock5->SetPosition(300.0, 10.0, 300.0);
 	m_ppGameObjects[14] = pRock5;
 
 	CHelicopterObject* StopZone = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Hellicopter/HELI1.bin");
@@ -271,30 +271,30 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[4];
-	
+
 	//Camera
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; 
+	pd3dRootParameters[0].Descriptor.ShaderRegister = 1;
 	pd3dRootParameters[0].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	
+
 	//GameObject
 	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[1].Constants.Num32BitValues = 32;
-	pd3dRootParameters[1].Constants.ShaderRegister = 2; 
+	pd3dRootParameters[1].Constants.ShaderRegister = 2;
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	
+
 	//terrain
 	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[2].Constants.Num32BitValues = 16;
-	pd3dRootParameters[2].Constants.ShaderRegister = 3; 
+	pd3dRootParameters[2].Constants.ShaderRegister = 3;
 	pd3dRootParameters[2].Constants.RegisterSpace = 0;
 	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	
+
 	//Lights
 	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[3].Descriptor.ShaderRegister = 4; 
+	pd3dRootParameters[3].Descriptor.ShaderRegister = 4;
 	pd3dRootParameters[3].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
@@ -348,7 +348,7 @@ void CScene::ReleaseShaderVariables()
 
 void CScene::ReleaseUploadBuffers()
 {
-	
+
 	for (int i = 0; i < m_nGameObjects; i++) m_ppGameObjects[i]->ReleaseUploadBuffers();
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 
@@ -370,13 +370,13 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 		case VK_DELETE:
 			((CHelicopterPlayer*)m_pPlayer)->FireBullet(NULL);
 			break;
-	
+
 		case VK_F4:
 			FightMode = true;
 			turn = m_nGameObjects;
 			pickingSight = true;
 			break;
-	
+
 		default:
 			break;
 		}
@@ -394,7 +394,7 @@ bool CScene::ProcessInput(UCHAR* pKeysBuffer)
 
 void CScene::PickingToPlayer()
 {
-	
+
 
 }
 
@@ -405,12 +405,22 @@ void CScene::CheckObjectByBulletCollisions()
 	m_pPlayer->m_pRocketFrame9->oobb = BoundingOrientedBox(m_pPlayer->m_pRocketFrame9->GetPosition(),
 		XMFLOAT3(5.0, 5.0, 5.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 
-	for (int i = 1; i < 15; i++)
-	{
-		if (m_ppGameObjects[i]->oobb.Intersects(m_pPlayer->m_pRocketFrame9->oobb)) {
-			m_ppGameObjects[i]->m_xmf4x4Transform._42 += 0.5f;
-			m_ppGameObjects[i-1]->m_xmf4x4Transform._41 -= 0.5f;
-			m_ppGameObjects[i%2]->m_xmf4x4Transform._41 += 0.5f;
+	
+	if (m_ppGameObjects[5]->oobb.Intersects(m_pPlayer->m_pRocketFrame9->oobb)) {
+		m_ppGameObjects[5]->SetScale(1.0, 1.0, 1.0);
+		for (int i = 6; i < 15; i++) {
+			m_ppGameObjects[i]->m_xmf4x4Transform._41 += RandF(-10, 10);
+			m_ppGameObjects[i]->m_xmf4x4Transform._42 += RandF(0, 0);
+			m_ppGameObjects[i]->m_xmf4x4Transform._43 += RandF(-10, 10);
+		}
+	
+	}
+	if (m_pPlayer->m_MissileActive == false) {
+		
+			for (int i = 6; i < 15;i++) {
+			m_ppGameObjects[i]->m_xmf4x4Transform._41 = m_ppGameObjects[5]->m_xmf4x4Transform._41;
+			m_ppGameObjects[i]->m_xmf4x4Transform._42 = m_ppGameObjects[5]->m_xmf4x4Transform._42;
+			m_ppGameObjects[i]->m_xmf4x4Transform._43 = m_ppGameObjects[5]->m_xmf4x4Transform._43;
 		}
 	}
 
@@ -423,7 +433,7 @@ void CScene::CheckObjectByPlayerCollisions()
 	{
 		if (m_ppGameObjects[i]->oobb.Intersects(m_pPlayer->oobb)) {
 
-			if (m_ppGameObjects[i]->GetPosition().x+12.0< m_pPlayer->GetPosition().x || m_ppGameObjects[i]->GetPosition().z + 10.0 > m_pPlayer->GetPosition().z) {
+			if (m_ppGameObjects[i]->GetPosition().x + 12.0 < m_pPlayer->GetPosition().x || m_ppGameObjects[i]->GetPosition().z + 10.0 > m_pPlayer->GetPosition().z) {
 
 				m_pPlayer->m_xmf3Position.z -= 1.0f;
 				m_pPlayer->m_xmf3Position.x += 1.0f;
@@ -435,12 +445,9 @@ void CScene::CheckObjectByPlayerCollisions()
 			}
 		}
 
-		
+
 	}
-	m_pPlayer->m_pRocketFrame9->oobb= BoundingOrientedBox(m_pPlayer->m_pRocketFrame9->GetPosition(), XMFLOAT3(5.0, 5.0, 5.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
-	if (m_ppGameObjects[5]->oobb.Intersects(m_pPlayer->m_pRocketFrame9->oobb)) {
-		m_ppGameObjects[5]->m_xmf4x4Transform._42 += 0.3f;
-	}
+	
 }
 
 
@@ -453,12 +460,12 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	if (m_pLights)
 	{
 		XMFLOAT3 offset = XMFLOAT3(0, 20, 50);
-		m_pLights[2].m_xmf3Position.z = m_pPlayer->GetPosition().z-2.0;
-		m_pLights[2].m_xmf3Position.y = m_pPlayer->GetPosition().y+32.0;
-		m_pLights[2].m_xmf3Position.x = m_pPlayer->GetPosition().x+5.0;
+		m_pLights[2].m_xmf3Position.z = m_pPlayer->GetPosition().z - 2.0;
+		m_pLights[2].m_xmf3Position.y = m_pPlayer->GetPosition().y + 32.0;
+		m_pLights[2].m_xmf3Position.x = m_pPlayer->GetPosition().x + 5.0;
 		m_pLights[2].m_xmf3Direction = m_pPlayer->GetLookVector();
 		XMStoreFloat3(&offset, XMVectorAdd(XMLoadFloat3(&m_pPlayer->GetPosition()), XMLoadFloat3(&offset)));
-		m_pLights[1].m_xmf3Position= m_ppGameObjects[1]->GetPosition();
+		m_pLights[1].m_xmf3Position = m_ppGameObjects[1]->GetPosition();
 		m_pLights[1].m_xmf3Direction = m_ppGameObjects[1]->GetLook();
 	}
 
