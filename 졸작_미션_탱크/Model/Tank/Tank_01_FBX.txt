@@ -1,0 +1,352 @@
+<Hierarchy>:
+	<Frame>: 0 Tank_01_FBX
+		<Transform>: 0 0 0 0 0 0 1 1 1 0 0 0 1  
+		<TransformMatrix>: 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1  
+		<Children>: 11
+			<Frame>: 1 Armor
+				<Transform>: 2.384186E-07 -1.136868E-13 0 9.334669E-06 0 0 40 40 40 8.146035E-08 0 0 1  
+				<TransformMatrix>: 40 0 0 0 0 40 6.516827E-06 0 0 -6.516827E-06 40 0 2.384186E-07 -1.136868E-13 0 1  
+				<Mesh>: 15861 Armor
+					<Bounds>: -0.004764801 0.02594024 -0.008456469 0.05651235 0.0152688 0.1006185
+					<Positions>: 0  
+					<Colors>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 1
+						<SubMesh>: 0 0  
+				</Mesh>
+				<Materials>: 1
+					<Material>: 0
+						<AlbedoColor>: 0.4799914 0.4766145 0.2044989 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+				</Materials>
+				<Children>: 0
+			</Frame>
+			<Frame>: 2 Camera
+				<Transform>: -12.00466 7.057267 8.602379 17.88785 123.1377 -8.074276E-05 100 100 100 0.07401793 0.8686975 -0.1367171 0.4703132  
+				<TransformMatrix>: -54.66539 -0.0001341105 -83.73589 0 25.71981 95.16595 -16.79084 0 79.68807 -30.71548 -52.02282 0 -12.00466 7.057267 8.602379 1  
+				<Children>: 0
+			</Frame>
+			<Frame>: 3 GearWheels
+				<Transform>: 2.384186E-07 -1.136868E-13 0 9.334669E-06 0 0 40 40 40 8.146035E-08 0 0 1  
+				<TransformMatrix>: 40 0 0 0 0 40 6.516827E-06 0 0 -6.516827E-06 40 0 2.384186E-07 -1.136868E-13 0 1  
+				<Mesh>: 24855 GearWheels
+					<Bounds>: -0.004764801 0.02496584 -0.01708696 0.05188335 0.010281 0.114882
+					<Positions>: 0  
+					<Colors>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 2
+						<SubMesh>: 0 0  
+						<SubMesh>: 1 0  
+				</Mesh>
+				<Materials>: 2
+					<Material>: 0
+						<AlbedoColor>: 0.05069042 0.08622479 0.04356912 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+					<Material>: 1
+						<AlbedoColor>: 0.2733245 0.2392452 0.2177772 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+				</Materials>
+				<Children>: 0
+			</Frame>
+			<Frame>: 4 LightHook
+				<Transform>: 2.384186E-07 -1.136868E-13 0 9.334669E-06 0 0 40 40 40 8.146035E-08 0 0 1  
+				<TransformMatrix>: 40 0 0 0 0 40 6.516827E-06 0 0 -6.516827E-06 40 0 2.384186E-07 -1.136868E-13 0 1  
+				<Mesh>: 10083 LightHook
+					<Bounds>: -0.004035749 0.04195914 -0.01930696 0.0500754 0.0200004 0.123636
+					<Positions>: 0  
+					<Colors>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 1
+						<SubMesh>: 0 0  
+				</Mesh>
+				<Materials>: 1
+					<Material>: 0
+						<AlbedoColor>: 0.4799914 0.4766145 0.2044989 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+				</Materials>
+				<Children>: 0
+			</Frame>
+			<Frame>: 5 MachWheels
+				<Transform>: 2.384186E-07 -1.136868E-13 0 9.334669E-06 0 0 40 40 40 8.146035E-08 0 0 1  
+				<TransformMatrix>: 40 0 0 0 0 40 6.516827E-06 0 0 -6.516827E-06 40 0 2.384186E-07 -1.136868E-13 0 1  
+				<Mesh>: 180136 MachWheels
+					<Bounds>: -0.004764896 0.01777309 -0.01628346 0.05160526 0.01777305 0.1159835
+					<Positions>: 0  
+					<Colors>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 2
+						<SubMesh>: 0 0  
+						<SubMesh>: 1 0  
+				</Mesh>
+				<Materials>: 2
+					<Material>: 0
+						<AlbedoColor>: 0.1359835 0.04312795 0.1399318 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+					<Material>: 1
+						<AlbedoColor>: 0.124415 0.2933246 0.1587204 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+				</Materials>
+				<Children>: 0
+			</Frame>
+			<Frame>: 6 MainGuns
+				<Transform>: 0 3.552714E-15 0 9.334669E-06 0 0 40 40 40 8.146035E-08 0 0 1  
+				<TransformMatrix>: 40 0 0 0 0 40 6.516827E-06 0 0 -6.516827E-06 40 0 0 3.552714E-15 0 1  
+				<Mesh>: 6306 MainGuns
+					<Bounds>: 0.0006570164 0.06283884 0.1044124 0.008478651 0.0114618 0.07009831
+					<Positions>: 0  
+					<Colors>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 2
+						<SubMesh>: 0 0  
+						<SubMesh>: 1 0  
+				</Mesh>
+				<Materials>: 2
+					<Material>: 0
+						<AlbedoColor>: 0.4799914 0.4766145 0.2044989 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+					<Material>: 1
+						<AlbedoColor>: 0.3399913 0.08699513 0.12632 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+				</Materials>
+				<Children>: 0
+			</Frame>
+			<Frame>: 7 MainTank
+				<Transform>: 2.384186E-07 -1.136868E-13 0 9.334669E-06 0 0 40 40 40 8.146035E-08 0 0 1  
+				<TransformMatrix>: 40 0 0 0 0 40 6.516827E-06 0 0 -6.516827E-06 40 0 2.384186E-07 -1.136868E-13 0 1  
+				<Mesh>: 40540 MainTank
+					<Bounds>: -0.00476479 0.03664874 -0.02058795 0.05651235 0.0179517 0.123559
+					<Positions>: 0  
+					<Colors>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 3
+						<SubMesh>: 0 0  
+						<SubMesh>: 1 0  
+						<SubMesh>: 2 0  
+				</Mesh>
+				<Materials>: 3
+					<Material>: 0
+						<AlbedoColor>: 0.2733245 0.2392452 0.2177772 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+					<Material>: 1
+						<AlbedoColor>: 0.4799914 0.4766145 0.2044989 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+					<Material>: 2
+						<AlbedoColor>: 0.7716358 0 0 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+				</Materials>
+				<Children>: 0
+			</Frame>
+			<Frame>: 8 PropsRot
+				<Transform>: 0 3.552714E-15 0 9.334669E-06 0 0 40 40 40 8.146035E-08 0 0 1  
+				<TransformMatrix>: 40 0 0 0 0 40 6.516827E-06 0 0 -6.516827E-06 40 0 0 3.552714E-15 0 1  
+				<Mesh>: 119805 PropsRot
+					<Bounds>: 0.0010677 0.1144949 -0.03803294 0.05898684 0.05943814 0.076696
+					<Positions>: 0  
+					<Colors>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 5
+						<SubMesh>: 0 0  
+						<SubMesh>: 1 0  
+						<SubMesh>: 2 0  
+						<SubMesh>: 3 0  
+						<SubMesh>: 4 0  
+				</Mesh>
+				<Materials>: 5
+					<Material>: 0
+						<AlbedoColor>: 0.4799914 0.4766145 0.2044989 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+					<Material>: 1
+						<AlbedoColor>: 0.1639235 0.1592136 0.5992284 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+					<Material>: 2
+						<AlbedoColor>: 0.2799901 0.2799901 0.2799901 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+					<Material>: 3
+						<AlbedoColor>: 0.3399913 0.08699513 0.12632 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+					<Material>: 4
+						<AlbedoColor>: 0.2733245 0.2392452 0.2177772 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+				</Materials>
+				<Children>: 0
+			</Frame>
+			<Frame>: 9 Shield
+				<Transform>: 2.384186E-07 -1.136868E-13 0 9.334669E-06 0 0 40 40 40 8.146035E-08 0 0 1  
+				<TransformMatrix>: 40 0 0 0 0 40 6.516827E-06 0 0 -6.516827E-06 40 0 2.384186E-07 -1.136868E-13 0 1  
+				<Mesh>: 28308 Shield
+					<Bounds>: -0.004764633 0.03831329 -0.01888395 0.0605545 0.01725555 0.121855
+					<Positions>: 0  
+					<Colors>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 4
+						<SubMesh>: 0 0  
+						<SubMesh>: 1 0  
+						<SubMesh>: 2 0  
+						<SubMesh>: 3 0  
+				</Mesh>
+				<Materials>: 4
+					<Material>: 0
+						<AlbedoColor>: 0.2733245 0.2392452 0.2177772 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+					<Material>: 1
+						<AlbedoColor>: 0.3399913 0.08699513 0.12632 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+					<Material>: 2
+						<AlbedoColor>: 0.4799914 0.4766145 0.2044989 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+					<Material>: 3
+						<AlbedoColor>: 1 1 1 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+				</Materials>
+				<Children>: 0
+			</Frame>
+			<Frame>: 10 TankRotation
+				<Transform>: 0 3.552714E-15 0 9.334669E-06 0 0 40 40 40 8.146035E-08 0 0 1  
+				<TransformMatrix>: 40 0 0 0 0 40 6.516827E-06 0 0 -6.516827E-06 40 0 0 3.552714E-15 0 1  
+				<Mesh>: 10846 TankRotation
+					<Bounds>: 0.001080511 0.06680309 -0.02376045 0.05097464 0.01643585 0.0985055
+					<Positions>: 0  
+					<Colors>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 1
+						<SubMesh>: 0 0  
+				</Mesh>
+				<Materials>: 1
+					<Material>: 0
+						<AlbedoColor>: 0.4799914 0.4766145 0.2044989 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+				</Materials>
+				<Children>: 0
+			</Frame>
+			<Frame>: 11 Wheels
+				<Transform>: 2.384186E-07 -1.136868E-13 0 9.334669E-06 0 0 40 40 40 8.146035E-08 0 0 1  
+				<TransformMatrix>: 40 0 0 0 0 40 6.516827E-06 0 0 -6.516827E-06 40 0 2.384186E-07 -1.136868E-13 0 1  
+				<Mesh>: 92478 Wheels
+					<Bounds>: -0.004765 0.01511856 -0.01618745 0.04905415 0.01337288 0.09407149
+					<Positions>: 0  
+					<Colors>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 4
+						<SubMesh>: 0 0  
+						<SubMesh>: 1 0  
+						<SubMesh>: 2 0  
+						<SubMesh>: 3 0  
+				</Mesh>
+				<Materials>: 4
+					<Material>: 0
+						<AlbedoColor>: 0.1639235 0.1592136 0.5992284 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+					<Material>: 1
+						<AlbedoColor>: 0.05069042 0.08622479 0.04356912 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+					<Material>: 2
+						<AlbedoColor>: 0.1863055 0.6999915 0.682162 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+					<Material>: 3
+						<AlbedoColor>: 0.2733245 0.2392452 0.2177772 1
+						<EmissiveColor>: 0 0 0 0
+						<Glossiness>: 0.3099652
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+				</Materials>
+				<Children>: 0
+			</Frame>
+	</Frame>
+</Hierarchy>
