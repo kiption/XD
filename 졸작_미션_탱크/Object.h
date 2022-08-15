@@ -204,6 +204,8 @@ public:
 	CTankObject* m_pChild = NULL;
 	CTankObject* m_pSibling = NULL;
 
+
+
 	virtual void SetMesh(CMesh* pMesh);
 	virtual void SetShader(CShader* pShader);
 	virtual void SetShader(int nMaterial, CShader* pShader);

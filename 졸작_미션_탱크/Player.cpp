@@ -337,18 +337,18 @@ CTankPlayer::CTankPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 		pBulletObject->SetChild(pBulletMesh, true);
 		pBulletObject->SetRotationSpeed(90.0f);
 		pBulletObject->SetMovingSpeed(300.0f);
-		pBulletObject->SetScale(7.3, 7.3, 7.3);
+		pBulletObject->SetScale(20.3, 20.3, 20.3);
 		pBulletObject->SetActive(false);
 		m_ppBullets[i] = pBulletObject;
 
 	}
 	
-	CTankObject* pGameObject = CTankObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Tank/T80.bin");
+	CTankObject* pGameObject = CTankObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Tank/Tank_01_FBX.bin");
 	SetChild(pGameObject, true);
-	pGameObject->Rotate(0.0f, 270.0f, 0.0f);
-	pGameObject->SetScale(5.0f, 5.0, 5.0);
-	pGameObject->SetPosition(0.0, 0, 0.0);
-
+	pGameObject->Rotate(0.0f, 0.0f, 0.0f);
+	pGameObject->SetScale(8.0f,8.0, 8.0);
+	pGameObject->SetPosition(0.0, -1.0, 0.0);
+	
 	OnInitialize();
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -362,119 +362,45 @@ CTankPlayer::~CTankPlayer()
 void CTankPlayer::OnInitialize()
 {
 	
-	m_pMainBodyFrame = FindFrame("body3");
-	m_pHoodFrame = FindFrame("hood");
-	m_pSubBodyFrame = FindFrame("Box03");
-	m_pRailFrame = FindFrame("h2");
-	m_pTyerFrame = FindFrame("tyer");
-	m_pHoodFrame->m_xmf4x4Transform._11 = m_xmf3Right.x * 0.65f;
-	m_pHoodFrame->m_xmf4x4Transform._12 = m_xmf3Right.y * 0.65f;
-	m_pHoodFrame->m_xmf4x4Transform._13 = m_xmf3Right.z * 0.65f;
-	m_pHoodFrame->m_xmf4x4Transform._21 = m_xmf3Up.x * 0.65f;
-	m_pHoodFrame->m_xmf4x4Transform._22 = m_xmf3Up.y * 0.65f;
-	m_pHoodFrame->m_xmf4x4Transform._23 = m_xmf3Up.z * 0.65f;
-	m_pHoodFrame->m_xmf4x4Transform._31 = m_xmf3Look.x * 0.65f;
-	m_pHoodFrame->m_xmf4x4Transform._32 = m_xmf3Look.y * 0.65f;
-	m_pHoodFrame->m_xmf4x4Transform._33 = m_xmf3Look.z * 0.65f;
-	if (m_gunbarrelControl == true)
-	{
-		m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
-		m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-		m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_pSubBodyFrame = FindFrame("TankRotation");
+	m_pHoodFrame = FindFrame("MainGuns");
+	m_pRailFrame = FindFrame("PropsRot");
 
-		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
-		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-	}
 }
 
 void CTankPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
-
-	
-
-	//	m_pMainBodyFrame->m_xmf4x4Transform._11 = m_xmf3Right.x;
-	//	m_pMainBodyFrame->m_xmf4x4Transform._12 = m_xmf3Right.y;
-	//	m_pMainBodyFrame->m_xmf4x4Transform._13 = m_xmf3Right.z;
-	//	m_pMainBodyFrame->m_xmf4x4Transform._21 = m_xmf3Up.x;
-	//	m_pMainBodyFrame->m_xmf4x4Transform._22 = m_xmf3Up.y;
-	//	m_pMainBodyFrame->m_xmf4x4Transform._23 = m_xmf3Up.z;
-	//	m_pMainBodyFrame->m_xmf4x4Transform._31 = m_xmf3Look.x;
-	//	m_pMainBodyFrame->m_xmf4x4Transform._32 = m_xmf3Look.y;
-	//	m_pMainBodyFrame->m_xmf4x4Transform._33 = m_xmf3Look.z;
-	//	XMMATRIX xmmtxRotate2 = XMMatrixRotationY(XMConvertToRadians(90.0f));
-	//	m_pMainBodyFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate2, m_pMainBodyFrame->m_xmf4x4Transform);
-
-	//	m_pHoodFrame->m_xmf4x4Transform._11 = m_xmf3Right.x;
-	//	m_pHoodFrame->m_xmf4x4Transform._12 = m_xmf3Right.y;
-	//	m_pHoodFrame->m_xmf4x4Transform._13 = m_xmf3Right.z;
-	//	m_pHoodFrame->m_xmf4x4Transform._21 = m_xmf3Up.x;
-	//	m_pHoodFrame->m_xmf4x4Transform._22 = m_xmf3Up.y;
-	//	m_pHoodFrame->m_xmf4x4Transform._23 = m_xmf3Up.z;
-	//	m_pHoodFrame->m_xmf4x4Transform._31 = m_xmf3Look.x;
-	//	m_pHoodFrame->m_xmf4x4Transform._32 = m_xmf3Look.y;
-	//	m_pHoodFrame->m_xmf4x4Transform._33 = m_xmf3Look.z;
-
-	//	m_pSubBodyFrame->m_xmf4x4Transform._11 = m_xmf3Right.x;
-	//	m_pSubBodyFrame->m_xmf4x4Transform._12 = m_xmf3Right.y;
-	//	m_pSubBodyFrame->m_xmf4x4Transform._13 = m_xmf3Right.z;
-	//	m_pSubBodyFrame->m_xmf4x4Transform._21 = m_xmf3Up.x;
-	//	m_pSubBodyFrame->m_xmf4x4Transform._22 = m_xmf3Up.y;
-	//	m_pSubBodyFrame->m_xmf4x4Transform._23 = m_xmf3Up.z;
-	//	m_pSubBodyFrame->m_xmf4x4Transform._31 = m_xmf3Look.x;
-	//	m_pSubBodyFrame->m_xmf4x4Transform._32 = m_xmf3Look.y;
-	//	m_pSubBodyFrame->m_xmf4x4Transform._33 = m_xmf3Look.z;
-	//	XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(90.0f));
-	//	m_pSubBodyFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pSubBodyFrame->m_xmf4x4Transform);
-
-	//	m_pRailFrame->m_xmf4x4Transform._11 = m_xmf3Right.x;
-	//	m_pRailFrame->m_xmf4x4Transform._12 = m_xmf3Right.y;
-	//	m_pRailFrame->m_xmf4x4Transform._13 = m_xmf3Right.z;
-	//	m_pRailFrame->m_xmf4x4Transform._21 = m_xmf3Up.x;
-	//	m_pRailFrame->m_xmf4x4Transform._22 = m_xmf3Up.y;
-	//	m_pRailFrame->m_xmf4x4Transform._23 = m_xmf3Up.z;
-	//	m_pRailFrame->m_xmf4x4Transform._31 = m_xmf3Look.x;
-	//	m_pRailFrame->m_xmf4x4Transform._32 = m_xmf3Look.y;
-	//	m_pRailFrame->m_xmf4x4Transform._33 = m_xmf3Look.z;
-
-	//	m_pTyerFrame->m_xmf4x4Transform._11 = m_xmf3Right.x;
-	//	m_pTyerFrame->m_xmf4x4Transform._12 = m_xmf3Right.y;
-	//	m_pTyerFrame->m_xmf4x4Transform._13 = m_xmf3Right.z;
-	//	m_pTyerFrame->m_xmf4x4Transform._21 = m_xmf3Up.x;
-	//	m_pTyerFrame->m_xmf4x4Transform._22 = m_xmf3Up.y;
-	//	m_pTyerFrame->m_xmf4x4Transform._23 = m_xmf3Up.z;
-	//	m_pTyerFrame->m_xmf4x4Transform._31 = m_xmf3Look.x;
-	//	m_pTyerFrame->m_xmf4x4Transform._32 = m_xmf3Look.y;
-	//	m_pTyerFrame->m_xmf4x4Transform._33 = m_xmf3Look.z;
-	//
-
+		
 	if (m_gunbarrelControl == true) {
 	
+		if (m_turn == false) {
+			m_RotateAngle += 0.001f;
 
-		m_pHoodFrame->m_xmf4x4Transform._11 = m_xmf3Right.x*0.65f;
-		m_pHoodFrame->m_xmf4x4Transform._12 = m_xmf3Right.y * 0.65f;
-		m_pHoodFrame->m_xmf4x4Transform._13 = m_xmf3Right.z * 0.65f;
-		m_pHoodFrame->m_xmf4x4Transform._21 = m_xmf3Up.x * 0.65f;
-		m_pHoodFrame->m_xmf4x4Transform._22 = m_xmf3Up.y * 0.65f;
-		m_pHoodFrame->m_xmf4x4Transform._23 = m_xmf3Up.z * 0.65f;
-		m_pHoodFrame->m_xmf4x4Transform._31 = m_xmf3Look.x * 0.65f;
-		m_pHoodFrame->m_xmf4x4Transform._32 = m_xmf3Look.y * 0.65f;
-		m_pHoodFrame->m_xmf4x4Transform._33 = m_xmf3Look.z * 0.65f;
+			if (m_RotateAngle >= 0.15f) { m_turn = true; }
+		}
+		
+		if (m_turn==true) {
+			m_RotateAngle -= 0.001f;
 
+			if (m_RotateAngle <= -0.15f) { m_turn = false; }
+
+		}
+
+		m_pHoodFrame->Rotate(0.0, m_RotateAngle, 0.0);
+		m_pSubBodyFrame->Rotate(0.0, m_RotateAngle, 0.0);
+		m_pRailFrame->Rotate(0.0, m_RotateAngle, 0.0);
+		
 	}
-
-	
-
-	
+		
 
 	for (int i = 0; i< BULLETS; i++)
 	{
 		if (m_ppBullets[i]->m_bActive) {
-			
-			m_ppBullets[i]->Animate(fTimeElapsed);
 
+			m_ppBullets[i]->Animate(fTimeElapsed);
 		}
 	}
+
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
 	oobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(15.0, 10.0, 30.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 }
@@ -504,20 +430,23 @@ void CTankPlayer::FireBullet(CTankObject* pLockedObject)
 			break;
 		}
 	}
-	XMFLOAT3 PlayerHelicpoterPosition = GetLook();
+
+	XMFLOAT3 PlayerHelicpoterPosition = m_pHoodFrame-> GetLook();
+	PlayerHelicpoterPosition.y += 0.5f;
 	XMFLOAT3 AnermyHelicopterPosition = m_pCamera->GetLookVector();
 	XMFLOAT3 AnermyTOPlayerLookVector = Vector3::Normalize(Vector3::Add(PlayerHelicpoterPosition, AnermyHelicopterPosition));
 	
 	if (pBulletObject)
 	{
 		
-		XMFLOAT3 xmf3Position  = m_pHoodFrame->GetPosition();
-		//xmf3Position.x -= 8.0f;
+		XMFLOAT3 xmf3Position = m_pHoodFrame->GetPosition();
+		xmf3Position.z += 5.0;
 		XMFLOAT3 xmf3Direction = AnermyTOPlayerLookVector;
+		AnermyTOPlayerLookVector.z += 2.0f;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 6.0f, true));
+	
 		pBulletObject->m_xmf4x4World = m_xmf4x4Transform;
 
-		//pBulletObject->Rotate(m_pCamera->GetLookVector().x, m_pCamera->GetLookVector().y, m_pCamera->GetLookVector().z);
 		pBulletObject->SetFirePosition(xmf3FirePosition);
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->SetActive(true);
@@ -538,7 +467,7 @@ CCamera* CTankPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(40.0f);
 		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(-5.0f,  0.0f, -50.0f));
+		m_pCamera->SetOffset(XMFLOAT3(-5.0f,  30.0f, -90.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -562,7 +491,7 @@ CCamera* CTankPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(20.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.3f); 
-		m_pCamera->SetOffset(XMFLOAT3(-5.0f, 15.0f, -120.0f));
+		m_pCamera->SetOffset(XMFLOAT3(-5.0f, 55.0f, -110.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);

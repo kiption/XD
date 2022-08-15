@@ -364,10 +364,16 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 			break;
 		case WM_LBUTTONDOWN:
         case WM_RBUTTONDOWN:
+			
+			OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+			break;
         case WM_LBUTTONUP:
         case WM_RBUTTONUP:
-        case WM_MOUSEMOVE:
+			
 			OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+			break;
+        case WM_MOUSEMOVE:
+			
             break;
         case WM_KEYDOWN:
         case WM_KEYUP:
@@ -477,8 +483,10 @@ void CGameFramework::ProcessInput()
 			{
 				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				else
+				else {
 					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+					
+				}
 			}
 			if (dwDirection) {
 				m_pPlayer->Move(dwDirection, 13.0f, false);

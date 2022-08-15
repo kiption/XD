@@ -30,6 +30,7 @@ public:
 	float           			m_fPitch;
 	float           			m_fYaw;
 	float           			m_fRoll;
+	float						m_RotateAngle=0.0;
 	CCamera						*m_pCamera = NULL;
 	LPVOID						m_pPlayerUpdatedContext;
 	XMFLOAT3					m_xmf3Position;
@@ -82,6 +83,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 
 	bool							m_gunbarrelControl = false;
+	bool  m_turn = false;
 };
 
 #define BULLETS					50
