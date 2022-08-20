@@ -96,7 +96,7 @@ public:
 	virtual ~CTankPlayer();
 
 public:
-	float							m_fBulletEffectiveRange = 500.0f;
+	float							m_fBulletEffectiveRange = 300.0f;
 	CBulletObject*					pBulletObject = NULL;
 	CTankObject*				m_pPlayerObejct = NULL;
 	CTankObject*				m_pRocketFrame = NULL;

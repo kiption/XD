@@ -96,6 +96,7 @@ public:
 	CHelicopterObject* m_pMainTailRotorFrame = NULL;
 	CHelicopterObject* m_pSubTailRotorFrame = NULL;
 
+	float m_MissileRange = 600.0f;
 	// Missile ON/OFF
 	bool m_MissileActive;
 };

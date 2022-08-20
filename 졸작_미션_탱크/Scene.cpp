@@ -49,7 +49,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	m_pLights[2].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
-	m_pLights[2].m_xmf3Position = XMFLOAT3(0.0f, 2000.0f, 0.0f);
+	m_pLights[2].m_xmf3Position = XMFLOAT3(0.0f, 1000.0f, 0.0f);
 	m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
 	m_pLights[2].m_xmf3Attenuation = XMFLOAT3(0.0001f, 0.0001f, 0.0001f);
 	m_pLights[2].m_fFalloff = 6.0f;
@@ -82,7 +82,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	CMaterialColors* pMaterialColors = new CMaterialColors();
 	pMaterialColors->m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	pMaterialColors->m_xmf4Diffuse = XMFLOAT4(0.63f, 0.8f, 0.1f, 1.0f);
-	pMaterialColors->m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 6.0f); //(r,g,b,a=power)
+	pMaterialColors->m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 8.0f); //(r,g,b,a=power)
 	pMaterialColors->m_xmf4Emissive = XMFLOAT4(0.0f, 0.5f, 0.0f, 1.0f);
 
 	CMaterial* pMaterial = new CMaterial();
@@ -421,10 +421,10 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 	if (m_pLights)
 	{
-		XMFLOAT3 offset = XMFLOAT3(0, 20, 50);
-		m_pLights[2].m_xmf3Position.z = m_pPlayer->GetPosition().z - 2.0F;
-		m_pLights[2].m_xmf3Position.y = m_pPlayer->GetPosition().y + 32.0;
-		m_pLights[2].m_xmf3Position.x = m_pPlayer->GetPosition().x + 5.0;
+		XMFLOAT3 offset = XMFLOAT3(20, 50, 50);
+		m_pLights[2].m_xmf3Position.z = m_pPlayer->GetPosition().z + 50.0F;
+		m_pLights[2].m_xmf3Position.y = m_pPlayer->GetPosition().y + 57.0;
+		m_pLights[2].m_xmf3Position.x = m_pPlayer->GetPosition().x;
 		m_pLights[2].m_xmf3Direction = m_pPlayer->GetLookVector();
 		XMStoreFloat3(&offset, XMVectorAdd(XMLoadFloat3(&m_pPlayer->GetPosition()), XMLoadFloat3(&offset)));
 		m_pLights[0].m_xmf3Position = m_ppGameObjects[6]->GetPosition();

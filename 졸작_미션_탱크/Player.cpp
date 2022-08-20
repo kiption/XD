@@ -337,7 +337,7 @@ CTankPlayer::CTankPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 		pBulletObject->SetChild(pBulletMesh, true);
 		pBulletObject->SetRotationSpeed(90.0f);
 		pBulletObject->Rotate(90.0,0.0,0.0);
-		pBulletObject->SetMovingSpeed(300.0f);
+		pBulletObject->SetMovingSpeed(400.0f);
 		pBulletObject->SetScale(50.3, 50.3, 50.3);
 		pBulletObject->SetActive(false);
 		m_ppBullets[i] = pBulletObject;
@@ -368,8 +368,9 @@ void CTankPlayer::OnInitialize()
 	m_pRailFrame = FindFrame("PropsRot");
 	m_pRocketFrame = FindFrame("AIM120D.fbx");
 	
-	m_pRocketFrame->m_xmf4x4Transform._41 += 0.3f;
-	m_pRocketFrame->m_xmf4x4Transform._43 = 0.59570694f;;
+	
+	m_pRocketFrame->m_xmf4x4Transform._43 = 0.89570694f;;
+	m_pRocketFrame->m_xmf4x4Transform._41 += 0.3;
 	m_pRocketFrame->Rotate(00.0, -55.0, 0.0);
 	m_pRocketFrame->SetScale(3.0, 3.0, 3.0);
 }
@@ -405,11 +406,13 @@ void CTankPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	
 	if (m_Bulletturn == true) {
 
-		m_pRocketFrame->m_xmf4x4Transform._43 += 0.5f;
-			if (m_pRocketFrame->m_xmf4x4Transform._43 >= 100.0f)
+		m_pRocketFrame->m_xmf4x4Transform._43 += 2.0f;
+			if (m_pRocketFrame->m_xmf4x4Transform._43 >= 150.0f)
 			{
 				m_Bulletturn = false;
-				m_pRocketFrame->m_xmf4x4Transform._43 = 0.59570694f;
+			
+				m_pRocketFrame->m_xmf4x4Transform._43 = 0.89570694f;
+				
 			}
 	}
 	
@@ -482,8 +485,6 @@ void CTankPlayer::FireBullet(CTankObject* pLockedObject)
 		pBulletObject->SetMovingDirection(Direction);
 		pBulletObject->SetActive(true);
 
-		
-		
 	}
 }
 

@@ -45,7 +45,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[1].m_bEnable = true;
 
 	m_pLights[2].m_nType = SPOT_LIGHT;
-	m_pLights[2].m_fRange = 200.0f;
+	m_pLights[2].m_fRange = 500.0f;
 	m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.5f);
 	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 0.5f);
 	m_pLights[2].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
@@ -80,10 +80,10 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pTerrainShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	CMaterialColors* pMaterialColors = new CMaterialColors();
-	pMaterialColors->m_xmf4Ambient = XMFLOAT4(0.1f, 0.15f, 0.1f, 0.5f);
-	pMaterialColors->m_xmf4Diffuse = XMFLOAT4(0.53f, 0.8f, 0.1f, 1.0f);
-	pMaterialColors->m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); //(r,g,b,a=power)
-	pMaterialColors->m_xmf4Emissive = XMFLOAT4(0.2f, 0.5f, 0.2f, 1.0f);
+	pMaterialColors->m_xmf4Ambient = XMFLOAT4(0.1f, 0.15f, 0.0f, 0.5f);
+	pMaterialColors->m_xmf4Diffuse = XMFLOAT4(0.23f, 0.4f, 0.1f, 1.0f);
+	pMaterialColors->m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 6.0f); //(r,g,b,a=power)
+	pMaterialColors->m_xmf4Emissive = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 
 	CMaterial* pMaterial = new CMaterial();
 	pMaterial->SetShader(pTerrainShader);
@@ -460,9 +460,9 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	if (m_pLights)
 	{
 		XMFLOAT3 offset = XMFLOAT3(0, 20, 50);
-		m_pLights[2].m_xmf3Position.z = m_pPlayer->GetPosition().z - 2.0;
+		m_pLights[2].m_xmf3Position.z = m_pPlayer->GetPosition().z + 20.0;
 		m_pLights[2].m_xmf3Position.y = m_pPlayer->GetPosition().y + 32.0;
-		m_pLights[2].m_xmf3Position.x = m_pPlayer->GetPosition().x + 5.0;
+		m_pLights[2].m_xmf3Position.x = m_pPlayer->GetPosition().x;
 		m_pLights[2].m_xmf3Direction = m_pPlayer->GetLookVector();
 		XMStoreFloat3(&offset, XMVectorAdd(XMLoadFloat3(&m_pPlayer->GetPosition()), XMLoadFloat3(&offset)));
 		m_pLights[1].m_xmf3Position = m_ppGameObjects[1]->GetPosition();
