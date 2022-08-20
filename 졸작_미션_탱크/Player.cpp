@@ -327,7 +327,7 @@ CTankPlayer::CTankPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_pCamera = ChangeCamera(/*SPACESHIP_CAMERA*/THIRD_PERSON_CAMERA, 0.0f);
 	
 	
-	CTankObject* pBulletMesh = CTankObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Tank/Bullet.bin");
+	CTankObject* pBulletMesh = CTankObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Tank/AIM120D.bin");
 
 	for (int i = 0; i < BULLETS; i++)
 	{
@@ -336,14 +336,15 @@ CTankPlayer::CTankPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 		
 		pBulletObject->SetChild(pBulletMesh, true);
 		pBulletObject->SetRotationSpeed(90.0f);
+		pBulletObject->Rotate(90.0,0.0,0.0);
 		pBulletObject->SetMovingSpeed(300.0f);
-		pBulletObject->SetScale(20.3, 20.3, 20.3);
+		pBulletObject->SetScale(50.3, 50.3, 50.3);
 		pBulletObject->SetActive(false);
 		m_ppBullets[i] = pBulletObject;
 
 	}
 	
-	CTankObject* pGameObject = CTankObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Tank/Tank_01_FBX.bin");
+	CTankObject* pGameObject = CTankObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Tank/ÅÊÅ©fbx.bin");
 	SetChild(pGameObject, true);
 	pGameObject->Rotate(0.0f, 0.0f, 0.0f);
 	pGameObject->SetScale(8.0f,8.0, 8.0);
@@ -365,7 +366,12 @@ void CTankPlayer::OnInitialize()
 	m_pSubBodyFrame = FindFrame("TankRotation");
 	m_pHoodFrame = FindFrame("MainGuns");
 	m_pRailFrame = FindFrame("PropsRot");
-
+	m_pRocketFrame = FindFrame("AIM120D.fbx");
+	
+	m_pRocketFrame->m_xmf4x4Transform._41 += 0.3f;
+	m_pRocketFrame->m_xmf4x4Transform._43 = 0.59570694f;;
+	m_pRocketFrame->Rotate(00.0, -55.0, 0.0);
+	m_pRocketFrame->SetScale(3.0, 3.0, 3.0);
 }
 
 void CTankPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
@@ -386,19 +392,36 @@ void CTankPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 
 		}
 
-		m_pHoodFrame->Rotate(0.0, m_RotateAngle, 0.0);
-		m_pSubBodyFrame->Rotate(0.0, m_RotateAngle, 0.0);
+		m_pHoodFrame->Rotate(0.0,  m_RotateAngle, 0.0);
+		m_pSubBodyFrame->Rotate(0.0,m_RotateAngle, 0.0);
 		m_pRailFrame->Rotate(0.0, m_RotateAngle, 0.0);
 		
-	}
-		
 
+		
+	}
+
+
+	
+	
+	if (m_Bulletturn == true) {
+
+		m_pRocketFrame->m_xmf4x4Transform._43 += 0.5f;
+			if (m_pRocketFrame->m_xmf4x4Transform._43 >= 100.0f)
+			{
+				m_Bulletturn = false;
+				m_pRocketFrame->m_xmf4x4Transform._43 = 0.59570694f;
+			}
+	}
+	
 	for (int i = 0; i< BULLETS; i++)
 	{
 		if (m_ppBullets[i]->m_bActive) {
-
+			m_Bulletturn = true;
 			m_ppBullets[i]->Animate(fTimeElapsed);
+			
+			
 		}
+		
 	}
 
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
@@ -432,24 +455,35 @@ void CTankPlayer::FireBullet(CTankObject* pLockedObject)
 	}
 
 	XMFLOAT3 PlayerHelicpoterPosition = m_pHoodFrame-> GetLook();
-	PlayerHelicpoterPosition.y += 0.5f;
-	XMFLOAT3 AnermyHelicopterPosition = m_pCamera->GetLookVector();
+
+	XMFLOAT3 AnermyHelicopterPosition = GetLookVector();
 	XMFLOAT3 AnermyTOPlayerLookVector = Vector3::Normalize(Vector3::Add(PlayerHelicpoterPosition, AnermyHelicopterPosition));
 	
 	if (pBulletObject)
 	{
 		
-		XMFLOAT3 xmf3Position = m_pHoodFrame->GetPosition();
-		xmf3Position.z += 5.0;
+		/*XMFLOAT3 xmf3Position = m_pHoodFrame->GetPosition();
 		XMFLOAT3 xmf3Direction = AnermyTOPlayerLookVector;
-		AnermyTOPlayerLookVector.z += 2.0f;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 6.0f, true));
-	
+		xmf3FirePosition.z += 7.0f;
+		xmf3Direction.y -= 0.3f;
 		pBulletObject->m_xmf4x4World = m_xmf4x4Transform;
-
 		pBulletObject->SetFirePosition(xmf3FirePosition);
+		
 		pBulletObject->SetMovingDirection(xmf3Direction);
+		pBulletObject->SetActive(true);*/
+
+		XMFLOAT3 Direction = AnermyTOPlayerLookVector;
+		XMFLOAT3 xmf3Position = Vector3::Add(m_pHoodFrame->GetPosition(), Vector3::ScalarProduct(Direction, 0.0f, true));
+		Direction.y -= 0.3f;
+		xmf3Position.z += 7.0f;
+		pBulletObject->m_xmf4x4World = m_xmf4x4Transform;
+		pBulletObject->SetFirePosition(xmf3Position);
+		pBulletObject->SetMovingDirection(Direction);
 		pBulletObject->SetActive(true);
+
+		
+		
 	}
 }
 

@@ -175,6 +175,14 @@ namespace Vector3
 	{
 		return(TransformCoord(xmf3Vector, XMLoadFloat4x4(&xmmtx4x4Matrix)));
 	}
+
+	inline XMFLOAT3 Multiply(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2)
+	{
+		XMFLOAT3 xmf4Result;
+		XMStoreFloat3(&xmf4Result, XMLoadFloat3(&xmf3Vector1) *
+			XMLoadFloat3(&xmf3Vector2));
+		return(xmf4Result);
+	}
 }
 
 namespace Vector4

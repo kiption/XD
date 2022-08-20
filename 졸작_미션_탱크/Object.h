@@ -402,7 +402,7 @@ public:
 	float						m_fLockingTime = 5.0f;
 	CTankObject* m_pLockedObject = NULL;
 	CCamera* m_pCamera = NULL;
-
+	CPlayer* m_pPlayer = NULL;
 	void SetFirePosition(XMFLOAT3 xmf3FirePosition);
 	void Reset();
 };

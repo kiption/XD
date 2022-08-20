@@ -84,6 +84,7 @@ public:
 
 	bool							m_gunbarrelControl = false;
 	bool  m_turn = false;
+	bool  m_Bulletturn;
 };
 
 #define BULLETS					50
@@ -98,7 +99,7 @@ public:
 	float							m_fBulletEffectiveRange = 500.0f;
 	CBulletObject*					pBulletObject = NULL;
 	CTankObject*				m_pPlayerObejct = NULL;
-	CTankObject*				m_pMainBodyFrame = NULL;
+	CTankObject*				m_pRocketFrame = NULL;
 	CTankObject*				m_pHoodFrame = NULL;
 	CTankObject*				m_pSubBodyFrame = NULL;
 	CTankObject*				m_pRailFrame = NULL;
