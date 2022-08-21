@@ -409,9 +409,9 @@ void CScene::CheckObjectByBulletCollisions()
 	if (m_ppGameObjects[5]->oobb.Intersects(m_pPlayer->m_pRocketFrame9->oobb)) {
 		m_ppGameObjects[5]->SetScale(1.0, 1.0, 1.0);
 		for (int i = 6; i < 15; i++) {
-			m_ppGameObjects[i]->m_xmf4x4Transform._41 += RandF(-10, 10);
+			m_ppGameObjects[i]->m_xmf4x4Transform._41 += RandF(-20, 20);
 			m_ppGameObjects[i]->m_xmf4x4Transform._42 += RandF(0, 0);
-			m_ppGameObjects[i]->m_xmf4x4Transform._43 += RandF(-10, 10);
+			m_ppGameObjects[i]->m_xmf4x4Transform._43 += RandF(-20, 20);
 		}
 	
 	}

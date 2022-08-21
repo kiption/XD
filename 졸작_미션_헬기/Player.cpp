@@ -149,6 +149,7 @@ void CPlayer::Rotate(float x, float y, float z)
 	
 	
 		
+		m_pCamera->Rotate(x, y, z);
 		if (STOPZONE == false) {
 
 			if (x != 0.0f)
@@ -157,7 +158,12 @@ void CPlayer::Rotate(float x, float y, float z)
 				m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 				m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
 			}
-		
+			if (z != 0.0f)
+			{
+				XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(z));
+				m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
+				m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+			}
 		}
 		if (STOPZONE == true)
 		{
@@ -175,7 +181,6 @@ void CPlayer::Rotate(float x, float y, float z)
 		
 			
 		}
-		m_pCamera->Rotate(x, y, z);
 		
 	}
 	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
@@ -338,7 +343,7 @@ CHelicopterPlayer::CHelicopterPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	
 	CHelicopterObject* pGameObject = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Hellicopter/Apache.bin");
 	SetChild(pGameObject, true);
-	pGameObject->Rotate(0.0f, -5.0f, 0.0f);
+	pGameObject->Rotate(0.0f, -3.0f, 0.0f);
 	pGameObject->SetScale(1.0f, 1.0, 1.0);
 	pGameObject->SetPosition(0.0, 0, 0.0);
 
@@ -443,12 +448,12 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	//////////////////////////////////////////////////////////////Âø·ú ¸ð¼Ç////////////////////////////////////////////////
 	if (this->GetPosition().x > 2500.0 && this->GetPosition().x < 2800.0 &&
 		this->GetPosition().z > 1800.0 && this->GetPosition().z < 2100.0 && 
-		this->GetPosition().y<200.0) {
-
+		this->GetPosition().y<150.0) {
+		m_MissileActive = false;
 	
 
 		STOPZONE = true;
-		if (this->GetPosition().y < 300.0) {
+		if (this->GetPosition().y < 150.0) {
 
 			delrot -= 0.003f;
 			if (delrot <= 0.0)
@@ -456,7 +461,12 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 
 			
 		}
-		
+		if (this->GetPosition().y > 10.0) {
+			STOPZONE = false;
+			delrot += 0.04f;
+			if (delrot >= 2.0)
+				delrot = 2.0f;
+		}
 		if (m_pMainRotorFrame)
 		{
 			XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * delrot) * fTimeElapsed);
@@ -479,7 +489,7 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	{
 		STOPZONE = false;
 		if (this->GetPosition().y > 10.0) {
-			delrot += 0.002f;
+			delrot += 0.003f;
 			if (delrot >= 2.0)
 				delrot = 2.0f;
 		}
@@ -598,11 +608,11 @@ CCamera* CHelicopterPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapse
 		break;
 	case THIRD_PERSON_CAMERA:
 		SetFriction(100.5f);
-		SetGravity(XMFLOAT3(0.0f, 2.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, 7.0f, 0.0f));
 		SetMaxVelocityXZ(25.5f);
 		SetMaxVelocityY(20.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
-		m_pCamera->SetTimeLag(0.05f);
+		m_pCamera->SetTimeLag(1.15f);
 		m_pCamera->SetOffset(XMFLOAT3(-5.0f, 15.0f, -120.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
