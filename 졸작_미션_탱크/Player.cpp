@@ -64,13 +64,6 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
 	if (dwDirection)
 	{
-		//int move_direction = -1;
-		//
-		//if (dwDirection & DIR_FORWARD) move_direction = 0;
-		//if (dwDirection & DIR_RIGHT) move_direction = 1;
-		//if (dwDirection & DIR_BACKWARD) move_direction = 2;
-		//if (dwDirection & DIR_LEFT) move_direction = 3;
-
 		XMFLOAT3 xmf3Shift = XMFLOAT3(0.0, 0, 0);
 		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance * 0.055f);
 		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance * 0.055f);
@@ -80,14 +73,6 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance * 0.055f);
 		
 		Move(xmf3Shift, bUpdateVelocity);
-
-		// Server
-		//CS_MOVE_PACKET p;
-		//p.size = sizeof(p);
-		//p.type = CS_MOVE;
-		//p.direction = move_direction;
-		//send_packet(&p);
-		// ====
 	}
 }
 

@@ -4,9 +4,6 @@
 #include "stdafx.h"
 #include "LabProject07-9-1.h"
 #include "GameFramework.h"
-// Server
-#include "Network.h"
-// ====
 
 #define MAX_LOADSTRING 100
 
@@ -23,27 +20,6 @@ INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-	// Server
-	wcout.imbue(locale("korean"));
-	WSADATA WSAData;
-	WSAStartup(MAKEWORD(2, 0), &WSAData);
-
-	s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, 0);
-	SOCKADDR_IN server_addr;
-	ZeroMemory(&server_addr, sizeof(server_addr));
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(PORT_NUM);
-	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
-	connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
-
-	CS_LOGIN_PACKET p;
-	p.size = sizeof(CS_LOGIN_PACKET);
-	p.type = CS_LOGIN;
-	strcpy_s(p.name, "TANK");
-
-	send_packet(&p);
-	// ====
-
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -73,8 +49,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		{
 			gGameFramework.FrameAdvance();
 		}
-
-		//recv_packet();
 	}
 	gGameFramework.OnDestroy();
 

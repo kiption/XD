@@ -4,9 +4,33 @@
 
 #include "stdafx.h"
 #include "GameFramework.h"
+//Server
+#include "Network.h"
+//
 
 CGameFramework::CGameFramework()
 {
+	// Server
+	wcout.imbue(locale("korean"));
+	WSADATA WSAData;
+	WSAStartup(MAKEWORD(2, 0), &WSAData);
+
+	s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, 0);
+	SOCKADDR_IN server_addr;
+	ZeroMemory(&server_addr, sizeof(server_addr));
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(PORT_NUM);
+	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
+	connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+
+	CS_LOGIN_PACKET p;
+	p.size = sizeof(CS_LOGIN_PACKET);
+	p.type = CS_LOGIN;
+	strcpy_s(p.name, "COPTER");
+
+	send_packet(&p);
+	//
+
 	m_pdxgiFactory = NULL;
 	m_pdxgiSwapChain = NULL;
 	m_pd3dDevice = NULL;
@@ -452,15 +476,43 @@ void CGameFramework::ProcessInput()
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
 	if (!bProcessedByScene)
 	{
+		int packetDirection = -1;//S
 		DWORD dwDirection = 0; if (m_pPlayer->STOPZONE == false) {
 
-		if (pKeysBuffer[VK_UP] & 0xF0 ) dwDirection |= DIR_FORWARD;
-		if (pKeysBuffer[VK_DOWN] & 0xF0 ) dwDirection |= DIR_BACKWARD;
-		if (pKeysBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
-		if (pKeysBuffer[VK_RIGHT] & 0xF0 ) dwDirection |= DIR_RIGHT;
+			if (pKeysBuffer[VK_UP] & 0xF0) {
+				packetDirection = 0;//S
+				dwDirection |= DIR_FORWARD;
+			}
+			if (pKeysBuffer[VK_DOWN] & 0xF0) {
+				packetDirection = 1;//S
+				dwDirection |= DIR_BACKWARD;
+			}
+			if (pKeysBuffer[VK_LEFT] & 0xF0) {
+				packetDirection = 2;//S
+				dwDirection |= DIR_LEFT;
+			}
+			if (pKeysBuffer[VK_RIGHT] & 0xF0) {
+				packetDirection = 3;//S
+				dwDirection |= DIR_RIGHT;
+			}
 		}
-		if (pKeysBuffer[VK_RSHIFT] & 0xF0) dwDirection |= DIR_DOWN;
-		if (pKeysBuffer[VK_LSHIFT] & 0xF0) dwDirection |= DIR_UP;
+		if (pKeysBuffer[VK_RSHIFT] & 0xF0) {
+			packetDirection = 4;//S
+			dwDirection |= DIR_DOWN;
+		}
+		if (pKeysBuffer[VK_LSHIFT] & 0xF0) {
+			packetDirection = 5;//S
+			dwDirection |= DIR_UP;
+		}
+		// Server
+		if (packetDirection != -1) {
+			CS_MOVE_PACKET move_p;
+			move_p.size = sizeof(move_p);
+			move_p.type = CS_MOVE;
+			move_p.direction = packetDirection;
+
+			send_packet(&move_p);
+		}//
 
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		POINT ptCursorPos;
