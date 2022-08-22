@@ -224,7 +224,7 @@ void process_packet(int client_id, char* packet)
 		float cur_y = clients[client_id].y_pos;
 		float cur_z = clients[client_id].z_pos;
 
-		switch (p->direction) {	// 0: North, 1: East, 2: South, 3: West
+		switch (p->direction) {	// 0: Forward, 1: Back, 2: Left, 3: Right, 4: Up, 5: Down
 		case 0: if (cur_x < WORLD_X_POS - 1) cur_x++; break;
 		case 1: if (cur_z < WORLD_Z_POS - 1) cur_z++; break;
 		case 2: if (cur_x > 0) cur_x--; break;
@@ -235,8 +235,11 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].y_pos = cur_y;
 		clients[client_id].z_pos = cur_z;
 
-		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] moves to ("
-			<< clients[client_id].x_pos << ", " << clients[client_id].y_pos << ")." << endl;	// server message
+		short tempNum = p->direction;
+		//cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] moves to ("
+		//	<< clients[client_id].x_pos << ", " << clients[client_id].y_pos << ")." << endl;	// server message (추후에 클라이언트 좌표값 받아오면 그때 사용할 예정)
+		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] send <Move Packet - DIR: " << tempNum << " >." << endl;
+		// 지금은 임시로 어떤 방향의 이동 패킷을 받았는지만 출력합니다.
 
 		for (auto& pl : clients) {
 			lock_guard<mutex> lg{ pl.s_lock };
