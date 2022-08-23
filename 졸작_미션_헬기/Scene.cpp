@@ -19,7 +19,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights = new LIGHT[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
-	m_xmf4GlobalAmbient = XMFLOAT4(0.5f, 0.2f, 0.4f, 1.0f);
+	m_xmf4GlobalAmbient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.8f);
 
 	m_pLights[0].m_nType = POINT_LIGHT;
 	m_pLights[0].m_fRange = 500.0f;
@@ -31,30 +31,36 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.01f);
 	m_pLights[0].m_bEnable = true;
 
+	
+	///////////////// BackGround LIGHT ////////////////////////////
+	
 	m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights[1].m_fRange = 500.0;
-	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f);
-	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6f, 0.5f, 0.5f);
-	m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 0.0f);
-	m_pLights[1].m_xmf3Position = XMFLOAT3(0.0f, 0.5f, 0.0f);
+	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.5f);
+	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.1f, 0.3f, 0.1f, 0.5f);
+	m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
+	m_pLights[1].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
-	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(0.5f, 0.5f, 0.5f);
+	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(0.1f, 0.1f, 0.1f);
 	m_pLights[1].m_fFalloff = 7.0f;
 	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(120.0f));
 	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(60.0f));
 	m_pLights[1].m_bEnable = true;
 
+	
+	/////////////////// Player LIGHT///////////////////////////////
+	
 	m_pLights[2].m_nType = SPOT_LIGHT;
 	m_pLights[2].m_fRange = 500.0f;
-	m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.5f);
-	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 0.5f);
+	m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
 	m_pLights[2].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
-	m_pLights[2].m_xmf3Position = XMFLOAT3(0.0f, 1500.0f, 0.0f);
-	m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-	m_pLights[2].m_xmf3Attenuation = XMFLOAT3(0.0001f, 0.0001f, 0.0001f);
-	m_pLights[2].m_fFalloff = 6.0f;
-	m_pLights[2].m_fPhi = (float)cos(XMConvertToRadians(120.0f));
-	m_pLights[2].m_fTheta = (float)cos(XMConvertToRadians(60.0f));
+	m_pLights[2].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	m_pLights[2].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights[2].m_fFalloff = 8.0f;
+	m_pLights[2].m_fPhi = (float)cos(XMConvertToRadians(100.0f));
+	m_pLights[2].m_fTheta = (float)cos(XMConvertToRadians(50.0f));
 	m_pLights[2].m_bEnable = true;
 
 
@@ -80,10 +86,10 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pTerrainShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	CMaterialColors* pMaterialColors = new CMaterialColors();
-	pMaterialColors->m_xmf4Ambient = XMFLOAT4(0.1f, 0.15f, 0.0f, 0.5f);
-	pMaterialColors->m_xmf4Diffuse = XMFLOAT4(0.23f, 0.4f, 0.1f, 1.0f);
+	pMaterialColors->m_xmf4Ambient = XMFLOAT4(0.15f, 0.35f, 0.1f, 0.5f);
+	pMaterialColors->m_xmf4Diffuse = XMFLOAT4(0.33f, 0.5f, 0.1f, 0.8f);
 	pMaterialColors->m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 6.0f); //(r,g,b,a=power)
-	pMaterialColors->m_xmf4Emissive = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	pMaterialColors->m_xmf4Emissive = XMFLOAT4(0.01f, 0.01, 0.01f, 1.0f);
 
 	CMaterial* pMaterial = new CMaterial();
 	pMaterial->SetShader(pTerrainShader);
@@ -91,7 +97,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	XMFLOAT3 xmf3Scale(16.0f, 10.0f, 16.0f);
 	XMFLOAT3 xmf3Pos(0.0, 0.0f, 0.0);
-	XMFLOAT4 xmf4Color(0.0f, 0.0f, 0.0f, 0.0f);
+	XMFLOAT4 xmf4Color(0.0f, 2.0f, 0.0f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Assets/Image/Terrain/terrain_heli_8bit_512x512.raw"), 512, 512, 16, 16, xmf3Scale, xmf4Color);
 
 	m_pTerrain->SetPosition(xmf3Pos);
@@ -100,137 +106,99 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 
 
-	m_nGameObjects = 16;
+	m_nGameObjects = 11;
 	m_ppGameObjects = new CHelicopterObject * [m_nGameObjects];
 
 	CHelicopterObject* pGameModel = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/tree.bin");
 	CHelicopterObject* pGameModel2 = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/stone_largeB.bin");
 	CobstacleObject* pTree1 = NULL;
-	pTree1 = new CobstacleObject();
-	pTree1->SetChild(pGameModel, true);
-	pTree1->OnInitialize();
-	pTree1->SetScale(5.0, 10.0, 5.0);
-	pTree1->SetPosition(uidx(dre), uidy(dre), uidz(dre));
-	m_ppGameObjects[0] = pTree1;
 
-	CobstacleObject* pTree2 = NULL;
-	pTree2 = new CobstacleObject();
-	pTree2->SetChild(pGameModel, true);
-	pTree2->OnInitialize();
-	pTree2->SetScale(5.0, 10.0, 5.0);
-	pTree2->SetPosition(uidx(dre), uidy(dre), uidz(dre));
-	m_ppGameObjects[1] = pTree2;
-
-	CobstacleObject* pTree3 = NULL;
-	pTree3 = new CobstacleObject();
-	pTree3->SetChild(pGameModel, true);
-	pTree3->OnInitialize();
-	pTree3->SetScale(5.0, 10.0, 5.0);
-	pTree3->SetPosition(uidx(dre), uidy(dre), uidz(dre));
-	m_ppGameObjects[2] = pTree3;
-
-	CobstacleObject* pTree4 = NULL;
-	pTree4 = new CobstacleObject();
-	pTree4->SetChild(pGameModel, true);
-	pTree4->OnInitialize();
-	pTree4->SetScale(5.0, 10.0, 5.0);
-	pTree4->SetPosition(uidx(dre), uidy(dre), uidz(dre));
-	m_ppGameObjects[3] = pTree4;
-
-	CobstacleObject* pTree5 = NULL;
-	pTree5 = new CobstacleObject();
-	pTree5->SetChild(pGameModel, true);
-	pTree5->OnInitialize();
-	pTree5->SetScale(5.0, 10.0, 5.0);
-	pTree5->SetPosition(uidx(dre), uidy(dre), uidz(dre));
-	m_ppGameObjects[4] = pTree5;
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	CobstacleObject* pTree6 = NULL;
-	pTree6 = new CobstacleObject();
-	pTree6->SetChild(pGameModel2, true);
-	pTree6->OnInitialize();
-	pTree6->SetScale(2.0, 2.0, 2.0);
-	pTree6->SetPosition(300.0, 10.0, 300.0);
-	m_ppGameObjects[5] = pTree6;
+	CobstacleObject* pRockParticle = NULL;
+	pRockParticle = new CobstacleObject();
+	pRockParticle->SetChild(pGameModel2, true);
+	pRockParticle->OnInitialize();
+	pRockParticle->SetScale(2.0, 2.0, 2.0);
+	pRockParticle->SetPosition(300.0, 10.0, 300.0);
+	m_ppGameObjects[0] = pRockParticle;
 
 
-	CobstacleObject* pTree7 = NULL;
-	pTree7 = new CobstacleObject();
-	pTree7->SetChild(pGameModel2, true);
-	pTree7->OnInitialize();
-	pTree7->SetScale(0.2, 0.2, 0.2);
-	pTree7->SetPosition(300.0, 10.0, 300.0);
-	m_ppGameObjects[6] = pTree7;
+	CobstacleObject* pRockParticle2 = NULL;
+	pRockParticle2 = new CobstacleObject();
+	pRockParticle2->SetChild(pGameModel2, true);
+	pRockParticle2->OnInitialize();
+	pRockParticle2->SetScale(0.2, 0.2, 0.2);
+	pRockParticle2->SetPosition(300.0, 10.0, 300.0);
+	m_ppGameObjects[1] = pRockParticle2;
 
 
-	CobstacleObject* pTree8 = NULL;
-	pTree8 = new CobstacleObject();
-	pTree8->SetChild(pGameModel2, true);
-	pTree8->OnInitialize();
-	pTree8->SetScale(0.2, 0.2, 0.2);
-	pTree8->SetPosition(300.0, 10.0, 300.0);
-	m_ppGameObjects[7] = pTree8;
+	CobstacleObject* pRockParticle3 = NULL;
+	pRockParticle3 = new CobstacleObject();
+	pRockParticle3->SetChild(pGameModel2, true);
+	pRockParticle3->OnInitialize();
+	pRockParticle3->SetScale(0.2, 0.2, 0.2);
+	pRockParticle3->SetPosition(300.0, 10.0, 300.0);
+	m_ppGameObjects[2] = pRockParticle3;
 
 
-	CobstacleObject* pTree9 = NULL;
-	pTree9 = new CobstacleObject();
-	pTree9->SetChild(pGameModel2, true);
-	pTree9->OnInitialize();
-	pTree9->SetScale(0.2, 0.2, 0.2);
-	pTree9->SetPosition(300.0, 10.0, 300.0);
-	m_ppGameObjects[8] = pTree9;
+	CobstacleObject* pRockParticle4 = NULL;
+	pRockParticle4 = new CobstacleObject();
+	pRockParticle4->SetChild(pGameModel2, true);
+	pRockParticle4->OnInitialize();
+	pRockParticle4->SetScale(0.2, 0.2, 0.2);
+	pRockParticle4->SetPosition(300.0, 10.0, 300.0);
+	m_ppGameObjects[3] = pRockParticle4;
 
 
-	CobstacleObject* pTree10 = NULL;
-	pTree10 = new CobstacleObject();
-	pTree10->SetChild(pGameModel2, true);
-	pTree10->OnInitialize();
-	pTree10->SetScale(0.2, 0.2, 0.2);
-	pTree10->SetPosition(300.0, 10.0, 300.0);
-	m_ppGameObjects[9] = pTree10;
+	CobstacleObject* pRockParticle5 = NULL;
+	pRockParticle5 = new CobstacleObject();
+	pRockParticle5->SetChild(pGameModel2, true);
+	pRockParticle5->OnInitialize();
+	pRockParticle5->SetScale(0.2, 0.2, 0.2);
+	pRockParticle5->SetPosition(300.0, 10.0, 300.0);
+	m_ppGameObjects[4] = pRockParticle5;
 
 	
 
-	CobstacleObject* pRock1 = NULL;
-	pRock1 = new CobstacleObject();
-	pRock1->SetChild(pGameModel2, true);
-	pRock1->OnInitialize();
-	pRock1->SetScale(0.2, 0.2, 0.2);
-	pRock1->SetPosition(300.0, 10.0, 300.0);
-	m_ppGameObjects[10] = pRock1;
+	CobstacleObject* pRockParticle6 = NULL;
+	pRockParticle6 = new CobstacleObject();
+	pRockParticle6->SetChild(pGameModel2, true);
+	pRockParticle6->OnInitialize();
+	pRockParticle6->SetScale(0.2, 0.2, 0.2);
+	pRockParticle6->SetPosition(300.0, 10.0, 300.0);
+	m_ppGameObjects[5] = pRockParticle6;
 
-	CobstacleObject* pRock2 = NULL;
-	pRock2 = new CobstacleObject();
-	pRock2->SetChild(pGameModel2, true);
-	pRock2->OnInitialize();
-	pRock2->SetScale(0.2, 0.2, 0.2);
-	pRock2->SetPosition(300.0, 10.0, 300.0);
-	m_ppGameObjects[11] = pRock2;
+	CobstacleObject* pRockParticle7 = NULL;
+	pRockParticle7 = new CobstacleObject();
+	pRockParticle7->SetChild(pGameModel2, true);
+	pRockParticle7->OnInitialize();
+	pRockParticle7->SetScale(0.2, 0.2, 0.2);
+	pRockParticle7->SetPosition(300.0, 10.0, 300.0);
+	m_ppGameObjects[6] = pRockParticle7;
 
-	CobstacleObject* pRock3 = NULL;
-	pRock3 = new CobstacleObject();
-	pRock3->SetChild(pGameModel2, true);
-	pRock3->OnInitialize();
-	pRock3->SetScale(0.2, 0.2, 0.2);
-	pRock3->SetPosition(300.0, 10.0, 300.0);
-	m_ppGameObjects[12] = pRock3;
+	CobstacleObject* pRockParticle8 = NULL;
+	pRockParticle8 = new CobstacleObject();
+	pRockParticle8->SetChild(pGameModel2, true);
+	pRockParticle8->OnInitialize();
+	pRockParticle8->SetScale(0.2, 0.2, 0.2);
+	pRockParticle8->SetPosition(300.0, 10.0, 300.0);
+	m_ppGameObjects[7] = pRockParticle8;
 
-	CobstacleObject* pRock4 = NULL;
-	pRock4 = new CobstacleObject();
-	pRock4->SetChild(pGameModel2, true);
-	pRock4->OnInitialize();
-	pRock4->SetScale(0.2, 0.2, 0.2);
-	pRock4->SetPosition(uidx(dre), uidR(dre), uidz(dre));
-	m_ppGameObjects[13] = pRock4;
+	CobstacleObject* pRockParticle9 = NULL;
+	pRockParticle9 = new CobstacleObject();
+	pRockParticle9->SetChild(pGameModel2, true);
+	pRockParticle9->OnInitialize();
+	pRockParticle9->SetScale(0.2, 0.2, 0.2);
+	pRockParticle9->SetPosition(300.0, 10.0, 300.0);
+	pRockParticle9->SetPosition(uidx(dre), uidR(dre), uidz(dre));
+	m_ppGameObjects[8] = pRockParticle9;
 
-	CobstacleObject* pRock5 = NULL;
-	pRock5 = new CobstacleObject();
-	pRock5->SetChild(pGameModel2, true);
-	pRock5->OnInitialize();
-	pRock5->SetScale(0.2, 0.2, 0.2);
-	pRock5->SetPosition(300.0, 10.0, 300.0);
-	m_ppGameObjects[14] = pRock5;
+	CobstacleObject* pRockParticle10 = NULL;
+	pRockParticle10 = new CobstacleObject();
+	pRockParticle10->SetChild(pGameModel2, true);
+	pRockParticle10->OnInitialize();
+	pRockParticle10->SetScale(0.2, 0.2, 0.2);
+	pRockParticle10->SetPosition(300.0, 10.0, 300.0);
+	m_ppGameObjects[9] = pRockParticle10;
 
 	CHelicopterObject* StopZone = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Hellicopter/HELI1.bin");
 
@@ -240,7 +208,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pStopZone->OnInitialize();
 	pStopZone->SetScale(5000.0, 500.0, 5000.0);
 	pStopZone->SetPosition(2650.0, 5.0, 1950.0);
-	m_ppGameObjects[15] = pStopZone;
+	m_ppGameObjects[10] = pStopZone;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -406,9 +374,9 @@ void CScene::CheckObjectByBulletCollisions()
 		XMFLOAT3(5.0, 5.0, 5.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 
 	
-	if (m_ppGameObjects[5]->oobb.Intersects(m_pPlayer->m_pRocketFrame9->oobb)) {
-		m_ppGameObjects[5]->SetScale(1.0, 1.0, 1.0);
-		for (int i = 6; i < 15; i++) {
+	if (m_ppGameObjects[0]->oobb.Intersects(m_pPlayer->m_pRocketFrame9->oobb)) {
+		
+		for (int i = 1; i < 10; i++) {
 			m_ppGameObjects[i]->m_xmf4x4Transform._41 += RandF(-20, 20);
 			m_ppGameObjects[i]->m_xmf4x4Transform._42 += RandF(0, 0);
 			m_ppGameObjects[i]->m_xmf4x4Transform._43 += RandF(-20, 20);
@@ -417,10 +385,10 @@ void CScene::CheckObjectByBulletCollisions()
 	}
 	if (m_pPlayer->m_MissileActive == false) {
 		
-			for (int i = 6; i < 15;i++) {
-			m_ppGameObjects[i]->m_xmf4x4Transform._41 = m_ppGameObjects[5]->m_xmf4x4Transform._41;
-			m_ppGameObjects[i]->m_xmf4x4Transform._42 = m_ppGameObjects[5]->m_xmf4x4Transform._42;
-			m_ppGameObjects[i]->m_xmf4x4Transform._43 = m_ppGameObjects[5]->m_xmf4x4Transform._43;
+			for (int i = 1; i < 10;i++) {
+			m_ppGameObjects[i]->m_xmf4x4Transform._41 = m_ppGameObjects[0]->m_xmf4x4Transform._41;
+			m_ppGameObjects[i]->m_xmf4x4Transform._42 = m_ppGameObjects[0]->m_xmf4x4Transform._42;
+			m_ppGameObjects[i]->m_xmf4x4Transform._43 = m_ppGameObjects[0]->m_xmf4x4Transform._43;
 		}
 	}
 
@@ -429,7 +397,7 @@ void CScene::CheckObjectByBulletCollisions()
 
 void CScene::CheckObjectByPlayerCollisions()
 {
-	for (int i = 10; i < 15; i++)
+	for (int i = 0; i < 2; i++)
 	{
 		if (m_ppGameObjects[i]->oobb.Intersects(m_pPlayer->oobb)) {
 
@@ -459,14 +427,15 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 	if (m_pLights)
 	{
-		XMFLOAT3 offset = XMFLOAT3(0, 20, 50);
-		m_pLights[2].m_xmf3Position.z = m_pPlayer->GetPosition().z + 20.0;
-		m_pLights[2].m_xmf3Position.y = m_pPlayer->GetPosition().y + 32.0;
-		m_pLights[2].m_xmf3Position.x = m_pPlayer->GetPosition().x;
+		
+		XMFLOAT3 offset = XMFLOAT3(0, 0,0);
+		m_pLights[2].m_xmf3Position = m_pPlayer->GetPosition();
+	
 		m_pLights[2].m_xmf3Direction = m_pPlayer->GetLookVector();
 		XMStoreFloat3(&offset, XMVectorAdd(XMLoadFloat3(&m_pPlayer->GetPosition()), XMLoadFloat3(&offset)));
-		m_pLights[1].m_xmf3Position = m_ppGameObjects[1]->GetPosition();
-		m_pLights[1].m_xmf3Direction = m_ppGameObjects[1]->GetLook();
+		
+	/*	m_pLights[1].m_xmf3Position = m_ppGameObjects[1]->GetPosition();
+		m_pLights[1].m_xmf3Direction = m_ppGameObjects[1]->GetLook();*/
 	}
 
 	CheckObjectByPlayerCollisions();
