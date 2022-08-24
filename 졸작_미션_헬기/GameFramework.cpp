@@ -360,9 +360,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				case VK_END:
 					m_pPlayer->m_gunbarrelControl =!m_pPlayer->m_gunbarrelControl;
 					break;
-				case VK_DELETE:
-					((CHelicopterPlayer*)m_pPlayer)->FireBullet(NULL);
-					break;
+				
 				default:
 					break;
 			}

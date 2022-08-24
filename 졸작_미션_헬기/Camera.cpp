@@ -277,8 +277,9 @@ CThirdPersonCamera::CThirdPersonCamera(CCamera *pCamera) : CCamera(pCamera)
 
 void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
-	if (m_pPlayer)
+	if (m_pPlayer || m_pPlayer->m_MissileActive==false)
 	{
+		
 		XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
 		XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
 		XMFLOAT3 xmf3Up = m_pPlayer->GetUpVector();
@@ -301,6 +302,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
 			SetLookAt(xmf3LookAt);
 		}
+		
 	}
 }
 

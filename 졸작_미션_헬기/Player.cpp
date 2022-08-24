@@ -347,8 +347,8 @@ CHelicopterPlayer::CHelicopterPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		
 		pBulletObject->SetChild(pBulletMesh, true);
 		pBulletObject->SetRotationSpeed(90.0f);
-		pBulletObject->SetMovingSpeed(2000.0f);
-		pBulletObject->SetScale(8.0, 8.0, 8.0);
+		pBulletObject->SetMovingSpeed(1500.0f);
+		pBulletObject->SetScale(8.0, 8.0, 14.0);
 		pBulletObject->SetActive(false);
 		m_ppBullets[i] = pBulletObject;
 
@@ -383,94 +383,97 @@ void CHelicopterPlayer::OnInitialize()
 	m_pRocketFrame7 = FindFrame("rocket_6");
 	m_pRocketFrame8 = FindFrame("rocket_7");
 	m_pRocketFrame9 = FindFrame("rocket_8");
+	m_pRocketFrame10 = FindFrame("rocket_9");
 
-		m_pRocketFrame1->SetScale(1.0, 1.5, 1.0);
-		m_pRocketFrame2->SetScale(1.0, 1.5, 1.0);
-		m_pRocketFrame3->SetScale(1.0, 1.5, 1.0);
-		m_pRocketFrame4->SetScale(1.0, 1.5, 1.0);
-		m_pRocketFrame5->SetScale(1.0, 1.5, 1.0);
-		m_pRocketFrame6->SetScale(1.0, 1.5, 1.0);
-		m_pRocketFrame7->SetScale(1.0, 1.5, 1.0);
-		m_pRocketFrame8->SetScale(1.0, 1.5, 1.0);
-		m_pRocketFrame9->SetScale(1.0, 1.5, 1.0);
+	m_pRocketFrame1->SetScale(1.5, 2.0, 1.5);
+	m_pRocketFrame2->SetScale(1.5, 2.0, 1.5);
+	m_pRocketFrame3->SetScale(1.5, 2.0, 1.5);
+	m_pRocketFrame4->SetScale(1.5, 2.0, 1.5);
+	m_pRocketFrame5->SetScale(1.5, 2.0, 1.5);
+	m_pRocketFrame6->SetScale(1.5, 2.0, 1.5);
+	m_pRocketFrame7->SetScale(1.5, 2.0, 1.5);
+	m_pRocketFrame8->SetScale(1.5, 2.0, 1.5);
+	m_pRocketFrame9->SetScale(1.5, 2.0, 1.5);
+	m_pRocketFrame10->SetScale(1.5, 2.0, 1.5);
 }
 
 void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
-
 	
 	if(m_MissileActive==true)
 	{
-
-		m_pRocketFrame1->m_xmf4x4Transform._43 += 5.f;
-		if (m_pRocketFrame1->m_xmf4x4Transform._43 >= m_MissileRange)
-			m_pRocketFrame1->m_xmf4x4Transform._43 = 2.f;
-
-		m_pRocketFrame2->m_xmf4x4Transform._43 += 8.f;
-		if (m_pRocketFrame2->m_xmf4x4Transform._43 >= m_MissileRange)
-			m_pRocketFrame2->m_xmf4x4Transform._43 = 2.f; 
-
-			m_pRocketFrame3->m_xmf4x4Transform._43 += 9.f;
-		if (m_pRocketFrame3->m_xmf4x4Transform._43 >= m_MissileRange)
-			m_pRocketFrame3->m_xmf4x4Transform._43 = 2.f;
-
-		m_pRocketFrame4->m_xmf4x4Transform._43 += 7.f;
-		if (m_pRocketFrame4->m_xmf4x4Transform._43 >= m_MissileRange)
-			m_pRocketFrame4->m_xmf4x4Transform._43 = 2.f;
-
-		m_pRocketFrame5->m_xmf4x4Transform._43 += 8.f;
-		if (m_pRocketFrame5->m_xmf4x4Transform._43 >= m_MissileRange)
-			m_pRocketFrame5->m_xmf4x4Transform._43 = 2.f;
-
-		m_pRocketFrame6->m_xmf4x4Transform._43 += 7.f;
-		if (m_pRocketFrame6->m_xmf4x4Transform._43 >= m_MissileRange)
-			m_pRocketFrame6->m_xmf4x4Transform._43 = 2.f;
-
-		m_pRocketFrame7->m_xmf4x4Transform._43 += 6.f;
-		if (m_pRocketFrame7->m_xmf4x4Transform._43 >= m_MissileRange)
-			m_pRocketFrame7->m_xmf4x4Transform._43 = 2.f;
-
-		m_pRocketFrame8->m_xmf4x4Transform._43 += 5.f;
-		if (m_pRocketFrame8->m_xmf4x4Transform._43 >= m_MissileRange)
-			m_pRocketFrame8->m_xmf4x4Transform._43 = 2.f;
-
-		m_pRocketFrame9->m_xmf4x4Transform._43 += 8.f;
-		if (m_pRocketFrame9->m_xmf4x4Transform._43 >= m_MissileRange) {
+		if (m_MissileCount >= 1 )
+			m_pRocketFrame1->m_xmf4x4Transform._43 += 8.f; {
 			
-			m_MissileActive = false;
-			m_pRocketFrame9->m_xmf4x4Transform._43 = 2.f;
+			m_pCamera->GetPosition().x = m_pRocketFrame1->GetPosition().x;
+			m_pCamera->GetPosition().y = m_pRocketFrame1->GetPosition().y;
+			m_pCamera->GetPosition().z = m_pRocketFrame1->GetPosition().z+50.0;
+			if (m_pRocketFrame1->m_xmf4x4Transform._43 > m_MissileRange) {
+				m_MissileActive = false;
+			}
+			
 		}
-
+		
+		if (m_MissileCount >= 2 )
+		m_pRocketFrame2->m_xmf4x4Transform._43 += 9.f;
+		
+		if (m_MissileCount >= 3)
+		m_pRocketFrame3->m_xmf4x4Transform._43 += 7.f;
+		
+		if (m_MissileCount >= 4)
+		m_pRocketFrame4->m_xmf4x4Transform._43 += 8.f;
+		
+		if (m_MissileCount >= 5)
+		m_pRocketFrame5->m_xmf4x4Transform._43 += 9.f;
+		
+		if (m_MissileCount >= 6)
+		m_pRocketFrame6->m_xmf4x4Transform._43 += 8.f;
+		
+		if (m_MissileCount >= 7)
+		m_pRocketFrame7->m_xmf4x4Transform._43 += 7.f;
+		
+		if (m_MissileCount >= 8)
+		m_pRocketFrame8->m_xmf4x4Transform._43 += 6.f;
+		
+		if (m_MissileCount >= 9)
+		m_pRocketFrame9->m_xmf4x4Transform._43 += 6.f;
+		
+		if (m_MissileCount >= 10)
+		m_pRocketFrame10->m_xmf4x4Transform._43 += 8.f;
 	}
 
 	if (m_MissileActive == false) 
 	{
-		m_pRocketFrame1->m_xmf4x4Transform._43 = -12.f;
-		m_pRocketFrame2->m_xmf4x4Transform._43 = -12.f;
-		m_pRocketFrame3->m_xmf4x4Transform._43 = -12.f;
-		m_pRocketFrame4->m_xmf4x4Transform._43 = -12.f;
-		m_pRocketFrame5->m_xmf4x4Transform._43 = -12.f;
-		m_pRocketFrame6->m_xmf4x4Transform._43 = -12.f;
-		m_pRocketFrame7->m_xmf4x4Transform._43 = -12.f;
-		m_pRocketFrame8->m_xmf4x4Transform._43 = -12.f;
-		m_pRocketFrame9->m_xmf4x4Transform._43 = -12.f;
+		m_MissileCount = 0;
+		m_pRocketFrame1->m_xmf4x4Transform._43 = -13.f;
+		m_pRocketFrame2->m_xmf4x4Transform._43 = -13.f;
+		m_pRocketFrame3->m_xmf4x4Transform._43 = -13.f;
+		m_pRocketFrame4->m_xmf4x4Transform._43 = -13.f;
+		m_pRocketFrame5->m_xmf4x4Transform._43 = -13.f;
+		m_pRocketFrame6->m_xmf4x4Transform._43 = -13.f;
+		m_pRocketFrame7->m_xmf4x4Transform._43 = -13.f;
+		m_pRocketFrame8->m_xmf4x4Transform._43 = -13.f;
+		m_pRocketFrame9->m_xmf4x4Transform._43 = -13.f;
 	}
 
 	
 	//////////////////////////////////////////////////////////////Âø·ú ¸ð¼Ç////////////////////////////////////////////////
 	if (this->GetPosition().x > 2500.0 && this->GetPosition().x < 2800.0 &&
 		this->GetPosition().z > 1800.0 && this->GetPosition().z < 2100.0 && 
-		this->GetPosition().y<150.0) {
-		m_MissileActive = false;
+		this->GetPosition().y<160.0) {
+		
 	
-
+		if (this->GetPosition().y == 10.0) {
+			m_MissileActive = false;
+		}
 		STOPZONE = true;
-		if (this->GetPosition().y < 150.0) {
+		if (this->GetPosition().y < 160.0) {
 
 			delrot -= 0.003f;
 			if (delrot <= 0.0)
 				delrot = 0.0f;
 
+			
 			
 		}
 		if (this->GetPosition().y > 10.0) {
@@ -562,7 +565,7 @@ void CHelicopterPlayer::FireBullet(CHelicopterObject* pLockedObject)
 	{
 		if (!m_ppBullets[i]->m_bActive)
 		{
-			//m_MissileActive = true;
+			
 			pBulletObject = m_ppBullets[i];
 			break;
 			
@@ -585,6 +588,11 @@ void CHelicopterPlayer::FireBullet(CHelicopterObject* pLockedObject)
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->SetActive(true);
 	}
+}
+
+void CHelicopterPlayer::HellFire()
+{
+	m_MissileActive = true;
 }
 
 CCamera* CHelicopterPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)

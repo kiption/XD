@@ -71,8 +71,8 @@ public:
 	void CheckObjectByPlayerCollisions();
 	void PickingToPlayer();
 	CPlayer						*m_pPlayer = NULL;
-	
-
+	CBulletObject* m_pBullet = NULL;
+	CHelicopterPlayer* m_HeliPlayer = NULL;
 public:
 	ID3D12RootSignature			*m_pd3dGraphicsRootSignature = NULL;
 

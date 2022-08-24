@@ -21,14 +21,17 @@ void CScene::BuildDefaultLightsAndMaterials()
 
 	m_xmf4GlobalAmbient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.8f);
 
-	m_pLights[0].m_nType = POINT_LIGHT;
+	m_pLights[0].m_nType = SPOT_LIGHT;
 	m_pLights[0].m_fRange = 500.0f;
-	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
-	m_pLights[0].m_xmf3Position = XMFLOAT3(0.0f, 5000.0f, 0.0f);
-	m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
-	m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.01f);
+	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.8f, 0.1f, 0.2f, 1.0f);
+	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.1f, 0.6f, 1.0f);
+	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.9f, 0.3f, 0.3f, 0.0f);
+	m_pLights[0].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 1.0f);
+	m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.01f);
+	m_pLights[0].m_fFalloff = 8.0f;
+	m_pLights[0].m_fPhi = (float)cos(XMConvertToRadians(60.0f));
+	m_pLights[0].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 	m_pLights[0].m_bEnable = true;
 
 	
@@ -335,10 +338,13 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		/*case VK_DELETE:
+		case VK_DELETE:
 			((CHelicopterPlayer*)m_pPlayer)->FireBullet(NULL);
-			break;*/
-
+			break;
+		case VK_END:
+			((CHelicopterPlayer*)m_pPlayer)->HellFire();
+			((CHelicopterPlayer*)m_pPlayer)->m_MissileCount++;
+			break;
 		case VK_F4:
 			FightMode = true;
 			turn = m_nGameObjects;
@@ -424,18 +430,18 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 	m_fElapsedTime = fTimeElapsed;
 	for (int i = 0; i < m_nGameObjects; i++) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
-
+	pBulletObject = new CBulletObject(500.0);
 	if (m_pLights)
 	{
 		
 		XMFLOAT3 offset = XMFLOAT3(0, 0,0);
 		m_pLights[2].m_xmf3Position = m_pPlayer->GetPosition();
-	
 		m_pLights[2].m_xmf3Direction = m_pPlayer->GetLookVector();
 		XMStoreFloat3(&offset, XMVectorAdd(XMLoadFloat3(&m_pPlayer->GetPosition()), XMLoadFloat3(&offset)));
 		
-	/*	m_pLights[1].m_xmf3Position = m_ppGameObjects[1]->GetPosition();
-		m_pLights[1].m_xmf3Direction = m_ppGameObjects[1]->GetLook();*/
+		
+		m_pLights[0].m_xmf3Position = pBulletObject->GetPosition();
+		m_pLights[0].m_xmf3Direction = m_pPlayer->GetLookVector();
 	}
 
 	CheckObjectByPlayerCollisions();

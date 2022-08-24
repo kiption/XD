@@ -93,10 +93,13 @@ public:
 	CHelicopterObject* m_pRocketFrame7 = NULL;
 	CHelicopterObject* m_pRocketFrame8 = NULL;
 	CHelicopterObject* m_pRocketFrame9 = NULL;
+	CHelicopterObject* m_pRocketFrame10 = NULL;
 	CHelicopterObject* m_pMainTailRotorFrame = NULL;
 	CHelicopterObject* m_pSubTailRotorFrame = NULL;
 
-	float m_MissileRange = 600.0f;
+	CBulletObject* pBulletObject = NULL;
+
+	float m_MissileRange = 1500.0f;
 	// Missile ON/OFF
 	bool m_MissileActive;
 };
@@ -111,11 +114,10 @@ public:
 
 public:
 	float							m_fBulletEffectiveRange = 500.0f;
-	CBulletObject*					pBulletObject = NULL;
 	CHelicopterObject*				m_pPlayerObejct = NULL;
-	
-	float delrot = 2.0;
-
+	CBulletObject* pBulletObject = NULL;
+	float delrot = 2.0; 
+	int m_MissileCount=0;
 	
 
 private:
@@ -130,6 +132,7 @@ public:
 public:
 	CBulletObject* m_ppBullets[BULLETS];
 	void FireBullet(CHelicopterObject* pLockedObject);
+	void HellFire();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 };
 
