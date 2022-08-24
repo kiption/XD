@@ -335,9 +335,9 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case VK_DELETE:
+		/*case VK_DELETE:
 			((CHelicopterPlayer*)m_pPlayer)->FireBullet(NULL);
-			break;
+			break;*/
 
 		case VK_F4:
 			FightMode = true;

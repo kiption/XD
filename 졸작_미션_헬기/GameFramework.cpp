@@ -361,8 +361,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 					m_pPlayer->m_gunbarrelControl =!m_pPlayer->m_gunbarrelControl;
 					break;
 				case VK_DELETE:
-					((CHelicopterPlayer*)m_pPlayer)->FireBullet(m_pAnermyObject);
-					m_pAnermyObject = NULL;
+					((CHelicopterPlayer*)m_pPlayer)->FireBullet(NULL);
 					break;
 				default:
 					break;

@@ -165,7 +165,7 @@ void CCamera::Rotate(float fPitch, float fYaw, float fRoll)
 // ÇÃ·¹ÀÌ¾î °´Ã¼°¡ »ìÂ¦º¸ÀÌ´Â 1ÀÎÄª
 CSpaceShipCamera::CSpaceShipCamera(CCamera *pCamera) : CCamera(pCamera)
 {
-	m_nMode = SPACESHIP_CAMERA;
+	m_nMode = HELI_IN_CAMERA;
 }
 
 void CSpaceShipCamera::Rotate(float x, float y, float z)
@@ -214,7 +214,7 @@ CFirstPersonCamera::CFirstPersonCamera(CCamera *pCamera) : CCamera(pCamera)
 	m_nMode = FIRST_PERSON_CAMERA;
 	if (pCamera)
 	{
-		if (pCamera->GetMode() == SPACESHIP_CAMERA)
+		if (pCamera->GetMode() == HELI_IN_CAMERA)
 		{
 			m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 			m_xmf3Right.y = 0.0f;
@@ -264,7 +264,7 @@ CThirdPersonCamera::CThirdPersonCamera(CCamera *pCamera) : CCamera(pCamera)
 	m_nMode = THIRD_PERSON_CAMERA;
 	if (pCamera)
 	{
-		if (pCamera->GetMode() == SPACESHIP_CAMERA)
+		if (pCamera->GetMode() == HELI_IN_CAMERA)
 		{
 			m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 			m_xmf3Right.y = 0.0f;
