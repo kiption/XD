@@ -374,26 +374,27 @@ void CHelicopterPlayer::OnInitialize()
 	m_pMainRotorFrame = FindFrame("rotor");
 	m_pMainTailRotorFrame = FindFrame("black_m_7");
 	m_pSubTailRotorFrame = FindFrame("black_m_6");
-	m_pRocketFrame1 = FindFrame("rocket");
-	m_pRocketFrame2 = FindFrame("rocket_1");
-	m_pRocketFrame3 = FindFrame("rocket_2");
-	m_pRocketFrame4 = FindFrame("rocket_3");
-	m_pRocketFrame5 = FindFrame("rocket_4");
-	m_pRocketFrame6 = FindFrame("rocket_5");
-	m_pRocketFrame7 = FindFrame("rocket_6");
-	m_pRocketFrame8 = FindFrame("rocket_7");
-	m_pRocketFrame9 = FindFrame("rocket_8");
+
+	 m_pRocketFrame1 = FindFrame("rocket");
+	 m_pRocketFrame2 = FindFrame("rocket_1");
+	 m_pRocketFrame3 = FindFrame("rocket_2");
+	 m_pRocketFrame4 = FindFrame("rocket_3");
+	 m_pRocketFrame5 = FindFrame("rocket_4");
+	 m_pRocketFrame6 = FindFrame("rocket_5");
+	 m_pRocketFrame7 = FindFrame("rocket_6");
+	 m_pRocketFrame8 = FindFrame("rocket_7");
+	 m_pRocketFrame9 = FindFrame("rocket_8");
 	m_pRocketFrame10 = FindFrame("rocket_9");
 
-	m_pRocketFrame1->SetScale(1.5, 2.0, 1.5);
-	m_pRocketFrame2->SetScale(1.5, 2.0, 1.5);
-	m_pRocketFrame3->SetScale(1.5, 2.0, 1.5);
-	m_pRocketFrame4->SetScale(1.5, 2.0, 1.5);
-	m_pRocketFrame5->SetScale(1.5, 2.0, 1.5);
-	m_pRocketFrame6->SetScale(1.5, 2.0, 1.5);
-	m_pRocketFrame7->SetScale(1.5, 2.0, 1.5);
-	m_pRocketFrame8->SetScale(1.5, 2.0, 1.5);
-	m_pRocketFrame9->SetScale(1.5, 2.0, 1.5);
+	 m_pRocketFrame1->SetScale(1.5, 2.0, 1.5);
+	 m_pRocketFrame2->SetScale(1.5, 2.0, 1.5);
+	 m_pRocketFrame3->SetScale(1.5, 2.0, 1.5);
+	 m_pRocketFrame4->SetScale(1.5, 2.0, 1.5);
+	 m_pRocketFrame5->SetScale(1.5, 2.0, 1.5);
+	 m_pRocketFrame6->SetScale(1.5, 2.0, 1.5);
+	 m_pRocketFrame7->SetScale(1.5, 2.0, 1.5);
+	 m_pRocketFrame8->SetScale(1.5, 2.0, 1.5);
+	 m_pRocketFrame9->SetScale(1.5, 2.0, 1.5);
 	m_pRocketFrame10->SetScale(1.5, 2.0, 1.5);
 }
 
@@ -403,18 +404,21 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	if(m_MissileActive==true)
 	{
 		if (m_MissileCount >= 1 )
-			m_pRocketFrame1->m_xmf4x4Transform._43 += 8.f; {
-			
+		{
+			m_pRocketFrame1->m_xmf4x4Transform._43 += 8.f;
+			m_pCamera->m_nMode = HELI_IN_CAMERA;
+		
 			m_pCamera->GetPosition().x = m_pRocketFrame1->GetPosition().x;
 			m_pCamera->GetPosition().y = m_pRocketFrame1->GetPosition().y;
-			m_pCamera->GetPosition().z = m_pRocketFrame1->GetPosition().z+50.0;
+			m_pCamera->GetPosition().z = m_pRocketFrame1->GetPosition().z-50.0;
+		
 			if (m_pRocketFrame1->m_xmf4x4Transform._43 > m_MissileRange) {
 				m_MissileActive = false;
+				m_pCamera->m_nMode = THIRD_PERSON_CAMERA;
 			}
-			
 		}
 		
-		if (m_MissileCount >= 2 )
+		if (m_MissileCount >= 2)
 		m_pRocketFrame2->m_xmf4x4Transform._43 += 9.f;
 		
 		if (m_MissileCount >= 3)
@@ -445,53 +449,56 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	if (m_MissileActive == false) 
 	{
 		m_MissileCount = 0;
-		m_pRocketFrame1->m_xmf4x4Transform._43 = -13.f;
-		m_pRocketFrame2->m_xmf4x4Transform._43 = -13.f;
-		m_pRocketFrame3->m_xmf4x4Transform._43 = -13.f;
-		m_pRocketFrame4->m_xmf4x4Transform._43 = -13.f;
-		m_pRocketFrame5->m_xmf4x4Transform._43 = -13.f;
-		m_pRocketFrame6->m_xmf4x4Transform._43 = -13.f;
-		m_pRocketFrame7->m_xmf4x4Transform._43 = -13.f;
-		m_pRocketFrame8->m_xmf4x4Transform._43 = -13.f;
-		m_pRocketFrame9->m_xmf4x4Transform._43 = -13.f;
+		m_pRocketFrame1->m_xmf4x4Transform._43 = -16.0f;
+		m_pRocketFrame2->m_xmf4x4Transform._43 = -16.0f;
+		m_pRocketFrame3->m_xmf4x4Transform._43 = -16.0f;
+		m_pRocketFrame4->m_xmf4x4Transform._43 = -16.0f;
+		m_pRocketFrame5->m_xmf4x4Transform._43 = -16.0f;
+		m_pRocketFrame6->m_xmf4x4Transform._43 = -16.0f;
+		m_pRocketFrame7->m_xmf4x4Transform._43 = -16.0f;
+		m_pRocketFrame8->m_xmf4x4Transform._43 = -16.0f;
+		m_pRocketFrame9->m_xmf4x4Transform._43 = -16.0f;
 	}
 
 	
-	//////////////////////////////////////////////////////////////Âø·ú ¸ð¼Ç////////////////////////////////////////////////
+	/////////////////////////////////////////////////////// Âø·ú ¸ð¼Ç /////////////////////////////////////////////////////////////
+
 	if (this->GetPosition().x > 2500.0 && this->GetPosition().x < 2800.0 &&
 		this->GetPosition().z > 1800.0 && this->GetPosition().z < 2100.0 && 
-		this->GetPosition().y<160.0) {
+		this->GetPosition().y < 160.0) {
 		
 	
-		if (this->GetPosition().y == 10.0) {
-			m_MissileActive = false;
-		}
+		if (this->GetPosition().y == 10.0) { m_MissileActive = false; }
+
 		STOPZONE = true;
+
 		if (this->GetPosition().y < 160.0) {
 
 			delrot -= 0.003f;
 			if (delrot <= 0.0)
 				delrot = 0.0f;
 
-			
-			
 		}
+
 		if (this->GetPosition().y > 10.0) {
 			STOPZONE = false;
 			delrot += 0.04f;
 			if (delrot >= 2.0)
 				delrot = 2.0f;
 		}
+
 		if (m_pMainRotorFrame)
 		{
 			XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * delrot) * fTimeElapsed);
 			m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
 		}
+
 		if (m_pMainTailRotorFrame)
 		{
 			XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * delrot) * fTimeElapsed);
 			m_pMainTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainTailRotorFrame->m_xmf4x4Transform);
 		}
+
 		if (m_pSubTailRotorFrame)
 		{
 			XMMATRIX xmmtxRotate = XMMatrixRotationZ(XMConvertToRadians(360.0f * delrot) * fTimeElapsed);
@@ -500,35 +507,41 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 
 		SetGravity(XMFLOAT3(0.0f, -2.0f, 0.0f));
 	}
+
 	else
 	{
 		STOPZONE = false;
 		if (this->GetPosition().y > 10.0) {
 			delrot += 0.003f;
-			if (delrot >= 2.0)
-				delrot = 2.0f;
+			if (delrot >= 2.0) delrot = 2.0f;
 		}
+
 		if (m_pMainRotorFrame)
 		{
 			XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
 			m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
 		}
+		
 		if (m_pMainTailRotorFrame)
 		{
 			XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
 			m_pMainTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainTailRotorFrame->m_xmf4x4Transform);
 		}
+		
 		if (m_pSubTailRotorFrame)
 		{
 			XMMATRIX xmmtxRotate = XMMatrixRotationZ(XMConvertToRadians(360.0f *4.0) * fTimeElapsed);
 			m_pSubTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pSubTailRotorFrame->m_xmf4x4Transform);
 		}
-			SetGravity(XMFLOAT3(0.0f, 2.0f, 0.0f));
-		if (this->GetPosition().y > 300.0) {
-			SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f));
-		}
+
+		SetGravity(XMFLOAT3(0.0f, 2.0f, 0.0f));
+		
+		if (this->GetPosition().y > 300.0) { SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f)); }
+
 	}
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
 	for (int i = 0; i< BULLETS; i++)
 	{
 		if (m_ppBullets[i]->m_bActive) {
@@ -628,7 +641,7 @@ CCamera* CHelicopterPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapse
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
 	case THIRD_PERSON_CAMERA:
-		SetFriction(100.5f);
+		SetFriction(-100.5f);
 		SetGravity(XMFLOAT3(0.0f, 7.0f, 0.0f));
 		SetMaxVelocityXZ(25.5f);
 		SetMaxVelocityY(20.0f);
@@ -636,7 +649,7 @@ CCamera* CHelicopterPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapse
 		m_pCamera->SetTimeLag(1.15f);
 		m_pCamera->SetOffset(XMFLOAT3(-5.0f, 10.0f, -50.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
-		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 0.5f);
+		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 0.7f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
 	default:

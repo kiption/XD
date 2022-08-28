@@ -23,7 +23,6 @@ protected:
 
 	XMFLOAT3						m_xmf3Offset;
 	float           				m_fTimeLag;
-	DWORD							m_nMode;
 
 
 	D3D12_RECT						m_d3dScissorRect;
@@ -34,6 +33,7 @@ protected:
 	VS_CB_CAMERA_INFO				*m_pcbMappedCamera = NULL;
 
 public:
+	DWORD							m_nMode;
 	XMFLOAT3						m_xmf3Position;
 	XMFLOAT3						m_xmf3Right;
 	XMFLOAT3						m_xmf3Up;
