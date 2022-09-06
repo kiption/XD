@@ -19,21 +19,20 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights = new LIGHT[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
-	m_xmf4GlobalAmbient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.8f);
+	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
 
 	m_pLights[0].m_nType = SPOT_LIGHT;
-	m_pLights[0].m_fRange = 500.0f;
-	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.8f, 0.1f, 0.2f, 1.0f);
-	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.1f, 0.6f, 1.0f);
-	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.9f, 0.3f, 0.3f, 0.0f);
+	m_pLights[0].m_fRange = 300.0f;
+	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.8f, 0.1f, 0.1f, 1.0f);
+	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.1f, 0.1f, 1.0f);
+	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.8f, 0.1f, 0.1f, 0.5f);
 	m_pLights[0].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 1.0f);
-	m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.01f);
+	m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
 	m_pLights[0].m_fFalloff = 8.0f;
-	m_pLights[0].m_fPhi = (float)cos(XMConvertToRadians(60.0f));
-	m_pLights[0].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights[0].m_fPhi = (float)cos(XMConvertToRadians(120.0f));
+	m_pLights[0].m_fTheta = (float)cos(XMConvertToRadians(60.0f));
 	m_pLights[0].m_bEnable = true;
-
 	
 	///////////////// BackGround LIGHT ////////////////////////////
 	
@@ -99,9 +98,9 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pMaterial->SetMaterialColors(pMaterialColors);
 
 	XMFLOAT3 xmf3Scale(16.0f, 10.0f, 16.0f);
-	XMFLOAT3 xmf3Pos(0.0, 0.0f, 0.0);
+	XMFLOAT3 xmf3Pos(0.0, -10.0f, 0.0);
 	XMFLOAT4 xmf4Color(0.0f, 2.0f, 0.0f, 0.0f);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Assets/Image/Terrain/terrain_heli_8bit_512x512.raw"), 512, 512, 16, 16, xmf3Scale, xmf4Color);
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Assets/Image/Terrain/terrain_water.raw"), 512, 512, 16, 16, xmf3Scale, xmf4Color);
 
 	m_pTerrain->SetPosition(xmf3Pos);
 	m_pTerrain->Rotate(0.0, 0.0, 0.0);
@@ -200,7 +199,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pRockParticle10->SetChild(pGameModel2, true);
 	pRockParticle10->OnInitialize();
 	pRockParticle10->SetScale(0.2, 0.2, 0.2);
-	pRockParticle10->SetPosition(300.0, 10.0, 300.0);
+	pRockParticle10->SetPosition(uidx(dre), uidR(dre), uidz(dre));
 	m_ppGameObjects[9] = pRockParticle10;
 
 	CHelicopterObject* StopZone = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Hellicopter/HELI1.bin");
@@ -209,8 +208,8 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pStopZone = new CobstacleObject();
 	pStopZone->SetChild(StopZone, true);
 	pStopZone->OnInitialize();
-	pStopZone->SetScale(5000.0, 500.0, 5000.0);
-	pStopZone->SetPosition(2650.0, 5.0, 1950.0);
+	pStopZone->SetScale(2000.0, 00.0, 2000.0);
+	pStopZone->SetPosition(2600.0, 0.0, 1900.0);
 	m_ppGameObjects[10] = pStopZone;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -376,13 +375,15 @@ void CScene::PickingToPlayer()
 void CScene::CheckObjectByBulletCollisions()
 {
 	// Check Control Point => Missile 9 : m_pRocketFrame9 
-	m_pPlayer->m_pRocketFrame9->oobb = BoundingOrientedBox(m_pPlayer->m_pRocketFrame9->GetPosition(),
-		XMFLOAT3(5.0, 5.0, 5.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
+	m_pPlayer->m_pRocketFrame1->oobb = BoundingOrientedBox(m_pPlayer->m_pRocketFrame1->GetPosition(),
+		XMFLOAT3(2.0, 2.0, 2.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 
-	
-	if (m_ppGameObjects[0]->oobb.Intersects(m_pPlayer->m_pRocketFrame9->oobb)) {
+	if (m_ppGameObjects[0]->oobb.Intersects(m_pPlayer->m_pRocketFrame1->oobb)) {
+
+		m_pPlayer->m_MissileActive = false;
 		
 		for (int i = 1; i < 10; i++) {
+		
 			m_ppGameObjects[i]->m_xmf4x4Transform._41 += RandF(-20, 20);
 			m_ppGameObjects[i]->m_xmf4x4Transform._42 += RandF(0, 0);
 			m_ppGameObjects[i]->m_xmf4x4Transform._43 += RandF(-20, 20);
@@ -390,7 +391,7 @@ void CScene::CheckObjectByBulletCollisions()
 	
 	}
 	if (m_pPlayer->m_MissileActive == false) {
-		
+			
 			for (int i = 1; i < 10;i++) {
 			m_ppGameObjects[i]->m_xmf4x4Transform._41 = m_ppGameObjects[0]->m_xmf4x4Transform._41;
 			m_ppGameObjects[i]->m_xmf4x4Transform._42 = m_ppGameObjects[0]->m_xmf4x4Transform._42;
@@ -440,8 +441,8 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		XMStoreFloat3(&offset, XMVectorAdd(XMLoadFloat3(&m_pPlayer->GetPosition()), XMLoadFloat3(&offset)));
 		
 		
-		m_pLights[0].m_xmf3Position = pBulletObject->GetPosition();
-		m_pLights[0].m_xmf3Direction = m_pPlayer->GetLookVector();
+		m_pLights[0].m_xmf3Position = m_ppGameObjects[10]->GetPosition();
+		m_pLights[0].m_xmf3Direction = m_ppGameObjects[10]->GetUp();
 	}
 
 	CheckObjectByPlayerCollisions();

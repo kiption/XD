@@ -311,13 +311,21 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	if (m_pScene) m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 	switch (nMessageID)
 	{
-		case WM_LBUTTONDOWN:
 		case WM_RBUTTONDOWN:
+			m_pPlayer->m_ZoomInActive = true;
 			::SetCapture(hWnd);
 			::GetCursorPos(&m_ptOldCursorPos);
 			break;
-		case WM_LBUTTONUP:
+		case WM_LBUTTONDOWN:
+			::SetCapture(hWnd);
+			::GetCursorPos(&m_ptOldCursorPos);
+			break;
 		case WM_RBUTTONUP:
+			m_pPlayer->m_ZoomInActive = false;
+			::ReleaseCapture();
+
+			break;
+		case WM_LBUTTONUP:
 			::ReleaseCapture();
 	
 			break;
@@ -522,6 +530,7 @@ void CGameFramework::ProcessInput()
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 10.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
+		if (m_pPlayer->m_ZoomInActive == false) {
 
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
@@ -535,6 +544,7 @@ void CGameFramework::ProcessInput()
 			if (dwDirection) {
 				m_pPlayer->Move(dwDirection, 13.0f, false);
 			}			
+		}
 		}
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());

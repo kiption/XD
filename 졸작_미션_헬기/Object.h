@@ -403,3 +403,15 @@ public:
 	void Reset();
 };
 
+class CAnemyHelicopterObject :public CHelicopterObject
+{
+public:
+	CAnemyHelicopterObject() {};
+	virtual ~CAnemyHelicopterObject() {};
+	
+
+public:
+	
+	BoundingOrientedBox			oobb = BoundingOrientedBox();
+};
+

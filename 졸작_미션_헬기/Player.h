@@ -102,6 +102,8 @@ public:
 	float m_MissileRange = 1500.0f;
 	// Missile ON/OFF
 	bool m_MissileActive;
+	bool m_ZoomInActive=false;
+
 };
 
 #define BULLETS					50

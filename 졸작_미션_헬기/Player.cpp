@@ -65,12 +65,12 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	if (dwDirection)
 	{
 		XMFLOAT3 xmf3Shift = XMFLOAT3(0.0, 0, 0);
-		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance * 0.05f);
-		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance * 0.05f);
-		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance * 0.05f);
-		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance * 0.05f);
-		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance * 0.05f);
-		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance * 0.05f);
+		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance * 0.25f);
+		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance * 0.25f);
+		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance * 0.25f);
+		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance * 0.25f);
+		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance * 0.25f);
+		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance * 0.25f);
 
 		Move(xmf3Shift, bUpdateVelocity);
 	}
@@ -344,7 +344,6 @@ CHelicopterPlayer::CHelicopterPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	{
 		
 		pBulletObject = new CBulletObject(m_fBulletEffectiveRange);
-		
 		pBulletObject->SetChild(pBulletMesh, true);
 		pBulletObject->SetRotationSpeed(90.0f);
 		pBulletObject->SetMovingSpeed(1500.0f);
@@ -401,20 +400,53 @@ void CHelicopterPlayer::OnInitialize()
 void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 	
-	if(m_MissileActive==true)
+	if (m_ZoomInActive == true)
 	{
+		m_pCamera->m_nMode = HELI_IN_CAMERA;
+		if (m_pCamera->m_fYaw > -60.0 && m_pCamera->m_fYaw < 60.0)
+		{
+			m_pCamera->m_xmf3Position.z += 1.0f;
+			if (m_pCamera->m_xmf3Position.z > this->m_xmf3Position.z + 1.0f)
+			{
+				m_pCamera->m_xmf3Position.z = this->m_xmf3Position.z + 1.0f;
+			}
+		}
+		if (m_pCamera->m_fYaw > 60.0 && m_pCamera->m_fYaw < 120.0)
+		{
+			m_pCamera->m_xmf3Position.x += 1.0f;
+			if (m_pCamera->m_xmf3Position.x > this->m_xmf3Position.z + 1.0f)
+			{
+				m_pCamera->m_xmf3Position.x = this->m_xmf3Position.z + 1.0f;
+			}
+		}
+
+		if (m_pCamera->m_fYaw < -60.0 && m_pCamera->m_fYaw > -120.0)
+		{
+			m_pCamera->m_xmf3Position.x -= 1.0f;
+			if (m_pCamera->m_xmf3Position.x > this->m_xmf3Position.x - 1.0f)
+			{
+				m_pCamera->m_xmf3Position.x = this->m_xmf3Position.x - 1.0f;
+			}
+		}
+		
+	}
+	if (m_ZoomInActive == false)
+	{
+		m_MissileActive = false;
+		m_pCamera->m_nMode = THIRD_PERSON_CAMERA;
+	}
+	
+	if(m_ZoomInActive == true && m_MissileActive==true)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationZ(XMConvertToRadians(360.0f * 2.0) * fTimeElapsed);
+		m_pRocketFrame1->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pRocketFrame1->m_xmf4x4Transform);
 		if (m_MissileCount >= 1 )
 		{
 			m_pRocketFrame1->m_xmf4x4Transform._43 += 8.f;
-			m_pCamera->m_nMode = HELI_IN_CAMERA;
-		
-			m_pCamera->GetPosition().x = m_pRocketFrame1->GetPosition().x;
-			m_pCamera->GetPosition().y = m_pRocketFrame1->GetPosition().y;
-			m_pCamera->GetPosition().z = m_pRocketFrame1->GetPosition().z-50.0;
-		
+
 			if (m_pRocketFrame1->m_xmf4x4Transform._43 > m_MissileRange) {
 				m_MissileActive = false;
-				m_pCamera->m_nMode = THIRD_PERSON_CAMERA;
+			
 			}
 		}
 		
@@ -446,7 +478,7 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 		m_pRocketFrame10->m_xmf4x4Transform._43 += 8.f;
 	}
 
-	if (m_MissileActive == false) 
+	if (m_MissileActive == false)
 	{
 		m_MissileCount = 0;
 		m_pRocketFrame1->m_xmf4x4Transform._43 = -16.0f;
@@ -463,12 +495,12 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	
 	/////////////////////////////////////////////////////// Âø·ú ¸ð¼Ç /////////////////////////////////////////////////////////////
 
-	if (this->GetPosition().x > 2500.0 && this->GetPosition().x < 2800.0 &&
-		this->GetPosition().z > 1800.0 && this->GetPosition().z < 2100.0 && 
+	if (this->GetPosition().x > 2400.0 && this->GetPosition().x < 2800.0 &&
+		this->GetPosition().z > 1700.0 && this->GetPosition().z < 2100.0 && 
 		this->GetPosition().y < 160.0) {
 		
 	
-		if (this->GetPosition().y == 10.0) { m_MissileActive = false; }
+		if (this->GetPosition().y <= 15.0) { m_MissileActive = false; }
 
 		STOPZONE = true;
 
@@ -578,10 +610,8 @@ void CHelicopterPlayer::FireBullet(CHelicopterObject* pLockedObject)
 	{
 		if (!m_ppBullets[i]->m_bActive)
 		{
-			
 			pBulletObject = m_ppBullets[i];
-			break;
-			
+			break;	
 		}
 	}
 	XMFLOAT3 PlayerHelicpoterPosition = GetLook();
@@ -615,7 +645,6 @@ CCamera* CHelicopterPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapse
 	switch (nNewCameraMode)
 	{
 	case FIRST_PERSON_CAMERA:
-
 		SetFriction(2.0f);
 		SetGravity(XMFLOAT3(0.0f, -1.0f, 0.0f));
 		SetMaxVelocityXZ(2.5f);
@@ -640,6 +669,7 @@ CCamera* CHelicopterPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapse
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
+		
 	case THIRD_PERSON_CAMERA:
 		SetFriction(-100.5f);
 		SetGravity(XMFLOAT3(0.0f, 7.0f, 0.0f));
@@ -652,6 +682,7 @@ CCamera* CHelicopterPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapse
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 0.7f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
+	
 	default:
 		break;
 	}

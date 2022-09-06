@@ -858,24 +858,27 @@ XMFLOAT3 CHelicopterObject::GetPosition()
 //게임 객체의 로컬 z-축 벡터를 반환한다. 
 XMFLOAT3 CHelicopterObject::GetLook()
 {
-	XMFLOAT3 a = { m_xmf4x4World._31, m_xmf4x4World._32, m_xmf4x4World._33 };
-	return(Vector3::Normalize(a));
+	/*XMFLOAT3 a = { m_xmf4x4World._31, m_xmf4x4World._32, m_xmf4x4World._33 };
+	return(Vector3::Normalize(a));*/
+	return(XMFLOAT3(m_xmf4x4World._31, m_xmf4x4World._32, m_xmf4x4World._33));
 }
 
 //게임 객체의 로컬 y-축 벡터를 반환한다.
 XMFLOAT3 CHelicopterObject::GetUp()
 {
-	return(Vector3::Normalize(XMFLOAT3(m_xmf4x4World._21, m_xmf4x4World._22, m_xmf4x4World._23)));
+	/*return(Vector3::Normalize(XMFLOAT3(m_xmf4x4World._21, m_xmf4x4World._22, m_xmf4x4World._23)));
 	XMFLOAT3 a = { m_xmf4x4World._21, m_xmf4x4World._22, m_xmf4x4World._23 };
-	return(Vector3::Normalize(a));
+	return(Vector3::Normalize(a));*/
+	return(XMFLOAT3(m_xmf4x4World._21, m_xmf4x4World._22, m_xmf4x4World._23));
 }
 
 //게임 객체의 로컬 x-축 벡터를 반환한다. 
 XMFLOAT3 CHelicopterObject::GetRight()
 {
-	return(Vector3::Normalize(XMFLOAT3(m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13)));
+	/*return(Vector3::Normalize(XMFLOAT3(m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13)));
 	XMFLOAT3 a = { m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13 };
-	return(Vector3::Normalize(a));
+	return(Vector3::Normalize(a));*/
+	return(XMFLOAT3(m_xmf4x4World._11, m_xmf4x4World._12, m_xmf4x4World._13));
 }
 
 // 
