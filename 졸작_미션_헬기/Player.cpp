@@ -124,7 +124,6 @@ void CPlayer::Rotate(float x, float y, float z)
 	else if (nCurrentCameraMode == HELI_IN_CAMERA)
 	{
 
-		m_pCamera->Rotate(x, y, z);
 		if (STOPZONE == false) {
 
 			if (x != 0.0f)
@@ -133,12 +132,12 @@ void CPlayer::Rotate(float x, float y, float z)
 				m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 				m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
 			}
-			/*if (z != 0.0f)
+			if (z != 0.0f)
 			{
 				XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(z));
 				m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
 				m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-			}*/
+			}
 		}
 		if (STOPZONE == true)
 		{
@@ -156,13 +155,11 @@ void CPlayer::Rotate(float x, float y, float z)
 
 
 		}
+		m_pCamera->Rotate(x, y, z);
 	}
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA)
 	{
 	
-	
-		
-		m_pCamera->Rotate(x, y, z);
 		if (STOPZONE == false) {
 
 			if (x != 0.0f)
@@ -194,6 +191,7 @@ void CPlayer::Rotate(float x, float y, float z)
 		
 			
 		}
+		m_pCamera->Rotate(x, y, z);
 		
 	}
 	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
@@ -349,6 +347,7 @@ CHelicopterPlayer::CHelicopterPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		pBulletObject->SetMovingSpeed(1500.0f);
 		pBulletObject->SetScale(8.0, 8.0, 14.0);
 		pBulletObject->SetActive(false);
+		
 		m_ppBullets[i] = pBulletObject;
 
 	}
@@ -583,6 +582,7 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 		}
 	}
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
+	
 	oobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(15.0, 10.0, 30.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 }
 

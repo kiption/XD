@@ -15,19 +15,19 @@ CScene::~CScene()
 
 void CScene::BuildDefaultLightsAndMaterials()
 {
-	m_nLights = 3;
+	m_nLights = 5;
 	m_pLights = new LIGHT[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
 	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
 
 	m_pLights[0].m_nType = SPOT_LIGHT;
-	m_pLights[0].m_fRange = 300.0f;
-	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.8f, 0.1f, 0.1f, 1.0f);
-	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.1f, 0.1f, 1.0f);
-	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.8f, 0.1f, 0.1f, 0.5f);
+	m_pLights[0].m_fRange = 2000.0f;
+	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.9f, 0.2f, 0.2f, 1.0f);
+	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
+	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.9f, 0.3f, 0.3f, 1.0f);
 	m_pLights[0].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, -1.0f);
 	m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
 	m_pLights[0].m_fFalloff = 8.0f;
 	m_pLights[0].m_fPhi = (float)cos(XMConvertToRadians(120.0f));
@@ -65,6 +65,32 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[2].m_fTheta = (float)cos(XMConvertToRadians(50.0f));
 	m_pLights[2].m_bEnable = true;
 
+
+	m_pLights[3].m_nType = SPOT_LIGHT;
+	m_pLights[3].m_fRange = 2000.0f;
+	m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.9f, 0.2f, 0.2f, 1.0f);
+	m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
+	m_pLights[3].m_xmf4Specular = XMFLOAT4(0.9f, 0.3f, 0.3f, 1.0f);
+	m_pLights[3].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_pLights[3].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights[3].m_fFalloff = 8.0f;
+	m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(120.0f));
+	m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(60.0f));
+	m_pLights[3].m_bEnable = true;
+
+	m_pLights[4].m_nType = SPOT_LIGHT;
+	m_pLights[4].m_fRange = 2000.0f;
+	m_pLights[4].m_xmf4Ambient = XMFLOAT4(0.9f, 0.2f, 0.2f, 1.0f);
+	m_pLights[4].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
+	m_pLights[4].m_xmf4Specular = XMFLOAT4(0.9f, 0.3f, 0.3f, 1.0f);
+	m_pLights[4].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_pLights[4].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	m_pLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights[4].m_fFalloff = 8.0f;
+	m_pLights[4].m_fPhi = (float)cos(XMConvertToRadians(120.0f));
+	m_pLights[4].m_fTheta = (float)cos(XMConvertToRadians(60.0f));
+	m_pLights[4].m_bEnable = true;
 
 }
 
@@ -108,7 +134,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 
 
-	m_nGameObjects = 11;
+	m_nGameObjects = 14;
 	m_ppGameObjects = new CHelicopterObject * [m_nGameObjects];
 
 	CHelicopterObject* pGameModel = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/tree.bin");
@@ -120,7 +146,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pRockParticle->SetChild(pGameModel2, true);
 	pRockParticle->OnInitialize();
 	pRockParticle->SetScale(2.0, 2.0, 2.0);
-	pRockParticle->SetPosition(300.0, 10.0, 300.0);
+	pRockParticle->SetPosition(300.0, 50.0, 300.0);
 	m_ppGameObjects[0] = pRockParticle;
 
 
@@ -138,7 +164,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pRockParticle3->SetChild(pGameModel2, true);
 	pRockParticle3->OnInitialize();
 	pRockParticle3->SetScale(0.2, 0.2, 0.2);
-	pRockParticle3->SetPosition(300.0, 10.0, 300.0);
+	pRockParticle3->SetPosition(300.0, 50.0, 300.0);
 	m_ppGameObjects[2] = pRockParticle3;
 
 
@@ -147,7 +173,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pRockParticle4->SetChild(pGameModel2, true);
 	pRockParticle4->OnInitialize();
 	pRockParticle4->SetScale(0.2, 0.2, 0.2);
-	pRockParticle4->SetPosition(300.0, 10.0, 300.0);
+	pRockParticle4->SetPosition(300.0, 50.0, 300.0);
 	m_ppGameObjects[3] = pRockParticle4;
 
 
@@ -156,7 +182,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pRockParticle5->SetChild(pGameModel2, true);
 	pRockParticle5->OnInitialize();
 	pRockParticle5->SetScale(0.2, 0.2, 0.2);
-	pRockParticle5->SetPosition(300.0, 10.0, 300.0);
+	pRockParticle5->SetPosition(300.0, 50.0, 300.0);
 	m_ppGameObjects[4] = pRockParticle5;
 
 	
@@ -166,7 +192,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pRockParticle6->SetChild(pGameModel2, true);
 	pRockParticle6->OnInitialize();
 	pRockParticle6->SetScale(0.2, 0.2, 0.2);
-	pRockParticle6->SetPosition(300.0, 10.0, 300.0);
+	pRockParticle6->SetPosition(300.0, 50.0, 300.0);
 	m_ppGameObjects[5] = pRockParticle6;
 
 	CobstacleObject* pRockParticle7 = NULL;
@@ -174,7 +200,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pRockParticle7->SetChild(pGameModel2, true);
 	pRockParticle7->OnInitialize();
 	pRockParticle7->SetScale(0.2, 0.2, 0.2);
-	pRockParticle7->SetPosition(300.0, 10.0, 300.0);
+	pRockParticle7->SetPosition(300.0, 50.0, 300.0);
 	m_ppGameObjects[6] = pRockParticle7;
 
 	CobstacleObject* pRockParticle8 = NULL;
@@ -182,7 +208,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pRockParticle8->SetChild(pGameModel2, true);
 	pRockParticle8->OnInitialize();
 	pRockParticle8->SetScale(0.2, 0.2, 0.2);
-	pRockParticle8->SetPosition(300.0, 10.0, 300.0);
+	pRockParticle8->SetPosition(300.0, 50.0, 300.0);
 	m_ppGameObjects[7] = pRockParticle8;
 
 	CobstacleObject* pRockParticle9 = NULL;
@@ -211,6 +237,36 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pStopZone->SetScale(2000.0, 00.0, 2000.0);
 	pStopZone->SetPosition(2600.0, 0.0, 1900.0);
 	m_ppGameObjects[10] = pStopZone;
+	
+	CHelicopterObject* pGameObject = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Hellicopter/Apache.bin");
+	
+	CAnemyHelicopterObject* pAnemyHelicopter= NULL;
+	pAnemyHelicopter = new CAnemyHelicopterObject();
+	pAnemyHelicopter->SetChild(pGameObject, true);
+	pAnemyHelicopter->Rotate(30.0,0.0,0.0);
+	pAnemyHelicopter->OnInitialize();
+	pAnemyHelicopter->SetScale(1.0, 1.0, 1.0);
+	pAnemyHelicopter->SetPosition(2000.0, 300.0, 1000.0);
+
+	m_ppGameObjects[11] = pAnemyHelicopter;
+
+	CAnemyHelicopterObject* pAnemyHelicopter2 = NULL;
+	pAnemyHelicopter2 = new CAnemyHelicopterObject();
+	pAnemyHelicopter2->SetChild(pGameObject, true);
+	pAnemyHelicopter2->Rotate(20.0, 20.0, 0.0);
+	pAnemyHelicopter2->OnInitialize();
+	pAnemyHelicopter2->SetScale(1.0, 1.0, 1.0);
+	pAnemyHelicopter2->SetPosition(1500.0, 150.0, 1400.0);
+	m_ppGameObjects[12] = pAnemyHelicopter2;
+
+	CAnemyHelicopterObject* pAnemyHelicopter3 = NULL;
+	pAnemyHelicopter3 = new CAnemyHelicopterObject();
+	pAnemyHelicopter3->SetChild(pGameObject, true);
+	pAnemyHelicopter3->Rotate(10.0, 0.0, 0.0);
+	pAnemyHelicopter3->OnInitialize();
+	pAnemyHelicopter3->SetScale(1.0,1.0,1.0);
+	pAnemyHelicopter3->SetPosition(1800.0, 250.0, 1500.0);
+	m_ppGameObjects[13] = pAnemyHelicopter3;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -382,10 +438,10 @@ void CScene::CheckObjectByBulletCollisions()
 
 		m_pPlayer->m_MissileActive = false;
 		
-		for (int i = 1; i < 10; i++) {
+		for (int i = 1; i < 10; i++) { 
 		
 			m_ppGameObjects[i]->m_xmf4x4Transform._41 += RandF(-20, 20);
-			m_ppGameObjects[i]->m_xmf4x4Transform._42 += RandF(0, 0);
+			m_ppGameObjects[i]->m_xmf4x4Transform._42 += RandF(0, 50);
 			m_ppGameObjects[i]->m_xmf4x4Transform._43 += RandF(-20, 20);
 		}
 	
@@ -396,6 +452,33 @@ void CScene::CheckObjectByBulletCollisions()
 			m_ppGameObjects[i]->m_xmf4x4Transform._41 = m_ppGameObjects[0]->m_xmf4x4Transform._41;
 			m_ppGameObjects[i]->m_xmf4x4Transform._42 = m_ppGameObjects[0]->m_xmf4x4Transform._42;
 			m_ppGameObjects[i]->m_xmf4x4Transform._43 = m_ppGameObjects[0]->m_xmf4x4Transform._43;
+		}
+	}
+
+	
+	for (int i = 11; i < 14; i++) {
+	CBulletObject** ppBullets = ((CHelicopterPlayer*)m_pPlayer)->m_ppBullets;
+
+		
+		for (int j = 0; j < BULLETS; j++)
+		{
+			if (ppBullets[j]->m_bActive && m_ppGameObjects[i]->oobb.Intersects(ppBullets[j]->oobb))
+			{
+					m_turn = 1;
+					ppBullets[j]->Reset();
+			}
+		}
+		
+
+		if ( m_ppGameObjects[i]->oobb.Intersects(m_pPlayer->m_pRocketFrame1->oobb))
+		{
+			m_turn = 1;
+		
+		}
+
+		if (m_ppGameObjects[i]->m_xmf4x4Transform._42 < -50.0f) {
+			m_turn = 0;
+			m_ppGameObjects[i]->m_xmf4x4Transform._42 += 1.0f;
 		}
 	}
 
@@ -419,16 +502,15 @@ void CScene::CheckObjectByPlayerCollisions()
 				m_pPlayer->m_xmf3Position.x -= 1.0f;
 			}
 		}
-
-
 	}
+
+
 	
 }
 
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-
 	m_fElapsedTime = fTimeElapsed;
 	for (int i = 0; i < m_nGameObjects; i++) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
 	pBulletObject = new CBulletObject(500.0);
@@ -441,8 +523,35 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		XMStoreFloat3(&offset, XMVectorAdd(XMLoadFloat3(&m_pPlayer->GetPosition()), XMLoadFloat3(&offset)));
 		
 		
-		m_pLights[0].m_xmf3Position = m_ppGameObjects[10]->GetPosition();
-		m_pLights[0].m_xmf3Direction = m_ppGameObjects[10]->GetUp();
+		m_pLights[0].m_xmf3Position = m_ppGameObjects[11]->GetPosition();
+		m_pLights[0].m_xmf3Direction = m_ppGameObjects[11]->GetLook();
+		
+		m_pLights[3].m_xmf3Position = m_ppGameObjects[12]->GetPosition();
+		m_pLights[3].m_xmf3Direction = m_ppGameObjects[12]->GetLook();
+		
+		m_pLights[4].m_xmf3Position = m_ppGameObjects[13]->GetPosition();
+		m_pLights[4].m_xmf3Direction = m_ppGameObjects[13]->GetLook();
+
+
+	}
+
+	for (int i = 11; i < 14; i++) {
+
+	XMFLOAT3 PlayerHelicpoterPosition = m_pPlayer->GetPosition();
+	XMFLOAT3 AnermyHelicopterPosition = m_ppGameObjects[i]->GetPosition();
+	XMFLOAT3 AnermyTOPlayerLookVector = Vector3::Normalize(Vector3::Subtract (AnermyHelicopterPosition, PlayerHelicpoterPosition));
+
+	m_ppGameObjects[i]->m_xmf4x4Transform._13 = AnermyTOPlayerLookVector.x;
+	m_ppGameObjects[i]->m_xmf4x4Transform._23 = AnermyTOPlayerLookVector.y;
+	m_ppGameObjects[i]->m_xmf4x4Transform._33 = AnermyTOPlayerLookVector.z;
+	
+	if (m_turn == 1) {
+		m_ppGameObjects[i]->Rotate(0.0, 5.0, 0.0);
+		m_ppGameObjects[i]->m_xmf4x4Transform._42 -= 1.0f;
+	}
+	if (m_turn == 0)
+		m_ppGameObjects[i]->m_xmf4x4Transform._42 = m_pPlayer->GetPosition().y;
+
 	}
 
 	CheckObjectByPlayerCollisions();

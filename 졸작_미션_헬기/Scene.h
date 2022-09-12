@@ -109,6 +109,7 @@ public:
 	float dy=0.0;
 	float dz=0.0;
 	
+	int m_turn=0;
 protected:
 	CTerrainShader* terrainShader;
 	CShader** m_ppShaderObjcet;

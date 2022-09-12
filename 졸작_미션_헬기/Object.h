@@ -278,11 +278,11 @@ public:
 	int PickObjectByRayIntersection(XMVECTOR& xmvPickPosition, XMMATRIX& xmmtxView, float* pfHitDistance);
 	CHelicopterObject* m_pMainRotorFrame = NULL;
 	CHelicopterObject* m_pTailRotorFrame = NULL;
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 
 public:
 	virtual void OnInitialize();
-	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	BoundingOrientedBox			oobb = BoundingOrientedBox();
 };
 
@@ -408,10 +408,14 @@ class CAnemyHelicopterObject :public CHelicopterObject
 public:
 	CAnemyHelicopterObject() {};
 	virtual ~CAnemyHelicopterObject() {};
-	
+	virtual void OnInitialize();
 
+	CHelicopterObject* m_pMainRotorFrame = NULL;
+	CHelicopterObject* m_pTailRotorFrame = NULL;
+	CMaterial* m_pMaterial = NULL;
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 public:
-	
+
 	BoundingOrientedBox			oobb = BoundingOrientedBox();
 };
 

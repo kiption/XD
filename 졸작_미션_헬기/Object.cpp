@@ -1193,8 +1193,8 @@ void CBulletObject::Animate(float fElapsedTime)
 	SetPosition(xmf3Position);
 	m_fMovingDistance += fDistance;
 
-	oobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(5.0, 5.0, 10.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
-
+	oobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(15.0, 15.0, 15.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
+	
 	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)) Reset();
 }
 
@@ -1208,3 +1208,28 @@ void CHelicopterObject::UpdateBoundingBox()
 	}
 }
 
+
+
+void CAnemyHelicopterObject::OnInitialize()
+{
+	m_pMainRotorFrame = FindFrame("rotor");
+	m_pTailRotorFrame = FindFrame("black_m_7");
+	//m_pSubTailRotorFrame = FindFrame("black_m_6");
+}
+
+void CAnemyHelicopterObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+{
+	if (m_pMainRotorFrame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
+		m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
+	}
+	if (m_pTailRotorFrame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
+		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+	}
+
+	oobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(15.0, 10.0, 30.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
+	CHelicopterObject::Animate(fTimeElapsed, pxmf4x4Parent);
+}
