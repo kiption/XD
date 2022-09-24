@@ -443,10 +443,10 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 		{
 			m_pRocketFrame1->m_xmf4x4Transform._43 += 8.f;
 
-			if (m_pRocketFrame1->m_xmf4x4Transform._43 > m_MissileRange) {
+			/*if (m_pRocketFrame1->m_xmf4x4Transform._43 > m_MissileRange) {
 				m_MissileActive = false;
 			
-			}
+			}*/
 		}
 		
 		if (m_MissileCount >= 2)

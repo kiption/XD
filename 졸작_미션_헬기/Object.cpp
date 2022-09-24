@@ -1193,7 +1193,7 @@ void CBulletObject::Animate(float fElapsedTime)
 	SetPosition(xmf3Position);
 	m_fMovingDistance += fDistance;
 
-	oobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(15.0, 15.0, 15.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
+	oobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(5.0, 5.0, 5.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 	
 	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)) Reset();
 }
@@ -1230,6 +1230,6 @@ void CAnemyHelicopterObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Pare
 		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
 	}
 
-	oobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(15.0, 10.0, 30.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
+	oobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(15.0, 10.0, 15.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 	CHelicopterObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }

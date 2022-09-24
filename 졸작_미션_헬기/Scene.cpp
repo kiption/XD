@@ -469,6 +469,7 @@ void CScene::CheckObjectByBulletCollisions()
 			}
 		}
 		
+		
 
 		if ( m_ppGameObjects[i]->oobb.Intersects(m_pPlayer->m_pRocketFrame1->oobb))
 		{
@@ -541,8 +542,8 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	XMFLOAT3 AnermyHelicopterPosition = m_ppGameObjects[i]->GetPosition();
 	XMFLOAT3 AnermyTOPlayerLookVector = Vector3::Normalize(Vector3::Subtract (AnermyHelicopterPosition, PlayerHelicpoterPosition));
 
-	m_ppGameObjects[i]->m_xmf4x4Transform._13 = AnermyTOPlayerLookVector.x;
-	m_ppGameObjects[i]->m_xmf4x4Transform._23 = AnermyTOPlayerLookVector.y;
+//	m_ppGameObjects[i]->GetLook().x = AnermyTOPlayerLookVector.x;
+	//m_ppGameObjects[i]->GetLook().y = AnermyTOPlayerLookVector.y;
 	m_ppGameObjects[i]->m_xmf4x4Transform._33 = AnermyTOPlayerLookVector.z;
 	
 	if (m_turn == 1) {
@@ -550,8 +551,12 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		m_ppGameObjects[i]->m_xmf4x4Transform._42 -= 1.0f;
 	}
 	if (m_turn == 0)
-		m_ppGameObjects[i]->m_xmf4x4Transform._42 = m_pPlayer->GetPosition().y;
+		m_ppGameObjects[i]->m_xmf4x4Transform._42 +=1.0;
+	if (m_ppGameObjects[i]->m_xmf4x4Transform._42 > 300.0)
+	{
+		m_ppGameObjects[i]->m_xmf4x4Transform._42 -=1.0;
 
+		}
 	}
 
 	CheckObjectByPlayerCollisions();

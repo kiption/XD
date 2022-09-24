@@ -140,6 +140,8 @@
   <ItemGroup>
     <ClInclude Include="..\Server\Server\protocol.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="d3dx12.h" />
+    <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="LabProject07-9-1.h" />
     <ClInclude Include="Mesh.h" />
@@ -155,6 +157,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="LabProject07-9-1.cpp" />
     <ClCompile Include="Mesh.cpp" />
