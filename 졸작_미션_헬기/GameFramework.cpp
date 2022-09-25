@@ -18,14 +18,14 @@ CGameFramework::CGameFramework()
 	server_addr.sin_port = htons(PORT_NUM);
 	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
 	connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
-	recv_packet();
 
 	CS_LOGIN_PACKET p;
 	p.size = sizeof(CS_LOGIN_PACKET);
 	p.type = CS_LOGIN;
 	strcpy_s(p.name, "COPTER");
-
 	send_packet(&p);
+
+	recv_packet();
 	//
 
 	m_pdxgiFactory = NULL;

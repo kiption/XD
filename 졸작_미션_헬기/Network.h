@@ -11,14 +11,14 @@ SOCKET s_socket;
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
-class OVER_EXP {
+class OVER_EX {
 public:
 	WSAOVERLAPPED overlapped;
 	WSABUF wsabuf;
 	char send_buf[BUF_SIZE];
 	PACKET_PROCESS_TYPE process_type;
 
-	OVER_EXP()
+	OVER_EX()
 	{
 		wsabuf.len = BUF_SIZE;
 		wsabuf.buf = send_buf;
@@ -26,7 +26,7 @@ public:
 		ZeroMemory(&overlapped, sizeof(overlapped));
 	}
 
-	OVER_EXP(char* packet)
+	OVER_EX(char* packet)
 	{
 		wsabuf.len = packet[0];
 		wsabuf.buf = send_buf;
@@ -37,20 +37,61 @@ public:
 };
 
 int remain_size = 0;
+void CALLBACK recvCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED lp_over, DWORD s_flag);
+void CALLBACK sendCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED lp_over, DWORD s_flag);
+OVER_EX recv_over;	// 09.25
 void recv_packet()
 {
+	cout << "Do RECV" << endl;
 	DWORD recv_flag = 0;
-	OVER_EXP recv_over;
+	//OVER_EX recv_over;
 	memset(&recv_over.overlapped, 0, sizeof(recv_over.overlapped));
-	recv_over.wsabuf.len = BUF_SIZE - remain_size;
-	recv_over.wsabuf.buf = recv_over.send_buf + remain_size;
-	WSARecv(s_socket, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.overlapped, 0);
+	recv_over.wsabuf.len = BUF_SIZE;
+	recv_over.wsabuf.buf = recv_over.send_buf;
+	//WSARecv(s_socket, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.overlapped, 0);
+	int ret = WSARecv(s_socket, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.overlapped, recvCallback);
+	//if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
+	//	cout << "WSARecv Error - " << ret << endl;
+	//	cout << GetLastError() << endl;
+	//}
+	if (ret != 0) {
+		if (GetLastError() == WSA_IO_PENDING)
+			SleepEx(100, TRUE);
+		else {
+			cout << "WSARecv Error - " << ret << endl;
+			cout << GetLastError() << endl;
+		}
+	}
 }
 void send_packet(void* packet)
 {
-	OVER_EXP* s_data = new OVER_EXP{ reinterpret_cast<char*>(packet) };
-	WSASend(s_socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, 0);
+	cout << "Do SEND" << endl;
+	OVER_EX* s_data = new OVER_EX{ reinterpret_cast<char*>(packet) };
+	//WSASend(s_socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback);
+	int ret = WSASend(s_socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback);
+	if (ret != 0) {
+		cout << "WSASend Error - " << ret << endl;
+		cout << GetLastError() << endl;
+	}
 }
+
+void CALLBACK recvCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flag)
+{
+	if (num_bytes == 0) {
+		cout << "NUM BYTE zero" << endl; //test
+		return;
+	}
+
+	cout << "RECV CALLBACK: " << num_bytes << " bytes." << endl; //test
+	recv_packet();
+}
+void CALLBACK sendCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flag)
+{
+	cout << "SEND CALLBACK" << endl; //test
+	delete over;
+	return;
+}
+
 
 int my_id;
 void ProcessPacket(char* ptr)

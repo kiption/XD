@@ -2,23 +2,23 @@
 C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(107,25): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(108,25): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(109,25): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(130,39): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(131,39): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(132,39): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(203,30): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(204,30): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(205,30): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(228,40): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(229,40): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(230,40): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(248,24): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(249,24): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(250,24): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(335,35): warning C4244: '인수': 'ULONG_PTR'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(356,35): warning C4244: '인수': 'ULONG_PTR'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(127,39): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(128,39): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(129,39): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(199,30): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(200,30): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(201,30): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(223,40): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(224,40): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(225,40): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(243,24): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(244,24): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(245,24): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(330,35): warning C4244: '인수': 'ULONG_PTR'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\hpy46\Desktop\XD\Server\Server\server.cpp(351,35): warning C4244: '인수': 'ULONG_PTR'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   코드를 생성하고 있습니다.
-  37 of 162 functions (22.8%) were compiled, the rest were copied from previous compilation.
-    21 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
+  3 of 162 functions ( 1.9%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    4 functions had inline decision re-evaluated but remain unchanged
   코드를 생성했습니다.
   Server.vcxproj -> C:\Users\hpy46\Desktop\XD\Server\x64\Release\Server.exe
