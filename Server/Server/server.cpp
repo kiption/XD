@@ -5,6 +5,7 @@
 #include <mutex>
 #include <array>
 #include <vector>
+#include <random>	// 플레이어의 초기 위치값 설정할 때 임시로 랜덤값을 부여하기로 함. -> 추후에 정해진 리스폰 지점에 생성되도록 변경해야함.
 
 #include "protocol.h"
 
@@ -12,6 +13,11 @@
 #pragma comment(lib, "MSWSock.lib")
 
 using namespace std;
+
+// 플레이어의 초기 위치값 설정할 때 임시로 랜덤값을 부여하기로 함. -> 추후에 정해진 리스폰 지점에 생성되도록 변경해야함.
+default_random_engine dre;
+uniform_int_distribution<int> uid(100, 500);
+// ==== 리스폰 지점에 생성되도록 변경한 후에 이 부분은 지워도 됨.
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
@@ -72,13 +78,24 @@ public:
 		memset(&recv_over.overlapped, 0, sizeof(recv_over.overlapped));
 		recv_over.wsabuf.len = BUF_SIZE - remain_size;
 		recv_over.wsabuf.buf = recv_over.send_buf + remain_size;
-		WSARecv(socket, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.overlapped, 0);
+
+		int ret = WSARecv(socket, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.overlapped, 0);
+		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
+			cout << "WSARecv Error - " << ret << endl;
+			cout << GetLastError() << endl;
+		}
 	}
 
 	void do_send(void* packet)
 	{
 		OVER_EXP* s_data = new OVER_EXP{ reinterpret_cast<char*>(packet) };
-		WSASend(socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, 0);
+
+		cout << "[do_send] Target ID: " << id << "\n" << endl;
+		int ret = WSASend(socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, 0);
+		if (ret != 0) {
+			cout << "WSASend Error - " << ret << endl;
+			cout << GetLastError() << endl;
+		}
 	}
 
 	void send_login_info_packet()
@@ -90,7 +107,7 @@ public:
 		login_info_packet.x = x_pos;
 		login_info_packet.y = y_pos;
 		login_info_packet.z = z_pos;
-
+		cout << "[SC_LOGIN_INFO]";
 		do_send(&login_info_packet);
 	}
 
@@ -111,6 +128,7 @@ void SESSION::send_move_packet(int client_id)
 	move_pl_packet.y = clients[client_id].y_pos;
 	move_pl_packet.z = clients[client_id].z_pos;
 
+	cout << "[SC_MOVE]";
 	do_send(&move_pl_packet);
 }
 
@@ -138,6 +156,7 @@ void disconnect(int client_id)
 		remove_pl_packet.id = client_id;
 		remove_pl_packet.size = sizeof(remove_pl_packet);
 		remove_pl_packet.type = SC_REMOVE_PLAYER;
+		cout << "[SC_REMOVE]";
 		pl.do_send(&remove_pl_packet);
 		pl.s_lock.unlock();
 	}
@@ -173,6 +192,14 @@ void process_packet(int client_id, char* packet)
 			disconnect(client_id);
 			break;
 		}
+		// 새로 접속한 플레이어의 초기 위치정보를 설정합니다.
+		int new_x = uid(dre);
+		int new_y = 0;
+		int new_z = uid(dre);
+		clients[client_id].x_pos = new_x;
+		clients[client_id].y_pos = new_y;
+		clients[client_id].z_pos = new_z;
+		cout << "A new object is successfully created! - POS:(" << new_x << "," << new_y << "," << new_z << ")." << endl;
 		strcpy_s(clients[client_id].name, login_packet->name);
 		clients[client_id].send_login_info_packet();
 		clients[client_id].s_state = ST_INGAME;
@@ -180,7 +207,7 @@ void process_packet(int client_id, char* packet)
 
 		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is log in" << endl;	// server message
 
-		for (auto& pl : clients) {
+		for (auto& pl : clients) {		// 현재 접속해 있는 모든 클라이언트에게 새로운 클라이언트(client_id)의 정보를 전송합니다.
 			if (pl.id == client_id) continue;
 
 			pl.s_lock.lock();
@@ -196,12 +223,15 @@ void process_packet(int client_id, char* packet)
 			add_pl_packet.x = clients[client_id].x_pos;
 			add_pl_packet.y = clients[client_id].y_pos;
 			add_pl_packet.z = clients[client_id].z_pos;
+			cout << "Send new client's info to client[" << pl.id << "]." << endl;//test 09.25
+			cout << "[SC_ADD]";
 			pl.do_send(&add_pl_packet);
 			pl.s_lock.unlock();
 		}
 
-		for (auto& pl : clients) {
+		for (auto& pl : clients) {		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 클라이언트의 정보를 전송합니다.
 			if (pl.id == client_id) continue;
+
 			lock_guard<mutex> lg{ pl.s_lock };
 			if (pl.s_state != ST_INGAME) continue;
 
@@ -214,6 +244,7 @@ void process_packet(int client_id, char* packet)
 			add_pl_packet.y = pl.y_pos;
 			add_pl_packet.z = pl.z_pos;
 
+			cout << "[SC_ADD]";
 			clients[client_id].do_send(&add_pl_packet);
 		}
 		break;
