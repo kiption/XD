@@ -538,14 +538,10 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 	for (int i = 11; i < 14; i++) {
 
-	XMFLOAT3 PlayerHelicpoterPosition = m_pPlayer->GetPosition();
-	XMFLOAT3 AnermyHelicopterPosition = m_ppGameObjects[i]->GetPosition();
-	XMFLOAT3 AnermyTOPlayerLookVector = Vector3::Normalize(Vector3::Subtract (AnermyHelicopterPosition, PlayerHelicpoterPosition));
+		m_ppGameObjects[i]->GetLook()=Vector3::Normalize(Vector3::Subtract(m_pPlayer->GetLookVector(),m_ppGameObjects[i]->GetLook()));
+		m_ppGameObjects[i]->m_xmf4x4World._21=0.0; m_ppGameObjects[i]->m_xmf4x4World._22 = 1.0; m_ppGameObjects[i]->m_xmf4x4World._23 = 0.0;
+		m_ppGameObjects[i]->GetRight() = Vector3::CrossProduct(m_ppGameObjects[i]->GetUp(), m_ppGameObjects[i]->GetLook());
 
-//	m_ppGameObjects[i]->GetLook().x = AnermyTOPlayerLookVector.x;
-	//m_ppGameObjects[i]->GetLook().y = AnermyTOPlayerLookVector.y;
-	m_ppGameObjects[i]->m_xmf4x4Transform._33 = AnermyTOPlayerLookVector.z;
-	
 	if (m_turn == 1) {
 		m_ppGameObjects[i]->Rotate(0.0, 5.0, 0.0);
 		m_ppGameObjects[i]->m_xmf4x4Transform._42 -= 1.0f;

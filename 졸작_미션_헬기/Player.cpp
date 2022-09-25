@@ -336,16 +336,14 @@ CHelicopterPlayer::CHelicopterPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	m_pCamera = ChangeCamera(/*SPACESHIP_CAMERA*/THIRD_PERSON_CAMERA, 0.0f);
 	
 	
-	CHelicopterObject* pBulletMesh = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Hellicopter/Bullet.bin");
+	CHelicopterObject* pBulletMesh = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Hellicopter/Roket.bin");
 
 	for (int i = 0; i < BULLETS; i++)
 	{
 		
 		pBulletObject = new CBulletObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, true);
-		pBulletObject->SetRotationSpeed(90.0f);
-		pBulletObject->SetMovingSpeed(1500.0f);
-		pBulletObject->SetScale(8.0, 8.0, 14.0);
+		pBulletObject->SetMovingSpeed(500.0f);
 		pBulletObject->SetActive(false);
 		
 		m_ppBullets[i] = pBulletObject;
@@ -439,15 +437,16 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationZ(XMConvertToRadians(360.0f * 2.0) * fTimeElapsed);
 		m_pRocketFrame1->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pRocketFrame1->m_xmf4x4Transform);
-		if (m_MissileCount >= 1 )
-		{
-			m_pRocketFrame1->m_xmf4x4Transform._43 += 8.f;
+		m_pRocketFrame2->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pRocketFrame2->m_xmf4x4Transform);
+		m_pRocketFrame3->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pRocketFrame3->m_xmf4x4Transform);
+		m_pRocketFrame4->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pRocketFrame4->m_xmf4x4Transform);
+		m_pRocketFrame5->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pRocketFrame5->m_xmf4x4Transform);
+		m_pRocketFrame6->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pRocketFrame6->m_xmf4x4Transform);
+		m_pRocketFrame7->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pRocketFrame7->m_xmf4x4Transform);
+		m_pRocketFrame8->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pRocketFrame8->m_xmf4x4Transform);
 
-			/*if (m_pRocketFrame1->m_xmf4x4Transform._43 > m_MissileRange) {
-				m_MissileActive = false;
-			
-			}*/
-		}
+		if (m_MissileCount >= 1 )
+		m_pRocketFrame1->m_xmf4x4Transform._43 += 8.f;
 		
 		if (m_MissileCount >= 2)
 		m_pRocketFrame2->m_xmf4x4Transform._43 += 9.f;
@@ -536,7 +535,7 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 			m_pSubTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pSubTailRotorFrame->m_xmf4x4Transform);
 		}
 
-		SetGravity(XMFLOAT3(0.0f, -2.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f));
 	}
 
 	else
@@ -565,7 +564,7 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 			m_pSubTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pSubTailRotorFrame->m_xmf4x4Transform);
 		}
 
-		SetGravity(XMFLOAT3(0.0f, 2.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, 20.0f, 0.0f));
 		
 		if (this->GetPosition().y > 300.0) { SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f)); }
 
@@ -625,10 +624,11 @@ void CHelicopterPlayer::FireBullet(CHelicopterObject* pLockedObject)
 		
 		XMFLOAT3 xmf3Direction = AnermyTOPlayerLookVector;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 6.0f, true));
-		pBulletObject->m_xmf4x4World = m_xmf4x4Transform;
-
+	
 		pBulletObject->SetFirePosition(xmf3FirePosition);
-		pBulletObject->SetMovingDirection(xmf3Direction);
+		pBulletObject->SetMovingDirection(GetLookVector());
+		pBulletObject->m_xmf4x4Transform = m_xmf4x4World;
+		pBulletObject->SetScale(20.0, 20.0, 120.0);
 		pBulletObject->SetActive(true);
 	}
 }
@@ -672,12 +672,12 @@ CCamera* CHelicopterPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapse
 		
 	case THIRD_PERSON_CAMERA:
 		SetFriction(-100.5f);
-		SetGravity(XMFLOAT3(0.0f, 7.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, 20.0f, 0.0f));
 		SetMaxVelocityXZ(25.5f);
 		SetMaxVelocityY(20.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(1.15f);
-		m_pCamera->SetOffset(XMFLOAT3(-5.0f, 10.0f, -50.0f));
+		m_pCamera->SetOffset(XMFLOAT3(-15.0f, 10.0f, -50.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 0.7f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
