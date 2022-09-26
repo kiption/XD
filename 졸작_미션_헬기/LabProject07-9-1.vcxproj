@@ -147,6 +147,7 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="ObjectsInfo.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Scene.h" />

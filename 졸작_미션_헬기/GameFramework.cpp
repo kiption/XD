@@ -23,9 +23,9 @@ CGameFramework::CGameFramework()
 	p.size = sizeof(CS_LOGIN_PACKET);
 	p.type = CS_LOGIN;
 	strcpy_s(p.name, "COPTER");
-	send_packet(&p);
+	sendPacket(&p);
 
-	recv_packet();
+	recvPacket();
 	//
 
 	m_pdxgiFactory = NULL;
@@ -513,7 +513,7 @@ void CGameFramework::ProcessInput()
 			move_p.type = CS_MOVE;
 			move_p.direction = packetDirection;
 
-			send_packet(&move_p);
+			sendPacket(&move_p);
 		}//
 
 		float cxDelta = 0.0f, cyDelta = 0.0f;
@@ -586,6 +586,8 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::FrameAdvance()
 {
+	SleepEx(1, TRUE);//Server
+
 	m_GameTimer.Tick(60.0f);
 
 	ProcessInput();
