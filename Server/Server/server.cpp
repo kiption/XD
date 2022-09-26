@@ -16,7 +16,7 @@ using namespace std;
 
 // 플레이어의 초기 위치값 설정할 때 임시로 랜덤값을 부여하기로 함. -> 추후에 정해진 리스폰 지점에 생성되도록 변경해야함.
 default_random_engine dre;
-uniform_int_distribution<int> uid(100, 500);
+uniform_int_distribution<int> uid(100, 1900);
 // ==== 리스폰 지점에 생성되도록 변경한 후에 이 부분은 지워도 됨.
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
@@ -193,9 +193,12 @@ void process_packet(int client_id, char* packet)
 			break;
 		}
 		// 새로 접속한 플레이어의 초기 위치정보를 설정합니다.
-		int new_x = uid(dre);
+		/*int new_x = uid(dre);
 		int new_y = 0;
-		int new_z = uid(dre);
+		int new_z = uid(dre);*/
+		int new_x = login_packet->x;
+		int new_y = 0;
+		int new_z = login_packet->z;
 		clients[client_id].x_pos = new_x;
 		clients[client_id].y_pos = new_y;
 		clients[client_id].z_pos = new_z;

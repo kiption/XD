@@ -22,6 +22,7 @@ struct CS_LOGIN_PACKET {
 	unsigned char size;
 	char type;
 	char name[NAME_SIZE];
+	short x, y, z;
 };
 
 struct CS_MOVE_PACKET {
