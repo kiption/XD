@@ -96,11 +96,12 @@ void processPacket(char* ptr)
 		SC_LOGIN_INFO_PACKET* recv_packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(ptr);
 		my_id = recv_packet->id;
 		// Player 초기 위치 설정
-		cout << "Init Position - x: " << recv_packet->x << ", y : " << recv_packet->y << ", z : " << recv_packet->z << endl;
+		//cout << "Init Position - x: " << recv_packet->x << ", y : " << recv_packet->y << ", z : " << recv_packet->z << endl;
 		my_info.m_id = recv_packet->id;
 		my_info.m_x = recv_packet->x;
 		my_info.m_y = recv_packet->y;
 		my_info.m_z = recv_packet->z;
+		my_info.m_state = ST_RUNNING;
 		cout << "Init My Info - id: " << my_info.m_id << ", Pos(x: " << my_info.m_x << ", y : " << my_info.m_y << ", z : " << my_info.m_z << ")." << endl;
 
 		break;
@@ -116,6 +117,7 @@ void processPacket(char* ptr)
 			other_players[recv_id].m_x = recv_packet->x;
 			other_players[recv_id].m_y = recv_packet->y;
 			other_players[recv_id].m_z = recv_packet->z;
+			other_players[recv_id].m_state = ST_RUNNING;
 			cout << "Init New Player's Info - id: " << other_players[recv_id].m_id
 				<< ", Pos(x: " << other_players[recv_id].m_x << ", y : " << other_players[recv_id].m_y << ", z : " << other_players[recv_id].m_z << ")." << endl;
 		}
@@ -126,20 +128,42 @@ void processPacket(char* ptr)
 	}
 	case SC_MOVE_PLAYER:
 	{
-		SC_MOVE_PLAYER_PACKET* my_packet = reinterpret_cast<SC_MOVE_PLAYER_PACKET*>(ptr);
-		int other_id = my_packet->id;
-		if (other_id == my_id) {
+		SC_MOVE_PLAYER_PACKET* recv_packet = reinterpret_cast<SC_MOVE_PLAYER_PACKET*>(ptr);
+		int recv_id = recv_packet->id;
+		if (recv_id == my_info.m_id) {
 			// Player 이동
+			my_info.m_x = recv_packet->x;
+			my_info.m_y = recv_packet->y;
+			my_info.m_z = recv_packet->z;
+			cout << "My object moves to (" << my_info.m_x << ", " << my_info.m_y << ", " << my_info.m_z << ")." << endl;
+		}
+		else {
+			// 상대 Object 이동
+			other_players[recv_id].m_x = recv_packet->x;
+			other_players[recv_id].m_y = recv_packet->y;
+			other_players[recv_id].m_z = recv_packet->z;
+			cout << "Player[" << recv_id << "]'s object moves to("
+				<< other_players[recv_id].m_x << ", " << other_players[recv_id].m_y << ", " << other_players[recv_id].m_z << ")." << endl;
 		}
 		break;
 	}
 
 	case SC_REMOVE_PLAYER:
 	{
-		SC_REMOVE_PLAYER_PACKET* my_packet = reinterpret_cast<SC_REMOVE_PLAYER_PACKET*>(ptr);
-		int other_id = my_packet->id;
-		if (other_id == my_id) {
+		SC_REMOVE_PLAYER_PACKET* recv_packet = reinterpret_cast<SC_REMOVE_PLAYER_PACKET*>(ptr);
+		int recv_id = recv_packet->id;
+		if (recv_id == my_id) {
 			// 자기자신 없애기
+		}
+		else {
+			// 상대 Object 없애기
+			other_players[recv_id].m_id = -1;
+			other_players[recv_id].m_x = 0;
+			other_players[recv_id].m_y = 0;
+			other_players[recv_id].m_z = 0;
+			other_players[recv_id].m_state = ST_EMPTY;
+
+			cout << "Player[" << recv_id << "] is log out" << endl;
 		}
 
 		break;

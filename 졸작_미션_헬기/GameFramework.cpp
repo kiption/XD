@@ -513,7 +513,11 @@ void CGameFramework::ProcessInput()
 			CS_MOVE_PACKET move_p;
 			move_p.size = sizeof(move_p);
 			move_p.type = CS_MOVE;
-			move_p.direction = packetDirection;
+			//move_p.direction = packetDirection;	// 추후에 물리 계산을 서버에서 맡게되면 다시 적용시킬 예정입니다.
+			XMFLOAT3 my_pos = m_pPlayer->GetPosition();
+			move_p.x = my_pos.x;
+			move_p.y = my_pos.y;
+			move_p.z = my_pos.z;
 
 			sendPacket(&move_p);
 		}//

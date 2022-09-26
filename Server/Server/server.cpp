@@ -223,7 +223,7 @@ void process_packet(int client_id, char* packet)
 			add_pl_packet.x = clients[client_id].x_pos;
 			add_pl_packet.y = clients[client_id].y_pos;
 			add_pl_packet.z = clients[client_id].z_pos;
-			cout << "Send new client's info to client[" << pl.id << "]." << endl;//test 09.25
+			cout << "Send new client's info to client[" << pl.id << "]." << endl;
 			cout << "[SC_ADD]";
 			pl.do_send(&add_pl_packet);
 			pl.s_lock.unlock();
@@ -243,7 +243,7 @@ void process_packet(int client_id, char* packet)
 			add_pl_packet.x = pl.x_pos;
 			add_pl_packet.y = pl.y_pos;
 			add_pl_packet.z = pl.z_pos;
-
+			cout << "Send client[" << pl.id << "]'s info to new client" << endl;
 			cout << "[SC_ADD]";
 			clients[client_id].do_send(&add_pl_packet);
 		}
@@ -251,7 +251,7 @@ void process_packet(int client_id, char* packet)
 	}
 	case CS_MOVE: {
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
-		float cur_x = clients[client_id].x_pos;
+		/*float cur_x = clients[client_id].x_pos;
 		float cur_y = clients[client_id].y_pos;
 		float cur_z = clients[client_id].z_pos;
 
@@ -264,13 +264,18 @@ void process_packet(int client_id, char* packet)
 
 		clients[client_id].x_pos = cur_x;
 		clients[client_id].y_pos = cur_y;
-		clients[client_id].z_pos = cur_z;
+		clients[client_id].z_pos = cur_z;*/
 
-		short tempNum = p->direction;
-		//cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] moves to ("
-		//	<< clients[client_id].x_pos << ", " << clients[client_id].y_pos << ")." << endl;	// server message (추후에 클라이언트 좌표값 받아오면 그때 사용할 예정)
-		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] send <Move Packet - DIR: " << tempNum << " >." << endl;
-		// 지금은 임시로 어떤 방향의 이동 패킷을 받았는지만 출력합니다.
+		// 임시로 클라에서 계산된 값을 받아서 모든 클라에게 전달하는 방식으로 구현하였습니다. 추후에 삭제할 예정.
+		clients[client_id].x_pos = p->x;
+		clients[client_id].y_pos = p->y;
+		clients[client_id].z_pos = p->z;
+
+		//short tempNum = p->direction;
+		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] moves to ("
+			<< clients[client_id].x_pos << ", " << clients[client_id].y_pos << ", " << clients[client_id].z_pos << ")." << endl;	// server messag
+
+		//cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] send <Move Packet - DIR: " << tempNum << " >." << endl;
 
 		for (auto& pl : clients) {
 			lock_guard<mutex> lg{ pl.s_lock };
