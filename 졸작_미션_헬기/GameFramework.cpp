@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameFramework.h"
+
 //Server
 #include "Network.h"
 //
@@ -442,14 +443,15 @@ void CGameFramework::BuildObjects()
 	m_pScene = new CScene();
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
+
 	CHelicopterPlayer* pPlayer = new CHelicopterPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
 
-	pPlayer->SetPosition(XMFLOAT3(500.0f, 0.0f, 200.0f));
+	pPlayer->SetPosition(XMFLOAT3(500.0, 0.0f,1000.0));
 	m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 
 	m_pCamera = m_pPlayer->GetCamera();
-
 	m_pPlayer->setTerrain(m_pScene->m_pTerrain);
+
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
@@ -515,7 +517,10 @@ void CGameFramework::ProcessInput()
 
 			sendPacket(&move_p);
 		}//
-
+		
+	/*	m_pPlayer->m_xmf3Position.x = (float)my_info.m_x;
+		m_pPlayer->m_xmf3Position.z = (float)my_info.m_z;*/
+		
 		float cxDelta = 0.0f, cyDelta = 0.0f;
 		POINT ptCursorPos;
 		if (GetCapture() == m_hWnd)
@@ -652,11 +657,20 @@ void CGameFramework::FrameAdvance()
 #endif
 #endif
 
-	MoveToNextFrame();
+	MoveToNextFrame(); //
 
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
 	size_t nLength = _tcslen(m_pszFrameRate);
 	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
+
+	xmf3Position.x = my_info.m_x;
+	xmf3Position.z = my_info.m_z;
+
+	m_pScene->m_ppGameObjects[11]->m_xmf4x4Transform._41= other_players[0].m_x;
+	m_pScene->m_ppGameObjects[11]->m_xmf4x4Transform._43= other_players[0].m_z;
+
+	
+
 	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }

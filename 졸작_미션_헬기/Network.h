@@ -96,7 +96,7 @@ void processPacket(char* ptr)
 		SC_LOGIN_INFO_PACKET* recv_packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(ptr);
 		my_id = recv_packet->id;
 		// Player 초기 위치 설정
-		//cout << "Init Position - x: " << recv_packet->x << ", y : " << recv_packet->y << ", z : " << recv_packet->z << endl;
+		cout << "Init Position - x: " << recv_packet->x << ", y : " << recv_packet->y << ", z : " << recv_packet->z << endl;
 		my_info.m_id = recv_packet->id;
 		my_info.m_x = recv_packet->x;
 		my_info.m_y = recv_packet->y;
