@@ -685,8 +685,11 @@ void CGameFramework::FrameAdvance()
     int other_id = -1;
     if (my_info.m_id == 0) other_id = 1;
     else other_id = 0;
-    m_pScene->m_ppGameObjects[11]->m_xmf4x4Transform._41 = other_players[other_id].m_x;
-    m_pScene->m_ppGameObjects[11]->m_xmf4x4Transform._43 = other_players[other_id].m_z;
+    
+    if (other_players[other_id].m_state == ST_RUNNING) {
+        m_pScene->m_ppGameObjects[11]->m_xmf4x4Transform._41 = other_players[other_id].m_x;
+        m_pScene->m_ppGameObjects[11]->m_xmf4x4Transform._43 = other_players[other_id].m_z;
+    }
 
     //m_pScene->m_ppGameObjects[11]->m_xmf4x4Transform._41 = other_players[0].m_x;
     //m_pScene->m_ppGameObjects[11]->m_xmf4x4Transform._43 = other_players[0].m_z;
