@@ -17,6 +17,24 @@
 class CShader;
 class CStandardShader;
 
+struct MATERIAL
+{
+	XMFLOAT4						m_xmf4Ambient;
+	XMFLOAT4						m_xmf4Diffuse;
+	XMFLOAT4						m_xmf4Specular; //(r,g,b,a=power)
+	XMFLOAT4						m_xmf4Emissive;
+};
+
+struct CB_GAMEOBJECT_INFO
+{
+	XMFLOAT4X4						m_xmf4x4World;
+	MATERIAL						m_material;
+
+	XMFLOAT4X4						m_xmf4x4Texture;
+	XMINT2							m_xmi2TextureTiling;
+	XMFLOAT2						m_xmf2TextureOffset;
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 #define RESOURCE_TEXTURE2D			0x01
@@ -163,10 +181,13 @@ public:
 public:
 	char							m_pstrFrameName[64];
 
+	int								m_nMeshes;
 	CMesh							*m_pMesh = NULL;
+	CMesh							** m_ppMeshes;
 
 	int								m_nMaterials = 0;
 	CMaterial						**m_ppMaterials = NULL;
+	CMaterial						*m_pMaterial = NULL;
 
 	XMFLOAT4X4						m_xmf4x4Transform;
 	XMFLOAT4X4						m_xmf4x4World;
@@ -175,10 +196,14 @@ public:
 	CGameObject 					*m_pChild = NULL;
 	CGameObject 					*m_pSibling = NULL;
 
-	void SetMesh(CMesh *pMesh);
+	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
+
+	virtual void SetMesh(CMesh *pMesh);
+	virtual void SetMesh(int nIndex, CMesh* pMesh);
 	void SetShader(CShader *pShader);
 	void SetShader(int nMaterial, CShader *pShader);
-	void SetMaterial(int nMaterial, CMaterial *pMaterial);
+	virtual void SetMaterial(CMaterial *pMaterial);
+	virtual void SetMaterial(int nMaterial,CMaterial *pMaterial);
 
 	void SetChild(CGameObject *pChild);
 
@@ -223,6 +248,8 @@ public:
 	int FindReplicatedTexture(_TCHAR* pstrTextureName, D3D12_GPU_DESCRIPTOR_HANDLE* pd3dSrvGpuDescriptorHandle);
 
 	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0x00); }
+
+	void SetCbvGPUDescriptorHandle(D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle) { m_d3dCbvGPUDescriptorHandle = d3dCbvGPUDescriptorHandle; }
 
 public:
 	void LoadMaterialsFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, CGameObject *pParent, FILE *pInFile, CShader *pShader);
@@ -290,3 +317,32 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 };
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class CHeightMapTerrain : public CGameObject
+{
+public:
+	CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color);
+	virtual ~CHeightMapTerrain();
+
+private:
+	CHeightMapImage* m_pHeightMapImage;
+
+	int							m_nWidth;
+	int							m_nLength;
+
+	XMFLOAT3					m_xmf3Scale;
+
+public:
+	float GetHeight(float x, float z, bool bReverseQuad = false) { return(m_pHeightMapImage->GetHeight(x, z, bReverseQuad) * m_xmf3Scale.y); } //World
+	XMFLOAT3 GetNormal(float x, float z) { return(m_pHeightMapImage->GetHeightMapNormal(int(x / m_xmf3Scale.x), int(z / m_xmf3Scale.z))); }
+
+	int GetRawImageWidth() { return(m_pHeightMapImage->GetRawImageWidth()); }
+	int GetRawImageLength() { return(m_pHeightMapImage->GetRawImageLength()); }
+
+	XMFLOAT3 GetScale() { return(m_xmf3Scale); }
+	float GetWidth() { return(m_nWidth * m_xmf3Scale.x); }
+	float GetLength() { return(m_nLength * m_xmf3Scale.z); }
+};
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

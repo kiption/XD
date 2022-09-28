@@ -584,3 +584,10 @@ void CPlayerShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
 
+CTexturedShader::CTexturedShader()
+{
+}
+
+CTexturedShader::~CTexturedShader()
+{
+}

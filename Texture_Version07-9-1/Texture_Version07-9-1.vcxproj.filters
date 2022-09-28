@@ -60,9 +60,6 @@
     <ClInclude Include="Timer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="WICTextureLoader12.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Network.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -102,9 +99,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Timer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="WICTextureLoader12.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

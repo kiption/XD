@@ -493,7 +493,7 @@ void CGameFramework::ProcessInput()
 			CS_MOVE_PACKET move_p;
 			move_p.size = sizeof(move_p);
 			move_p.type = CS_MOVE;
-			move_p.direction = packetDirection;
+			//move_p.direction = packetDirection;
 
 			send_packet(&move_p);
 		}//

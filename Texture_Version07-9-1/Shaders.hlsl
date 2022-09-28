@@ -24,7 +24,7 @@ cbuffer cbGameObjectInfo : register(b2)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//#define _WITH_VERTEX_LIGHTING
+///#define _WITH_VERTEX_LIGHTING
 
 #define MATERIAL_ALBEDO_MAP			0x01
 #define MATERIAL_SPECULAR_MAP		0x02
