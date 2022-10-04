@@ -15,7 +15,7 @@ CScene::~CScene()
 
 void CScene::BuildDefaultLightsAndMaterials()
 {
-	m_nLights = 5;
+	m_nLights = 6;
 	m_pLights = new LIGHT[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
@@ -92,6 +92,19 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[4].m_fTheta = (float)cos(XMConvertToRadians(60.0f));
 	m_pLights[4].m_bEnable = true;
 
+	m_pLights[5].m_nType = SPOT_LIGHT;
+	m_pLights[5].m_fRange = 2000.0f;
+	m_pLights[5].m_xmf4Ambient = XMFLOAT4(0.9f, 0.2f, 0.2f, 1.0f);
+	m_pLights[5].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
+	m_pLights[5].m_xmf4Specular = XMFLOAT4(0.9f, 0.3f, 0.3f, 1.0f);
+	m_pLights[5].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_pLights[5].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	m_pLights[5].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights[5].m_fFalloff = 8.0f;
+	m_pLights[5].m_fPhi = (float)cos(XMConvertToRadians(120.0f));
+	m_pLights[5].m_fTheta = (float)cos(XMConvertToRadians(60.0f));
+	m_pLights[5].m_bEnable = true;
+
 }
 
 
@@ -134,7 +147,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 
 
-	m_nGameObjects = 14;
+	m_nGameObjects = 15;
 	m_ppGameObjects = new CHelicopterObject * [m_nGameObjects];
 
 	CHelicopterObject* pGameModel = CHelicopterObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/tree.bin");
@@ -267,6 +280,15 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pAnemyHelicopter3->SetScale(1.0,1.0,1.0);
 	pAnemyHelicopter3->SetPosition(1800.0, 250.0, 1500.0);
 	m_ppGameObjects[13] = pAnemyHelicopter3;
+
+	CAnemyHelicopterObject* pAnemyHelicopter4 = NULL;
+	pAnemyHelicopter4 = new CAnemyHelicopterObject();
+	pAnemyHelicopter4->SetChild(pGameObject, true);
+	pAnemyHelicopter4->Rotate(10.0, 0.0, 0.0);
+	pAnemyHelicopter4->OnInitialize();
+	pAnemyHelicopter4->SetScale(1.0, 1.0, 1.0);
+	pAnemyHelicopter4->SetPosition(1200.0, 250.0, 1500.0);
+	m_ppGameObjects[14] = pAnemyHelicopter4;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -533,7 +555,8 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		m_pLights[4].m_xmf3Position = m_ppGameObjects[13]->GetPosition();
 		m_pLights[4].m_xmf3Direction = m_ppGameObjects[13]->GetLook();
 
-
+		m_pLights[5].m_xmf3Position = m_ppGameObjects[14]->GetPosition();
+		m_pLights[5].m_xmf3Direction = m_ppGameObjects[14]->GetLook();
 	}
 
 	for (int i = 11; i < 14; i++) {

@@ -35,8 +35,11 @@ CGameFramework::CGameFramework()
 
     recvPacket();
     //
-    other_players[0].m_x = uid(dre);
-    other_players[0].m_z = uid(dre);
+    for (int i = 0;i < 4;i++) {
+
+    other_players[i].m_x = uid(dre);
+    other_players[i].m_z = uid(dre);
+    }
 
     m_pdxgiFactory = NULL;
     m_pdxgiSwapChain = NULL;
@@ -682,18 +685,16 @@ void CGameFramework::FrameAdvance()
 
     // 09.26 시연에서 있었던 동기화 버그 수정을 위해 임시로 수정한 코드.
     // 이후에 MAX USER 수만큼 모든 객체를 돌면서 온라인 상태인 객체를 전부 렌더링하도록 변경해야함. (수정일자 09.27)
-    int other_id = -1;
-    if (my_info.m_id == 0) other_id = 1;
-    else other_id = 0;
-    
-    if (other_players[other_id].m_state == ST_RUNNING) {
-        m_pScene->m_ppGameObjects[11]->m_xmf4x4Transform._41 = other_players[other_id].m_x;
-        m_pScene->m_ppGameObjects[11]->m_xmf4x4Transform._43 = other_players[other_id].m_z;
-    }
+   
+    for (int j = 0; j < 4; j++) {
+        if (other_players[j].m_state == ST_RUNNING && j != my_info.m_id) {
+            m_pScene->m_ppGameObjects[11 + j]->m_xmf4x4Transform._41 = other_players[j].m_x;
+            m_pScene->m_ppGameObjects[11 + j]->m_xmf4x4Transform._43 = other_players[j].m_z;
+        }
 
-    //m_pScene->m_ppGameObjects[11]->m_xmf4x4Transform._41 = other_players[0].m_x;
-    //m_pScene->m_ppGameObjects[11]->m_xmf4x4Transform._43 = other_players[0].m_z;
-    // ===========================
+    }
+        
+    
 
     _stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), m_pPlayer->m_xmf3Position.x, m_pPlayer->m_xmf3Position.y, m_pPlayer->m_xmf3Position.z);
     ::SetWindowText(m_hWnd, m_pszFrameRate);
