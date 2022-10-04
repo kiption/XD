@@ -495,7 +495,7 @@ void CGameFramework::ProcessInput()
     if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
     if (!bProcessedByScene)
     {
-        int packetDirection = -1;//S
+        packetDirection = -1;//S
         DWORD dwDirection = 0; if (m_pPlayer->STOPZONE == false) {
 
             if (pKeysBuffer[VK_UP] & 0xF0) {
@@ -523,8 +523,9 @@ void CGameFramework::ProcessInput()
             packetDirection = 5;//S
             dwDirection |= DIR_UP;
         }
+ 
         // Server
-        if (packetDirection != -1) {
+        if (packetDirection != -1 || m_pScene->m_Direction != -1) {
             CS_MOVE_PACKET move_p;
             move_p.size = sizeof(move_p);
             move_p.type = CS_MOVE;

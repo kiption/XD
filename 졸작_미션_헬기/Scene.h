@@ -108,7 +108,7 @@ public:
 	float dx=0.0;
 	float dy=0.0;
 	float dz=0.0;
-	
+	int m_Direction=-1;
 	int m_turn=0;
 protected:
 	CTerrainShader* terrainShader;

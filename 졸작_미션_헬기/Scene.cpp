@@ -409,16 +409,17 @@ bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam,
 
 bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
-
+	m_Direction = -1;//S
+	DWORD dwDirection = 0;
 	switch (nMessageID)
 	{
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case VK_DELETE:
+		case VK_SPACE:
 			((CHelicopterPlayer*)m_pPlayer)->FireBullet(NULL);
 			break;
-		case VK_END:
+		case 'R' :
 			((CHelicopterPlayer*)m_pPlayer)->HellFire();
 			((CHelicopterPlayer*)m_pPlayer)->m_MissileCount++;
 			break;
@@ -427,7 +428,24 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			turn = m_nGameObjects;
 			pickingSight = true;
 			break;
-
+		case 'W':
+			m_Direction = 0;//S
+			break;
+		case 'S':
+			m_Direction = 1;//S
+			break;
+		case 'A':
+			m_Direction = 2;//S
+			break;
+		case 'D':
+			m_Direction = 3;//S
+			break;
+		case 'Q':
+			m_Direction = 4;//S
+			break;
+		case 'E':
+			m_Direction = 5;//S
+			break;
 		default:
 			break;
 		}
@@ -437,7 +455,6 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	}
 	return(false);
 }
-
 bool CScene::ProcessInput(UCHAR* pKeysBuffer)
 {
 	return(false);

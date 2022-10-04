@@ -1,12 +1,15 @@
 #pragma once
 
-#define FRAME_BUFFER_WIDTH		400
-#define FRAME_BUFFER_HEIGHT		400
+#define FRAME_BUFFER_WIDTH		860
+#define FRAME_BUFFER_HEIGHT		680
 #define _PIPELINESTATE01 
 #include "Timer.h"
 #include "Player.h"
 #include "Scene.h"
-
+#define VK_LEFT           0x40
+#define VK_UP             0x57
+#define VK_RIGHT          0x44
+#define VK_DOWN           0x53
 class CGameFramework
 {
 public:
@@ -41,11 +44,9 @@ public:
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	LRESULT OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	
-
+	int packetDirection = -1;
 	bool m_bPIPIELINESTATE = false;
-private:
-	float rotateL = 0.0f;
-	float rotateR = 0.0f;
+
 private:
 	HINSTANCE					m_hInstance;
 	HWND						m_hWnd; 
