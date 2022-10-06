@@ -251,7 +251,7 @@ public:
 	CGameObject 					*m_pSibling = NULL;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
-
+	BoundingOrientedBox xoobb = BoundingOrientedBox();
 public:
 	float m_fMovingSpeed = 0.0f;
 	float m_fMovingRange = 0.0f;
@@ -333,8 +333,7 @@ public:
 	static CGameObject* LoadGeometryFromFile2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName);
 
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
-public:
-	BoundingOrientedBox			xoobb = BoundingOrientedBox();
+
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -367,6 +366,7 @@ private:
 public:
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = NULL);
+	
 };
 
 class CGunshipObject : public CGameObject
@@ -384,6 +384,7 @@ private:
 public:
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = NULL);
+
 };
 
 
@@ -448,6 +449,7 @@ public:
 
 	void SetFirePosition(XMFLOAT3 xmf3FirePosition);
 	void Reset();
+
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

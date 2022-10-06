@@ -1249,6 +1249,7 @@ void CGunshipObject::PrepareAnimate()
 
 void CGunshipObject::Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent)
 {
+	xoobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(10.0, 10.0, 20.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
@@ -1259,7 +1260,6 @@ void CGunshipObject::Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent)
 		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
 		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
 	}
-	xoobb = BoundingOrientedBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10.0, 10.0, 20.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 
 
 	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
@@ -1283,6 +1283,7 @@ void CMi24Object::PrepareAnimate()
 
 void CMi24Object::Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent)
 {
+	xoobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(0.0, 0.0, .0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
@@ -1293,7 +1294,6 @@ void CMi24Object::Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent)
 		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
 		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
 	}
-	xoobb = BoundingOrientedBox(XMFLOAT3(0, 0, 0), XMFLOAT3(10.0, 10.0, 20.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
@@ -1400,8 +1400,6 @@ void CBulletObject::Animate(float fElapsedTime)
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
 	SetPosition(xmf3Position);
 	m_fMovingDistance += fDistance;
-
-	xoobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(5.0, 5.0, 5.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 
 	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)) Reset();
 }

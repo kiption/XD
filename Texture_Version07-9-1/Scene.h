@@ -71,11 +71,11 @@ public:
 	CGameObject							**m_ppGameObjects = NULL;
 
 	int									m_nShaders = 0;
-	CShader								**m_ppShaders = NULL;
-
+	CObjectsShader**m_ppShaders = NULL;
+	
 	CSkyBox								*m_pSkyBox = NULL;
 	CGunshipObject* m_pGunshipObj;
-	CMi24Object* m_pMi24Obj;
+	CMi24Object* m_pMi24Obj = NULL;
 
 	LIGHT								*m_pLights = NULL;
 	int									m_nLights = 0;

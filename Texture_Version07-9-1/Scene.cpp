@@ -71,7 +71,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	m_nShaders = 1;
-	m_ppShaders = new CShader*[m_nShaders];
+	m_ppShaders = new CObjectsShader *[m_nShaders];
 
 	CObjectsShader *pObjectsShader = new CObjectsShader();
 	pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -380,14 +380,44 @@ bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 	return(false);
 }
 
+int CollisionCheck = 0;
 void CScene::AnimateObjects(float fTimeElapsed)
 {
+
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->UpdateTransform(NULL);
-
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);	
 
-	
+	m_ppShaders[0]->m_ppObjects[0]->xoobb = BoundingOrientedBox(XMFLOAT3(m_ppShaders[0]->m_ppObjects[0]->GetPosition()), XMFLOAT3(3.0, 3.0, 5.0), XMFLOAT4(0, 0, 0, 1));
+	m_pPlayer->xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(3.0, 3.0, 5.0), XMFLOAT4(0, 0, 0, 1));
+	CBulletObject** ppBullets = ((CAirplanePlayer*)m_pPlayer)->m_ppBullets;
+
+	for (int j = 0; j < BULLETS; j++){ppBullets[j]->xoobb = BoundingOrientedBox(XMFLOAT3(ppBullets[j]->GetPosition()), XMFLOAT3(1.0, 1.0, 1.0), XMFLOAT4(0, 0, 0, 1));}
+
+	/// /////////////////////////////////////////////////
+
+	for (int j = 0; j < BULLETS; j++)
+	{
+		if (ppBullets[j]->m_bActive && m_ppShaders[0]->m_ppObjects[0]->xoobb.Intersects(ppBullets[j]->xoobb))
+		{
+			CollisionCheck = 1;
+			ppBullets[j]->Reset();
+		}
+	}
+	if (CollisionCheck == 1)
+	{
+		m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._42 -= 0.5f;
+		m_ppShaders[0]->m_ppObjects[0]->Rotate(0, 2.0, 0);
+		if (m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._42 < -50.0f) CollisionCheck = 2;
+	}
+	if (CollisionCheck == 2)
+	{
+		m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._42 += 0.5f;
+		m_ppShaders[0]->m_ppObjects[0]->Rotate(0, 0.0, 0);
+		if (m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._42 > 0.0) CollisionCheck = 0;
+	}
+
+	if (m_ppShaders[0]->m_ppObjects[0]->xoobb.Intersects(m_pPlayer->xoobb)) m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._43 -= 2.0f;
 
 	if (m_pLights)
 	{

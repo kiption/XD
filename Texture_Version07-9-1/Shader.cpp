@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "Shader.h"
-
+#include "Player.h"
 CShader::CShader()
 {
 	m_d3dSrvCPUDescriptorStartHandle.ptr = NULL;
@@ -498,6 +498,8 @@ void CObjectsShader::ReleaseObjects()
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
 {
+	xoobb = BoundingOrientedBox(XMFLOAT3(m_ppObjects[0]->m_xmf4x4Transform._41, m_ppObjects[0]->m_xmf4x4Transform._42, m_ppObjects[0]->m_xmf4x4Transform._43),
+		XMFLOAT3(10.0, 10.0, 20.0), XMFLOAT4(0, 0, 0, 1));
 
 	for (int i = 0; i < 20; i++)
 	{
@@ -529,15 +531,8 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 
 	}
 
-	CBulletObject** ppBullets = ((CAirplanePlayer*)m_pPlayer)->m_ppBullets;
-	for (int j = 0; j < BULLETS; j++)
-	{
-		if (ppBullets[j]->m_bActive && m_ppObjects[0]->xoobb.Intersects(ppBullets[j]->xoobb))
-		{
-			m_ppObjects[0]->m_xmf4x4Transform._42 -= 1.0f;
-			ppBullets[j]->Reset();
-		}
-	}
+
+	
 
 }
 
