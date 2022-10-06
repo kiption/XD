@@ -74,6 +74,8 @@ public:
 	CShader								**m_ppShaders = NULL;
 
 	CSkyBox								*m_pSkyBox = NULL;
+	CGunshipObject* m_pGunshipObj;
+	CMi24Object* m_pMi24Obj;
 
 	LIGHT								*m_pLights = NULL;
 	int									m_nLights = 0;

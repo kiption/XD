@@ -42,17 +42,17 @@ D3D12_SHADER_BYTECODE CShader::CreatePixelShader()
 	return(d3dShaderByteCode);
 }
 
-D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(const wchar_t *pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob **ppd3dShaderBlob)
+D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(const wchar_t* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob)
 {
 	UINT nCompileFlags = 0;
 #if defined(_DEBUG)
 	nCompileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
 
-	ID3DBlob *pd3dErrorBlob = NULL;
+	ID3DBlob* pd3dErrorBlob = NULL;
 	HRESULT hResult = ::D3DCompileFromFile(pszFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, pszShaderName, pszShaderProfile, nCompileFlags, 0, ppd3dShaderBlob, &pd3dErrorBlob);
-	char *pErrorString = NULL;
-	if (pd3dErrorBlob) pErrorString = (char *)pd3dErrorBlob->GetBufferPointer();
+	char* pErrorString = NULL;
+	if (pd3dErrorBlob) pErrorString = (char*)pd3dErrorBlob->GetBufferPointer();
 
 	D3D12_SHADER_BYTECODE d3dShaderByteCode;
 	d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
@@ -71,15 +71,15 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(const wchar_t *pszFileName,
 #include <sstream>
 #endif
 
-D3D12_SHADER_BYTECODE CShader::ReadCompiledShaderFromFile(WCHAR *pszFileName, ID3DBlob **ppd3dShaderBlob)
+D3D12_SHADER_BYTECODE CShader::ReadCompiledShaderFromFile(WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob)
 {
 	UINT nReadBytes = 0;
 #ifdef _WITH_WFOPEN
-	FILE *pFile = NULL;
+	FILE* pFile = NULL;
 	::_wfopen_s(&pFile, pszFileName, L"rb");
 	::fseek(pFile, 0, SEEK_END);
 	int nFileSize = ::ftell(pFile);
-	BYTE *pByteCode = new BYTE[nFileSize];
+	BYTE* pByteCode = new BYTE[nFileSize];
 	::rewind(pFile);
 	nReadBytes = (UINT)::fread(pByteCode, sizeof(BYTE), nFileSize, pFile);
 	::fclose(pFile);
@@ -88,9 +88,9 @@ D3D12_SHADER_BYTECODE CShader::ReadCompiledShaderFromFile(WCHAR *pszFileName, ID
 	std::ifstream ifsFile;
 	ifsFile.open(pszFileName, std::ios::in | std::ios::ate | std::ios::binary);
 	nReadBytes = (int)ifsFile.tellg();
-	BYTE *pByteCode = new BYTE[*pnReadBytes];
+	BYTE* pByteCode = new BYTE[*pnReadBytes];
 	ifsFile.seekg(0);
-	ifsFile.read((char *)pByteCode, nReadBytes);
+	ifsFile.read((char*)pByteCode, nReadBytes);
 	ifsFile.close();
 #endif
 
@@ -183,7 +183,7 @@ D3D12_BLEND_DESC CShader::CreateBlendState()
 	return(d3dBlendDesc);
 }
 
-void CShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
+void CShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	::ZeroMemory(&m_d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 
@@ -202,17 +202,17 @@ void CShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *
 	m_d3dPipelineStateDesc.SampleDesc.Count = 1;
 	m_d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
-	HRESULT hResult = pd3dDevice->CreateGraphicsPipelineState(&m_d3dPipelineStateDesc, __uuidof(ID3D12PipelineState), (void **)&m_ppd3dPipelineStates[0]);
+	HRESULT hResult = pd3dDevice->CreateGraphicsPipelineState(&m_d3dPipelineStateDesc, __uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[0]);
 }
 
-void CShader::CreateCbvSrvDescriptorHeaps(ID3D12Device *pd3dDevice, int nConstantBufferViews, int nShaderResourceViews)
+void CShader::CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews)
 {
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
 	d3dDescriptorHeapDesc.NumDescriptors = nConstantBufferViews + nShaderResourceViews; //CBVs + SRVs 
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	d3dDescriptorHeapDesc.NodeMask = 0;
-	pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void **)&m_pd3dCbvSrvDescriptorHeap);
+	pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dCbvSrvDescriptorHeap);
 
 	m_d3dCbvCPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	m_d3dCbvGPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
@@ -223,7 +223,7 @@ void CShader::CreateCbvSrvDescriptorHeaps(ID3D12Device *pd3dDevice, int nConstan
 	m_d3dSrvGPUDescriptorNextHandle = m_d3dSrvGPUDescriptorStartHandle;
 }
 
-void CShader::CreateConstantBufferViews(ID3D12Device *pd3dDevice, int nConstantBufferViews, ID3D12Resource *pd3dConstantBuffers, UINT nStride)
+void CShader::CreateConstantBufferViews(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride)
 {
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = pd3dConstantBuffers->GetGPUVirtualAddress();
 	D3D12_CONSTANT_BUFFER_VIEW_DESC d3dCBVDesc;
@@ -272,14 +272,14 @@ void CShader::CreateShaderResourceView(ID3D12Device* pd3dDevice, CTexture* pText
 	}
 }
 
-void CShader::OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList, int nPipelineState)
+void CShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState)
 {
 	if (m_ppd3dPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
 
 	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
 }
 
-void CShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState)
+void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
 	OnPrepareRender(pd3dCommandList, nPipelineState);
 }
@@ -297,7 +297,7 @@ CSkyBoxShader::~CSkyBoxShader()
 D3D12_INPUT_LAYOUT_DESC CSkyBoxShader::CreateInputLayout()
 {
 	UINT nInputElementDescs = 1;
-	D3D12_INPUT_ELEMENT_DESC *pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
@@ -339,10 +339,10 @@ D3D12_SHADER_BYTECODE CSkyBoxShader::CreatePixelShader()
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSkyBox", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
-void CSkyBoxShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
+void CSkyBoxShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	m_nPipelineStates = 1;
-	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
+	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
 	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 
@@ -365,7 +365,7 @@ CStandardShader::~CStandardShader()
 D3D12_INPUT_LAYOUT_DESC CStandardShader::CreateInputLayout()
 {
 	UINT nInputElementDescs = 5;
-	D3D12_INPUT_ELEMENT_DESC *pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
@@ -390,10 +390,10 @@ D3D12_SHADER_BYTECODE CStandardShader::CreatePixelShader()
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSStandard", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
-void CStandardShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
+void CStandardShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	m_nPipelineStates = 1;
-	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
+	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
 	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 
@@ -405,8 +405,10 @@ void CStandardShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsComma
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+
 CObjectsShader::CObjectsShader()
 {
+
 }
 
 CObjectsShader::~CObjectsShader()
@@ -428,74 +430,58 @@ float Random()
 
 XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn, int nColumnSpace)
 {
-    float fAngle = Random() * 360.0f * (2.0f * 3.14159f / 360.0f);
+	float fAngle = Random() * 360.0f * (2.0f * 3.14159f / 360.0f);
 
 	XMFLOAT3 xmf3Position;
-    xmf3Position.x = xmf3Center.x + fRadius * sin(fAngle);
-    xmf3Position.y = xmf3Center.y - (nColumn * float(nColumnSpace) / 2.0f) + (nColumn * nColumnSpace) + Random();
-    xmf3Position.z = xmf3Center.z + fRadius * cos(fAngle);
+	xmf3Position.x = xmf3Center.x + fRadius * sin(fAngle);
+	xmf3Position.y = xmf3Center.y - (nColumn * float(nColumnSpace) / 2.0f) + (nColumn * nColumnSpace) + Random();
+	xmf3Position.z = xmf3Center.z + fRadius * cos(fAngle);
 
 	return(xmf3Position);
 }
 
-void CObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext)
+void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nObjects = 120;
-	m_ppObjects = new CGameObject*[m_nObjects];
+	m_nObjects = 20;
+	m_ppObjects = new CGameObject * [m_nObjects];
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 50); //SuperCobra(17), Gunship(2)
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 2); //SuperCobra(17), Gunship(2)
 
-	CGameObject *pSuperCobraModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/SuperCobra.bin", this);
+	CGameObject* pSuperCobraModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/SuperCobra.bin", this);
 	CGameObject* pGunshipModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Gunship.bin", this);
-//	CGameObject *pGunshipModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Player.bin", this);
-
-	int nColumnSpace = 5, nColumnSize = 30;           
-    int nFirstPassColumnSize = (m_nObjects % nColumnSize) > 0 ? (nColumnSize - 1) : nColumnSize;
+	//	CGameObject *pGunshipModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Player.bin", this);
 
 	int nObjects = 0;
-    for (int h = 0; h < nFirstPassColumnSize; h++)
-    {
-        for (int i = 0; i < floor(float(m_nObjects) / float(nColumnSize)); i++)
-        {
-			if (nObjects % 2)
-			{
-				m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pSuperCobraModel);
-				pSuperCobraModel->AddRef();
-			}
-			else
-			{
-				m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pGunshipModel);
-				pGunshipModel->AddRef();
-			}
-			m_ppObjects[nObjects]->SetPosition(RandomPositionInSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), Random(20.0f, 100.0f), h - int(floor(nColumnSize / 2.0f)), nColumnSpace));
-			m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
-			m_ppObjects[nObjects++]->PrepareAnimate();
-		}
-    }
 
-    if (nFirstPassColumnSize != nColumnSize)
-    {
-        for (int i = 0; i < m_nObjects - int(floor(float(m_nObjects) / float(nColumnSize)) * nFirstPassColumnSize); i++)
-        {
-			if (nObjects % 2)
-			{
-				m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pSuperCobraModel);
-				pSuperCobraModel->AddRef();
-			}
-			else
-			{
-				m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pGunshipModel);
-				pGunshipModel->AddRef();
-			}
-			m_ppObjects[nObjects]->SetPosition(RandomPositionInSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), Random(20.0f, 100.0f), nColumnSize - int(floor(nColumnSize / 2.0f)), nColumnSpace));
-			m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
-			m_ppObjects[nObjects++]->PrepareAnimate();
-        }
-    }
+	for (int i = 0; i < m_nObjects; i++)
+	{
+		for (int i = 0; i < m_nObjects / 2; i++)
+		{
+			m_ppObjects[i] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			m_ppObjects[i]->SetChild(pSuperCobraModel);
+			m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), Random(20.0f, 100.0f), i - int(floor(30 / 2.0f)), 5));
+			m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
+			SavePos[i] = m_ppObjects[i]->m_xmf4x4Transform._41;
+			m_ppObjects[i]->PrepareAnimate();
+			pSuperCobraModel->AddRef();
+		}
+		
+		for (int i = m_nObjects / 2; i < m_nObjects; i++)
+		{
+			m_ppObjects[i] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			m_ppObjects[i]->SetChild(pGunshipModel);
+			m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), Random(20.0f, 50.0f), i - int(floor(20 / 2.0f)),5));
+			m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
+			SavePos[i] = m_ppObjects[i]->m_xmf4x4Transform._41;
+			m_ppObjects[i]->PrepareAnimate();
+			pGunshipModel->AddRef();
+		}
+		
+	
+	
+	}
+
+
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -509,8 +495,50 @@ void CObjectsShader::ReleaseObjects()
 	}
 }
 
+
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
 {
+
+	for (int i = 0; i < 20; i++)
+	{
+
+		if (MovingTurn[i] == 1) {
+			m_ppObjects[i]->m_xmf4x4Transform._41 += 0.05;
+			if (m_ppObjects[i]->m_xmf4x4Transform._41 > SavePos[i] + 30.0f)
+			{
+				m_ppObjects[i]->m_xmf4x4Transform._41 -= 0.05f;
+				MovingTurn[i] = 2;
+				/*DelRotation += 0.1f;
+				m_ppObjects[i]->Rotate(0.0f, DelRotation, 0.0f);*/
+				if (DelRotation > 8.0f) { DelRotation = 0.0f; MovingTurn[i] = 2; }
+			}
+		}
+
+		if (MovingTurn[i] == 2) {
+			m_ppObjects[i]->m_xmf4x4Transform._41 -= 0.05f;
+
+			if (m_ppObjects[i]->m_xmf4x4Transform._41 < SavePos[i] - 30.0f)
+			{
+				m_ppObjects[i]->m_xmf4x4Transform._41 += 0.05f;
+				/*	DelRotation -= 0.1f;
+					m_ppObjects[i]->Rotate(0.0f, DelRotation, 0.0f);*/
+				MovingTurn[i] = 1;
+				if (DelRotation < -8.0f) { DelRotation = 0.0f; MovingTurn[i] = 1; }
+			}
+		}
+
+	}
+
+	CBulletObject** ppBullets = ((CAirplanePlayer*)m_pPlayer)->m_ppBullets;
+	for (int j = 0; j < BULLETS; j++)
+	{
+		if (ppBullets[j]->m_bActive && m_ppObjects[0]->xoobb.Intersects(ppBullets[j]->xoobb))
+		{
+			m_ppObjects[0]->m_xmf4x4Transform._42 -= 1.0f;
+			ppBullets[j]->Reset();
+		}
+	}
+
 }
 
 void CObjectsShader::ReleaseUploadBuffers()
@@ -518,7 +546,7 @@ void CObjectsShader::ReleaseUploadBuffers()
 	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
 }
 
-void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState)
+void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
 	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
@@ -546,7 +574,7 @@ CPlayerShader::~CPlayerShader()
 D3D12_INPUT_LAYOUT_DESC CPlayerShader::CreateInputLayout()
 {
 	UINT nInputElementDescs = 5;
-	D3D12_INPUT_ELEMENT_DESC *pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
@@ -571,10 +599,10 @@ D3D12_SHADER_BYTECODE CPlayerShader::CreatePixelShader()
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSStandard", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
-void CPlayerShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature)
+void CPlayerShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	m_nPipelineStates = 1;
-	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
+	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
 	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 

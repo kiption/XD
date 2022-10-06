@@ -236,6 +236,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 		if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera, 0);
 		CGameObject::Render(pd3dCommandList, pCamera);
 	}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -245,9 +246,22 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommand
 {
 	m_pCamera = ChangeCamera(/*SPACESHIP_CAMERA*/THIRD_PERSON_CAMERA, 0.0f);
 
+
 	m_pShader = new CPlayerShader();
 	m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1); //Mi24(1)
+	m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1+10); //Mi24(1)
+	
+	CGameObject* pBulletMesh = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Player.bin", m_pShader);
+	
+	for (int i = 0; i < BULLETS; i++)
+	{
+		pBulletObject = new CBulletObject(m_fBulletEffectiveRange);
+		pBulletObject->SetChild(pBulletMesh,true);
+		pBulletObject->SetScale(3.0,3.0,3.0);
+		pBulletObject->SetMovingSpeed(500.0f);
+		pBulletObject->SetActive(false);
+		m_ppBullets[i] = pBulletObject;
+	}
 
 	CGameObject *pGameObject = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Mi24.bin", m_pShader);
 	SetChild(pGameObject);
@@ -280,12 +294,56 @@ void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent)
 		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
 	}
 
+	for (int i = 0; i < BULLETS; i++)
+	{
+		if (m_ppBullets[i]->m_bActive) 
+			m_ppBullets[i]->Animate(fTimeElapsed);
+		
+	}
+
+	xoobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(15.0, 10.0, 30.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
 void CAirplanePlayer::OnPrepareRender()
 {
 	CPlayer::OnPrepareRender();
+}
+
+void CAirplanePlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CPlayer::Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]->m_bActive) {m_ppBullets[i]->Render(pd3dCommandList, pCamera);}
+}
+
+void CAirplanePlayer::FireBullet(CGameObject* pLockedObject)
+{
+	CBulletObject* pBulletObject = NULL;
+	for (int i = 0; i < BULLETS; i++)
+	{
+		if (!m_ppBullets[i]->m_bActive)
+		{
+			pBulletObject = m_ppBullets[i];
+			break;
+		}
+	}
+
+	XMFLOAT3 PlayerHelicpoterPosition = GetLook();
+	XMFLOAT3 AnermyHelicopterPosition = m_pCamera->GetLookVector();
+	XMFLOAT3 AnermyTOPlayerLookVector = Vector3::Normalize(Vector3::Add(PlayerHelicpoterPosition, AnermyHelicopterPosition));
+
+	if (pBulletObject)
+	{
+		XMFLOAT3 xmf3Position = GetPosition();
+		XMFLOAT3 xmf3Direction = AnermyTOPlayerLookVector;
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 6.0f, true));
+
+		pBulletObject->SetFirePosition(xmf3FirePosition);
+		pBulletObject->SetMovingDirection(GetLookVector());
+		pBulletObject->m_xmf4x4Transform = m_xmf4x4World;
+	
+		pBulletObject->SetActive(true);
+	}
 }
 
 CCamera *CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)

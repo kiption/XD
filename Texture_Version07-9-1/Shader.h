@@ -6,6 +6,9 @@
 
 #include "Object.h"
 #include "Camera.h"
+#include "Player.h"
+
+class CPlayer;
 
 class CShader
 {
@@ -131,8 +134,14 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState=0);
 
 protected:
-	CGameObject						**m_ppObjects = 0;
 	int								m_nObjects = 0;
+	int MovingTurn[20] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+	float SavePos[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	float DelRotation=0.0;
+	CPlayer							*m_pPlayer=NULL;
+	CGameObject						**m_ppObjects = 0;
+
+	
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

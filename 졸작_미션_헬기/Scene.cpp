@@ -473,7 +473,7 @@ void CScene::CheckObjectByBulletCollisions()
 	m_pPlayer->m_pRocketFrame1->oobb = BoundingOrientedBox(m_pPlayer->m_pRocketFrame1->GetPosition(),
 		XMFLOAT3(2.0, 2.0, 2.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 
-	if (m_ppGameObjects[0]->oobb.Intersects(m_pPlayer->m_pRocketFrame1->oobb)) {
+	if (m_ppGameObjects[0]->oobb.Intersects(m_pPlayer->oobb)) {
 
 		m_pPlayer->m_MissileActive = false;
 		
@@ -508,8 +508,6 @@ void CScene::CheckObjectByBulletCollisions()
 			}
 		}
 		
-		
-
 		if ( m_ppGameObjects[i]->oobb.Intersects(m_pPlayer->m_pRocketFrame1->oobb))
 		{
 			m_turn = 1;

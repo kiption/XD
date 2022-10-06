@@ -5,6 +5,20 @@
 #include "stdafx.h"
 #include "Mesh.h"
 
+CMeshLoadInfo::~CMeshLoadInfo()
+{
+	if (m_pxmf3Positions) delete[] m_pxmf3Positions;
+	if (m_pxmf4Colors) delete[] m_pxmf4Colors;
+	if (m_pxmf3Normals) delete[] m_pxmf3Normals;
+
+	if (m_pnIndices) delete[] m_pnIndices;
+
+	if (m_pnSubSetIndices) delete[] m_pnSubSetIndices;
+
+	for (int i = 0; i < m_nSubMeshes; i++) if (m_ppnSubSetIndices[i] != NULL) delete[] m_ppnSubSetIndices[i];
+	if (m_ppnSubSetIndices) delete[] m_ppnSubSetIndices;
+}
+
 CMesh::CMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 }

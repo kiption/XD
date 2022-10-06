@@ -13,7 +13,6 @@
 class CPlayer : public CGameObject
 {
 protected:
-	XMFLOAT3					m_xmf3Position;
 	XMFLOAT3					m_xmf3Right;
 	XMFLOAT3					m_xmf3Up;
 	XMFLOAT3					m_xmf3Look;
@@ -32,14 +31,14 @@ protected:
 	LPVOID						m_pCameraUpdatedContext;
 
 	CCamera						*m_pCamera = NULL;
-
 	CShader						*m_pShader = NULL;
 
 public:
 	CPlayer();
 	virtual ~CPlayer();
 
-	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
+	XMFLOAT3				m_xmf3Position;
+	XMFLOAT3 GetPosition() { return(m_xmf3Position);}
 	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
 	XMFLOAT3 GetUpVector() { return(m_xmf3Up); }
 	XMFLOAT3 GetRightVector() { return(m_xmf3Right); }
@@ -81,14 +80,19 @@ public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
+	
 };
 
+#define BULLETS					50
 class CAirplanePlayer : public CPlayer
 {
 public:
 	CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
 	virtual ~CAirplanePlayer();
 
+	float						m_fBulletEffectiveRange = 500.0f;
+
+	CBulletObject				*pBulletObject = NULL;
 	CGameObject					*m_pMainRotorFrame = NULL;
 	CGameObject					*m_pTailRotorFrame = NULL;
 
@@ -97,8 +101,12 @@ private:
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = NULL);
 
 public:
+
+	CBulletObject* m_ppBullets[BULLETS];
+	void FireBullet(CGameObject* pLockedObject);
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPrepareRender();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 };
 
 

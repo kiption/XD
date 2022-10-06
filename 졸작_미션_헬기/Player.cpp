@@ -602,8 +602,6 @@ void CHelicopterPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 	
 void CHelicopterPlayer::FireBullet(CHelicopterObject* pLockedObject)
 {
-	
-	
 	CBulletObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS; i++)
 	{

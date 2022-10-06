@@ -264,7 +264,7 @@ D3D12_INPUT_LAYOUT_DESC CIlluminatedShader::CreateInputLayout()
 
 D3D12_SHADER_BYTECODE CIlluminatedShader::CreateVertexShader()
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSLighting", "vs_5_1", &m_pd3dPixelShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSLighting", "vs_5_1", &m_pd3dVertexShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CIlluminatedShader::CreatePixelShader()
@@ -330,7 +330,7 @@ D3D12_INPUT_LAYOUT_DESC CTerrainShader::CreateInputLayout()
 D3D12_SHADER_BYTECODE CTerrainShader::CreateVertexShader()
 {
 	
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSLighting", "vs_5_1", &m_pd3dPixelShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSLighting", "vs_5_1", &m_pd3dVertexShaderBlob));
 
 }
 
