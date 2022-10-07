@@ -177,24 +177,55 @@ VS_SPRITE_TEXTURED_OUTPUT VSTextured(VS_SPRITE_TEXTURED_INPUT input)
 	return(output);
 }
 
-/*
-float4 PSTextured(VS_SPRITE_TEXTURED_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+Texture2D gtxtTerrainTexture : register(t14);
+Texture2D gtxtDetailTexture : register(t15);
+Texture2D gtxtAlphaTexture : register(t16);
+
+float4 PSTextured(VS_SPRITE_TEXTURED_OUTPUT input) : SV_TARGET
 {
-	float4 cColor;
-	if (nPrimitiveID < 2)
-		cColor = gtxtTextures[0].Sample(gWrapSamplerState, input.uv);
-	else if (nPrimitiveID < 4)
-		cColor = gtxtTextures[1].Sample(gWrapSamplerState, input.uv);
-	else if (nPrimitiveID < 6)
-		cColor = gtxtTextures[2].Sample(gWrapSamplerState, input.uv);
-	else if (nPrimitiveID < 8)
-		cColor = gtxtTextures[3].Sample(gWrapSamplerState, input.uv);
-	else if (nPrimitiveID < 10)
-		cColor = gtxtTextures[4].Sample(gWrapSamplerState, input.uv);
-	else
-		cColor = gtxtTextures[5].Sample(gWrapSamplerState, input.uv);
-	float4 cColor = gtxtTextures[NonUniformResourceIndex(nPrimitiveID/2)].Sample(gWrapSamplerState, input.uv);
+	float4 cColor = gtxtTerrainTexture.Sample(gssWrap, input.uv);
 
 	return(cColor);
 }
-*/
+
+
+struct VS_TERRAIN_INPUT
+{
+	float3 position : POSITION;
+	float4 color : COLOR;
+	float2 uv0 : TEXCOORD0;
+	float2 uv1 : TEXCOORD1;
+};
+
+struct VS_TERRAIN_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float4 color : COLOR;
+	float2 uv0 : TEXCOORD0;
+	float2 uv1 : TEXCOORD1;
+};
+
+
+VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
+{
+	VS_TERRAIN_OUTPUT output;
+
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+	output.color = input.color;
+	output.uv0 = input.uv0;
+	output.uv1 = input.uv1;
+
+	return(output);
+}
+
+float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
+{
+	float4 cBaseTexColor = gtxtTerrainTexture.Sample(gssWrap, input.uv0);
+	float4 cDetailTexColor = gtxtDetailTexture.Sample(gssWrap, input.uv1);
+	//	float fAlpha = gtxtTerrainTexture.Sample(gssWrap, input.uv0);
+
+		float4 cColor = cBaseTexColor * 0.5f + cDetailTexColor * 0.5f;
+		//	float4 cColor = saturate(lerp(cBaseTexColor, cDetailTexColor, fAlpha));
+
+		return(cColor);
+}

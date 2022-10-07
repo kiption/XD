@@ -459,7 +459,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		{
 			m_ppObjects[i] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			m_ppObjects[i]->SetChild(pSuperCobraModel);
-			m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), Random(20.0f, 100.0f), i - int(floor(30 / 2.0f)), 5));
+			m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(1200.0f, 800.0f, 1000.0f), Random(400.0f, 800.0f), i - int(floor(20 / 2.0f)), 5));
 			m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
 			SavePos[i] = m_ppObjects[i]->m_xmf4x4Transform._41;
 			m_ppObjects[i]->PrepareAnimate();
@@ -470,7 +470,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		{
 			m_ppObjects[i] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			m_ppObjects[i]->SetChild(pGunshipModel);
-			m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), Random(20.0f, 50.0f), i - int(floor(20 / 2.0f)),5));
+			m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(1200.0f, 800.0f, 1000.0f), Random(500.0f, 800.0f), i - int(floor(20 / 2.0f)),5));
 			m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
 			SavePos[i] = m_ppObjects[i]->m_xmf4x4Transform._41;
 			m_ppObjects[i]->PrepareAnimate();
@@ -505,26 +505,26 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 	{
 
 		if (MovingTurn[i] == 1) {
-			m_ppObjects[i]->m_xmf4x4Transform._41 += 0.05;
-			if (m_ppObjects[i]->m_xmf4x4Transform._41 > SavePos[i] + 30.0f)
+			m_ppObjects[i]->m_xmf4x4Transform._41 += 0.25;
+			if (m_ppObjects[i]->m_xmf4x4Transform._41 > SavePos[i] + 200.0f)
 			{
-				m_ppObjects[i]->m_xmf4x4Transform._41 -= 0.05f;
-				MovingTurn[i] = 2;
-				/*DelRotation += 0.1f;
-				m_ppObjects[i]->Rotate(0.0f, DelRotation, 0.0f);*/
+				m_ppObjects[i]->m_xmf4x4Transform._41 -= 0.25f;
+		
+				DelRotation += 0.1f;
+				m_ppObjects[i]->Rotate(0.0f, DelRotation, 0.0f);
 				if (DelRotation > 8.0f) { DelRotation = 0.0f; MovingTurn[i] = 2; }
 			}
 		}
 
 		if (MovingTurn[i] == 2) {
-			m_ppObjects[i]->m_xmf4x4Transform._41 -= 0.05f;
+			m_ppObjects[i]->m_xmf4x4Transform._41 -= 0.25f;
 
-			if (m_ppObjects[i]->m_xmf4x4Transform._41 < SavePos[i] - 30.0f)
+			if (m_ppObjects[i]->m_xmf4x4Transform._41 < SavePos[i] - 200.0f)
 			{
-				m_ppObjects[i]->m_xmf4x4Transform._41 += 0.05f;
-				/*	DelRotation -= 0.1f;
-					m_ppObjects[i]->Rotate(0.0f, DelRotation, 0.0f);*/
-				MovingTurn[i] = 1;
+				m_ppObjects[i]->m_xmf4x4Transform._41 += 0.25f;
+			
+				DelRotation -= 0.1f;
+				m_ppObjects[i]->Rotate(0.0f, DelRotation, 0.0f);
 				if (DelRotation < -8.0f) { DelRotation = 0.0f; MovingTurn[i] = 1; }
 			}
 		}
@@ -607,6 +607,8 @@ void CPlayerShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 CTexturedShader::CTexturedShader()
 {
 }
@@ -614,3 +616,84 @@ CTexturedShader::CTexturedShader()
 CTexturedShader::~CTexturedShader()
 {
 }
+
+D3D12_INPUT_LAYOUT_DESC CTexturedShader::CreateInputLayout()
+{
+	UINT nInputElementDescs = 2;
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+
+	return(d3dInputLayoutDesc);
+}
+
+D3D12_SHADER_BYTECODE CTexturedShader::CreateVertexShader()
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSTextured", "vs_5_1", &m_pd3dVertexShaderBlob));
+}
+
+D3D12_SHADER_BYTECODE CTexturedShader::CreatePixelShader()
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTextured", "ps_5_1", &m_pd3dPixelShaderBlob));
+}
+
+void CTexturedShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	m_nPipelineStates = 1;
+	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+
+	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+
+	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
+	if (m_pd3dPixelShaderBlob) m_pd3dPixelShaderBlob->Release();
+
+	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
+}
+
+
+
+D3D12_INPUT_LAYOUT_DESC CTerrainShader::CreateInputLayout()
+{
+	UINT nInputElementDescs = 4;
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[2] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[3] = { "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 3, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+
+	return(d3dInputLayoutDesc);
+}
+
+D3D12_SHADER_BYTECODE CTerrainShader::CreateVertexShader()
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSTerrain", "vs_5_1", &m_pd3dVertexShaderBlob));
+}
+
+D3D12_SHADER_BYTECODE CTerrainShader::CreatePixelShader()
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTerrain", "ps_5_1", &m_pd3dPixelShaderBlob));
+}
+
+void CTerrainShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	m_nPipelineStates = 1;
+	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+
+	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+
+	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
+	if (m_pd3dPixelShaderBlob) m_pd3dPixelShaderBlob->Release();
+
+	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
+}
+

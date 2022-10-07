@@ -74,6 +74,7 @@ public:
 	CObjectsShader**m_ppShaders = NULL;
 	
 	CSkyBox								*m_pSkyBox = NULL;
+	CHeightMapTerrain					*m_pTerrain = NULL;
 	CGunshipObject* m_pGunshipObj;
 	CMi24Object* m_pMi24Obj = NULL;
 

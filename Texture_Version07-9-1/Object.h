@@ -228,20 +228,19 @@ public:
 	void Release();
 
 public:
-	CGameObject();
-	CGameObject(int nMaterials);
+	CGameObject(int nMeshes, int nMaterials);
     virtual ~CGameObject();
 
 public:
 	char							m_pstrFrameName[64];
 
 	int								m_nMeshes;
-	CMesh							*m_pMesh = NULL;
 	CMesh							** m_ppMeshes;
+//	CMesh							*m_pMesh = NULL;
 
 	int								m_nMaterials = 0;
 	CMaterial						**m_ppMaterials = NULL;
-	CMaterial						*m_pMaterial = NULL;
+	//CMaterial						*m_pMaterial = NULL;
 
 	XMFLOAT4X4						m_xmf4x4Transform;
 	XMFLOAT4X4						m_xmf4x4World;
@@ -250,7 +249,7 @@ public:
 	CGameObject 					*m_pChild = NULL;
 	CGameObject 					*m_pSibling = NULL;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
+//	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
 	BoundingOrientedBox xoobb = BoundingOrientedBox();
 public:
 	float m_fMovingSpeed = 0.0f;
@@ -267,11 +266,11 @@ public:
 	void SetActive(bool bActive) { m_bActive = bActive; }
 
 public:
-	virtual void SetMesh(CMesh *pMesh);
+	//virtual void SetMesh(CMesh *pMesh);
 	virtual void SetMesh(int nIndex, CMesh* pMesh);
-	void SetShader(CShader *pShader);
+	//void SetShader(CShader *pShader);
 	void SetShader(int nMaterial, CShader *pShader);
-	virtual void SetMaterial(CMaterial *pMaterial);
+	//virtual void SetMaterial(CMaterial *pMaterial);
 	virtual void SetMaterial(int nMaterial,CMaterial *pMaterial);
 
 	
@@ -317,9 +316,9 @@ public:
 
 	int FindReplicatedTexture(_TCHAR* pstrTextureName, D3D12_GPU_DESCRIPTOR_HANDLE* pd3dSrvGpuDescriptorHandle);
 
-	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0x00); }
+	UINT GetMeshType(UINT nIndex) { return((m_ppMeshes[nIndex]) ? m_ppMeshes[nIndex]->GetType() : 0x00); }
 
-	void SetCbvGPUDescriptorHandle(D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle) { m_d3dCbvGPUDescriptorHandle = d3dCbvGPUDescriptorHandle; }
+	//void SetCbvGPUDescriptorHandle(D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle) { m_d3dCbvGPUDescriptorHandle = d3dCbvGPUDescriptorHandle; }
 
 public:
 	void LoadMaterialsFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, CGameObject *pParent, FILE *pInFile, CShader *pShader);
@@ -329,8 +328,6 @@ public:
 
 	static MATERIALSLOADINFO* LoadMaterialsInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 	static CMeshLoadInfo* LoadMeshInfoFromFile(FILE* pInFile);
-	static CGameObject* LoadFrameHierarchyFromFile2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, FILE* pInFile);
-	static CGameObject* LoadGeometryFromFile2(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName);
 
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
 
