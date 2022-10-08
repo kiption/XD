@@ -4,9 +4,9 @@ constexpr int NAME_SIZE = 20;
 
 constexpr int MAX_USER = 10;
 
-constexpr int WORLD_X_POS = 8;
-constexpr int WORLD_Y_POS = 8;
-constexpr int WORLD_Z_POS = 8;
+constexpr int WORLD_X_POS = 2000;
+constexpr int WORLD_Y_POS = 2000;
+constexpr int WORLD_Z_POS = 2000;
 
 // Packet ID
 constexpr char CS_LOGIN = 0;
@@ -28,11 +28,8 @@ struct CS_LOGIN_PACKET {
 struct CS_MOVE_PACKET {
 	unsigned char size;
 	char type;
-	short x, y, z;
-	// 현재는 임시로 물리 계산을 클라이언트에서 하고 있어서 클라에서 계산된 좌표값을 받아오고 그 값을 접속해있는 모든 클라이언트들에게 전달하는 방식으로 되어있습니다.
-	// 추후에 서버에서 클라로부터 direction을 받아 물리 계산을 하도록 변경할 예정입니다.
-	//char direction;  // 0: North, 1: East, 2: South, 3: West
-	//bool bUpdateVelocity;
+	char direction;				// 0: Foward, 1: Back, 2: Left, 3: Right, 4: Down, 5: Up
+	float vec_x, vec_y, vec_z;	// 이동방향이 Foward/Back이면 LookVec을, Left/Right이면 RightVec, Down/Up이면 UpVec을 넣어주면 됨.
 };
 
 struct SC_LOGIN_INFO_PACKET {
