@@ -8,6 +8,7 @@
 #include <random>	// 플레이어의 초기 위치값 설정할 때 임시로 랜덤값을 부여하기로 함. -> 추후에 정해진 리스폰 지점에 생성되도록 변경해야함.
 
 #include "protocol.h"
+#include "Func_forVectorCalc.h"
 
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
@@ -254,31 +255,20 @@ void process_packet(int client_id, char* packet)
 	}
 	case CS_MOVE: {
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
-		/*float cur_x = clients[client_id].x_pos;
-		float cur_y = clients[client_id].y_pos;
-		float cur_z = clients[client_id].z_pos;
 
-		switch (p->direction) {	// 0: Forward, 1: Back, 2: Left, 3: Right, 4: Up, 5: Down
-		case 0: if (cur_x < WORLD_X_POS - 1) cur_x++; break;
-		case 1: if (cur_z < WORLD_Z_POS - 1) cur_z++; break;
-		case 2: if (cur_x > 0) cur_x--; break;
-		case 3: if (cur_z > 0) cur_z--; break;
-		}
+		float vec1[4], vec2[4];
+		vec1[X] = clients[client_id].x_pos, vec1[Y] = clients[client_id].y_pos, vec1[Z] = clients[client_id].z_pos, vec1[W] = 0;
+		vec2[X] = p->vec_x, vec2[Y] = p->vec_y, vec2[Z] = p->vec_z, vec2[W] = 0;
 
-		clients[client_id].x_pos = cur_x;
-		clients[client_id].y_pos = cur_y;
-		clients[client_id].z_pos = cur_z;*/
+		calcMove(vec1, vec2, 13.0f * 0.25f); // 이동 계산
 
-		// 임시로 클라에서 계산된 값을 받아서 모든 클라에게 전달하는 방식으로 구현하였습니다. 추후에 삭제할 예정.
-		clients[client_id].x_pos = p->x;
-		clients[client_id].y_pos = p->y;
-		clients[client_id].z_pos = p->z;
+		clients[client_id].x_pos = vec1[X];
+		clients[client_id].y_pos = vec1[Y];
+		clients[client_id].z_pos = vec1[Z];
 
-		//short tempNum = p->direction;
+		// server message
 		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] moves to ("
-			<< clients[client_id].x_pos << ", " << clients[client_id].y_pos << ", " << clients[client_id].z_pos << ")." << endl;	// server messag
-
-		//cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] send <Move Packet - DIR: " << tempNum << " >." << endl;
+			<< clients[client_id].x_pos << ", " << clients[client_id].y_pos << ", " << clients[client_id].z_pos << ")." << endl;
 
 		for (auto& pl : clients) {
 			lock_guard<mutex> lg{ pl.s_lock };

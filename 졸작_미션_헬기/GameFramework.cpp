@@ -529,15 +529,42 @@ void CGameFramework::ProcessInput()
             CS_MOVE_PACKET move_p;
             move_p.size = sizeof(move_p);
             move_p.type = CS_MOVE;
-            //move_p.direction = packetDirection;   // 추후에 물리 계산을 서버에서 맡게되면 다시 적용시킬 예정입니다.
-            XMFLOAT3 my_pos = m_pPlayer->GetPosition();
-            move_p.x = my_pos.x;
-            move_p.y = my_pos.y;
-            move_p.z = my_pos.z;
+            move_p.direction = packetDirection;
+            XMFLOAT3 packetVec = m_pPlayer->GetLookVector();             // 이동 계산에 필요한 벡터로,
+                                                                         // Foward/Back 이동은 LookVector를 Left/Right 이동은 RightVector, Up/Down 이동은 UpVector를 보냅니다.
+            int positive_or_negative = 0;                                // Foward/Right/Up은 1, Back/Left/Down은 -1
+            switch (packetDirection) {
+            case 0:
+                positive_or_negative = 1;
+                packetVec = m_pPlayer->GetLookVector();
+                break;
+            case 1:
+                positive_or_negative = -1;
+                packetVec = m_pPlayer->GetLookVector();
+                break;
+            case 2:
+                positive_or_negative = -1;
+                packetVec = m_pPlayer->GetRightVector();
+                break;
+            case 3:
+                positive_or_negative = 1;
+                packetVec = m_pPlayer->GetRightVector();
+                break;
+            case 4:
+                positive_or_negative = -1;
+                packetVec = m_pPlayer->GetUpVector();
+                break;
+            case 5:
+                positive_or_negative = 1;
+                packetVec = m_pPlayer->GetUpVector();
+                break;
+            }
+            move_p.vec_x = packetVec.x * positive_or_negative;
+            move_p.vec_y = packetVec.y * positive_or_negative;
+            move_p.vec_z = packetVec.z * positive_or_negative;
 
             sendPacket(&move_p);
         }//
-
 
 
         float cxDelta = 0.0f, cyDelta = 0.0f;
