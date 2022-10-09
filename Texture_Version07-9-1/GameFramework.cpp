@@ -34,7 +34,7 @@ CGameFramework::CGameFramework()
 
 	recvPacket();
 
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 2; i++) {
 
 		other_players[i].m_x = uid(dre);
 		other_players[i].m_z = uid(dre);
@@ -679,18 +679,19 @@ void CGameFramework::FrameAdvance()
 
 	//	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 	MoveToNextFrame();
-
-	for (int j = 0; j < 4; j++) {
-		if (other_players[j].m_state == ST_RUNNING && j != my_info.m_id) {
-			m_pShader->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
-			m_pShader->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
-		}
-	}
+	m_pScene->m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._41 = other_players[0].m_x;
+	m_pScene->m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._43 = other_players[0].m_z;
+	//for (int j = 0; j < 2; j++) {
+	//	if (other_players[j].m_state == ST_RUNNING && j != my_info.m_id) {
+	//		m_pShader->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
+	//		m_pShader->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
+	//	}
+	//}
 
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
 	size_t nLength = _tcslen(m_pszFrameRate);
 	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
-	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
+	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), m_pPlayer->m_xmf3Position.x, m_pPlayer->m_xmf3Position.y, m_pPlayer->m_xmf3Position.z);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 
