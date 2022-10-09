@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "Shader.h"
 #include "Player.h"
+
 CShader::CShader()
 {
 	m_d3dSrvCPUDescriptorStartHandle.ptr = NULL;
@@ -480,6 +481,14 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	
 	
 	}
+
+	//for (int j = 0; j < 4; j++) {
+	//	if (other_players[j].m_state == ST_RUNNING && j != my_info.m_id) {
+	//		m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
+	//		m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
+	//	}
+	//}
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 

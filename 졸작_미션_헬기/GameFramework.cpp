@@ -496,7 +496,8 @@ void CGameFramework::ProcessInput()
     if (!bProcessedByScene)
     {
         packetDirection = -1;//S
-        DWORD dwDirection = 0; if (m_pPlayer->STOPZONE == false) {
+        DWORD dwDirection = 0; 
+        if (m_pPlayer->STOPZONE == false) {
 
             if (pKeysBuffer[VK_UP] & 0xF0) {
                 packetDirection = 0;//S

@@ -6,10 +6,10 @@
 #include "Timer.h"
 #include "Player.h"
 #include "Scene.h"
-#define VK_LEFT           0x40
-#define VK_UP             0x57
+#define VK_LEFT           0x41
 #define VK_RIGHT          0x44
 #define VK_DOWN           0x53
+#define VK_UP             0x57
 class CGameFramework
 {
 public:

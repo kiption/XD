@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 #include "Network.h"
-
+uniform_int_distribution<int> uid(1200, 3000);
 CGameFramework::CGameFramework()
 {
 	// Server
@@ -20,15 +20,25 @@ CGameFramework::CGameFramework()
 	server_addr.sin_port = htons(PORT_NUM);
 	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
 	connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
-	recv_packet();
-
 	CS_LOGIN_PACKET p;
 	p.size = sizeof(CS_LOGIN_PACKET);
 	p.type = CS_LOGIN;
 	strcpy_s(p.name, "COPTER");
+	my_info.m_x = uid(dre);
+	my_info.m_y = 0;
+	my_info.m_z = uid(dre);
+	p.x = my_info.m_x;
+	p.y = my_info.m_y;
+	p.z = my_info.m_z;
+	sendPacket(&p);
 
-	send_packet(&p);
-	//
+	recvPacket();
+
+	for (int i = 0; i < 4; i++) {
+
+		other_players[i].m_x = uid(dre);
+		other_players[i].m_z = uid(dre);
+	}
 
 	m_pdxgiFactory = NULL;
 	m_pdxgiSwapChain = NULL;
@@ -428,9 +438,13 @@ void CGameFramework::BuildObjects()
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
 	CAirplanePlayer* pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
-	pAirplanePlayer->SetPosition(XMFLOAT3(1295.0f, 750.0f, 1369.0f));
 	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
+	pAirplanePlayer->m_xmf3Position.x = (float)my_info.m_x;
+	pAirplanePlayer->m_xmf3Position.z = (float)my_info.m_z;
+	pAirplanePlayer->SetPosition(XMFLOAT3(pAirplanePlayer->m_xmf3Position.x, 800.0f, pAirplanePlayer->m_xmf3Position.z));
 	m_pCamera = m_pPlayer->GetCamera();
+
+	
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
@@ -488,14 +502,47 @@ void CGameFramework::ProcessInput()
 			packetDirection = 5;//S
 			dwDirection |= DIR_UP;
 		}
+
 		// Server
-		if (packetDirection != -1) {
+		if (packetDirection != -1 ) {
 			CS_MOVE_PACKET move_p;
 			move_p.size = sizeof(move_p);
 			move_p.type = CS_MOVE;
-			//move_p.direction = packetDirection;
+			move_p.direction = packetDirection;
+			XMFLOAT3 packetVec = m_pPlayer->GetLookVector();             // 이동 계산에 필요한 벡터로,
+																		 // Foward/Back 이동은 LookVector를 Left/Right 이동은 RightVector, Up/Down 이동은 UpVector를 보냅니다.
+			int positive_or_negative = 0;                                // Foward/Right/Up은 1, Back/Left/Down은 -1
+			switch (packetDirection) {
+			case 0:
+				positive_or_negative = 1;
+				packetVec = m_pPlayer->GetLookVector();
+				break;
+			case 1:
+				positive_or_negative = -1;
+				packetVec = m_pPlayer->GetLookVector();
+				break;
+			case 2:
+				positive_or_negative = -1;
+				packetVec = m_pPlayer->GetRightVector();
+				break;
+			case 3:
+				positive_or_negative = 1;
+				packetVec = m_pPlayer->GetRightVector();
+				break;
+			case 4:
+				positive_or_negative = -1;
+				packetVec = m_pPlayer->GetUpVector();
+				break;
+			case 5:
+				positive_or_negative = 1;
+				packetVec = m_pPlayer->GetUpVector();
+				break;
+			}
+			move_p.vec_x = packetVec.x * positive_or_negative;
+			move_p.vec_y = packetVec.y * positive_or_negative;
+			move_p.vec_z = packetVec.z * positive_or_negative;
 
-			send_packet(&move_p);
+			sendPacket(&move_p);
 		}//
 
 		float cxDelta = 0.0f, cyDelta = 0.0f;
@@ -560,10 +607,12 @@ void CGameFramework::MoveToNextFrame()
 	}
 }
 
-//#define _WITH_PLAYER_TOP
+#define _WITH_PLAYER_TOP
 
 void CGameFramework::FrameAdvance()
 {
+	SleepEx(1, TRUE);//Server
+
 	m_GameTimer.Tick(0.0f);
 
 	ProcessInput();
@@ -630,6 +679,13 @@ void CGameFramework::FrameAdvance()
 
 	//	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 	MoveToNextFrame();
+
+	for (int j = 0; j < 4; j++) {
+		if (other_players[j].m_state == ST_RUNNING && j != my_info.m_id) {
+			m_pShader->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
+			m_pShader->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
+		}
+	}
 
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
 	size_t nLength = _tcslen(m_pszFrameRate);
