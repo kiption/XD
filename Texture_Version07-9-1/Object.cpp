@@ -9,7 +9,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootParameters)
+CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootParameters,int nRows,int nCols)
 {
 	m_nTextureType = nTextureType;
 
@@ -36,6 +36,9 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 
 	m_nSamplers = nSamplers;
 	if (m_nSamplers > 0) m_pd3dSamplerGpuDescriptorHandles = new D3D12_GPU_DESCRIPTOR_HANDLE[m_nSamplers];
+
+	m_nRows = nRows;
+	m_nCols = nCols;
 }
 
 CTexture::~CTexture()
@@ -104,6 +107,20 @@ void CTexture::ReleaseUploadBuffers()
 		for (int i = 0; i < m_nTextures; i++) if (m_ppd3dTextureUploadBuffers[i]) m_ppd3dTextureUploadBuffers[i]->Release();
 		delete[] m_ppd3dTextureUploadBuffers;
 		m_ppd3dTextureUploadBuffers = NULL;
+	}
+}
+
+void CTexture::AnimateRowColumn(float fTime)
+{
+	m_xmf4x4Texture._11 = 1.0f / float(m_nRows);
+	m_xmf4x4Texture._22 = 1.0f / float(m_nCols);
+	m_xmf4x4Texture._31 = float(m_nRow) / float(m_nRows);
+	m_xmf4x4Texture._32 = float(m_nCol) / float(m_nCols);
+
+	if (fTime == 0.0f)
+	{
+		if (++m_nCol == m_nCols) { m_nRow++; m_nCol = 0; }
+		if (m_nRow == m_nRows) m_nRow = 0;
 	}
 }
 
@@ -431,6 +448,15 @@ void CBulletObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
 void CGameObject::SetMovingDirection(const XMFLOAT3& xmf3MovingDirection)
 {
 	XMStoreFloat3(&m_xmf3MovingDirection, XMVector3Normalize(XMLoadFloat3(&xmf3MovingDirection)));
+}
+
+void CGameObject::SetLookAt(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up)
+{
+	XMFLOAT3 xmf3Position(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43);
+	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(xmf3Position, xmf3Target, xmf3Up);
+	m_xmf4x4World._11 = mtxLookAt._11; m_xmf4x4World._12 = mtxLookAt._21; m_xmf4x4World._13 = mtxLookAt._31;
+	m_xmf4x4World._21 = mtxLookAt._12; m_xmf4x4World._22 = mtxLookAt._22; m_xmf4x4World._23 = mtxLookAt._32;
+	m_xmf4x4World._31 = mtxLookAt._13; m_xmf4x4World._32 = mtxLookAt._23; m_xmf4x4World._33 = mtxLookAt._33;
 }
 
 void CGameObject::SetMesh(int nIndex, CMesh* pMesh)
@@ -1298,3 +1324,17 @@ void CBulletObject::Animate(float fElapsedTime)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CExplosionObject::CExplosionObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(0, 0)
+{
+}
+
+void CExplosionObject::Animate(float fTimeElapsed)
+{
+	if (m_nMaterials==1 && (m_ppMaterials[0])->m_pTexture)
+	{
+		m_fTime += fTimeElapsed * 0.5f;
+		if (m_fTime >= m_fSpeed) m_fTime = 0.0f;
+		m_ppMaterials[0]->m_pTexture->AnimateRowColumn(m_fTime);
+	}
+}

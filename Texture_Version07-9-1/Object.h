@@ -50,7 +50,7 @@ class CGameObject;
 class CTexture
 {
 public:
-	CTexture(int nTextureResources, UINT nResourceType, int nSamplers, int nRootParameters);
+	CTexture(int nTextureResources, UINT nResourceType, int nSamplers, int nRootParameters, int nRows = 1, int nCols = 1);
 	virtual ~CTexture();
 
 private:
@@ -74,6 +74,9 @@ private:
 
 	int								m_nSamplers = 0;
 	D3D12_GPU_DESCRIPTOR_HANDLE*	m_pd3dSamplerGpuDescriptorHandles = NULL;
+
+	int 							m_nRow = 0;
+	int 							m_nCol = 0;
 
 public:
 	void AddRef() { m_nReferences++; }
@@ -109,6 +112,12 @@ public:
 	D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(int nIndex);
 
 	void ReleaseUploadBuffers();
+
+public:
+	void AnimateRowColumn(float fTime = 0.0f);
+	XMFLOAT4X4						m_xmf4x4Texture;
+	int 							m_nRows = 1;
+	int 							m_nCols = 1;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -264,7 +273,7 @@ public:
 	void SetRotationSpeed(float fSpeed) { m_fRotationSpeed = fSpeed; }
 	void SetMovingSpeed(float fSpeed) { m_fMovingSpeed = fSpeed; }
 	void SetActive(bool bActive) { m_bActive = bActive; }
-
+	void SetLookAt(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f));
 public:
 	//virtual void SetMesh(CMesh *pMesh);
 	virtual void SetMesh(int nIndex, CMesh* pMesh);
@@ -449,4 +458,15 @@ public:
 
 };
 
+class CExplosionObject : public CGameObject
+{
+public:
+	CExplosionObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CExplosionObject() {};
+
+	float m_fSpeed = 0.1f;
+	float m_fTime = 0.0f;
+
+	virtual void Animate(float fTimeElapsed);
+};
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

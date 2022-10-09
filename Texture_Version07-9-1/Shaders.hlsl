@@ -4,6 +4,10 @@ struct MATERIAL
 	float4					m_cDiffuse;
 	float4					m_cSpecular; //a = power
 	float4					m_cEmissive;
+
+	/*matrix					gmtxTexture;
+	int2					gi2TextureTiling;
+	float2					gf2TextureOffset;*/
 };
 
 cbuffer cbCameraInfo : register(b1)
@@ -177,6 +181,16 @@ VS_SPRITE_TEXTURED_OUTPUT VSTextured(VS_SPRITE_TEXTURED_INPUT input)
 	return(output);
 }
 
+//VS_SPRITE_TEXTURED_OUTPUT VSSpriteAnimation(VS_SPRITE_TEXTURED_INPUT input)
+//{
+//	VS_SPRITE_TEXTURED_OUTPUT output;
+//
+//	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+//	output.uv = mul(float3(input.uv, 1.0f), (float3x3)(gMaterial.gmtxTexture)).xy;
+//
+//	return(output);
+//}
+
 Texture2D gtxtTerrainTexture : register(t14);
 Texture2D gtxtDetailTexture : register(t15);
 Texture2D gtxtAlphaTexture : register(t16);
@@ -187,7 +201,6 @@ float4 PSTextured(VS_SPRITE_TEXTURED_OUTPUT input) : SV_TARGET
 
 	return(cColor);
 }
-
 
 struct VS_TERRAIN_INPUT
 {
