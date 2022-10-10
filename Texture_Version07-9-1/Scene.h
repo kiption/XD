@@ -77,6 +77,7 @@ public:
 	int							m_nCShaders = 0;
 
 	CSkyBox								*m_pSkyBox = NULL;
+	CExplosionObject								*m_pExplo = NULL;
 	CHeightMapTerrain					*m_pTerrain = NULL;
 	CGunshipObject* m_pGunshipObj;
 	CMi24Object* m_pMi24Obj = NULL;

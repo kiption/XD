@@ -181,7 +181,7 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
 };
 
-class CTerrainShader : public CTexturedShader
+class CTerrainShader : public CObjectsShader
 {
 public:
 	CTerrainShader() {};
@@ -194,7 +194,7 @@ public:
 	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 };
 
-class CExplosionShader : public CShader
+class CExplosionShader : public CTexturedShader
 {
 public:
 	CExplosionShader() {};

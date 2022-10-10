@@ -12,6 +12,7 @@ struct MATERIAL
 	float4					m_cDiffuse;
 	float4					m_cSpecular; //a = power
 	float4					m_cEmissive;
+	
 	//matrix					gmtxTexture;
 };
 
@@ -147,6 +148,7 @@ VS_SKYBOX_CUBEMAP_OUTPUT VSSkyBox(VS_SKYBOX_CUBEMAP_INPUT input)
 
 TextureCube gtxtSkyCubeTexture : register(t13);
 SamplerState gssClamp : register(s1);
+Texture2D gtxtTexture : register(t17);
 
 float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 {
@@ -174,24 +176,25 @@ VS_SPRITE_TEXTURED_OUTPUT VSTextured(VS_SPRITE_TEXTURED_INPUT input)
 	VS_SPRITE_TEXTURED_OUTPUT output;
 
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
-	//output.uv = mul(float3(input.uv, 1.0f), (float3x3)(gMaterial.gmtxTexture)).xy;
 	output.uv = input.uv;
+
 	return(output);
 }
 
-//VS_SPRITE_TEXTURED_OUTPUT VSSpriteAnimation(VS_SPRITE_TEXTURED_INPUT input)
-//{
-//	VS_SPRITE_TEXTURED_OUTPUT output;
-//
-//	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
-//	output.uv = mul(float3(input.uv, 1.0f), (float3x3)(gMaterial.gmtxTexture)).xy;
-//
-//	return(output);
-//}
+VS_SPRITE_TEXTURED_OUTPUT VSSpriteAnimation(VS_SPRITE_TEXTURED_INPUT input)
+{
+	VS_SPRITE_TEXTURED_OUTPUT output;
+
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+	output.uv = mul(float3(input.uv, 1.0f), (float4)(gMaterial.m_cAmbient));
+
+	return(output);
+}
 
 Texture2D gtxtTerrainTexture : register(t14);
 Texture2D gtxtDetailTexture : register(t15);
 Texture2D gtxtAlphaTexture : register(t16);
+
 
 float4 PSTextured(VS_SPRITE_TEXTURED_OUTPUT input) : SV_TARGET
 {

@@ -1330,7 +1330,7 @@ CExplosionObject::CExplosionObject(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 void CExplosionObject::Animate(float fTimeElapsed)
 {
-	if (m_nMaterials==1 && (m_ppMaterials[0])->m_pTexture)
+	if (m_pMaterial && m_pMaterial->m_pTexture)
 	{
 		m_fTime += fTimeElapsed * 0.5f;
 		if (m_fTime >= m_fSpeed) m_fTime = 0.0f;

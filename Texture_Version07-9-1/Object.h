@@ -15,9 +15,13 @@
 #define DIR_UP						0x10
 #define DIR_DOWN					0x20
 
-class CShader;
+#define RESOURCE_TEXTURE2D			0x01
+#define RESOURCE_TEXTURE2D_ARRAY	0x02	//[]
+#define RESOURCE_TEXTURE2DARRAY		0x03
+#define RESOURCE_TEXTURE_CUBE		0x04
+#define RESOURCE_BUFFER				0x05
 
-class CStandardShader;
+class CShader;
 
 struct MATERIAL
 {
@@ -39,13 +43,10 @@ struct CB_GAMEOBJECT_INFO
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-#define RESOURCE_TEXTURE2D			0x01
-#define RESOURCE_TEXTURE2D_ARRAY	0x02	//[]
-#define RESOURCE_TEXTURE2DARRAY		0x03
-#define RESOURCE_TEXTURE_CUBE		0x04
-#define RESOURCE_BUFFER				0x05
+
 
 class CGameObject;
+class CStandardShader;
 
 class CTexture
 {
@@ -248,7 +249,7 @@ public:
 
 	int								m_nMaterials = 0;
 	CMaterial						**m_ppMaterials = NULL;
-	//CMaterial						*m_pMaterial = NULL;
+	CMaterial						*m_pMaterial = NULL;
 
 	XMFLOAT4X4						m_xmf4x4Transform;
 	XMFLOAT4X4						m_xmf4x4World;
@@ -469,5 +470,6 @@ public:
 	float m_fTime = 0.0f;
 
 	virtual void Animate(float fTimeElapsed);
+	
 };
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

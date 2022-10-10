@@ -739,7 +739,7 @@ D3D12_BLEND_DESC CExplosionShader::CreateBlendState()
 
 D3D12_SHADER_BYTECODE CExplosionShader::CreateVertexShader()
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSTextured", "vs_5_1", &m_pd3dVertexShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSSpriteAnimation", "vs_5_1", &m_pd3dVertexShaderBlob));
 }
 
 void CExplosionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
@@ -756,21 +756,22 @@ void CExplosionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	ppSpriteMaterials[1] = new CMaterial();
 	ppSpriteMaterials[1]->SetTexture(ppSpriteTextures[1]);
 
-	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	m_nObjects = 2;
 
-	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
+	//UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
 
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 2);
-	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	//CreateConstantBufferViews(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
-	CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[0], 0, 11);
-	CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[1], 0, 11);
+	CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[0], 0, 12);
+	CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[1], 0, 12);
 
 	m_ppObjects = new CGameObject * [m_nObjects];
 	XMFLOAT3 xmf3Position = XMFLOAT3(1030.0f, 180.0f, 1410.0f);
 	CExplosionObject* pExplodeObject = NULL;
+
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		pExplodeObject = new CExplosionObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -803,8 +804,9 @@ void CExplosionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 		CPlayer* pPlayer = pCamera->GetPlayer();
 		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
-		xmf3PlayerPosition.y += 5.0f;
+		xmf3PlayerPosition.y += 10.0f;
 		XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 50.0f, false));
+		
 		for (int j = 0; j < m_nObjects; j++)
 		{
 			if (m_ppObjects[j])
@@ -814,13 +816,12 @@ void CExplosionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 			}
 		}
 
-		CShader::Render(pd3dCommandList, pCamera);
+		CTexturedShader::Render(pd3dCommandList, pCamera, nPipelineState);
+
 		for (int j = 0; j < m_nObjects; j++)
 		{
 			if (m_ppObjects[j])
 			{
-				m_ppObjects[j]->Animate(0.16f);
-				m_ppObjects[j]->UpdateTransform(NULL);
 				m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 			}
 		}
