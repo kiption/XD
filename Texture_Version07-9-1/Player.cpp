@@ -322,6 +322,7 @@ void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	{
 		if (m_ppBullets[i]->m_bActive) {
 
+			
 			m_ppBullets[i]->Rotate(0.0, 0.0, 50.0f);
 			m_ppBullets[i]->Animate(fTimeElapsed);
 		}
@@ -350,24 +351,26 @@ void CAirplanePlayer::FireBullet(CGameObject* pLockedObject)
 	{
 		if (!m_ppBullets[i]->m_bActive)
 		{
+			this->m_xmf3Position.z -= 1.0f;
 			pBulletObject = m_ppBullets[i];
 			break;
 		}
 	}
 
-	XMFLOAT3 PlayerLook = GetLook();
+	XMFLOAT3 PlayerLook = this->GetLookVector();
 	XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
 	XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
 
 	if (pBulletObject)
 	{
-		XMFLOAT3 xmf3Position = GetPosition();
+		
+		XMFLOAT3 xmf3Position = this->GetPosition();
 		XMFLOAT3 xmf3Direction = TotalLookVector;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 6.0f, true));
-		pBulletObject->SetFirePosition(xmf3FirePosition);
 		pBulletObject->SetMovingDirection(GetLookVector());
+		pBulletObject->SetFirePosition(xmf3FirePosition);
 		pBulletObject->m_xmf4x4Transform = m_xmf4x4World;
-		pBulletObject->SetScale(0.05, 0.05, 0.8);
+		pBulletObject->SetScale(0.05, 0.05, 0.7);
 		pBulletObject->SetActive(true);
 	}
 }
@@ -403,13 +406,13 @@ CCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
 	case THIRD_PERSON_CAMERA:
-		SetFriction(20.5f);
+		SetFriction(30.5f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 		SetMaxVelocityXZ(25.5f);
 		SetMaxVelocityY(20.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 15.0f, -30.0f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 15.0f, -60.0f));
 		m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);

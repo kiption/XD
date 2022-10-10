@@ -1312,7 +1312,7 @@ void CBulletObject::Animate(float fElapsedTime)
 
 	float fDistance = m_fMovingSpeed * fElapsedTime;
 	XMFLOAT4X4 mtxRotate = Matrix4x4::RotationYawPitchRoll(0.0f, m_fRotationSpeed * fElapsedTime, 0.0f);
-	m_xmf4x4World = Matrix4x4::Multiply(mtxRotate, m_xmf4x4Transform);
+	m_xmf4x4Transform = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
 	XMFLOAT3 xmf3Movement = Vector3::ScalarProduct(m_xmf3MovingDirection, fDistance, false);
 	XMFLOAT3 xmf3Position = GetPosition();
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);

@@ -90,7 +90,7 @@ public:
 	CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
 	virtual ~CAirplanePlayer();
 
-	float						m_fBulletEffectiveRange = 500.0f;
+	float						m_fBulletEffectiveRange = 800.0f;
 
 	CBulletObject				*pBulletObject = NULL;
 	CGameObject					*m_pMainRotorFrame = NULL;
