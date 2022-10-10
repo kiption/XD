@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 #include "Network.h"
-uniform_int_distribution<int> uid(1200, 3000);
+uniform_int_distribution<int> uid(1200, 1500);
 CGameFramework::CGameFramework()
 {
 	// Server
@@ -34,7 +34,7 @@ CGameFramework::CGameFramework()
 
 	recvPacket();
 
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < 5; i++) {
 
 		other_players[i].m_x = uid(dre);
 		other_players[i].m_z = uid(dre);
@@ -441,7 +441,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
 	pAirplanePlayer->m_xmf3Position.x = (float)my_info.m_x;
 	pAirplanePlayer->m_xmf3Position.z = (float)my_info.m_z;
-	pAirplanePlayer->SetPosition(XMFLOAT3(pAirplanePlayer->m_xmf3Position.x, 800.0f, pAirplanePlayer->m_xmf3Position.z));
+	pAirplanePlayer->SetPosition(XMFLOAT3(pAirplanePlayer->m_xmf3Position.x, 700.0f, pAirplanePlayer->m_xmf3Position.z));
 	m_pCamera = m_pPlayer->GetCamera();
 
 	
@@ -502,7 +502,9 @@ void CGameFramework::ProcessInput()
 			packetDirection = 5;//S
 			dwDirection |= DIR_UP;
 		}
-
+		if (pKeysBuffer[VK_SPACE] & 0xF0) {
+			((CAirplanePlayer*)m_pPlayer)->FireBullet(NULL);
+		}
 		// Server
 		if (packetDirection != -1 ) {
 			CS_MOVE_PACKET move_p;
@@ -636,7 +638,7 @@ void CGameFramework::FrameAdvance()
 	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * gnRtvDescriptorIncrementSize);
 
 	float pfClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
-	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor/*Colors::Azure*/, 0, NULL);
+	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor, 0, NULL);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
@@ -656,7 +658,6 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
 
 	hResult = m_pd3dCommandList->Close();
-
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 
@@ -677,16 +678,14 @@ void CGameFramework::FrameAdvance()
 #endif
 #endif
 
-	//	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 	MoveToNextFrame();
-	m_pScene->m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._41 = other_players[0].m_x;
-	m_pScene->m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._43 = other_players[0].m_z;
-	//for (int j = 0; j < 2; j++) {
-	//	if (other_players[j].m_state == ST_RUNNING && j != my_info.m_id) {
-	//		m_pShader->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
-	//		m_pShader->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
-	//	}
-	//}
+
+	for (int j = 0; j < 5; j++) {
+		if (other_players[j].m_state == ST_RUNNING && j != my_info.m_id) {
+			m_pScene->m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
+			m_pScene->m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
+		}
+	}
 
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
 	size_t nLength = _tcslen(m_pszFrameRate);

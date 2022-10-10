@@ -242,7 +242,6 @@ public:
 
 public:
 	char							m_pstrFrameName[64];
-
 	int								m_nMeshes;
 	CMesh							** m_ppMeshes;
 //	CMesh							*m_pMesh = NULL;
@@ -258,6 +257,8 @@ public:
 	CGameObject 					*m_pChild = NULL;
 	CGameObject 					*m_pSibling = NULL;
 
+	ID3D12Resource* m_pd3dcbGameObject = NULL;
+	CB_GAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
 //	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
 	BoundingOrientedBox xoobb = BoundingOrientedBox();
 public:

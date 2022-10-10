@@ -53,6 +53,7 @@ void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 void CPlayer::ReleaseShaderVariables()
 {
 	if (m_pCamera) m_pCamera->ReleaseShaderVariables();
+
 }
 
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
@@ -281,8 +282,8 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	{
 		pBulletObject = new CBulletObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, true);
-		pBulletObject->SetMovingSpeed(250.0f);
-		pBulletObject->SetActive(false);
+		pBulletObject->SetMovingSpeed(800.0f);
+		pBulletObject->SetActive(true);
 		m_ppBullets[i] = pBulletObject;
 	}
 
@@ -321,7 +322,7 @@ void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	{
 		if (m_ppBullets[i]->m_bActive) {
 
-			m_ppBullets[i]->Rotate(0.0, 0.0, 10.0f);
+			m_ppBullets[i]->Rotate(0.0, 0.0, 50.0f);
 			m_ppBullets[i]->Animate(fTimeElapsed);
 		}
 
@@ -366,7 +367,7 @@ void CAirplanePlayer::FireBullet(CGameObject* pLockedObject)
 		pBulletObject->SetFirePosition(xmf3FirePosition);
 		pBulletObject->SetMovingDirection(GetLookVector());
 		pBulletObject->m_xmf4x4Transform = m_xmf4x4World;
-		pBulletObject->SetScale(0.05, 0.05, 0.6);
+		pBulletObject->SetScale(0.05, 0.05, 0.8);
 		pBulletObject->SetActive(true);
 	}
 }

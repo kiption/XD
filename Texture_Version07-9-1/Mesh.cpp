@@ -708,7 +708,7 @@ float CHeightMapGridMesh::OnGetHeight(int x, int z, void* pContext)
 
 XMFLOAT4 CHeightMapGridMesh::OnGetColor(int x, int z, void* pContext)
 {
-	XMFLOAT3 xmf3LightDirection = XMFLOAT3(-1.0f, 1.0f, 1.0f);
+	XMFLOAT3 xmf3LightDirection = XMFLOAT3(1.0f, 1.0f, 1.0f);
 	xmf3LightDirection = Vector3::Normalize(xmf3LightDirection);
 	CHeightMapImage* pHeightMapImage = (CHeightMapImage*)pContext;
 	XMFLOAT3 xmf3Scale = pHeightMapImage->GetScale();

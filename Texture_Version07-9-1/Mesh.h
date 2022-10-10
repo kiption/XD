@@ -30,7 +30,26 @@ public:
 	CVertex(XMFLOAT3 xmf3Position) { m_xmf3Position = xmf3Position; }
 	~CVertex() { }
 };
-
+class CNormalVertex : public CVertex
+{
+protected:
+	//정점의 색상이다.
+	XMFLOAT3 m_xmf3Normal;
+public:
+	CNormalVertex() {
+		m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); m_xmf3Normal =
+			XMFLOAT3(0.0f, 0.0f, 0.0f);
+	}
+	CNormalVertex(float x, float y, float z, XMFLOAT3 xmf3Normal) {
+		m_xmf3Position =
+			XMFLOAT3(x, y, z); m_xmf3Normal = xmf3Normal;
+	}
+	CNormalVertex(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Normal) {
+		m_xmf3Position =
+			xmf3Position; m_xmf3Normal = xmf3Normal;
+	}
+	~CNormalVertex() { }
+};
 class CDiffusedVertex : public CVertex
 {
 public:

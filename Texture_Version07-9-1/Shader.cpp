@@ -443,7 +443,7 @@ XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn,
 
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nObjects = 20;
+	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 2); //SuperCobra(17), Gunship(2)
@@ -456,7 +456,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	for (int i = 0; i < m_nObjects; i++)
 	{
-		for (int i = 0; i < m_nObjects / 2; i++)
+		for (int i = 0; i < m_nObjects; i++)
 		{
 			m_ppObjects[i] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			m_ppObjects[i]->SetChild(pSuperCobraModel);
@@ -498,10 +498,10 @@ void CObjectsShader::ReleaseObjects()
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
 {
-	xoobb = BoundingOrientedBox(XMFLOAT3(m_ppObjects[0]->m_xmf4x4Transform._41, m_ppObjects[0]->m_xmf4x4Transform._42, m_ppObjects[0]->m_xmf4x4Transform._43),
-		XMFLOAT3(10.0, 10.0, 20.0), XMFLOAT4(0, 0, 0, 1));
+	//xoobb = BoundingOrientedBox(XMFLOAT3(m_ppObjects[0]->m_xmf4x4Transform._41, m_ppObjects[0]->m_xmf4x4Transform._42, m_ppObjects[0]->m_xmf4x4Transform._43),
+	//	XMFLOAT3(10.0, 10.0, 20.0), XMFLOAT4(0, 0, 0, 1));
 
-	for (int i = 0; i < 20; i++)
+	for (int i = 4; i < 10; i++)
 	{
 
 		if (MovingTurn[i] == 1) {
@@ -664,6 +664,7 @@ D3D12_INPUT_LAYOUT_DESC CTerrainShader::CreateInputLayout()
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	//pd3dInputElementDescs[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[2] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[3] = { "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 3, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
@@ -761,11 +762,11 @@ void CExplosionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, m_nObjects, 2);
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 2);
+	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	//CreateConstantBufferViews(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
-	CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[0], 0, 12);
-	CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[1], 0, 12);
+	CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[0], 0, 11);
+	CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[1], 0, 11);
 
 	m_ppObjects = new CGameObject * [m_nObjects];
 	XMFLOAT3 xmf3Position = XMFLOAT3(1030.0f, 180.0f, 1410.0f);
@@ -775,7 +776,7 @@ void CExplosionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		pExplodeObject = new CExplosionObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 
 		pExplodeObject->SetMesh(0, pSpriteMesh);
-		//pExplodeObject->SetMaterial(0,ppSpriteMaterials[j]);
+		pExplodeObject->SetMaterial(0,ppSpriteMaterials[j]);
 		pExplodeObject->SetPosition(XMFLOAT3(xmf3Position.x, xmf3Position.y, xmf3Position.z));
 		//pExplodeObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * j));
 
@@ -814,5 +815,14 @@ void CExplosionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 		}
 
 		CShader::Render(pd3dCommandList, pCamera);
+		for (int j = 0; j < m_nObjects; j++)
+		{
+			if (m_ppObjects[j])
+			{
+				m_ppObjects[j]->Animate(0.16f);
+				m_ppObjects[j]->UpdateTransform(NULL);
+				m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+			}
+		}
 	}
 }

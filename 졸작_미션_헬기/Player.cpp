@@ -204,21 +204,21 @@ void CPlayer::Update(float fTimeElapsed)
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
 	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
 	float fMaxVelocityXZ = m_fMaxVelocityXZ;
+
 	if (fLength > m_fMaxVelocityXZ)
 	{
 		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
 		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
 	}
+
 	float fMaxVelocityY = m_fMaxVelocityY;
 	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
 	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
-
 	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
 	Move(xmf3Velocity, false);
 
 	if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
 	
-
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
 	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
@@ -564,9 +564,9 @@ void CHelicopterPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 			m_pSubTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pSubTailRotorFrame->m_xmf4x4Transform);
 		}
 
-		//SetGravity(XMFLOAT3(0.0f, 20.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, 20.0f, 0.0f));
 		
-		//if (this->GetPosition().y > 300.0) { SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f)); }
+		if (this->GetPosition().y > 300.0) { SetGravity(XMFLOAT3(0.0f, -10.0f, 0.0f)); }
 
 	}
 
@@ -670,7 +670,7 @@ CCamera* CHelicopterPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapse
 		
 	case THIRD_PERSON_CAMERA:
 		SetFriction(-100.5f);
-		//SetGravity(XMFLOAT3(0.0f, 20.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, 20.0f, 0.0f));
 		SetMaxVelocityXZ(25.5f);
 		SetMaxVelocityY(20.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);

@@ -515,8 +515,13 @@ void CGameFramework::ProcessInput()
                 packetDirection = 3;//S
                 dwDirection |= DIR_RIGHT;
             }
+            if (pKeysBuffer[VK_SPACE] & 0xF0)
+            {
+                ((CHelicopterPlayer*)m_pPlayer)->FireBullet(NULL);
+            }
         }
         if (pKeysBuffer[VK_RSHIFT] & 0xF0) {
+            
             packetDirection = 4;//S
             dwDirection |= DIR_DOWN;
         }
@@ -708,9 +713,7 @@ void CGameFramework::FrameAdvance()
 
     m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
     size_t nLength = _tcslen(m_pszFrameRate);
-    //XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
-    //xmf3Position.x = my_info.m_x;
-    //xmf3Position.z = my_info.m_z;
+
 
     // 09.26 시연에서 있었던 동기화 버그 수정을 위해 임시로 수정한 코드.
     // 이후에 MAX USER 수만큼 모든 객체를 돌면서 온라인 상태인 객체를 전부 렌더링하도록 변경해야함. (수정일자 09.27)

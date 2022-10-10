@@ -70,19 +70,26 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	XMFLOAT3 xmf3Scale(14.0f, 8.0f, 14.0f);
+	XMFLOAT3 xmf3Scale(12.0f, 5.0f, 12.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/terrain_water.raw"), 512, 512, 16, 16, xmf3Scale, xmf4Color);
-	m_pTerrain->SetPosition(0.0,500.0,0.0);
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color);
+	m_pTerrain->SetPosition(0.0,100.0,0.0);
 
 	m_nShaders = 1;
-	m_ppShaders = new CObjectsShader *[m_nShaders];
+	m_nCShaders = 1;
 
+	m_ppShaders = new CObjectsShader *[m_nShaders];
+	m_ppCShaders = new CShader * [m_nCShaders];
 	CObjectsShader *pObjectsShader = new CObjectsShader();
 	pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	pObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-
 	m_ppShaders[0] = pObjectsShader;
+
+	CExplosionShader* pMultiSpriteObjectShader = new CExplosionShader();
+	pMultiSpriteObjectShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pMultiSpriteObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,NULL);
+	pMultiSpriteObjectShader->SetActive(false);
+	m_ppCShaders[0] = pMultiSpriteObjectShader;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -103,7 +110,16 @@ void CScene::ReleaseObjects()
 		}
 		delete[] m_ppShaders;
 	}
-
+	if (m_ppCShaders)
+	{
+		for (int i = 0; i < m_nShaders; i++)
+		{
+			m_ppCShaders[i]->ReleaseShaderVariables();
+			m_ppCShaders[i]->ReleaseObjects();
+			m_ppCShaders[i]->Release();
+		}
+		delete[] m_ppCShaders;
+	}
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
 
@@ -381,7 +397,8 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case 'R': ((CAirplanePlayer*)m_pPlayer)->FireBullet(NULL); break;
+		case VK_SPACE: ((CAirplanePlayer*)m_pPlayer)->FireBullet(NULL); break;
+		case 'F':m_ppCShaders[0]->SetActive(!m_ppCShaders[0]->GetActive()); break;
 		default:
 			break;
 		}
@@ -404,38 +421,45 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->UpdateTransform(NULL);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);	
+	for (int i = 0; i < m_nCShaders; i++) if (m_ppCShaders[i]) m_ppCShaders[i]->AnimateObjects(fTimeElapsed);
 
-	m_ppShaders[0]->m_ppObjects[0]->xoobb = BoundingOrientedBox(XMFLOAT3(m_ppShaders[0]->m_ppObjects[0]->GetPosition()), XMFLOAT3(3.0, 3.0, 5.0), XMFLOAT4(0, 0, 0, 1));
-	m_pPlayer->xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(3.0, 3.0, 5.0), XMFLOAT4(0, 0, 0, 1));
+	for(int i=0;i<10;i++)
+	m_ppShaders[0]->m_ppObjects[i]->xoobb = BoundingOrientedBox(XMFLOAT3(m_ppShaders[0]->m_ppObjects[i]->GetPosition()), XMFLOAT3(8.0, 6.0, 12.0), XMFLOAT4(0, 0, 0, 1));
+	
+	m_pPlayer->xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(8.0, 6.0, 12.0), XMFLOAT4(0, 0, 0, 1));
 	CBulletObject** ppBullets = ((CAirplanePlayer*)m_pPlayer)->m_ppBullets;
-
-	for (int j = 0; j < BULLETS; j++){ppBullets[j]->xoobb = BoundingOrientedBox(XMFLOAT3(ppBullets[j]->GetPosition()), XMFLOAT3(1.0, 1.0, 1.0), XMFLOAT4(0, 0, 0, 1));}
+	for (int j = 0; j < BULLETS; j++){ppBullets[j]->xoobb = BoundingOrientedBox(XMFLOAT3(ppBullets[j]->GetPosition()), XMFLOAT3(5.0, 5.0, 5.0), XMFLOAT4(0, 0, 0, 1));}
 
 	/// /////////////////////////////////////////////////
 
 	for (int j = 0; j < BULLETS; j++)
 	{
-		if (ppBullets[j]->m_bActive && m_ppShaders[0]->m_ppObjects[0]->xoobb.Intersects(ppBullets[j]->xoobb))
+		for (int i = 0; i < 10; i++) {
+
+		if (ppBullets[j]->m_bActive && m_ppShaders[0]->m_ppObjects[i]->xoobb.Intersects(ppBullets[j]->xoobb))
 		{
-			CollisionCheck = 1;
+			CollisionCheck = i;
 			ppBullets[j]->Reset();
 		}
-	}
-	if (CollisionCheck == 1)
-	{
-		m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._42 -= 0.5f;
-		m_ppShaders[0]->m_ppObjects[0]->Rotate(0, 2.0, 0);
-		if (m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._42 < -50.0f) CollisionCheck = 2;
-	}
-	if (CollisionCheck == 2)
-	{
-		m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._42 += 0.5f;
-		m_ppShaders[0]->m_ppObjects[0]->Rotate(0, 0.0, 0);
-		if (m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._42 > 0.0) CollisionCheck = 0;
+		}
 	}
 
-	if (m_ppShaders[0]->m_ppObjects[0]->xoobb.Intersects(m_pPlayer->xoobb)) m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._43 -= 2.0f;
+	for (int i = 0; i < 10; i++)
+	{
+		if (CollisionCheck == i) {
+			m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 -= 1.0f;
+			m_ppShaders[0]->m_ppObjects[i]->Rotate(0, 2.0, 0);
+			if (m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 < 0.0f) {
+				CollisionCheck = 10;
+				m_ppShaders[0]->m_ppObjects[i]->Rotate(0, 0.0, 0);
+				m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 += 1.0f;
+			}
+		}
+	}
 
+	for (int i = 0; i < 10;i++) {
+		if (m_ppShaders[0]->m_ppObjects[i]->xoobb.Intersects(m_pPlayer->xoobb)) m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 -= 2.0f;
+	}
 	if (m_pLights)
 	{
 		m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
@@ -460,5 +484,6 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nCShaders; i++) if (m_ppCShaders[i]) m_ppCShaders[i]->Render(pd3dCommandList, pCamera);
 }
 

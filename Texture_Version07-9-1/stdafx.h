@@ -46,8 +46,8 @@ using Microsoft::WRL::ComPtr;
 
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 
-#define FRAME_BUFFER_WIDTH		1028
-#define FRAME_BUFFER_HEIGHT		960
+#define FRAME_BUFFER_WIDTH		1400
+#define FRAME_BUFFER_HEIGHT		1200
 
 //#define _WITH_CB_GAMEOBJECT_32BIT_CONSTANTS
 //#define _WITH_CB_GAMEOBJECT_ROOT_DESCRIPTOR
@@ -113,14 +113,14 @@ namespace Vector3
 		return(xmf3Result);
 	}
 
-	inline XMFLOAT3 Add(const XMFLOAT3& xmf3Vector1, const XMFLOAT3& xmf3Vector2)
+	inline XMFLOAT3 Add(const XMFLOAT3 xmf3Vector1, const XMFLOAT3 xmf3Vector2)
 	{
 		XMFLOAT3 xmf3Result;
 		XMStoreFloat3(&xmf3Result, XMLoadFloat3(&xmf3Vector1) + XMLoadFloat3(&xmf3Vector2));
 		return(xmf3Result);
 	}
 
-	inline XMFLOAT3 Add(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2, float fScalar)
+	inline XMFLOAT3 Add(XMFLOAT3 xmf3Vector1, XMFLOAT3 xmf3Vector2, float fScalar)
 	{
 		XMFLOAT3 xmf3Result;
 		XMStoreFloat3(&xmf3Result, XMLoadFloat3(&xmf3Vector1) + (XMLoadFloat3(&xmf3Vector2) * fScalar));
