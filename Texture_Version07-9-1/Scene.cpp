@@ -425,7 +425,7 @@ bool CScene::ProcessInput(UCHAR *pKeysBuffer)
 	return(false);
 }
 
-int CollisionCheck = 0;
+int CollisionCheck;
 void CScene::AnimateObjects(float fTimeElapsed)
 {
 
@@ -455,7 +455,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		}
 	}
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 1; i < 10; i++)
 	{
 		if (CollisionCheck == i) {
 			m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 -= 1.0f;

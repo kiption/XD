@@ -715,9 +715,6 @@ void CGameFramework::FrameAdvance()
     size_t nLength = _tcslen(m_pszFrameRate);
 
 
-    // 09.26 시연에서 있었던 동기화 버그 수정을 위해 임시로 수정한 코드.
-    // 이후에 MAX USER 수만큼 모든 객체를 돌면서 온라인 상태인 객체를 전부 렌더링하도록 변경해야함. (수정일자 09.27)
-   
     for (int j = 0; j < 4; j++) {
         if (other_players[j].m_state == ST_RUNNING && j != my_info.m_id) {
             m_pScene->m_ppGameObjects[11 + j]->m_xmf4x4Transform._41 = other_players[j].m_x;

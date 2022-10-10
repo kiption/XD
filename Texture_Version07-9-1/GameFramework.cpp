@@ -25,7 +25,7 @@ CGameFramework::CGameFramework()
 	p.type = CS_LOGIN;
 	strcpy_s(p.name, "COPTER");
 	my_info.m_x = uid(dre);
-	my_info.m_y = 0;
+	my_info.m_y = 800;
 	my_info.m_z = uid(dre);
 	p.x = my_info.m_x;
 	p.y = my_info.m_y;
@@ -35,9 +35,10 @@ CGameFramework::CGameFramework()
 	recvPacket();
 
 	for (int i = 0; i < 5; i++) {
-
-		other_players[i].m_x = uid(dre);
-		other_players[i].m_z = uid(dre);
+		if (other_players[i].m_state == ST_EMPTY) {
+			other_players[i].m_x = uid(dre);
+			other_players[i].m_z = uid(dre);
+		}
 	}
 
 	m_pdxgiFactory = NULL;
@@ -683,13 +684,14 @@ void CGameFramework::FrameAdvance()
 	for (int j = 0; j < 5; j++) {
 		if (other_players[j].m_state == ST_RUNNING && j != my_info.m_id) {
 			m_pScene->m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
+			
 			m_pScene->m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
 		}
 	}
 
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
 	size_t nLength = _tcslen(m_pszFrameRate);
-	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
+
 	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), m_pPlayer->m_xmf3Position.x, m_pPlayer->m_xmf3Position.y, m_pPlayer->m_xmf3Position.z);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }

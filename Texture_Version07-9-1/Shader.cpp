@@ -454,33 +454,32 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	int nObjects = 0;
 
-	for (int i = 0; i < m_nObjects; i++)
+	
+	for (int i = 0; i < m_nObjects/2; i++)
 	{
-		for (int i = 0; i < m_nObjects; i++)
-		{
-			m_ppObjects[i] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			m_ppObjects[i]->SetChild(pSuperCobraModel);
-			m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(1200.0f, 800.0f, 1000.0f), Random(400.0f, 800.0f), i - int(floor(20 / 2.0f)), 5));
-			m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-			SavePos[i] = m_ppObjects[i]->m_xmf4x4Transform._41;
-			m_ppObjects[i]->PrepareAnimate();
-			pSuperCobraModel->AddRef();
-		}
-		
-		for (int i = m_nObjects / 2; i < m_nObjects; i++)
-		{
-			m_ppObjects[i] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			m_ppObjects[i]->SetChild(pGunshipModel);
-			m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(1200.0f, 800.0f, 1000.0f), Random(500.0f, 800.0f), i - int(floor(20 / 2.0f)),5));
-			m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-			SavePos[i] = m_ppObjects[i]->m_xmf4x4Transform._41;
-			m_ppObjects[i]->PrepareAnimate();
-			pGunshipModel->AddRef();
-		}
-		
-	
-	
+		m_ppObjects[i] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppObjects[i]->SetChild(pSuperCobraModel);
+		m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(1200.0f, 800.0f, 1000.0f), Random(400.0f, 800.0f), i - int(floor(20 / 2.0f)), 5));
+		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
+		SavePos[i] = m_ppObjects[i]->m_xmf4x4Transform._41;
+		m_ppObjects[i]->PrepareAnimate();
+		pSuperCobraModel->AddRef();
 	}
+		
+	for (int i = m_nObjects / 2; i < m_nObjects; i++)
+	{
+		m_ppObjects[i] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppObjects[i]->SetChild(pGunshipModel);
+		m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(1200.0f, 800.0f, 1000.0f), Random(500.0f, 800.0f), i - int(floor(20 / 2.0f)),5));
+		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
+		SavePos[i] = m_ppObjects[i]->m_xmf4x4Transform._41;
+		m_ppObjects[i]->PrepareAnimate();
+		pGunshipModel->AddRef();
+	}
+		
+	
+	
+	
 
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
