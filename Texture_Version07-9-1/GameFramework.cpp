@@ -327,6 +327,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	case WM_RBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
+		if (nMessageID == WM_RBUTTONDOWN) m_pLockedObject = m_pScene->PickObjectPointedByCursor(LOWORD(lParam), HIWORD(lParam), m_pCamera);
 		break;
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
@@ -360,9 +361,13 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_F9:
 			ChangeSwapChainState();
 			break;
+		case VK_SPACE: ((CAirplanePlayer*)m_pPlayer)->FireBullet(m_pLockedObject); 
+			m_pLockedObject = NULL;
+			break;
 		case VK_F5:
 			break;
 		default:
+			m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 			break;
 		}
 		break;

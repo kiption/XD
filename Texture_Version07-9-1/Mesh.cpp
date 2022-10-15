@@ -13,8 +13,6 @@ CMeshLoadInfo::~CMeshLoadInfo()
 
 	if (m_pnIndices) delete[] m_pnIndices;
 
-	if (m_pnSubSetIndices) delete[] m_pnSubSetIndices;
-
 	for (int i = 0; i < m_nSubMeshes; i++) if (m_ppnSubSetIndices[i] != NULL) delete[] m_ppnSubSetIndices[i];
 	if (m_ppnSubSetIndices) delete[] m_ppnSubSetIndices;
 }
@@ -63,7 +61,6 @@ void CMesh::ReleaseUploadBuffers()
 void CMesh::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet)
 {
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
-
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 
 	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
@@ -75,6 +72,25 @@ void CMesh::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet)
 	{
 		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 	}
+}
+
+BOOL CMesh::RayIntersectionByTriangle(XMVECTOR& xmRayOrigin, XMVECTOR& xmRayDirection, XMVECTOR v0, XMVECTOR v1, XMVECTOR v2, float* pfNearHitDistance)
+{
+	float fHitDistance;
+	BOOL bIntersected = TriangleTests::Intersects(xmRayOrigin, xmRayDirection, v0, v1, v2, fHitDistance);
+	if (bIntersected && (fHitDistance < *pfNearHitDistance)) *pfNearHitDistance = fHitDistance;
+
+	return(bIntersected);
+}
+
+int CMesh::CheckRayIntersection(XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRayDirection, float* pfNearHitDistance)
+{
+	int nIntersections = 0;
+	bool bIntersected = m_xmOOBB.Intersects(xmvPickRayOrigin, xmvPickRayDirection, *pfNearHitDistance);
+	XMVECTOR v0 = XMLoadFloat3(&m_pxmf3Positions[0]);
+	XMVECTOR v1 = XMLoadFloat3(&m_pxmf3Positions[1]);
+	XMVECTOR v2 = XMLoadFloat3(&m_pxmf3Positions[2]);
+	return(nIntersections);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,13 +169,15 @@ CTexturedRectMesh::CTexturedRectMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 		}
 	}
 
-	m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+	m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions, 
+		sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
 
 	m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
 	m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
 	m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 
-	m_pd3dTextureCoord0Buffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTextureCoord0UploadBuffer);
+	m_pd3dTextureCoord0Buffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions, 
+		sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dTextureCoord0UploadBuffer);
 
 	m_d3dTextureCoord0BufferView.BufferLocation = m_pd3dTextureCoord0Buffer->GetGPUVirtualAddress();
 	m_d3dTextureCoord0BufferView.StrideInBytes = sizeof(XMFLOAT2);
@@ -269,8 +287,10 @@ CStandardMesh::~CStandardMesh()
 
 	if (m_pxmf4Colors) delete[] m_pxmf4Colors;
 	if (m_pxmf3Normals) delete[] m_pxmf3Normals;
+
 	if (m_pxmf3Tangents) delete[] m_pxmf3Tangents;
 	if (m_pxmf3BiTangents) delete[] m_pxmf3BiTangents;
+
 	if (m_pxmf2TextureCoords0) delete[] m_pxmf2TextureCoords0;
 	if (m_pxmf2TextureCoords1) delete[] m_pxmf2TextureCoords1;
 }

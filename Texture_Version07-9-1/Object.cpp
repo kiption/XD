@@ -268,7 +268,9 @@ CMaterialColors::CMaterialColors(MATERIALLOADINFO* pMaterialInfo)
 	m_xmf4Specular.w = (pMaterialInfo->m_fGlossiness * 255.0f);
 	m_xmf4Emissive = pMaterialInfo->m_xmf4EmissiveColor;
 }
+
 CShader* CMaterial::m_pIlluminatedShader = NULL;
+
 CMaterial::CMaterial()
 {
 }
@@ -521,6 +523,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 			}
 		}
 	}
+
 	else
 	{
 		if ((m_nMaterials == 1) && (m_ppMaterials[0]))
@@ -906,6 +909,28 @@ void CGameObject::PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent)
 	if (pGameObject->m_pChild) CGameObject::PrintFrameInfo(pGameObject->m_pChild, pGameObject);
 }
 
+void CGameObject::GenerateRayForPicking(XMVECTOR& xmvPickPosition, XMMATRIX& xmmtxView, XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRayDirection)
+{
+	XMMATRIX xmmtxToModel = XMMatrixInverse(NULL, XMLoadFloat4x4(&m_xmf4x4World) * xmmtxView);
+
+	XMFLOAT3 xmf3CameraOrigin(0.0f, 0.0f, 0.0f);
+	xmvPickRayOrigin = XMVector3TransformCoord(XMLoadFloat3(&xmf3CameraOrigin), xmmtxToModel);
+	xmvPickRayDirection = XMVector3TransformCoord(xmvPickPosition, xmmtxToModel);
+	xmvPickRayDirection = XMVector3Normalize(xmvPickRayDirection - xmvPickRayOrigin);
+}
+
+int CGameObject::PickObjectByRayIntersection(XMVECTOR& xmPickPosition, XMMATRIX& xmmtxView, float* pfHitDistance)
+{
+	int nIntersected = 0;
+	if (m_ppMeshes)
+	{
+		XMVECTOR xmvPickRayOrigin, xmvPickRayDirection;
+		GenerateRayForPicking(xmPickPosition, xmmtxView, xmvPickRayOrigin, xmvPickRayDirection);
+		nIntersected = m_ppMeshes[0]->CheckRayIntersection(xmvPickRayOrigin, xmvPickRayDirection, pfHitDistance);
+	}
+	return(nIntersected); 
+}
+
 CGameObject *CGameObject::LoadGeometryFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature,const char *pstrFileName, CShader *pShader)
 {
 	FILE *pInFile = NULL;
@@ -1250,17 +1275,19 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	CTexture* pTerrainTexture = new CTexture(3, RESOURCE_TEXTURE2D, 0, 1);
+	CTexture* pTerrainTexture = new CTexture(5, RESOURCE_TEXTURE2D, 0, 1);
 
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Base_Texture.dds", RESOURCE_TEXTURE2D, 0);
-	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Detail_Texture_7.dds", RESOURCE_TEXTURE2D, 1);
-	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/HeightMap(Alpha).dds", RESOURCE_TEXTURE2D, 2);
+	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Base_Texture.dds", RESOURCE_TEXTURE2D, 1);
+	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Detail_Texture_7.dds", RESOURCE_TEXTURE2D, 2);
+	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Water_Base_Texture_0.dds", RESOURCE_TEXTURE2D, 3);
+	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/HeightMap2(Flipped)Alpha.dds", RESOURCE_TEXTURE2D, 4);
 
 	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
 
 	CTerrainShader* pTerrainShader = new CTerrainShader();
 	pTerrainShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
+	pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 5);
 	pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	//	pTerrainShader->CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbGameObject, ncbElementBytes);
 	pTerrainShader->CreateShaderResourceViews(pd3dDevice, pTerrainTexture, 0, 11);
@@ -1270,9 +1297,6 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pTerrainMaterial->SetShader(pTerrainShader);
 	SetMaterial(0, pTerrainMaterial);
 
-	/*SetCbvGPUDescriptorHandle(pTerrainShader->GetGPUCbvDescriptorStartHandle());
-
-	SetShader(pTerrainShader);*/
 }
 
 CHeightMapTerrain::~CHeightMapTerrain(void)
@@ -1284,6 +1308,7 @@ CHeightMapTerrain::~CHeightMapTerrain(void)
 CBulletObject::CBulletObject(float fEffectiveRange) : CGameObject(0, 0)
 {
 	m_fBulletEffectiveRange = fEffectiveRange;
+
 }
 
 CBulletObject::~CBulletObject()
@@ -1336,4 +1361,36 @@ void CExplosionObject::Animate(float fTimeElapsed)
 		if (m_fTime >= m_fSpeed) m_fTime = 0.0f;
 		m_ppMaterials[0]->m_pTexture->AnimateRowColumn(m_fTime);
 	}
+}
+
+CTerrainWaterMove::CTerrainWaterMove(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float nWidth, float nLength):CGameObject(1,1)
+{
+	CTexturedRectMesh* pWaterMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, nWidth, 0.0f, nLength, 0.0f, 0.0f, 0.0f);
+	SetMesh(0, pWaterMesh);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	CTexture* pWaterTexture = new CTexture(3, RESOURCE_TEXTURE2D, 0, 1);
+
+	pWaterTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Water_Base_Texture_0.dds", RESOURCE_TEXTURE2D, 0);
+	pWaterTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Water_Detail_Texture_0.dds", RESOURCE_TEXTURE2D, 1);
+	pWaterTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Lava(Diffuse).dds", RESOURCE_TEXTURE2D, 2);
+
+	CTerrainWaterShader* pWaterShader = new CTerrainWaterShader();
+	pWaterShader->CreateShader(pd3dDevice, pd3dCommandList,pd3dGraphicsRootSignature);
+	pWaterShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	pWaterShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 3);
+	pWaterShader->CreateShaderResourceViews(pd3dDevice, pWaterTexture, 0, 13);
+
+	CMaterial* pWaterMaterial = new CMaterial();
+	pWaterMaterial->SetTexture(pWaterTexture);
+	pWaterMaterial->SetShader(pWaterShader);
+
+	SetMaterial(0, pWaterMaterial);
+
+
+}
+
+CTerrainWaterMove::~CTerrainWaterMove()
+{
 }

@@ -88,7 +88,7 @@ private:
 	CCamera						*m_pCamera = NULL;
 	CObjectsShader				*m_pShader = NULL;
 	POINT						m_ptOldCursorPos;
-
+	CGameObject* m_pLockedObject = NULL;
 	_TCHAR						m_pszFrameRate[70];
 };
 
