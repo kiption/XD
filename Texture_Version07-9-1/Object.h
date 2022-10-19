@@ -245,7 +245,7 @@ public:
 	char							m_pstrFrameName[64];
 	int								m_nMeshes;
 	CMesh							** m_ppMeshes;
-//	CMesh							*m_pMesh = NULL;
+	CMesh							*m_pMesh = NULL;
 
 	int								m_nMaterials = 0;
 	CMaterial						**m_ppMaterials = NULL;
@@ -258,9 +258,11 @@ public:
 	CGameObject 					*m_pChild = NULL;
 	CGameObject 					*m_pSibling = NULL;
 
+	XMFLOAT3 xmf3PickRayOrigin, xmf3PickRayDirection;
+
 	ID3D12Resource* m_pd3dcbGameObject = NULL;
 	CB_GAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
-//	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
+	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
 	BoundingOrientedBox xoobb = BoundingOrientedBox();
 public:
 	float m_fMovingSpeed = 0.0f;
@@ -329,7 +331,7 @@ public:
 
 	UINT GetMeshType(UINT nIndex) { return((m_ppMeshes[nIndex]) ? m_ppMeshes[nIndex]->GetType() : 0x00); }
 
-	//void SetCbvGPUDescriptorHandle(D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle) { m_d3dCbvGPUDescriptorHandle = d3dCbvGPUDescriptorHandle; }
+	void SetCbvGPUDescriptorHandle(D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle) { m_d3dCbvGPUDescriptorHandle = d3dCbvGPUDescriptorHandle; }
 
 public:
 	void LoadMaterialsFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, CGameObject *pParent, FILE *pInFile, CShader *pShader);
@@ -342,6 +344,9 @@ public:
 
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
 
+public:
+	void GenerateRayForPicking(XMFLOAT3 xmvPickPosition, XMFLOAT4X4* pxmf4x4World,XMFLOAT4X4 xmmtxView, XMFLOAT3* xmvPickRayOrigin, XMFLOAT3* xmvPickRayDirection);
+	int PickObjectByRayIntersection(XMFLOAT3 xmPickPosition, XMFLOAT4X4 xmmtxView, float* pfHitDistance);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -444,7 +449,7 @@ public:
 public:
 	virtual void Animate(float fElapsedTime);
 	virtual void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
-	float						m_fBulletEffectiveRange = 200.0f;
+	float						m_fBulletEffectiveRange = 800.0f;
 	float						m_fMovingDistance = 0.0f;
 	float						m_fRotationAngle = 0.0f;
 	XMFLOAT3					m_xmf3FirePosition = XMFLOAT3(0.0f, 0.0f, 1.0f);
@@ -459,7 +464,25 @@ public:
 	void Reset();
 
 };
+class CTerrainWaterMove : public CGameObject
+{
+public:
+	CTerrainWaterMove(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, float nWidth, float nLength);
+	//	CTerrainWater(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale);
+	virtual ~CTerrainWaterMove();
 
+private:
+	int							m_nWidth;
+	int							m_nLength;
+
+	XMFLOAT3					m_xmf3Scale;
+
+public:
+	XMFLOAT4X4					m_xmf4x4Texture;
+
+	//	virtual void Animate(float fTimeElapsed);
+	//	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+};
 class CExplosionObject : public CGameObject
 {
 public:

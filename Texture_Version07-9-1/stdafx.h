@@ -94,8 +94,10 @@ static std::random_device rd;
 static std::default_random_engine dre(rd());
 
 
+
 namespace Vector3
 {
+
 	inline XMFLOAT3 XMVectorToFloat3(XMVECTOR& xmvVector)
 	{
 		XMFLOAT3 xmf3Result;

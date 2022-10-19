@@ -60,9 +60,12 @@ public:
 	bool ProcessInput(UCHAR *pKeysBuffer);
     void AnimateObjects(float fTimeElapsed);
     void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
+	void PrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseUploadBuffers();
 
 	CPlayer								*m_pPlayer = NULL;
+public:
+	CGameObject* PickObjectPointedByCursor(int xClient, int yClient, CCamera* pCamera);
 
 public:
 	ID3D12RootSignature					*m_pd3dGraphicsRootSignature = NULL;
@@ -71,22 +74,22 @@ public:
 	CGameObject							**m_ppGameObjects = NULL;
 
 	int									m_nShaders = 0;
-	CObjectsShader**m_ppShaders = NULL;
+	CObjectsShader** m_ppShaders = NULL;
+	CObjectsShader* m_pShaders = NULL;
 	
 	CShader** m_ppCShaders = NULL;
 	int							m_nCShaders = 0;
 
 	CSkyBox								*m_pSkyBox = NULL;
-	CExplosionObject								*m_pExplo = NULL;
+	CExplosionObject					*m_pExplo = NULL;
 	CHeightMapTerrain					*m_pTerrain = NULL;
-	CGunshipObject* m_pGunshipObj;
-	CMi24Object* m_pMi24Obj = NULL;
-
-	LIGHT								*m_pLights = NULL;
-	int									m_nLights = 0;
-
+	CTerrainWaterMove					*m_pTerrainWater = NULL;
+	XMFLOAT4X4							m_xmf4x4WaterAnimation;
+	ID3D12Resource						*m_pd3cbWater = NULL;
+	
 	XMFLOAT4							m_xmf4GlobalAmbient;
-
+	int									m_nLights = 0;
+	LIGHT								*m_pLights = NULL;
 	ID3D12Resource						*m_pd3dcbLights = NULL;
 	LIGHTS								*m_pcbMappedLights = NULL;
 };

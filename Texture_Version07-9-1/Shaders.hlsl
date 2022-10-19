@@ -18,9 +18,19 @@ struct MATERIAL
 
 cbuffer cbGameObjectInfo : register(b2)
 {
-	matrix		gmtxGameObject : packoffset(c0);
-	MATERIAL	gMaterial : packoffset(c4);
-	uint		gnTexturesMask : packoffset(c8);
+	matrix		gmtxGameObject : packoffset(c0); //16
+	MATERIAL	gMaterial : packoffset(c4); // 16
+	uint		gnTexturesMask : packoffset(c8); // 1
+};
+
+cbuffer cbFrameTimekInfo : register(b3)
+{
+	float 		gDeltaTime;
+};
+
+cbuffer cbWaterMatrixInfo : register(b4)
+{
+	matrix		gf4x4TextureAnimation : packoffset(c0);
 };
 
 #include "Light.hlsl"
@@ -148,7 +158,7 @@ VS_SKYBOX_CUBEMAP_OUTPUT VSSkyBox(VS_SKYBOX_CUBEMAP_INPUT input)
 
 TextureCube gtxtSkyCubeTexture : register(t13);
 SamplerState gssClamp : register(s1);
-Texture2D gtxtTexture : register(t17);
+Texture2D gtxtTexture : register(t19);
 
 float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 {
@@ -192,8 +202,8 @@ VS_SPRITE_TEXTURED_OUTPUT VSSpriteAnimation(VS_SPRITE_TEXTURED_INPUT input)
 }
 
 Texture2D gtxtTerrainTexture : register(t14);
-Texture2D gtxtDetailTexture : register(t15);
-Texture2D gtxtAlphaTexture : register(t16);
+Texture2D gtxtDetailTexture[3]:register(t15);
+Texture2D gtxtAlphaTexture : register(t18);
 
 
 float4 PSTextured(VS_SPRITE_TEXTURED_OUTPUT input) : SV_TARGET
@@ -238,12 +248,77 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
 	
-	float4 cBaseTexColor = gtxtTerrainTexture.Sample(gssWrap, input.uv0);
-	float4 cDetailTexColor = gtxtDetailTexture.Sample(gssWrap, input.uv1);
-	float fAlpha = gtxtTerrainTexture.Sample(gssWrap, input.uv0);
+	float4 cBaseTexColor = gtxtTerrainTexture.Sample(gssWrap, input.uv0 *1.0f);
+	float fAlpha = gtxtAlphaTexture.Sample(gssWrap, input.uv0).w;
 
-	float4 cColor = cBaseTexColor * 0.5f + cDetailTexColor * 0.8f;
-	//float4 cColor = saturate(lerp(cBaseTexColor, cDetailTexColor, fAlpha));
+	float4 cDetailTexColors[3];
+	cDetailTexColors[0] = gtxtDetailTexture[0].Sample(gssWrap, input.uv1 * 2.0f);
+	cDetailTexColors[1] = gtxtDetailTexture[1].Sample(gssWrap, input.uv1 * 0.125f);
+	cDetailTexColors[2] = gtxtDetailTexture[2].Sample(gssWrap, input.uv1 * 1.5f);
+
+	float4 cColor = cBaseTexColor * cDetailTexColors[0];
+	cColor += lerp(cDetailTexColors[1] * 0.45f, cDetailTexColors[2], 0.8f - fAlpha);
+	/*
+		cColor = lerp(cDetailTexColors[0], cDetailTexColors[2], 1.0f - fAlpha) ;
+		cColor = lerp(cBaseTexColor, cColor, 0.3f) + cDetailTexColors[1] * (1.0f - fAlpha);
+	*/
+	/*
+		if (fAlpha < 0.35f) cColor = cDetailTexColors[2];
+		else if (fAlpha > 0.8975f) cColor = cDetailTexColors[0];
+		else cColor = cDetailTexColors[1];
+	*/
+		return(cColor);
+}
+///////////////////////////////////////////////////////////////////
+struct VS_WATER_INPUT
+{
+	float3 position : POSITION;
+	float2 uv : TEXCOORD0;
+};
+
+struct VS_WATER_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float2 uv : TEXCOORD0;
+};
+
+Texture2D<float4> gtxtWaterTexture[3] : register(t20); //20~22
+static matrix<float, 3, 3> Af3x3TerrainWaterAnimation = { { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
+
+VS_WATER_OUTPUT VSTerrainWater(VS_WATER_INPUT input)
+{
+	VS_WATER_OUTPUT output;
+
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+	output.uv = input.uv;
+
+	return(output);
+}
+//#define _WITH_TEXTURE_ANIMATION
+//#ifndef _WITH_TEXTURE_ANIMATION
+//float4 PSTerrainWater(VS_WATER_OUTPUT input) : SV_TARGET
+//{
+//	float4 cBaseTexColor = gtxtWaterTexture[0].Sample(gssWrap, input.uv);
+//	float4 cDetail0TexColor = gtxtWaterTexture[1].Sample(gssWrap, input.uv * 20.0f);
+//	float4 cDetail1TexColor = gtxtWaterTexture[2].Sample(gssWrap, input.uv * 20.0f);
+//	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+//	cColor = lerp(cBaseTexColor * cDetail0TexColor, cDetail1TexColor.r * 0.8f, 0.55f);
+//
+//	return(cColor);
+//}
+//#else
+float4 PSTerrainWater(VS_WATER_OUTPUT input) : SV_TARGET
+{
+	float2 uv = input.uv;
+	uv = mul(float3(input.uv, 1.0f), (float3x3)gf4x4TextureAnimation).xy;
+	uv.y += gDeltaTime * 0.00125f;
+	float4 cBaseTexColor = gtxtWaterTexture[0].Sample(gssWrap, input.uv,0);
+	float4 cDetail0TexColor = gtxtWaterTexture[1].Sample(gssWrap, input.uv * 20.0f);
+	float4 cDetail1TexColor = gtxtWaterTexture[2].Sample(gssWrap, input.uv * 20.0f);
+
+	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	cColor = lerp(cBaseTexColor * cDetail0TexColor, cDetail1TexColor.r * 0.5f, 0.35f);
 
 	return(cColor);
 }
+//#endif

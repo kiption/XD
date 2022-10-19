@@ -35,6 +35,8 @@ public:
     void BuildObjects();
     void ReleaseObjects();
 
+	void UpdateShaderVariables();
+
     void ProcessInput();
     void AnimateObjects();
     void FrameAdvance();
@@ -45,7 +47,7 @@ public:
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-
+	CGameObject* m_pSelectedObject = NULL;
 private:
 	HINSTANCE					m_hInstance;
 	HWND						m_hWnd; 
@@ -88,7 +90,7 @@ private:
 	CCamera						*m_pCamera = NULL;
 	CObjectsShader				*m_pShader = NULL;
 	POINT						m_ptOldCursorPos;
-
+	CGameObject* m_pLockedObject = NULL;
 	_TCHAR						m_pszFrameRate[70];
 };
 

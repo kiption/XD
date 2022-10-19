@@ -353,6 +353,26 @@ void CSkyBoxShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
 
+D3D12_BLEND_DESC CSkyBoxShader::CreateBlendState()
+{
+	D3D12_BLEND_DESC d3dBlendDesc;
+	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
+	d3dBlendDesc.AlphaToCoverageEnable = FALSE;
+	d3dBlendDesc.IndependentBlendEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].BlendEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	return(d3dBlendDesc);
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CStandardShader::CStandardShader()
@@ -476,13 +496,28 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[i]->PrepareAnimate();
 		pGunshipModel->AddRef();
 	}
-		
-	
-	
-	
-
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+D3D12_BLEND_DESC CObjectsShader::CreateBlendState()
+{
+	D3D12_BLEND_DESC d3dBlendDesc;
+	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
+	d3dBlendDesc.AlphaToCoverageEnable = FALSE;
+	d3dBlendDesc.IndependentBlendEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].BlendEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	return(d3dBlendDesc);
 }
 
 void CObjectsShader::ReleaseObjects()
@@ -497,8 +532,8 @@ void CObjectsShader::ReleaseObjects()
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
 {
-	//xoobb = BoundingOrientedBox(XMFLOAT3(m_ppObjects[0]->m_xmf4x4Transform._41, m_ppObjects[0]->m_xmf4x4Transform._42, m_ppObjects[0]->m_xmf4x4Transform._43),
-	//	XMFLOAT3(10.0, 10.0, 20.0), XMFLOAT4(0, 0, 0, 1));
+	xoobb = BoundingOrientedBox(XMFLOAT3(m_ppObjects[0]->m_xmf4x4Transform._41, m_ppObjects[0]->m_xmf4x4Transform._42, m_ppObjects[0]->m_xmf4x4Transform._43),
+		XMFLOAT3(10.0, 10.0, 20.0), XMFLOAT4(0, 0, 0, 1));
 
 	for (int i = 4; i < 10; i++)
 	{
@@ -529,10 +564,6 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 		}
 
 	}
-
-
-	
-
 }
 
 void CObjectsShader::ReleaseUploadBuffers()
@@ -553,6 +584,24 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}
 	}
+}
+
+CGameObject* CObjectsShader::PickObjectByRayIntersection(XMFLOAT3& xmf3PickPosition, XMFLOAT4X4& xmf4x4View, float* pfNearHitDistance)
+{
+	int nIntersected = 0;
+	*pfNearHitDistance = FLT_MAX;
+	float fHitDistance = FLT_MAX;
+	CGameObject* pSelectedObject = NULL;
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		nIntersected = m_ppObjects[j]->PickObjectByRayIntersection(xmf3PickPosition,xmf4x4View, &fHitDistance);
+		if ((nIntersected > 0) && (fHitDistance < *pfNearHitDistance))
+		{
+			*pfNearHitDistance = fHitDistance;
+			pSelectedObject = m_ppObjects[j];
+		}
+	}
+	return(pSelectedObject);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -825,4 +874,68 @@ void CExplosionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 			}
 		}
 	}
+}
+
+CTerrainWaterShader::CTerrainWaterShader()
+{
+}
+
+CTerrainWaterShader::~CTerrainWaterShader()
+{
+}
+
+D3D12_INPUT_LAYOUT_DESC CTerrainWaterShader::CreateInputLayout()
+{
+	UINT nInputElementDescs = 2;
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+
+	return(d3dInputLayoutDesc);
+}
+D3D12_BLEND_DESC CTerrainWaterShader::CreateBlendState()
+{
+	D3D12_BLEND_DESC d3dBlendDesc;
+	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
+	d3dBlendDesc.AlphaToCoverageEnable = FALSE;
+	d3dBlendDesc.IndependentBlendEnable = TRUE;
+	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_DEST_COLOR;
+	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_REV_SUBTRACT;
+	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_DEST_ALPHA;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_REV_SUBTRACT;
+	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = 15;
+
+	return(d3dBlendDesc);
+}
+D3D12_SHADER_BYTECODE CTerrainWaterShader::CreateVertexShader()
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSTerrainWater", "vs_5_1", &m_pd3dVertexShaderBlob));
+}
+
+D3D12_SHADER_BYTECODE CTerrainWaterShader::CreatePixelShader()
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTerrainWater", "ps_5_1", &m_pd3dPixelShaderBlob));
+}
+
+void CTerrainWaterShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	m_nPipelineStates = 1;
+	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+
+	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+
+	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
+	if (m_pd3dPixelShaderBlob) m_pd3dPixelShaderBlob->Release();
+
+	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }

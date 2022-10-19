@@ -9,7 +9,7 @@
 
 #include "Object.h"
 #include "Camera.h"
-
+#include "Shader.h"
 class CPlayer : public CGameObject
 {
 protected:
@@ -30,10 +30,10 @@ protected:
 	LPVOID						m_pPlayerUpdatedContext;
 	LPVOID						m_pCameraUpdatedContext;
 
-	CCamera						*m_pCamera = NULL;
 	CShader						*m_pShader = NULL;
-
+	CObjectsShader				*m_pObjectsShader = NULL;
 public:
+	CCamera						*m_pCamera = NULL;
 	CPlayer();
 	virtual ~CPlayer();
 
@@ -80,7 +80,13 @@ public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
-	
+
+	void SetTerrain(LPVOID pPlayerUpdatedContext);
+public:
+	float m_MissileRange = 1500.0f;
+	// Missile ON/OFF
+	bool m_MissileActive;
+	bool m_ZoomInActive = false;
 };
 
 #define BULLETS					50
@@ -95,11 +101,12 @@ public:
 	CBulletObject				*pBulletObject = NULL;
 	CGameObject					*m_pMainRotorFrame = NULL;
 	CGameObject					*m_pTailRotorFrame = NULL;
+	CGameObject					*m_pBulletFrame = NULL;
 
 private:
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = NULL);
-
+	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
 public:
 
 	CBulletObject* m_ppBullets[BULLETS];
