@@ -18,16 +18,12 @@ class CPlayer;
 class CCamera
 {
 protected:
-	XMFLOAT3						m_xmf3Position;
+	
 	XMFLOAT3						m_xmf3Right;
 	XMFLOAT3						m_xmf3Up;
 	XMFLOAT3						m_xmf3Look;
 
-	float           				m_fPitch;
-	float           				m_fRoll;
-	float           				m_fYaw;
 
-	DWORD							m_nMode;
 
 	XMFLOAT3						m_xmf3LookAtWorld;
 	XMFLOAT3						m_xmf3Offset;
@@ -38,13 +34,19 @@ protected:
 
 	CPlayer							*m_pPlayer = NULL;
 
-	D3D12_VIEWPORT					m_d3dViewport;
 	ID3D12Resource					*m_pd3dcbCamera = NULL;
 	VS_CB_CAMERA_INFO				*m_pcbMappedCamera = NULL;
 public:
+	DWORD							m_nMode;
+	D3D12_VIEWPORT					m_d3dViewport;
 	XMFLOAT4X4						m_xmf4x4View;
 	XMFLOAT4X4						m_xmf4x4Projection;
+	XMFLOAT3						m_xmf3Position;
 
+
+	float           				m_fPitch;
+	float           				m_fRoll;
+	float           				m_fYaw;
 public:
 	CCamera();
 	CCamera(CCamera *pCamera);
@@ -108,7 +110,6 @@ class CSpaceShipCamera : public CCamera
 public:
 	CSpaceShipCamera(CCamera *pCamera);
 	virtual ~CSpaceShipCamera() { }
-
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
 };
 
@@ -119,6 +120,7 @@ public:
 	virtual ~CFirstPersonCamera() { }
 
 	virtual void Rotate(float fPitch = 0.0f, float fYaw = 0.0f, float fRoll = 0.0f);
+
 };
 
 class CThirdPersonCamera : public CCamera

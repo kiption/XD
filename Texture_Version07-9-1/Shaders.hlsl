@@ -23,14 +23,12 @@ cbuffer cbGameObjectInfo : register(b2)
 	uint		gnTexturesMask : packoffset(c8); // 1
 };
 
-cbuffer cbFrameworkInfo : register(b3)
+cbuffer cbFrameTimekInfo : register(b3)
 {
-	float 		gfCurrentTime;
-	float		gfElapsedTime;
-	float2		gf2CursorPos;
+	float 		gDeltaTime;
 };
 
-cbuffer cbWaterInfo : register(b4)
+cbuffer cbWaterMatrixInfo : register(b4)
 {
 	matrix		gf4x4TextureAnimation : packoffset(c0);
 };
@@ -284,6 +282,9 @@ struct VS_WATER_OUTPUT
 	float2 uv : TEXCOORD0;
 };
 
+Texture2D<float4> gtxtWaterTexture[3] : register(t20); //20~22
+static matrix<float, 3, 3> Af3x3TerrainWaterAnimation = { { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
+
 VS_WATER_OUTPUT VSTerrainWater(VS_WATER_INPUT input)
 {
 	VS_WATER_OUTPUT output;
@@ -293,72 +294,31 @@ VS_WATER_OUTPUT VSTerrainWater(VS_WATER_INPUT input)
 
 	return(output);
 }
-
-Texture2D<float4> gtxtWaterTexture[3] : register(t20);
-
-static matrix<float, 3, 3> sf3x3TextureAnimation = { { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
-
-#define _WITH_TEXTURE_ANIMATION
-
-#define _WITH_BASE_TEXTURE_ONLY
-//#define _WITH_FULL_TEXTURES
-
-#ifndef _WITH_TEXTURE_ANIMATION
-float4 PSTerrainWater(VS_WATER_OUTPUT input) : SV_TARGET
-{
-	float4 WaterTexture = gtxtWaterTexture[0].Sample(gssWrap, input.uv);
-	float4 DetailTexture0 = gtxtWaterTexture[1].Sample(gssWrap, input.uv * 20.0f);
-	float4 DetailTexture1 = gtxtWaterTexture[2].Sample(gssWrap, input.uv * 20.0f);
-
-	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-#ifdef _WITH_BASE_TEXTURE_ONLY
-	cColor = WaterTexture;
-#else
-#ifdef _WITH_FULL_TEXTURES
-	cColor = lerp(WaterTexture * DetailTexture0, DetailTexture1.r * 0.5f, 0.55f);
-#else
-	cColor = WaterTexture * DetailTexture0;
-#endif
-#endif
-
-	return(cColor);
-}
-#else
-#define _WITH_CONSTANT_BUFFER_MATRIX
-//#define _WITH_STATIC_MATRIX
-
+//#define _WITH_TEXTURE_ANIMATION
+//#ifndef _WITH_TEXTURE_ANIMATION
+//float4 PSTerrainWater(VS_WATER_OUTPUT input) : SV_TARGET
+//{
+//	float4 cBaseTexColor = gtxtWaterTexture[0].Sample(gssWrap, input.uv);
+//	float4 cDetail0TexColor = gtxtWaterTexture[1].Sample(gssWrap, input.uv * 20.0f);
+//	float4 cDetail1TexColor = gtxtWaterTexture[2].Sample(gssWrap, input.uv * 20.0f);
+//	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+//	cColor = lerp(cBaseTexColor * cDetail0TexColor, cDetail1TexColor.r * 0.8f, 0.55f);
+//
+//	return(cColor);
+//}
+//#else
 float4 PSTerrainWater(VS_WATER_OUTPUT input) : SV_TARGET
 {
 	float2 uv = input.uv;
-
-#ifdef _WITH_STATIC_MATRIX
-	sf3x3TextureAnimation._m21 = gfCurrentTime * 0.00125f;
-	uv = mul(float3(input.uv, 1.0f), sf3x3TextureAnimation).xy;
-#else
-#ifdef _WITH_CONSTANT_BUFFER_MATRIX
 	uv = mul(float3(input.uv, 1.0f), (float3x3)gf4x4TextureAnimation).xy;
-	uv = mul(float4(uv, 1.0f, 0.0f), gf4x4TextureAnimation).xy;
-#else
-	uv.y += gfCurrentTime * 0.00125f;
-#endif
-#endif
-
-	float4 WaterTexture = gtxtWaterTexture[0].Sample(gssWrap, uv,0);
-	float4 DetailTexture0 = gtxtWaterTexture[1].Sample(gssWrap, uv * 20.0f,0);
-	float4 DetailTexture1 = gtxtWaterTexture[2].Sample(gssWrap, uv * 20.0f,0);
-
+	uv.y += gDeltaTime * 0.00125f;
+	float4 cBaseTexColor = gtxtWaterTexture[0].Sample(gssWrap, input.uv,0);
+	float4 cDetail0TexColor = gtxtWaterTexture[1].Sample(gssWrap, input.uv * 20.0f);
+	float4 cDetail1TexColor = gtxtWaterTexture[2].Sample(gssWrap, input.uv * 20.0f);
 
 	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-#ifdef _WITH_BASE_TEXTURE_ONLY
-	cColor = WaterTexture;
-#else
-#ifdef _WITH_FULL_TEXTURES
-	cColor = lerp(WaterTexture * DetailTexture0, DetailTexture1.r * 0.5f, 0.35f);
-#else
-	cColor = WaterTexture * DetailTexture0;
-#endif
-#endif
+	cColor = lerp(cBaseTexColor * cDetail0TexColor, cDetail1TexColor.r * 0.5f, 0.35f);
 
 	return(cColor);
 }
-#endif
+//#endif

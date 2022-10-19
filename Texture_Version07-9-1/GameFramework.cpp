@@ -327,10 +327,12 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	case WM_RBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
-		if (nMessageID == WM_RBUTTONDOWN) m_pLockedObject = m_pScene->PickObjectPointedByCursor(LOWORD(lParam), HIWORD(lParam), m_pCamera);
+		if (nMessageID == WM_RBUTTONDOWN) m_pLockedObject = m_pScene->PickObjectPointedByCursor(LOWORD(lParam), HIWORD(lParam), m_pPlayer->m_pCamera);
+		if (nMessageID == WM_RBUTTONDOWN) m_pPlayer->m_ZoomInActive = true;;
 		break;
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
+		if (nMessageID == WM_RBUTTONUP) m_pPlayer->m_ZoomInActive = false;
 		::ReleaseCapture();
 		break;
 	case WM_MOUSEMOVE:
@@ -449,7 +451,7 @@ void CGameFramework::BuildObjects()
 	pAirplanePlayer->m_xmf3Position.z = (float)my_info.m_z;
 	pAirplanePlayer->SetPosition(XMFLOAT3(pAirplanePlayer->m_xmf3Position.x, 700.0f, pAirplanePlayer->m_xmf3Position.z));
 	m_pCamera = m_pPlayer->GetCamera();
-
+	m_pPlayer->SetTerrain(m_pScene->m_pTerrain);
 	
 
 	m_pd3dCommandList->Close();
@@ -588,6 +590,25 @@ void CGameFramework::AnimateObjects()
 	m_pPlayer->Animate(fTimeElapsed, NULL);
 }
 
+void CGameFramework::UpdateShaderVariables()
+{
+	/*float fCurrentTime = m_GameTimer.GetTotalTime();
+	float fElapsedTime = m_GameTimer.GetTimeElapsed();
+
+	m_pd3dCommandList->SetGraphicsRoot32BitConstants(14, 1, &fCurrentTime, 0);
+	m_pd3dCommandList->SetGraphicsRoot32BitConstants(14, 1, &fElapsedTime, 1);
+
+	POINT ptCursorPos;
+	::GetCursorPos(&ptCursorPos);
+	::ScreenToClient(m_hWnd, &ptCursorPos);
+	float fxCursorPos = (ptCursorPos.x < 0) ? 0.0f : float(ptCursorPos.x);
+	float fyCursorPos = (ptCursorPos.y < 0) ? 0.0f : float(ptCursorPos.y);
+
+	m_pd3dCommandList->SetGraphicsRoot32BitConstants(14, 1, &fxCursorPos, 2);
+	m_pd3dCommandList->SetGraphicsRoot32BitConstants(14, 1, &fyCursorPos, 3);
+*/
+}
+
 void CGameFramework::WaitForGpuComplete()
 {
 	const UINT64 nFenceValue = ++m_nFenceValues[m_nSwapChainBufferIndex];
@@ -650,6 +671,9 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
+
+	if (m_pScene) m_pScene->PrepareRender(m_pd3dCommandList);
+	//UpdateShaderVariables();
 
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
 

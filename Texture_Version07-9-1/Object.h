@@ -245,7 +245,7 @@ public:
 	char							m_pstrFrameName[64];
 	int								m_nMeshes;
 	CMesh							** m_ppMeshes;
-//	CMesh							*m_pMesh = NULL;
+	CMesh							*m_pMesh = NULL;
 
 	int								m_nMaterials = 0;
 	CMaterial						**m_ppMaterials = NULL;
@@ -257,6 +257,8 @@ public:
 	CGameObject 					*m_pParent = NULL;
 	CGameObject 					*m_pChild = NULL;
 	CGameObject 					*m_pSibling = NULL;
+
+	XMFLOAT3 xmf3PickRayOrigin, xmf3PickRayDirection;
 
 	ID3D12Resource* m_pd3dcbGameObject = NULL;
 	CB_GAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
@@ -343,8 +345,8 @@ public:
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
 
 public:
-	void GenerateRayForPicking(XMVECTOR& xmvPickPosition, XMMATRIX& xmmtxView, XMVECTOR& xmvPickRayOrigin, XMVECTOR& xmvPickRayDirection);
-	int PickObjectByRayIntersection(XMVECTOR& xmPickPosition, XMMATRIX& xmmtxView, float* pfHitDistance);
+	void GenerateRayForPicking(XMFLOAT3 xmvPickPosition, XMFLOAT4X4* pxmf4x4World,XMFLOAT4X4 xmmtxView, XMFLOAT3* xmvPickRayOrigin, XMFLOAT3* xmvPickRayDirection);
+	int PickObjectByRayIntersection(XMFLOAT3 xmPickPosition, XMFLOAT4X4 xmmtxView, float* pfHitDistance);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -447,7 +449,7 @@ public:
 public:
 	virtual void Animate(float fElapsedTime);
 	virtual void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
-	float						m_fBulletEffectiveRange = 200.0f;
+	float						m_fBulletEffectiveRange = 800.0f;
 	float						m_fMovingDistance = 0.0f;
 	float						m_fRotationAngle = 0.0f;
 	XMFLOAT3					m_xmf3FirePosition = XMFLOAT3(0.0f, 0.0f, 1.0f);

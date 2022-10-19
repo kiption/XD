@@ -60,6 +60,7 @@ public:
 	bool ProcessInput(UCHAR *pKeysBuffer);
     void AnimateObjects(float fTimeElapsed);
     void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
+	void PrepareRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseUploadBuffers();
 
 	CPlayer								*m_pPlayer = NULL;
@@ -73,7 +74,8 @@ public:
 	CGameObject							**m_ppGameObjects = NULL;
 
 	int									m_nShaders = 0;
-	CObjectsShader**m_ppShaders = NULL;
+	CObjectsShader** m_ppShaders = NULL;
+	CObjectsShader* m_pShaders = NULL;
 	
 	CShader** m_ppCShaders = NULL;
 	int							m_nCShaders = 0;
