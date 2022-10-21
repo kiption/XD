@@ -70,15 +70,20 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	XMFLOAT3 xmf3Scale(8.0f, 5.0f, 8.0f);
+	XMFLOAT3 xmf3Scale(12.0f, 4.0f, 12.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color);
 	m_pTerrain->SetPosition(0.0, 0.0, 0.0);
 
+	m_pTerrainWater = new CTerrainWater(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 257 * xmf3Scale.x, 257 * xmf3Scale.z);
+	m_pTerrainWater->SetPosition(+(257 * xmf3Scale.x * 0.5f), 250.0f, +(257 * xmf3Scale.z * 0.5f));
 
-	m_pTerrainWater = new CTerrainWaterMove(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 257 * xmf3Scale.x, 257 * xmf3Scale.z);
-	m_pTerrainWater->SetPosition(+(257 * xmf3Scale.x * 0.5f), 400.0f, +(257 * xmf3Scale.z * 0.5f));
+	XMFLOAT4 xmf4ColorW(0.0f, 0.5f, 0.0f, 0.0f);
+	XMFLOAT3 xmf4ScaleW(12.0f, 2.5f, 12.0f);
+	m_pUseWaterMove = new CUseWaterMoveTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf4ScaleW, xmf4ColorW);
+	m_pUseWaterMove->SetPosition(0.0, 94.0f,0.0);
 
+	
 	m_nShaders = 1;
 	m_nCShaders = 1;
 
@@ -128,6 +133,7 @@ void CScene::ReleaseObjects()
 	}
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pTerrainWater) delete m_pTerrainWater;
+	if (m_pUseWaterMove) delete m_pUseWaterMove;
 	if (m_pSkyBox) delete m_pSkyBox;
 
 	if (m_ppGameObjects)
@@ -423,6 +429,7 @@ void CScene::ReleaseShaderVariables()
 	}
 
 	if (m_pTerrainWater) m_pTerrainWater->ReleaseShaderVariables();
+	if (m_pUseWaterMove) m_pUseWaterMove->ReleaseShaderVariables();
 	if (m_pTerrain) m_pTerrain->ReleaseShaderVariables();
 	if (m_pSkyBox) m_pSkyBox->ReleaseShaderVariables();
 }
@@ -430,6 +437,7 @@ void CScene::ReleaseShaderVariables()
 void CScene::ReleaseUploadBuffers()
 {
 	if (m_pTerrainWater) m_pTerrainWater->ReleaseUploadBuffers();
+	if (m_pUseWaterMove) m_pUseWaterMove->ReleaseUploadBuffers();
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
 
@@ -497,8 +505,7 @@ bool CScene::ProcessInput(UCHAR* pKeysBuffer)
 int CollisionCheck;
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-	m_xmf4x4WaterAnimation._32 += fTimeElapsed * 0.0125f;
-
+	m_pUseWaterMove->Animate(fTimeElapsed);
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->UpdateTransform(NULL);
 	for (int i = 0; i < m_nShaders; i++) if (m_pShaders)m_pShaders[i].AnimateObjects(fTimeElapsed);
@@ -574,6 +581,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
+	if (m_pUseWaterMove) m_pUseWaterMove->Render(pd3dCommandList, pCamera);
 	if (m_pTerrainWater) m_pTerrainWater->Render(pd3dCommandList, pCamera);
 
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);

@@ -4,7 +4,7 @@
 //Server
 #include "Network.h"
 //
-uniform_int_distribution<int> uid(100, 1900);
+uniform_int_distribution<int> uid(1000, 1900);
 
 CGameFramework::CGameFramework()
 {
@@ -462,7 +462,7 @@ void CGameFramework::BuildObjects()
 
     pPlayer->m_xmf3Position.x = (float)my_info.m_x;
     pPlayer->m_xmf3Position.z = (float)my_info.m_z;
-    pPlayer->SetPosition(XMFLOAT3(pPlayer->m_xmf3Position.x, 0.0f, pPlayer->m_xmf3Position.z));
+    pPlayer->SetPosition(XMFLOAT3(pPlayer->m_xmf3Position.x,0.0f, pPlayer->m_xmf3Position.z));
 
     m_pCamera = m_pPlayer->GetCamera();
     m_pPlayer->setTerrain(m_pScene->m_pTerrain);

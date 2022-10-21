@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 #include "Network.h"
-uniform_int_distribution<int> uid(1200, 1500);
+uniform_int_distribution<int> uid(1200, 1900);
 CGameFramework::CGameFramework()
 {
 	// Server
@@ -25,7 +25,7 @@ CGameFramework::CGameFramework()
 	p.type = CS_LOGIN;
 	strcpy_s(p.name, "COPTER");
 	my_info.m_x = uid(dre);
-	my_info.m_y = 800;
+	my_info.m_y = 600;
 	my_info.m_z = uid(dre);
 	p.x = my_info.m_x;
 	p.y = my_info.m_y;
@@ -449,7 +449,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
 	pAirplanePlayer->m_xmf3Position.x = (float)my_info.m_x;
 	pAirplanePlayer->m_xmf3Position.z = (float)my_info.m_z;
-	pAirplanePlayer->SetPosition(XMFLOAT3(pAirplanePlayer->m_xmf3Position.x, 700.0f, pAirplanePlayer->m_xmf3Position.z));
+	pAirplanePlayer->SetPosition(XMFLOAT3(pAirplanePlayer->m_xmf3Position.x, 400.0f, pAirplanePlayer->m_xmf3Position.z));
 	m_pCamera = m_pPlayer->GetCamera();
 	m_pPlayer->SetTerrain(m_pScene->m_pTerrain);
 	
@@ -575,7 +575,7 @@ void CGameFramework::ProcessInput()
 				else
 					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 1.25f, true);
+			if (dwDirection) m_pPlayer->Move(dwDirection, 1.25f, false);
 		}
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
@@ -712,9 +712,8 @@ void CGameFramework::FrameAdvance()
 
 	for (int j = 0; j < 5; j++) {
 		if (other_players[j].m_state == ST_RUNNING && j != my_info.m_id) {
-			m_pScene->m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
-			
-			m_pScene->m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
+			m_pScene->m_pShaders->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
+			m_pScene->m_pShaders->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
 		}
 	}
 

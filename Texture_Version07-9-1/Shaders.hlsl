@@ -322,3 +322,28 @@ float4 PSTerrainWater(VS_WATER_OUTPUT input) : SV_TARGET
 	return(cColor);
 }
 //#endif
+
+VS_WATER_OUTPUT VSTerrainMoveWater(VS_WATER_INPUT input)
+{
+	VS_WATER_OUTPUT output;
+
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+	output.uv = input.uv;
+
+	return(output);
+}
+
+float4 PSTerrainMoveWater(VS_WATER_OUTPUT input) : SV_TARGET
+{
+	float2 uv = input.uv;
+	uv = mul(float3(input.uv, 1.0f), (float3x3)gf4x4TextureAnimation).xy;
+	uv.y += gDeltaTime * 0.00125f;
+	float4 cBaseTexColor = gtxtWaterTexture[0].Sample(gssWrap, input.uv,0);
+	float4 cDetail0TexColor = gtxtWaterTexture[1].Sample(gssWrap, input.uv * 20.0f);
+	float4 cDetail1TexColor = gtxtWaterTexture[2].Sample(gssWrap, input.uv * 20.0f);
+
+	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	cColor = lerp(cBaseTexColor * cDetail0TexColor, cDetail1TexColor.r * 0.5f, 0.35f);
+
+	return(cColor);
+}
