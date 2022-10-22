@@ -25,7 +25,7 @@ CGameFramework::CGameFramework()
 	p.type = CS_LOGIN;
 	strcpy_s(p.name, "COPTER");
 	my_info.m_x = uid(dre);
-	my_info.m_y = 600;
+	my_info.m_y = 400;
 	my_info.m_z = uid(dre);
 	p.x = my_info.m_x;
 	p.y = my_info.m_y;
@@ -448,6 +448,7 @@ void CGameFramework::BuildObjects()
 	CAirplanePlayer* pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
 	m_pScene->m_pPlayer = m_pPlayer = pAirplanePlayer;
 	pAirplanePlayer->m_xmf3Position.x = (float)my_info.m_x;
+	pAirplanePlayer->m_xmf3Position.y = (float)my_info.m_y;
 	pAirplanePlayer->m_xmf3Position.z = (float)my_info.m_z;
 	pAirplanePlayer->SetPosition(XMFLOAT3(pAirplanePlayer->m_xmf3Position.x, 400.0f, pAirplanePlayer->m_xmf3Position.z));
 	m_pCamera = m_pPlayer->GetCamera();
@@ -717,6 +718,7 @@ void CGameFramework::FrameAdvance()
 	for (int j = 0; j < 5; j++) {
 		if (other_players[j].m_state == ST_RUNNING && j != my_info.m_id) {
 			m_pScene->m_pShaders->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
+			m_pScene->m_pShaders->m_ppObjects[j]->m_xmf4x4Transform._42 = other_players[j].m_y;
 			m_pScene->m_pShaders->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
 		}
 	}

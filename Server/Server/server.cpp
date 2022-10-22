@@ -194,11 +194,8 @@ void process_packet(int client_id, char* packet)
 			break;
 		}
 		// 새로 접속한 플레이어의 초기 위치정보를 설정합니다.
-		/*int new_x = uid(dre);
-		int new_y = 0;
-		int new_z = uid(dre);*/
 		int new_x = login_packet->x;
-		int new_y = 0;
+		int new_y = login_packet->y;
 		int new_z = login_packet->z;
 		clients[client_id].x_pos = new_x;
 		clients[client_id].y_pos = new_y;
@@ -260,8 +257,7 @@ void process_packet(int client_id, char* packet)
 		vec1[X] = clients[client_id].x_pos, vec1[Y] = clients[client_id].y_pos, vec1[Z] = clients[client_id].z_pos, vec1[W] = 0;
 		vec2[X] = p->vec_x, vec2[Y] = p->vec_y, vec2[Z] = p->vec_z, vec2[W] = 0;
 
-		//calcMove(vec1, vec2, 13.0f * 0.25f); // 이동 계산
-		calcMove(vec1, vec2, 1.25f); // 이동 계산
+		calcMove(vec1, vec2, 0.6f); // 이동 계산
 
 		clients[client_id].x_pos = vec1[X];
 		clients[client_id].y_pos = vec1[Y];
