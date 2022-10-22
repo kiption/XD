@@ -576,7 +576,6 @@ void CGameFramework::ProcessInput()
 				else
 					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 1.25f, false);
 		}
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
@@ -710,6 +709,10 @@ void CGameFramework::FrameAdvance()
 #endif
 
 	MoveToNextFrame();
+
+	// 서버에서 받은 값으로 적용
+	XMFLOAT3 temp = { my_info.m_x, my_info.m_y, my_info.m_z };
+	m_pPlayer->SetPosition(temp);
 
 	for (int j = 0; j < 5; j++) {
 		if (other_players[j].m_state == ST_RUNNING && j != my_info.m_id) {
