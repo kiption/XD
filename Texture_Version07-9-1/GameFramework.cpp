@@ -452,6 +452,7 @@ void CGameFramework::BuildObjects()
 	pAirplanePlayer->SetPosition(XMFLOAT3(pAirplanePlayer->m_xmf3Position.x, 400.0f, pAirplanePlayer->m_xmf3Position.z));
 	m_pCamera = m_pPlayer->GetCamera();
 	m_pPlayer->SetTerrain(m_pScene->m_pTerrain);
+	m_pPlayer->SetWaterSurface(m_pScene->m_pUseWaterMove);
 	
 
 	m_pd3dCommandList->Close();

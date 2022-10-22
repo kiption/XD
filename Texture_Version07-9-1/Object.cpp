@@ -1444,7 +1444,7 @@ CUseWaterMoveTerrain::CUseWaterMoveTerrain(ID3D12Device* pd3dDevice, ID3D12Graph
 	CWaterMoveShader* pWaterMoveShader = new CWaterMoveShader();
 	pWaterMoveShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	pWaterMoveShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 1);
-	pWaterMoveShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	pWaterMoveShader->CreateShaderVariables(pd3dDevice, pd3dCommandList); 
 	pWaterMoveShader->CreateShaderResourceViews(pd3dDevice, pWaterMoveTexture, 0, 13);
 
 	CMaterial* pWaterMoveMaterial = new CMaterial();
@@ -1460,23 +1460,27 @@ CUseWaterMoveTerrain::~CUseWaterMoveTerrain()
 
 void CUseWaterMoveTerrain::Animate(float fTimeElapsed)
 {
-	float EndWaterSurface = 105.0;
-	float StartWaterSurface = 94.0;
+	float EndWaterSurface = 290.0;
+	float StartWaterSurface = 240.0;
 	if (m_bSurfacePoint == false)
 	{
-		this->m_xmf4x4World._42 += fTimeElapsed * 1.5f;
+		this->m_xmf4x4World._42 += fTimeElapsed * 9.5f;
+		this->m_xmf4x4World._41 += fTimeElapsed * 6.5f;
 		if (this->m_xmf4x4World._42 > EndWaterSurface)
 		{
-			this->m_xmf4x4World._42 -= fTimeElapsed * 1.5f;
+			
+			this->m_xmf4x4World._41 -= fTimeElapsed * 6.5f;
 			m_bSurfacePoint = true;
 		}
 	}
 	if (m_bSurfacePoint == true)
 	{
 		this->m_xmf4x4World._42 -= fTimeElapsed * 1.5f;
+		this->m_xmf4x4World._41 -= fTimeElapsed * 6.5f;
 		if (this->m_xmf4x4World._42 < StartWaterSurface)
 		{
-			this->m_xmf4x4World._42 += fTimeElapsed * 1.5f;
+		
+			this->m_xmf4x4World._41 += fTimeElapsed * 6.5f;
 			m_bSurfacePoint = false;
 		}
 	}

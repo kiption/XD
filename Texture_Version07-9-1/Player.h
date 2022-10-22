@@ -28,6 +28,7 @@ protected:
 	float           			m_fFriction;
 
 	LPVOID						m_pPlayerUpdatedContext;
+	LPVOID						m_pPlayerUpdatedContext2;
 	LPVOID						m_pCameraUpdatedContext;
 
 	CShader						*m_pShader = NULL;
@@ -66,7 +67,9 @@ public:
 	void Update(float fTimeElapsed);
 
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed) { }
+	virtual void WaterOnPlayerUpdateCallback(float fTimeElapsed) { }
 	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
+	void SetWPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext2 = pContext; }
 
 	virtual void OnCameraUpdateCallback(float fTimeElapsed) { }
 	void SetCameraUpdatedContext(LPVOID pContext) { m_pCameraUpdatedContext = pContext; }
@@ -82,6 +85,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 
 	void SetTerrain(LPVOID pPlayerUpdatedContext);
+	void SetWaterSurface(LPVOID pPlayerUpdatedContext);
 public:
 	float m_MissileRange = 1500.0f;
 	// Missile ON/OFF
@@ -107,6 +111,7 @@ private:
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = NULL);
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
+	virtual void WaterOnPlayerUpdateCallback(float fTimeElapsed);
 public:
 
 	CBulletObject* m_ppBullets[BULLETS];

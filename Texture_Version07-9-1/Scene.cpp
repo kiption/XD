@@ -70,18 +70,18 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	XMFLOAT3 xmf3Scale(12.0f, 4.0f, 12.0f);
+	XMFLOAT3 xmf3Scale(12.0f, 6.5f, 12.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.5f, 0.0f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color);
 	m_pTerrain->SetPosition(0.0, 0.0, 0.0);
 
 	m_pTerrainWater = new CTerrainWater(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 257 * xmf3Scale.x, 257 * xmf3Scale.z);
-	m_pTerrainWater->SetPosition(+(257 * xmf3Scale.x * 0.5f), 250.0f, +(257 * xmf3Scale.z * 0.5f));
+	m_pTerrainWater->SetPosition(+(257 * xmf3Scale.x * 0.5f), 350.0f, +(257 * xmf3Scale.z * 0.5f));
 
-	XMFLOAT4 xmf4ColorW(0.0f, 0.5f, 0.0f, 0.0f);
-	XMFLOAT3 xmf4ScaleW(12.0f, 2.5f, 12.0f);
-	m_pUseWaterMove = new CUseWaterMoveTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf4ScaleW, xmf4ColorW);
-	m_pUseWaterMove->SetPosition(0.0, 94.0f,0.0);
+	XMFLOAT4 xmf4ColorW(0.0f, 1.0f, 0.0f, 0.0f);
+	XMFLOAT3 xmf4ScaleW(14.0f, 1.5f, 14.0);
+	m_pUseWaterMove = new CUseWaterMoveTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/HeightMap2.raw"), 257, 257, 257, 257, xmf4ScaleW, xmf4ColorW);
+	m_pUseWaterMove->SetPosition(0.0, 250.0f,0.0);
 
 	
 	m_nShaders = 1;

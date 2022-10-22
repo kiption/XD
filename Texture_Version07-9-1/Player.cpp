@@ -29,6 +29,7 @@ CPlayer::CPlayer() : CGameObject(0, 0)
 	m_fYaw = 0.0f;
 
 	m_pPlayerUpdatedContext = NULL;
+	m_pPlayerUpdatedContext2 = NULL;
 	m_pCameraUpdatedContext = NULL;
 }
 
@@ -45,7 +46,10 @@ void CPlayer::SetTerrain(LPVOID pPlayerUpdatedContext)
 {
 	m_pPlayerUpdatedContext = pPlayerUpdatedContext;
 }
-
+void CPlayer::SetWaterSurface(LPVOID pPlayerUpdatedContext)
+{
+	m_pPlayerUpdatedContext2 = pPlayerUpdatedContext;
+}
 void CPlayer::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if (m_pCamera) m_pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -66,12 +70,12 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	if (dwDirection)
 	{
 		XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
-		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance*2.25);
-		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance * 2.25);
-		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance * 2.25);
-		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance * 2.25);
-		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance * 2.25);
-		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance * 2.25);
+		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
+		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance );
+		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance );
+		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
+		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance );
+		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance );
 
 		Move(xmf3Shift, bUpdateVelocity);
 	}
@@ -191,6 +195,7 @@ void CPlayer::Update(float fTimeElapsed)
 	Move(xmf3Velocity, false);
 
 	if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
+	if (m_pPlayerUpdatedContext2) WaterOnPlayerUpdateCallback(fTimeElapsed);
 
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
@@ -354,12 +359,12 @@ void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	//	m_pBulletFrame->m_xmf4x4Transform._43 += 1.5f;
 
 	}
-	if (m_ZoomInActive == false)
-	{
-		m_MissileActive = false;
-		m_pCamera->m_nMode = THIRD_PERSON_CAMERA;
-		//m_pBulletFrame->m_xmf4x4Transform._43 = pos;
-	}
+	//if (m_ZoomInActive == false)
+	//{
+	//	m_MissileActive = false;
+	//	m_pCamera->m_nMode = THIRD_PERSON_CAMERA;
+	//	//m_pBulletFrame->m_xmf4x4Transform._43 = pos;
+	//}
 
 
 	if (m_pMainRotorFrame)
@@ -384,6 +389,14 @@ void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 
 	}
 
+	//if (this->m_xmf4x4Transform._42 > 450.0f)
+	//{
+	//	SetGravity(XMFLOAT3(0.0,-1.0,0.0));
+	//}
+	//else
+	//{
+	//	SetGravity(XMFLOAT3(0.0, 1.0, 0.0));
+	//}
 	xoobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(15.0, 10.0, 30.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
 }
@@ -395,7 +408,7 @@ void CAirplanePlayer::OnPlayerUpdateCallback(float fTimeElapsed)
 	/*지형에서 플레이어의 현재 위치 (x, z)의 지형 높이(y)를 구한다. 그리고 플레이어 메쉬의 높이가 12이고 플레이어의
 	중심이 직육면체의 가운데이므로 y 값에 메쉬의 높이의 절반을 더하면 플레이어의 위치가 된다.*/
 
-	float fHeight = pTerrain->GetHeight(xmf3PlayerPosition.x, xmf3PlayerPosition.z) + 10.0f;
+	float fHeight = pTerrain->GetHeight(xmf3PlayerPosition.x, xmf3PlayerPosition.z) + 50.0f;
 	/*플레이어의 위치 벡터의 y-값이 음수이면(예를 들어, 중력이 적용되는 경우) 플레이어의 위치 벡터의 y-값이 점점
 	작아지게 된다. 이때 플레이어의 현재 위치 벡터의 y 값이 지형의 높이(실제로 지형의 높이 + 6)보다 작으면 플레이어
 	의 일부가 지형 아래에 있게 된다. 이러한 경우를 방지하려면 플레이어의 속도 벡터의 y 값을 0으로 만들고 플레이어
@@ -406,6 +419,22 @@ void CAirplanePlayer::OnPlayerUpdateCallback(float fTimeElapsed)
 		xmf3PlayerVelocity.y = 0.0f;
 		SetVelocity(xmf3PlayerVelocity);
 		xmf3PlayerPosition.y = fHeight;
+		SetPosition(xmf3PlayerPosition);
+	}
+	
+}
+
+void CAirplanePlayer::WaterOnPlayerUpdateCallback(float fTimeElapsed)
+{
+	XMFLOAT3 xmf3PlayerPosition = GetPosition();
+	CUseWaterMoveTerrain* pWaterSurface = (CUseWaterMoveTerrain*)m_pPlayerUpdatedContext2;
+	float fHeightw = pWaterSurface->GetHeight(xmf3PlayerPosition.x, xmf3PlayerPosition.z) + 50.0f;
+	if (xmf3PlayerPosition.y < fHeightw)
+	{
+		XMFLOAT3 xmf3PlayerVelocity = GetVelocity();
+		xmf3PlayerVelocity.y = 0.0f;
+		SetVelocity(xmf3PlayerVelocity);
+		xmf3PlayerPosition.y = fHeightw;
 		SetPosition(xmf3PlayerPosition);
 	}
 }
