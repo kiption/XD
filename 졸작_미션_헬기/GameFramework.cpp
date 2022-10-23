@@ -26,7 +26,7 @@ CGameFramework::CGameFramework()
     p.type = CS_LOGIN;
     strcpy_s(p.name, "COPTER");
     my_info.m_x = uid(dre);
-    my_info.m_y = 0;
+    my_info.m_y = uid(dre);
     my_info.m_z = uid(dre);
     p.x = my_info.m_x;
     p.y = my_info.m_y;
@@ -461,8 +461,9 @@ void CGameFramework::BuildObjects()
     //XMFLOAT3 xmf3Position = pPlayer->GetPosition();
 
     pPlayer->m_xmf3Position.x = (float)my_info.m_x;
+    pPlayer->m_xmf3Position.y = (float)my_info.m_y;
     pPlayer->m_xmf3Position.z = (float)my_info.m_z;
-    pPlayer->SetPosition(XMFLOAT3(pPlayer->m_xmf3Position.x,0.0f, pPlayer->m_xmf3Position.z));
+    pPlayer->SetPosition(XMFLOAT3(pPlayer->m_xmf3Position.x, pPlayer->m_xmf3Position.y, pPlayer->m_xmf3Position.z));
 
     m_pCamera = m_pPlayer->GetCamera();
     m_pPlayer->setTerrain(m_pScene->m_pTerrain);

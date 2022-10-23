@@ -75,10 +75,11 @@ public:
 
 	int									m_nShaders = 0;
 	int									m_nCShaders = 0;
-
+	int									m_nOtherPlayers = 0;
 	CObjectsShader** m_ppShaders = NULL;
 	CObjectsShader* m_pShaders = NULL;
 	CShader** m_ppCShaders = NULL;
+	COtherPlayerShader* m_pOtherplayersShader = NULL;
 
 	CSkyBox								*m_pSkyBox = NULL;
 	CExplosionObject					*m_pExplo = NULL;

@@ -524,4 +524,16 @@ public:
 	virtual void Animate(float fTimeElapsed);
 	
 };
+
+class CTreeObject : public CGameObject
+{
+public:
+	CTreeObject();
+	virtual ~CTreeObject();
+
+	virtual void Animate(float fTimeElapsed);
+
+	float m_fRotationAngle = 0.0f;
+	float m_fRotationDelta = 1.0f;
+};
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

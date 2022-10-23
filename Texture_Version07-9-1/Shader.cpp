@@ -995,3 +995,327 @@ void CWaterMoveShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
+
+D3D12_RASTERIZER_DESC CBillboardObjectsShader::CreateRasterizerState()
+{
+	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
+	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
+	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	//	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
+	d3dRasterizerDesc.DepthBias = 0;
+	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
+	d3dRasterizerDesc.SlopeScaledDepthBias = 0.0f;
+	d3dRasterizerDesc.DepthClipEnable = TRUE;
+	d3dRasterizerDesc.MultisampleEnable = FALSE;
+	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
+	d3dRasterizerDesc.ForcedSampleCount = 0;
+	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+
+	return(d3dRasterizerDesc);
+}
+
+D3D12_BLEND_DESC CBillboardObjectsShader::CreateBlendState()
+{
+	D3D12_BLEND_DESC d3dBlendDesc;
+	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
+	d3dBlendDesc.AlphaToCoverageEnable = TRUE;
+	d3dBlendDesc.IndependentBlendEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	return(d3dBlendDesc);
+}
+
+void CBillboardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
+{
+	CTexture* ppGrassTextures[2];
+	ppGrassTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppGrassTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds", RESOURCE_TEXTURE2D, 0);
+	ppGrassTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppGrassTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Grass02.dds", RESOURCE_TEXTURE2D, 0);
+
+	CTexture* ppFlowerTextures[2];
+	ppFlowerTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppFlowerTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Flower01.dds", RESOURCE_TEXTURE2D, 0);
+	ppFlowerTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppFlowerTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Flower02.dds", RESOURCE_TEXTURE2D, 0);
+
+	CTexture* ppTreeTextures[3];
+	ppTreeTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTreeTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Tree01.dds", RESOURCE_TEXTURE2D, 0);
+	ppTreeTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTreeTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Tree02.dds", RESOURCE_TEXTURE2D, 0);
+	ppTreeTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTreeTextures[2]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Tree03.dds", RESOURCE_TEXTURE2D, 0);
+
+	CMaterial* ppGrassMaterials[2];
+	ppGrassMaterials[0] = new CMaterial();
+	ppGrassMaterials[0]->SetTexture(ppGrassTextures[0]);
+	ppGrassMaterials[1] = new CMaterial();
+	ppGrassMaterials[1]->SetTexture(ppGrassTextures[1]);
+
+	CMaterial* ppFlowerMaterials[2];
+	ppFlowerMaterials[0] = new CMaterial();
+	ppFlowerMaterials[0]->SetTexture(ppFlowerTextures[0]);
+	ppFlowerMaterials[1] = new CMaterial();
+	ppFlowerMaterials[1]->SetTexture(ppFlowerTextures[1]);
+
+	CMaterial* ppTreeMaterials[3];
+	ppTreeMaterials[0] = new CMaterial();
+	ppTreeMaterials[0]->SetTexture(ppTreeTextures[0]);
+	ppTreeMaterials[1] = new CMaterial();
+	ppTreeMaterials[1]->SetTexture(ppTreeTextures[1]);
+	ppTreeMaterials[2] = new CMaterial();
+	ppTreeMaterials[2]->SetTexture(ppTreeTextures[2]);
+
+	CTexturedRectMesh* pGrassMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 8.0f, 8.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	CTexturedRectMesh* pFlowerMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 8.0f, 16.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	CTexturedRectMesh* pTreeMesh01 = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 24.0f, 36.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	CTexturedRectMesh* pTreeMesh02 = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 16.0f, 46.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+
+	CRawFormatImage* pRawFormatImage = new CRawFormatImage(L"Image/ObjectsMap.raw", 257, 257, true);
+
+	int nGrassObjects = 0, nFlowerObjects = 0, nBlacks = 0, nOthers = 0, nTreeObjects[3] = { 0, 0, 0 };
+	for (int z = 2; z <= 254; z++)
+	{
+		for (int x = 2; x <= 254; x++)
+		{
+			BYTE nPixel = pRawFormatImage->GetRawImagePixel(x, z);
+			switch (nPixel)
+			{
+			case 102: nGrassObjects++; break;
+			case 128: nGrassObjects++; break;
+			case 153: nFlowerObjects++; break;
+			case 179: nFlowerObjects++; break;
+			case 204: nTreeObjects[0]++; break;
+			case 225: nTreeObjects[1]++; break;
+			case 255: nTreeObjects[2]++; break;
+			case 0: nBlacks++; break;
+			default: nOthers++; break;
+			}
+		}
+	}
+	m_nObjects = nGrassObjects + nFlowerObjects + nTreeObjects[0] + nTreeObjects[1] + nTreeObjects[2];
+
+	//UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
+
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, m_nObjects, 7);
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	//CreateConstantBufferViews(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
+	CreateShaderResourceViews(pd3dDevice, ppGrassTextures[0], 0, 13);
+	CreateShaderResourceViews(pd3dDevice, ppGrassTextures[1], 0, 13);
+	CreateShaderResourceViews(pd3dDevice, ppFlowerTextures[0], 0, 13);
+	CreateShaderResourceViews(pd3dDevice, ppFlowerTextures[1], 0, 13);
+	CreateShaderResourceViews(pd3dDevice, ppTreeTextures[0], 0, 13);
+	CreateShaderResourceViews(pd3dDevice, ppTreeTextures[1], 0, 13);
+	CreateShaderResourceViews(pd3dDevice, ppTreeTextures[2], 0, 13);
+
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+
+	int nTerrainWidth = int(pTerrain->GetWidth());
+	int nTerrainLength = int(pTerrain->GetLength());
+
+	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
+
+	m_ppObjects = new CGameObject * [m_nObjects];
+
+	CTreeObject* pBillboardObject = NULL;
+	for (int nObjects = 0, z = 2; z <= 254; z++)
+	{
+		for (int x = 2; x <= 254; x++)
+		{
+			BYTE nPixel = pRawFormatImage->GetRawImagePixel(x, z);
+
+			float fyOffset = 0.0f;
+
+			CMaterial* pMaterial = NULL;
+			CMesh* pMesh = NULL;
+
+			switch (nPixel)
+			{
+			case 102:
+				pMesh = pGrassMesh;
+				pMaterial = ppGrassMaterials[0];
+				fyOffset = 8.0f * 0.5f;
+				break;
+			case 128:
+				pMesh = pGrassMesh;
+				pMaterial = ppGrassMaterials[1];
+				fyOffset = 6.0f * 0.5f;
+				break;
+			case 153:
+				pMesh = pFlowerMesh;
+				pMaterial = ppFlowerMaterials[0];
+				fyOffset = 16.0f * 0.5f;
+				break;
+			case 179:
+				pMesh = pFlowerMesh;
+				pMaterial = ppFlowerMaterials[1];
+				fyOffset = 16.0f * 0.5f;
+				break;
+			case 204:
+				pMesh = pTreeMesh01;
+				pMaterial = ppTreeMaterials[0];
+				fyOffset = 33.0f * 0.5f;
+				break;
+			case 225:
+				pMesh = pTreeMesh01;
+				pMaterial = ppTreeMaterials[1];
+				fyOffset = 33.0f * 0.5f;
+				break;
+			case 255:
+				pMesh = pTreeMesh02;
+				pMaterial = ppTreeMaterials[2];
+				fyOffset = 40.0f * 0.5f;
+				break;
+			default:
+				break;
+			}
+
+			if (pMesh && pMaterial)
+			{
+				pBillboardObject = new CTreeObject();
+
+				pBillboardObject->SetMesh(0, pMesh);
+				pBillboardObject->SetMaterial(0,pMaterial);
+
+				float xPosition = x * xmf3Scale.x;
+				float zPosition = z * xmf3Scale.z;
+				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+				pBillboardObject->SetPosition(xPosition, fHeight + fyOffset, zPosition);
+				//pBillboardObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * nObjects));
+
+				m_ppObjects[nObjects++] = pBillboardObject;
+			}
+		}
+	}
+}
+void CBillboardObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j]) m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
+	}
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j]) m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+	}
+	CTexturedShader::Render(pd3dCommandList, pCamera);
+}
+
+void CBillboardObjectsShader::ReleaseObjects()
+{
+	if (m_ppObjects)
+	{
+		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) delete m_ppObjects[j];
+		delete[] m_ppObjects;
+	}
+	CTexturedShader::ReleaseObjects();
+}
+
+void CBillboardObjectsShader::ReleaseUploadBuffers()
+{
+	if (m_ppObjects)
+	{
+		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
+	}
+
+	CTexturedShader::ReleaseUploadBuffers();
+}
+
+void COtherPlayerShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	m_nObjects = 4;
+	m_ppObjects = new CGameObject * [m_nObjects];
+
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1); //SuperCobra(17), Gunship(2)
+
+	CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Mi24.bin", this);
+
+	int nObjects = 0;
+
+
+	for (int i = 0; i < m_nObjects; i++)
+	{
+		m_ppObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppObjects[i]->SetChild(pOtherPlayerModel);
+		/*m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(1200.0f, 800.0f, 1000.0f), Random(400.0f, 800.0f), i - int(floor(20 / 2.0f)), 5));*/
+		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
+		SavePos[i] = m_ppObjects[i]->m_xmf4x4Transform._41;
+		m_ppObjects[i]->PrepareAnimate();
+		pOtherPlayerModel->AddRef();
+	}
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void COtherPlayerShader::AnimateObjects(float fTimeElapsed)
+{
+	xoobb = BoundingOrientedBox(XMFLOAT3(m_ppObjects[0]->m_xmf4x4Transform._41, m_ppObjects[0]->m_xmf4x4Transform._42, m_ppObjects[0]->m_xmf4x4Transform._43),
+		XMFLOAT3(10.0, 10.0, 20.0), XMFLOAT4(0, 0, 0, 1));
+}
+
+void COtherPlayerShader::ReleaseObjects()
+{
+	if (m_ppObjects)
+	{
+		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->Release();
+		delete[] m_ppObjects;
+	}
+}
+
+D3D12_BLEND_DESC COtherPlayerShader::CreateBlendState()
+{
+	D3D12_BLEND_DESC d3dBlendDesc;
+	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
+	d3dBlendDesc.AlphaToCoverageEnable = FALSE;
+	d3dBlendDesc.IndependentBlendEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].BlendEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	return(d3dBlendDesc);
+}
+
+void COtherPlayerShader::ReleaseUploadBuffers()
+{
+	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
+}
+
+void COtherPlayerShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+{
+	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
+
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			m_ppObjects[j]->Animate(0.16f);
+			m_ppObjects[j]->UpdateTransform(NULL);
+			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+		}
+	}
+}
+
+CGameObject* COtherPlayerShader::PickObjectByRayIntersection(XMFLOAT3& xmf3PickPosition, XMFLOAT4X4& xmf4x4View, float* pfNearHitDistance)
+{
+	return nullptr;
+}

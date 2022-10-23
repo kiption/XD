@@ -154,6 +154,35 @@ public:
 	XMFLOAT4X4& xmf4x4View, float* pfNearHitDistance);
 };
 
+class COtherPlayerShader : public CStandardShader
+{
+public:
+	COtherPlayerShader() {};
+	virtual ~COtherPlayerShader() {};
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
+	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void ReleaseObjects();
+	virtual D3D12_BLEND_DESC CreateBlendState();
+	virtual void ReleaseUploadBuffers();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
+
+	int			m_nObjects = 0;
+	CGameObject** m_ppObjects = 0;
+
+protected:
+	int MovingTurn[20] = { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 };
+	float SavePos[20] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+	float DelRotation = 0.0;
+	CPlayer* m_pPlayer = NULL;
+
+public:
+	//셰이더에 포함되어 있는 모든 게임 객체들에 대한 마우스 픽킹을 수행한다.
+	virtual CGameObject* PickObjectByRayIntersection(XMFLOAT3& xmf3PickPosition,
+		XMFLOAT4X4& xmf4x4View, float* pfNearHitDistance);
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 class CPlayerShader : public CShader
@@ -241,4 +270,27 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
 	virtual void ReleaseUploadBuffers();
+};
+
+
+class CBillboardObjectsShader : public CTexturedShader
+{
+public:
+	CBillboardObjectsShader() {};
+	virtual ~CBillboardObjectsShader() {};
+
+	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
+	virtual D3D12_BLEND_DESC CreateBlendState();
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext = NULL);
+	virtual void ReleaseObjects();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+
+	virtual void ReleaseUploadBuffers();
+	CGameObject** m_ppObjects = 0;
+	int								m_nObjects = 0;
+#ifdef _WITH_BATCH_MATERIAL
+	CMaterial* m_ppGrassMaterials[2] = { NULL, NULL };
+	CMaterial* m_ppFlowerMaterials[2] = { NULL, NULL };
+#endif
 };

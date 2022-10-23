@@ -717,9 +717,9 @@ void CGameFramework::FrameAdvance()
 
 	for (int j = 0; j < 5; j++) {
 		if (other_players[j].m_state == ST_RUNNING && j != my_info.m_id) {
-			m_pScene->m_pShaders->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
-			m_pScene->m_pShaders->m_ppObjects[j]->m_xmf4x4Transform._42 = other_players[j].m_y;
-			m_pScene->m_pShaders->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
+			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
+			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._42 = other_players[j].m_y;
+			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
 		}
 	}
 
