@@ -86,7 +86,8 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUCbvDescriptorStartHandle() { return(m_d3dCbvGPUDescriptorStartHandle); }
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUSrvDescriptorStartHandle() { return(m_d3dSrvCPUDescriptorStartHandle); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUSrvDescriptorStartHandle() { return(m_d3dSrvGPUDescriptorStartHandle); }
-
+	CGameObject** m_ppObjects = 0;
+	int								m_nObjects = 0;
 	BoundingOrientedBox xoobb = BoundingOrientedBox();
 };
 
@@ -226,7 +227,7 @@ public:
 	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 };
 
-class CWaterMoveShader : public CTexturedShader
+class CWaterMoveShader : public CTerrainShader
 {
 public:
 	CWaterMoveShader() {};
@@ -287,8 +288,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 	virtual void ReleaseUploadBuffers();
-	CGameObject** m_ppObjects = 0;
-	int								m_nObjects = 0;
+
 #ifdef _WITH_BATCH_MATERIAL
 	CMaterial* m_ppGrassMaterials[2] = { NULL, NULL };
 	CMaterial* m_ppFlowerMaterials[2] = { NULL, NULL };
