@@ -24,22 +24,18 @@ CGameFramework::CGameFramework()
 	p.size = sizeof(CS_LOGIN_PACKET);
 	p.type = CS_LOGIN;
 	strcpy_s(p.name, "COPTER");
+
 	my_info.m_x = uid(dre);
-	my_info.m_y = 400;
+	my_info.m_y = 700;
 	my_info.m_z = uid(dre);
+
+
 	p.x = my_info.m_x;
 	p.y = my_info.m_y;
 	p.z = my_info.m_z;
 	sendPacket(&p);
 
 	recvPacket();
-
-	//for (int i = 0; i < 5; i++) {
-	//	if (other_players[i].m_state == OJB_ST_EMPTY) {
-	//		other_players[i].m_x = uid(dre);
-	//		other_players[i].m_z = uid(dre);
-	//	}
-	//}
 
 	m_pdxgiFactory = NULL;
 	m_pdxgiSwapChain = NULL;
@@ -184,7 +180,7 @@ void CGameFramework::CreateDirect3DDevice()
 	{
 		m_pdxgiFactory->EnumWarpAdapter(_uuidof(IDXGIFactory4), (void**)&pd3dAdapter);
 		hResult = D3D12CreateDevice(pd3dAdapter, D3D_FEATURE_LEVEL_12_0, _uuidof(ID3D12Device), (void**)&m_pd3dDevice);
-	}
+}
 
 	::gnCbvSrvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	::gnRtvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -363,7 +359,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_F9:
 			ChangeSwapChainState();
 			break;
-		case VK_SPACE: ((CAirplanePlayer*)m_pPlayer)->FireBullet(m_pLockedObject); 
+		case VK_SPACE: ((CAirplanePlayer*)m_pPlayer)->FireBullet(m_pLockedObject);
 			m_pLockedObject = NULL;
 			break;
 		case VK_F5:
@@ -450,11 +446,11 @@ void CGameFramework::BuildObjects()
 	pAirplanePlayer->m_xmf3Position.x = (float)my_info.m_x;
 	pAirplanePlayer->m_xmf3Position.y = (float)my_info.m_y;
 	pAirplanePlayer->m_xmf3Position.z = (float)my_info.m_z;
-	pAirplanePlayer->SetPosition(XMFLOAT3(pAirplanePlayer->m_xmf3Position.x, 400.0f, pAirplanePlayer->m_xmf3Position.z));
+	pAirplanePlayer->SetPosition(XMFLOAT3(pAirplanePlayer->m_xmf3Position.x, pAirplanePlayer->m_xmf3Position.y, pAirplanePlayer->m_xmf3Position.z));
 	m_pCamera = m_pPlayer->GetCamera();
 	m_pPlayer->SetTerrain(m_pScene->m_pTerrain);
 	m_pPlayer->SetWaterSurface(m_pScene->m_pUseWaterMove);
-	
+
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
@@ -516,7 +512,7 @@ void CGameFramework::ProcessInput()
 			((CAirplanePlayer*)m_pPlayer)->FireBullet(NULL);
 		}
 		// Server
-		if (packetDirection != -1 ) {
+		if (packetDirection != -1) {
 			CS_MOVE_PACKET move_p;
 			move_p.size = sizeof(move_p);
 			move_p.type = CS_MOVE;
@@ -712,6 +708,7 @@ void CGameFramework::FrameAdvance()
 	MoveToNextFrame();
 
 	// 서버에서 받은 값으로 적용
+
 	XMFLOAT3 temp = { my_info.m_x, my_info.m_y, my_info.m_z };
 	m_pPlayer->SetPosition(temp);
 
@@ -720,7 +717,13 @@ void CGameFramework::FrameAdvance()
 			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
 			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._42 = other_players[j].m_y;
 			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
-		}
+		/*	if (other_players[j].m_state == OBJ_ST_EMPTY)
+			{
+				m_pScene->m_pOtherplayersShader->m_ppObjects[j]->Release();
+				m_pScene->m_pOtherplayersShader->m_ppObjects[j]->ReleaseShaderVariables();
+				m_pScene->m_pOtherplayersShader->ReleaseObjects();
+			}*/
+}
 	}
 
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
