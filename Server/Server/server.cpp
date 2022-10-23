@@ -17,7 +17,7 @@ using namespace std;
 
 // 플레이어의 초기 위치값 설정할 때 임시로 랜덤값을 부여하기로 함. -> 추후에 정해진 리스폰 지점에 생성되도록 변경해야함.
 default_random_engine dre;
-uniform_int_distribution<int> uid(100, 1900);
+uniform_int_distribution<int> uid(1, 10);
 // ==== 리스폰 지점에 생성되도록 변경한 후에 이 부분은 지워도 됨.
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
@@ -99,26 +99,28 @@ public:
 		}
 	}
 
-	void send_login_info_packet()
-	{
-		SC_LOGIN_INFO_PACKET login_info_packet;
-		login_info_packet.id = id;
-		login_info_packet.size = sizeof(SC_LOGIN_INFO_PACKET);
-		login_info_packet.type = SC_LOGIN_INFO;
-		login_info_packet.x = x_pos;
-		login_info_packet.y = y_pos;
-		login_info_packet.z = z_pos;
-		cout << "[SC_LOGIN_INFO]";
-		do_send(&login_info_packet);
-	}
+	void send_login_info_packet();
 
 	void send_move_packet(int client_id);
 };
 
-array<SESSION, MAX_USER> clients;
+array<SESSION, MAX_USER + MAX_NPCS> clients;		// 0 ~ MAX_USER-1: Player,	 MAX_USER ~ MAX_USER+MAX_NPCS: NPC
+
 HANDLE g_h_iocp;
 SOCKET g_s_socket;
 
+void SESSION::send_login_info_packet()
+{
+	SC_LOGIN_INFO_PACKET login_info_packet;
+	login_info_packet.id = id;
+	login_info_packet.size = sizeof(SC_LOGIN_INFO_PACKET);
+	login_info_packet.type = SC_LOGIN_INFO;
+	login_info_packet.x = x_pos;
+	login_info_packet.y = y_pos;
+	login_info_packet.z = z_pos;
+	cout << "[SC_LOGIN_INFO]";
+	do_send(&login_info_packet);
+}
 void SESSION::send_move_packet(int client_id)
 {
 	SC_MOVE_PLAYER_PACKET move_pl_packet;
@@ -146,8 +148,11 @@ void disconnect(int client_id)
 
 	cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << " is log out" << endl;	// server message
 
-	for (auto& pl : clients) {
+	for (int i = 0; i < MAX_USER; i++) {
+		auto& pl = clients[i];
+
 		if (pl.id == client_id) continue;
+
 		pl.s_lock.lock();
 		if (pl.s_state != ST_INGAME) {
 			pl.s_lock.unlock();
@@ -160,6 +165,20 @@ void disconnect(int client_id)
 		cout << "[SC_REMOVE]";
 		pl.do_send(&remove_pl_packet);
 		pl.s_lock.unlock();
+	}
+}
+
+void init_npc()
+{
+	for (int i = 0; i < MAX_USER + MAX_NPCS; ++i)
+		clients[i].id = i;
+	for (int i = 0; i < MAX_NPCS; i++) {
+		int npc_id = i + MAX_USER;
+		clients[npc_id].s_state = ST_INGAME;
+		clients[npc_id].x_pos = uid(dre) * 100;
+		clients[npc_id].y_pos = 800 + uid(dre) * 50;
+		clients[npc_id].z_pos = uid(dre) * 100;
+		sprintf_s(clients[npc_id].name, "NPC-No.%d", i);
 	}
 }
 
@@ -208,7 +227,9 @@ void process_packet(int client_id, char* packet)
 
 		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is log in" << endl;	// server message
 
-		for (auto& pl : clients) {		// 현재 접속해 있는 모든 클라이언트에게 새로운 클라이언트(client_id)의 정보를 전송합니다.
+		for (int i = 0; i < MAX_USER; ++i) {		// 현재 접속해 있는 모든 클라이언트에게 새로운 클라이언트(client_id)의 정보를 전송합니다.
+			auto& pl = clients[i];
+			
 			if (pl.id == client_id) continue;
 
 			pl.s_lock.lock();
@@ -352,6 +373,8 @@ void do_worker()
 
 int main()
 {
+	init_npc();
+
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 	g_s_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
