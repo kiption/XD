@@ -101,7 +101,7 @@ void processPacket(char* ptr)
 		my_info.m_x = recv_packet->x;
 		my_info.m_y = recv_packet->y;
 		my_info.m_z = recv_packet->z;
-		my_info.m_state = ST_RUNNING;
+		my_info.m_state = OBJ_ST_RUNNING;
 		cout << "Init My Info - id: " << my_info.m_id << ", Pos(x: " << my_info.m_x << ", y : " << my_info.m_y << ", z : " << my_info.m_z << ")." << endl;
 
 		break;
@@ -112,14 +112,24 @@ void processPacket(char* ptr)
 		int recv_id = recv_packet->id;
 		if (recv_id == my_info.m_id) break;
 
-		if (recv_id < MAX_USER) {
-			other_players[recv_id].m_id = recv_packet->id;
+		if (recv_id < MAX_USER) {		// Player 추가
+			other_players[recv_id].m_id = recv_id;
 			other_players[recv_id].m_x = recv_packet->x;
 			other_players[recv_id].m_y = recv_packet->y;
 			other_players[recv_id].m_z = recv_packet->z;
-			other_players[recv_id].m_state = ST_RUNNING;
+			other_players[recv_id].m_state = OBJ_ST_RUNNING;
 			cout << "Init New Player's Info - id: " << other_players[recv_id].m_id
 				<< ", Pos(x: " << other_players[recv_id].m_x << ", y : " << other_players[recv_id].m_y << ", z : " << other_players[recv_id].m_z << ")." << endl;
+		}
+		else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {	// NPC 추가
+			int npc_id = recv_id - MAX_USER;
+			npcs_info[npc_id].m_id = recv_id;
+			npcs_info[npc_id].m_x = recv_packet->x;
+			npcs_info[npc_id].m_y = recv_packet->y;
+			npcs_info[npc_id].m_z = recv_packet->z;
+			npcs_info[npc_id].m_state = OBJ_ST_RUNNING;
+			cout << "Init New NPC's Info - id: " << npcs_info[npc_id].m_id
+				<< ", Pos(x: " << npcs_info[npc_id].m_x << ", y : " << npcs_info[npc_id].m_y << ", z : " << npcs_info[npc_id].m_z << ")." << endl;
 		}
 		else {
 			cout << "Exceed Max User." << endl;
@@ -161,7 +171,7 @@ void processPacket(char* ptr)
 			other_players[recv_id].m_x = 0;
 			other_players[recv_id].m_y = 0;
 			other_players[recv_id].m_z = 0;
-			other_players[recv_id].m_state = ST_EMPTY;
+			other_players[recv_id].m_state = OBJ_ST_EMPTY;
 
 			cout << "Player[" << recv_id << "] is log out" << endl;
 		}

@@ -34,12 +34,12 @@ CGameFramework::CGameFramework()
 
 	recvPacket();
 
-	for (int i = 0; i < 5; i++) {
-		if (other_players[i].m_state == ST_EMPTY) {
-			other_players[i].m_x = uid(dre);
-			other_players[i].m_z = uid(dre);
-		}
-	}
+	//for (int i = 0; i < 5; i++) {
+	//	if (other_players[i].m_state == OJB_ST_EMPTY) {
+	//		other_players[i].m_x = uid(dre);
+	//		other_players[i].m_z = uid(dre);
+	//	}
+	//}
 
 	m_pdxgiFactory = NULL;
 	m_pdxgiSwapChain = NULL;
@@ -716,7 +716,7 @@ void CGameFramework::FrameAdvance()
 	m_pPlayer->SetPosition(temp);
 
 	for (int j = 0; j < 5; j++) {
-		if (other_players[j].m_state == ST_RUNNING && j != my_info.m_id) {
+		if (other_players[j].m_state == OBJ_ST_RUNNING && j != my_info.m_id) {
 			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
 			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._42 = other_players[j].m_y;
 			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
