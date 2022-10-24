@@ -213,13 +213,11 @@ void process_packet(int client_id, char* packet)
 			break;
 		}
 		// 새로 접속한 플레이어의 초기 위치정보를 설정합니다.
-		int new_x = login_packet->x;
-		int new_y = login_packet->y;
-		int new_z = login_packet->z;
-		clients[client_id].x_pos = new_x;
-		clients[client_id].y_pos = new_y;
-		clients[client_id].z_pos = new_z;
-		cout << "A new object is successfully created! - POS:(" << new_x << "," << new_y << "," << new_z << ")." << endl;
+		clients[client_id].x_pos = 640 + client_id * 15;
+		clients[client_id].y_pos = 733;
+		clients[client_id].z_pos = 1165 - client_id * 15;
+		cout << "A new object is successfully created! - POS:(" << clients[client_id].x_pos
+			<< "," << clients[client_id].y_pos << "," << clients[client_id].z_pos << ")." << endl;
 		strcpy_s(clients[client_id].name, login_packet->name);
 		clients[client_id].send_login_info_packet();
 		clients[client_id].s_state = ST_INGAME;
