@@ -551,6 +551,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 			if (ppBullets[j]->m_bActive && m_pShaders->m_ppObjects[i]->xoobb.Intersects(ppBullets[j]->xoobb))
 			{
+				m_pShaders->m_ppObjects[i]->SetScale(0.0f, 0.0f, 0.0f);
 				CollisionCheck = i;
 				ppBullets[j]->Reset();
 			}
