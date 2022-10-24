@@ -5,7 +5,9 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 #include "Network.h"
-uniform_int_distribution<int> uid(1200, 1900);
+uniform_real_distribution<float> uidx(640.0, 690.0);
+uniform_real_distribution<float> uidy(720.0, 725.0);
+uniform_real_distribution<float> uidz(1100.0, 1200.0);
 CGameFramework::CGameFramework()
 {
 	// Server
@@ -25,9 +27,9 @@ CGameFramework::CGameFramework()
 	p.type = CS_LOGIN;
 	strcpy_s(p.name, "COPTER");
 
-	my_info.m_x = uid(dre);
-	my_info.m_y = 700;
-	my_info.m_z = uid(dre);
+	my_info.m_x = uidx(dre);
+	my_info.m_y = uidy(dre);
+	my_info.m_z = uidz(dre);
 
 
 	p.x = my_info.m_x;
@@ -720,9 +722,11 @@ void CGameFramework::FrameAdvance()
 		}
 		else if (other_players[j].m_state == OBJ_ST_LOGOUT) {
 			other_players[j].m_state = OBJ_ST_EMPTY;
-			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->Release();
-			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->ReleaseShaderVariables();
-			//m_pScene->m_pOtherplayersShader->ReleaseObjects();
+			if (m_pScene->m_pOtherplayersShader->m_ppObjects[j])
+			{
+				m_pScene->m_pOtherplayersShader->m_ppObjects[j]->SetScale(0.0,0.0,0.0);
+			}
+	
 		}
 	}
 

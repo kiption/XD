@@ -1239,7 +1239,7 @@ void CBillboardObjectsShader::ReleaseUploadBuffers()
 
 void COtherPlayerShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nObjects = 4;
+	m_nObjects = 5;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1); //SuperCobra(17), Gunship(2)
@@ -1253,7 +1253,7 @@ void COtherPlayerShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	{
 		m_ppObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pOtherPlayerModel);
-		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
+		m_ppObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
 		SavePos[i] = m_ppObjects[i]->m_xmf4x4Transform._41;
 		m_ppObjects[i]->PrepareAnimate();
 		pOtherPlayerModel->AddRef();
