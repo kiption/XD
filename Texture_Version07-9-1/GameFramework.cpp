@@ -717,13 +717,13 @@ void CGameFramework::FrameAdvance()
 			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
 			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._42 = other_players[j].m_y;
 			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
-		/*	if (other_players[j].m_state == OBJ_ST_EMPTY)
-			{
-				m_pScene->m_pOtherplayersShader->m_ppObjects[j]->Release();
-				m_pScene->m_pOtherplayersShader->m_ppObjects[j]->ReleaseShaderVariables();
-				m_pScene->m_pOtherplayersShader->ReleaseObjects();
-			}*/
-}
+		}
+		else if (other_players[j].m_state == OBJ_ST_LOGOUT) {
+			other_players[j].m_state = OBJ_ST_EMPTY;
+			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->Release();
+			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->ReleaseShaderVariables();
+			//m_pScene->m_pOtherplayersShader->ReleaseObjects();
+		}
 	}
 
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);

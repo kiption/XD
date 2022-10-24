@@ -2,7 +2,7 @@
 #include <array>
 #include "../Server/Server/protocol.h"
 
-enum OBJECT_STATE { OBJ_ST_EMPTY, OBJ_ST_RUNNING };
+enum OBJECT_STATE { OBJ_ST_EMPTY, OBJ_ST_LOGOUT, OBJ_ST_RUNNING };
 struct ObjectsInfo
 {
 	short m_id;

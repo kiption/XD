@@ -96,7 +96,6 @@ void processPacket(char* ptr)
 		SC_LOGIN_INFO_PACKET* recv_packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(ptr);
 		my_id = recv_packet->id;
 		// Player 초기 위치 설정
-		//cout << "Init Position - x: " << recv_packet->x << ", y : " << recv_packet->y << ", z : " << recv_packet->z << endl;
 		my_info.m_id = recv_packet->id;
 		my_info.m_x = recv_packet->x;
 		my_info.m_y = recv_packet->y;
@@ -123,6 +122,7 @@ void processPacket(char* ptr)
 		}
 		else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {	// NPC 추가
 			int npc_id = recv_id - MAX_USER;
+
 			npcs_info[npc_id].m_id = recv_id;
 			npcs_info[npc_id].m_x = recv_packet->x;
 			npcs_info[npc_id].m_y = recv_packet->y;
@@ -147,7 +147,7 @@ void processPacket(char* ptr)
 			my_info.m_z = recv_packet->z;
 			cout << "My object moves to (" << my_info.m_x << ", " << my_info.m_y << ", " << my_info.m_z << ")." << endl;
 		}
-		else {
+		else if (0 <= recv_id && recv_id < MAX_USER) {
 			// 상대 Object 이동
 			other_players[recv_id].m_x = recv_packet->x;
 			other_players[recv_id].m_y = recv_packet->y;
@@ -155,6 +155,17 @@ void processPacket(char* ptr)
 			cout << "Player[" << recv_id << "]'s object moves to("
 				<< other_players[recv_id].m_x << ", " << other_players[recv_id].m_y << ", " << other_players[recv_id].m_z << ")." << endl;
 		}
+		else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
+			// Npc 이동
+			int npc_id = recv_id - MAX_USER;
+
+			npcs_info[npc_id].m_x = recv_packet->x;
+			npcs_info[npc_id].m_y = recv_packet->y;
+			npcs_info[npc_id].m_z = recv_packet->z;
+			cout << "NPC[" << npc_id << "]'s object moves to("
+				<< npcs_info[npc_id].m_x << ", " << npcs_info[npc_id].m_y << ", " << npcs_info[npc_id].m_z << ")." << endl;
+		}
+
 		break;
 	}
 
@@ -165,15 +176,27 @@ void processPacket(char* ptr)
 		if (recv_id == my_id) {
 			// 자기자신 없애기
 		}
-		else {
-			// 상대 Object 없애기
+		else if (0 <= recv_id && recv_id < MAX_USER) {
+			// 상대 Player 없애기
 			other_players[recv_id].m_id = -1;
 			other_players[recv_id].m_x = 0;
 			other_players[recv_id].m_y = 0;
 			other_players[recv_id].m_z = 0;
-			other_players[recv_id].m_state = OBJ_ST_EMPTY;
+			other_players[recv_id].m_state = OBJ_ST_LOGOUT;
 
 			cout << "Player[" << recv_id << "] is log out" << endl;
+		}
+		else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
+			// NPC 없애기
+			int npc_id = recv_id - MAX_USER;
+
+			npcs_info[npc_id].m_id = -1;
+			npcs_info[npc_id].m_x = 0;
+			npcs_info[npc_id].m_y = 0;
+			npcs_info[npc_id].m_z = 0;
+			npcs_info[npc_id].m_state = OBJ_ST_LOGOUT;
+
+			cout << "NPC[" << npc_id << "] is removed" << endl;
 		}
 
 		break;

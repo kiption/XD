@@ -251,7 +251,7 @@ void process_packet(int client_id, char* packet)
 			pl.s_lock.unlock();
 		}
 
-		for (auto& pl : clients) {		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 클라이언트의 정보를 전송합니다.
+		for (auto& pl : clients) {		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 클라이언트와 NPC들의 정보를 전송합니다.
 			if (pl.id == client_id) continue;
 
 			lock_guard<mutex> lg{ pl.s_lock };
@@ -288,7 +288,8 @@ void process_packet(int client_id, char* packet)
 		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] moves to ("
 			<< clients[client_id].x_pos << ", " << clients[client_id].y_pos << ", " << clients[client_id].z_pos << ")." << endl;
 
-		for (auto& pl : clients) {
+		for (int i = 0; i < MAX_USER; i++) {
+			auto& pl = clients[i];
 			lock_guard<mutex> lg{ pl.s_lock };
 			if (pl.s_state == ST_INGAME)
 				pl.send_move_packet(client_id);
