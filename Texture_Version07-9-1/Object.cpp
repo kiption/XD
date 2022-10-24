@@ -1240,16 +1240,17 @@ void CMi24Object::PrepareAnimate()
 void CMi24Object::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 	xoobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(0.0, 0.0, .0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
-	if (m_pMainRotorFrame)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
-		m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
-	}
-	if (m_pTailRotorFrame)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
-		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
-	}
+	//if (m_pMainRotorFrame)
+	//{
+	//	XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
+	//	m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
+	//}
+	//if (m_pTailRotorFrame)
+	//{
+	//	XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
+	//	m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+	//}
+
 	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 

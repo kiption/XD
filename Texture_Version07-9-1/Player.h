@@ -110,6 +110,7 @@ public:
 private:
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = NULL);
+	void StopZoneAnimate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = NULL);
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
 	virtual void WaterOnPlayerUpdateCallback(float fTimeElapsed);
 public:
@@ -120,6 +121,8 @@ public:
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
+	bool m_bStopZone=true;
+	float m_fdelrot = 0.0;
 	BoundingOrientedBox xoobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(15.0, 10.0, 30.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 };
 

@@ -99,11 +99,11 @@ void CPlayer::Rotate(float x, float y, float z)
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	if ((nCurrentCameraMode == FIRST_PERSON_CAMERA))
 	{
-		if (x!=0.0)
+		if (x != 0.0)
 		{
 			m_fPitch += x;
-			if (m_fPitch > +89.0f) {x -= (m_fPitch - 89.0f);m_fPitch = +89.0f; }
-			if (m_fPitch < -89.0f) {x -= (m_fPitch + 89.0f);m_fPitch = -89.0f; }
+			if (m_fPitch > +89.0f) { x -= (m_fPitch - 89.0f); m_fPitch = +89.0f; }
+			if (m_fPitch < -89.0f) { x -= (m_fPitch + 89.0f); m_fPitch = -89.0f; }
 		}
 		if (y != 0.0f)
 		{
@@ -158,8 +158,8 @@ void CPlayer::Rotate(float x, float y, float z)
 		if (x != 0.0)
 		{
 			m_fPitch += x;
-			if (m_fPitch > +20.0f) {x -= (m_fPitch - 20.0f);m_fPitch = +20.0f;}
-			if (m_fPitch < -20.0f) {x -= (m_fPitch + 20.0f);m_fPitch = -20.0f;}
+			if (m_fPitch > +20.0f) { x -= (m_fPitch - 20.0f); m_fPitch = +20.0f; }
+			if (m_fPitch < -20.0f) { x -= (m_fPitch + 20.0f); m_fPitch = -20.0f; }
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(x));
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
@@ -177,7 +177,7 @@ void CPlayer::Rotate(float x, float y, float z)
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 		}
-	
+
 
 	}
 	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
@@ -328,14 +328,11 @@ void CAirplanePlayer::PrepareAnimate()
 {
 	m_pMainRotorFrame = FindFrame("Top_Rotor");
 	m_pTailRotorFrame = FindFrame("Tail_Rotor");
-	//m_pBulletFrame = FindFrame("Hellfire_Missile");
-	//m_pBulletFrame->SetScale(3.0,3.0,3.0);
-	//pos=m_pBulletFrame->m_xmf4x4Transform._43;
-
 }
 
 void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
+	this->StopZoneAnimate(fTimeElapsed, pxmf4x4Parent);
 	if (m_ZoomInActive == true)
 	{
 		m_pCamera->m_nMode = SPACESHIP_CAMERA;
@@ -364,33 +361,25 @@ void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 				m_pCamera->m_xmf3Position.x = this->m_xmf3Position.x - 1.0f;
 			}
 		}
-		//	m_pBulletFrame->m_xmf4x4Transform._43 += 1.5f;
-
 	}
-	//if (m_ZoomInActive == false)
+
+
+
+	//if (m_pMainRotorFrame)
 	//{
-	//	m_MissileActive = false;
-	//	m_pCamera->m_nMode = THIRD_PERSON_CAMERA;
-	//	//m_pBulletFrame->m_xmf4x4Transform._43 = pos;
+	//	XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
+	//	m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
 	//}
-
-
-	if (m_pMainRotorFrame)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
-		m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
-	}
-	if (m_pTailRotorFrame)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
-		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
-	}
+	//if (m_pTailRotorFrame)
+	//{
+	//	XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
+	//	m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+	//}
 
 	for (int i = 0; i < BULLETS; i++)
 	{
 		if (m_ppBullets[i]->m_bActive) {
 
-			//m_pBulletFrame->Animate(fTimeElapsed);
 			m_ppBullets[i]->Rotate(0.0, 0.0, 50.0f);
 			m_ppBullets[i]->Animate(fTimeElapsed);
 		}
@@ -405,8 +394,70 @@ void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	{
 		SetGravity(XMFLOAT3(0.0, 10.0, 0.0));
 	}
-	xoobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(15.0, 10.0, 30.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
+
+	xoobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(10.0, 10.0, 30.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
+}
+
+void CAirplanePlayer::StopZoneAnimate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+{
+	if (this->GetPosition().x > 300.0 && this->GetPosition().x < 800.0 && this->GetPosition().z > 600.0 && this->GetPosition().z < 1200.0 && this->GetPosition().y < 760.0)
+	{
+		m_bStopZone = true;
+	}
+	//else 
+	//{
+	//	m_bStopZone = false;
+	//}
+
+	if (m_bStopZone == true) {
+
+		if (this->GetPosition().y < 760.0) {
+			m_bStopZone = true;
+			m_fdelrot -= 0.01f;
+			if (m_fdelrot <= 0.0)
+				m_fdelrot = 0.0f;
+		}
+		if (this->GetPosition().y > 745.0) {
+			m_bStopZone = false;
+			m_fdelrot += 0.01f;
+			if (m_fdelrot >= 4.0)
+				m_fdelrot = 4.0f;
+		}
+
+		if (m_pMainRotorFrame)
+		{
+			XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * m_fdelrot) * fTimeElapsed);
+			m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
+		}
+
+		if (m_pTailRotorFrame)
+		{
+			XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * m_fdelrot) * fTimeElapsed);
+			m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+		}
+	}
+
+	if (m_bStopZone == false)
+	{
+
+		if (this->GetPosition().y > 745.0) {
+			m_fdelrot += 0.01f;
+			if (m_fdelrot >= 4.0) m_fdelrot = 4.0f;
+		}
+
+		if (m_pMainRotorFrame)
+		{
+			XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * m_fdelrot) * fTimeElapsed);
+			m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
+		}
+
+		if (m_pTailRotorFrame)
+		{
+			XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * m_fdelrot) * fTimeElapsed);
+			m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+		}
+	}
 }
 
 void CAirplanePlayer::OnPlayerUpdateCallback(float fTimeElapsed)
@@ -473,7 +524,6 @@ void CAirplanePlayer::FireBullet(CGameObject* pLockedObject)
 	{
 		if (!m_ppBullets[i]->m_bActive)
 		{
-			//this->m_xmf3Position.z -= 1.0f;
 			pBulletObject = m_ppBullets[i];
 			break;
 		}
