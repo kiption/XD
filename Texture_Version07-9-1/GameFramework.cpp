@@ -27,14 +27,6 @@ CGameFramework::CGameFramework()
 	p.type = CS_LOGIN;
 	strcpy_s(p.name, "COPTER");
 
-	my_info.m_x = uidx(dre);
-	my_info.m_y = uidy(dre);
-	my_info.m_z = uidz(dre);
-
-
-	p.x = my_info.m_x;
-	p.y = my_info.m_y;
-	p.z = my_info.m_z;
 	sendPacket(&p);
 
 	recvPacket();
