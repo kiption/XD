@@ -7,7 +7,6 @@
 #include "Mesh.h"
 #include "Camera.h"
 
-
 #define DIR_FORWARD					0x01
 #define DIR_BACKWARD				0x02
 #define DIR_LEFT					0x04
@@ -22,6 +21,7 @@
 #define RESOURCE_BUFFER				0x05
 
 class CShader;
+class CPlayer;
 
 struct MATERIAL
 {
@@ -375,7 +375,7 @@ public:
 private:
 	CGameObject					*m_pMainRotorFrame = NULL;
 	CGameObject					*m_pTailRotorFrame = NULL;
-
+	CPlayer* m_pPlayer = NULL;
 public:
 	virtual void PrepareAnimate();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = NULL);

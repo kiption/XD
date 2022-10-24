@@ -91,6 +91,7 @@ public:
 	// Missile ON/OFF
 	bool m_MissileActive;
 	bool m_ZoomInActive = false;
+	bool m_bStopZone = false;
 };
 
 #define BULLETS					50
@@ -121,8 +122,8 @@ public:
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
-	bool m_bStopZone=true;
-	float m_fdelrot = 0.0;
+
+	float m_fdelrot = 1.0;
 	BoundingOrientedBox xoobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(15.0, 10.0, 30.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 };
 

@@ -154,11 +154,11 @@ void CPlayer::Rotate(float x, float y, float z)
 	{
 
 
-		m_pCamera->Rotate(x, y, z);
+		
 		if (x != 0.0)
 		{
 			m_fPitch += x;
-			if (m_fPitch > +20.0f) { x -= (m_fPitch - 20.0f); m_fPitch = +20.0f; }
+			if (m_fPitch > +40.0f) { x -= (m_fPitch - 40.0f); m_fPitch = +40.0f; }
 			if (m_fPitch < -20.0f) { x -= (m_fPitch + 20.0f); m_fPitch = -20.0f; }
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(x));
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
@@ -177,7 +177,7 @@ void CPlayer::Rotate(float x, float y, float z)
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 		}
-
+		m_pCamera->Rotate(x, y, z);
 
 	}
 	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
@@ -363,19 +363,6 @@ void CAirplanePlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 		}
 	}
 
-
-
-	//if (m_pMainRotorFrame)
-	//{
-	//	XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
-	//	m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
-	//}
-	//if (m_pTailRotorFrame)
-	//{
-	//	XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
-	//	m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
-	//}
-
 	for (int i = 0; i < BULLETS; i++)
 	{
 		if (m_ppBullets[i]->m_bActive) {
@@ -405,10 +392,7 @@ void CAirplanePlayer::StopZoneAnimate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Par
 	{
 		m_bStopZone = true;
 	}
-	//else 
-	//{
-	//	m_bStopZone = false;
-	//}
+	
 
 	if (m_bStopZone == true) {
 
@@ -597,7 +581,7 @@ CCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(20.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(5.0f, 10.0f, -45.0f));
+		m_pCamera->SetOffset(XMFLOAT3(5.0f, 5.0f, -45.0f));
 		m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);

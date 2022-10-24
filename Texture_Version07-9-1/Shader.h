@@ -8,7 +8,7 @@
 #include "Camera.h"
 //#include "Network.h"
 
-class CPlayer;
+//class CPlayer;
 
 class CShader
 {
