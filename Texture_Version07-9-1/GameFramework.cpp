@@ -706,7 +706,8 @@ void CGameFramework::FrameAdvance()
 	XMFLOAT3 temp = { my_info.m_x, my_info.m_y, my_info.m_z };
 	m_pPlayer->SetPosition(temp);
 
-	for (int j = 0; j < 5; j++) {
+	// ´Ù¸¥ Player
+	for (int j = 0; j < MAX_USER; j++) {
 		if (other_players[j].m_state == OBJ_ST_RUNNING && j != my_info.m_id) {
 			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
 			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._42 = other_players[j].m_y;
@@ -716,9 +717,25 @@ void CGameFramework::FrameAdvance()
 			other_players[j].m_state = OBJ_ST_EMPTY;
 			if (m_pScene->m_pOtherplayersShader->m_ppObjects[j])
 			{
-				m_pScene->m_pOtherplayersShader->m_ppObjects[j]->SetScale(0.0,0.0,0.0);
+				m_pScene->m_pOtherplayersShader->m_ppObjects[j]->SetScale(0.0, 0.0, 0.0);
 			}
-	
+
+		}
+	}
+	// Npc
+	for (int i = 0; i < MAX_NPCS; i++) {
+		if (npcs_info[i].m_state == OBJ_ST_RUNNING) {
+			m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._41 = npcs_info[i].m_x;
+			m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._42 = npcs_info[i].m_y;
+			m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._43 = npcs_info[i].m_z;
+		}
+		else if (npcs_info[i].m_state == OBJ_ST_LOGOUT) {
+			npcs_info[i].m_state = OBJ_ST_EMPTY;
+			if (m_pScene->m_pShaders->m_ppObjects[i])
+			{
+				m_pScene->m_pShaders->m_ppObjects[i]->SetScale(0.0, 0.0, 0.0);
+			}
+
 		}
 	}
 
