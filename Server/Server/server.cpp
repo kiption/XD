@@ -175,9 +175,9 @@ void init_npc()
 	for (int i = 0; i < MAX_NPCS; i++) {
 		int npc_id = i + MAX_USER;
 		clients[npc_id].s_state = ST_INGAME;
-		clients[npc_id].x_pos = uid(dre) * 100;
+		clients[npc_id].x_pos = uid(dre) * 150;
 		clients[npc_id].y_pos = 800 + uid(dre) * 50;
-		clients[npc_id].z_pos = uid(dre) * 100;
+		clients[npc_id].z_pos = uid(dre) * 150;
 		sprintf_s(clients[npc_id].name, "NPC-No.%d", i);
 	}
 }

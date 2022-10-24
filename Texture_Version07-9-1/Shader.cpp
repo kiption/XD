@@ -535,35 +535,52 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 	xoobb = BoundingOrientedBox(XMFLOAT3(m_ppObjects[0]->m_xmf4x4Transform._41, m_ppObjects[0]->m_xmf4x4Transform._42, m_ppObjects[0]->m_xmf4x4Transform._43),
 		XMFLOAT3(10.0, 10.0, 20.0), XMFLOAT4(0, 0, 0, 1));
 
-	for (int i = 4; i < 10; i++)
-	{
+	//for (int i = 4; i < 10; i++)
+	//{
 
-		if (MovingTurn[i] == 1) {
-			m_ppObjects[i]->m_xmf4x4Transform._41 += 0.25;
-			if (m_ppObjects[i]->m_xmf4x4Transform._41 > SavePos[i] + 200.0f)
-			{
-				m_ppObjects[i]->m_xmf4x4Transform._41 -= 0.25f;
-		
-				DelRotation += 0.1f;
-				m_ppObjects[i]->Rotate(0.0f, DelRotation, 0.0f);
-				if (DelRotation > 8.0f) { DelRotation = 0.0f; MovingTurn[i] = 2; }
-			}
-		}
+	//	if (MovingTurn[i] == 1) {
+	//		m_ppObjects[i]->m_xmf4x4Transform._41 += 0.25;
+	//		if (m_ppObjects[i]->m_xmf4x4Transform._41 > SavePos[i] + 200.0f)
+	//		{
+	//			m_ppObjects[i]->m_xmf4x4Transform._41 -= 0.25f;
+	//	
+	//			DelRotation += 0.1f;
+	//			m_ppObjects[i]->Rotate(0.0f, DelRotation, 0.0f);
+	//			if (DelRotation > 8.0f) { DelRotation = 0.0f; MovingTurn[i] = 2; }
+	//		}
+	//	}
 
-		if (MovingTurn[i] == 2) {
-			m_ppObjects[i]->m_xmf4x4Transform._41 -= 0.25f;
+	//	if (MovingTurn[i] == 2) {
+	//		m_ppObjects[i]->m_xmf4x4Transform._41 -= 0.25f;
 
-			if (m_ppObjects[i]->m_xmf4x4Transform._41 < SavePos[i] - 200.0f)
-			{
-				m_ppObjects[i]->m_xmf4x4Transform._41 += 0.25f;
-			
-				DelRotation -= 0.1f;
-				m_ppObjects[i]->Rotate(0.0f, DelRotation, 0.0f);
-				if (DelRotation < -8.0f) { DelRotation = 0.0f; MovingTurn[i] = 1; }
-			}
-		}
+	//		if (m_ppObjects[i]->m_xmf4x4Transform._41 < SavePos[i] - 200.0f)
+	//		{
+	//			m_ppObjects[i]->m_xmf4x4Transform._41 += 0.25f;
+	//		
+	//			DelRotation -= 0.1f;
+	//			m_ppObjects[i]->Rotate(0.0f, DelRotation, 0.0f);
+	//			if (DelRotation < -8.0f) { DelRotation = 0.0f; MovingTurn[i] = 1; }
+	//		}
+	//	}
 
-	}
+	//}
+
+
+	//for (int i = 0; i < MAX_NPCS; i++) {
+	//	if (npcs_info[i].m_state == OBJ_ST_RUNNING) {
+	//		m_ppObjects[i]->m_xmf4x4Transform._41 += npcs_info[i].m_x* fTimeElapsed;
+	//		m_ppObjects[i]->m_xmf4x4Transform._42 += npcs_info[i].m_y * fTimeElapsed;
+	//		m_ppObjects[i]->m_xmf4x4Transform._43 += npcs_info[i].m_z * fTimeElapsed;
+	//	}
+	//	else if (npcs_info[i].m_state == OBJ_ST_LOGOUT) {
+	//		npcs_info[i].m_state = OBJ_ST_EMPTY;
+	//		if (m_ppObjects[i])
+	//		{
+	//			m_ppObjects[i]->SetScale(0.0, 0.0, 0.0);
+	//		}
+
+	//	}
+	//}
 }
 
 void CObjectsShader::ReleaseUploadBuffers()

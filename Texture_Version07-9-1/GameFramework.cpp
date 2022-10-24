@@ -174,7 +174,7 @@ void CGameFramework::CreateDirect3DDevice()
 	{
 		m_pdxgiFactory->EnumWarpAdapter(_uuidof(IDXGIFactory4), (void**)&pd3dAdapter);
 		hResult = D3D12CreateDevice(pd3dAdapter, D3D_FEATURE_LEVEL_12_0, _uuidof(ID3D12Device), (void**)&m_pd3dDevice);
-}
+	}
 
 	::gnCbvSrvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	::gnRtvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -578,6 +578,15 @@ void CGameFramework::AnimateObjects()
 
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
+	//====
+	//g_time += 1.0 / 100.0;
+	//float turn = 0;
+	//for (int i = 0; i < MAX_USER; i++) {
+	//	if (npcs_info[i].m_state == OBJ_ST_RUNNING) {
+	//		npcs_info[i].m_y += 1.0 * sin(g_time);
+	//	}
+	//}
+
 	m_pPlayer->Animate(fTimeElapsed, NULL);
 }
 
@@ -629,6 +638,8 @@ void CGameFramework::MoveToNextFrame()
 
 #define _WITH_PLAYER_TOP
 
+float g_time = 0.0f;
+float g_reverse_time = 0.0f;
 void CGameFramework::FrameAdvance()
 {
 	SleepEx(1, TRUE);//Server
@@ -723,11 +734,20 @@ void CGameFramework::FrameAdvance()
 		}
 	}
 	// Npc
+	g_time += 0.01f;
+	g_reverse_time -= 0.01f;
 	for (int i = 0; i < MAX_NPCS; i++) {
 		if (npcs_info[i].m_state == OBJ_ST_RUNNING) {
-			m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._41 = npcs_info[i].m_x;
-			m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._42 = npcs_info[i].m_y;
-			m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._43 = npcs_info[i].m_z;
+			if (i % 2) {
+				m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._41 = npcs_info[i].m_x + 30 * (i % 5) * cos(g_time);
+				m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._42 = npcs_info[i].m_y + 100 * sin(g_time);
+				m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._43 = npcs_info[i].m_z + 30 * (i % 5) * sin(g_time);
+			}
+			else {
+				m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._41 = npcs_info[i].m_x + 30 * (i % 5) * cos(g_reverse_time);
+				m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._42 = npcs_info[i].m_y + 100 * sin(g_reverse_time);
+				m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._43 = npcs_info[i].m_z + 30 * (i % 5) * sin(g_reverse_time);
+			}
 		}
 		else if (npcs_info[i].m_state == OBJ_ST_LOGOUT) {
 			npcs_info[i].m_state = OBJ_ST_EMPTY;
