@@ -12,10 +12,12 @@ constexpr int WORLD_Z_POS = 2000;
 // Packet ID
 constexpr char CS_LOGIN = 0;
 constexpr char CS_MOVE = 1;
-constexpr char SC_LOGIN_INFO = 2;
-constexpr char SC_ADD_PLAYER = 3;
-constexpr char SC_REMOVE_PLAYER = 4;
-constexpr char SC_MOVE_PLAYER = 5;
+constexpr char CS_ROTATE = 2;
+constexpr char SC_LOGIN_INFO = 3;
+constexpr char SC_ADD_PLAYER = 4;
+constexpr char SC_REMOVE_PLAYER = 5;
+constexpr char SC_MOVE_PLAYER = 6;
+constexpr char SC_ROTATE_PLAYER = 7;
 
 // Packets ( CS: Client->Server, SC: Server->Client )
 #pragma pack (push, 1)
@@ -25,26 +27,38 @@ struct CS_LOGIN_PACKET {
 	char name[NAME_SIZE];
 };
 
+enum move_dir { MV_FORWARD, MV_BACK, MV_LEFT, MV_RIGHT, MV_DOWN, MV_UP };
 struct CS_MOVE_PACKET {
 	unsigned char size;
 	char type;
-	char direction;				// 0: Foward, 1: Back, 2: Left, 3: Right, 4: Down, 5: Up
-	float vec_x, vec_y, vec_z;	// 이동방향이 Foward/Back이면 LookVec을, Left/Right이면 RightVec, Down/Up이면 UpVec을 넣어주면 됨.
+	char direction;
+};
+
+struct CS_ROTATE_PACKET {
+	unsigned char size;
+	char type;
+	float roll, pitch, yaw;
 };
 
 struct SC_LOGIN_INFO_PACKET {
 	unsigned char size;
 	char type;
 	short id;
-	short x, y, z;
+	float x, y, z;
+	float right_x, right_y, right_z;
+	float up_x, up_y, up_z;
+	float look_x, look_y, look_z;
 };
 
 struct SC_ADD_PLAYER_PACKET {
 	unsigned char size;
 	char type;
 	short id;
-	short x, y, z;
 	char name[NAME_SIZE];
+	float x, y, z;
+	float right_x, right_y, right_z;
+	float up_x, up_y, up_z;
+	float look_x, look_y, look_z;
 };
 
 struct SC_REMOVE_PLAYER_PACKET {
@@ -57,7 +71,16 @@ struct SC_MOVE_PLAYER_PACKET {
 	unsigned char size;
 	char type;
 	short id;
-	short x, y, z;
+	float x, y, z;
+};
+
+struct SC_ROTATE_PLAYER_PACKET {
+	unsigned char size;
+	char type;
+	short id;
+	float right_x, right_y, right_z;
+	float up_x, up_y, up_z;
+	float look_x, look_y, look_z;
 };
 
 #pragma pack (pop)

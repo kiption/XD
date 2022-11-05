@@ -510,39 +510,7 @@ void CGameFramework::ProcessInput()
 			CS_MOVE_PACKET move_p;
 			move_p.size = sizeof(move_p);
 			move_p.type = CS_MOVE;
-			move_p.direction = packetDirection;
-			XMFLOAT3 packetVec = m_pPlayer->GetLookVector();             // 이동 계산에 필요한 벡터로,
-																		 // Foward/Back 이동은 LookVector를 Left/Right 이동은 RightVector, Up/Down 이동은 UpVector를 보냅니다.
-			int positive_or_negative = 0;                                // Foward/Right/Up은 1, Back/Left/Down은 -1
-			switch (packetDirection) {
-			case 0:
-				positive_or_negative = 1;
-				packetVec = m_pPlayer->GetLookVector();
-				break;
-			case 1:
-				positive_or_negative = -1;
-				packetVec = m_pPlayer->GetLookVector();
-				break;
-			case 2:
-				positive_or_negative = -1;
-				packetVec = m_pPlayer->GetRightVector();
-				break;
-			case 3:
-				positive_or_negative = 1;
-				packetVec = m_pPlayer->GetRightVector();
-				break;
-			case 4:
-				positive_or_negative = -1;
-				packetVec = m_pPlayer->GetUpVector();
-				break;
-			case 5:
-				positive_or_negative = 1;
-				packetVec = m_pPlayer->GetUpVector();
-				break;
-			}
-			move_p.vec_x = packetVec.x * positive_or_negative;
-			move_p.vec_y = packetVec.y * positive_or_negative;
-			move_p.vec_z = packetVec.z * positive_or_negative;
+			move_p.direction = packetDirection;	// 입력받은 키값 전달
 
 			sendPacket(&move_p);
 		}//
@@ -562,10 +530,21 @@ void CGameFramework::ProcessInput()
 		{
 			if (cxDelta || cyDelta)
 			{
-				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				else
-					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				CS_ROTATE_PACKET rotate_p;
+				rotate_p.size = sizeof(rotate_p);
+				rotate_p.type = CS_ROTATE;
+				rotate_p.roll = 0.0f;
+				rotate_p.pitch = -cyDelta * 3.141592654f / 180;
+				rotate_p.yaw = cxDelta * 3.141592654f / 180;
+
+				sendPacket(&rotate_p);
+
+				//if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+				//	m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+				//else
+				//	m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+
+				cout << "GetUp: " << m_pPlayer->GetUp().x << ", " << m_pPlayer->GetUp().y << ", " << m_pPlayer->GetUp().z << ", " << endl;
 			}
 		}
 	}
@@ -577,15 +556,6 @@ void CGameFramework::AnimateObjects()
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
-
-	//====
-	//g_time += 1.0 / 100.0;
-	//float turn = 0;
-	//for (int i = 0; i < MAX_USER; i++) {
-	//	if (npcs_info[i].m_state == OBJ_ST_RUNNING) {
-	//		npcs_info[i].m_y += 1.0 * sin(g_time);
-	//	}
-	//}
 
 	m_pPlayer->Animate(fTimeElapsed, NULL);
 }
@@ -717,12 +687,26 @@ void CGameFramework::FrameAdvance()
 	XMFLOAT3 temp = { my_info.m_x, my_info.m_y, my_info.m_z };
 	m_pPlayer->SetPosition(temp);
 
+	XMFLOAT3 tempRight = { my_info.m_right_vec.x, my_info.m_right_vec.y , my_info.m_right_vec.z };
+	XMFLOAT3 tempUp = { my_info.m_up_vec.x, my_info.m_up_vec.y , my_info.m_up_vec.z };
+	XMFLOAT3 tempLook = { my_info.m_look_vec.x, my_info.m_look_vec.y , my_info.m_look_vec.z };
+	m_pPlayer->SetVectorsByServer(tempRight, tempUp, tempLook);
+
 	// 다른 Player
 	for (int j = 0; j < MAX_USER; j++) {
-		if (other_players[j].m_state == OBJ_ST_RUNNING && j != my_info.m_id) {
+		if (j == my_info.m_id || other_players[j].m_state == OBJ_ST_EMPTY) continue;
+
+		if (other_players[j].m_state == OBJ_ST_RUNNING) {
 			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
 			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._42 = other_players[j].m_y;
 			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
+
+			XMFLOAT3 tempOtherRight = { other_players[j].m_right_vec.x, other_players[j].m_right_vec.y , other_players[j].m_right_vec.z};
+			XMFLOAT3 tempOtherUp = { other_players[j].m_up_vec.x, other_players[j].m_up_vec.y , other_players[j].m_up_vec.z };
+			XMFLOAT3 tempOtherLook = { other_players[j].m_look_vec.x, other_players[j].m_look_vec.y , other_players[j].m_look_vec.z };
+			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->SetUp(tempOtherUp);
+			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->SetRight(tempOtherRight);
+			m_pScene->m_pOtherplayersShader->m_ppObjects[j]->SetLook(tempOtherLook);
 		}
 		else if (other_players[j].m_state == OBJ_ST_LOGOUT) {
 			other_players[j].m_state = OBJ_ST_EMPTY;

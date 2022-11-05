@@ -311,6 +311,12 @@ public:
 	XMFLOAT3 GetUp();
 	XMFLOAT3 GetRight();
 
+	// Server
+	void SetUp(XMFLOAT3 xmf3Up) { m_xmf4x4Transform._21 = xmf3Up.x, m_xmf4x4Transform._22 = xmf3Up.y, m_xmf4x4Transform._23 = xmf3Up.z; }
+	void SetRight(XMFLOAT3 xmf3right) { m_xmf4x4Transform._11 = xmf3right.x; m_xmf4x4Transform._12 = xmf3right.y; m_xmf4x4Transform._13 = xmf3right.z; }
+	void SetLook(XMFLOAT3 xmf3look) { m_xmf4x4Transform._31 = xmf3look.x; m_xmf4x4Transform._32 = xmf3look.y; m_xmf4x4Transform._33 = xmf3look.z; }
+	//
+
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);

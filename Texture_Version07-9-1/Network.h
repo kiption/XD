@@ -100,11 +100,16 @@ void processPacket(char* ptr)
 		my_info.m_x = recv_packet->x;
 		my_info.m_y = recv_packet->y;
 		my_info.m_z = recv_packet->z;
+
+		my_info.m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+		my_info.m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+		my_info.m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+
 		my_info.m_state = OBJ_ST_RUNNING;
 		cout << "Init My Info - id: " << my_info.m_id << ", Pos(x: " << my_info.m_x << ", y : " << my_info.m_y << ", z : " << my_info.m_z << ")." << endl;
 
 		break;
-	}
+	}// SC_LOGIN_INFO end
 	case SC_ADD_PLAYER:
 	{
 		SC_ADD_PLAYER_PACKET* recv_packet = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(ptr);
@@ -113,10 +118,17 @@ void processPacket(char* ptr)
 
 		if (recv_id < MAX_USER) {		// Player 추가
 			other_players[recv_id].m_id = recv_id;
+
 			other_players[recv_id].m_x = recv_packet->x;
 			other_players[recv_id].m_y = recv_packet->y;
 			other_players[recv_id].m_z = recv_packet->z;
+
+			other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+			other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+			other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+
 			other_players[recv_id].m_state = OBJ_ST_RUNNING;
+
 			cout << "Init New Player's Info - id: " << other_players[recv_id].m_id
 				<< ", Pos(x: " << other_players[recv_id].m_x << ", y : " << other_players[recv_id].m_y << ", z : " << other_players[recv_id].m_z << ")." << endl;
 		}
@@ -124,9 +136,15 @@ void processPacket(char* ptr)
 			int npc_id = recv_id - MAX_USER;
 
 			npcs_info[npc_id].m_id = recv_id;
+
 			npcs_info[npc_id].m_x = recv_packet->x;
 			npcs_info[npc_id].m_y = recv_packet->y;
 			npcs_info[npc_id].m_z = recv_packet->z;
+
+			npcs_info[npc_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+			npcs_info[npc_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+			npcs_info[npc_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+
 			npcs_info[npc_id].m_state = OBJ_ST_RUNNING;
 			cout << "Init New NPC's Info - id: " << npcs_info[npc_id].m_id
 				<< ", Pos(x: " << npcs_info[npc_id].m_x << ", y : " << npcs_info[npc_id].m_y << ", z : " << npcs_info[npc_id].m_z << ")." << endl;
@@ -135,7 +153,7 @@ void processPacket(char* ptr)
 			cout << "Exceed Max User." << endl;
 		}
 		break;
-	}
+	}// SC_ADD_PLAYER end
 	case SC_MOVE_PLAYER:
 	{
 		SC_MOVE_PLAYER_PACKET* recv_packet = reinterpret_cast<SC_MOVE_PLAYER_PACKET*>(ptr);
@@ -147,13 +165,15 @@ void processPacket(char* ptr)
 			my_info.m_z = recv_packet->z;
 			cout << "My object moves to (" << my_info.m_x << ", " << my_info.m_y << ", " << my_info.m_z << ")." << endl;
 		}
-		else if (0 <= recv_id && recv_id < MAX_USER) {
+		else if (0 <= recv_id && recv_id < MAX_USER && recv_id != my_info.m_id) {
 			// 상대 Object 이동
 			other_players[recv_id].m_x = recv_packet->x;
 			other_players[recv_id].m_y = recv_packet->y;
 			other_players[recv_id].m_z = recv_packet->z;
 			cout << "Player[" << recv_id << "]'s object moves to("
 				<< other_players[recv_id].m_x << ", " << other_players[recv_id].m_y << ", " << other_players[recv_id].m_z << ")." << endl;
+
+			cout << "[TEST] R_PACK POS: " << recv_packet->x << ", " << recv_packet->y << ", " << recv_packet->z << endl;
 		}
 		else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
 			// Npc 이동
@@ -167,8 +187,39 @@ void processPacket(char* ptr)
 		}
 
 		break;
-	}
+	}// SC_MOVE_PLAYER end
+	case SC_ROTATE_PLAYER:
+	{
+		SC_ROTATE_PLAYER_PACKET* recv_packet = reinterpret_cast<SC_ROTATE_PLAYER_PACKET*>(ptr);
+		int recv_id = recv_packet->id;
+		if (recv_id == my_info.m_id) {
+			// Player 회전
+			my_info.m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+			my_info.m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+			my_info.m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+			cout << "My object is rotated, LookVec:(" << my_info.m_look_vec.x << ", " << my_info.m_look_vec.y << ", " << my_info.m_look_vec.z << ")." << endl;
+		}
+		else if (0 <= recv_id && recv_id < MAX_USER) {
+			// 상대 Object 회전
+			other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+			other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+			other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+			cout << "Player[" << recv_id << "]'s object is rotated, lookVec:"
+				<< other_players[recv_id].m_look_vec.x << ", " << other_players[recv_id].m_look_vec.y << ", " << other_players[recv_id].m_look_vec.z << ")." << endl;
+		}
+		else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
+			// Npc 회전
+			int npc_id = recv_id - MAX_USER;
 
+			npcs_info[npc_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+			npcs_info[npc_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+			npcs_info[npc_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+			cout << "NPC[" << npc_id << "]'s object is rotated, lookVec:("
+				<< npcs_info[npc_id].m_look_vec.x << ", " << npcs_info[npc_id].m_look_vec.y << ", " << npcs_info[npc_id].m_look_vec.z << ")." << endl;
+		}
+
+		break;
+	}// SC_ROTATE_PLAYER end
 	case SC_REMOVE_PLAYER:
 	{
 		SC_REMOVE_PLAYER_PACKET* recv_packet = reinterpret_cast<SC_REMOVE_PLAYER_PACKET*>(ptr);
@@ -200,7 +251,7 @@ void processPacket(char* ptr)
 		}
 
 		break;
-	}
+	}//SC_REMOVE_PLAYER end
 	}
 }
 

@@ -81,6 +81,13 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	}
 }
 
+void CPlayer::SetVectorsByServer(const XMFLOAT3& xmf3right, const XMFLOAT3& xmf3up, const XMFLOAT3& xmf3look)
+{
+	m_xmf3Right = xmf3right;
+	m_xmf3Up = xmf3up;
+	m_xmf3Look = xmf3look;
+}
+
 void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
 	if (bUpdateVelocity)
