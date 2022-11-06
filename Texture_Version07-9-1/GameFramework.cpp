@@ -318,11 +318,11 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
 		if (nMessageID == WM_RBUTTONDOWN) m_pLockedObject = m_pScene->PickObjectPointedByCursor(LOWORD(lParam), HIWORD(lParam), m_pPlayer->m_pCamera);
-		if (nMessageID == WM_RBUTTONDOWN) m_pPlayer->m_ZoomInActive = true;;
+		//if (nMessageID == WM_RBUTTONDOWN) m_pPlayer->m_ZoomInActive = true;;
 		break;
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
-		if (nMessageID == WM_RBUTTONUP) m_pPlayer->m_ZoomInActive = false;
+		//if (nMessageID == WM_RBUTTONUP) m_pPlayer->m_ZoomInActive = false;
 		::ReleaseCapture();
 		break;
 	case WM_MOUSEMOVE:
@@ -530,21 +530,27 @@ void CGameFramework::ProcessInput()
 		{
 			if (cxDelta || cyDelta)
 			{
+				// Server
 				CS_ROTATE_PACKET rotate_p;
 				rotate_p.size = sizeof(rotate_p);
 				rotate_p.type = CS_ROTATE;
-				rotate_p.roll = 0.0f;
-				rotate_p.pitch = -cyDelta * 3.141592654f / 180;
-				rotate_p.yaw = cxDelta * 3.141592654f / 180;
+				if (pKeysBuffer[VK_RBUTTON] & 0xF0) {		// 마우스 우클릭 회전   (roll, pitch 회전)
+					//rotate_p.roll = cxDelta * 3.141592654f / 180;
+					////rotate_p.pitch = -cyDelta * 3.141592654f / 180;
+					//rotate_p.pitch = 0.0f;
+					//rotate_p.yaw = 0.0f;
 
-				sendPacket(&rotate_p);
+					//sendPacket(&rotate_p);
+				}
+				else if (pKeysBuffer[VK_LBUTTON] & 0xF0) {	// 마우스 좌클릭 회전	(pitch, yaw 회전)
+					rotate_p.roll = 0.0f;
+					//rotate_p.pitch = -cyDelta * 3.141592654f / 180;
+					rotate_p.pitch = 0.0f;
+					rotate_p.yaw = cxDelta * 3.141592654f / 180;
 
-				//if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-				//	m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				//else
-				//	m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-
-				cout << "GetUp: " << m_pPlayer->GetUp().x << ", " << m_pPlayer->GetUp().y << ", " << m_pPlayer->GetUp().z << ", " << endl;
+					sendPacket(&rotate_p);
+				}
+				//====
 			}
 		}
 	}
