@@ -84,28 +84,26 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pUseWaterMove->SetPosition(0.0, 320.0f, 0.0);
 
 	
-	m_nShaders = 1;
-	m_nCShaders = 2;
+	m_nShaders = 3;
 	m_nOtherPlayers = 1;
-	m_pShaders = new CObjectsShader[m_nShaders];
-	m_ppCShaders = new CShader * [m_nCShaders];
+	m_ppShaders = new CObjectsShader * [m_nShaders];
 	m_pOtherplayersShader = new COtherPlayerShader;
 
 	CObjectsShader* pObjectsShader = new CObjectsShader();
 	pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	pObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_pShaders = pObjectsShader;
-
-	CExplosionShader* pMultiSpriteObjectShader = new CExplosionShader();
-	pMultiSpriteObjectShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	pMultiSpriteObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	pMultiSpriteObjectShader->SetActive(false);
-	m_ppCShaders[0] = pMultiSpriteObjectShader;
+	m_ppShaders[0] = pObjectsShader;
 
 	CBillboardObjectsShader* pBillboardObjectShader = new CBillboardObjectsShader();
 	pBillboardObjectShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	pBillboardObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
-	m_ppCShaders[1] = pBillboardObjectShader;
+	pBillboardObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
+	m_ppShaders[1] = pBillboardObjectShader;
+
+	CExplosionShader* pMultiSpriteObjectShader = new CExplosionShader();
+	pMultiSpriteObjectShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pMultiSpriteObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
+	pMultiSpriteObjectShader->SetActive(false);
+	m_ppShaders[2] = pMultiSpriteObjectShader;
 
 	COtherPlayerShader* pOtherPlayerShader = new COtherPlayerShader();
 	pOtherPlayerShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -131,26 +129,6 @@ void CScene::ReleaseObjects()
 		}
 		delete[] m_ppShaders;
 	}
-	if (m_ppCShaders)
-	{
-		for (int i = 0; i < m_nShaders; i++)
-		{
-			m_ppCShaders[i]->ReleaseShaderVariables();
-			m_ppCShaders[i]->ReleaseObjects();
-			m_ppCShaders[i]->Release();
-		}
-		delete[] m_ppCShaders;
-	}
-	//if (m_pOtherplayersShader)
-	//{
-	//	for (int i = 0; i < m_nOtherPlayers; i++)
-	//	{
-	//		m_pOtherplayersShader->ReleaseShaderVariables();
-	//		m_pOtherplayersShader->ReleaseObjects();
-	//		m_pOtherplayersShader->Release();
-	//	}
-	//	delete[] m_pOtherplayersShader;
-	//}
 
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pOtherplayersShader) delete m_pOtherplayersShader;
@@ -463,9 +441,8 @@ void CScene::ReleaseUploadBuffers()
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
 
-	for (int i = 0; i < m_nShaders; i++) m_pShaders->ReleaseUploadBuffers();
+	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nOtherPlayers; i++)m_pOtherplayersShader->ReleaseUploadBuffers();
-	for (int i = 0; i < m_nCShaders; i++) m_ppCShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nGameObjects; i++) m_ppGameObjects[i]->ReleaseUploadBuffers();
 }
 
@@ -487,7 +464,7 @@ CGameObject* CScene::PickObjectPointedByCursor(int xClient, int yClient, CCamera
 	CGameObject* pIntersectedObject = NULL, * pNearestObject = NULL;
 	for (int i = 0; i < m_nShaders; i++)
 	{
-		pIntersectedObject = m_pShaders->PickObjectByRayIntersection(xmf3PickPosition, xmf4x4View, &fHitDistance);
+		//pIntersectedObject = m_ppShaders[i]->PickObjectByRayIntersection(xmf3PickPosition, xmf4x4View, &fHitDistance);
 		if (pIntersectedObject && (fHitDistance < fNearestHitDistance))
 		{
 			fNearestHitDistance = fHitDistance;
@@ -532,12 +509,11 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	m_pUseWaterMove->Animate(fTimeElapsed);
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->UpdateTransform(NULL);
-	for (int i = 0; i < m_nShaders; i++) if (m_pShaders)m_pShaders->AnimateObjects(fTimeElapsed);
-	for (int i = 0; i < m_nCShaders; i++) if (m_ppCShaders[i]) m_ppCShaders[i]->AnimateObjects(fTimeElapsed);
+	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i])m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nOtherPlayers; i++) if (m_pOtherplayersShader) m_pOtherplayersShader->AnimateObjects(fTimeElapsed);
 
 	for (int i = 0; i < 10; i++)
-		m_pShaders->m_ppObjects[i]->xoobb = BoundingOrientedBox(XMFLOAT3(m_pShaders->m_ppObjects[i]->GetPosition()), XMFLOAT3(8.0, 6.0, 12.0), XMFLOAT4(0, 0, 0, 1));
+		m_ppShaders[0]->m_ppObjects[i]->xoobb = BoundingOrientedBox(XMFLOAT3(m_ppShaders[0]->m_ppObjects[i]->GetPosition()), XMFLOAT3(8.0, 6.0, 12.0), XMFLOAT4(0, 0, 0, 1));
 
 	m_pPlayer->xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(8.0, 6.0, 12.0), XMFLOAT4(0, 0, 0, 1));
 	CBulletObject** ppBullets = ((CAirplanePlayer*)m_pPlayer)->m_ppBullets;
@@ -549,9 +525,9 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	{
 		for (int i = 0; i < 10; i++) {
 
-			if (ppBullets[j]->m_bActive && m_pShaders->m_ppObjects[i]->xoobb.Intersects(ppBullets[j]->xoobb))
+			if (ppBullets[j]->m_bActive && m_ppShaders[0]->m_ppObjects[i]->xoobb.Intersects(ppBullets[j]->xoobb))
 			{
-				m_pShaders->m_ppObjects[i]->SetScale(0.0f, 0.0f, 0.0f);
+				m_ppShaders[0]->m_ppObjects[i]->SetScale(0.0f, 0.0f, 0.0f);
 				CollisionCheck = i;
 				ppBullets[j]->Reset();
 			}
@@ -573,18 +549,18 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	for (int i = 1; i < 10; i++)
 	{
 		if (CollisionCheck == i) {
-			m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._42 -= 1.0f;
-			m_pShaders->m_ppObjects[i]->Rotate(0, 2.0, 0);
-			if (m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._42 < 0.0f) {
+			m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 -= 1.0f;
+			m_ppShaders[0]->m_ppObjects[i]->Rotate(0, 2.0, 0);
+			if (m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 < 0.0f) {
 				CollisionCheck = 10;
-				m_pShaders->m_ppObjects[i]->Rotate(0, 0.0, 0);
-				m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._42 += 1.0f;
+				m_ppShaders[0]->m_ppObjects[i]->Rotate(0, 0.0, 0);
+				m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 += 1.0f;
 			}
 		}
 	}
 
 	for (int i = 0; i < 10; i++) {
-		if (m_pShaders->m_ppObjects[i]->xoobb.Intersects(m_pPlayer->xoobb)) m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._43 -= 2.0f;
+		if (m_ppShaders[0]->m_ppObjects[i]->xoobb.Intersects(m_pPlayer->xoobb)) m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 -= 2.0f;
 	}
 	if (m_pLights)
 	{
@@ -607,13 +583,11 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i])m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nOtherPlayers; i++) if (m_pOtherplayersShader) m_pOtherplayersShader->Render(pd3dCommandList, pCamera);
 	if (m_pUseWaterMove) m_pUseWaterMove->Render(pd3dCommandList, pCamera);
 	//if (m_pTerrainWater) m_pTerrainWater->Render(pd3dCommandList, pCamera);
-
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < m_nCShaders; i++) if (m_ppCShaders[i]) m_ppCShaders[i]->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < m_nOtherPlayers; i++) if (m_pOtherplayersShader) m_pOtherplayersShader->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < m_nShaders; i++) if (m_pShaders)m_pShaders->Render(pd3dCommandList, pCamera);
 }
 
 void CScene::PrepareRender(ID3D12GraphicsCommandList* pd3dCommandList)

@@ -533,11 +533,11 @@ public:
 	
 };
 
-class CTreeObject : public CGameObject
+class CBillboardObject : public CGameObject
 {
 public:
-	CTreeObject();
-	virtual ~CTreeObject();
+	CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CBillboardObject();
 
 	virtual void Animate(float fTimeElapsed);
 

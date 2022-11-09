@@ -12,8 +12,8 @@ struct MATERIAL
 	float4					m_cDiffuse;
 	float4					m_cSpecular; //a = power
 	float4					m_cEmissive;
-	
-	//matrix					gmtxTexture;
+
+
 };
 
 cbuffer cbGameObjectInfo : register(b2)
@@ -76,10 +76,10 @@ struct VS_STANDARD_OUTPUT
 {
 	float4 position : SV_POSITION;
 	float3 positionW : POSITION;
+	float2 uv : TEXCOORD;
 	float3 normalW : NORMAL;
 	float3 tangentW : TANGENT;
 	float3 bitangentW : BITANGENT;
-	float2 uv : TEXCOORD;
 };
 
 VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
@@ -92,7 +92,9 @@ VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 	output.bitangentW = (float3)mul(float4(input.bitangent, 1.0f), gmtxGameObject);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
-
+	//ㅋㅋㅋㅋㅋ이거 문제네  아그래????ㅇㅇ 빌보드 셰이더 만들어주삼 이게 문제같은데 저거
+	//어케만듦이거 이유가 너 다른거들 안넘겨주는대 계속 곱해줘서 그냥
+	//00들어갔거나 그런듯 일단
 	return(output);
 }
 
@@ -169,21 +171,21 @@ float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-struct VS_SPRITE_TEXTURED_INPUT
+struct VS_TEXTURED_INPUT
 {
 	float3 position : POSITION;
 	float2 uv : TEXCOORD;
 };
 
-struct VS_SPRITE_TEXTURED_OUTPUT
+struct VS_TEXTURED_OUTPUT
 {
 	float4 position : SV_POSITION;
-	float2 uv : TEXCOORD;
+	float2 uv : TEXCOORD0;
 };
 
-VS_SPRITE_TEXTURED_OUTPUT VSTextured(VS_SPRITE_TEXTURED_INPUT input)
+VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 {
-	VS_SPRITE_TEXTURED_OUTPUT output;
+	VS_TEXTURED_OUTPUT output;
 
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
 	output.uv = input.uv;
@@ -191,27 +193,17 @@ VS_SPRITE_TEXTURED_OUTPUT VSTextured(VS_SPRITE_TEXTURED_INPUT input)
 	return(output);
 }
 
-VS_SPRITE_TEXTURED_OUTPUT VSSpriteAnimation(VS_SPRITE_TEXTURED_INPUT input)
+float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
-	VS_SPRITE_TEXTURED_OUTPUT output;
+	float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
 
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
-	output.uv = mul(float3(input.uv, 1.0f), (float4)(gMaterial.m_cAmbient));
-
-	return(output);
+	return(cColor);
 }
 
 Texture2D gtxtTerrainTexture : register(t14);
 Texture2D gtxtDetailTexture[3]:register(t15);
 Texture2D gtxtAlphaTexture : register(t18);
 
-
-float4 PSTextured(VS_SPRITE_TEXTURED_OUTPUT input) : SV_TARGET
-{
-	float4 cColor = gtxtTerrainTexture.Sample(gssWrap, input.uv);
-
-	return(cColor);
-}
 
 struct VS_TERRAIN_INPUT
 {
@@ -236,7 +228,7 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 {
 	VS_TERRAIN_OUTPUT output;
 
-	
+
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
 	output.color = input.color;
 	output.uv0 = input.uv0;
@@ -247,8 +239,8 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 
 float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
-	
-	float4 cBaseTexColor = gtxtTerrainTexture.Sample(gssWrap, input.uv0 *1.0f);
+
+	float4 cBaseTexColor = gtxtTerrainTexture.Sample(gssWrap, input.uv0 * 1.0f);
 	float fAlpha = gtxtAlphaTexture.Sample(gssWrap, input.uv0).w;
 
 	float4 cDetailTexColors[3];
@@ -294,19 +286,7 @@ VS_WATER_OUTPUT VSTerrainWater(VS_WATER_INPUT input)
 
 	return(output);
 }
-//#define _WITH_TEXTURE_ANIMATION
-//#ifndef _WITH_TEXTURE_ANIMATION
-//float4 PSTerrainWater(VS_WATER_OUTPUT input) : SV_TARGET
-//{
-//	float4 cBaseTexColor = gtxtWaterTexture[0].Sample(gssWrap, input.uv);
-//	float4 cDetail0TexColor = gtxtWaterTexture[1].Sample(gssWrap, input.uv * 20.0f);
-//	float4 cDetail1TexColor = gtxtWaterTexture[2].Sample(gssWrap, input.uv * 20.0f);
-//	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-//	cColor = lerp(cBaseTexColor * cDetail0TexColor, cDetail1TexColor.r * 0.8f, 0.55f);
-//
-//	return(cColor);
-//}
-//#else
+
 float4 PSTerrainWater(VS_WATER_OUTPUT input) : SV_TARGET
 {
 	float2 uv = input.uv;
@@ -321,7 +301,7 @@ float4 PSTerrainWater(VS_WATER_OUTPUT input) : SV_TARGET
 
 	return(cColor);
 }
-//#endif
+
 
 VS_WATER_OUTPUT VSTerrainMoveWater(VS_WATER_INPUT input)
 {
@@ -348,40 +328,17 @@ float4 PSTerrainMoveWater(VS_WATER_OUTPUT input) : SV_TARGET
 	return(cColor);
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////
-struct VS_LIGHTING_INPUT
+VS_TEXTURED_OUTPUT VSBillBoardTextured(VS_TEXTURED_INPUT input)
 {
-	float3 position : POSITION;
-	float3 normal : NORMAL;
-};
+	VS_TEXTURED_OUTPUT output;
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);//아마 이렇게 하고 
+	output.uv = input.uv;
+	return (output);
 
-struct VS_LIGHTING_OUTPUT
-{
-	float4 position : SV_POSITION;
-	float3 positionW : POSITION;
-	float3 normalW : NORMAL;
-	float4 color : COLOR;
-};
-
-VS_LIGHTING_OUTPUT VSLighting(VS_LIGHTING_INPUT input)
-{
-	VS_LIGHTING_OUTPUT output;
-
-	output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
-	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
-
-	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-
-	return(output);
 }
-
-float4 PSLighting(VS_LIGHTING_OUTPUT input) : SV_TARGET
+float4 PSBillBoardTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
-	input.normalW = normalize(input.normalW);
-	float4 color = Lighting(input.positionW, input.normalW);
 
-	//	color.rgb = input.normalW;
-
-		return(color);
+	float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
+	return (cColor);
 }

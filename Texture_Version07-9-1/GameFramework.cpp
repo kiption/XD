@@ -729,21 +729,21 @@ void CGameFramework::FrameAdvance()
 	for (int i = 0; i < MAX_NPCS; i++) {
 		if (npcs_info[i].m_state == OBJ_ST_RUNNING) {
 			if (i % 2) {
-				m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._41 = npcs_info[i].m_x + 30 * (i % 5) * cos(g_time);
-				m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._42 = npcs_info[i].m_y + 100 * sin(g_time);
-				m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._43 = npcs_info[i].m_z + 30 * (i % 5) * sin(g_time);
+				m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._41 = npcs_info[i].m_x + 30 * (i % 5) * cos(g_time);
+				m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 = npcs_info[i].m_y + 100 * sin(g_time);
+				m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 = npcs_info[i].m_z + 30 * (i % 5) * sin(g_time);
 			}
 			else {
-				m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._41 = npcs_info[i].m_x + 30 * (i % 5) * cos(g_reverse_time);
-				m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._42 = npcs_info[i].m_y + 100 * sin(g_reverse_time);
-				m_pScene->m_pShaders->m_ppObjects[i]->m_xmf4x4Transform._43 = npcs_info[i].m_z + 30 * (i % 5) * sin(g_reverse_time);
+				m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._41 = npcs_info[i].m_x + 30 * (i % 5) * cos(g_reverse_time);
+				m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 = npcs_info[i].m_y + 100 * sin(g_reverse_time);
+				m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 = npcs_info[i].m_z + 30 * (i % 5) * sin(g_reverse_time);
 			}
 		}
 		else if (npcs_info[i].m_state == OBJ_ST_LOGOUT) {
 			npcs_info[i].m_state = OBJ_ST_EMPTY;
-			if (m_pScene->m_pShaders->m_ppObjects[i])
+			if (m_pScene->m_ppShaders[0]->m_ppObjects[i])
 			{
-				m_pScene->m_pShaders->m_ppObjects[i]->SetScale(0.0, 0.0, 0.0);
+				m_pScene->m_ppShaders[0]->m_ppObjects[i]->SetScale(0.0, 0.0, 0.0);
 			}
 
 		}

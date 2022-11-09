@@ -308,11 +308,9 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pShader = new CPlayerShader();
 	m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1); //Mi24(1)
-	m_pShader2 = new CIlluminatedShader();
-	m_pShader2->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	m_pShader2->CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 1); 
 
-	CGameObject* pBulletMesh = CGameObject::LoadBulletGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Roket.bin", m_pShader2);
+
+	CGameObject* pBulletMesh = CGameObject::LoadBulletGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Roket.bin", NULL);
 
 	for (int i = 0; i < BULLETS; i++)
 	{

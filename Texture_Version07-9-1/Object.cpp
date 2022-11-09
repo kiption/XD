@@ -454,11 +454,11 @@ void CGameObject::SetMovingDirection(const XMFLOAT3& xmf3MovingDirection)
 
 void CGameObject::SetLookAt(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up)
 {
-	XMFLOAT3 xmf3Position(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43);
+	XMFLOAT3 xmf3Position(m_xmf4x4Transform._41, m_xmf4x4Transform._42, m_xmf4x4Transform._43);
 	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(xmf3Position, xmf3Target, xmf3Up);
-	m_xmf4x4World._11 = mtxLookAt._11; m_xmf4x4World._12 = mtxLookAt._21; m_xmf4x4World._13 = mtxLookAt._31;
-	m_xmf4x4World._21 = mtxLookAt._12; m_xmf4x4World._22 = mtxLookAt._22; m_xmf4x4World._23 = mtxLookAt._32;
-	m_xmf4x4World._31 = mtxLookAt._13; m_xmf4x4World._32 = mtxLookAt._23; m_xmf4x4World._33 = mtxLookAt._33;
+	m_xmf4x4Transform._11 = mtxLookAt._11; m_xmf4x4Transform._12 = mtxLookAt._21; m_xmf4x4Transform._13 = mtxLookAt._31;
+	m_xmf4x4Transform._21 = mtxLookAt._12; m_xmf4x4Transform._22 = mtxLookAt._22; m_xmf4x4Transform._23 = mtxLookAt._32;
+	m_xmf4x4Transform._31 = mtxLookAt._13; m_xmf4x4Transform._32 = mtxLookAt._23; m_xmf4x4Transform._33 = mtxLookAt._33;
 }
 
 void CGameObject::SetMesh(int nIndex, CMesh* pMesh)
@@ -1616,15 +1616,15 @@ void CUseWaterMoveTerrain::Animate(float fTimeElapsed)
 	}
 }
 
-CTreeObject::CTreeObject() : CGameObject(1, 1)
+CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1, 1)
 {
 }
 
-CTreeObject::~CTreeObject()
+CBillboardObject::~CBillboardObject()
 {
 }
 
-void CTreeObject::Animate(float fTimeElapsed)
+void CBillboardObject::Animate(float fTimeElapsed)
 {
 	if (m_fRotationAngle <= -1.5f) m_fRotationDelta = 1.0f;
 	if (m_fRotationAngle >= +1.5f) m_fRotationDelta = -1.0f;
