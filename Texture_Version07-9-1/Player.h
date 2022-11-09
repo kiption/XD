@@ -32,6 +32,7 @@ protected:
 	LPVOID						m_pCameraUpdatedContext;
 
 	CShader						*m_pShader = NULL;
+	CShader						*m_pShader2 = NULL;
 	CObjectsShader				*m_pObjectsShader = NULL;
 public:
 	CCamera						*m_pCamera = NULL;

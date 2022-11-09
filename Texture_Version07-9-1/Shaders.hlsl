@@ -347,3 +347,41 @@ float4 PSTerrainMoveWater(VS_WATER_OUTPUT input) : SV_TARGET
 	cColor += lerp(cDetailTexColors[1] * 0.45f, cDetailTexColors[2], 1.0f - fAlpha);
 	return(cColor);
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+struct VS_LIGHTING_INPUT
+{
+	float3 position : POSITION;
+	float3 normal : NORMAL;
+};
+
+struct VS_LIGHTING_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float3 positionW : POSITION;
+	float3 normalW : NORMAL;
+	float4 color : COLOR;
+};
+
+VS_LIGHTING_OUTPUT VSLighting(VS_LIGHTING_INPUT input)
+{
+	VS_LIGHTING_OUTPUT output;
+
+	output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
+	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
+
+	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+
+	return(output);
+}
+
+float4 PSLighting(VS_LIGHTING_OUTPUT input) : SV_TARGET
+{
+	input.normalW = normalize(input.normalW);
+	float4 color = Lighting(input.positionW, input.normalW);
+
+	//	color.rgb = input.normalW;
+
+		return(color);
+}

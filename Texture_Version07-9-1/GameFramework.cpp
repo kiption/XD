@@ -515,14 +515,15 @@ void CGameFramework::ProcessInput()
 			sendPacket(&move_p);
 		}//
 
-		float cxDelta = 0.0f, cyDelta = 0.0f;
+		float cxDelta = 0.0f, cyDelta = 0.0f,czDelta = 0.0f;
 		POINT ptCursorPos;
 		if (GetCapture() == m_hWnd)
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 2.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 2.0f;
+			czDelta = ((float)(ptCursorPos.y - m_ptOldCursorPos.y)+ (float)(ptCursorPos.x - m_ptOldCursorPos.x)) / 3.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
@@ -534,20 +535,19 @@ void CGameFramework::ProcessInput()
 				CS_ROTATE_PACKET rotate_p;
 				rotate_p.size = sizeof(rotate_p);
 				rotate_p.type = CS_ROTATE;
-				if (pKeysBuffer[VK_RBUTTON] & 0xF0) {		// 마우스 우클릭 회전   (roll, pitch 회전)
-					//rotate_p.roll = cxDelta * 3.141592654f / 180;
-					////rotate_p.pitch = -cyDelta * 3.141592654f / 180;
-					//rotate_p.pitch = 0.0f;
-					//rotate_p.yaw = 0.0f;
 
-					//sendPacket(&rotate_p);
-				}
-				else if (pKeysBuffer[VK_LBUTTON] & 0xF0) {	// 마우스 좌클릭 회전	(pitch, yaw 회전)
-					rotate_p.roll = 0.0f;
+				
+				if (pKeysBuffer[VK_LBUTTON] & 0xF0) {	// 마우스 좌클릭 회전	(pitch, yaw 회전)
 					//rotate_p.pitch = -cyDelta * 3.141592654f / 180;
+					rotate_p.roll = 0.0f;
 					rotate_p.pitch = 0.0f;
 					rotate_p.yaw = cxDelta * 3.141592654f / 180;
+					if (pKeysBuffer[VK_RBUTTON] & 0xF0) 
 
+					{// 마우스 우클릭 회전   (roll, pitch 회전)
+						rotate_p.pitch = -cxDelta * 3.141592654f / 90;
+						
+					}
 					sendPacket(&rotate_p);
 				}
 				//====

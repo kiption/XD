@@ -8,38 +8,38 @@ uniform_int_distribution<int> uid(1000, 1900);
 
 CGameFramework::CGameFramework()
 {
-    // Server
-    wcout.imbue(locale("korean"));
-    WSADATA WSAData;
-    WSAStartup(MAKEWORD(2, 0), &WSAData);
+    //// Server
+    //wcout.imbue(locale("korean"));
+    //WSADATA WSAData;
+    //WSAStartup(MAKEWORD(2, 0), &WSAData);
 
-    s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-    SOCKADDR_IN server_addr;
-    ZeroMemory(&server_addr, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(PORT_NUM);
-    inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
-    connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+    //s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+    //SOCKADDR_IN server_addr;
+    //ZeroMemory(&server_addr, sizeof(server_addr));
+    //server_addr.sin_family = AF_INET;
+    //server_addr.sin_port = htons(PORT_NUM);
+    //inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
+    //connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 
-    CS_LOGIN_PACKET p;
-    p.size = sizeof(CS_LOGIN_PACKET);
-    p.type = CS_LOGIN;
-    strcpy_s(p.name, "COPTER");
-    my_info.m_x = uid(dre);
-    my_info.m_y = uid(dre);
-    my_info.m_z = uid(dre);
-    p.x = my_info.m_x;
-    p.y = my_info.m_y;
-    p.z = my_info.m_z;
-    sendPacket(&p);
+    //CS_LOGIN_PACKET p;
+    //p.size = sizeof(CS_LOGIN_PACKET);
+    //p.type = CS_LOGIN;
+    //strcpy_s(p.name, "COPTER");
+    //my_info.m_x = uid(dre);
+    //my_info.m_y = uid(dre);
+    //my_info.m_z = uid(dre);
+    //p.x = my_info.m_x;
+    //p.y = my_info.m_y;
+    //p.z = my_info.m_z;
+    //sendPacket(&p);
 
-    recvPacket();
-    //
-    for (int i = 0;i < 4;i++) {
+    //recvPacket();
+    ////
+    //for (int i = 0;i < 4;i++) {
 
-    other_players[i].m_x = uid(dre);
-    other_players[i].m_z = uid(dre);
-    }
+    //other_players[i].m_x = uid(dre);
+    //other_players[i].m_z = uid(dre);
+    //}
 
     m_pdxgiFactory = NULL;
     m_pdxgiSwapChain = NULL;
@@ -566,9 +566,9 @@ void CGameFramework::ProcessInput()
                 packetVec = m_pPlayer->GetUpVector();
                 break;
             }
-            move_p.vec_x = packetVec.x * positive_or_negative;
+           /* move_p.vec_x = packetVec.x * positive_or_negative;
             move_p.vec_y = packetVec.y * positive_or_negative;
-            move_p.vec_z = packetVec.z * positive_or_negative;
+            move_p.vec_z = packetVec.z * positive_or_negative;*/
 
             sendPacket(&move_p);
         }//
