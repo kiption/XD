@@ -536,20 +536,16 @@ void CGameFramework::ProcessInput()
 				rotate_p.size = sizeof(rotate_p);
 				rotate_p.type = CS_ROTATE;
 
-				
-				if (pKeysBuffer[VK_LBUTTON] & 0xF0) {	// 마우스 좌클릭 회전	(pitch, yaw 회전)
-					//rotate_p.pitch = -cyDelta * 3.141592654f / 180;
-					rotate_p.roll = 0.0f;
-					rotate_p.pitch = 0.0f;
-					rotate_p.yaw = cxDelta * 3.141592654f / 180;
-					if (pKeysBuffer[VK_RBUTTON] & 0xF0) 
-
-					{// 마우스 우클릭 회전   (roll, pitch 회전)
-						rotate_p.pitch = -cxDelta * 3.141592654f / 90;
-						
-					}
-					sendPacket(&rotate_p);
+				if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
+					rotate_p.key_val = RT_LBUTTON;
 				}
+				else if (pKeysBuffer[VK_RBUTTON] & 0xF0) {
+					rotate_p.key_val = RT_RBUTTON;
+				}
+				rotate_p.delta_x = cxDelta;
+				rotate_p.delta_y = cyDelta;
+
+				sendPacket(&rotate_p);
 				//====
 			}
 		}

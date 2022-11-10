@@ -1,6 +1,6 @@
-#include "Func_forVectorCalc.h"
+#include "Func_CalcVectors.h"
 
-MyFloat3 myNormalize(MyFloat3 vec)
+MyVector3D myNormalize(MyVector3D vec)
 {
 	float dist = sqrtf(powf(vec.x, 2) + powf(vec.y, 2) + powf(vec.z, 2));
 
@@ -11,7 +11,7 @@ MyFloat3 myNormalize(MyFloat3 vec)
 	return vec;
 }
 
-MyFloat3 calcMove(MyFloat3 vec1, MyFloat3 vec2, float scalar)
+MyVector3D calcMove(MyVector3D vec1, MyVector3D vec2, float scalar)
 {
 	vec1.x = vec1.x + vec2.x * scalar;
 	vec1.y = vec1.y + vec2.y * scalar;
@@ -20,10 +20,10 @@ MyFloat3 calcMove(MyFloat3 vec1, MyFloat3 vec2, float scalar)
 	return vec1;
 }
 
-MyFloat3 calcRotate(MyFloat3 vec, float roll, float pitch, float yaw)
+MyVector3D calcRotate(MyVector3D vec, float roll, float pitch, float yaw)
 {
-	float x1, y1;
 	// roll
+	float x1, y1;
 	x1 = vec.x * cos(roll) - vec.y * sin(roll);
 	y1 = vec.x * sin(roll) + vec.y * cos(roll);
 

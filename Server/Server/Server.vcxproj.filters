@@ -18,7 +18,7 @@
     <ClCompile Include="server.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Func_forVectorCalc.cpp">
+    <ClCompile Include="Func_CalcVectors.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -26,10 +26,10 @@
     <ClInclude Include="protocol.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Func_forVectorCalc.h">
+    <ClInclude Include="Func_CalcVectors.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="MyFloat3.h">
+    <ClInclude Include="MyVectors.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

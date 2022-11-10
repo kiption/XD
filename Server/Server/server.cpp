@@ -5,21 +5,23 @@
 #include <mutex>
 #include <array>
 #include <vector>
-#include <random>	// 플레이어의 초기 위치값 설정할 때 임시로 랜덤값을 부여하기로 함. -> 추후에 정해진 리스폰 지점에 생성되도록 변경해야함.
+#include <random>	// NPC의 초기 위치값 설정할 때 임시로 랜덤값을 부여하기로 함. -> 추후에 정해진 리스폰 지점에 생성되도록 변경해야함.
 
-#include "MyFloat3.h"
+#include "MyVectors.h"
 #include "protocol.h"
-#include "Func_forVectorCalc.h"
+#include "Func_CalcVectors.h"
 
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
 
 using namespace std;
 
-// 플레이어의 초기 위치값 설정할 때 임시로 랜덤값을 부여하기로 함. -> 추후에 정해진 리스폰 지점에 생성되도록 변경해야함.
+// NPC를 랜덤한 위치에 생성함.
 default_random_engine dre;
 uniform_int_distribution<int> uid(1, 10);
-// ==== 리스폰 지점에 생성되도록 변경한 후에 이 부분은 지워도 됨.
+// ==== NPC의 리스폰 지점을 만들고나면 없애도 됨.
+
+Coordinate basic_coordinate;	// 기본(초기) 좌표계
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
@@ -57,8 +59,9 @@ public:
 	SESSION_STATE s_state;
 	int id;
 	SOCKET socket;
-	MyFloat3 pos;							// Position (x, y, z)
-	MyFloat3 right_vec, up_vec, look_vec;	// Vector (x, y ,z)
+	MyVector3D pos;							// Position (x, y, z)
+	float pitch, yaw, roll;					// Rotated Degree
+	Coordinate curr_coordinate;				// 현재 Look, Right, Up Vectors
 	char name[NAME_SIZE];
 	int remain_size;
 
@@ -68,9 +71,10 @@ public:
 		id = -1;
 		socket = 0;
 		pos = { 0.0f, 0.0f, 0.0f };
-		right_vec = { 1.0f, 0.0f, 0.0f };
-		up_vec = { 0.0f, 1.0f, 0.0f };
-		look_vec = { 0.0f, 0.0f, 1.0f };
+		pitch = yaw = roll = 0.0f;
+		curr_coordinate.x_coordinate = { 1.0f, 0.0f, 0.0f };
+		curr_coordinate.y_coordinate = { 0.0f, 1.0f, 0.0f };
+		curr_coordinate.z_coordinate = { 0.0f, 0.0f, 1.0f };
 		name[0] = 0;
 		s_state = ST_FREE;
 		remain_size = 0;
@@ -124,9 +128,17 @@ void SESSION::send_login_info_packet()
 	login_info_packet.y = pos.y;
 	login_info_packet.z = pos.z;
 
-	login_info_packet.up_x = up_vec.x, login_info_packet.up_y = up_vec.y, login_info_packet.up_z = up_vec.z;
-	login_info_packet.right_x = right_vec.x, login_info_packet.right_y = right_vec.y, login_info_packet.right_z = right_vec.z;
-	login_info_packet.look_x = look_vec.x, login_info_packet.look_y = look_vec.y, login_info_packet.look_z = look_vec.z;
+	login_info_packet.right_x = curr_coordinate.x_coordinate.x;
+	login_info_packet.right_y = curr_coordinate.x_coordinate.y;
+	login_info_packet.right_z = curr_coordinate.x_coordinate.z;
+
+	login_info_packet.up_x = curr_coordinate.y_coordinate.x;
+	login_info_packet.up_y = curr_coordinate.y_coordinate.y;
+	login_info_packet.up_z = curr_coordinate.y_coordinate.z;
+
+	login_info_packet.look_x = curr_coordinate.z_coordinate.x;
+	login_info_packet.look_y = curr_coordinate.z_coordinate.y;
+	login_info_packet.look_z = curr_coordinate.z_coordinate.z;
 
 	cout << "[SC_LOGIN_INFO]";
 	do_send(&login_info_packet);
@@ -151,17 +163,17 @@ void SESSION::send_rotate_packet(int client_id)
 	rotate_pl_packet.size = sizeof(SC_ROTATE_PLAYER_PACKET);
 	rotate_pl_packet.type = SC_ROTATE_PLAYER;
 
-	rotate_pl_packet.look_x = clients[client_id].look_vec.x;
-	rotate_pl_packet.look_y = clients[client_id].look_vec.y;
-	rotate_pl_packet.look_z = clients[client_id].look_vec.z;
+	rotate_pl_packet.right_x = clients[client_id].curr_coordinate.x_coordinate.x;
+	rotate_pl_packet.right_y = clients[client_id].curr_coordinate.x_coordinate.y;
+	rotate_pl_packet.right_z = clients[client_id].curr_coordinate.x_coordinate.z;
 
-	rotate_pl_packet.right_x = clients[client_id].right_vec.x;
-	rotate_pl_packet.right_y = clients[client_id].right_vec.y;
-	rotate_pl_packet.right_z = clients[client_id].right_vec.z;
+	rotate_pl_packet.up_x = clients[client_id].curr_coordinate.y_coordinate.x;
+	rotate_pl_packet.up_y = clients[client_id].curr_coordinate.y_coordinate.y;
+	rotate_pl_packet.up_z = clients[client_id].curr_coordinate.y_coordinate.z;
 
-	rotate_pl_packet.up_x = clients[client_id].up_vec.x;
-	rotate_pl_packet.up_y = clients[client_id].up_vec.y;
-	rotate_pl_packet.up_z = clients[client_id].up_vec.z;
+	rotate_pl_packet.look_x = clients[client_id].curr_coordinate.z_coordinate.x;
+	rotate_pl_packet.look_y = clients[client_id].curr_coordinate.z_coordinate.y;
+	rotate_pl_packet.look_z = clients[client_id].curr_coordinate.z_coordinate.z;
 
 	cout << "[SC_ROTATE]";
 	do_send(&rotate_pl_packet);
@@ -210,9 +222,10 @@ void init_npc()
 		clients[npc_id].pos.x = uid(dre) * 150;
 		clients[npc_id].pos.y = 800 + uid(dre) * 50;
 		clients[npc_id].pos.z = uid(dre) * 150;
-		clients[npc_id].right_vec = { 1.0f, 0.0f, 0.0f };
-		clients[npc_id].up_vec = { 0.0f, 1.0f, 0.0f };
-		clients[npc_id].look_vec = { 0.0f, 0.0f, 1.0f };
+		clients[npc_id].pitch = clients[npc_id].yaw = clients[npc_id].roll = 0.0f;
+		clients[npc_id].curr_coordinate.x_coordinate = { 1.0f, 0.0f, 0.0f };
+		clients[npc_id].curr_coordinate.y_coordinate = { 0.0f, 1.0f, 0.0f };
+		clients[npc_id].curr_coordinate.z_coordinate = { 0.0f, 0.0f, 1.0f };
 		sprintf_s(clients[npc_id].name, "NPC-No.%d", i);
 	}
 }
@@ -255,10 +268,13 @@ void process_packet(int client_id, char* packet)
 		cout << "A new object is successfully created! - POS:(" << clients[client_id].pos.x
 			<< "," << clients[client_id].pos.y << "," << clients[client_id].pos.z << ")." << endl;
 
-		clients[client_id].right_vec = { 1.0f, 0.0f, 0.0f };
-		clients[client_id].up_vec = { 0.0f, 1.0f, 0.0f };
-		clients[client_id].look_vec = { 0.0f, 0.0f, 1.0f };
+		clients[client_id].pitch = clients[client_id].yaw = clients[client_id].roll = 0.0f;
+		clients[client_id].curr_coordinate.x_coordinate = { 1.0f, 0.0f, 0.0f };
+		clients[client_id].curr_coordinate.y_coordinate = { 0.0f, 1.0f, 0.0f };
+		clients[client_id].curr_coordinate.z_coordinate = { 0.0f, 0.0f, 1.0f };
+
 		strcpy_s(clients[client_id].name, login_packet->name);
+
 		clients[client_id].send_login_info_packet();
 		clients[client_id].s_state = ST_INGAME;
 		clients[client_id].s_lock.unlock();
@@ -280,12 +296,22 @@ void process_packet(int client_id, char* packet)
 			strcpy_s(add_pl_packet.name, login_packet->name);
 			add_pl_packet.size = sizeof(add_pl_packet);
 			add_pl_packet.type = SC_ADD_PLAYER;
+
 			add_pl_packet.x = clients[client_id].pos.x;
 			add_pl_packet.y = clients[client_id].pos.y;
 			add_pl_packet.z = clients[client_id].pos.z;
-			add_pl_packet.right_x = clients[client_id].right_vec.x, add_pl_packet.right_y = clients[client_id].right_vec.y, add_pl_packet.right_z = clients[client_id].right_vec.z;
-			add_pl_packet.up_x = clients[client_id].up_vec.x, add_pl_packet.up_y = clients[client_id].up_vec.y, add_pl_packet.up_z = clients[client_id].up_vec.z;
-			add_pl_packet.look_x = clients[client_id].look_vec.x, add_pl_packet.look_y = clients[client_id].look_vec.y, add_pl_packet.look_z = clients[client_id].look_vec.z;
+
+			add_pl_packet.right_x = clients[client_id].curr_coordinate.x_coordinate.x;
+			add_pl_packet.right_y = clients[client_id].curr_coordinate.x_coordinate.y;
+			add_pl_packet.right_z = clients[client_id].curr_coordinate.x_coordinate.z;
+
+			add_pl_packet.up_x = clients[client_id].curr_coordinate.y_coordinate.x;
+			add_pl_packet.up_y = clients[client_id].curr_coordinate.y_coordinate.y;
+			add_pl_packet.up_z = clients[client_id].curr_coordinate.y_coordinate.z;
+
+			add_pl_packet.look_x = clients[client_id].curr_coordinate.z_coordinate.x;
+			add_pl_packet.look_y = clients[client_id].curr_coordinate.z_coordinate.y;
+			add_pl_packet.look_z = clients[client_id].curr_coordinate.z_coordinate.z;
 
 			cout << "Send new client's info to client[" << pl.id << "]." << endl;
 			cout << "[SC_ADD]";
@@ -311,9 +337,18 @@ void process_packet(int client_id, char* packet)
 			add_pl_packet.x = pl.pos.x;
 			add_pl_packet.y = pl.pos.y;
 			add_pl_packet.z = pl.pos.z;
-			add_pl_packet.right_x = pl.right_vec.x, add_pl_packet.right_y = pl.right_vec.y, add_pl_packet.right_z = pl.right_vec.z;
-			add_pl_packet.up_x = pl.up_vec.x, add_pl_packet.up_y = pl.up_vec.y, add_pl_packet.up_z = pl.up_vec.z;
-			add_pl_packet.look_x = pl.look_vec.x, add_pl_packet.look_y = pl.look_vec.y, add_pl_packet.look_z = pl.look_vec.z;
+
+			add_pl_packet.right_x = pl.curr_coordinate.x_coordinate.x;
+			add_pl_packet.right_y = pl.curr_coordinate.x_coordinate.y;
+			add_pl_packet.right_z = pl.curr_coordinate.x_coordinate.z;
+
+			add_pl_packet.up_x = pl.curr_coordinate.y_coordinate.x;
+			add_pl_packet.up_y = pl.curr_coordinate.y_coordinate.y;
+			add_pl_packet.up_z = pl.curr_coordinate.y_coordinate.z;
+
+			add_pl_packet.look_x = pl.curr_coordinate.z_coordinate.x;
+			add_pl_packet.look_y = pl.curr_coordinate.z_coordinate.y;
+			add_pl_packet.look_z = pl.curr_coordinate.z_coordinate.z;
 
 			cout << "Send client[" << pl.id << "]'s info to new client" << endl;
 			cout << "[SC_ADD]";
@@ -326,32 +361,32 @@ void process_packet(int client_id, char* packet)
 		CS_MOVE_PACKET* mv_p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 
 		clients[client_id].s_lock.lock();
-		MyFloat3 temp{ 0, };
+		MyVector3D temp{ 0, };
 		float pos_or_neg = 1.0f;
 		switch (mv_p->direction) {
 		case MV_BACK:
 			pos_or_neg = -1.0f;
 		case MV_FORWARD:
-			temp.x = clients[client_id].look_vec.x * pos_or_neg;
-			temp.y = clients[client_id].look_vec.y * pos_or_neg;
-			temp.z = clients[client_id].look_vec.z * pos_or_neg;
+			temp.x = clients[client_id].curr_coordinate.z_coordinate.x * pos_or_neg;
+			temp.y = clients[client_id].curr_coordinate.z_coordinate.y * pos_or_neg;
+			temp.z = clients[client_id].curr_coordinate.z_coordinate.z * pos_or_neg;
 			break;
 		case MV_LEFT:
 			pos_or_neg = -1.0f;
 		case MV_RIGHT:
-			temp.x = clients[client_id].right_vec.x * pos_or_neg;
-			temp.y = clients[client_id].right_vec.y * pos_or_neg;
-			temp.z = clients[client_id].right_vec.z * pos_or_neg;
+			temp.x = clients[client_id].curr_coordinate.x_coordinate.x * pos_or_neg;
+			temp.y = clients[client_id].curr_coordinate.x_coordinate.y * pos_or_neg;
+			temp.z = clients[client_id].curr_coordinate.x_coordinate.z * pos_or_neg;
 			break;
 		case MV_DOWN:
 			pos_or_neg = -1.0f;
 		case MV_UP:
-			temp.x = clients[client_id].up_vec.x * pos_or_neg;
-			temp.y = clients[client_id].up_vec.y * pos_or_neg;
-			temp.z = clients[client_id].up_vec.z * pos_or_neg;
+			temp.x = clients[client_id].curr_coordinate.y_coordinate.x * pos_or_neg;
+			temp.y = clients[client_id].curr_coordinate.y_coordinate.y * pos_or_neg;
+			temp.z = clients[client_id].curr_coordinate.y_coordinate.z * pos_or_neg;
 			break;
 		}
-		MyFloat3 tempPos = calcMove(clients[client_id].pos, temp, 0.6f);// 이동 계산
+		MyVector3D tempPos = calcMove(clients[client_id].pos, temp, 0.6f);// 이동 계산
 		clients[client_id].pos = { tempPos.x, tempPos.y, tempPos.z };
 		clients[client_id].s_lock.unlock();
 
@@ -372,18 +407,48 @@ void process_packet(int client_id, char* packet)
 		CS_ROTATE_PACKET* rt_p = reinterpret_cast<CS_ROTATE_PACKET*>(packet);
 		
 		clients[client_id].s_lock.lock();
+
 		if (clients[client_id].s_state == ST_FREE) {
 			clients[client_id].s_lock.unlock();
 			break;
 		}
-		clients[client_id].right_vec = calcRotate(clients[client_id].right_vec, rt_p->roll, rt_p->pitch, rt_p->yaw);
-		clients[client_id].up_vec = calcRotate(clients[client_id].up_vec, rt_p->roll, rt_p->pitch, rt_p->yaw);
-		clients[client_id].look_vec = calcRotate(clients[client_id].look_vec, rt_p->roll, rt_p->pitch, rt_p->yaw);
+
+		// 마우스 이동거리에 비례하여 회전 각도(pitch, yaw, roll) 결정
+		float temp_pitch = 0.0f;
+		float temp_yaw = 0.0f;
+		float temp_roll= 0.0f;
+		if (rt_p->key_val == RT_LBUTTON) {							// 마우스 좌클릭 회전	(pitch, yaw 회전)
+			temp_pitch = 0.0f;
+			//temp_pitch = -1 * rt_p->delta_y * PI / 360;			// x축기준 회전하려면 이거 주석풀면 됨.
+			temp_yaw = rt_p->delta_x * PI / 360;
+			temp_roll = 0.0f;
+
+		}
+		else if (rt_p->key_val == RT_RBUTTON) {						// 마우스 우클릭 회전   (roll, pitch 회전)
+			temp_pitch = 0.0f;
+			temp_yaw = 0.0f;
+			temp_roll = -1 * rt_p->delta_x * PI / 360;
+
+		}
+
+		// pitch, yaw, roll 업데이트
+		clients[client_id].pitch += temp_pitch;
+		clients[client_id].yaw += temp_yaw;
+		clients[client_id].roll += temp_roll;
+
+		// right, up, look 벡터 업데이트
+		clients[client_id].curr_coordinate.x_coordinate = calcRotate(basic_coordinate.x_coordinate
+			, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+		clients[client_id].curr_coordinate.y_coordinate = calcRotate(basic_coordinate.y_coordinate
+			, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+		clients[client_id].curr_coordinate.z_coordinate = calcRotate(basic_coordinate.z_coordinate
+			, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+
 		clients[client_id].s_lock.unlock();
 
 		// server message
-		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. LookVec:("
-			<< clients[client_id].look_vec.x << ", " << clients[client_id].look_vec.y << ", " << clients[client_id].look_vec.z << ")." << endl;
+		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
+			<< "Pitch: " << clients[client_id].pitch << "Yaw: " << clients[client_id].yaw << "Roll: " << clients[client_id].roll << endl;
 
 		// send to all of running clients
 		for (int i = 0; i < MAX_USER; i++) {

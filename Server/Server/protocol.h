@@ -34,10 +34,13 @@ struct CS_MOVE_PACKET {
 	char direction;
 };
 
+enum rotate_type { RT_LBUTTON, RT_RBUTTON, RT_BOTH };
 struct CS_ROTATE_PACKET {
 	unsigned char size;
 	char type;
-	float roll, pitch, yaw;
+	char key_val;
+	float delta_x, delta_y;
+	//float roll, pitch, yaw;
 };
 
 struct SC_LOGIN_INFO_PACKET {
