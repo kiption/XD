@@ -1178,11 +1178,6 @@ void CBillboardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	ppGrassTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppGrassTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Grass02.dds", RESOURCE_TEXTURE2D, 0);
 
-	CTexture* ppFlowerTextures[2];
-	ppFlowerTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppFlowerTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Flower01.dds", RESOURCE_TEXTURE2D, 0);
-	ppFlowerTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppFlowerTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Flower02.dds", RESOURCE_TEXTURE2D, 0);
 
 	CTexture* ppTreeTextures[3];
 	ppTreeTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -1198,12 +1193,6 @@ void CBillboardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	ppGrassMaterials[1] = new CMaterial();
 	ppGrassMaterials[1]->SetTexture(ppGrassTextures[1]);
 
-	CMaterial* ppFlowerMaterials[2];
-	ppFlowerMaterials[0] = new CMaterial();
-	ppFlowerMaterials[0]->SetTexture(ppFlowerTextures[0]);
-	ppFlowerMaterials[1] = new CMaterial();
-	ppFlowerMaterials[1]->SetTexture(ppFlowerTextures[1]);
-
 	CMaterial* ppTreeMaterials[3];
 	ppTreeMaterials[0] = new CMaterial();
 	ppTreeMaterials[0]->SetTexture(ppTreeTextures[0]);
@@ -1213,13 +1202,12 @@ void CBillboardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	ppTreeMaterials[2]->SetTexture(ppTreeTextures[2]);
 
 	CTexturedRectMesh* pGrassMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 8.0f, 8.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	CTexturedRectMesh* pFlowerMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 8.0f, 16.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	CTexturedRectMesh* pTreeMesh01 = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 12.0f, 36.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	CTexturedRectMesh* pTreeMesh02 = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 16.0f, 46.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	CRawFormatImage* pRawFormatImage = new CRawFormatImage(L"Image/ObjectsMap.raw", 257, 257, true);
 
-	int nGrassObjects = 0, nFlowerObjects = 0, nBlacks = 0, nOthers = 0, nTreeObjects[3] = { 0, 0, 0 };
+	int nGrassObjects = 0,  nBlacks = 0, nOthers = 0, nTreeObjects[3] = { 0, 0, 0 };
 	for (int z = 2; z <= 254; z++)
 	{
 		for (int x = 2; x <= 254; x++)
@@ -1229,8 +1217,6 @@ void CBillboardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 			{
 			case 102: nGrassObjects++; break;
 			case 128: nGrassObjects++; break;
-			case 153: nFlowerObjects++; break;
-			case 179: nFlowerObjects++; break;
 			case 204: nTreeObjects[0]++; break;
 			case 225: nTreeObjects[1]++; break;
 			case 255: nTreeObjects[2]++; break;
@@ -1239,14 +1225,12 @@ void CBillboardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 			}
 		}
 	}
-	m_nObjects = nGrassObjects + nFlowerObjects + nTreeObjects[0] + nTreeObjects[1] + nTreeObjects[2];
+	m_nObjects = nGrassObjects + nTreeObjects[0] + nTreeObjects[1] + nTreeObjects[2];
 
 
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 7);
 	CreateShaderResourceViews(pd3dDevice, ppGrassTextures[0], 0, 12);
 	CreateShaderResourceViews(pd3dDevice, ppGrassTextures[1], 0, 12);
-	CreateShaderResourceViews(pd3dDevice, ppFlowerTextures[0], 0, 12);
-	CreateShaderResourceViews(pd3dDevice, ppFlowerTextures[1], 0, 12);
 	CreateShaderResourceViews(pd3dDevice, ppTreeTextures[0], 0, 12);
 	CreateShaderResourceViews(pd3dDevice, ppTreeTextures[1], 0, 12);
 	CreateShaderResourceViews(pd3dDevice, ppTreeTextures[2], 0, 12);
@@ -1281,16 +1265,6 @@ void CBillboardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 				pMesh = pGrassMesh;
 				pMaterial = ppGrassMaterials[1];
 				fyOffset = 6.0f * 0.5f;
-				break;
-			case 153:
-				pMesh = pFlowerMesh;
-				pMaterial = ppFlowerMaterials[0];
-				fyOffset = 16.0f * 0.5f;
-				break;
-			case 179:
-				pMesh = pFlowerMesh;
-				pMaterial = ppFlowerMaterials[1];
-				fyOffset = 16.0f * 0.5f;
 				break;
 			case 204:
 				pMesh = pTreeMesh01;
