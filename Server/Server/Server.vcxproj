@@ -143,6 +143,7 @@
     <ClCompile Include="server.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="global.h" />
     <ClInclude Include="Func_CalcVectors.h" />
     <ClInclude Include="MyVectors.h" />
     <ClInclude Include="protocol.h" />

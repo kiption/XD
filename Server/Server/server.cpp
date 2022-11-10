@@ -7,6 +7,7 @@
 #include <vector>
 #include <random>	// NPC의 초기 위치값 설정할 때 임시로 랜덤값을 부여하기로 함. -> 추후에 정해진 리스폰 지점에 생성되도록 변경해야함.
 
+#include "global.h"
 #include "MyVectors.h"
 #include "protocol.h"
 #include "Func_CalcVectors.h"
@@ -413,6 +414,7 @@ void process_packet(int client_id, char* packet)
 			break;
 		}
 
+		cout << "Mouse - dX: " << rt_p->delta_x << ", dY: " << rt_p->delta_y << endl;
 		// 마우스 이동거리에 비례하여 회전 각도(pitch, yaw, roll) 결정
 		float temp_pitch = 0.0f;
 		float temp_yaw = 0.0f;
@@ -420,14 +422,14 @@ void process_packet(int client_id, char* packet)
 		if (rt_p->key_val == RT_LBUTTON) {							// 마우스 좌클릭 회전	(pitch, yaw 회전)
 			temp_pitch = 0.0f;
 			//temp_pitch = -1 * rt_p->delta_y * PI / 360;			// x축기준 회전하려면 이거 주석풀면 됨.
-			temp_yaw = rt_p->delta_x * PI / 360;
+			temp_yaw = rt_p->delta_x * SENSITIVITY * PI / 360;
 			temp_roll = 0.0f;
 
 		}
 		else if (rt_p->key_val == RT_RBUTTON) {						// 마우스 우클릭 회전   (roll, pitch 회전)
 			temp_pitch = 0.0f;
 			temp_yaw = 0.0f;
-			temp_roll = -1 * rt_p->delta_x * PI / 360;
+			temp_roll = -1.0f * rt_p->delta_x * SENSITIVITY * PI / 360;
 
 		}
 
@@ -435,6 +437,17 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].pitch += temp_pitch;
 		clients[client_id].yaw += temp_yaw;
 		clients[client_id].roll += temp_roll;
+
+		// 비정상적인 회전 방지
+		if (clients[client_id].roll > ROLL_LIMIT * PI / 360.0f)
+			clients[client_id].roll = (ROLL_LIMIT - 1) * PI / 360.0f;
+		else if (clients[client_id].roll < -1.0f * ROLL_LIMIT * PI / 360.0f)
+			clients[client_id].roll = -1.0f * (ROLL_LIMIT - 1) * PI / 360.0f;
+
+		if (clients[client_id].pitch > PITCH_LIMIT * PI / 360.0f)
+			clients[client_id].pitch = (PITCH_LIMIT - 1) * PI / 360.0f;
+		else if (clients[client_id].pitch < -1.0f * PITCH_LIMIT * PI / 360.0f)
+			clients[client_id].pitch = -1.0f * (PITCH_LIMIT - 1) * PI / 360.0f;
 
 		// right, up, look 벡터 업데이트
 		clients[client_id].curr_coordinate.x_coordinate = calcRotate(basic_coordinate.x_coordinate
@@ -448,7 +461,7 @@ void process_packet(int client_id, char* packet)
 
 		// server message
 		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
-			<< "Pitch: " << clients[client_id].pitch << "Yaw: " << clients[client_id].yaw << "Roll: " << clients[client_id].roll << endl;
+			<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
 
 		// send to all of running clients
 		for (int i = 0; i < MAX_USER; i++) {
