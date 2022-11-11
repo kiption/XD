@@ -473,40 +473,41 @@ void CGameFramework::ProcessInput()
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
 	if (!bProcessedByScene)
 	{
-		int packetDirection = -1;//S
+		char packetDirection = 0b000000;//S	// 0b[W][S][A][D][E][Q]
 		DWORD dwDirection = 0;
 
-
 		if (pKeysBuffer[KEY_W] & 0xF0) {
-			packetDirection = 0;//S
+			packetDirection += 0b100000;//S
 			dwDirection |= DIR_FORWARD;
 		}
 		if (pKeysBuffer[KEY_S] & 0xF0) {
-			packetDirection = 1;//S
+			packetDirection += 0b010000;//S
 			dwDirection |= DIR_BACKWARD;
 		}
-		if (pKeysBuffer[KEY_A] & 0xF0) {
-			packetDirection = 2;//S
-			dwDirection |= DIR_LEFT;
-		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
-			packetDirection = 3;//S
+			packetDirection += 0b001000;//S
 			dwDirection |= DIR_RIGHT;
 		}
-
-		if (pKeysBuffer[KEY_E] & 0xF0) {
-			packetDirection = 4;//S
-			dwDirection |= DIR_DOWN;
+		if (pKeysBuffer[KEY_A] & 0xF0) {
+			packetDirection += 0b000100;//S
+			dwDirection |= DIR_LEFT;
 		}
+
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
-			packetDirection = 5;//S
+			packetDirection += 0b000010;//S
 			dwDirection |= DIR_UP;
 		}
+		if (pKeysBuffer[KEY_E] & 0xF0) {
+			packetDirection += 0b000001;//S
+			dwDirection |= DIR_DOWN;
+		}
+
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
 			((CAirplanePlayer*)m_pPlayer)->FireBullet(NULL);
 		}
+
 		// Server
-		if (packetDirection != -1) {
+		if (packetDirection) {
 			CS_MOVE_PACKET move_p;
 			move_p.size = sizeof(move_p);
 			move_p.type = CS_MOVE;

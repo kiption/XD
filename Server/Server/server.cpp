@@ -362,33 +362,38 @@ void process_packet(int client_id, char* packet)
 		CS_MOVE_PACKET* mv_p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 
 		clients[client_id].s_lock.lock();
-		MyVector3D temp{ 0, };
-		float pos_or_neg = 1.0f;
-		switch (mv_p->direction) {
-		case MV_BACK:
-			pos_or_neg = -1.0f;
-		case MV_FORWARD:
-			temp.x = clients[client_id].curr_coordinate.z_coordinate.x * pos_or_neg;
-			temp.y = clients[client_id].curr_coordinate.z_coordinate.y * pos_or_neg;
-			temp.z = clients[client_id].curr_coordinate.z_coordinate.z * pos_or_neg;
-			break;
-		case MV_LEFT:
-			pos_or_neg = -1.0f;
-		case MV_RIGHT:
-			temp.x = clients[client_id].curr_coordinate.x_coordinate.x * pos_or_neg;
-			temp.y = clients[client_id].curr_coordinate.x_coordinate.y * pos_or_neg;
-			temp.z = clients[client_id].curr_coordinate.x_coordinate.z * pos_or_neg;
-			break;
-		case MV_DOWN:
-			pos_or_neg = -1.0f;
-		case MV_UP:
-			temp.x = clients[client_id].curr_coordinate.y_coordinate.x * pos_or_neg;
-			temp.y = clients[client_id].curr_coordinate.y_coordinate.y * pos_or_neg;
-			temp.z = clients[client_id].curr_coordinate.y_coordinate.z * pos_or_neg;
-			break;
+
+		enum { MV_Y, MV_X, MV_Z };
+		MyVector3D move_dir{ 0, 0, 0 };
+
+		for (int i = 0; i <= 5; i++) {
+			if ((mv_p->direction >> i) & 1) {
+				float sign = 1.0f;					// 양, 음 부호
+				if (i % 2 == 0) sign = -1.0f;		// A, S, E key
+
+				switch (i/2) {
+				case MV_Y:
+					move_dir.x = clients[client_id].curr_coordinate.y_coordinate.x * sign;
+					move_dir.y = clients[client_id].curr_coordinate.y_coordinate.y * sign;
+					move_dir.z = clients[client_id].curr_coordinate.y_coordinate.z * sign;
+					break;
+				case MV_X:
+					move_dir.x = clients[client_id].curr_coordinate.x_coordinate.x * sign;
+					move_dir.y = clients[client_id].curr_coordinate.x_coordinate.y * sign;
+					move_dir.z = clients[client_id].curr_coordinate.x_coordinate.z * sign;
+					break;
+				case MV_Z:
+					move_dir.x = clients[client_id].curr_coordinate.z_coordinate.x * sign;
+					move_dir.y = clients[client_id].curr_coordinate.z_coordinate.y * sign;
+					move_dir.z = clients[client_id].curr_coordinate.z_coordinate.z * sign;
+					break;
+				}
+
+				MyVector3D move_result = calcMove(clients[client_id].pos, move_dir, MOVE_SCALAR);	// 이동 계산
+				clients[client_id].pos = move_result;												// 이동결과 업데이트
+			}
 		}
-		MyVector3D tempPos = calcMove(clients[client_id].pos, temp, 0.6f);// 이동 계산
-		clients[client_id].pos = { tempPos.x, tempPos.y, tempPos.z };
+
 		clients[client_id].s_lock.unlock();
 
 		// server message

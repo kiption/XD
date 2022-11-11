@@ -27,7 +27,6 @@ struct CS_LOGIN_PACKET {
 	char name[NAME_SIZE];
 };
 
-enum move_dir { MV_FORWARD, MV_BACK, MV_LEFT, MV_RIGHT, MV_DOWN, MV_UP };
 struct CS_MOVE_PACKET {
 	unsigned char size;
 	char type;
