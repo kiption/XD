@@ -224,9 +224,7 @@ void init_npc()
 		clients[npc_id].pos.y = 800 + uid(dre) * 50;
 		clients[npc_id].pos.z = uid(dre) * 150;
 		clients[npc_id].pitch = clients[npc_id].yaw = clients[npc_id].roll = 0.0f;
-		clients[npc_id].curr_coordinate.x_coordinate = { 1.0f, 0.0f, 0.0f };
-		clients[npc_id].curr_coordinate.y_coordinate = { 0.0f, 1.0f, 0.0f };
-		clients[npc_id].curr_coordinate.z_coordinate = { 0.0f, 0.0f, 1.0f };
+		clients[npc_id].curr_coordinate = basic_coordinate;
 		sprintf_s(clients[npc_id].name, "NPC-No.%d", i);
 	}
 }
@@ -270,9 +268,7 @@ void process_packet(int client_id, char* packet)
 			<< "," << clients[client_id].pos.y << "," << clients[client_id].pos.z << ")." << endl;
 
 		clients[client_id].pitch = clients[client_id].yaw = clients[client_id].roll = 0.0f;
-		clients[client_id].curr_coordinate.x_coordinate = { 1.0f, 0.0f, 0.0f };
-		clients[client_id].curr_coordinate.y_coordinate = { 0.0f, 1.0f, 0.0f };
-		clients[client_id].curr_coordinate.z_coordinate = { 0.0f, 0.0f, 1.0f };
+		clients[client_id].curr_coordinate = basic_coordinate;
 
 		strcpy_s(clients[client_id].name, login_packet->name);
 
@@ -358,59 +354,91 @@ void process_packet(int client_id, char* packet)
 		}
 		break;
 	}// CS_LOGIN end
-	case CS_MOVE: {
-		CS_MOVE_PACKET* mv_p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
+	case CS_INPUT_KEYBOARD: {
+		CS_INPUT_KEYBOARD_PACKET* inputkey_p = reinterpret_cast<CS_INPUT_KEYBOARD_PACKET*>(packet);
 
-		clients[client_id].s_lock.lock();
-
-		enum { MV_Y, MV_X, MV_Z };
-		MyVector3D move_dir{ 0, 0, 0 };
+		enum { KEY_QE, KEY_DA, KEY_WS };
 
 		for (int i = 0; i <= 5; i++) {
-			if ((mv_p->direction >> i) & 1) {
+			if ((inputkey_p->direction >> i) & 1) {
+				clients[client_id].s_lock.lock();
+
 				float sign = 1.0f;					// 양, 음 부호
 				if (i % 2 == 0) sign = -1.0f;		// A, S, E key
 
 				switch (i/2) {
-				case MV_Y:
+				case KEY_QE:
+					// 아직 기능 없음.
+					
+					// unlock
+					clients[client_id].s_lock.unlock();
+
+					break;
+
+				case KEY_DA:	// D, A는 기체의 yaw회전 키입니다. 기체를 y축 기준으로 회전시킵니다.
+					// yaw 설정
+					clients[client_id].yaw += 1.0f * sign * PI / 360.0f;
+
+					// right, up, look 벡터 업데이트
+					clients[client_id].curr_coordinate.x_coordinate = calcRotate(basic_coordinate.x_coordinate
+						, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+					clients[client_id].curr_coordinate.y_coordinate = calcRotate(basic_coordinate.y_coordinate
+						, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+					clients[client_id].curr_coordinate.z_coordinate = calcRotate(basic_coordinate.z_coordinate
+						, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+
+					// unlock
+					clients[client_id].s_lock.unlock();
+
+					// server message
+					cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
+						<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
+
+					// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
+					for (int i = 0; i < MAX_USER; i++) {
+						auto& pl = clients[i];
+						lock_guard<mutex> lg{ pl.s_lock };
+						if (pl.s_state == ST_INGAME)
+							pl.send_rotate_packet(client_id);
+					}
+
+					break;
+
+				case KEY_WS:	// W, S는 엔진출력 조절 키입니다. 기체를 상승 또는 하강시킵니다.
+					// 이동 방향 설정
+					MyVector3D move_dir{ 0, 0, 0 };
 					move_dir.x = clients[client_id].curr_coordinate.y_coordinate.x * sign;
 					move_dir.y = clients[client_id].curr_coordinate.y_coordinate.y * sign;
 					move_dir.z = clients[client_id].curr_coordinate.y_coordinate.z * sign;
-					break;
-				case MV_X:
-					move_dir.x = clients[client_id].curr_coordinate.x_coordinate.x * sign;
-					move_dir.y = clients[client_id].curr_coordinate.x_coordinate.y * sign;
-					move_dir.z = clients[client_id].curr_coordinate.x_coordinate.z * sign;
-					break;
-				case MV_Z:
-					move_dir.x = clients[client_id].curr_coordinate.z_coordinate.x * sign;
-					move_dir.y = clients[client_id].curr_coordinate.z_coordinate.y * sign;
-					move_dir.z = clients[client_id].curr_coordinate.z_coordinate.z * sign;
+
+					// 이동 계산 & 결과 업데이트
+					MyVector3D move_result = calcMove(clients[client_id].pos, move_dir, MOVE_SCALAR);	
+					clients[client_id].pos = move_result;
+
+					// unlock
+					clients[client_id].s_lock.unlock();
+
+					// server message
+					cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] moves to ("
+						<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.z << ")." << endl;
+
+					// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
+					for (int i = 0; i < MAX_USER; i++) {
+						auto& pl = clients[i];
+						lock_guard<mutex> lg{ pl.s_lock };
+						if (pl.s_state == ST_INGAME)
+							pl.send_move_packet(client_id);
+					}
+
 					break;
 				}
-
-				MyVector3D move_result = calcMove(clients[client_id].pos, move_dir, MOVE_SCALAR);	// 이동 계산
-				clients[client_id].pos = move_result;												// 이동결과 업데이트
 			}
 		}
 
-		clients[client_id].s_lock.unlock();
-
-		// server message
-		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] moves to ("
-			<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.z << ")." << endl;
-
-		// send to all of running clients
-		for (int i = 0; i < MAX_USER; i++) {
-			auto& pl = clients[i];
-			lock_guard<mutex> lg{ pl.s_lock };
-			if (pl.s_state == ST_INGAME)
-				pl.send_move_packet(client_id);
-		}
 		break;
-	}// CS_MOVE end
-	case CS_ROTATE: {
-		CS_ROTATE_PACKET* rt_p = reinterpret_cast<CS_ROTATE_PACKET*>(packet);
+	}// CS_INPUT_KEYBOARD end
+	case CS_INPUT_MOUSE: {
+		CS_INPUT_MOUSE_PACKET* rt_p = reinterpret_cast<CS_INPUT_MOUSE_PACKET*>(packet);
 		
 		clients[client_id].s_lock.lock();
 
@@ -418,65 +446,89 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].s_lock.unlock();
 			break;
 		}
+	
+		if (rt_p->key_val == RT_LBUTTON) {			// 마우스 좌클릭 드래그
 
-		cout << "Mouse - dX: " << rt_p->delta_x << ", dY: " << rt_p->delta_y << endl;
-		// 마우스 이동거리에 비례하여 회전 각도(pitch, yaw, roll) 결정
-		float temp_pitch = 0.0f;
-		float temp_yaw = 0.0f;
-		float temp_roll= 0.0f;
-		if (rt_p->key_val == RT_LBUTTON) {							// 마우스 좌클릭 회전	(pitch, yaw 회전)
-			temp_pitch = 0.0f;
-			//temp_pitch = -1 * rt_p->delta_y * PI / 360;			// x축기준 회전하려면 이거 주석풀면 됨.
-			temp_yaw = rt_p->delta_x * SENSITIVITY * PI / 360;
-			temp_roll = 0.0f;
+			MyVector3D move_dir{ 0, 0, 0 };
+			MyVector3D move_result{ 0, 0, 0 };
+			float tmp_scalar = 0.0f;
+
+			if (fabs(rt_p->delta_x) < fabs(rt_p->delta_y)) {	// 마우스 상,하 드래그: 기수를 조절합니다.기체를 x축 기준으로 회전시키고 앞뒤로 이동합니다.
+				// 1. pitch 회전
+				// pitch 설정
+				clients[client_id].pitch += -1.0f * rt_p->delta_y * SENSITIVITY * PI / 360.0f;
+
+				// 비정상적인 회전 방지
+				if (clients[client_id].pitch > PITCH_LIMIT * PI / 360.0f)
+					clients[client_id].pitch = (PITCH_LIMIT - 1) * PI / 360.0f;
+				else if (clients[client_id].pitch < -1.0f * PITCH_LIMIT * PI / 360.0f)
+					clients[client_id].pitch = -1.0f * (PITCH_LIMIT - 1) * PI / 360.0f;
+
+				// 2. z축 이동
+				// 이동 관련 설정
+				move_dir.x = clients[client_id].curr_coordinate.z_coordinate.x;
+				move_dir.y = clients[client_id].curr_coordinate.z_coordinate.y;
+				move_dir.z = clients[client_id].curr_coordinate.z_coordinate.z;
+
+				tmp_scalar = -1.0f * rt_p->delta_y * SENSITIVITY;
+			}
+			else {									// 마우스 좌,우 드래그: 기수의 수평을 조절합니다.기체를 z축 기준으로 회전시키고 좌우로 이동합니다.
+				// 1. roll 회전
+				// roll 설정
+				clients[client_id].roll += -1.0f * rt_p->delta_x * SENSITIVITY * PI / 360.0f;
+
+				// 비정상적인 회전 방지
+				if (clients[client_id].roll > ROLL_LIMIT * PI / 360.0f)
+					clients[client_id].roll = (ROLL_LIMIT - 1) * PI / 360.0f;
+				else if (clients[client_id].roll < -1.0f * ROLL_LIMIT * PI / 360.0f)
+					clients[client_id].roll = -1.0f * (ROLL_LIMIT - 1) * PI / 360.0f;
+
+				// 2. x축 이동
+				// 이동 관련 설정
+				move_dir.x = clients[client_id].curr_coordinate.x_coordinate.x;
+				move_dir.y = clients[client_id].curr_coordinate.x_coordinate.y;
+				move_dir.z = clients[client_id].curr_coordinate.x_coordinate.z;
+
+				tmp_scalar = rt_p->delta_x * SENSITIVITY;
+			}
+
+			// right, up, look 벡터 회전 & 업데이트
+			clients[client_id].curr_coordinate.x_coordinate = calcRotate(basic_coordinate.x_coordinate
+				, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+			clients[client_id].curr_coordinate.y_coordinate = calcRotate(basic_coordinate.y_coordinate
+				, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+			clients[client_id].curr_coordinate.z_coordinate = calcRotate(basic_coordinate.z_coordinate
+				, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+
+			// 이동 & 좌표 업데이트
+			move_result = calcMove(clients[client_id].pos, move_dir, tmp_scalar);
+			clients[client_id].pos = move_result;
 
 		}
-		else if (rt_p->key_val == RT_RBUTTON) {						// 마우스 우클릭 회전   (roll, pitch 회전)
-			temp_pitch = 0.0f;
-			temp_yaw = 0.0f;
-			temp_roll = -1.0f * rt_p->delta_x * SENSITIVITY * PI / 360;
+		else if (rt_p->key_val == RT_RBUTTON) {		// 마우스 우클릭 드래그: 기능 미정.
+			
 
 		}
-
-		// pitch, yaw, roll 업데이트
-		clients[client_id].pitch += temp_pitch;
-		clients[client_id].yaw += temp_yaw;
-		clients[client_id].roll += temp_roll;
-
-		// 비정상적인 회전 방지
-		if (clients[client_id].roll > ROLL_LIMIT * PI / 360.0f)
-			clients[client_id].roll = (ROLL_LIMIT - 1) * PI / 360.0f;
-		else if (clients[client_id].roll < -1.0f * ROLL_LIMIT * PI / 360.0f)
-			clients[client_id].roll = -1.0f * (ROLL_LIMIT - 1) * PI / 360.0f;
-
-		if (clients[client_id].pitch > PITCH_LIMIT * PI / 360.0f)
-			clients[client_id].pitch = (PITCH_LIMIT - 1) * PI / 360.0f;
-		else if (clients[client_id].pitch < -1.0f * PITCH_LIMIT * PI / 360.0f)
-			clients[client_id].pitch = -1.0f * (PITCH_LIMIT - 1) * PI / 360.0f;
-
-		// right, up, look 벡터 업데이트
-		clients[client_id].curr_coordinate.x_coordinate = calcRotate(basic_coordinate.x_coordinate
-			, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
-		clients[client_id].curr_coordinate.y_coordinate = calcRotate(basic_coordinate.y_coordinate
-			, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
-		clients[client_id].curr_coordinate.z_coordinate = calcRotate(basic_coordinate.z_coordinate
-			, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
 
 		clients[client_id].s_lock.unlock();
 
 		// server message
 		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
 			<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
+		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] moves to ("
+			<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.z << ")." << endl;
 
-		// send to all of running clients
+		// 작동 중인 모든 클라이언트에게 이동&회전 결과를 알려줍니다.
 		for (int i = 0; i < MAX_USER; i++) {
 			auto& pl = clients[i];
 			lock_guard<mutex> lg{ pl.s_lock };
-			if (pl.s_state == ST_INGAME)
+			if (pl.s_state == ST_INGAME) {
 				pl.send_rotate_packet(client_id);
+				pl.send_move_packet(client_id);
+			}
 		}
 		break;
-	}// CS_ROTATE end
+	}// CS_INPUT_MOUSE end
 	}
 }
 

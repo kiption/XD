@@ -9,10 +9,18 @@ constexpr int WORLD_X_POS = 2000;
 constexpr int WORLD_Y_POS = 2000;
 constexpr int WORLD_Z_POS = 2000;
 
+// key value
+constexpr char INPUT_KEY_W = 0b100000;
+constexpr char INPUT_KEY_S = 0b010000;
+constexpr char INPUT_KEY_D = 0b001000;
+constexpr char INPUT_KEY_A = 0b000100;
+constexpr char INPUT_KEY_Q = 0b000010;
+constexpr char INPUT_KEY_E = 0b000001;
+
 // Packet ID
 constexpr char CS_LOGIN = 0;
-constexpr char CS_MOVE = 1;
-constexpr char CS_ROTATE = 2;
+constexpr char CS_INPUT_KEYBOARD = 1;
+constexpr char CS_INPUT_MOUSE = 2;
 constexpr char SC_LOGIN_INFO = 3;
 constexpr char SC_ADD_PLAYER = 4;
 constexpr char SC_REMOVE_PLAYER = 5;
@@ -27,14 +35,14 @@ struct CS_LOGIN_PACKET {
 	char name[NAME_SIZE];
 };
 
-struct CS_MOVE_PACKET {
+struct CS_INPUT_KEYBOARD_PACKET {
 	unsigned char size;
 	char type;
 	char direction;
 };
 
 enum rotate_type { RT_LBUTTON, RT_RBUTTON, RT_BOTH };
-struct CS_ROTATE_PACKET {
+struct CS_INPUT_MOUSE_PACKET {
 	unsigned char size;
 	char type;
 	char key_val;

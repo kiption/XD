@@ -473,32 +473,32 @@ void CGameFramework::ProcessInput()
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
 	if (!bProcessedByScene)
 	{
-		char packetDirection = 0b000000;//S	// 0b[W][S][A][D][E][Q]
+		char packetDirection = 0;//S
 		DWORD dwDirection = 0;
 
 		if (pKeysBuffer[KEY_W] & 0xF0) {
-			packetDirection += 0b100000;//S
+			packetDirection += INPUT_KEY_W;//S
 			dwDirection |= DIR_FORWARD;
 		}
 		if (pKeysBuffer[KEY_S] & 0xF0) {
-			packetDirection += 0b010000;//S
+			packetDirection += INPUT_KEY_S;//S
 			dwDirection |= DIR_BACKWARD;
 		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
-			packetDirection += 0b001000;//S
+			packetDirection += INPUT_KEY_D;//S
 			dwDirection |= DIR_RIGHT;
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
-			packetDirection += 0b000100;//S
+			packetDirection += INPUT_KEY_A;//S
 			dwDirection |= DIR_LEFT;
 		}
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
-			packetDirection += 0b000010;//S
+			packetDirection += INPUT_KEY_Q;//S
 			dwDirection |= DIR_UP;
 		}
 		if (pKeysBuffer[KEY_E] & 0xF0) {
-			packetDirection += 0b000001;//S
+			packetDirection += INPUT_KEY_E;//S
 			dwDirection |= DIR_DOWN;
 		}
 
@@ -508,12 +508,12 @@ void CGameFramework::ProcessInput()
 
 		// Server
 		if (packetDirection) {
-			CS_MOVE_PACKET move_p;
-			move_p.size = sizeof(move_p);
-			move_p.type = CS_MOVE;
-			move_p.direction = packetDirection;	// 입력받은 키값 전달
+			CS_INPUT_KEYBOARD_PACKET keyboard_p;
+			keyboard_p.size = sizeof(keyboard_p);
+			keyboard_p.type = CS_INPUT_KEYBOARD;
+			keyboard_p.direction = packetDirection;	// 입력받은 키값 전달
 
-			sendPacket(&move_p);
+			sendPacket(&keyboard_p);
 		}//
 
 		float cxDelta = 0.0f, cyDelta = 0.0f,czDelta = 0.0f;
@@ -523,7 +523,7 @@ void CGameFramework::ProcessInput()
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
 			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 2.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 2.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 2.0f; 
 			czDelta = ((float)(ptCursorPos.y - m_ptOldCursorPos.y)+ (float)(ptCursorPos.x - m_ptOldCursorPos.x)) / 3.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
@@ -533,9 +533,9 @@ void CGameFramework::ProcessInput()
 			if (cxDelta || cyDelta)
 			{
 				// Server
-				CS_ROTATE_PACKET rotate_p;
+				CS_INPUT_MOUSE_PACKET rotate_p;
 				rotate_p.size = sizeof(rotate_p);
-				rotate_p.type = CS_ROTATE;
+				rotate_p.type = CS_INPUT_MOUSE;
 
 				if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
 					rotate_p.key_val = RT_LBUTTON;
