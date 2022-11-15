@@ -516,6 +516,51 @@ void CGameFramework::ProcessInput()
 			sendPacket(&keyboard_p);
 		}//
 
+		// Server TempCode
+		// 마우스로 전진, 후진하는 것이 아직 어색하고 불편하여 마우스를 통한 이동 로직을 개선하기 전까지
+		// 임시로 방향키 위아래를 통해 전후 이동을 합니다.
+		float lookScalar = 0.9f;
+		float rightScalar = 2.0f;
+		if (pKeysBuffer[VK_UP] & 0xF0) {
+			CS_INPUT_MOUSE_PACKET temp_p;
+			temp_p.size = sizeof(temp_p);
+			temp_p.type = CS_INPUT_MOUSE;
+			temp_p.key_val = RT_LBUTTON;
+			temp_p.delta_x = 0.0f;
+			temp_p.delta_y = -1.0f * lookScalar;
+			sendPacket(&temp_p);
+		}
+		else if (pKeysBuffer[VK_DOWN] & 0xF0) {
+			CS_INPUT_MOUSE_PACKET temp_p;
+			temp_p.size = sizeof(temp_p);
+			temp_p.type = CS_INPUT_MOUSE;
+			temp_p.key_val = RT_LBUTTON;
+			temp_p.delta_x = 0.0f;
+			temp_p.delta_y = lookScalar;
+			sendPacket(&temp_p);
+		}
+
+		if (pKeysBuffer[VK_LEFT] & 0xF0) {
+			CS_INPUT_MOUSE_PACKET temp_p;
+			temp_p.size = sizeof(temp_p);
+			temp_p.type = CS_INPUT_MOUSE;
+			temp_p.key_val = RT_LBUTTON;
+			temp_p.delta_x = -1.0f * rightScalar;
+			temp_p.delta_y = 0.0f;
+			sendPacket(&temp_p);
+		}
+		else if (pKeysBuffer[VK_RIGHT] & 0xF0) {
+			CS_INPUT_MOUSE_PACKET temp_p;
+			temp_p.size = sizeof(temp_p);
+			temp_p.type = CS_INPUT_MOUSE;
+			temp_p.key_val = RT_LBUTTON;
+			temp_p.delta_x = rightScalar;
+			temp_p.delta_y = 0.0f;
+			sendPacket(&temp_p);
+		}
+		//== tempcode end
+
+
 		float cxDelta = 0.0f, cyDelta = 0.0f,czDelta = 0.0f;
 		POINT ptCursorPos;
 		if (GetCapture() == m_hWnd)
