@@ -1272,7 +1272,7 @@ D3D12_BLEND_DESC CWaterMoveShader::CreateBlendState()
 	D3D12_BLEND_DESC d3dBlendDesc;
 	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
 	d3dBlendDesc.AlphaToCoverageEnable = FALSE;
-	d3dBlendDesc.IndependentBlendEnable = TRUE;
+	d3dBlendDesc.IndependentBlendEnable = FALSE;
 	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
 	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
 	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
@@ -1312,7 +1312,7 @@ D3D12_SHADER_BYTECODE CWaterMoveShader::CreateVertexShader()
 
 D3D12_SHADER_BYTECODE CWaterMoveShader::CreatePixelShader()
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTerrain", "ps_5_1", &m_pd3dPixelShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSWater", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
 void CWaterMoveShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)

@@ -259,6 +259,27 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 
 	return(cColor);
 }
+
+float4 PSWater(VS_TERRAIN_OUTPUT input) : SV_TARGET
+{
+
+	input.normalW = normalize(input.normalW);
+	float4 cBaseTexColor = gtxtTerrainTexture.Sample(gssWrap, input.uv0 * 1.0f);
+	float fAlpha = gtxtAlphaTexture.Sample(gssWrap, input.uv0).w;
+	float4 cIllumination = float4(0.4f, 0.8f, 0.4f, 1.0f);
+
+	float4 cDetailTexColors[1];
+	cDetailTexColors[0] = gtxtDetailTexture[0].Sample(gssWrap, input.uv1 * 0.1f);
+
+
+	cIllumination = Lighting(input.positionW, input.normalW);
+
+	float4 cColor = (cBaseTexColor * cDetailTexColors[0]);
+
+	cColor += lerp(cColor, cIllumination, 0.05);
+
+	return(cColor);
+}
 ///////////////////////////////////////////////////////////////////
 struct VS_WATER_INPUT
 {
