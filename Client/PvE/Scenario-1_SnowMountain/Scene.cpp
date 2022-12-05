@@ -451,14 +451,14 @@ void CScene::WarMode()
 	{
 		m_ppShaders[0]->m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0, 1, 0));
 		m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._41 += (((-m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._41 + m_pPlayer->GetPosition().x) / 15.0f) - (j)+5.0) / 50;
-		m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._42 += (((-m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._42 + m_pPlayer->GetPosition().y))/20 -1.5);
+		m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._42 += (((-m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._42 + m_pPlayer->GetPosition().y))/10 -1.5);
 		m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._43 += (((-m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._43 + m_pPlayer->GetPosition().z) / 15.0f) - (j)+3.0) /50;
 	}
 	for (int k = 5; k < 10; k++)
 	{
 		m_ppShaders[0]->m_ppObjects[k]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0, 1, 0));
 		m_ppShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._41 += (((-m_ppShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._41 + m_pPlayer->GetPosition().x) / 15.0f) - k + 3.0) / 50;
-		m_ppShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._42 += (((-m_ppShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._42 + m_pPlayer->GetPosition().y))/20 - 1.5);
+		m_ppShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._42 += (((-m_ppShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._42 + m_pPlayer->GetPosition().y))/10 - 1.5);
 		m_ppShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._43 += (((-m_ppShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._43 + m_pPlayer->GetPosition().z) / 15.0f) - k + 5.0) / 50;
 	}
 

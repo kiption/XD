@@ -1089,9 +1089,9 @@ void CBulletMotionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 
 	CTexturedRectMesh* pSpriteMesh[3];
-	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList,5.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 25.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	pSpriteMesh[2] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 25.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList,15.0f, 35.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 15.0f, 35.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[2] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 15.0f, 35.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 
 

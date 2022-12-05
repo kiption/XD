@@ -5,15 +5,15 @@ GameSound::GameSound()
 	result = FMOD::System_Create(&soundSystem);
 
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_DEFAULT, 0, &shootSound);
+	result = soundSystem->createSound("Sound/Shooting.wav", FMOD_DEFAULT, 0, &shootSound);
 	result = shootSound->setMode(FMOD_LOOP_OFF);
 
 	result = soundSystem->init(64, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("Sound/Speaking.mp3", FMOD_DEFAULT, 0, &speakSound);
+	result = soundSystem->createSound("Sound/Speaking.wav", FMOD_DEFAULT, 0, &speakSound);
 	result = speakSound->setMode(FMOD_LOOP_OFF);
 
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("Sound/BackGround.mp3", FMOD_3D, 0, &bgmSound);
+	result = soundSystem->createSound("Sound/BackGround.wav", FMOD_3D, 0, &bgmSound);
 	result = bgmSound->setMode(FMOD_LOOP_NORMAL);
 
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);

@@ -1303,10 +1303,10 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Snowsurface.dds", RESOURCE_TEXTURE2D, 0);
 
-	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Glacier.dds", RESOURCE_TEXTURE2D, 1);
+	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Snowsurface.dds", RESOURCE_TEXTURE2D, 1);
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/SnowMountain_Detail.dds", RESOURCE_TEXTURE2D, 2);
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/SnowMountain_Detail.dds", RESOURCE_TEXTURE2D, 3);
-	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Ice_Detail.dds", RESOURCE_TEXTURE2D, 4);
+	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Grass.dds", RESOURCE_TEXTURE2D, 4);
 	//SnowMountain_Detail
 
 	CTerrainShader* pTerrainShader = new CTerrainShader();

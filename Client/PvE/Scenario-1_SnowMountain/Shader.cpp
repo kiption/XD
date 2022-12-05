@@ -5,8 +5,8 @@
 #include "stdafx.h"
 #include "Shader.h"
 #include "Player.h"
-uniform_int_distribution<int>uidxz(200, 4500);
-uniform_int_distribution<int>uidy(1000, 1250);
+uniform_int_distribution<int>uidxz(0, 4500);
+uniform_int_distribution<int>uidy(1000, 1550);
 uniform_real_distribution<float>StartState_xz(500.0, 2500.0);
 uniform_real_distribution<float>StartState_y(800.0, 850.0);
 
@@ -481,7 +481,6 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	CGameObject* pSuperCobraModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/SuperCobra.bin", this);
 	CGameObject* pGunshipModel = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Gunship.bin", this);
-	pSuperCobraModel->SetScale(2.0, 2.0, 2.0);
 	int nObjects = 0;
 
 
@@ -491,7 +490,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[i]->SetChild(pSuperCobraModel);
 		m_ppObjects[i]->SetPosition(XMFLOAT3(StartState_xz(dre), StartState_y(dre), StartState_xz(dre)));
 		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-		m_ppObjects[i]->SetScale(1.0f, 1.0f, 1.0f);
+		m_ppObjects[i]->SetScale(2.0f, 2.0f, 2.0f);
 		SavePos[i] = m_ppObjects[i]->m_xmf4x4Transform._41;
 		m_ppObjects[i]->PrepareAnimate();
 		pSuperCobraModel->AddRef();
@@ -918,9 +917,9 @@ void CExplosionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 
 	CTexturedRectMesh* pSpriteMesh[3];
-	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	pSpriteMesh[2] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList,15.0f, 15.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[2] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 
 
@@ -1059,7 +1058,7 @@ void CBulletMotionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Bullet.dds", RESOURCE_TEXTURE2D, 0);
 	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Sparky.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Bullet.dds", RESOURCE_TEXTURE2D, 0);
 	ppSpriteTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppSpriteTextures[2]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Bullet.dds", RESOURCE_TEXTURE2D, 0);
 
@@ -1701,9 +1700,9 @@ void CSnowObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	ppSpriteMaterials[0] = new CMaterial();
 	ppSpriteMaterials[0]->SetTexture(ppSpriteTextures[0]);
 
-	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList,4.0f, 3.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList,4.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-	m_nObjects = 1500;
+	m_nObjects = 2000;
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[0], 0, 12);
@@ -1740,7 +1739,7 @@ void CSnowObjectShader::AnimateObjects(float fTimeElapsed)
 {
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		m_ppObjects[j]->m_xmf4x4Transform._42 -= 4.0f;
+		m_ppObjects[j]->m_xmf4x4Transform._42 -= 5.0f;
 		if (m_ppObjects[j]->m_xmf4x4Transform._42 < 550.0)
 		{
 			m_ppObjects[j]->SetPosition(XMFLOAT3(uidxz(dre), uidy(dre), uidxz(dre)));

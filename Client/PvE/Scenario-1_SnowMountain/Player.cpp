@@ -301,7 +301,7 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	CGameObject* pGameObject = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Mi24.bin", m_pShader);
 	SetChild(pGameObject);
-	pGameObject->SetScale(0.5, 0.5, 0.5);
+	pGameObject->SetScale(0.65, 0.65, 0.85);
 
 	CGameObject* pBulletMesh = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Mi24.bin", m_pShader);
 	for (int i = 0; i < BULLETS; i++)

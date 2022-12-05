@@ -289,7 +289,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
-	m_pCamera = ChangeCamera(SPACESHIP_CAMERA, 0.0f);
+	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
 	m_pPShader = new CINPlayerShader();
 	m_pPShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -349,16 +349,7 @@ void CMainPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 		}
 
 	}
-	if (m_xmf3Position.y > 900.0)
-	{
-		SetGravity(XMFLOAT3(0.0, -10.0, 0.0));
-
-	}
-	else
-	{
-		SetGravity(XMFLOAT3(0.0, 10.0, 0.0));
-	}
-
+	
 
 	StopZoneAnimate(fTimeElapsed, pxmf4x4Parent);
 	xoobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(10.0, 10.0, 30.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
@@ -513,7 +504,7 @@ CCamera* CMainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(20.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(10.0f, 30.0f, -70.0f));
+		m_pCamera->SetOffset(XMFLOAT3(10.0f, 55.0f, -70.0f));
 		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z), m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 8000.0f, ASPECT_RATIO, 70.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
