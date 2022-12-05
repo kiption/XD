@@ -3,7 +3,7 @@
 #include "Timer.h"
 #include "Player.h"
 #include "Scene.h"
-
+#include "GameSound.h"
 #define KEY_A         0x41
 #define KEY_D         0x44
 #define KEY_S         0x53
@@ -81,7 +81,7 @@ private:
 	ID3D12Fence					*m_pd3dFence = NULL;
 	UINT64						m_nFenceValues[m_nSwapChainBuffers];
 	HANDLE						m_hFenceEvent;
-
+	GameSound m_GameSound;
 	///
 	UINT64						m_pnFenceValues[m_nSwapChainBuffers];
 	ID3D12CommandAllocator* m_ppd3dCommandAllocators[m_nSwapChainBuffers];

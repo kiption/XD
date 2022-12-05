@@ -491,7 +491,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_F9:
 			ChangeSwapChainState();
 			break;
-		case VK_SPACE: ((CMainPlayer*)m_pPlayer)->FireBullet(m_pLockedObject);
+		case VK_SPACE: 
+			m_GameSound.shootingSound();
+			((CMainPlayer*)m_pPlayer)->FireBullet(m_pLockedObject);
 			break;
 		case VK_F5:
 			break;

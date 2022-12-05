@@ -112,7 +112,7 @@ void CGameFramework::CreateDirect2DDevice()
 #if defined(_DEBUG) || defined(DBG)
 	nD2DFactoryOptions.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
 	ID3D12InfoQueue* pd3dInfoQueue = NULL;
-	if (SUCCEEDED(m_pd3d12Device->QueryInterface(IID_PPV_ARGS(&pd3dInfoQueue))))
+	if (SUCCEEDED(m_pd3dDevice->QueryInterface(IID_PPV_ARGS(&pd3dInfoQueue))))
 	{
 		D3D12_MESSAGE_SEVERITY pd3dSeverities[] =
 		{
@@ -665,8 +665,8 @@ void CGameFramework::ProcessInput()
 		// Server TempCode
 		// 마우스로 전진, 후진하는 것이 아직 어색하고 불편하여 마우스를 통한 이동 로직을 개선하기 전까지
 		// 임시로 방향키 위아래를 통해 전후 이동을 합니다.
-		float lookScalar = 0.9f;
-		float rightScalar = 2.0f;
+		float lookScalar = 0.2f;
+		float rightScalar = 1.0f;
 		if (pKeysBuffer[VK_UP] & 0xF0) {
 			CS_INPUT_MOUSE_PACKET temp_p;
 			temp_p.size = sizeof(temp_p);
