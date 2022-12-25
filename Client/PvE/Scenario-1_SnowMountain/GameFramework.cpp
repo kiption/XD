@@ -859,7 +859,7 @@ void CGameFramework::FrameAdvance()
 	m_pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	D2D_POINT_2F d2dPoint = { 0.0f, 0.0f };
-	D2D_RECT_F d2dRect = { 100.0f, 100.0f, 400.0f, 400.0f };
+	D2D_RECT_F d2dRect = { 100.0f, 100.0f, 300.0f, 300.0f };
 	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxGaussianBlur, &d2dPoint, &d2dRect);
 #endif
 	D2D1_SIZE_F szRenderTarget = m_ppd2dRenderTargets[m_nSwapChainBufferIndex]->GetSize();

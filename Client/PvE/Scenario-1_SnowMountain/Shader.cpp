@@ -1815,7 +1815,7 @@ void CCrossHairShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	CTexture* ppSpriteTextures[1];
 	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Cross.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/SpaceCross.dds", RESOURCE_TEXTURE2D, 0);
 
 
 
