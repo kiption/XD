@@ -71,7 +71,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	XMFLOAT4 xmf4ColorW(0.0f, 1.0f, 0.0f, 0.0f);
 	XMFLOAT3 xmf4ScaleW(18.0f, 7.5f, 18.0);
 	m_pUseWaterMove = new CUseWaterMoveTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/waterterrain8bit.raw"), 257, 257, 8, 8, xmf4ScaleW, xmf4ColorW);
-	m_pUseWaterMove->SetPosition(0.0, 480.0f, 0.0);
+	m_pUseWaterMove->SetPosition(0.0, 520.0f, 0.0);
 
 
 	m_nShaders = 7;

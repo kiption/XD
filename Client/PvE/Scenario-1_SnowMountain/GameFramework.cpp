@@ -68,7 +68,7 @@ CGameFramework::CGameFramework()
 	m_pScene = NULL;
 	m_pPlayer = NULL;
 	
-	_tcscpy_s(m_pszFrameRate, _T("Texture_Version : "));
+	_tcscpy_s(m_pszFrameRate, _T("REVENGER : "));
 }
 
 CGameFramework::~CGameFramework()
@@ -493,7 +493,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case VK_SPACE: 
 			m_GameSound.shootingSound();
-			((CMainPlayer*)m_pPlayer)->FireBullet(m_pLockedObject);
+			((CMainPlayer*)m_pPlayer)->FireBullet(NULL);
 			break;
 		case VK_F5:
 			break;
@@ -859,12 +859,12 @@ void CGameFramework::FrameAdvance()
 	m_pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	D2D_POINT_2F d2dPoint = { 0.0f, 0.0f };
-	D2D_RECT_F d2dRect = { 100.0f, 100.0f, 300.0f, 300.0f };
+	D2D_RECT_F d2dRect = { 100.0f, 100.0f, 200.0f, 200.0f };
 	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxGaussianBlur, &d2dPoint, &d2dRect);
 #endif
 	D2D1_SIZE_F szRenderTarget = m_ppd2dRenderTargets[m_nSwapChainBufferIndex]->GetSize();
 	D2D1_RECT_F rcUpperText = D2D1::RectF(0, 0, szRenderTarget.width, szRenderTarget.height * 0.25f);
-	m_pd2dDeviceContext->DrawTextW(L"Locking...", (UINT32)wcslen(L"Locking..."), m_pdwFont, &rcUpperText, m_pd2dbrText);
+	m_pd2dDeviceContext->DrawTextW(L"", (UINT32)wcslen(L""), m_pdwFont, &rcUpperText, m_pd2dbrText);
 
 	D2D1_RECT_F rcLowerText = D2D1::RectF(0, szRenderTarget.height * 0.8f, szRenderTarget.width, szRenderTarget.height);
 	m_pd2dDeviceContext->DrawTextW(L" ", (UINT32)wcslen(L" "), m_pdwFont, &rcLowerText, m_pd2dbrText);

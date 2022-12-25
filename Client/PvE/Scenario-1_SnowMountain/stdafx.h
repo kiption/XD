@@ -70,8 +70,8 @@ using namespace DirectX::PackedVector;
 using Microsoft::WRL::ComPtr;
 
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
-#define FRAME_BUFFER_WIDTH		980
-#define FRAME_BUFFER_HEIGHT		860
+#define FRAME_BUFFER_WIDTH		680
+#define FRAME_BUFFER_HEIGHT		560
 
 //#define _WITH_CB_GAMEOBJECT_32BIT_CONSTANTS
 //#define _WITH_CB_GAMEOBJECT_ROOT_DESCRIPTOR

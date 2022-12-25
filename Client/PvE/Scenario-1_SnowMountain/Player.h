@@ -98,7 +98,7 @@ public:
 	bool m_bStopZone = false;
 };
 
-#define BULLETS					50
+#define BULLETS					200
 class CMainPlayer : public CPlayer
 {
 public:

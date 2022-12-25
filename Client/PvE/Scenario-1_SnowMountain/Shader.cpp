@@ -1054,33 +1054,20 @@ D3D12_SHADER_BYTECODE CBulletMotionShader::CreatePixelShader()
 }
 void CBulletMotionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	CTexture* ppSpriteTextures[3];
+	CTexture* ppSpriteTextures[1];
 	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Bullet.dds", RESOURCE_TEXTURE2D, 0);
-	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Bullet.dds", RESOURCE_TEXTURE2D, 0);
-	ppSpriteTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures[2]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Bullet.dds", RESOURCE_TEXTURE2D, 0);
 
-
-	CMaterial* ppSpriteMaterials[3];
+	CMaterial* ppSpriteMaterials[1];
 	ppSpriteMaterials[0] = new CMaterial();
 	ppSpriteMaterials[0]->SetTexture(ppSpriteTextures[0]);
-	ppSpriteMaterials[1] = new CMaterial();
-	ppSpriteMaterials[1]->SetTexture(ppSpriteTextures[1]);
-	ppSpriteMaterials[2] = new CMaterial();
-	ppSpriteMaterials[2]->SetTexture(ppSpriteTextures[2]);
+
+	CTexturedRectMesh* pSpriteMesh[1];
+	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.0f, 25.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 
-	CTexturedRectMesh* pSpriteMesh[3];
-	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 20.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	pSpriteMesh[2] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 20.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-
-
-
-	m_nObjects = 3;
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 3, 3);
+	m_nObjects = 1;
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 1);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	for (int i = 0; i < m_nObjects; i++)
 	{
@@ -1118,14 +1105,14 @@ void CBulletMotionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 	CPlayer* pPlayer = pCamera->GetPlayer();
 	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
-	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 40.0f, false));
+	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 40.0f, true));
 
 	if (m_bBulletActive == true)
 	{
 		CObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState);
-		for (int i =0; i < 3; i++)
+		for (int i =0; i < 1; i++)
 		{
-			m_ppObjects[i]->SetLookAt(xmf3Position, XMFLOAT3(0, 1, 0));
+			m_ppObjects[i]->SetLookAt(xmf3Position, XMFLOAT3(0, 1.5, 0));
 		}
 		
 	}
@@ -1133,9 +1120,9 @@ void CBulletMotionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 }
 void CBulletMotionShader::AnimateObjects(float fTimeElapsed)
 {
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 1; i++)
 	{
-		BulletPosition.y -= 5.0f;
+		BulletPosition.y -= 5.5f;
 		m_ppObjects[i]->SetPosition((BulletPosition));
 	}
 }
@@ -1274,12 +1261,12 @@ D3D12_BLEND_DESC CWaterMoveShader::CreateBlendState()
 	d3dBlendDesc.IndependentBlendEnable = FALSE;
 	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
 	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
-	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_COLOR;
 	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_DEST_COLOR;
 	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
 	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_SRC_ALPHA_SAT;
 	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_DEST_ALPHA;
-	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_SUBTRACT;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
 	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = 15;
 	return(d3dBlendDesc);

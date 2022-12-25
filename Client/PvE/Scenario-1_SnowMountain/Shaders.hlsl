@@ -126,7 +126,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
 		normalW = normalize(mul(vNormal, TBN));
 		cIllumination = Lighting(input.positionW, normalW);
-		cColor = lerp(cColor, cIllumination, 0.5f);
+		cColor += lerp(cColor, cIllumination, 0.5f);
 	}
 
 	return(cColor);
@@ -246,15 +246,15 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	
 	float4 cDetailTexColors[4];
 	cDetailTexColors[0] = gtxtDetailTexture[0].Sample(gssWrap, input.uv1 * 1.0f);
-	cDetailTexColors[1] = gtxtDetailTexture[1].Sample(gssWrap, input.uv1 * 1.6f);
-	cDetailTexColors[2] = gtxtDetailTexture[2].Sample(gssWrap, input.uv1 * 1.7f);
-	cDetailTexColors[3] = gtxtDetailTexture[3].Sample(gssWrap, input.uv1 * 0.45f);
+	cDetailTexColors[1] = gtxtDetailTexture[1].Sample(gssWrap, input.uv1 * 1.0f);
+	cDetailTexColors[2] = gtxtDetailTexture[2].Sample(gssWrap, input.uv1 * 1.0f);
+	cDetailTexColors[3] = gtxtDetailTexture[3].Sample(gssWrap, input.uv1 * 1.0f);
 
 	cIllumination = Lighting(input.positionW, input.normalW);
-	float4 cColor = (cBaseTexColor * cDetailTexColors[0]+ cDetailTexColors[1]);
-	cColor += lerp(cDetailTexColors[1] * 0.55f, (cDetailTexColors[2] + cDetailTexColors[3])*0.2f, 0.6f);
+	float4 cColor = (cBaseTexColor * cDetailTexColors[0]);
+	cColor += lerp(cDetailTexColors[1] * 0.65f, (cDetailTexColors[2] * 0.5f + cDetailTexColors[3] * 0.5f), 0.6f);
 
-	cColor = lerp(cColor, cIllumination, 0.38f);
+	cColor = lerp(cColor, cIllumination, 0.20f);
 
 	return(cColor);
 }
