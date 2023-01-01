@@ -261,7 +261,6 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 
 float4 PSWater(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
-
 	input.normalW = normalize(input.normalW);
 	float4 cBaseTexColor = gtxtTerrainTexture.Sample(gssWrap, input.uv0 * 1.0f);
 	float fAlpha = gtxtAlphaTexture.Sample(gssWrap, input.uv0).w;
