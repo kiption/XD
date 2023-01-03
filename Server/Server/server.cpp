@@ -377,7 +377,7 @@ void process_packet(int client_id, char* packet)
 
 				case KEY_DA:	// D, A는 기체의 yaw회전 키입니다. 기체를 y축 기준으로 회전시킵니다.
 					// yaw 설정
-					clients[client_id].yaw += 1.0f * sign * PI / 360.0f;
+					clients[client_id].yaw += 1.0f * sign * YAW_ROTATE_SCALAR * PI / 360.0f;
 
 					// right, up, look 벡터 업데이트
 					clients[client_id].curr_coordinate.x_coordinate = calcRotate(basic_coordinate.x_coordinate

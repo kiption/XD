@@ -2,8 +2,8 @@
 #include "inc/inc/fmod.hpp"
 #include "inc/inc/fmod_errors.h"
 // fmod dll
-#pragma comment(lib, "lib/lib/x64/fmod_vc.lib")
-#pragma comment(lib, "lib/lib/x64/fmodL_vc.lib")
+#pragma comment(lib, "lib/lib/64/fmod_vc.lib")
+#pragma comment(lib, "lib/lib/64/fmodL_vc.lib")
 
 
 class GameSound
