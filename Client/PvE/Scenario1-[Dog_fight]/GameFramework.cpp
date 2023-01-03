@@ -865,7 +865,7 @@ void CGameFramework::FrameAdvance()
 	m_pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	D2D_POINT_2F d2dPoint = { 0.0f, 0.0f };
-	D2D_RECT_F d2dRect = { 100.0f, 100.0f, 400.0f, 400.0f };
+	D2D_RECT_F d2dRect = { 100.0f, 100.0f, 250.0f, 250.0f };
 	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxGaussianBlur, &d2dPoint, &d2dRect);
 #endif
 	D2D1_SIZE_F szRenderTarget = m_ppd2dRenderTargets[m_nSwapChainBufferIndex]->GetSize();
@@ -934,30 +934,30 @@ void CGameFramework::FrameAdvance()
 		}
 	}
 	// Npc
-	g_time += 0.01f;
-	g_reverse_time -= 0.01f;
-	for (int i = 0; i < MAX_NPCS; i++) {
-		if (npcs_info[i].m_state == OBJ_ST_RUNNING) {
-			if (i % 2) {
-				m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._41 = npcs_info[i].m_x + 30 * (i % 5) * cos(g_time);
-				m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 = npcs_info[i].m_y + 100 * sin(g_time);
-				m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 = npcs_info[i].m_z + 30 * (i % 5) * sin(g_time);
-			}
-			else {
-				m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._41 = npcs_info[i].m_x + 30 * (i % 5) * cos(g_reverse_time);
-				m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 = npcs_info[i].m_y + 100 * sin(g_reverse_time);
-				m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 = npcs_info[i].m_z + 30 * (i % 5) * sin(g_reverse_time);
-			}
-		}
-		else if (npcs_info[i].m_state == OBJ_ST_LOGOUT) {
-			npcs_info[i].m_state = OBJ_ST_EMPTY;
-			if (m_pScene->m_ppShaders[0]->m_ppObjects[i])
-			{
-				m_pScene->m_ppShaders[0]->m_ppObjects[i]->SetScale(0.0, 0.0, 0.0);
-			}
+	//g_time += 0.01f;
+	//g_reverse_time -= 0.01f;
+	//for (int i = 0; i < MAX_NPCS; i++) {
+	//	if (npcs_info[i].m_state == OBJ_ST_RUNNING) {
+	//		if (i % 2) {
+	//			m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._41 = npcs_info[i].m_x + 30 * (i % 5) * cos(g_time);
+	//			m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 = npcs_info[i].m_y + 100 * sin(g_time);
+	//			m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 = npcs_info[i].m_z + 30 * (i % 5) * sin(g_time);
+	//		}
+	//		else {
+	//			m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._41 = npcs_info[i].m_x + 30 * (i % 5) * cos(g_reverse_time);
+	//			m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 = npcs_info[i].m_y + 100 * sin(g_reverse_time);
+	//			m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 = npcs_info[i].m_z + 30 * (i % 5) * sin(g_reverse_time);
+	//		}
+	//	}
+	//	else if (npcs_info[i].m_state == OBJ_ST_LOGOUT) {
+	//		npcs_info[i].m_state = OBJ_ST_EMPTY;
+	//		if (m_pScene->m_ppShaders[0]->m_ppObjects[i])
+	//		{
+	//			m_pScene->m_ppShaders[0]->m_ppObjects[i]->SetScale(0.0, 0.0, 0.0);
+	//		}
 
-		}
-	}
+	//	}
+	//}
 
 
 
