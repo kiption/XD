@@ -154,7 +154,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	XMFLOAT4 xmf4Color(0.0f, 0.0f, 0.0f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf4Color);
 
-	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, (char*)"Asset/GameObject.bin");
+	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, (char*)"Models/Scene.bin");
 
 	m_nShaders = 1;
 	m_ppShaders = new CShader*[m_nShaders];
