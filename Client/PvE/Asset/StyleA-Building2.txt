@@ -1,0 +1,24 @@
+<Hierarchy>:
+	<Frame>: 0 StyleA-Building2
+		<Transform>: 0.2406082 -0.63 -0.14 270 0 0 1 1 1 -0.7071068 0 0 0.7071068  
+		<TransformMatrix>: 1 0 0 0 0 -1.192093E-07 -1 0 0 1 -1.192093E-07 0 0.2406082 -0.63 -0.14 1  
+		<Mesh>: 2457 StyleA-Building2
+			<Bounds>: -5.531311E-05 -3.910065E-05 5.908982 10.75006 10.75008 5.908977
+			<Positions>: 0  
+			<Colors>: 0  
+			<Normals>: 0  
+			<SubMeshes>: 1
+				<SubMesh>: 0 0  
+		</Mesh>
+		<Materials>: 1
+			<Material>: 0
+				<AlbedoColor>: 1 1 1 1
+				<EmissiveColor>: 0 0 0 1
+				<Glossiness>: 0.1414213
+				<Metallic>: 0
+				<SpecularHighlight>: 1
+				<GlossyReflection>: 1
+		</Materials>
+		<Children>: 0
+	</Frame>
+</Hierarchy>
