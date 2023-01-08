@@ -975,7 +975,7 @@ void CGameObject::PrintFrameInfo(CGameObject* pGameObject, CGameObject* pParent)
 	if (pGameObject->m_pSibling) CGameObject::PrintFrameInfo(pGameObject->m_pSibling, pParent);
 	if (pGameObject->m_pChild) CGameObject::PrintFrameInfo(pGameObject->m_pChild, pGameObject);
 }
-
+#define _WITH_DEBUG_FRAME_HIERARCHY
 CGameObject* CGameObject::LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName, CShader* pShader)
 {
 	FILE* pInFile = NULL;
@@ -991,6 +991,41 @@ CGameObject* CGameObject::LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12G
 
 	CGameObject::PrintFrameInfo(pGameObject, NULL);
 #endif
+
+	return(pGameObject);
+}
+
+CGameObject* CGameObject::LoadGeometryHierachyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName, CShader* pShader)
+{
+	FILE* pInFile = NULL;
+	::fopen_s(&pInFile, pstrFileName, "rb");
+	::rewind(pInFile);
+	CGameObject* pGameObject = NULL;
+	char pstrToken[64] = { '\0' };
+
+	for (; ; )
+	{
+		if (::ReadStringFromFile(pInFile, pstrToken))
+		{
+			if (!strcmp(pstrToken, "<Hierarchy>:"))
+			{
+				pGameObject = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, pInFile, pShader);
+				::ReadStringFromFile(pInFile, pstrToken); //"</Hierarchy>"
+			}
+		}
+		else
+		{
+			break;
+		}
+	}
+
+//#ifdef _WITH_DEBUG_FRAME_HIERARCHY
+//	TCHAR pstrDebug[256] = { 0 };
+//	_stprintf_s(pstrDebug, 256, _T("Frame Hierarchy\n"));
+//	OutputDebugString(pstrDebug);
+//
+//	CGameObject::PrintFrameInfo(pGameObject, NULL);
+//#endif
 
 	return(pGameObject);
 }

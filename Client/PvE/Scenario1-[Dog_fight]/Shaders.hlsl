@@ -56,16 +56,15 @@ cbuffer CDynamicObjectInfo : register(b8)
 #define MATERIAL_DETAIL_ALBEDO_MAP	0x20
 #define MATERIAL_DETAIL_NORMAL_MAP	0x40
 
-
 #define _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
 #ifdef _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
-Texture2D gtxtAlbedoTexture : register(t6);
-Texture2D gtxtSpecularTexture : register(t7);
-Texture2D gtxtNormalTexture : register(t8);
-Texture2D gtxtMetallicTexture : register(t9);
-Texture2D gtxtEmissionTexture : register(t10);
-Texture2D gtxtDetailAlbedoTexture : register(t11);
-Texture2D gtxtDetailNormalTexture : register(t12);
+Texture2D gtxtAlbedoTexture : register(t0);
+Texture2D gtxtSpecularTexture : register(t1);
+Texture2D gtxtNormalTexture : register(t2);
+Texture2D gtxtMetallicTexture : register(t3);
+Texture2D gtxtEmissionTexture : register(t4);
+Texture2D gtxtDetailAlbedoTexture : register(t5);
+Texture2D gtxtDetailNormalTexture : register(t6);
 #else
 Texture2D gtxtStandardTextures[7] : register(t0);
 #endif
@@ -112,83 +111,44 @@ VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 	output.bitangentW = (float3)mul(float4(input.bitangent, 1.0f), gmtxGameObject);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
+
 	return(output);
 }
 float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 {
-	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0);
-	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0);
-	float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0);
-	float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0);
-	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0);
+	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 
 #ifdef _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
-	if (gnTexturesMask & MATERIAL_ALBEDO_MAP)	cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
+	if (gnTexturesMask & MATERIAL_ALBEDO_MAP) cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
 	if (gnTexturesMask & MATERIAL_SPECULAR_MAP) cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
-	if (gnTexturesMask & MATERIAL_NORMAL_MAP)	cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
+	if (gnTexturesMask & MATERIAL_NORMAL_MAP) cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
 	if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
 #else
-	if (gnTexturesMask & MATERIAL_ALBEDO_MAP)	cAlbedoColor = gtxtStandardTextures[0].Sample(gssWrap, input.uv);
+	if (gnTexturesMask & MATERIAL_ALBEDO_MAP) cAlbedoColor = gtxtStandardTextures[0].Sample(gssWrap, input.uv);
 	if (gnTexturesMask & MATERIAL_SPECULAR_MAP) cSpecularColor = gtxtStandardTextures[1].Sample(gssWrap, input.uv);
-	if (gnTexturesMask & MATERIAL_NORMAL_MAP)	cNormalColor = gtxtStandardTextures[2].Sample(gssWrap, input.uv);
+	if (gnTexturesMask & MATERIAL_NORMAL_MAP) cNormalColor = gtxtStandardTextures[2].Sample(gssWrap, input.uv);
 	if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxtStandardTextures[3].Sample(gssWrap, input.uv);
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtStandardTextures[4].Sample(gssWrap, input.uv);
 #endif
 
 	float4 cIllumination = float4(1.0f, 1.0f, 1.0f, 1.0f);
-	float fAlpha = gtxtAlbedoTexture.Sample(gssWrap, input.uv).w + gtxtSpecularTexture.Sample(gssWrap, input.uv).w
-		+ gtxtEmissionTexture.Sample(gssWrap, input.uv).w+ gtxtMetallicTexture.Sample(gssWrap, input.uv).w;
-	cMetallicColor.r=0.0;
-	cMetallicColor.g=0.0;
-	cMetallicColor.b=0.0;
-	fAlpha = 0.29;
-
-	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor+ cMetallicColor+ fAlpha;
-
+	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
 	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	{
-		
 		float3 normalW = input.normalW;
 		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
 		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
 		normalW = normalize(mul(vNormal, TBN));
 		cIllumination = Lighting(input.positionW, normalW);
-		cColor-= lerp(cColor, cIllumination, 0.55f+ fAlpha);
+		cColor = lerp(cColor, cIllumination, 0.3f);
 	}
 
 	return(cColor);
-}
-
-
-struct VS_INPUT
-{
-	float3 position : POSITION;
-	float4 color : COLOR;
-
-};
-struct VS_OUTPUT
-{
-	float4 position : SV_POSITION;
-	float4 color : COLOR;
-
-};
-
-VS_OUTPUT VSDiffused(VS_INPUT input)
-{
-	VS_OUTPUT output;
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
-	output.color = input.color;
-	return(output);
-}
-
-float4 PSDiffused(VS_OUTPUT input) : SV_TARGET
-{
-	input.color.r = 1.0;
-	input.color.g = 0.0;
-	input.color.b = 0.0;
-	input.color.w = 1.0;
-	return(input.color);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

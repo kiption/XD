@@ -206,7 +206,7 @@ ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 7;
-	pd3dDescriptorRanges[0].BaseShaderRegister = 0; //t6: gtxtStandardTextures[7] //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
+	pd3dDescriptorRanges[0].BaseShaderRegister = 0; //t0: gtxtStandardTextures[7] //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
 	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
@@ -639,7 +639,7 @@ void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 	m_pPlayer->xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(8.0, 8.0, 10.0), XMFLOAT4(0, 0, 0, 1));
 	for (int i = 0; i < 10; i++) if (m_ppShaders[0]->m_ppObjects[i]->xoobb.Intersects(m_pPlayer->xoobb)) m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 -= 5.0f;
 	CBulletObject** ppBullets = ((CMainPlayer*)m_pPlayer)->m_ppBullets;
-	for (int j = 0; j < BULLETS; j++) { ppBullets[j]->xoobb = BoundingOrientedBox(XMFLOAT3(ppBullets[j]->GetPosition()), XMFLOAT3(3.0, 3.0, 5.0), XMFLOAT4(0, 0, 0, 1)); }
+	for (int j = 0; j < BULLETS; j++) { ppBullets[j]->xoobb = BoundingOrientedBox(XMFLOAT3(ppBullets[j]->GetPosition()), XMFLOAT3(13.0, 13.0, 15.0), XMFLOAT4(0, 0, 0, 1)); }
 
 	/// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

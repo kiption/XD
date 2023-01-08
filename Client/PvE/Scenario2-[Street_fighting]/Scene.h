@@ -68,10 +68,11 @@ public:
     void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 
 	void ReleaseUploadBuffers();
-	void LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName);
+	void LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName);
 
 	CPlayer	*m_pPlayer = NULL;
-	CSceneObjcet** m_ppObject = NULL;
+
+	CGameObject** m_ppObject = NULL;
 	CSceneObjcet* m_pObject = NULL;
 	int	m_nObjects = 0;
 protected:

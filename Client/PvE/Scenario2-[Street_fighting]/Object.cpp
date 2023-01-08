@@ -683,8 +683,6 @@ void CGameObject::SceneModelRender(ID3D12GraphicsCommandList* pd3dCommandList, C
 
 	UpdateShaderVariables(pd3dCommandList);
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
-
-	CGameObject::Render(pd3dCommandList, pCamera);
 }
 
 void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)

@@ -407,24 +407,7 @@ CStandardShader::CStandardShader()
 CStandardShader::~CStandardShader()
 {
 }
-D3D12_BLEND_DESC CStandardShader::CreateBlendState(int nPipelineState)
-{
-	D3D12_BLEND_DESC m_d3dBlendDesc;
-	::ZeroMemory(&m_d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
-	m_d3dBlendDesc.AlphaToCoverageEnable = TRUE;
-	m_d3dBlendDesc.IndependentBlendEnable = TRUE;
-	m_d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
-	m_d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
-	m_d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
-	m_d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_DEST_COLOR;
-	m_d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
-	m_d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	m_d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_DEST_ALPHA;
-	m_d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	m_d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
-	m_d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = 15;
-	return(m_d3dBlendDesc);
-}
+
 D3D12_INPUT_LAYOUT_DESC CStandardShader::CreateInputLayout(int nPipelineState)
 {
 	UINT nInputElementDescs = 5;
@@ -525,7 +508,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 170); //SuperCobra(17), Gunship(2)
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 170); //SuperCobra(17)
 	CGameObject* pModel[10];
 
 	for (int i = 0; i < m_nObjects / 2; i++)
@@ -599,25 +582,7 @@ CPlayerShader::~CPlayerShader()
 {
 }
 
-D3D12_BLEND_DESC CPlayerShader::CreateBlendState(int nPipelineState)
-{
-	D3D12_BLEND_DESC d3dBlendDesc;
-	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
-	d3dBlendDesc.AlphaToCoverageEnable = FALSE;
-	d3dBlendDesc.IndependentBlendEnable = TRUE;
-	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
-	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
-	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
-	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_DEST_COLOR;
-	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_SUBTRACT;
-	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
-	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_INV_DEST_ALPHA;
-	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_SUBTRACT;
-	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
-	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = 15;
-	return(d3dBlendDesc);
 
-}
 D3D12_INPUT_LAYOUT_DESC CPlayerShader::CreateInputLayout(int nPipelineState)
 {
 	UINT nInputElementDescs = 5;
@@ -650,10 +615,10 @@ void CPlayerShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12
 
 	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
 }
-void CPlayerShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
-{
-	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
-}
+//void CPlayerShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+//{
+//	//CShader::Render(pd3dCommandList, pCamera, nPipelineState);
+//}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -2011,7 +1976,7 @@ void CBulletMotionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 
 	CTexturedRectMesh* pSpriteMesh[3];
-	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.0f, 25.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 25.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	pSpriteMesh[2] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 25.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -2145,7 +2110,7 @@ void CExplosionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	CTexturedRectMesh* pSpriteMesh[2];
 	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 30.0f, 30.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 25.0f,25.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 55.0f,25.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	m_nObjects = 2;
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 2);

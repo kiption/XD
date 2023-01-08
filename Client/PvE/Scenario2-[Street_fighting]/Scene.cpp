@@ -24,14 +24,14 @@ CScene::CScene()
 CScene::~CScene()
 {
 }
-void CScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName)
+void CScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName)
 {
 	FILE* pFile = NULL;
 	::fopen_s(&pFile, pstrFileName, "rb");
 	::rewind(pFile);
 
 	CPseudoLightingShader* pShader = new CPseudoLightingShader();
-	pShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	char pstrToken[64] = { '\0' };
@@ -44,12 +44,12 @@ void CScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	nReads = (UINT)::fread(pstrToken, sizeof(char), 14, pFile); //"<GameObjects>:"
 	nReads = (UINT)::fread(&m_nObjects, sizeof(int), 1, pFile);
 
-	m_ppObject = new CSceneObjcet * [m_nObjects];
+	m_ppObject = new CGameObject * [m_nObjects];
 
-	CSceneObjcet* pGameObject = NULL;
+	CGameObject* pGameObject = NULL;
 	for (int i = 0; i < m_nObjects; i++)
 	{
-		pGameObject = new CSceneObjcet();
+		pGameObject = new CGameObject();
 
 		nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pFile);
 		nReads = (UINT)::fread(pstrToken, sizeof(char), 13, pFile); //"<GameObject>:"
@@ -64,9 +64,9 @@ void CScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		CMesh* pMesh = NULL;
 		for (int j = 0; j < i; j++)
 		{
-			if (!strcmp(pstrGameObjectName, m_ppObject[j]->m_pstrName))
+			if (!strcmp(pstrGameObjectName, pGameObject->m_pstrName))
 			{
-				pMesh = m_ppObject[j]->m_pMesh;
+				pMesh = pGameObject->m_pMesh;
 				break;
 			}
 		}
@@ -154,7 +154,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	XMFLOAT4 xmf4Color(0.0f, 0.0f, 0.0f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf4Color);
 
-	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, (char*)"Asset/GameObject.bin");
+	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,(char*)"Models/Scene.bin");
 
 	m_nShaders = 1;
 	m_ppShaders = new CShader*[m_nShaders];
@@ -657,6 +657,11 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
  	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObject[j]) m_ppObject[j]->SceneModelRender(pd3dCommandList, pCamera);
+		/*m_ppObject[j]->OnPrepareRender();
+		if (m_ppObject[j]->m_pShader) m_ppObject[j]->m_pShader->Render(pd3dCommandList, pCamera);
+
+		m_ppObject[j]->UpdateShaderVariables(pd3dCommandList);
+		if (m_ppObject[j]->m_pMesh) m_ppObject[j]->m_pMesh->Render(pd3dCommandList);*/
 	}
 
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
@@ -672,5 +677,6 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 			m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
+
 }
 

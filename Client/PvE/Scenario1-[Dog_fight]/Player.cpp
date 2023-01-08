@@ -259,8 +259,11 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 {
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 
-	if (m_pShader) (m_pShader)->Render(pd3dCommandList, pCamera, 0);
-	CGameObject::Render(pd3dCommandList, pCamera);
+	if (nCameraMode == THIRD_PERSON_CAMERA || nCameraMode == SPACESHIP_CAMERA)
+	{
+		if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera, 0);
+		CGameObject::Render(pd3dCommandList, pCamera);
+	}
 
 }
 
@@ -272,18 +275,18 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	m_pShader= new CPlayerShader();
 	m_pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
-	m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17 + 1);
+	m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 4 + 1);
 
-	CGameObject* pGameObject = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Supercobra.bin", m_pShader);
+	CGameObject* pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/GO.bin", m_pShader);
 	SetChild(pGameObject);
-	pGameObject->SetScale(5.5, 5.5, 5.5);
+	pGameObject->SetScale(5.0, 5.0, 5.0);
 
 	CGameObject* pBulletMesh = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Mi24.bin", m_pShader);
 	for (int i = 0; i < BULLETS; i++)
 	{
 		pBulletObject = new CBulletObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, true);
-		pBulletObject->SetMovingSpeed(5000.0f);
+		pBulletObject->SetMovingSpeed(5500.0f);
 		pBulletObject->SetActive(false);
 		m_ppBullets[i] = pBulletObject;
 	}
@@ -298,7 +301,7 @@ CMainPlayer::~CMainPlayer()
 
 void CMainPlayer::PrepareAnimate()
 {
-	m_pMainRotorFrame = FindFrame("MainRotorBlade");
+	m_pMainRotorFrame = FindFrame("military_helicopter_blades");
 	m_pTailRotorFrame = FindFrame("TailRotor");
 
 	m_pMissile1 = FindFrame("Nacelles_Missiles");
@@ -448,7 +451,7 @@ CCamera* CMainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(20.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(7.0f, -8.0f, -70.0f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 90.0f, -140.0f));
 		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z), m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 8000.0f, ASPECT_RATIO, 70.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
