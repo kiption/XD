@@ -24,71 +24,7 @@ CScene::CScene()
 CScene::~CScene()
 {
 }
-void CScene::LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName)
-{
-	FILE* pFile = NULL;
-	::fopen_s(&pFile, pstrFileName, "rb");
-	::rewind(pFile);
 
-	CPseudoLightingShader* pShader = new CPseudoLightingShader();
-	pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	char pstrToken[64] = { '\0' };
-	char pstrGameObjectName[64] = { '\0' };
-
-	UINT nReads = 0, nObjectNameLength = 0;
-	BYTE nStrLength = 0;
-
-	nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pFile);
-	nReads = (UINT)::fread(pstrToken, sizeof(char), 14, pFile); //"<GameObjects>:"
-	nReads = (UINT)::fread(&m_nObjects, sizeof(int), 1, pFile);
-
-	m_ppObject = new CGameObject * [m_nObjects];
-
-	CGameObject* pGameObject = NULL;
-	for (int i = 0; i < m_nObjects; i++)
-	{
-		pGameObject = new CGameObject();
-
-		nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pFile);
-		nReads = (UINT)::fread(pstrToken, sizeof(char), 13, pFile); //"<GameObject>:"
-		nReads = (UINT)::fread(&nObjectNameLength, sizeof(UINT), 1, pFile);
-		nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pFile);
-		nReads = (UINT)::fread(pstrGameObjectName, sizeof(char), nObjectNameLength, pFile);
-		nReads = (UINT)::fread(&pGameObject->m_xmf4x4World, sizeof(float), 16, pFile);
-
-		pstrGameObjectName[nObjectNameLength] = '\0';
-		strcpy_s(pGameObject->m_pstrName, 64, pstrGameObjectName);
-
-		CMesh* pMesh = NULL;
-		for (int j = 0; j < i; j++)
-		{
-			if (!strcmp(pstrGameObjectName, pGameObject->m_pstrName))
-			{
-				pMesh = pGameObject->m_pMesh;
-				break;
-			}
-		}
-		if (!pMesh)
-		{
-			char pstrFilePath[64] = { '\0' };
-			strcpy_s(pstrFilePath, 64, "Models/");
-			strcpy_s(pstrFilePath + 7, 64 - 7, pstrGameObjectName);
-			strcpy_s(pstrFilePath + 7 + nObjectNameLength, 64 - 7 - nObjectNameLength, ".bin");
-			pMesh = new CMesh(pd3dDevice, pd3dCommandList, pstrFilePath);
-		}
-
-		pGameObject->SetMesh(pMesh);
-		pGameObject->SetShader(pShader);
-		pGameObject->SetPosition(500.0, m_pTerrain->GetHeight(500.0,900.0)+1.5f, 900.0);
-		pGameObject->SetScale(8.0, 8.0, 8.0);
-		pGameObject->Rotate(0.0, 180.0, 0.0);
-		m_ppObject[i] = pGameObject;
-	}
-
-	::fclose(pFile);
-}
 void CScene::BuildDefaultLightsAndMaterials()
 {
 	m_nLights = 4;
@@ -150,24 +86,29 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	XMFLOAT3 xmf3Scale(8.0f, 2.0f, 8.0f);
+	XMFLOAT3 xmf3Scale(6.0f, 2.0f, 6.0f);
 	XMFLOAT4 xmf4Color(0.0f, 0.0f, 0.0f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf4Color);
-
-	LoadSceneObjectsFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,(char*)"Models/Scene.bin");
-
-	m_nShaders = 1;
+	m_pTerrain->SetPosition(XMFLOAT3(-500.0f,-10.0f, -500.0f));
+	
+	m_nShaders = 2;
 	m_ppShaders = new CShader*[m_nShaders];
 
 	CObjectsShader *pObjectsShader = new CObjectsShader();
 	pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	pObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
-
 	m_ppShaders[0] = pObjectsShader;
+
+
+	CSceneShader* pSceneShader = new CSceneShader();
+	pSceneShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pSceneShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Models/Scene.bin");
+	//pSceneShader->m_ppObjects[pSceneShader->m_nObjects]->SetPosition(500.0, 16.0, 500.0);
+	m_ppShaders[1] = pSceneShader;
+	
 
 	CGameObject *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Player.bin", NULL, true);
 
-	
 	m_nHierarchicalGameObjects = 2;
 	m_ppHierarchicalGameObjects = new CGameObject*[m_nHierarchicalGameObjects];
 
@@ -210,12 +151,13 @@ void CScene::ReleaseObjects()
 		}
 		delete[] m_ppShaders;
 	}
+
 	if (m_ppBilboardShaders)
 	{
 		for (int i = 0; i < m_nShaders; i++)
 		{
-			m_ppBilboardShaders[i]->ReleaseShaderVariables();
-			m_ppBilboardShaders[i]->ReleaseObjects();
+			//m_ppBilboardShaders[i]->ReleaseShaderVariables();
+			//m_ppBilboardShaders[i]->ReleaseObjects();
 			m_ppBilboardShaders[i]->Release();
 		}
 		delete[] m_ppShaders;
@@ -223,12 +165,6 @@ void CScene::ReleaseObjects()
 
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
-
-	if (m_ppObject)
-	{
-		for (int i = 0; i < m_nObjects; i++) if (m_ppObject[i]) m_ppObject[i]->Release();
-		delete[] m_ppObject;
-	}
 
 	if (m_ppHierarchicalGameObjects)
 	{
@@ -465,9 +401,6 @@ void CScene::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsComma
 	m_pd3dcbLights->Map(0, NULL, (void **)&m_pcbMappedLights);
 
 
-	UINT ncbGElementBytes = ((sizeof(CB_SCENEMODEL_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
-	m_pd3dcbSceneObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbGElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-	m_pd3dcbSceneObject->Map(0, NULL, (void**)&m_pcbSceneGameObject);
 }
 
 void CScene::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
@@ -476,16 +409,7 @@ void CScene::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
 	::memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
 
-	for (int i = 0; i < m_nObjects; i++)
-	{
-		XMFLOAT4X4 xmf4x4world;
-		XMStoreFloat4x4(&xmf4x4world, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObject[i]->m_xmf4x4World)));
-		::memcpy(&m_pcbSceneGameObject->m_xmf4x4World, &xmf4x4world, sizeof(XMFLOAT4X4));
-		::memcpy(&m_pcbSceneGameObject->m_xmf3Color, &m_ppObject[i]->m_xmf3Color, sizeof(XMFLOAT3));
-		D3D12_GPU_VIRTUAL_ADDRESS d3dcbModelGpuVirtualAddress = m_pd3dcbSceneObject->GetGPUVirtualAddress();
-		pd3dCommandList->SetGraphicsRootConstantBufferView(15, d3dcbModelGpuVirtualAddress);
 	
-	}
 
 }
 
@@ -497,11 +421,7 @@ void CScene::ReleaseShaderVariables()
 		m_pd3dcbLights->Release();
 	}
 
-	if (m_pd3dcbSceneObject)
-	{
-		m_pd3dcbSceneObject->Unmap(0, NULL);
-		m_pd3dcbSceneObject->Release();
-	}
+	
 }
 
 void CScene::ReleaseUploadBuffers()
@@ -509,7 +429,6 @@ void CScene::ReleaseUploadBuffers()
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 	
-	for (int j = 0; j < m_nObjects; j++) if (m_ppObject[j]) m_ppObject[j]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nBilboardShaders; i++) m_ppBilboardShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->ReleaseUploadBuffers();
@@ -606,7 +525,6 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nBilboardShaders; i++) if (m_ppBilboardShaders[i]) m_ppBilboardShaders[i]->AnimateObjects(fTimeElapsed);
-	for (int i = 0; i < m_nObjects; i++) if (m_ppObject[i]) m_ppObject[i]->Animate(fTimeElapsed);
 
 	if (m_pLights)
 	{
@@ -654,19 +572,9 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
- 	for (int j = 0; j < m_nObjects; j++)
-	{
-		if (m_ppObject[j]) m_ppObject[j]->SceneModelRender(pd3dCommandList, pCamera);
-		/*m_ppObject[j]->OnPrepareRender();
-		if (m_ppObject[j]->m_pShader) m_ppObject[j]->m_pShader->Render(pd3dCommandList, pCamera);
-
-		m_ppObject[j]->UpdateShaderVariables(pd3dCommandList);
-		if (m_ppObject[j]->m_pMesh) m_ppObject[j]->m_pMesh->Render(pd3dCommandList);*/
-	}
-
+	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nBilboardShaders; i++) if (m_ppBilboardShaders[i]) m_ppBilboardShaders[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
 	{
@@ -677,6 +585,5 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 			m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
-
 }
 

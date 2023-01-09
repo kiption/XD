@@ -558,6 +558,8 @@ void CGameObject::SetLookAt(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up)
 	m_xmf4x4ToParent._31 = mtxLookAt._13;m_xmf4x4ToParent._32 = mtxLookAt._23; m_xmf4x4ToParent._33 = mtxLookAt._33;
 }
 
+
+
 void CGameObject::SetMovingDirection(const XMFLOAT3& xmf3MovingDirection)
 {
 	XMStoreFloat3(&m_xmf3MovingDirection, XMVector3Normalize(XMLoadFloat3(&xmf3MovingDirection)));
@@ -601,6 +603,42 @@ void CGameObject::SetMaterial(CMaterial* pMaterial)
 	if (m_pMaterials) m_pMaterials->AddRef();
 }
 
+void CGameObject::SetMaterial(UINT nIndex, UINT nReflection)
+{
+	if ((nIndex >= 0) && (nIndex < m_nMaterials))
+	{
+		if (!m_ppMaterials[nIndex])
+		{
+			m_ppMaterials[nIndex] = new CMaterial(0);
+			m_ppMaterials[nIndex]->AddRef();
+		}
+		m_ppMaterials[nIndex]->m_nMaterial = nReflection;
+	}
+}
+void CGameObject::SetEmissionColor(UINT nIndex, XMFLOAT4 xmf4Color)
+{
+	if ((nIndex >= 0) && (nIndex < m_nMaterials))
+	{
+		if (!m_ppMaterials[nIndex])
+		{
+			m_ppMaterials[nIndex] = new CMaterial(0);
+			m_ppMaterials[nIndex]->AddRef();
+		}
+		m_ppMaterials[nIndex]->SetEmissionColor(xmf4Color);
+	}
+}
+void CGameObject::SetAlbedoColor(UINT nIndex, XMFLOAT4 xmf4Color)
+{
+	if ((nIndex >= 0) && (nIndex < m_nMaterials))
+	{
+		if (!m_ppMaterials[nIndex])
+		{
+			m_ppMaterials[nIndex] = new CMaterial(0);
+			m_ppMaterials[nIndex]->AddRef();
+		}
+		m_ppMaterials[nIndex]->SetAlbedoColor(xmf4Color);
+	}
+}
 CGameObject *CGameObject::FindFrame(char *pstrFrameName)
 {
 	CGameObject *pFrameObject = NULL;
@@ -676,14 +714,6 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 
 }
 
-void CGameObject::SceneModelRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-{
-	OnPrepareRender();
-	if (m_pShader) m_pShader->Render(pd3dCommandList, pCamera);
-
-	UpdateShaderVariables(pd3dCommandList);
-	if (m_pMesh) m_pMesh->Render(pd3dCommandList);
-}
 
 void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {

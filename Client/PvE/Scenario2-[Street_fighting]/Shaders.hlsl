@@ -20,11 +20,11 @@ cbuffer cbGameObjectInfo : register(b2)
 	uint					gnTexturesMask : packoffset(c8);
 };
 
-cbuffer cbGameModelObjectInfo : register(b10)
-{
-	matrix		gmtxObject : packoffset(c0);
-	float3		gf3ObjectColor : packoffset(c4);
-};
+//cbuffer cbGameModelObjectInfo : register(b10)
+//{
+//	matrix		gmtxObject : packoffset(c0);
+//	MATERIAL	gMaterial : packoffset(c4);
+//};
 
 #include "Light.hlsl"
 
@@ -170,7 +170,8 @@ Texture2D gtxtTerrainDetailTexture : register(t2);
 struct VS_TERRAIN_INPUT
 {
 	float3 position : POSITION;
-	float4 color : COLOR;
+	//float4 color : COLOR;
+	float3 normal : NORMAL;
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
 };
@@ -178,7 +179,9 @@ struct VS_TERRAIN_INPUT
 struct VS_TERRAIN_OUTPUT
 {
 	float4 position : SV_POSITION;
-	float4 color : COLOR;
+	float3 positionW : POSITION;
+	//float4 color : COLOR;
+	float3 normalW : NORMAL;
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
 };
@@ -187,8 +190,10 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 {
 	VS_TERRAIN_OUTPUT output;
 
+	output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
+	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
-	output.color = input.color;
+	//output.color = input.color;
 	output.uv0 = input.uv0;
 	output.uv1 = input.uv1;
 
@@ -197,11 +202,14 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 
 float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
+	input.normalW = normalize(input.normalW);
 	float4 cBaseTexColor = gtxtTerrainBaseTexture.Sample(gssWrap, input.uv0);
 	float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gssWrap, input.uv1);
-//	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
-	float4 cColor = input.color * saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
-
+	float4 cIllumination = float4(0.4f, 0.8f, 0.4f, 1.0f);
+	cIllumination = Lighting(input.positionW, input.normalW);
+	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
+//	float4 cColor = input.color * saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
+	cColor = lerp(cColor, cIllumination, 0.2f);
 	return(cColor);
 }
 
@@ -252,60 +260,50 @@ static float gfGlossiness = 1.8f;
 static float gfSmoothness = 0.95f;
 static float gfOneMinusReflectivity = 0.5f;
 
-struct VS_INPUT
+struct VS_SINPUT
 {
-	float3		position : POSITION;
-	float3		normal : NORMAL;
-	float2		uv : TEXTURECOORD;
+	float3 position : POSITION;
+	float3 normal : NORMAL;
 };
 
-struct VS_OUTPUT
+struct VS_SOUTPUT
 {
-	float4		positionH : SV_POSITION;
-	float3		positionW : POSITION;
-	float3		normal : NORMAL0;
-	float3		normalW : NORMAL1;
-	float2		uv : TEXTURECOORD;
-
-	float4		color : COLOR;
+	float4 positionH : SV_POSITION;
+	float3 positionW : POSITION;
+	float3 normalW : NORMAL;
+#ifdef _WITH_VERTEX_LIGHTING
+	float4 color : COLOR;
+#endif
 };
 
-VS_OUTPUT VSPseudoLighting(VS_INPUT input)
+VS_SOUTPUT VSScene(VS_SINPUT input)
 {
-	VS_OUTPUT output;
+	VS_SOUTPUT output;
 
-	output.positionW = mul(float4(input.position, 1.0f), gmtxObject).xyz;
+	output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
 	output.positionH = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-	output.normalW = mul(float4(input.normal, 0.0f), gmtxObject).xyz;
-	output.normal = input.normal;
-	output.uv = input.uv;
+	float3 normalW = mul(input.normal, (float3x3) gmtxGameObject);
+#ifdef _WITH_VERTEX_LIGHTING
+	output.color = Lighting(output.positionW, normalize(normalW));
+	output.color = float4(0.5f * normalize(gvCameraPosition - output.positionW) + 0.5f, 1.0f);
+#else
+	output.normalW = normalW;
+#endif
 
-	output.color = lerp(float4(normalize(output.positionW), 1.0f), float4(normalize(output.normalW), 1.0f), 0.5f);
-
-	return(output);
+	return (output);
 }
 
-float4 PSPseudoLighting(VS_OUTPUT input) : SV_TARGET
+float4 PSScene(VS_SOUTPUT input) : SV_TARGET
 {
-	float4 cColor = float4(0.9f, 0.9f, 0.9f, 1.0f);
+#ifdef _WITH_VERTEX_LIGHTING
+	//	return(float4(input.positionW, 1.0f));
+		return(input.color);
+	#else
+		float3 normalW = normalize(input.normalW);
+		float4 cIllumination = Lighting(input.positionW, normalW);
 
-	float3 f3Normal = normalize(input.normalW);
-
-	float fDiffused = max(0.0f, dot(f3Normal, gf3LightDirection));
-	cColor.rgb = gf3ObjectColor * gf3LightColor * fDiffused;
-
-	float3 f3ToCamera = normalize(gvCameraPosition - input.positionW);
-	float3 f3Half = normalize(gf3LightDirection + f3ToCamera);
-	float fHalf = max(0.0f, dot(f3Normal, f3Half));
-	float fSpecular = pow(fHalf, gfSpecular * 68.0f) * gfGlossiness;
-	cColor.rgb += gf3SpecularColor * fSpecular;
-
-	cColor.rgb += saturate(float3(0.25f * abs(input.uv.r), 0.25f * abs(input.uv.g), 0.25f)) * 0.5f;
-
-	float fRim = saturate(dot(f3ToCamera, f3Normal));
-	cColor.rgb += float3(0.0f, 0.0f, 0.0f) * pow(fRim, 1.0f);
-
-	return(cColor);
+		return (cIllumination);
+	#endif
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -131,16 +131,41 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 
-protected:
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
+
+public:
 	CGameObject						**m_ppObjects = 0;
+	CGameObject						*m_pObjects = 0;
 	int								m_nObjects = 0;
 
 public:
 	XMFLOAT3 TargetPosition;
 	XMFLOAT3 BulletPosition;
 	bool								m_bBulletActive = false;
+private:
+	ID3D12Resource* m_pd3dcbSceneObject = NULL;
+	CB_SCENEMODEL_INFO* m_pcbMappedSceneGameObject = NULL;
 };
+class CSceneShader : public CObjectsShader
+{
+public:
+	CSceneShader();
+	virtual ~CSceneShader();
 
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,char* pstrFileName, void* pContext = NULL);
+	virtual void ReleaseObjects();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+
+	virtual void ReleaseUploadBuffers();
+
+};
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 class CPlayerShader : public CStandardShader
@@ -163,17 +188,7 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
 };
 
-class CPseudoLightingShader : public CShader
-{
-public:
-	CPseudoLightingShader();
-	virtual ~CPseudoLightingShader();
 
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
-
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
-};
 
 class CBulletMotionShader : public CObjectsShader
 {

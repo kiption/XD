@@ -24,7 +24,19 @@ class CStandardShader;
 #define RESOURCE_TEXTURE2DARRAY		0x03
 #define RESOURCE_TEXTURE_CUBE		0x04
 #define RESOURCE_BUFFER				0x05
-
+struct MATERIAL
+{
+	XMFLOAT4						m_xmf4Ambient;
+	XMFLOAT4						m_xmf4Diffuse;
+	XMFLOAT4						m_xmf4Specular; //(r,g,b,a=power)
+	XMFLOAT4						m_xmf4Emissive;
+};
+struct CB_SCENEMODEL_INFO
+{
+	XMFLOAT4X4						m_xmf4x4World;
+	MATERIAL						m_material;
+	XMFLOAT4X4						m_xmf4x4Texture;
+};
 class CTexture
 {
 public:
@@ -52,7 +64,9 @@ private:
 	int								m_nSamplers = 0;
 	D3D12_GPU_DESCRIPTOR_HANDLE*	m_pd3dSamplerGpuDescriptorHandles = NULL;
 
+
 public:
+	XMFLOAT4X4						m_xmf4x4Texture;
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
@@ -125,10 +139,12 @@ public:
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList);
 
 	virtual void ReleaseUploadBuffers();
-
+	void SetAlbedoColor(XMFLOAT4 xmf4Color) { m_xmf4AlbedoColor = xmf4Color; }
+	void SetEmissionColor(XMFLOAT4 xmf4Color) { m_xmf4EmissiveColor = xmf4Color; }
+	void SetMaterial(int nMaterial) { m_nMaterial = nMaterial; }
 public:
 	UINT							m_nType = 0x00;
-
+	int								m_nMaterial = 1;
 	float							m_fGlossiness = 0.0f;
 	float							m_fSmoothness = 0.0f;
 	float							m_fSpecularHighlight = 0.0f;
@@ -323,6 +339,11 @@ public:
 	void SetMaterial(int nMaterial, CMaterial *pMaterial);
 	void SetMaterial(CMaterial *pMaterial);
 
+
+	void SetMaterial(UINT nIndex, UINT nReflection);
+	void SetAlbedoColor(UINT nIndex, XMFLOAT4 xmf4Color);
+	void SetEmissionColor(UINT nIndex, XMFLOAT4 xmf4Color);
+
 	void SetChild(CGameObject *pChild, bool bReferenceUpdate=false);
 	void SetLookAt(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f));
 
@@ -333,7 +354,6 @@ public:
 
 	virtual void OnPrepareRender() { }
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
-	virtual void SceneModelRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
