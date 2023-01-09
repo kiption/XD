@@ -153,6 +153,7 @@ public:
 public:
 	XMFLOAT3 TargetPosition;
 	XMFLOAT3 BulletPosition;
+	XMFLOAT3 BulletPositionR;
 	
 	int								m_nObjects = 0;
 	CGameObject						**m_ppObjects = 0;

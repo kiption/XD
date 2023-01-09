@@ -727,7 +727,7 @@ D3D12_BLEND_DESC CWaterMoveShader::CreateBlendState(int nPipelineState)
 	D3D12_BLEND_DESC d3dBlendDesc;
 	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
 	d3dBlendDesc.AlphaToCoverageEnable = FALSE;
-	d3dBlendDesc.IndependentBlendEnable = FALSE;
+	d3dBlendDesc.IndependentBlendEnable = TRUE;
 	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
 	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
 	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
@@ -740,7 +740,6 @@ D3D12_BLEND_DESC CWaterMoveShader::CreateBlendState(int nPipelineState)
 	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = 15;
 	return(d3dBlendDesc);
 }
-
 
 D3D12_INPUT_LAYOUT_DESC CWaterMoveShader::CreateInputLayout(int nPipelineState)
 {
@@ -1976,9 +1975,9 @@ void CBulletMotionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 
 	CTexturedRectMesh* pSpriteMesh[3];
-	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.0f, 25.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 25.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	pSpriteMesh[2] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 25.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f,30.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 30.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[2] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 30.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	m_nObjects = 3;
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
@@ -2023,7 +2022,7 @@ void CBulletMotionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 	}
 	else if (pCamera->GetMode() == SPACESHIP_CAMERA)
 	{
-		BulletPosition.y += 5.0;
+		BulletPosition.y;
 	}
 	if (m_bBulletActive == true)
 	{
@@ -2037,10 +2036,8 @@ void CBulletMotionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 }
 void CBulletMotionShader::AnimateObjects(float fTimeElapsed)
 {
-	for (int i = 0; i < 3; i++)
-	{
-		m_ppObjects[i]->SetPosition(BulletPosition);
-	}
+	for (int i = 0; i < 2; i++) m_ppObjects[i]->SetPosition(BulletPosition);
+	for (int j = 2; j < 3; j++) m_ppObjects[j]->SetPosition(BulletPositionR);
 }
 
 void CExplosionShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)

@@ -74,15 +74,15 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	XMFLOAT3 xmf3Scale(20.0f, 6.5f, 20.0f);
+	XMFLOAT3 xmf3Scale(20.0f, 20.5f,20.0f);
 	XMFLOAT3 xmf3Normal(0.0f, 0.5f, 0.0f);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf3Normal);
-	m_pTerrain->SetPosition(0.0, 0.0, 0.0);
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/Mountain.raw"), 257, 257, 257, 257, xmf3Scale, xmf3Normal);
+	m_pTerrain->SetPosition(0.0, 500.0, 0.0);
 
 
-	XMFLOAT3 xmf4ScaleW(18.0f, 2.5f, 18.0);
+	XMFLOAT3 xmf4ScaleW(20.0f, 2.5f, 20.0);
 	m_pUseWaterMove = new CUseWaterMoveTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/waterterrain8bit.raw"), 257, 257, 8, 8, xmf4ScaleW, xmf3Normal);
-	m_pUseWaterMove->SetPosition(0.0, 570.0f, 0.0);
+	m_pUseWaterMove->SetPosition(0.0, 560.0f, 0.0);
 
 
 	m_nShaders = 6;
@@ -639,7 +639,9 @@ void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 	m_pPlayer->xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(8.0, 8.0, 10.0), XMFLOAT4(0, 0, 0, 1));
 	for (int i = 0; i < 10; i++) if (m_ppShaders[0]->m_ppObjects[i]->xoobb.Intersects(m_pPlayer->xoobb)) m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 -= 5.0f;
 	CBulletObject** ppBullets = ((CMainPlayer*)m_pPlayer)->m_ppBullets;
+	CBulletObject** ppBulletsR = ((CMainPlayer*)m_pPlayer)->m_ppBullets2;
 	for (int j = 0; j < BULLETS; j++) { ppBullets[j]->xoobb = BoundingOrientedBox(XMFLOAT3(ppBullets[j]->GetPosition()), XMFLOAT3(13.0, 13.0, 15.0), XMFLOAT4(0, 0, 0, 1)); }
+	for (int j = 0; j < BULLETS2; j++) { ppBulletsR[j]->xoobb = BoundingOrientedBox(XMFLOAT3(ppBulletsR[j]->GetPosition()), XMFLOAT3(13.0, 13.0, 15.0), XMFLOAT4(0, 0, 0, 1)); }
 
 	/// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -663,6 +665,29 @@ void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 			{
 				m_ppShaders[4]->m_bBulletActive = true;
 				m_ppShaders[4]->BulletPosition = ppBullets[j]->GetPosition();
+			}
+		}
+	}
+
+	for (int j = 0; j < BULLETS2; j++)
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			for (int i = 0; i < 10; i++)
+			{
+				if (ppBulletsR[j]->m_bActive && m_ppShaders[0]->m_ppObjects[i]->xoobb.Intersects(ppBulletsR[j]->xoobb))
+				{
+
+					m_ppShaders[5]->m_bActive = true;
+					CollisionCheck = i;
+					ppBulletsR[j]->Reset();
+				}
+			}
+
+			if (ppBulletsR[j]->m_bActive)
+			{
+				m_ppShaders[4]->m_bBulletActive = true;
+				m_ppShaders[4]->BulletPositionR = ppBulletsR[j]->GetPosition();
 			}
 		}
 	}

@@ -529,7 +529,6 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 		break;
 	case WM_RBUTTONDOWN:
 	{
-
 		((CMainPlayer*)m_pPlayer)->FireBullet(NULL);
 		m_GameSound.shootingSound();
 	}
@@ -627,6 +626,7 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[KEY_W] & 0xF0) {
 			packetDirection += INPUT_KEY_W;//S
 			dwDirection |= DIR_FORWARD;
+		
 		}
 		if (pKeysBuffer[KEY_S] & 0xF0) {
 			packetDirection += INPUT_KEY_S;//S
@@ -635,10 +635,19 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[KEY_D] & 0xF0) {
 			packetDirection += INPUT_KEY_D;//S
 			dwDirection |= DIR_RIGHT;
+			if (m_pCamera->GetMode() == SPACESHIP_CAMERA)
+			{
+				m_pPlayer->Rotate(0.0, 0.5, 0.0);
+			}
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
 			packetDirection += INPUT_KEY_A;//S
 			dwDirection |= DIR_LEFT;
+			if (m_pCamera->GetMode() == SPACESHIP_CAMERA)
+			{
+				m_pPlayer->Rotate(0.0, -0.5, 0.0);
+			}
+
 		}
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
@@ -652,6 +661,7 @@ void CGameFramework::ProcessInput()
 
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
 			((CMainPlayer*)m_pPlayer)->FireBullet(NULL);
+			m_GameSound.shootingSound();
 		}
 
 		// Server
@@ -738,7 +748,7 @@ void CGameFramework::ProcessInput()
 				}
 				rotate_p.delta_x = cxDelta;
 				rotate_p.delta_y = cyDelta;
-
+				
 				sendPacket(&rotate_p);
 				//====
 			}

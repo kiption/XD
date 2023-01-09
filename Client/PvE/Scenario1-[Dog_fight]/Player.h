@@ -10,7 +10,7 @@
 #include "Object.h"
 #include "Camera.h"
 #include "Shader.h"
-
+#include "GameSound.h"
 class CPlayer : public CGameObject
 {
 protected:
@@ -26,6 +26,7 @@ protected:
 	LPVOID						m_pCameraUpdatedContext;
 
 	CPlayerShader* m_pShader = NULL;
+	GameSound m_GameSound;
 public:
 	XMFLOAT3					m_xmf3Right;
 	XMFLOAT3					m_xmf3Up;
@@ -96,6 +97,7 @@ public:
 };
 
 #define BULLETS					50
+#define BULLETS2					50
 class CMainPlayer : public CPlayer
 {
 public:
@@ -104,6 +106,7 @@ public:
 
 	float						m_fBulletEffectiveRange = 1000.0f;
 	CBulletObject* pBulletObject = NULL;
+	CBulletObject* pBulletObject2 = NULL;
 	CMi24Object* pPlayerObject = NULL;
 	CGameObject* m_pMainRotorFrame = NULL;
 	CGameObject* m_pTailRotorFrame = NULL;
@@ -116,6 +119,7 @@ private:
 public:
 
 	CBulletObject* m_ppBullets[BULLETS];
+	CBulletObject* m_ppBullets2[BULLETS2];
 	void FireBullet(CGameObject* pLockedObject);
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPrepareRender();

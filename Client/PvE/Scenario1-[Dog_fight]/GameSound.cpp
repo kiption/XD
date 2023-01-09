@@ -4,8 +4,8 @@ GameSound::GameSound()
 {
 	result = FMOD::System_Create(&soundSystem);
 
-	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_DEFAULT, 0, &shootSound);
+	result = soundSystem->init(64, FMOD_INIT_NORMAL, extradriverdata);
+	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_3D, 0, &shootSound);
 	result = shootSound->setMode(FMOD_LOOP_OFF);
 
 	result = soundSystem->init(64, FMOD_INIT_NORMAL, extradriverdata);
@@ -69,7 +69,7 @@ void GameSound::backGroundMusic()
 void GameSound::SpeakMusic()
 {
 	result = soundSystem->playSound(speakSound, 0, false, &speakChannel);
-	speakChannel->setVolume(0.08f);
+	speakChannel->setVolume(0.38f);
 }
 void GameSound::walkingSound()
 {
