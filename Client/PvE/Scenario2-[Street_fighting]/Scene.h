@@ -37,11 +37,7 @@ struct LIGHTS
 	int									m_nLights;
 };
 
-struct CB_SCENEMODEL_INFO
-{
-	XMFLOAT4X4						m_xmf4x4World;
-	XMFLOAT3						m_xmf3Color;
-};
+
 
 class CScene
 {
@@ -68,11 +64,9 @@ public:
     void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 
 	void ReleaseUploadBuffers();
-	void LoadSceneObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName);
 
 	CPlayer	*m_pPlayer = NULL;
-
-	CGameObject** m_ppObject = NULL;
+	CSceneObjcet** m_ppObject = NULL;
 	CSceneObjcet* m_pObject = NULL;
 	int	m_nObjects = 0;
 protected:
@@ -130,7 +124,5 @@ public:
 	CGameObject							**m_ppHierarchicalGameObjects = NULL;
 
 
-private:
-	ID3D12Resource* m_pd3dcbSceneObject = NULL;
-	CB_SCENEMODEL_INFO* m_pcbSceneGameObject = NULL;
+
 };

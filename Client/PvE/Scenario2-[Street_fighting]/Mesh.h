@@ -29,7 +29,7 @@ class CGameObject;
 class CMesh
 {
 public:
-	CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName = NULL);
+	CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	virtual ~CMesh();
 
@@ -61,13 +61,14 @@ protected:
 	ID3D12Resource* m_pd3dPositionBuffer = NULL;
 	ID3D12Resource* m_pd3dPositionUploadBuffer = NULL;
 	D3D12_VERTEX_BUFFER_VIEW	m_d3dPositionBufferView;
-
+	UINT							m_nSubsets = 0;
 	int	m_nSubMeshes = 0;
-	int* m_pnSubSetIndices = NULL;
+	UINT* m_pnSubSetIndices = NULL;
 	UINT** m_ppnSubSetIndices = NULL;
 	ID3D12Resource** m_ppd3dSubSetIndexBuffers = NULL;
 	ID3D12Resource** m_ppd3dSubSetIndexUploadBuffers = NULL;
 	D3D12_INDEX_BUFFER_VIEW* m_pd3dSubSetIndexBufferViews = NULL;
+	UINT* m_pnSubSetStartIndices = NULL;
 
 	ID3D12Resource* m_pd3dVertexBuffer = NULL;
 	ID3D12Resource* m_pd3dVertexUploadBuffer = NULL;
@@ -75,13 +76,14 @@ protected:
 	UINT							m_nVertexBufferViews = 0;
 	D3D12_VERTEX_BUFFER_VIEW* m_pd3dVertexBufferViews = NULL;
 
-	ID3D12Resource* m_pd3dIndexBuffer = NULL;
-	ID3D12Resource* m_pd3dIndexUploadBuffer = NULL;
-	D3D12_INDEX_BUFFER_VIEW			m_d3dIndexBufferView;
+	ID3D12Resource** m_pd3dIndexBuffer = NULL;
+	ID3D12Resource** m_pd3dIndexUploadBuffer = NULL;
+	D3D12_INDEX_BUFFER_VIEW*			m_d3dIndexBufferView = NULL;
 
 	XMFLOAT3* m_pxmf3Normals = NULL;
 	ID3D12Resource* m_pd3dNormalBuffer = NULL;
 	ID3D12Resource* m_pd3dNormalUploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW m_d3dNormalBufferView;
 
 	XMFLOAT2* m_pxmf2TextureCoords = NULL;
 	ID3D12Resource* m_pd3dTextureCoordBuffer = NULL;
@@ -141,7 +143,7 @@ protected:
 	XMFLOAT4* m_pxmf4Colors = NULL;
 	XMFLOAT2* m_pxmf2TextureCoords0 = NULL;
 	XMFLOAT2* m_pxmf2TextureCoords1 = NULL;
-
+	XMFLOAT3* m_pxmf3Normal = NULL;
 	ID3D12Resource* m_pd3dColorBuffer = NULL;
 	ID3D12Resource* m_pd3dColorUploadBuffer = NULL;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dColorBufferView;
@@ -296,4 +298,16 @@ protected:
 public:
 	virtual void ReleaseUploadBuffers();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet);
+};
+
+
+class CSceneMesh : public CMesh
+{
+public:
+	CSceneMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName = NULL);
+	virtual ~CSceneMesh();
+	void LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, char* pstrFileName);
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubset);
+
 };

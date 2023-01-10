@@ -169,7 +169,7 @@ public class BinarySceneWriter : MonoBehaviour
 #endif
         WriteIntegers(binaryWriter, "<Indices>:", mesh.triangles);
 
-//      WriteSubMeshes(binaryWriter, "<SubMeshes>:", mesh);
+        WriteSubMeshes(binaryWriter, "<SubMeshes>:", mesh);
 
         binaryWriter.Flush();
         binaryWriter.Close();
@@ -205,7 +205,7 @@ public class BinarySceneWriter : MonoBehaviour
             string strObjectName = string.Copy(transform.name).Replace(" ", "_");
             sceneBinaryWriter.Write("<GameObject>:");
             sceneBinaryWriter.Write(strObjectName);
-//          WriteMaterials(sceneBinaryWriter, "<Materials>:", meshRenderer.materials);
+            WriteMaterials(sceneBinaryWriter, "<Materials>:", meshRenderer.materials);
             WriteWorldMatrix(sceneBinaryWriter, transform);
 
             if (FindObjectByName(strObjectName) == false) WriteMesh(meshFilter.mesh, strObjectName);
