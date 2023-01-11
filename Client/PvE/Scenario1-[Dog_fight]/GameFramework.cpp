@@ -4,8 +4,8 @@
 
 #include "stdafx.h"
 #include "GameFramework.h"
-#include "Network.h"
 
+//#include "Network.h"
 
 uniform_real_distribution<float> uidx(640.0, 690.0);
 uniform_real_distribution<float> uidy(720.0, 725.0);
@@ -13,28 +13,6 @@ uniform_real_distribution<float> uidz(1100.0, 1200.0);
 
 CGameFramework::CGameFramework()
 {
-
-	// Server
-	wcout.imbue(locale("korean"));
-	WSADATA WSAData;
-	WSAStartup(MAKEWORD(2, 0), &WSAData);
-
-	s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	SOCKADDR_IN server_addr;
-	ZeroMemory(&server_addr, sizeof(server_addr));
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(PORT_NUM);
-	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
-	connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
-	CS_LOGIN_PACKET p;
-	p.size = sizeof(CS_LOGIN_PACKET);
-	p.type = CS_LOGIN;
-	strcpy_s(p.name, "COPTER");
-
-	sendPacket(&p);
-
-	recvPacket();
-
 	m_pdxgiFactory = NULL;
 	m_pdxgiSwapChain = NULL;
 	m_pd3dDevice = NULL;
@@ -583,9 +561,9 @@ void CGameFramework::BuildObjects()
 
 	CMainPlayer* pMainPlayer = new CMainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
 	m_pScene->m_pPlayer = m_pPlayer = pMainPlayer;
-	pMainPlayer->m_xmf3Position.x = (float)my_info.m_x;
-	pMainPlayer->m_xmf3Position.y = (float)my_info.m_y;
-	pMainPlayer->m_xmf3Position.z = (float)my_info.m_z;
+	pMainPlayer->m_xmf3Position.x = 0.0f;
+	pMainPlayer->m_xmf3Position.y = 0.0f;
+	pMainPlayer->m_xmf3Position.z = 0.0f;
 	pMainPlayer->SetPosition(XMFLOAT3(pMainPlayer->m_xmf3Position.x, pMainPlayer->m_xmf3Position.y, pMainPlayer->m_xmf3Position.z));
 	m_pCamera = m_pPlayer->GetCamera();
 	m_pPlayer->SetTerrain(m_pScene->m_pTerrain);
@@ -612,7 +590,13 @@ void CGameFramework::ReleaseObjects()
 }
 
 
-
+// key value
+constexpr char INPUT_KEY_W = 0b100000;
+constexpr char INPUT_KEY_S = 0b010000;
+constexpr char INPUT_KEY_D = 0b001000;
+constexpr char INPUT_KEY_A = 0b000100;
+constexpr char INPUT_KEY_Q = 0b000010;
+constexpr char INPUT_KEY_E = 0b000001;
 void CGameFramework::ProcessInput()
 {
 	static UCHAR pKeysBuffer[256];
@@ -620,20 +604,20 @@ void CGameFramework::ProcessInput()
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
 	if (!bProcessedByScene)
 	{
-		char packetDirection = 0;//S
+		char inputKeyValue = 0;//S
 		DWORD dwDirection = 0;
 
 		if (pKeysBuffer[KEY_W] & 0xF0) {
-			packetDirection += INPUT_KEY_W;//S
+			inputKeyValue += INPUT_KEY_W;//S
 			dwDirection |= DIR_FORWARD;
 		
 		}
 		if (pKeysBuffer[KEY_S] & 0xF0) {
-			packetDirection += INPUT_KEY_S;//S
+			inputKeyValue += INPUT_KEY_S;//S
 			dwDirection |= DIR_BACKWARD;
 		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
-			packetDirection += INPUT_KEY_D;//S
+			inputKeyValue += INPUT_KEY_D;//S
 			dwDirection |= DIR_RIGHT;
 			if (m_pCamera->GetMode() == SPACESHIP_CAMERA)
 			{
@@ -641,7 +625,7 @@ void CGameFramework::ProcessInput()
 			}
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
-			packetDirection += INPUT_KEY_A;//S
+			inputKeyValue += INPUT_KEY_A;//S
 			dwDirection |= DIR_LEFT;
 			if (m_pCamera->GetMode() == SPACESHIP_CAMERA)
 			{
@@ -651,11 +635,11 @@ void CGameFramework::ProcessInput()
 		}
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
-			packetDirection += INPUT_KEY_Q;//S
+			inputKeyValue += INPUT_KEY_Q;//S
 			dwDirection |= DIR_UP;
 		}
 		if (pKeysBuffer[KEY_E] & 0xF0) {
-			packetDirection += INPUT_KEY_E;//S
+			inputKeyValue += INPUT_KEY_E;//S
 			dwDirection |= DIR_DOWN;
 		}
 
@@ -665,58 +649,51 @@ void CGameFramework::ProcessInput()
 		}
 
 		// Server
-		if (packetDirection) {
-			CS_INPUT_KEYBOARD_PACKET keyboard_p;
-			keyboard_p.size = sizeof(keyboard_p);
-			keyboard_p.type = CS_INPUT_KEYBOARD;
-			keyboard_p.direction = packetDirection;	// 입력받은 키값 전달
-
-			sendPacket(&keyboard_p);
+		if (inputKeyValue != 0) {
+			q_keyboardInput.push(inputKeyValue);
 		}//
 
-		// Server TempCode
+		// Server (temp)
 		// 마우스로 전진, 후진하는 것이 아직 어색하고 불편하여 마우스를 통한 이동 로직을 개선하기 전까지
 		// 임시로 방향키 위아래를 통해 전후 이동을 합니다.
-		float lookScalar = 0.9f;
-		float rightScalar = 2.0f;
+		float lookScalar = 2.0f, rightScalar = 0.5f;
+		bool directionKeyPush = false;
+		MouseInputVal inputMouseValue_temp;
+
 		if (pKeysBuffer[VK_UP] & 0xF0) {
-			CS_INPUT_MOUSE_PACKET temp_p;
-			temp_p.size = sizeof(temp_p);
-			temp_p.type = CS_INPUT_MOUSE;
-			temp_p.key_val = RT_LBUTTON;
-			temp_p.delta_x = 0.0f;
-			temp_p.delta_y = -1.0f * lookScalar;
-			sendPacket(&temp_p);
+			inputMouseValue_temp.button = L_BUTTON;
+			inputMouseValue_temp.delX = 0.0f;
+			inputMouseValue_temp.delY = -1.0f * lookScalar;
+
+			directionKeyPush = true;
 		}
 		else if (pKeysBuffer[VK_DOWN] & 0xF0) {
-			CS_INPUT_MOUSE_PACKET temp_p;
-			temp_p.size = sizeof(temp_p);
-			temp_p.type = CS_INPUT_MOUSE;
-			temp_p.key_val = RT_LBUTTON;
-			temp_p.delta_x = 0.0f;
-			temp_p.delta_y = lookScalar;
-			sendPacket(&temp_p);
+			inputMouseValue_temp.button = L_BUTTON;
+			inputMouseValue_temp.delX = 0.0f;
+			inputMouseValue_temp.delY = lookScalar;
+
+			directionKeyPush = true;
 		}
 
 		if (pKeysBuffer[VK_LEFT] & 0xF0) {
-			CS_INPUT_MOUSE_PACKET temp_p;
-			temp_p.size = sizeof(temp_p);
-			temp_p.type = CS_INPUT_MOUSE;
-			temp_p.key_val = RT_LBUTTON;
-			temp_p.delta_x = -1.0f * rightScalar;
-			temp_p.delta_y = 0.0f;
-			sendPacket(&temp_p);
+			inputMouseValue_temp.button = L_BUTTON;
+			inputMouseValue_temp.delX = -1.0f * rightScalar;
+			inputMouseValue_temp.delY = 0.0f;
+
+			directionKeyPush = true;
 		}
 		else if (pKeysBuffer[VK_RIGHT] & 0xF0) {
-			CS_INPUT_MOUSE_PACKET temp_p;
-			temp_p.size = sizeof(temp_p);
-			temp_p.type = CS_INPUT_MOUSE;
-			temp_p.key_val = RT_LBUTTON;
-			temp_p.delta_x = rightScalar;
-			temp_p.delta_y = 0.0f;
-			sendPacket(&temp_p);
+			inputMouseValue_temp.button = L_BUTTON;
+			inputMouseValue_temp.delX = rightScalar;
+			inputMouseValue_temp.delY = 0.0f;
+
+			directionKeyPush = true;
 		}
-		//== tempcode end
+
+		if (directionKeyPush) {
+			q_mouseInput.push(inputMouseValue_temp);
+		}
+		// ====
 
 
 		float cxDelta = 0.0f, cyDelta = 0.0f, czDelta = 0.0f;
@@ -736,20 +713,17 @@ void CGameFramework::ProcessInput()
 			if (cxDelta || cyDelta)
 			{
 				// Server
-				CS_INPUT_MOUSE_PACKET rotate_p;
-				rotate_p.size = sizeof(rotate_p);
-				rotate_p.type = CS_INPUT_MOUSE;
+				MouseInputVal inputMouseValue;
 
-				if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
-					rotate_p.key_val = RT_LBUTTON;
-				}
-				else if (pKeysBuffer[VK_RBUTTON] & 0xF0) {
-					rotate_p.key_val = RT_RBUTTON;
-				}
-				rotate_p.delta_x = cxDelta;
-				rotate_p.delta_y = cyDelta;
+				if (pKeysBuffer[VK_LBUTTON] & 0xF0)
+					inputMouseValue.button = L_BUTTON;
+				else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+					inputMouseValue.button = R_BUTTON;
 				
-				sendPacket(&rotate_p);
+				inputMouseValue.delX = cxDelta;
+				inputMouseValue.delY = cyDelta;
+
+				q_mouseInput.push(inputMouseValue);
 				//====
 			}
 		}
@@ -908,41 +882,6 @@ void CGameFramework::FrameAdvance()
 
 	MoveToNextFrame();
 
-	// 서버에서 받은 값으로 적용
-
-	XMFLOAT3 temp = { my_info.m_x, my_info.m_y, my_info.m_z };
-	m_pPlayer->SetPosition(temp);
-
-	XMFLOAT3 tempRight = { my_info.m_right_vec.x, my_info.m_right_vec.y , my_info.m_right_vec.z };
-	XMFLOAT3 tempUp = { my_info.m_up_vec.x, my_info.m_up_vec.y , my_info.m_up_vec.z };
-	XMFLOAT3 tempLook = { my_info.m_look_vec.x, my_info.m_look_vec.y , my_info.m_look_vec.z };
-	m_pPlayer->SetVectorsByServer(tempRight, tempUp, tempLook);
-
-	// 다른 Player
-	for (int j = 0; j < MAX_USER; j++) {
-		if (j == my_info.m_id || other_players[j].m_state == OBJ_ST_EMPTY) continue;
-
-		if (other_players[j].m_state == OBJ_ST_RUNNING) {
-			m_pScene->m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._41 = other_players[j].m_x;
-			m_pScene->m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._42 = other_players[j].m_y;
-			m_pScene->m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._43 = other_players[j].m_z;
-
-			XMFLOAT3 tempOtherRight = { other_players[j].m_right_vec.x, other_players[j].m_right_vec.y , other_players[j].m_right_vec.z };
-			XMFLOAT3 tempOtherUp = { other_players[j].m_up_vec.x, other_players[j].m_up_vec.y , other_players[j].m_up_vec.z };
-			XMFLOAT3 tempOtherLook = { other_players[j].m_look_vec.x, other_players[j].m_look_vec.y , other_players[j].m_look_vec.z };
-			m_pScene->m_ppShaders[0]->m_ppObjects[j]->SetUp(tempOtherUp);
-			m_pScene->m_ppShaders[0]->m_ppObjects[j]->SetRight(tempOtherRight);
-			m_pScene->m_ppShaders[0]->m_ppObjects[j]->SetLook(tempOtherLook);
-		}
-		else if (other_players[j].m_state == OBJ_ST_LOGOUT) {
-			other_players[j].m_state = OBJ_ST_EMPTY;
-			if (m_pScene->m_ppShaders[0]->m_ppObjects[j])
-			{
-				m_pScene->m_ppShaders[0]->m_ppObjects[j]->SetScale(0.0, 0.0, 0.0);
-			}
-
-		}
-	}
 	// Npc
 	//g_time += 0.01f;
 	//g_reverse_time -= 0.01f;
@@ -969,10 +908,57 @@ void CGameFramework::FrameAdvance()
 	//	}
 	//}
 
-
-
 	m_GameTimer.GetFrameRate(m_pszCaption + 14, 37);
 	size_t nLength = _tcslen(m_pszCaption);
 	_stprintf_s(m_pszCaption + nLength, 100 - nLength, _T("(%5.1f, %5.1f, %5.1f) Particles = %d"), m_pPlayer->m_xmf3Position.x, m_pPlayer->m_xmf3Position.y, m_pPlayer->m_xmf3Position.z, ::gnCurrentParticles);
 	::SetWindowText(m_hWnd, m_pszCaption);
 }
+
+
+//==================================================
+//			    Function for Networking
+//==================================================
+bool CGameFramework::CheckNewInputExist_Keyboard() {
+	return q_keyboardInput.empty();
+}
+bool CGameFramework::CheckNewInputExist_Mouse() {
+	return q_mouseInput.empty();
+}
+
+short CGameFramework::PopInputVal_Keyboard() {
+	short val = q_keyboardInput.front();
+	q_keyboardInput.pop();
+
+	return val;
+}
+MouseInputVal CGameFramework::PopInputVal_Mouse() {
+	MouseInputVal val = q_mouseInput.front();
+	q_mouseInput.pop();
+
+	return val;
+}
+
+void CGameFramework::SetPosition_PlayerObj(XMFLOAT3 pos) {
+	m_pPlayer->SetPosition(pos);
+}
+void CGameFramework::SetVectors_PlayerObj(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec) {
+	m_pPlayer->SetVectorsByServer(rightVec, upVec, lookVec);
+}
+
+void CGameFramework::SetPosition_OtherPlayerObj(int id, XMFLOAT3 pos) {
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4Transform._41 = pos.x;
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4Transform._42 = pos.y;
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4Transform._43 = pos.z;
+}
+void CGameFramework::SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec) {
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetUp(upVec);
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetRight(rightVec);
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetLook(lookVec);
+}
+void CGameFramework::Remove_OtherPlayerObj(int id) {
+	if (m_pScene->m_ppShaders[0]->m_ppObjects[id]) {
+		m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetScale(0.0, 0.0, 0.0);
+	}
+}
+
+//==================================================

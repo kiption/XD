@@ -5,6 +5,8 @@
 #include "Scenario1-[Dog_fight].h"
 #include "GameFramework.h"
 
+#include "Network.h"
+
 #define MAX_LOADSTRING 100
 
 HINSTANCE						ghAppInstance;
@@ -20,6 +22,29 @@ INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
+	//==================================================
+	//					Server Code
+	//==================================================
+	wcout.imbue(locale("korean"));
+	WSADATA WSAData;
+	WSAStartup(MAKEWORD(2, 0), &WSAData);
+
+	s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	SOCKADDR_IN server_addr;
+	ZeroMemory(&server_addr, sizeof(server_addr));
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(PORT_NUM);
+	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
+	connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+	CS_LOGIN_PACKET p;
+	p.size = sizeof(CS_LOGIN_PACKET);
+	p.type = CS_LOGIN;
+	strcpy_s(p.name, "COPTER");
+
+	sendPacket(&p);
+	recvPacket();
+	//==================================================
+
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -47,6 +72,57 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		}
 		else
 		{
+			//==================================================
+			//		새로운 키 입력을 서버에게 전달합니다.
+			//==================================================
+			if (!gGameFramework.CheckNewInputExist_Keyboard()) {
+				short keyValue = gGameFramework.PopInputVal_Keyboard();
+				CS_INPUT_KEYBOARD_PACKET keyinput_pack;
+				keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+				keyinput_pack.type = CS_INPUT_KEYBOARD;
+				keyinput_pack.direction = keyValue;
+				
+				cout << "[Keyboard] Send KeyValue - " << keyinput_pack.direction << endl;//test
+				sendPacket(&keyinput_pack);
+			}
+
+			if (!gGameFramework.CheckNewInputExist_Mouse()) {
+				MouseInputVal mouseValue = gGameFramework.PopInputVal_Mouse();
+				CS_INPUT_MOUSE_PACKET mouseinput_pack;
+				mouseinput_pack.size = sizeof(CS_INPUT_MOUSE_PACKET);
+				mouseinput_pack.type = CS_INPUT_MOUSE;
+				mouseinput_pack.key_val = mouseValue.button;
+				mouseinput_pack.delta_x = mouseValue.delX;
+				mouseinput_pack.delta_y = mouseValue.delY;
+
+				cout << "[Mouse] Send KeyValue - " << mouseinput_pack.key_val << endl;//test
+				sendPacket(&mouseinput_pack);
+			}
+			//==================================================
+
+			//==================================================
+			//	    서버로부터 받은 값으로 최신화해줍니다.
+			//==================================================
+			// 1. 자기자신 Player 객체 최신화
+			gGameFramework.SetPosition_PlayerObj(my_info.m_pos);
+			gGameFramework.SetVectors_PlayerObj(my_info.m_right_vec, my_info.m_up_vec, my_info.m_look_vec);
+
+			// 2. 다른 Player 객체 최신화
+			for (int i = 0; i < MAX_USER; i++) {
+				if (i == my_info.m_id || other_players[i].m_state == OBJ_ST_EMPTY) continue;
+
+				if (other_players[i].m_state == OBJ_ST_RUNNING) {
+					gGameFramework.SetPosition_OtherPlayerObj(i, other_players[i].m_pos);
+					gGameFramework.SetVectors_OtherPlayerObj(i, other_players[i].m_right_vec, other_players[i].m_up_vec, other_players[i].m_look_vec);
+				}
+				else if (other_players[i].m_state == OBJ_ST_LOGOUT) {
+					other_players[i].m_state = OBJ_ST_EMPTY;
+					gGameFramework.Remove_OtherPlayerObj(i);
+				}
+			}
+			//==================================================
+
+
 			gGameFramework.FrameAdvance();
 		}
 	}

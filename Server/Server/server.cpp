@@ -261,9 +261,9 @@ void process_packet(int client_id, char* packet)
 		}
 
 		// 새로 접속한 플레이어의 초기 위치정보를 설정합니다.
-		clients[client_id].pos.x = 640 + client_id * 15;
-		clients[client_id].pos.y = 961 + client_id;
-		clients[client_id].pos.z = 1165 - client_id * 15;
+		clients[client_id].pos.x = 640 + client_id * 50;
+		clients[client_id].pos.y = 1400;
+		clients[client_id].pos.z = 1165 - client_id * 50;
 		cout << "A new object is successfully created! - POS:(" << clients[client_id].pos.x
 			<< "," << clients[client_id].pos.y << "," << clients[client_id].pos.z << ")." << endl;
 
@@ -366,10 +366,10 @@ void process_packet(int client_id, char* packet)
 				float sign = 1.0f;					// 양, 음 부호
 				if (i % 2 == 0) sign = -1.0f;		// A, S, E key
 
-				switch (i/2) {
+				switch (i / 2) {
 				case KEY_QE:
 					// 아직 기능 없음.
-					
+
 					// unlock
 					clients[client_id].s_lock.unlock();
 

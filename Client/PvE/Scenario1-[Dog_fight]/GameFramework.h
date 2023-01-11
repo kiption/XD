@@ -5,6 +5,14 @@
 #include "Scene.h"
 #include "GameSound.h"
 
+#include <queue> //S
+enum MButton { L_BUTTON, R_BUTTON };
+struct MouseInputVal {
+	char button;
+	float delX, delY;
+};
+//S
+
 #define KEY_A         0x41
 #define KEY_D         0x44
 #define KEY_S         0x53
@@ -36,6 +44,39 @@ public:
 	void CreateRtvAndDsvDescriptorHeaps();
 	void CreateCommandQueueAndList();
 	void CreateDirect3DDevice();
+
+//==================================================
+//			  서버 통신을 위한 것들...
+//==================================================
+public:
+	// 서버로 보낼 키보드 입력값
+	queue<short> q_keyboardInput;
+
+	// 서버로 보낼 마우스 입력값
+	queue<MouseInputVal> q_mouseInput;
+//==================================================
+
+//==================================================
+//			  서버 통신에 필요한 함수들
+//==================================================
+public:
+	// 새로운 입력이 있는지 확인하는 함수입니다.
+	bool CheckNewInputExist_Keyboard();
+	bool CheckNewInputExist_Mouse();
+
+	// 키입력 큐에서 값을 하나 꺼내옵니다.
+	short PopInputVal_Keyboard();
+	MouseInputVal PopInputVal_Mouse();
+
+	// 객체 값 최신화 함수입니다.
+	void SetPosition_PlayerObj(XMFLOAT3 pos);
+	void SetVectors_PlayerObj(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+
+	void SetPosition_OtherPlayerObj(int id, XMFLOAT3 pos);
+	void SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+	void Remove_OtherPlayerObj(int id);
+
+//==================================================
 
 #ifdef _WITH_DIRECT2D
 	void CreateDirect2DDevice();
@@ -147,5 +188,6 @@ private:
 protected:
 	ID3D12Resource* m_pd3dcbFrameworkInfo = NULL;
 	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;
+
 };
 
