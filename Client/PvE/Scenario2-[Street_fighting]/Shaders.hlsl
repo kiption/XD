@@ -208,9 +208,9 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	float4 cIllumination = float4(0.4f, 0.8f, 0.4f, 1.0f);
 	cIllumination = Lighting(input.positionW, input.normalW);
 	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
-//	float4 cColor = input.color * saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
-	cColor = lerp(cColor, cIllumination, 0.2f);
-	return(cColor);
+	//	float4 cColor = input.color * saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
+		cColor = lerp(cColor, cIllumination, 0.5f);
+		return(cColor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
