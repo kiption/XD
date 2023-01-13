@@ -11,6 +11,7 @@
 #include "MyVectors.h"
 #include "protocol.h"
 #include "Func_CalcVectors.h"
+#include "NPC.h"
 
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
@@ -21,6 +22,7 @@ Coordinate basic_coordinate;	// 기본(초기) 좌표계
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
+
 
 class OVER_EXP {
 public:
@@ -110,7 +112,7 @@ public:
 };
 
 array<SESSION, MAX_USER + MAX_NPCS> clients;		// 0 ~ MAX_USER-1: Player,	 MAX_USER ~ MAX_USER+MAX_NPCS: NPC
-
+array<NPC, MAX_NPCS> npcs;
 HANDLE g_h_iocp;
 SOCKET g_s_socket;
 
@@ -173,6 +175,32 @@ void SESSION::send_rotate_packet(int client_id)
 
 	cout << "[SC_ROTATE]";
 	do_send(&rotate_pl_packet);
+}
+
+void init_npc()
+{
+	for (int i{}; i < MAX_NPCS; i++) {
+		int npc_id = 7001 + i;
+		npcs[i].SetID(npc_id);
+		npcs[i].SetNpcType(NPC_Helicopter);
+		npcs[i].SetRotate(0.0f, 0.0f, 0.0f);
+		npcs[i].SetActive(false);
+
+		random_device rd;
+		default_random_engine dre(rd());
+		uniform_real_distribution<float>AirHigh(1400, 1600);
+		uniform_real_distribution<float>AirPos(900, 2000);
+
+		npcs[i].SetPosition(AirPos(dre), AirHigh(dre), AirPos(dre));
+		npcs[i].SetOrgPosition(npcs[i].GetPosition());
+
+		uniform_real_distribution<float>rTheta(1.2f, 3.0f);
+		npcs[i].SetTheta(rTheta(dre));
+		npcs[i].SetAcc(npcs[i].GetTheta());
+
+		uniform_int_distribution<int>rRange(15, 30);
+		npcs[i].SetRange(rRange(dre));
+	}
 }
 
 void disconnect(int client_id)
@@ -259,7 +287,7 @@ void process_packet(int client_id, char* packet)
 
 		for (int i = 0; i < MAX_USER; ++i) {		// 현재 접속해 있는 모든 클라이언트에게 새로운 클라이언트(client_id)의 정보를 전송합니다.
 			auto& pl = clients[i];
-			
+
 			if (pl.id == client_id) continue;
 
 			pl.s_lock.lock();
@@ -418,14 +446,14 @@ void process_packet(int client_id, char* packet)
 	}// CS_INPUT_KEYBOARD end
 	case CS_INPUT_MOUSE: {
 		CS_INPUT_MOUSE_PACKET* rt_p = reinterpret_cast<CS_INPUT_MOUSE_PACKET*>(packet);
-		
+
 		clients[client_id].s_lock.lock();
 
 		if (clients[client_id].s_state == ST_FREE) {
 			clients[client_id].s_lock.unlock();
 			break;
 		}
-	
+
 		if (rt_p->key_val == RT_LBUTTON) {			// 마우스 좌클릭 드래그
 
 			XMFLOAT3 move_dir{ 0, 0, 0 };
@@ -485,7 +513,7 @@ void process_packet(int client_id, char* packet)
 
 		}
 		else if (rt_p->key_val == RT_RBUTTON) {		// 마우스 우클릭 드래그: 기능 미정.
-			
+
 
 		}
 
@@ -579,11 +607,26 @@ void do_worker()
 			delete ex_over;
 			break;
 		}
+
+
+
 	}
 }
 
 int main()
 {
+	init_npc();
+
+	int cnt = 0;
+	while (cnt < 100) {
+		for (int i{}; i < MAX_NPCS; ++i) {
+			if (i == 0) {
+				npcs[i].MovetoRotate();
+				cout << i << "th Pos: " << npcs[i].GetPosition().x << ", " << npcs[i].GetPosition().y << ", " << npcs[i].GetPosition().z << endl;
+
+			}
+		}
+	}
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 	g_s_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
