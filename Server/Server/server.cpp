@@ -17,11 +17,6 @@
 
 using namespace std;
 
-// NPC를 랜덤한 위치에 생성함.
-default_random_engine dre;
-uniform_int_distribution<int> uid(1, 10);
-// ==== NPC의 리스폰 지점을 만들고나면 없애도 됨.
-
 Coordinate basic_coordinate;	// 기본(초기) 좌표계
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
@@ -60,7 +55,7 @@ public:
 	SESSION_STATE s_state;
 	int id;
 	SOCKET socket;
-	MyVector3D pos;							// Position (x, y, z)
+	XMFLOAT3 pos;							// Position (x, y, z)
 	float pitch, yaw, roll;					// Rotated Degree
 	Coordinate curr_coordinate;				// 현재 Look, Right, Up Vectors
 	char name[NAME_SIZE];
@@ -73,9 +68,9 @@ public:
 		socket = 0;
 		pos = { 0.0f, 0.0f, 0.0f };
 		pitch = yaw = roll = 0.0f;
-		curr_coordinate.x_coordinate = { 1.0f, 0.0f, 0.0f };
-		curr_coordinate.y_coordinate = { 0.0f, 1.0f, 0.0f };
-		curr_coordinate.z_coordinate = { 0.0f, 0.0f, 1.0f };
+		curr_coordinate.right = { 1.0f, 0.0f, 0.0f };
+		curr_coordinate.up = { 0.0f, 1.0f, 0.0f };
+		curr_coordinate.look = { 0.0f, 0.0f, 1.0f };
 		name[0] = 0;
 		s_state = ST_FREE;
 		remain_size = 0;
@@ -129,17 +124,17 @@ void SESSION::send_login_info_packet()
 	login_info_packet.y = pos.y;
 	login_info_packet.z = pos.z;
 
-	login_info_packet.right_x = curr_coordinate.x_coordinate.x;
-	login_info_packet.right_y = curr_coordinate.x_coordinate.y;
-	login_info_packet.right_z = curr_coordinate.x_coordinate.z;
+	login_info_packet.right_x = curr_coordinate.right.x;
+	login_info_packet.right_y = curr_coordinate.right.y;
+	login_info_packet.right_z = curr_coordinate.right.z;
 
-	login_info_packet.up_x = curr_coordinate.y_coordinate.x;
-	login_info_packet.up_y = curr_coordinate.y_coordinate.y;
-	login_info_packet.up_z = curr_coordinate.y_coordinate.z;
+	login_info_packet.up_x = curr_coordinate.up.x;
+	login_info_packet.up_y = curr_coordinate.up.y;
+	login_info_packet.up_z = curr_coordinate.up.z;
 
-	login_info_packet.look_x = curr_coordinate.z_coordinate.x;
-	login_info_packet.look_y = curr_coordinate.z_coordinate.y;
-	login_info_packet.look_z = curr_coordinate.z_coordinate.z;
+	login_info_packet.look_x = curr_coordinate.look.x;
+	login_info_packet.look_y = curr_coordinate.look.y;
+	login_info_packet.look_z = curr_coordinate.look.z;
 
 	cout << "[SC_LOGIN_INFO]";
 	do_send(&login_info_packet);
@@ -164,17 +159,17 @@ void SESSION::send_rotate_packet(int client_id)
 	rotate_pl_packet.size = sizeof(SC_ROTATE_PLAYER_PACKET);
 	rotate_pl_packet.type = SC_ROTATE_PLAYER;
 
-	rotate_pl_packet.right_x = clients[client_id].curr_coordinate.x_coordinate.x;
-	rotate_pl_packet.right_y = clients[client_id].curr_coordinate.x_coordinate.y;
-	rotate_pl_packet.right_z = clients[client_id].curr_coordinate.x_coordinate.z;
+	rotate_pl_packet.right_x = clients[client_id].curr_coordinate.right.x;
+	rotate_pl_packet.right_y = clients[client_id].curr_coordinate.right.y;
+	rotate_pl_packet.right_z = clients[client_id].curr_coordinate.right.z;
 
-	rotate_pl_packet.up_x = clients[client_id].curr_coordinate.y_coordinate.x;
-	rotate_pl_packet.up_y = clients[client_id].curr_coordinate.y_coordinate.y;
-	rotate_pl_packet.up_z = clients[client_id].curr_coordinate.y_coordinate.z;
+	rotate_pl_packet.up_x = clients[client_id].curr_coordinate.up.x;
+	rotate_pl_packet.up_y = clients[client_id].curr_coordinate.up.y;
+	rotate_pl_packet.up_z = clients[client_id].curr_coordinate.up.z;
 
-	rotate_pl_packet.look_x = clients[client_id].curr_coordinate.z_coordinate.x;
-	rotate_pl_packet.look_y = clients[client_id].curr_coordinate.z_coordinate.y;
-	rotate_pl_packet.look_z = clients[client_id].curr_coordinate.z_coordinate.z;
+	rotate_pl_packet.look_x = clients[client_id].curr_coordinate.look.x;
+	rotate_pl_packet.look_y = clients[client_id].curr_coordinate.look.y;
+	rotate_pl_packet.look_z = clients[client_id].curr_coordinate.look.z;
 
 	cout << "[SC_ROTATE]";
 	do_send(&rotate_pl_packet);
@@ -210,22 +205,6 @@ void disconnect(int client_id)
 		cout << "[SC_REMOVE]";
 		pl.do_send(&remove_pl_packet);
 		pl.s_lock.unlock();
-	}
-}
-
-void init_npc()
-{
-	for (int i = 0; i < MAX_USER + MAX_NPCS; ++i)
-		clients[i].id = i;
-	for (int i = 0; i < MAX_NPCS; i++) {
-		int npc_id = i + MAX_USER;
-		clients[npc_id].s_state = ST_INGAME;
-		clients[npc_id].pos.x = uid(dre) * 150;
-		clients[npc_id].pos.y = 800 + uid(dre) * 50;
-		clients[npc_id].pos.z = uid(dre) * 150;
-		clients[npc_id].pitch = clients[npc_id].yaw = clients[npc_id].roll = 0.0f;
-		clients[npc_id].curr_coordinate = basic_coordinate;
-		sprintf_s(clients[npc_id].name, "NPC-No.%d", i);
 	}
 }
 
@@ -298,17 +277,17 @@ void process_packet(int client_id, char* packet)
 			add_pl_packet.y = clients[client_id].pos.y;
 			add_pl_packet.z = clients[client_id].pos.z;
 
-			add_pl_packet.right_x = clients[client_id].curr_coordinate.x_coordinate.x;
-			add_pl_packet.right_y = clients[client_id].curr_coordinate.x_coordinate.y;
-			add_pl_packet.right_z = clients[client_id].curr_coordinate.x_coordinate.z;
+			add_pl_packet.right_x = clients[client_id].curr_coordinate.right.x;
+			add_pl_packet.right_y = clients[client_id].curr_coordinate.right.y;
+			add_pl_packet.right_z = clients[client_id].curr_coordinate.right.z;
 
-			add_pl_packet.up_x = clients[client_id].curr_coordinate.y_coordinate.x;
-			add_pl_packet.up_y = clients[client_id].curr_coordinate.y_coordinate.y;
-			add_pl_packet.up_z = clients[client_id].curr_coordinate.y_coordinate.z;
+			add_pl_packet.up_x = clients[client_id].curr_coordinate.up.x;
+			add_pl_packet.up_y = clients[client_id].curr_coordinate.up.y;
+			add_pl_packet.up_z = clients[client_id].curr_coordinate.up.z;
 
-			add_pl_packet.look_x = clients[client_id].curr_coordinate.z_coordinate.x;
-			add_pl_packet.look_y = clients[client_id].curr_coordinate.z_coordinate.y;
-			add_pl_packet.look_z = clients[client_id].curr_coordinate.z_coordinate.z;
+			add_pl_packet.look_x = clients[client_id].curr_coordinate.look.x;
+			add_pl_packet.look_y = clients[client_id].curr_coordinate.look.y;
+			add_pl_packet.look_z = clients[client_id].curr_coordinate.look.z;
 
 			cout << "Send new client's info to client[" << pl.id << "]." << endl;
 			cout << "[SC_ADD]";
@@ -335,17 +314,17 @@ void process_packet(int client_id, char* packet)
 			add_pl_packet.y = pl.pos.y;
 			add_pl_packet.z = pl.pos.z;
 
-			add_pl_packet.right_x = pl.curr_coordinate.x_coordinate.x;
-			add_pl_packet.right_y = pl.curr_coordinate.x_coordinate.y;
-			add_pl_packet.right_z = pl.curr_coordinate.x_coordinate.z;
+			add_pl_packet.right_x = pl.curr_coordinate.right.x;
+			add_pl_packet.right_y = pl.curr_coordinate.right.y;
+			add_pl_packet.right_z = pl.curr_coordinate.right.z;
 
-			add_pl_packet.up_x = pl.curr_coordinate.y_coordinate.x;
-			add_pl_packet.up_y = pl.curr_coordinate.y_coordinate.y;
-			add_pl_packet.up_z = pl.curr_coordinate.y_coordinate.z;
+			add_pl_packet.up_x = pl.curr_coordinate.up.x;
+			add_pl_packet.up_y = pl.curr_coordinate.up.y;
+			add_pl_packet.up_z = pl.curr_coordinate.up.z;
 
-			add_pl_packet.look_x = pl.curr_coordinate.z_coordinate.x;
-			add_pl_packet.look_y = pl.curr_coordinate.z_coordinate.y;
-			add_pl_packet.look_z = pl.curr_coordinate.z_coordinate.z;
+			add_pl_packet.look_x = pl.curr_coordinate.look.x;
+			add_pl_packet.look_y = pl.curr_coordinate.look.y;
+			add_pl_packet.look_z = pl.curr_coordinate.look.z;
 
 			cout << "Send client[" << pl.id << "]'s info to new client" << endl;
 			cout << "[SC_ADD]";
@@ -380,11 +359,11 @@ void process_packet(int client_id, char* packet)
 					clients[client_id].yaw += 1.0f * sign * YAW_ROTATE_SCALAR * PI / 360.0f;
 
 					// right, up, look 벡터 업데이트
-					clients[client_id].curr_coordinate.x_coordinate = calcRotate(basic_coordinate.x_coordinate
+					clients[client_id].curr_coordinate.right = calcRotate(basic_coordinate.right
 						, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
-					clients[client_id].curr_coordinate.y_coordinate = calcRotate(basic_coordinate.y_coordinate
+					clients[client_id].curr_coordinate.up = calcRotate(basic_coordinate.up
 						, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
-					clients[client_id].curr_coordinate.z_coordinate = calcRotate(basic_coordinate.z_coordinate
+					clients[client_id].curr_coordinate.look = calcRotate(basic_coordinate.look
 						, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
 
 					// unlock
@@ -406,13 +385,13 @@ void process_packet(int client_id, char* packet)
 
 				case KEY_WS:	// W, S는 엔진출력 조절 키입니다. 기체를 상승 또는 하강시킵니다.
 					// 이동 방향 설정
-					MyVector3D move_dir{ 0, 0, 0 };
-					move_dir.x = clients[client_id].curr_coordinate.y_coordinate.x * sign;
-					move_dir.y = clients[client_id].curr_coordinate.y_coordinate.y * sign;
-					move_dir.z = clients[client_id].curr_coordinate.y_coordinate.z * sign;
+					XMFLOAT3 move_dir{ 0, 0, 0 };
+					move_dir.x = clients[client_id].curr_coordinate.up.x * sign;
+					move_dir.y = clients[client_id].curr_coordinate.up.y * sign;
+					move_dir.z = clients[client_id].curr_coordinate.up.z * sign;
 
 					// 이동 계산 & 결과 업데이트
-					MyVector3D move_result = calcMove(clients[client_id].pos, move_dir, ENGINE_SCALAR);
+					XMFLOAT3 move_result = calcMove(clients[client_id].pos, move_dir, ENGINE_SCALAR);
 					clients[client_id].pos = move_result;
 
 					// unlock
@@ -449,8 +428,8 @@ void process_packet(int client_id, char* packet)
 	
 		if (rt_p->key_val == RT_LBUTTON) {			// 마우스 좌클릭 드래그
 
-			MyVector3D move_dir{ 0, 0, 0 };
-			MyVector3D move_result{ 0, 0, 0 };
+			XMFLOAT3 move_dir{ 0, 0, 0 };
+			XMFLOAT3 move_result{ 0, 0, 0 };
 			float tmp_scalar = 0.0f;
 
 			if (fabs(rt_p->delta_x) < fabs(rt_p->delta_y)) {	// 마우스 상,하 드래그: 기수를 조절합니다.기체를 x축 기준으로 회전시키고 앞뒤로 이동합니다.
@@ -466,9 +445,9 @@ void process_packet(int client_id, char* packet)
 
 				// 2. z축 이동
 				// 이동 관련 설정
-				move_dir.x = clients[client_id].curr_coordinate.z_coordinate.x;
-				move_dir.y = clients[client_id].curr_coordinate.z_coordinate.y;
-				move_dir.z = clients[client_id].curr_coordinate.z_coordinate.z;
+				move_dir.x = clients[client_id].curr_coordinate.look.x;
+				move_dir.y = clients[client_id].curr_coordinate.look.y;
+				move_dir.z = clients[client_id].curr_coordinate.look.z;
 
 				tmp_scalar = -1.0f * rt_p->delta_y * SENSITIVITY;
 			}
@@ -485,19 +464,19 @@ void process_packet(int client_id, char* packet)
 
 				// 2. x축 이동
 				// 이동 관련 설정
-				move_dir.x = clients[client_id].curr_coordinate.x_coordinate.x;
-				move_dir.y = clients[client_id].curr_coordinate.x_coordinate.y;
-				move_dir.z = clients[client_id].curr_coordinate.x_coordinate.z;
+				move_dir.x = clients[client_id].curr_coordinate.right.x;
+				move_dir.y = clients[client_id].curr_coordinate.right.y;
+				move_dir.z = clients[client_id].curr_coordinate.right.z;
 
 				tmp_scalar = rt_p->delta_x * SENSITIVITY;
 			}
 
 			// right, up, look 벡터 회전 & 업데이트
-			clients[client_id].curr_coordinate.x_coordinate = calcRotate(basic_coordinate.x_coordinate
+			clients[client_id].curr_coordinate.right = calcRotate(basic_coordinate.right
 				, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
-			clients[client_id].curr_coordinate.y_coordinate = calcRotate(basic_coordinate.y_coordinate
+			clients[client_id].curr_coordinate.up = calcRotate(basic_coordinate.up
 				, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
-			clients[client_id].curr_coordinate.z_coordinate = calcRotate(basic_coordinate.z_coordinate
+			clients[client_id].curr_coordinate.look = calcRotate(basic_coordinate.look
 				, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
 
 			// 이동 & 좌표 업데이트
@@ -605,8 +584,6 @@ void do_worker()
 
 int main()
 {
-	init_npc();
-
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 	g_s_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);

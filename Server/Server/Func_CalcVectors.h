@@ -2,7 +2,7 @@
 #include <math.h>
 #include "MyVectors.h"
 
-MyVector3D myNormalize(MyVector3D vec);
+XMFLOAT3 myNormalize(XMFLOAT3 vec);
 
-MyVector3D calcMove(MyVector3D vec1, MyVector3D vec2, float scalar);
-MyVector3D calcRotate(MyVector3D vec, float roll, float pitch, float yaw);
+XMFLOAT3 calcMove(XMFLOAT3 vec1, XMFLOAT3 vec2, float scalar);
+XMFLOAT3 calcRotate(XMFLOAT3 vec, float roll, float pitch, float yaw);
