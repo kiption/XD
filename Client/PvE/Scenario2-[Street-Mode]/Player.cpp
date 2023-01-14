@@ -357,7 +357,7 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 
-	CLoadedModelInfo* pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL);
+	CLoadedModelInfo* pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", m_pShader);
 	SetChild(pAngrybotModel->m_pModelRootObject, true);
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 2, pAngrybotModel);
@@ -376,16 +376,17 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	CAnimationCallbackHandler* pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
 
-	CLoadedModelInfo* pBulletMesh = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL);
+	CLoadedModelInfo* pBulletMesh = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", m_pShader);
 	for (int i = 0; i < BULLETS; i++)
 	{
 		pBulletObject = new CBulletObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh->m_pModelRootObject, true);
-		pBulletObject->SetMovingSpeed(50.0f);
+		pBulletObject->SetMovingSpeed(1000.0f);
+
 		pBulletObject->SetActive(false);
+		pBulletObject->m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 0, pBulletMesh);
+		//	pBulletObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 		m_ppBullets[i] = pBulletObject;
-		m_ppBullets[i]->m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 1, pBulletMesh);
-		m_ppBullets[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	}
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -394,8 +395,9 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	SetCameraUpdatedContext(pContext);
 
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+	SetPosition(XMFLOAT3(500.0,pTerrain->GetHeight(500.0,500.0),500.0));
 
-
+	OnPrepareRender();
 	if (pBulletMesh) delete pBulletMesh;
 	if (pAngrybotModel) delete pAngrybotModel;
 }
@@ -441,7 +443,7 @@ CCamera* CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.5f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 10.0f, -22.0f));
+		m_pCamera->SetOffset(XMFLOAT3(5.0f, 10.0f, -22.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -545,22 +547,23 @@ void CTerrainPlayer::FireBullet(CGameObject* pLockedObject)
 	if (pBulletObject)
 	{
 
+
 		XMFLOAT3 xmf3Position = this->GetPosition();
 		XMFLOAT3 xmf3Direction = TotalLookVector;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 10.0f, false));
-		xmf3FirePosition.y += 5.0f;
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, -5.3f, false));
 
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-		pBulletObject->SetScale(0.5, 0.5, 2.0);
-		pBulletObject->Rotate(90.5, 0.0 , 0.0);
+		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + 4.0, xmf3FirePosition.z));
+		pBulletObject->SetScale(1.0, 1.0, 1.0);
+		pBulletObject->Rotate(120.0, 0.0, 0.0);
 		pBulletObject->SetActive(true);
 	}
 }
 
 void CTerrainPlayer::OnPrepareRender()
 {
+	//m_pBulletFindFrame->FindFrame("Bip001_R_Finger0Nub");
 	CPlayer::OnPrepareRender();
 }
 
@@ -568,7 +571,7 @@ void CTerrainPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 {
 	CPlayer::Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < BULLETS; i++) {
- 		if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
+		if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
 	}
 }
 
@@ -582,7 +585,6 @@ void CTerrainPlayer::Animate(float fTimeElapsed)
 	{
 		if (m_ppBullets[i]->m_bActive) {
 
-	/*		m_ppBullets[i]->Rotate(0.0, 0.0, 50.0f);*/
 			m_ppBullets[i]->Animate(fTimeElapsed);
 		}
 	}
