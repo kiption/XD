@@ -349,7 +349,8 @@ public:
 	char							m_pstrFrameName[64];
 
 	CMesh							*m_pMesh = NULL;
-
+	int								m_nMeshes;
+	CMesh** m_ppMeshes;
 	int								m_nMaterials = 0;
 	CMaterial						**m_ppMaterials = NULL;
 
@@ -359,6 +360,16 @@ public:
 	CGameObject 					*m_pParent = NULL;
 	CGameObject 					*m_pChild = NULL;
 	CGameObject 					*m_pSibling = NULL;
+
+	float m_fMovingSpeed = 0.0f;
+	float m_fMovingRange = 0.0f;
+	float m_fRotationSpeed = 0.0f;
+	bool m_bActive = false;
+	XMFLOAT3 m_xmf3RotationAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	XMFLOAT3 m_xmf3MovingDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	void SetMovingSpeed(float fSpeed) { m_fMovingSpeed = fSpeed; }
+	void SetActive(bool bActive) { m_bActive = bActive; }
+	void SetMovingDirection(const XMFLOAT3& xmf3MovingDirection);
 
 	void SetMesh(CMesh *pMesh);
 	void SetShader(CShader *pShader);
@@ -379,6 +390,7 @@ public:
 
 	virtual void OnPrepareRender() { }
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
+	virtual void BulletRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
@@ -429,6 +441,7 @@ public:
 	static CGameObject *LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CGameObject *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes);
 
 	static CLoadedModelInfo *LoadGeometryAndAnimationFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, char *pstrFileName, CShader *pShader);
+	static CGameObject* LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName, CShader* pShader);
 
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
 };
@@ -586,3 +599,27 @@ public:
 	virtual ~CEagleObject();
 };
 
+class CBulletObject : public CGameObject
+{
+public:
+	CBulletObject(float fEffectiveRange);
+	virtual ~CBulletObject();
+
+public:
+	virtual void Animate(float fElapsedTime);
+	virtual void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
+	float						m_fBulletEffectiveRange = 1500.0f;
+	float						m_fMovingDistance = 0.0f;
+	float						m_fRotationAngle = 0.0f;
+	XMFLOAT3					m_xmf3FirePosition = XMFLOAT3(0.0f, 0.0f, 1.0f);
+
+	float						m_fElapsedTimeAfterFire = 0.0f;
+	float						m_fLockingDelayTime = 0.3f;
+	float						m_fLockingTime = 5.0f;
+	CGameObject* m_pLockedObject = NULL;
+	CCamera* m_pCamera = NULL;
+	CPlayer* m_pPlayer = NULL;
+	void SetFirePosition(XMFLOAT3 xmf3FirePosition);
+	void Reset();
+
+};
