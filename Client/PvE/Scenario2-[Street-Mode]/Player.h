@@ -83,6 +83,8 @@ public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
+
+	CShader* m_pShader = NULL;
 };
 
 class CAirplanePlayer : public CPlayer
@@ -112,7 +114,7 @@ public:
 public:
 	virtual void HandleCallback(void *pCallbackData, float fTrackPosition); 
 };
-
+#define BULLETS					50
 class CTerrainPlayer : public CPlayer
 {
 public:
@@ -120,6 +122,12 @@ public:
 	virtual ~CTerrainPlayer();
 
 public:
+
+	float						m_fBulletEffectiveRange = 1000.0f;
+	CBulletObject* pBulletObject = NULL;
+	CBulletObject* m_ppBullets[BULLETS];
+
+
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
@@ -128,5 +136,13 @@ public:
 	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
 
 	virtual void Update(float fTimeElapsed);
+	
+	void FireBullet(CGameObject* pLockedObject);
+	virtual void OnPrepareRender();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+
+	virtual void PrepareAnimate();
+	virtual void Animate(float fTimeElapsed);
+
 };
 

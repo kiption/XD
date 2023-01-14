@@ -329,7 +329,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				
 				case VK_SPACE:
 					if (WM_KEYUP) m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-					
+					((CTerrainPlayer*)m_pPlayer)->FireBullet(NULL);
 					break;
 				
 				default:

@@ -596,6 +596,11 @@ void CGameObject::SetChild(CGameObject *pChild, bool bReferenceUpdate)
 	}
 }
 
+void CGameObject::SetMovingDirection(const XMFLOAT3& xmf3MovingDirection)
+{
+	XMStoreFloat3(&m_xmf3MovingDirection, XMVector3Normalize(XMLoadFloat3(&xmf3MovingDirection)));
+}
+
 void CGameObject::SetMesh(CMesh *pMesh)
 {
 	if (m_pMesh) m_pMesh->Release();
@@ -742,6 +747,51 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 				}
 
 				m_pMesh->Render(pd3dCommandList, i);
+			}
+		}
+	}
+	 
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
+	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+}
+
+void CGameObject::BulletRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	OnPrepareRender();
+
+	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+
+	if (m_nMaterials > 1)
+	{
+		for (int i = 0; i < m_nMaterials; i++)
+		{
+			if (m_ppMaterials[i])
+			{
+				if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+				m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+			}
+			//pd3dCommandList->SetGraphicsRootDescriptorTable(21, m_d3dCbvGPUDescriptorHandle);//
+			if (m_nMeshes == 1)
+			{
+				if (m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dCommandList, i);
+
+			}
+		}
+	}
+	else
+	{
+		if ((m_nMaterials == 1) && (m_ppMaterials[0]))
+		{
+			if (m_ppMaterials[0]->m_pShader) m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera);
+			m_ppMaterials[0]->UpdateShaderVariable(pd3dCommandList);
+		}
+
+		//pd3dCommandList->SetGraphicsRootDescriptorTable(21, m_d3dCbvGPUDescriptorHandle);//
+		if (m_ppMeshes)
+		{
+			for (int i = 0; i < m_nMeshes; i++)
+			{
+				if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, 0);
 			}
 		}
 	}
@@ -1239,6 +1289,26 @@ CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device *pd
 	return(pLoadedModel);
 }
 
+CGameObject* CGameObject::LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName, CShader* pShader)
+{
+	FILE* pInFile = NULL;
+	::fopen_s(&pInFile, pstrFileName, "rb");
+	::rewind(pInFile);
+
+	CGameObject* pGameObject = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, pInFile, pShader,0);
+
+#ifdef _WITH_DEBUG_FRAME_HIERARCHY
+	TCHAR pstrDebug[256] = { 0 };
+	_stprintf_s(pstrDebug, 256, _T("Frame Hierarchy\n"));
+	OutputDebugString(pstrDebug);
+
+	CGameObject::PrintFrameInfo(pGameObject, NULL);
+#endif
+
+	return(pGameObject);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CHeightMapTerrain::CHeightMapTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale, XMFLOAT3 xmf3Normal) : CGameObject(1)
@@ -1521,3 +1591,63 @@ CEagleObject::~CEagleObject()
 }
 
 
+
+CBulletObject::CBulletObject(float fEffectiveRange) : CGameObject(0)
+{
+	m_fBulletEffectiveRange = fEffectiveRange;
+
+}
+
+CBulletObject::~CBulletObject()
+{
+}
+
+void CBulletObject::SetFirePosition(XMFLOAT3 xmf3FirePosition)
+{
+	m_xmf3FirePosition = xmf3FirePosition;
+	SetPosition(xmf3FirePosition);
+}
+
+void CBulletObject::Reset()
+{
+	m_pLockedObject = NULL;
+	m_fElapsedTimeAfterFire = 0;
+	m_fMovingDistance = 0;
+	m_fRotationAngle = 0.0f;
+
+	m_bActive = false;
+}
+
+void CBulletObject::Animate(float fElapsedTime)
+{
+	m_fElapsedTimeAfterFire += fElapsedTime;
+
+	float fDistance = m_fMovingSpeed * fElapsedTime;
+	XMFLOAT4X4 mtxRotate = Matrix4x4::RotationYawPitchRoll(0.0f, m_fRotationSpeed * fElapsedTime, 0.0f);
+	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+	XMFLOAT3 xmf3Movement = Vector3::ScalarProduct(m_xmf3MovingDirection, fDistance, false);
+	XMFLOAT3 xmf3Position = GetPosition();
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
+	SetPosition(xmf3Position);
+	m_fMovingDistance += fDistance;
+
+	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)) Reset();
+}
+
+void CBulletObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
+{
+	if (pChild)
+	{
+		pChild->m_pParent = this;
+		if (bReferenceUpdate) pChild->AddRef();
+	}
+	if (m_pChild)
+	{
+		if (pChild) pChild->m_pSibling = m_pChild->m_pSibling;
+		m_pChild->m_pSibling = pChild;
+	}
+	else
+	{
+		m_pChild = pChild;
+	}
+}
