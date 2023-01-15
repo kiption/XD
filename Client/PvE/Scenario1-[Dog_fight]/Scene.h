@@ -87,6 +87,9 @@ public:
 	CShader* m_pShader = NULL;
 	CPlayerShader* m_pPlayerShader= NULL;
 	CParticleObject** m_ppParticleObjects = NULL;
+
+
+
 	int							m_nParticleObjects;
 	CDynamicCubeMappingShader** m_ppEnvironmentMappingShaders = NULL;
 	int							m_nEnvironmentMappingShaders = 0;

@@ -594,11 +594,11 @@ VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 	output.size = 3.5f;
 	output.type = input.type;
 
-	if (input.type == PARTICLE_TYPE_EMITTER) { output.color = float4(1.0f, 0.1f, 0.1f, 1.0f); output.size = 3.0f; }
-	else if (input.type == PARTICLE_TYPE_SHELL) { output.color = float4(1.0f, 0.0f, 0.1f, 1.0f); output.size = 3.0f; }
-	else if (input.type == PARTICLE_TYPE_FLARE01) { output.color = float4(1.0f, 0.2f, 0.1f, 1.0f); output.color *= (input.lifetime / FLARE01_PARTICLE_LIFETIME); }
-	else if (input.type == PARTICLE_TYPE_FLARE02) output.color = float4(1.0f, 0.3f, 0.0f, 1.0f);
-	else if (input.type == PARTICLE_TYPE_FLARE03) { output.color = float4(1.0f, 0.3f, 0.0f, 1.0f); output.color *= (input.lifetime / FLARE03_PARTICLE_LIFETIME); }
+	if (input.type == PARTICLE_TYPE_EMITTER) { output.color = float4(1.01f, 0.01f, 0.01f, 1.0f); output.size = 3.0f; }
+	else if (input.type == PARTICLE_TYPE_SHELL) { output.color = float4(1.03f, 0.0f, 0.1f, 1.0f); output.size = 3.0f; }
+	else if (input.type == PARTICLE_TYPE_FLARE01) { output.color = float4(1.02f, 0.01f, 0.01f, 1.0f); output.color *= (input.lifetime / FLARE01_PARTICLE_LIFETIME); }
+	else if (input.type == PARTICLE_TYPE_FLARE02) output.color = float4(1.01f, 0.0f, 0.01f, 1.0f);
+	else if (input.type == PARTICLE_TYPE_FLARE03) { output.color = float4(1.01, 0.0f, 0.0f, 1.0f); output.color *= (input.lifetime / FLARE03_PARTICLE_LIFETIME); }
 
 	return(output);
 }

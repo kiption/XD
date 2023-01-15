@@ -1590,6 +1590,11 @@ void CParticleObject::ReleaseUploadBuffers()
 	CGameObject::ReleaseUploadBuffers();
 }
 
+void CParticleObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+{
+	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+}
+
 void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	OnPrepareRender();

@@ -421,7 +421,6 @@ void CMainPlayer::FireBullet(CGameObject* pLockedObject)
 		XMFLOAT3 xmf3Position = this->GetPosition();
 		xmf3Position.x -= 10.0f;
 		XMFLOAT3 xmf3Direction = TotalLookVector;
-		xmf3Direction.y += 0.0f;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 80.0f, false));
 
 		pBulletObject->m_xmf4x4Transform = m_xmf4x4World;

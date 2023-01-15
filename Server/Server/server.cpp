@@ -618,7 +618,7 @@ int main()
 	init_npc();
 
 	int cnt = 0;
-	while (cnt < 100) {
+	/*while (cnt < 100) {
 		for (int i{}; i < MAX_NPCS; ++i) {
 			if (i == 0) {
 				npcs[i].MovetoRotate();
@@ -626,7 +626,7 @@ int main()
 
 			}
 		}
-	}
+	}*/
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 	g_s_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
