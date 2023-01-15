@@ -18,7 +18,6 @@
 #pragma comment(lib, "MSWSock.lib")
 
 using namespace std;
-using namespace chrono;
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
@@ -58,6 +57,7 @@ public:
 	SESSION_STATE s_state;
 	int id;
 	SOCKET socket;
+	int hp;
 	XMFLOAT3 pos;								// Position (x, y, z)
 	float pitch, yaw, roll;						// Rotated Degree
 	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;	// 현재 Look, Right, Up Vectors
@@ -69,6 +69,7 @@ public:
 	{
 		id = -1;
 		socket = 0;
+		hp = 100;
 		pos = { 0.0f, 0.0f, 0.0f };
 		pitch = yaw = roll = 0.0f;
 		m_rightvec = { 1.0f, 0.0f, 0.0f };
@@ -98,6 +99,7 @@ public:
 	void do_send(void* packet)
 	{
 		OVER_EXP* s_data = new OVER_EXP{ reinterpret_cast<char*>(packet) };
+		ZeroMemory(&s_data->overlapped, sizeof(s_data->overlapped));
 
 		cout << "[do_send] Target ID: " << id << "\n" << endl;
 		int ret = WSASend(socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, 0);
@@ -116,8 +118,7 @@ array<SESSION, MAX_USER + MAX_NPCS> clients;		// 0 ~ MAX_USER-1: Player,	 MAX_US
 array<NPC, MAX_NPCS> npcs;
 
 array<Bullets, MAX_BULLET> bullets_arr;
-system_clock::time_point shoot_time;
-milliseconds bullet_cooldown;
+chrono::system_clock::time_point shoot_time;
 
 HANDLE g_h_iocp;
 SOCKET g_s_socket;
@@ -276,7 +277,7 @@ void process_packet(int client_id, char* packet)
 			break;
 		}
 
-		// 새로 접속한 플레이어의 초기 위치정보를 설정합니다.
+		// 새로 접속한 플레이어의 초기 정보를 설정합니다.
 		clients[client_id].pos.x = 640 + client_id * 50;
 		clients[client_id].pos.y = 1400;
 		clients[client_id].pos.z = 1165 - client_id * 50;
@@ -460,7 +461,7 @@ void process_packet(int client_id, char* packet)
 					// bullet lock (구현 예정)
 
 					// Bullet Cooldown Check
-					milliseconds shoot_term = duration_cast<milliseconds>(system_clock::now() - shoot_time);
+					milliseconds shoot_term = duration_cast<milliseconds>(chrono::system_clock::now() - shoot_time);
 					if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) {	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
 						milliseconds left_cooldown = duration_cast<milliseconds>(milliseconds(SHOOT_COOLDOWN_BULLET) - shoot_term);
 						break;
@@ -482,7 +483,7 @@ void process_packet(int client_id, char* packet)
 						break;
 
 					// shoot time update
-					shoot_time = system_clock::now();
+					shoot_time = chrono::system_clock::now();
 
 					// Bullet 생성
 					bullets_arr[new_bullet_id].setId(new_bullet_id);
@@ -494,6 +495,7 @@ void process_packet(int client_id, char* packet)
 					bullets_arr[new_bullet_id].setUpvector(clients[client_id].m_upvec);
 					bullets_arr[new_bullet_id].setLookvector(clients[client_id].m_lookvec);
 					bullets_arr[new_bullet_id].setOwner(client_id);
+					bullets_arr[new_bullet_id].setInitialPos(bullets_arr[new_bullet_id].getPos());
 
 					// 접속해있는 모든 클라이언트에게 새로운 Bullet정보를 보냅니다.
 					SC_ADD_OBJECT_PACKET add_bullet_packet;
@@ -520,10 +522,12 @@ void process_packet(int client_id, char* packet)
 					add_bullet_packet.look_z = bullets_arr[new_bullet_id].getLookvector().z;
 
 					// server message
+					/*
 					cout << "Create New Bullet [ID: " << bullets_arr[new_bullet_id].getId()
 						<< ", Pos(" << bullets_arr[new_bullet_id].getPos().x
 						<< ", " << bullets_arr[new_bullet_id].getPos().y
 						<< ", " << bullets_arr[new_bullet_id].getPos().z << ")." << endl;
+					*/
 
 					for (auto& pl : clients) {
 						if (pl.s_state == ST_INGAME)
@@ -699,15 +703,63 @@ void do_worker()
 			break;
 		}
 
+	}
+}
 
+void timerFunc() {
+	while (true) {
+		// Bullet
+		for (auto& bullet : bullets_arr) {
+			if (bullet.getId() == -1) continue;
 
+			if (bullet.calcDistance(bullet.getInitialPos()) > BULLET_RANGE) {	// 만약 총알이 초기 위치로부터 멀리 떨어졌다면 제거합니다.
+				/*cout << "[" << bullet.getId() << "]번 총알을 제거합니다.";
+				cout << "\tDist: " << bullet.calcDistance(bullet.getInitialPos())
+					<< " (CurPos:" << bullet.getPos().x << "," << bullet.getPos().y << "," << bullet.getPos().z
+					<< " , InitPos:" << bullet.getInitialPos().x << "," << bullet.getInitialPos().y << "," << bullet.getInitialPos().z << ")" << endl;*/
+				bullet.clear();
+
+				// 객체 제거패킷을 모든 클라이언트에게 보냅니다.
+				SC_REMOVE_OBJECT_PACKET remove_bullet_packet;
+				remove_bullet_packet.target = TARGET_BULLET;
+				remove_bullet_packet.size = sizeof(SC_REMOVE_OBJECT_PACKET);
+				remove_bullet_packet.id = bullet.getId();
+				remove_bullet_packet.type = SC_REMOVE_OBJECT;
+
+				for (auto& cl : clients) {
+					if (cl.s_state == ST_INGAME)
+						cl.do_send(&remove_bullet_packet);
+				}
+			}
+			else {
+				// 총알을 앞으로 이동시킵니다.
+				bullet.moveObj(bullet.getLookvector(), BULLET_MOVE_SCALAR);
+				/*cout << "[" << bullet.getId() << "]번 총알이 Pos("
+					<< bullet.getPos().x << ", " << bullet.getPos().y << ", " << bullet.getPos().z << ")로 이동하였습니다." << endl;*/
+
+				// 이동된 총알의 위치를 모든 클라이언트에게 전달합니다.
+				SC_MOVE_OBJECT_PACKET move_bullet_packet;
+				move_bullet_packet.target = TARGET_BULLET;
+				move_bullet_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
+				move_bullet_packet.id = bullet.getId();
+				move_bullet_packet.type = SC_MOVE_OBJECT;
+				move_bullet_packet.x = bullet.getPos().x;
+				move_bullet_packet.y = bullet.getPos().y;
+				move_bullet_packet.z = bullet.getPos().z;
+
+				for (auto& cl : clients) {
+					if (cl.s_state == ST_INGAME)
+						cl.do_send(&move_bullet_packet);
+				}
+			}
+		}
 	}
 }
 
 int main()
 {
 	init_npc();
-	shoot_time = system_clock::now();
+	shoot_time = chrono::system_clock::now();
 
 	//int cnt = 0;
 	//while (cnt < 100) {
@@ -745,6 +797,10 @@ int main()
 	vector <thread> worker_threads;
 	for (int i = 0; i < 6; ++i)
 		worker_threads.emplace_back(do_worker);
+
+	thread timer_thread{ timerFunc };
+	timer_thread.join();
+
 	for (auto& th : worker_threads)
 		th.join();
 

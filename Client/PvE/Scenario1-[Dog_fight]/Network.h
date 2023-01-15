@@ -193,6 +193,12 @@ void processPacket(char* ptr)
 					<< npcs_info[npc_id].m_pos.x << ", " << npcs_info[npc_id].m_pos.y << ", " << npcs_info[npc_id].m_pos.z << ")." << endl;
 			}
 		}
+		// 2. Move Bullet
+		else if (recv_packet->target == TARGET_BULLET) {
+			bullets_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+			cout << "Bullet[" << recv_id << "] object moves to("
+				<< bullets_info[recv_id].m_pos.x << ", " << bullets_info[recv_id].m_pos.y << ", " << bullets_info[recv_id].m_pos.z << ")." << endl;
+		}
 		else {
 			cout << "[MOVE ERROR] Unknown Target!" << endl;
 		}
@@ -266,6 +272,14 @@ void processPacket(char* ptr)
 
 				cout << "NPC[" << npc_id << "] is removed" << endl;
 			}
+		}
+		// 2. Remove Bullet
+		else if (recv_packet->target == TARGET_BULLET) {
+			bullets_info[recv_id].m_id = -1;
+			bullets_info[recv_id].m_pos = { 0.f ,0.f ,0.f };
+			bullets_info[recv_id].m_state = OBJ_ST_LOGOUT;
+
+			cout << "Bullet[" << recv_id << "] is removed" << endl;
 		}
 		else {
 			cout << "[REMOVE ERROR] Unknown Target!" << endl;

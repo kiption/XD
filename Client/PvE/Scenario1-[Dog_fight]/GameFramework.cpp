@@ -885,30 +885,10 @@ void CGameFramework::FrameAdvance()
 	MoveToNextFrame();
 
 	// Npc
-	//g_time += 0.01f;
-	//g_reverse_time -= 0.01f;
-	//for (int i = 0; i < MAX_NPCS; i++) {
-	//	if (npcs_info[i].m_state == OBJ_ST_RUNNING) {
-	//		if (i % 2) {
-	//			m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._41 = npcs_info[i].m_x + 30 * (i % 5) * cos(g_time);
-	//			m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 = npcs_info[i].m_y + 100 * sin(g_time);
-	//			m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 = npcs_info[i].m_z + 30 * (i % 5) * sin(g_time);
-	//		}
-	//		else {
-	//			m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._41 = npcs_info[i].m_x + 30 * (i % 5) * cos(g_reverse_time);
-	//			m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 = npcs_info[i].m_y + 100 * sin(g_reverse_time);
-	//			m_pScene->m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 = npcs_info[i].m_z + 30 * (i % 5) * sin(g_reverse_time);
-	//		}
-	//	}
-	//	else if (npcs_info[i].m_state == OBJ_ST_LOGOUT) {
-	//		npcs_info[i].m_state = OBJ_ST_EMPTY;
-	//		if (m_pScene->m_ppShaders[0]->m_ppObjects[i])
-	//		{
-	//			m_pScene->m_ppShaders[0]->m_ppObjects[i]->SetScale(0.0, 0.0, 0.0);
-	//		}
+	m_pScene->m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._41 = 1500;
+	m_pScene->m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._42 = 1500;
+	m_pScene->m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._43 = 1500;
 
-	//	}
-	//}
 
 	m_GameTimer.GetFrameRate(m_pszCaption + 14, 37);
 	size_t nLength = _tcslen(m_pszCaption);
@@ -948,9 +928,7 @@ void CGameFramework::SetVectors_PlayerObj(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMF
 }
 
 void CGameFramework::SetPosition_OtherPlayerObj(int id, XMFLOAT3 pos) {
-	m_pScene->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4Transform._41 = pos.x;
-	m_pScene->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4Transform._42 = pos.y;
-	m_pScene->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4Transform._43 = pos.z;
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetPosition(pos);
 }
 void CGameFramework::SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec) {
 	m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetUp(upVec);

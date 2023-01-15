@@ -46,6 +46,16 @@ XMFLOAT3 calcRotate(XMFLOAT3 vec, float roll, float pitch, float yaw)
 }
 
 
+void Objects::clear()
+{
+	m_id = -1;
+	m_pos = { 0.0f, 0.0f, 0.0f };
+	m_pitch = m_yaw = m_roll = 0.0f;
+	m_rightvec = { 0.0f, 0.0f, 0.0f };
+	m_upvec = { 0.0f, 0.0f, 0.0f };
+	m_lookvec = { 0.0f, 0.0f, 0.0f };
+}
+
 // ===========================================
 //				Objects Å¬·¡½º
 // ===========================================
@@ -61,4 +71,16 @@ void Objects::rotateObj(float roll, float pitch, float yaw)
 	setRightvector(calcRotate(basic_coordinate.right, m_roll, m_pitch, m_yaw));
 	setUpvector(calcRotate(basic_coordinate.up, m_roll, m_pitch, m_yaw));
 	setLookvector(calcRotate(basic_coordinate.look, m_roll, m_pitch, m_yaw));
+}
+
+float Objects::calcDistance(XMFLOAT3 others_pos)
+{
+	float dist = 0;
+	
+	float x_difference = pow(others_pos.x - m_pos.x, 2);
+	float y_difference = pow(others_pos.y - m_pos.y, 2);
+	float z_difference = pow(others_pos.z - m_pos.z, 2);
+	dist = sqrtf(x_difference + y_difference + z_difference);
+
+	return dist;
 }

@@ -45,8 +45,8 @@ public:
 	}
 
 public:
-	// 1. Accessor Function
-	//  1-1. Set
+	// Accessor Function
+	//  1. Set
 	void setId(int id) { m_id = id; }
 	void setPos(XMFLOAT3 pos) { m_pos = pos; }
 	void setPitch(float pitch) { m_pitch = pitch; }
@@ -55,7 +55,7 @@ public:
 	void setRightvector(XMFLOAT3 right) { m_rightvec = right; }
 	void setUpvector(XMFLOAT3 up) { m_upvec = up; }
 	void setLookvector(XMFLOAT3 look) { m_lookvec = look; }
-	//  1-2. Get
+	//  2. Get
 	int			getId() { return m_id; }
 	XMFLOAT3	getPos() { return m_pos; }
 	float		getPitch() { return m_pitch; }
@@ -66,7 +66,10 @@ public:
 	XMFLOAT3	getLookvector() { return m_lookvec; }
 
 public:
+	void clear();
+
 	void moveObj(XMFLOAT3 direction, float scalar);
 	void rotateObj(float roll, float pitch, float yaw);
 
+	float calcDistance(XMFLOAT3 others_pos);
 };
