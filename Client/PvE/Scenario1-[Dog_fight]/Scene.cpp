@@ -74,7 +74,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	XMFLOAT3 xmf3Scale(20.0f, 20.5f,20.0f);
+	XMFLOAT3 xmf3Scale(20.0f, 20.5f, 20.0f);
 	XMFLOAT3 xmf3Normal(0.0f, 0.5f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/Mountain.raw"), 257, 257, 257, 257, xmf3Scale, xmf3Normal);
 	m_pTerrain->SetPosition(0.0, 0.0, 0.0);
@@ -82,11 +82,11 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	XMFLOAT3 xmf4ScaleW(20.0f, 2.5f, 20.0);
 	m_pUseWaterMove = new CUseWaterMoveTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/waterterrain8bit.raw"), 257, 257, 8, 8, xmf4ScaleW, xmf3Normal);
-	m_pUseWaterMove->SetPosition(0.0,60.0f, 0.0);
+	m_pUseWaterMove->SetPosition(0.0, 60.0f, 0.0);
 
 
 	m_nShaders = 6;
-	m_nOtherPlayers = 1;
+
 	m_ppShaders = new CObjectsShader * [m_nShaders];
 
 	CObjectsShader* pObjectsShader = new CObjectsShader();
@@ -120,13 +120,22 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pCExplosionShader->SetActive(false);
 	m_ppShaders[5] = pCExplosionShader;
 
+
+	/// ///
+	m_ppNPCShaders = new CNPCShader * [1];
+	CNPCShader* pCNPCShader = new CNPCShader();
+	pCNPCShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pCNPCShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppNPCShaders[0] = pCNPCShader;
+
+
 	m_nParticleObjects = 4;
 	m_ppParticleObjects = new CParticleObject * [m_nParticleObjects];
 	m_ppParticleObjects[0] = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
 		XMFLOAT3(m_ppShaders[0]->m_ppObjects[4]->GetPosition()), XMFLOAT3(0.0f, 65.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(10.0f, 10.0f), MAX_PARTICLES);
 
 	m_ppParticleObjects[1] = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
-		XMFLOAT3(m_ppShaders[0]->m_ppObjects[3]->GetPosition()), XMFLOAT3(0.0f, 75.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f,0.0f), XMFLOAT2(12.0f, 12.0f), MAX_PARTICLES);
+		XMFLOAT3(m_ppShaders[0]->m_ppObjects[3]->GetPosition()), XMFLOAT3(0.0f, 75.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(12.0f, 12.0f), MAX_PARTICLES);
 
 	m_ppParticleObjects[2] = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
 		XMFLOAT3(m_ppShaders[0]->m_ppObjects[2]->GetPosition()), XMFLOAT3(0.0f, 65.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(15.0f, 15.0f), MAX_PARTICLES);
@@ -165,6 +174,18 @@ void CScene::ReleaseObjects()
 		}
 		delete[] m_ppShaders;
 	}
+
+	if (m_ppNPCShaders)
+	{
+		for (int i = 0; i < 1; i++)
+		{
+			m_ppNPCShaders[i]->ReleaseShaderVariables();
+			m_ppNPCShaders[i]->ReleaseObjects();
+			m_ppNPCShaders[i]->Release();
+		}
+		delete[] m_ppNPCShaders;
+	}
+
 	if (m_pOutlineShader)
 	{
 		m_pOutlineShader->ReleaseShaderVariables();
@@ -579,11 +600,13 @@ void CScene::ReleaseUploadBuffers()
 
 	if (m_pUseWaterMove) m_pUseWaterMove->ReleaseUploadBuffers();
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
+
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
 
 	for (int i = 0; i < m_nEnvironmentMappingShaders; i++) m_ppEnvironmentMappingShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nParticleObjects; i++) m_ppParticleObjects[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < 1; i++) m_ppNPCShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nGameObjects; i++) m_ppGameObjects[i]->ReleaseUploadBuffers();
 }
 
@@ -610,7 +633,7 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			m_bWarMode = !m_bWarMode;
 			break;
 		case 'T':
-			m_bOutlineMode =!m_bOutlineMode;
+			m_bOutlineMode = !m_bOutlineMode;
 			break;
 		default:
 			break;
@@ -633,6 +656,7 @@ void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 	for (int i = 0; i < m_nEnvironmentMappingShaders; i++) m_ppEnvironmentMappingShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nParticleObjects; i++) m_ppParticleObjects[i]->AnimateObject(pCamera, fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
+	for (int i = 0; i < 1; i++) if (m_ppNPCShaders[i]) m_ppNPCShaders[i]->AnimateObjects(fTimeElapsed);
 
 	/// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	for (int i = 0; i < 10; i++) m_ppShaders[0]->m_ppObjects[i]->xoobb = BoundingOrientedBox(XMFLOAT3(m_ppShaders[0]->m_ppObjects[i]->GetPosition()), XMFLOAT3(12.0, 12.0, 16.0), XMFLOAT4(0, 0, 0, 1));
@@ -648,7 +672,7 @@ void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 	{
 		if (m_ppShaders[0]->m_ppObjects[i]->xoobb.Intersects(m_pPlayer->xoobb))
 		{
-			m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43-=2.0f;
+			m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 -= 2.0f;
 		}
 	}
 
@@ -700,34 +724,34 @@ void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 			}
 		}
 	}
-	
-		if (m_ppShaders[5]->m_bActive == true)
-		{
 
-			m_ppShaders[5]->m_fTime += 0.2;
-			m_ppShaders[5]->TargetPosition = m_ppShaders[0]->m_ppObjects[CollisionCheck]->GetPosition();
-			if (m_ppShaders[2]->m_fTime > 0.0)
-			{
-				m_ppShaders[5]->m_fSpeed = 1;
-			}
-			if (m_ppShaders[5]->m_fTime > 1.0)
-			{
-				m_ppShaders[5]->m_fSpeed = 2;
-			}
-			if (m_ppShaders[5]->m_fTime > 2.0)
-			{
-				m_ppShaders[5]->m_fSpeed = 3;
-			}
-			if (m_ppShaders[5]->m_fTime > 3.0)
-			{
-				m_ppShaders[4]->m_bBulletActive = false;
-				m_ppShaders[5]->m_bActive = false;
-				m_ppShaders[5]->m_fTime = 0.0;
-				CollisionCheck = 0;
-			}
+	if (m_ppShaders[5]->m_bActive == true)
+	{
+
+		m_ppShaders[5]->m_fTime += 0.2;
+		m_ppShaders[5]->TargetPosition = m_ppShaders[0]->m_ppObjects[CollisionCheck]->GetPosition();
+		if (m_ppShaders[2]->m_fTime > 0.0)
+		{
+			m_ppShaders[5]->m_fSpeed = 1;
+		}
+		if (m_ppShaders[5]->m_fTime > 1.0)
+		{
+			m_ppShaders[5]->m_fSpeed = 2;
+		}
+		if (m_ppShaders[5]->m_fTime > 2.0)
+		{
+			m_ppShaders[5]->m_fSpeed = 3;
+		}
+		if (m_ppShaders[5]->m_fTime > 3.0)
+		{
+			m_ppShaders[4]->m_bBulletActive = false;
+			m_ppShaders[5]->m_bActive = false;
+			m_ppShaders[5]->m_fTime = 0.0;
+			CollisionCheck = 0;
+		}
 
 	}
-	
+
 	if (m_bWarMode == true) WarMode();
 	for (int i = 0; i < 10; i++)
 	{
@@ -764,16 +788,19 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 	//for (int i = 0; i < m_nEnvironmentMappingShaders; i++)m_ppEnvironmentMappingShaders[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i])m_ppShaders[i]->Render(pd3dCommandList, pCamera, 0);
+	for (int i = 0; i < 1; i++) if (m_ppNPCShaders[i])m_ppNPCShaders[i]->Render(pd3dCommandList, pCamera, 0);
+
 	if (m_pUseWaterMove) m_pUseWaterMove->Render(pd3dCommandList, pCamera);
+
 	if (m_bOutlineMode)
 	{
-		for (int i = 0; i < m_ppShaders[0]->m_nObjects; i++)
+		for (int i = 0; i < m_ppNPCShaders[0]->m_nObjects; i++)
 		{
-			m_pOutlineShader->UpdateShaderVariables(pd3dCommandList, m_ppShaders[0]->m_ppObjects[i]);
+			m_pOutlineShader->UpdateShaderVariables(pd3dCommandList, m_ppNPCShaders[0]->m_ppObjects[i]);
 			m_pOutlineShader->Render(pd3dCommandList, pCamera, 0);
-			m_ppShaders[0]->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
+			m_ppNPCShaders[0]->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
 			m_pOutlineShader->Render(pd3dCommandList, pCamera, 1);
-			m_ppShaders[0]->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
+			m_ppNPCShaders[0]->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
 }

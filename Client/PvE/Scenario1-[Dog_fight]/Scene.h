@@ -83,8 +83,9 @@ public:
 	int									m_nCShaders = 0;
 	int									m_nOtherPlayers = 0;
 	CObjectsShader** m_ppShaders = NULL;
+	CNPCShader** m_ppNPCShaders = NULL;
 	CShader** m_ppCShaders = NULL;
-	CShader* m_pShader = NULL;
+	
 	CPlayerShader* m_pPlayerShader= NULL;
 	CParticleObject** m_ppParticleObjects = NULL;
 
