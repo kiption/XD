@@ -328,8 +328,8 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 					break;
 				
 				case VK_SPACE:
-					if (WM_KEYUP) m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-					((CTerrainPlayer*)m_pPlayer)->FireBullet(NULL);
+				
+			
 					break;
 				
 				default:
@@ -355,15 +355,17 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 		}
 		case WM_SIZE:
 			break;
-		case WM_LBUTTONDOWN:
         case WM_RBUTTONDOWN:
+			m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+			((CTerrainPlayer*)m_pPlayer)->FireBullet(NULL);
+		case WM_LBUTTONDOWN:
         case WM_LBUTTONUP:
         case WM_RBUTTONUP:
+			/*m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);*/
         case WM_MOUSEMOVE:
 			OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
             break;
         case WM_KEYDOWN:
-			m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
         case WM_KEYUP:
 			OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 			break;
@@ -418,7 +420,7 @@ void CGameFramework::BuildObjects()
 	pPlayer->SetPosition(XMFLOAT3(425.0f, 240.0f, 640.0f));
 #endif
 	pPlayer->SetScale(XMFLOAT3(2.0, 2.0,2.0));
-	pPlayer->SetPosition(XMFLOAT3(- 40.0, 0.0, -100.0));
+
 	m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 
@@ -522,7 +524,7 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::FrameAdvance()
 {    
-	m_GameTimer.Tick(60.0f);
+	m_GameTimer.Tick(30.0f);
 	
 	ProcessInput();
 

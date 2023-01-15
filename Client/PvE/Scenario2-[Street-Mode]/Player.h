@@ -114,7 +114,7 @@ public:
 public:
 	virtual void HandleCallback(void *pCallbackData, float fTrackPosition); 
 };
-#define BULLETS					50
+#define BULLETS					150
 class CTerrainPlayer : public CPlayer
 {
 public:
@@ -123,7 +123,7 @@ public:
 
 public:
 
-	float						m_fBulletEffectiveRange = 1000.0f;
+	float						m_fBulletEffectiveRange = 800.0f;
 	CBulletObject* pBulletObject = NULL;
 	CBulletObject* m_ppBullets[BULLETS];
 

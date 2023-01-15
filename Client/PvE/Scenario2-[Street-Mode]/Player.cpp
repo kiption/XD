@@ -381,7 +381,7 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	{
 		pBulletObject = new CBulletObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh->m_pModelRootObject, true);
-		pBulletObject->SetMovingSpeed(1000.0f);
+		pBulletObject->SetMovingSpeed(100.0f);
 
 		pBulletObject->SetActive(false);
 		pBulletObject->m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 0, pBulletMesh);
@@ -395,7 +395,7 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	SetCameraUpdatedContext(pContext);
 
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-	SetPosition(XMFLOAT3(500.0,pTerrain->GetHeight(500.0,500.0),500.0));
+	SetPosition(XMFLOAT3(300.0,pTerrain->GetHeight(300.0,300.0),300.0));
 
 	OnPrepareRender();
 	if (pBulletMesh) delete pBulletMesh;
@@ -443,7 +443,7 @@ CCamera* CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.5f);
-		m_pCamera->SetOffset(XMFLOAT3(5.0f, 10.0f, -22.0f));
+		m_pCamera->SetOffset(XMFLOAT3(5.0f, 5.0f, -20.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -541,6 +541,7 @@ void CTerrainPlayer::FireBullet(CGameObject* pLockedObject)
 
 	}
 	XMFLOAT3 PlayerLook = this->GetLookVector();
+	PlayerLook.y += 0.3;
 	XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
 	XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
 
@@ -550,11 +551,11 @@ void CTerrainPlayer::FireBullet(CGameObject* pLockedObject)
 
 		XMFLOAT3 xmf3Position = this->GetPosition();
 		XMFLOAT3 xmf3Direction = TotalLookVector;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, -5.3f, false));
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction,0.5f, false));
 
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + 4.0, xmf3FirePosition.z));
+		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + 3.0, xmf3FirePosition.z));
 		pBulletObject->SetScale(1.0, 1.0, 1.0);
 		pBulletObject->Rotate(120.0, 0.0, 0.0);
 		pBulletObject->SetActive(true);
