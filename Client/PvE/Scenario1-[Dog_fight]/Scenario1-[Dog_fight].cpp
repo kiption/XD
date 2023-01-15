@@ -120,6 +120,29 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					gGameFramework.Remove_OtherPlayerObj(i);
 				}
 			}
+
+			// 3. Bullet 객체 최신화
+			for (int i = 0; i < MAX_BULLET; i++) {
+				if (bullets_info[i].m_state == OBJ_ST_EMPTY) {
+					continue;
+				}
+
+				if (bullets_info[i].m_state == OBJ_ST_STANDBY) {	// Create
+					gGameFramework.Create_Bullet(i, bullets_info[i].m_pos);
+					bullets_info[i].m_state = OBJ_ST_RUNNING;
+				}
+				else if (bullets_info[i].m_state == OBJ_ST_LOGOUT) {	// Clear
+					bullets_info[i].m_id = -1;
+					bullets_info[i].m_pos = { 0.0f, 0.0f, 0.0f };
+					bullets_info[i].m_right_vec = { 1.0f, 0.0f, 0.0f };
+					bullets_info[i].m_up_vec = { 0.0f, 1.0f, 0.0f };
+					bullets_info[i].m_look_vec = { 0.0f, 0.0f, 1.0f };
+					bullets_info[i].m_state = OBJ_ST_EMPTY;
+				}
+				else if (bullets_info[i].m_state == OBJ_ST_RUNNING) {	// Update
+					gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos);
+				}
+			}
 			//==================================================
 
 

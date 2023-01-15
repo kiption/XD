@@ -591,12 +591,13 @@ void CGameFramework::ReleaseObjects()
 
 
 // key value
-constexpr char INPUT_KEY_W = 0b100000;
-constexpr char INPUT_KEY_S = 0b010000;
-constexpr char INPUT_KEY_D = 0b001000;
-constexpr char INPUT_KEY_A = 0b000100;
-constexpr char INPUT_KEY_Q = 0b000010;
-constexpr char INPUT_KEY_E = 0b000001;
+constexpr char INPUT_SPACEBAR = 0b1000000;
+constexpr char INPUT_KEY_W = 0b0100000;
+constexpr char INPUT_KEY_S = 0b0010000;
+constexpr char INPUT_KEY_D = 0b0001000;
+constexpr char INPUT_KEY_A = 0b0000100;
+constexpr char INPUT_KEY_E = 0b0000010;
+constexpr char INPUT_KEY_Q = 0b0000001;
 void CGameFramework::ProcessInput()
 {
 	static UCHAR pKeysBuffer[256];
@@ -644,8 +645,9 @@ void CGameFramework::ProcessInput()
 		}
 
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
-			((CMainPlayer*)m_pPlayer)->FireBullet(NULL);
-			m_GameSound.shootingSound();
+			inputKeyValue += INPUT_SPACEBAR;//S
+			//((CMainPlayer*)m_pPlayer)->FireBullet(NULL);
+			//m_GameSound.shootingSound();
 		}
 
 		// Server
@@ -959,6 +961,18 @@ void CGameFramework::Remove_OtherPlayerObj(int id) {
 	if (m_pScene->m_ppShaders[0]->m_ppObjects[id]) {
 		m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetScale(0.0, 0.0, 0.0);
 	}
+}
+
+void CGameFramework::Create_Bullet(int id, XMFLOAT3 pos)
+{
+	((CMainPlayer*)m_pPlayer)->FireBullet(NULL);
+	m_GameSound.shootingSound();
+	((CMainPlayer*)m_pPlayer)->m_ppBullets[id]->m_xmf3FirePosition = pos;
+}
+
+void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos)
+{
+	((CMainPlayer*)m_pPlayer)->m_ppBullets[id]->m_xmf3FirePosition = pos;
 }
 
 //==================================================

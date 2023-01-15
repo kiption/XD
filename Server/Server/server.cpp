@@ -5,24 +5,25 @@
 #include <mutex>
 #include <array>
 #include <vector>
-#include <random>	// NPC의 초기 위치값 설정할 때 임시로 랜덤값을 부여하기로 함. -> 추후에 정해진 리스폰 지점에 생성되도록 변경해야함.
+#include <chrono>
+#include <random>
 
 #include "global.h"
-#include "MyVectors.h"
+#include "BulletsMgr.h"
 #include "protocol.h"
-#include "Func_CalcVectors.h"
 #include "NPC.h"
+#include "Timer.h"
 
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
 
 using namespace std;
-
-Coordinate basic_coordinate;	// 기본(초기) 좌표계
+using namespace chrono;
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
 
+Coordinate basic_coordinate;	// 기본(초기) 좌표계
 
 class OVER_EXP {
 public:
@@ -57,9 +58,9 @@ public:
 	SESSION_STATE s_state;
 	int id;
 	SOCKET socket;
-	XMFLOAT3 pos;							// Position (x, y, z)
-	float pitch, yaw, roll;					// Rotated Degree
-	Coordinate curr_coordinate;				// 현재 Look, Right, Up Vectors
+	XMFLOAT3 pos;								// Position (x, y, z)
+	float pitch, yaw, roll;						// Rotated Degree
+	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;	// 현재 Look, Right, Up Vectors
 	char name[NAME_SIZE];
 	int remain_size;
 
@@ -70,9 +71,9 @@ public:
 		socket = 0;
 		pos = { 0.0f, 0.0f, 0.0f };
 		pitch = yaw = roll = 0.0f;
-		curr_coordinate.right = { 1.0f, 0.0f, 0.0f };
-		curr_coordinate.up = { 0.0f, 1.0f, 0.0f };
-		curr_coordinate.look = { 0.0f, 0.0f, 1.0f };
+		m_rightvec = { 1.0f, 0.0f, 0.0f };
+		m_upvec = { 0.0f, 1.0f, 0.0f };
+		m_lookvec = { 0.0f, 0.0f, 1.0f };
 		name[0] = 0;
 		s_state = ST_FREE;
 		remain_size = 0;
@@ -107,12 +108,17 @@ public:
 	}
 
 	void send_login_info_packet();
-	void send_move_packet(int client_id);
-	void send_rotate_packet(int client_id);
+	void send_move_packet(int client_id, short move_target);
+	void send_rotate_packet(int client_id, short rotate_target);
 };
 
 array<SESSION, MAX_USER + MAX_NPCS> clients;		// 0 ~ MAX_USER-1: Player,	 MAX_USER ~ MAX_USER+MAX_NPCS: NPC
 array<NPC, MAX_NPCS> npcs;
+
+array<Bullets, MAX_BULLET> bullets_arr;
+system_clock::time_point shoot_time;
+milliseconds bullet_cooldown;
+
 HANDLE g_h_iocp;
 SOCKET g_s_socket;
 
@@ -126,27 +132,28 @@ void SESSION::send_login_info_packet()
 	login_info_packet.y = pos.y;
 	login_info_packet.z = pos.z;
 
-	login_info_packet.right_x = curr_coordinate.right.x;
-	login_info_packet.right_y = curr_coordinate.right.y;
-	login_info_packet.right_z = curr_coordinate.right.z;
+	login_info_packet.right_x = basic_coordinate.right.x;
+	login_info_packet.right_y = basic_coordinate.right.y;
+	login_info_packet.right_z = basic_coordinate.right.z;
 
-	login_info_packet.up_x = curr_coordinate.up.x;
-	login_info_packet.up_y = curr_coordinate.up.y;
-	login_info_packet.up_z = curr_coordinate.up.z;
+	login_info_packet.up_x = basic_coordinate.up.x;
+	login_info_packet.up_y = basic_coordinate.up.y;
+	login_info_packet.up_z = basic_coordinate.up.z;
 
-	login_info_packet.look_x = curr_coordinate.look.x;
-	login_info_packet.look_y = curr_coordinate.look.y;
-	login_info_packet.look_z = curr_coordinate.look.z;
+	login_info_packet.look_x = basic_coordinate.look.x;
+	login_info_packet.look_y = basic_coordinate.look.y;
+	login_info_packet.look_z = basic_coordinate.look.z;
 
 	cout << "[SC_LOGIN_INFO]";
 	do_send(&login_info_packet);
 }
-void SESSION::send_move_packet(int client_id)
+void SESSION::send_move_packet(int client_id, short move_target)
 {
-	SC_MOVE_PLAYER_PACKET move_pl_packet;
+	SC_MOVE_OBJECT_PACKET move_pl_packet;
+	move_pl_packet.target = move_target;
 	move_pl_packet.id = client_id;
-	move_pl_packet.size = sizeof(SC_MOVE_PLAYER_PACKET);
-	move_pl_packet.type = SC_MOVE_PLAYER;
+	move_pl_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
+	move_pl_packet.type = SC_MOVE_OBJECT;
 	move_pl_packet.x = clients[client_id].pos.x;
 	move_pl_packet.y = clients[client_id].pos.y;
 	move_pl_packet.z = clients[client_id].pos.z;
@@ -154,24 +161,25 @@ void SESSION::send_move_packet(int client_id)
 	cout << "[SC_MOVE]";
 	do_send(&move_pl_packet);
 }
-void SESSION::send_rotate_packet(int client_id)
+void SESSION::send_rotate_packet(int client_id, short rotate_target)
 {
-	SC_ROTATE_PLAYER_PACKET rotate_pl_packet;
+	SC_ROTATE_OBJECT_PACKET rotate_pl_packet;
+	rotate_pl_packet.target = rotate_target;
 	rotate_pl_packet.id = client_id;
-	rotate_pl_packet.size = sizeof(SC_ROTATE_PLAYER_PACKET);
-	rotate_pl_packet.type = SC_ROTATE_PLAYER;
+	rotate_pl_packet.size = sizeof(SC_ROTATE_OBJECT_PACKET);
+	rotate_pl_packet.type = SC_ROTATE_OBJECT;
 
-	rotate_pl_packet.right_x = clients[client_id].curr_coordinate.right.x;
-	rotate_pl_packet.right_y = clients[client_id].curr_coordinate.right.y;
-	rotate_pl_packet.right_z = clients[client_id].curr_coordinate.right.z;
+	rotate_pl_packet.right_x = clients[client_id].m_rightvec.x;
+	rotate_pl_packet.right_y = clients[client_id].m_rightvec.y;
+	rotate_pl_packet.right_z = clients[client_id].m_rightvec.z;
 
-	rotate_pl_packet.up_x = clients[client_id].curr_coordinate.up.x;
-	rotate_pl_packet.up_y = clients[client_id].curr_coordinate.up.y;
-	rotate_pl_packet.up_z = clients[client_id].curr_coordinate.up.z;
+	rotate_pl_packet.up_x = clients[client_id].m_upvec.x;
+	rotate_pl_packet.up_y = clients[client_id].m_upvec.y;
+	rotate_pl_packet.up_z = clients[client_id].m_upvec.z;
 
-	rotate_pl_packet.look_x = clients[client_id].curr_coordinate.look.x;
-	rotate_pl_packet.look_y = clients[client_id].curr_coordinate.look.y;
-	rotate_pl_packet.look_z = clients[client_id].curr_coordinate.look.z;
+	rotate_pl_packet.look_x = clients[client_id].m_lookvec.x;
+	rotate_pl_packet.look_y = clients[client_id].m_lookvec.y;
+	rotate_pl_packet.look_z = clients[client_id].m_lookvec.z;
 
 	cout << "[SC_ROTATE]";
 	do_send(&rotate_pl_packet);
@@ -226,10 +234,11 @@ void disconnect(int client_id)
 			pl.s_lock.unlock();
 			continue;
 		}
-		SC_REMOVE_PLAYER_PACKET remove_pl_packet;
+		SC_REMOVE_OBJECT_PACKET remove_pl_packet;
+		remove_pl_packet.target = TARGET_PLAYER;
 		remove_pl_packet.id = client_id;
 		remove_pl_packet.size = sizeof(remove_pl_packet);
-		remove_pl_packet.type = SC_REMOVE_PLAYER;
+		remove_pl_packet.type = SC_REMOVE_OBJECT;
 		cout << "[SC_REMOVE]";
 		pl.do_send(&remove_pl_packet);
 		pl.s_lock.unlock();
@@ -275,7 +284,9 @@ void process_packet(int client_id, char* packet)
 			<< "," << clients[client_id].pos.y << "," << clients[client_id].pos.z << ")." << endl;
 
 		clients[client_id].pitch = clients[client_id].yaw = clients[client_id].roll = 0.0f;
-		clients[client_id].curr_coordinate = basic_coordinate;
+		clients[client_id].m_rightvec = basic_coordinate.right;
+		clients[client_id].m_upvec = basic_coordinate.up;
+		clients[client_id].m_lookvec = basic_coordinate.look;
 
 		strcpy_s(clients[client_id].name, login_packet->name);
 
@@ -295,27 +306,28 @@ void process_packet(int client_id, char* packet)
 				pl.s_lock.unlock();
 				continue;
 			}
-			SC_ADD_PLAYER_PACKET add_pl_packet;
+			SC_ADD_OBJECT_PACKET add_pl_packet;
+			add_pl_packet.target = TARGET_PLAYER;
 			add_pl_packet.id = client_id;
 			strcpy_s(add_pl_packet.name, login_packet->name);
 			add_pl_packet.size = sizeof(add_pl_packet);
-			add_pl_packet.type = SC_ADD_PLAYER;
+			add_pl_packet.type = SC_ADD_OBJECT;
 
 			add_pl_packet.x = clients[client_id].pos.x;
 			add_pl_packet.y = clients[client_id].pos.y;
 			add_pl_packet.z = clients[client_id].pos.z;
 
-			add_pl_packet.right_x = clients[client_id].curr_coordinate.right.x;
-			add_pl_packet.right_y = clients[client_id].curr_coordinate.right.y;
-			add_pl_packet.right_z = clients[client_id].curr_coordinate.right.z;
+			add_pl_packet.right_x = clients[client_id].m_rightvec.x;
+			add_pl_packet.right_y = clients[client_id].m_rightvec.y;
+			add_pl_packet.right_z = clients[client_id].m_rightvec.z;
 
-			add_pl_packet.up_x = clients[client_id].curr_coordinate.up.x;
-			add_pl_packet.up_y = clients[client_id].curr_coordinate.up.y;
-			add_pl_packet.up_z = clients[client_id].curr_coordinate.up.z;
+			add_pl_packet.up_x = clients[client_id].m_upvec.x;
+			add_pl_packet.up_y = clients[client_id].m_upvec.y;
+			add_pl_packet.up_z = clients[client_id].m_upvec.z;
 
-			add_pl_packet.look_x = clients[client_id].curr_coordinate.look.x;
-			add_pl_packet.look_y = clients[client_id].curr_coordinate.look.y;
-			add_pl_packet.look_z = clients[client_id].curr_coordinate.look.z;
+			add_pl_packet.look_x = clients[client_id].m_lookvec.x;
+			add_pl_packet.look_y = clients[client_id].m_lookvec.y;
+			add_pl_packet.look_z = clients[client_id].m_lookvec.z;
 
 			cout << "Send new client's info to client[" << pl.id << "]." << endl;
 			cout << "[SC_ADD]";
@@ -332,27 +344,28 @@ void process_packet(int client_id, char* packet)
 				continue;
 			}
 
-			SC_ADD_PLAYER_PACKET add_pl_packet;
+			SC_ADD_OBJECT_PACKET add_pl_packet;
+			add_pl_packet.target = TARGET_PLAYER;
 			add_pl_packet.id = pl.id;
 			strcpy_s(add_pl_packet.name, pl.name);
 			add_pl_packet.size = sizeof(add_pl_packet);
-			add_pl_packet.type = SC_ADD_PLAYER;
+			add_pl_packet.type = SC_ADD_OBJECT;
 
 			add_pl_packet.x = pl.pos.x;
 			add_pl_packet.y = pl.pos.y;
 			add_pl_packet.z = pl.pos.z;
 
-			add_pl_packet.right_x = pl.curr_coordinate.right.x;
-			add_pl_packet.right_y = pl.curr_coordinate.right.y;
-			add_pl_packet.right_z = pl.curr_coordinate.right.z;
+			add_pl_packet.right_x = pl.m_rightvec.x;
+			add_pl_packet.right_y = pl.m_rightvec.y;
+			add_pl_packet.right_z = pl.m_rightvec.z;
 
-			add_pl_packet.up_x = pl.curr_coordinate.up.x;
-			add_pl_packet.up_y = pl.curr_coordinate.up.y;
-			add_pl_packet.up_z = pl.curr_coordinate.up.z;
+			add_pl_packet.up_x = pl.m_upvec.x;
+			add_pl_packet.up_y = pl.m_upvec.y;
+			add_pl_packet.up_z = pl.m_upvec.z;
 
-			add_pl_packet.look_x = pl.curr_coordinate.look.x;
-			add_pl_packet.look_y = pl.curr_coordinate.look.y;
-			add_pl_packet.look_z = pl.curr_coordinate.look.z;
+			add_pl_packet.look_x = pl.m_lookvec.x;
+			add_pl_packet.look_y = pl.m_lookvec.y;
+			add_pl_packet.look_z = pl.m_lookvec.z;
 
 			cout << "Send client[" << pl.id << "]'s info to new client" << endl;
 			cout << "[SC_ADD]";
@@ -364,34 +377,35 @@ void process_packet(int client_id, char* packet)
 	case CS_INPUT_KEYBOARD: {
 		CS_INPUT_KEYBOARD_PACKET* inputkey_p = reinterpret_cast<CS_INPUT_KEYBOARD_PACKET*>(packet);
 
-		enum { KEY_QE, KEY_DA, KEY_WS };
+		enum InputKey { KEY_Q, KEY_E, KEY_A, KEY_D, KEY_S, KEY_W, KEY_SPACEBAR };
 
-		for (int i = 0; i <= 5; i++) {
+		for (int i = 0; i <= 6; i++) {
 			if ((inputkey_p->direction >> i) & 1) {
-				clients[client_id].s_lock.lock();
-
-				float sign = 1.0f;					// 양, 음 부호
-				if (i % 2 == 0) sign = -1.0f;		// A, S, E key
-
-				switch (i / 2) {
-				case KEY_QE:
+				float sign = 1.0f;					// right/up/look벡터 방향으로 움직이는지, 반대 방향으로 움직이는지
+				switch (i) {
+				case KEY_Q:
+				case KEY_E:
+					clients[client_id].s_lock.lock();
 					// 아직 기능 없음.
 
 					// unlock
 					clients[client_id].s_lock.unlock();
-
 					break;
 
-				case KEY_DA:	// D, A는 기체의 yaw회전 키입니다. 기체를 y축 기준으로 회전시킵니다.
+				case KEY_A:			// D, A는 기체의 yaw회전 키입니다. 기체를 y축 기준으로 회전시킵니다.
+					sign = -1.0f;	// A는 right벡터 반대 방향으로 움직이기 때문에 -1을 곱해줍니다.
+					[[fallthrough]]
+				case KEY_D:
+					clients[client_id].s_lock.lock();
 					// yaw 설정
 					clients[client_id].yaw += 1.0f * sign * YAW_ROTATE_SCALAR * PI / 360.0f;
 
 					// right, up, look 벡터 업데이트
-					clients[client_id].curr_coordinate.right = calcRotate(basic_coordinate.right
+					clients[client_id].m_rightvec = calcRotate(basic_coordinate.right
 						, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
-					clients[client_id].curr_coordinate.up = calcRotate(basic_coordinate.up
+					clients[client_id].m_upvec = calcRotate(basic_coordinate.up
 						, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
-					clients[client_id].curr_coordinate.look = calcRotate(basic_coordinate.look
+					clients[client_id].m_lookvec = calcRotate(basic_coordinate.look
 						, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
 
 					// unlock
@@ -402,21 +416,24 @@ void process_packet(int client_id, char* packet)
 						<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
 
 					// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
-					for (int i = 0; i < MAX_USER; i++) {
-						auto& pl = clients[i];
+					for (int j = 0; j < MAX_USER; j++) {
+						auto& pl = clients[j];
 						lock_guard<mutex> lg{ pl.s_lock };
 						if (pl.s_state == ST_INGAME)
-							pl.send_rotate_packet(client_id);
+							pl.send_rotate_packet(client_id, TARGET_PLAYER);
 					}
-
 					break;
 
-				case KEY_WS:	// W, S는 엔진출력 조절 키입니다. 기체를 상승 또는 하강시킵니다.
+				case KEY_S:			// W, S는 엔진출력 조절 키입니다. 기체를 상승 또는 하강시킵니다.
+					sign = -1.0f;	// S는 up벡터 반대 방향으로 움직이기 때문에 -1을 곱해줍니다.
+					[[fallthrough]]
+				case KEY_W:
+					clients[client_id].s_lock.lock();
 					// 이동 방향 설정
 					XMFLOAT3 move_dir{ 0, 0, 0 };
-					move_dir.x = clients[client_id].curr_coordinate.up.x * sign;
-					move_dir.y = clients[client_id].curr_coordinate.up.y * sign;
-					move_dir.z = clients[client_id].curr_coordinate.up.z * sign;
+					move_dir.x = clients[client_id].m_upvec.x * sign;
+					move_dir.y = clients[client_id].m_upvec.y * sign;
+					move_dir.z = clients[client_id].m_upvec.z * sign;
 
 					// 이동 계산 & 결과 업데이트
 					XMFLOAT3 move_result = calcMove(clients[client_id].pos, move_dir, ENGINE_SCALAR);
@@ -430,13 +447,90 @@ void process_packet(int client_id, char* packet)
 						<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.z << ")." << endl;
 
 					// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
-					for (int i = 0; i < MAX_USER; i++) {
-						auto& pl = clients[i];
+					for (int j = 0; j < MAX_USER; j++) {
+						auto& pl = clients[j];
 						lock_guard<mutex> lg{ pl.s_lock };
 						if (pl.s_state == ST_INGAME)
-							pl.send_move_packet(client_id);
+							pl.send_move_packet(client_id, TARGET_PLAYER);
 					}
 
+					break;
+
+				case KEY_SPACEBAR:	// 스페이스바는 공격 키입니다. 바라보는 방향으로 총을 쏩니다.
+					// bullet lock (구현 예정)
+
+					// Bullet Cooldown Check
+					milliseconds shoot_term = duration_cast<milliseconds>(system_clock::now() - shoot_time);
+					if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) {	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
+						milliseconds left_cooldown = duration_cast<milliseconds>(milliseconds(SHOOT_COOLDOWN_BULLET) - shoot_term);
+						break;
+					}
+
+					// empty space check
+					int new_bullet_id = -1;
+					int arr_cnt = 0;
+					while (arr_cnt < MAX_BULLET) {
+						if (bullets_arr[arr_cnt].getId() == -1) {
+							new_bullet_id = arr_cnt;
+							break;
+						}
+						else {
+							arr_cnt++;
+						}
+					}
+					if (new_bullet_id == -1)
+						break;
+
+					// shoot time update
+					shoot_time = system_clock::now();
+
+					// Bullet 생성
+					bullets_arr[new_bullet_id].setId(new_bullet_id);
+					bullets_arr[new_bullet_id].setPos(clients[client_id].pos);
+					bullets_arr[new_bullet_id].setPitch(clients[client_id].pitch);
+					bullets_arr[new_bullet_id].setYaw(clients[client_id].yaw);
+					bullets_arr[new_bullet_id].setRoll(clients[client_id].roll);
+					bullets_arr[new_bullet_id].setRightvector(clients[client_id].m_rightvec);
+					bullets_arr[new_bullet_id].setUpvector(clients[client_id].m_upvec);
+					bullets_arr[new_bullet_id].setLookvector(clients[client_id].m_lookvec);
+					bullets_arr[new_bullet_id].setOwner(client_id);
+
+					// 접속해있는 모든 클라이언트에게 새로운 Bullet정보를 보냅니다.
+					SC_ADD_OBJECT_PACKET add_bullet_packet;
+					add_bullet_packet.target = TARGET_BULLET;
+					add_bullet_packet.id = new_bullet_id;
+					strcpy_s(add_bullet_packet.name, "bullet");
+					add_bullet_packet.size = sizeof(add_bullet_packet);
+					add_bullet_packet.type = SC_ADD_OBJECT;
+
+					add_bullet_packet.x = bullets_arr[new_bullet_id].getPos().x;
+					add_bullet_packet.y = bullets_arr[new_bullet_id].getPos().y;
+					add_bullet_packet.z = bullets_arr[new_bullet_id].getPos().z;
+
+					add_bullet_packet.right_x = bullets_arr[new_bullet_id].getRightvector().x;
+					add_bullet_packet.right_y = bullets_arr[new_bullet_id].getRightvector().y;
+					add_bullet_packet.right_z = bullets_arr[new_bullet_id].getRightvector().z;
+
+					add_bullet_packet.up_x = bullets_arr[new_bullet_id].getUpvector().x;
+					add_bullet_packet.up_y = bullets_arr[new_bullet_id].getUpvector().y;
+					add_bullet_packet.up_z = bullets_arr[new_bullet_id].getUpvector().z;
+
+					add_bullet_packet.look_x = bullets_arr[new_bullet_id].getLookvector().x;
+					add_bullet_packet.look_y = bullets_arr[new_bullet_id].getLookvector().y;
+					add_bullet_packet.look_z = bullets_arr[new_bullet_id].getLookvector().z;
+
+					// server message
+					cout << "Create New Bullet [ID: " << bullets_arr[new_bullet_id].getId()
+						<< ", Pos(" << bullets_arr[new_bullet_id].getPos().x
+						<< ", " << bullets_arr[new_bullet_id].getPos().y
+						<< ", " << bullets_arr[new_bullet_id].getPos().z << ")." << endl;
+
+					for (auto& pl : clients) {
+						if (pl.s_state == ST_INGAME)
+							pl.do_send(&add_bullet_packet);
+					}
+
+					// bullet unlock (구현 예정)
 					break;
 				}
 			}
@@ -473,9 +567,9 @@ void process_packet(int client_id, char* packet)
 
 				// 2. z축 이동
 				// 이동 관련 설정
-				move_dir.x = clients[client_id].curr_coordinate.look.x;
-				move_dir.y = clients[client_id].curr_coordinate.look.y;
-				move_dir.z = clients[client_id].curr_coordinate.look.z;
+				move_dir.x = clients[client_id].m_lookvec.x;
+				move_dir.y = clients[client_id].m_lookvec.y;
+				move_dir.z = clients[client_id].m_lookvec.z;
 
 				tmp_scalar = -1.0f * rt_p->delta_y * SENSITIVITY;
 			}
@@ -492,20 +586,17 @@ void process_packet(int client_id, char* packet)
 
 				// 2. x축 이동
 				// 이동 관련 설정
-				move_dir.x = clients[client_id].curr_coordinate.right.x;
-				move_dir.y = clients[client_id].curr_coordinate.right.y;
-				move_dir.z = clients[client_id].curr_coordinate.right.z;
+				move_dir.x = clients[client_id].m_rightvec.x;
+				move_dir.y = clients[client_id].m_rightvec.y;
+				move_dir.z = clients[client_id].m_rightvec.z;
 
 				tmp_scalar = rt_p->delta_x * SENSITIVITY;
 			}
 
 			// right, up, look 벡터 회전 & 업데이트
-			clients[client_id].curr_coordinate.right = calcRotate(basic_coordinate.right
-				, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
-			clients[client_id].curr_coordinate.up = calcRotate(basic_coordinate.up
-				, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
-			clients[client_id].curr_coordinate.look = calcRotate(basic_coordinate.look
-				, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+			clients[client_id].m_rightvec = calcRotate(basic_coordinate.right, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+			clients[client_id].m_upvec = calcRotate(basic_coordinate.up, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+			clients[client_id].m_lookvec = calcRotate(basic_coordinate.look, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
 
 			// 이동 & 좌표 업데이트
 			move_result = calcMove(clients[client_id].pos, move_dir, tmp_scalar);
@@ -513,7 +604,7 @@ void process_packet(int client_id, char* packet)
 
 		}
 		else if (rt_p->key_val == RT_RBUTTON) {		// 마우스 우클릭 드래그: 기능 미정.
-
+			cout << "마우스 우클릭 입력됨." << endl;// 임시코드
 
 		}
 
@@ -530,8 +621,8 @@ void process_packet(int client_id, char* packet)
 			auto& pl = clients[i];
 			lock_guard<mutex> lg{ pl.s_lock };
 			if (pl.s_state == ST_INGAME) {
-				pl.send_rotate_packet(client_id);
-				pl.send_move_packet(client_id);
+				pl.send_rotate_packet(client_id, TARGET_PLAYER);
+				pl.send_move_packet(client_id, TARGET_PLAYER);
 			}
 		}
 		break;
@@ -616,17 +707,19 @@ void do_worker()
 int main()
 {
 	init_npc();
+	shoot_time = system_clock::now();
 
-	int cnt = 0;
-	/*while (cnt < 100) {
-		for (int i{}; i < MAX_NPCS; ++i) {
-			if (i == 0) {
-				npcs[i].MovetoRotate();
-				cout << i << "th Pos: " << npcs[i].GetPosition().x << ", " << npcs[i].GetPosition().y << ", " << npcs[i].GetPosition().z << endl;
+	//int cnt = 0;
+	//while (cnt < 100) {
+	//	for (int i{}; i < MAX_NPCS; ++i) {
+	//		if (i == 0) {
+	//			npcs[i].MovetoRotate();
+	//			cout << i << "th Pos: " << npcs[i].GetPosition().x << ", " << npcs[i].GetPosition().y << ", " << npcs[i].GetPosition().z << endl;
 
-			}
-		}
-	}*/
+	//		}
+	//	}
+	//}
+
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 	g_s_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);

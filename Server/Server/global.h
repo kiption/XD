@@ -11,3 +11,5 @@
 #define ROLL_LIMIT 60.f			// 회전 각도제한
 #define PITCH_LIMIT 20.f
 #define YAW_LIMIT 90.f
+
+#define SHOOT_COOLDOWN_BULLET 100		// 총알 발사 쿨타임

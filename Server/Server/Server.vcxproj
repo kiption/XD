@@ -139,16 +139,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Func_CalcVectors.cpp" />
+    <ClCompile Include="BulletsMgr.cpp" />
     <ClCompile Include="NPC.cpp" />
+    <ClCompile Include="ObjectsMgr.cpp" />
     <ClCompile Include="server.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BulletsMgr.h" />
     <ClInclude Include="global.h" />
-    <ClInclude Include="Func_CalcVectors.h" />
     <ClInclude Include="MyVectors.h" />
     <ClInclude Include="NPC.h" />
+    <ClInclude Include="ObjectsMgr.h" />
     <ClInclude Include="protocol.h" />
+    <ClInclude Include="Timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

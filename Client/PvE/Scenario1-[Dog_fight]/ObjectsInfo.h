@@ -1,8 +1,8 @@
 #pragma once
 #include <array>
-#include "protocol.h"
+#include "../../../Server/Server/protocol.h"
 
-enum OBJECT_STATE { OBJ_ST_EMPTY, OBJ_ST_LOGOUT, OBJ_ST_RUNNING };
+enum OBJECT_STATE { OBJ_ST_EMPTY, OBJ_ST_STANDBY, OBJ_ST_LOGOUT, OBJ_ST_RUNNING };
 struct ObjectsInfo
 {
 	short m_id;
@@ -25,3 +25,5 @@ struct ObjectsInfo
 ObjectsInfo my_info;
 std::array<ObjectsInfo, MAX_USER> other_players;
 std::array<ObjectsInfo, MAX_NPCS> npcs_info;
+
+std::array<ObjectsInfo, MAX_BULLET> bullets_info;

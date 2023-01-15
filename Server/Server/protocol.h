@@ -4,6 +4,7 @@ constexpr int NAME_SIZE = 20;
 
 constexpr int MAX_USER = 10;
 constexpr int MAX_NPCS = 10;
+constexpr int MAX_BULLET = 50;
 
 constexpr int WORLD_X_POS = 2000;
 constexpr int WORLD_Y_POS = 2000;
@@ -18,14 +19,10 @@ constexpr char INPUT_KEY_Q = 0b000010;
 constexpr char INPUT_KEY_E = 0b000001;
 
 // Packet ID
-constexpr char CS_LOGIN = 0;
-constexpr char CS_INPUT_KEYBOARD = 1;
-constexpr char CS_INPUT_MOUSE = 2;
-constexpr char SC_LOGIN_INFO = 3;
-constexpr char SC_ADD_PLAYER = 4;
-constexpr char SC_REMOVE_PLAYER = 5;
-constexpr char SC_MOVE_PLAYER = 6;
-constexpr char SC_ROTATE_PLAYER = 7;
+enum PacketID { CS_LOGIN, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT };
+
+// Target Type
+enum TargetType { TARGET_PLAYER, TARGET_BULLET };
 
 // Packets ( CS: Client->Server, SC: Server->Client )
 #pragma pack (push, 1)
@@ -60,9 +57,10 @@ struct SC_LOGIN_INFO_PACKET {
 	float look_x, look_y, look_z;
 };
 
-struct SC_ADD_PLAYER_PACKET {
+struct SC_ADD_OBJECT_PACKET {
 	unsigned char size;
 	char type;
+	short target;
 	short id;
 	char name[NAME_SIZE];
 	float x, y, z;
@@ -71,22 +69,25 @@ struct SC_ADD_PLAYER_PACKET {
 	float look_x, look_y, look_z;
 };
 
-struct SC_REMOVE_PLAYER_PACKET {
+struct SC_REMOVE_OBJECT_PACKET {
 	unsigned char size;
 	char type;
+	short target;
 	short id;
 };
 
-struct SC_MOVE_PLAYER_PACKET {
+struct SC_MOVE_OBJECT_PACKET {
 	unsigned char size;
 	char type;
+	short target;
 	short id;
 	float x, y, z;
 };
 
-struct SC_ROTATE_PLAYER_PACKET {
+struct SC_ROTATE_OBJECT_PACKET {
 	unsigned char size;
 	char type;
+	short target;
 	short id;
 	float right_x, right_y, right_z;
 	float up_x, up_y, up_z;

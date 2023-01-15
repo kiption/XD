@@ -107,132 +107,168 @@ void processPacket(char* ptr)
 
 		break;
 	}// SC_LOGIN_INFO end
-	case SC_ADD_PLAYER:
+	case SC_ADD_OBJECT:
 	{
-		SC_ADD_PLAYER_PACKET* recv_packet = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(ptr);
+		SC_ADD_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_ADD_OBJECT_PACKET*>(ptr);
 		int recv_id = recv_packet->id;
-		if (recv_id == my_info.m_id) break;
 
-		if (recv_id < MAX_USER) {		// Player 추가
-			other_players[recv_id].m_id = recv_id;
+		// 1. Add Player
+		if (recv_packet->target == TARGET_PLAYER) {
+			if (recv_id == my_info.m_id) break;
 
-			other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+			if (recv_id < MAX_USER) {		// Player 추가
+				other_players[recv_id].m_id = recv_id;
+				other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+				other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+				other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+				other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
 
-			other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-			other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-			other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+				other_players[recv_id].m_state = OBJ_ST_RUNNING;
 
-			other_players[recv_id].m_state = OBJ_ST_RUNNING;
+				cout << "Init New Player's Info - id: " << other_players[recv_id].m_id
+					<< ", Pos(x: " << other_players[recv_id].m_pos.x
+					<< ", y : " << other_players[recv_id].m_pos.y
+					<< ", z : " << other_players[recv_id].m_pos.z << ")." << endl;
+			}
+			else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {	// NPC 추가
+				int npc_id = recv_id - MAX_USER;
 
-			cout << "Init New Player's Info - id: " << other_players[recv_id].m_id
-				<< ", Pos(x: " << other_players[recv_id].m_pos.x
-				<< ", y : " << other_players[recv_id].m_pos.y
-				<< ", z : " << other_players[recv_id].m_pos.z << ")." << endl;
+				npcs_info[npc_id].m_id = recv_id;
+				npcs_info[npc_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+				npcs_info[npc_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+				npcs_info[npc_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+				npcs_info[npc_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+
+				npcs_info[npc_id].m_state = OBJ_ST_RUNNING;
+				cout << "Init New NPC's Info - id: " << npcs_info[npc_id].m_id
+					<< ", Pos(x: " << npcs_info[npc_id].m_pos.x << ", y : " << npcs_info[npc_id].m_pos.y << ", z : " << npcs_info[npc_id].m_pos.z << ")." << endl;
+			}
+			else {
+				cout << "Exceed Max User." << endl;
+			}
 		}
-		else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {	// NPC 추가
-			int npc_id = recv_id - MAX_USER;
+		// 2. Add Bullet
+		else if (recv_packet->target == TARGET_BULLET) {
+			bullets_info[recv_id].m_id = recv_id;
+			bullets_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+			bullets_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+			bullets_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+			bullets_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
 
-			npcs_info[npc_id].m_id = recv_id;
-
-			npcs_info[npc_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-
-			npcs_info[npc_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-			npcs_info[npc_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-			npcs_info[npc_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-
-			npcs_info[npc_id].m_state = OBJ_ST_RUNNING;
-			cout << "Init New NPC's Info - id: " << npcs_info[npc_id].m_id
-				<< ", Pos(x: " << npcs_info[npc_id].m_pos.x << ", y : " << npcs_info[npc_id].m_pos.y << ", z : " << npcs_info[npc_id].m_pos.z << ")." << endl;
+			bullets_info[recv_id].m_state = OBJ_ST_STANDBY;                       
+			cout << "Create New Bullet - id: " << bullets_info[recv_id].m_id
+				<< ", Pos(x: " << bullets_info[recv_id].m_pos.x << ", y : " << bullets_info[recv_id].m_pos.y << ", z : " << bullets_info[recv_id].m_pos.z << ")." << endl;
 		}
 		else {
-			cout << "Exceed Max User." << endl;
+			cout << "[ADD ERROR] Unknown Target!" << endl;
 		}
 		break;
-	}// SC_ADD_PLAYER end
-	case SC_MOVE_PLAYER:
+	}// SC_ADD_OBJECT end
+	case SC_MOVE_OBJECT:
 	{
-		SC_MOVE_PLAYER_PACKET* recv_packet = reinterpret_cast<SC_MOVE_PLAYER_PACKET*>(ptr);
+		SC_MOVE_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_MOVE_OBJECT_PACKET*>(ptr);
 		int recv_id = recv_packet->id;
-		if (recv_id == my_info.m_id) {
-			// Player 이동
-			my_info.m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-			cout << "My object moves to (" << my_info.m_pos.x << ", " << my_info.m_pos.y << ", " << my_info.m_pos.z << ")." << endl;
-		}
-		else if (0 <= recv_id && recv_id < MAX_USER && recv_id != my_info.m_id) {
-			// 상대 Object 이동
-			other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-			cout << "Player[" << recv_id << "]'s object moves to("
-				<< other_players[recv_id].m_pos.x << ", " << other_players[recv_id].m_pos.y << ", " << other_players[recv_id].m_pos.z << ")." << endl;
 
-			cout << "[TEST] R_PACK POS: " << recv_packet->x << ", " << recv_packet->y << ", " << recv_packet->z << endl;
-		}
-		else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
-			// Npc 이동
-			int npc_id = recv_id - MAX_USER;
+		// 1. Move Player
+		if (recv_packet->target == TARGET_PLAYER) {
+			if (recv_id == my_info.m_id) {
+				// Player 이동
+				my_info.m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+				cout << "My object moves to (" << my_info.m_pos.x << ", " << my_info.m_pos.y << ", " << my_info.m_pos.z << ")." << endl;
+			}
+			else if (0 <= recv_id && recv_id < MAX_USER && recv_id != my_info.m_id) {
+				// 상대 Object 이동
+				other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+				cout << "Player[" << recv_id << "]'s object moves to("
+					<< other_players[recv_id].m_pos.x << ", " << other_players[recv_id].m_pos.y << ", " << other_players[recv_id].m_pos.z << ")." << endl;
 
-			npcs_info[npc_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-			cout << "NPC[" << npc_id << "]'s object moves to("
-				<< npcs_info[npc_id].m_pos.x << ", " << npcs_info[npc_id].m_pos.y << ", " << npcs_info[npc_id].m_pos.z << ")." << endl;
+				cout << "[TEST] R_PACK POS: " << recv_packet->x << ", " << recv_packet->y << ", " << recv_packet->z << endl;
+			}
+			else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
+				// Npc 이동
+				int npc_id = recv_id - MAX_USER;
+
+				npcs_info[npc_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+				cout << "NPC[" << npc_id << "]'s object moves to("
+					<< npcs_info[npc_id].m_pos.x << ", " << npcs_info[npc_id].m_pos.y << ", " << npcs_info[npc_id].m_pos.z << ")." << endl;
+			}
+		}
+		else {
+			cout << "[MOVE ERROR] Unknown Target!" << endl;
 		}
 
 		break;
-	}// SC_MOVE_PLAYER end
-	case SC_ROTATE_PLAYER:
+	}// SC_MOVE_OBJECT end
+	case SC_ROTATE_OBJECT:
 	{
-		SC_ROTATE_PLAYER_PACKET* recv_packet = reinterpret_cast<SC_ROTATE_PLAYER_PACKET*>(ptr);
+		SC_ROTATE_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_ROTATE_OBJECT_PACKET*>(ptr);
 		int recv_id = recv_packet->id;
-		if (recv_id == my_info.m_id) {
-			// Player 회전
-			my_info.m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-			my_info.m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-			my_info.m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-			cout << "My object is rotated, LookVec:(" << my_info.m_look_vec.x << ", " << my_info.m_look_vec.y << ", " << my_info.m_look_vec.z << ")." << endl;
-		}
-		else if (0 <= recv_id && recv_id < MAX_USER) {
-			// 상대 Object 회전
-			other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-			other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-			other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-			cout << "Player[" << recv_id << "]'s object is rotated, lookVec:"
-				<< other_players[recv_id].m_look_vec.x << ", " << other_players[recv_id].m_look_vec.y << ", " << other_players[recv_id].m_look_vec.z << ")." << endl;
-		}
-		else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
-			// Npc 회전
-			int npc_id = recv_id - MAX_USER;
 
-			npcs_info[npc_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-			npcs_info[npc_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-			npcs_info[npc_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-			cout << "NPC[" << npc_id << "]'s object is rotated, lookVec:("
-				<< npcs_info[npc_id].m_look_vec.x << ", " << npcs_info[npc_id].m_look_vec.y << ", " << npcs_info[npc_id].m_look_vec.z << ")." << endl;
+		// 1. Rotate Player
+		if (recv_packet->target == TARGET_PLAYER) {
+			if (recv_id == my_info.m_id) {
+				// Player 회전
+				my_info.m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+				my_info.m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+				my_info.m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+				cout << "My object is rotated, LookVec:(" << my_info.m_look_vec.x << ", " << my_info.m_look_vec.y << ", " << my_info.m_look_vec.z << ")." << endl;
+			}
+			else if (0 <= recv_id && recv_id < MAX_USER) {
+				// 상대 Object 회전
+				other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+				other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+				other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+				cout << "Player[" << recv_id << "]'s object is rotated, lookVec:"
+					<< other_players[recv_id].m_look_vec.x << ", " << other_players[recv_id].m_look_vec.y << ", " << other_players[recv_id].m_look_vec.z << ")." << endl;
+			}
+			else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
+				// Npc 회전
+				int npc_id = recv_id - MAX_USER;
+
+				npcs_info[npc_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+				npcs_info[npc_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+				npcs_info[npc_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+				cout << "NPC[" << npc_id << "]'s object is rotated, lookVec:("
+					<< npcs_info[npc_id].m_look_vec.x << ", " << npcs_info[npc_id].m_look_vec.y << ", " << npcs_info[npc_id].m_look_vec.z << ")." << endl;
+			}
+		}
+		else {
+			cout << "[ROTATE ERROR] Unknown Target!" << endl;
 		}
 
 		break;
 	}// SC_ROTATE_PLAYER end
-	case SC_REMOVE_PLAYER:
+	case SC_REMOVE_OBJECT:
 	{
-		SC_REMOVE_PLAYER_PACKET* recv_packet = reinterpret_cast<SC_REMOVE_PLAYER_PACKET*>(ptr);
+		SC_REMOVE_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_REMOVE_OBJECT_PACKET*>(ptr);
 		int recv_id = recv_packet->id;
-		if (recv_id == my_id) {
-			// 자기자신 없애기
+
+		// 1. Remove Player
+		if (recv_packet->target == TARGET_PLAYER) {
+			if (recv_id == my_id) {
+				// 자기자신 없애기
+			}
+			else if (0 <= recv_id && recv_id < MAX_USER) {
+				// 상대 Player 없애기
+				other_players[recv_id].m_id = -1;
+				other_players[recv_id].m_pos = { 0.f ,0.f ,0.f };
+				other_players[recv_id].m_state = OBJ_ST_LOGOUT;
+
+				cout << "Player[" << recv_id << "] is log out" << endl;
+			}
+			else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
+				// NPC 없애기
+				int npc_id = recv_id - MAX_USER;
+
+				npcs_info[npc_id].m_id = -1;
+				npcs_info[npc_id].m_pos = { 0.f ,0.f ,0.f };
+				npcs_info[npc_id].m_state = OBJ_ST_LOGOUT;
+
+				cout << "NPC[" << npc_id << "] is removed" << endl;
+			}
 		}
-		else if (0 <= recv_id && recv_id < MAX_USER) {
-			// 상대 Player 없애기
-			other_players[recv_id].m_id = -1;
-			other_players[recv_id].m_pos = { 0.f ,0.f ,0.f };
-			other_players[recv_id].m_state = OBJ_ST_LOGOUT;
-
-			cout << "Player[" << recv_id << "] is log out" << endl;
-		}
-		else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
-			// NPC 없애기
-			int npc_id = recv_id - MAX_USER;
-
-			npcs_info[npc_id].m_id = -1;
-			npcs_info[npc_id].m_pos = { 0.f ,0.f ,0.f };
-			npcs_info[npc_id].m_state = OBJ_ST_LOGOUT;
-
-			cout << "NPC[" << npc_id << "] is removed" << endl;
+		else {
+			cout << "[REMOVE ERROR] Unknown Target!" << endl;
 		}
 
 		break;
