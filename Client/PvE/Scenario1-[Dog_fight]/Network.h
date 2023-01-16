@@ -159,6 +159,17 @@ void processPacket(char* ptr)
 			cout << "Create New Bullet - id: " << bullets_info[recv_id].m_id
 				<< ", Pos(x: " << bullets_info[recv_id].m_pos.x << ", y : " << bullets_info[recv_id].m_pos.y << ", z : " << bullets_info[recv_id].m_pos.z << ")." << endl;
 		}
+		else if (recv_packet->target == TARGET_NPC) {
+			npcs_info[recv_id].m_id = recv_id;
+			npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+			npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+			npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+			npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+
+			npcs_info[recv_id].m_state = OBJ_ST_RUNNING;
+			cout << "Create New Bullet - id: " << npcs_info[recv_id].m_id
+				<< ", Pos(x: " << npcs_info[recv_id].m_pos.x << ", y : " << npcs_info[recv_id].m_pos.y << ", z : " << npcs_info[recv_id].m_pos.z << ")." << endl;
+		}
 		else {
 			cout << "[ADD ERROR] Unknown Target!" << endl;
 		}

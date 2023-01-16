@@ -79,6 +79,9 @@ public:
 	void Create_Bullet(int id, XMFLOAT3 pos);
 	void SetPosition_Bullet(int id, XMFLOAT3 pos);
 
+	void SetPosition_NPC(int id, XMFLOAT3 pos);
+	void SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+
 //==================================================
 
 #ifdef _WITH_DIRECT2D

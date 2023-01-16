@@ -189,7 +189,7 @@ void SESSION::send_rotate_packet(int client_id, short rotate_target)
 void init_npc()
 {
 	for (int i{}; i < MAX_NPCS; i++) {
-		int npc_id = 7001 + i;
+		int npc_id = i;
 		npcs[i].SetID(npc_id);
 		npcs[i].SetNpcType(NPC_Helicopter);
 		npcs[i].SetRotate(0.0f, 0.0f, 0.0f);

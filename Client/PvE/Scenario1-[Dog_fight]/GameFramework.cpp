@@ -953,4 +953,15 @@ void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos)
 	((CMainPlayer*)m_pPlayer)->m_ppBullets[id]->m_xmf3FirePosition = pos;
 }
 
+void CGameFramework::SetPosition_NPC(int id, XMFLOAT3 pos)
+{
+	m_pScene->m_ppNPCShaders[0]->m_ppObjects[id]->SetPosition(pos);
+}
+
+void CGameFramework::SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
+{
+	m_pScene->m_ppNPCShaders[0]->m_ppObjects[id]->SetUp(upVec);
+	m_pScene->m_ppNPCShaders[0]->m_ppObjects[id]->SetRight(rightVec);
+	m_pScene->m_ppNPCShaders[0]->m_ppObjects[id]->SetLook(lookVec);
+}
 //==================================================
