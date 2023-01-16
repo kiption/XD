@@ -367,8 +367,7 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 3);
 #ifdef _WITH_SOUND_RESOURCE
-	m_pSkinnedAnimationController->SetCallbackKey(1, 0.5f, _T("Footstep02"));
-	m_pSkinnedAnimationController->SetCallbackKey(2, 0.9f, _T("Footstep03"));
+	m_pSkinnedAnimationController->SetCallbackKey(1, 0.5f, _T("Footstep02"));	m_pSkinnedAnimationController->SetCallbackKey(2, 0.9f, _T("Footstep03"));
 #else
 	m_pSkinnedAnimationController->SetCallbackKey(1, 0, 0.001f, _T("Sound/Footstep01.wav"));
 	m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.125f, _T("Sound/Footstep02.wav"));
@@ -443,7 +442,7 @@ CCamera* CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.5f);
-		m_pCamera->SetOffset(XMFLOAT3(5.0f, 5.0f, 15.0f));
+		m_pCamera->SetOffset(XMFLOAT3(5.0f, 5.0f, -15.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -555,7 +554,7 @@ void CTerrainPlayer::FireBullet(CGameObject* pLockedObject)
 
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + 3.0, xmf3FirePosition.z));
+		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + 3.5, xmf3FirePosition.z));
 		pBulletObject->SetScale(1.0, 1.0, 1.0);
 		pBulletObject->Rotate(120.0, 0.0, 0.0);
 		pBulletObject->SetActive(true);
