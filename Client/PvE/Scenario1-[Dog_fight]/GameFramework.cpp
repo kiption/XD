@@ -561,10 +561,10 @@ void CGameFramework::BuildObjects()
 
 	CMainPlayer* pMainPlayer = new CMainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
 	m_pScene->m_pPlayer = m_pPlayer = pMainPlayer;
-	pMainPlayer->m_xmf3Position.x = 0.0f;
+	/*pMainPlayer->m_xmf3Position.x = 0.0f;
 	pMainPlayer->m_xmf3Position.y = 0.0f;
 	pMainPlayer->m_xmf3Position.z = 0.0f;
-	pMainPlayer->SetPosition(XMFLOAT3(pMainPlayer->m_xmf3Position.x, pMainPlayer->m_xmf3Position.y, pMainPlayer->m_xmf3Position.z));
+	pMainPlayer->SetPosition(XMFLOAT3(pMainPlayer->m_xmf3Position.x, pMainPlayer->m_xmf3Position.y, pMainPlayer->m_xmf3Position.z));*/
 	m_pCamera = m_pPlayer->GetCamera();
 	m_pPlayer->SetTerrain(m_pScene->m_pTerrain);
 	m_pScene->m_pPlayer = m_pPlayer;
@@ -620,18 +620,18 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[KEY_D] & 0xF0) {
 			inputKeyValue += INPUT_KEY_D;//S
 			dwDirection |= DIR_RIGHT;
-			if (m_pCamera->GetMode() == SPACESHIP_CAMERA)
+		/*	if (m_pCamera->GetMode() == SPACESHIP_CAMERA)
 			{
 				m_pPlayer->Rotate(0.0, 0.5, 0.0);
-			}
+			}*/
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
 			inputKeyValue += INPUT_KEY_A;//S
 			dwDirection |= DIR_LEFT;
-			if (m_pCamera->GetMode() == SPACESHIP_CAMERA)
+			/*if (m_pCamera->GetMode() == SPACESHIP_CAMERA)
 			{
 				m_pPlayer->Rotate(0.0, -0.5, 0.0);
-			}
+			}*/
 
 		}
 

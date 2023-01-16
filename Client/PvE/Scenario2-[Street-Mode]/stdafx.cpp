@@ -44,6 +44,8 @@ CGameObject** LoadGameObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		nReads = (UINT)::fread(pstrToken, sizeof(char), nStrLength, pFile); //"<Materials>:"
 		nReads = (UINT)::fread(&nMaterials, sizeof(int), 1, pFile);
 		pGameObject = new CGameObject(nMaterials);
+
+
 		strcpy_s(pGameObject->m_pstrFrameName, 64, pstrGameObjectName);
 
 		CGameObject* pObjectFound = NULL;

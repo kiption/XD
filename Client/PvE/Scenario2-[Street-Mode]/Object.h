@@ -121,6 +121,7 @@ public:
 	void SetAlbedoColor(XMFLOAT4 xmf4Color) { m_xmf4AlbedoColor = xmf4Color; }
 	void SetEmissionColor(XMFLOAT4 xmf4Color) { m_xmf4EmissiveColor = xmf4Color; }
 	void SetMaterial(int nMaterial) { m_nMaterial = nMaterial; }
+	
 
 	void SetShader(CShader *pShader);
 	void SetMaterialType(UINT nType) { m_nType |= nType; }

@@ -36,10 +36,6 @@ public:
 	float           			m_fRoll;
 	CCamera* m_pCamera = NULL;
 
-	CGameObject* m_pCockpit = NULL;
-	CGameObject* m_pMissile1 = NULL;
-	CGameObject* m_pLDoor = NULL;
-
 	CPlayer();
 	virtual ~CPlayer();
 
@@ -96,15 +92,15 @@ public:
 
 };
 
-#define BULLETS					50
-#define BULLETS2					50
+#define BULLETS					150
+#define BULLETS2					150
 class CMainPlayer : public CPlayer
 {
 public:
 	CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual ~CMainPlayer();
 
-	float						m_fBulletEffectiveRange = 1000.0f;
+	float						m_fBulletEffectiveRange = 2000.0f;
 	CBulletObject* pBulletObject = NULL;
 	CBulletObject* pBulletObject2 = NULL;
 	CMi24Object* pPlayerObject = NULL;

@@ -85,7 +85,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pUseWaterMove->SetPosition(0.0, 60.0f, 0.0);
 
 
-	m_nShaders = 6;
+	m_nShaders = 4;
 
 	m_ppShaders = new CObjectsShader * [m_nShaders];
 
@@ -109,39 +109,46 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pCrossHeadShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer);
 	m_ppShaders[3] = pCrossHeadShader;
 
-	CBulletMotionShader* pCBulletMotionShader = new CBulletMotionShader();
-	pCBulletMotionShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
-	pCBulletMotionShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_ppShaders[4] = pCBulletMotionShader;
-
-	CExplosionShader* pCExplosionShader = new CExplosionShader();
-	pCExplosionShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
-	pCExplosionShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	pCExplosionShader->SetActive(false);
-	m_ppShaders[5] = pCExplosionShader;
 
 
-	/// ///
-	m_ppNPCShaders = new CNPCShader * [1];
+
+	int m_nNPCShaders = 3;
+	m_ppNPCShaders = new CNPCShader * [m_nNPCShaders];
 	CNPCShader* pCNPCShader = new CNPCShader();
 	pCNPCShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
 	pCNPCShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppNPCShaders[0] = pCNPCShader;
 
+	CBulletMotionShader* pCBulletMotionShader = new CBulletMotionShader();
+	pCBulletMotionShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pCBulletMotionShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppNPCShaders[1] = pCBulletMotionShader;
+
+	CExplosionShader* pCExplosionShader = new CExplosionShader();
+	pCExplosionShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pCExplosionShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	pCExplosionShader->SetActive(false);
+	m_ppNPCShaders[2] = pCExplosionShader;
+	/// ///
+	m_ppOtherPlayers = new COtherPlayerShader * [1];
+	COtherPlayerShader* pCOtherPlayerShader = new COtherPlayerShader();
+	pCOtherPlayerShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pCOtherPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppOtherPlayers[0] = pCOtherPlayerShader;
 
 	m_nParticleObjects = 4;
 	m_ppParticleObjects = new CParticleObject * [m_nParticleObjects];
 	m_ppParticleObjects[0] = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
-		XMFLOAT3(m_ppShaders[0]->m_ppObjects[4]->GetPosition()), XMFLOAT3(0.0f, 65.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(10.0f, 10.0f), MAX_PARTICLES);
+		XMFLOAT3(m_ppNPCShaders[0]->m_ppObjects[4]->GetPosition()), XMFLOAT3(0.0f, 65.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(10.0f, 10.0f), MAX_PARTICLES);
 
 	m_ppParticleObjects[1] = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
-		XMFLOAT3(m_ppShaders[0]->m_ppObjects[3]->GetPosition()), XMFLOAT3(0.0f, 75.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(12.0f, 12.0f), MAX_PARTICLES);
+		XMFLOAT3(m_ppNPCShaders[0]->m_ppObjects[3]->GetPosition()), XMFLOAT3(0.0f, 75.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(12.0f, 12.0f), MAX_PARTICLES);
 
 	m_ppParticleObjects[2] = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
-		XMFLOAT3(m_ppShaders[0]->m_ppObjects[2]->GetPosition()), XMFLOAT3(0.0f, 65.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(15.0f, 15.0f), MAX_PARTICLES);
+		XMFLOAT3(m_ppNPCShaders[0]->m_ppObjects[2]->GetPosition()), XMFLOAT3(0.0f, 65.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(15.0f, 15.0f), MAX_PARTICLES);
 
 	m_ppParticleObjects[3] = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
-		XMFLOAT3(m_ppShaders[0]->m_ppObjects[1]->GetPosition()), XMFLOAT3(0.0f, 85.0f, 0.0f), 0.0f, XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT2(8.0f, 8.0f), MAX_PARTICLES);
+		XMFLOAT3(m_ppNPCShaders[0]->m_ppObjects[1]->GetPosition()), XMFLOAT3(0.0f, 85.0f, 0.0f), 0.0f, XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT2(8.0f, 8.0f), MAX_PARTICLES);
 
 	m_nEnvironmentMappingShaders = 1;
 	m_ppEnvironmentMappingShaders = new CDynamicCubeMappingShader * [m_nEnvironmentMappingShaders];
@@ -177,13 +184,24 @@ void CScene::ReleaseObjects()
 
 	if (m_ppNPCShaders)
 	{
-		for (int i = 0; i < 1; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			m_ppNPCShaders[i]->ReleaseShaderVariables();
 			m_ppNPCShaders[i]->ReleaseObjects();
 			m_ppNPCShaders[i]->Release();
 		}
 		delete[] m_ppNPCShaders;
+	}
+
+	if (m_ppOtherPlayers)
+	{
+		for (int i = 0; i < 1; i++)
+		{
+			m_ppOtherPlayers[i]->ReleaseShaderVariables();
+			m_ppOtherPlayers[i]->ReleaseObjects();
+			m_ppOtherPlayers[i]->Release();
+		}
+		delete[] m_ppOtherPlayers;
 	}
 
 	if (m_pOutlineShader)
@@ -606,7 +624,8 @@ void CScene::ReleaseUploadBuffers()
 	for (int i = 0; i < m_nEnvironmentMappingShaders; i++) m_ppEnvironmentMappingShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nParticleObjects; i++) m_ppParticleObjects[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
-	for (int i = 0; i < 1; i++) m_ppNPCShaders[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < 3; i++) m_ppNPCShaders[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < 1; i++) m_ppOtherPlayers[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nGameObjects; i++) m_ppGameObjects[i]->ReleaseUploadBuffers();
 }
 
@@ -656,23 +675,23 @@ void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 	for (int i = 0; i < m_nEnvironmentMappingShaders; i++) m_ppEnvironmentMappingShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nParticleObjects; i++) m_ppParticleObjects[i]->AnimateObject(pCamera, fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
-	for (int i = 0; i < 1; i++) if (m_ppNPCShaders[i]) m_ppNPCShaders[i]->AnimateObjects(fTimeElapsed);
+	for (int i = 0; i < 3; i++) if (m_ppNPCShaders[i]) m_ppNPCShaders[i]->AnimateObjects(fTimeElapsed);
+	for (int i = 0; i < 1; i++) if (m_ppOtherPlayers[i]) m_ppOtherPlayers[i]->AnimateObjects(fTimeElapsed);
 
 	/// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	for (int i = 0; i < 10; i++) m_ppShaders[0]->m_ppObjects[i]->xoobb = BoundingOrientedBox(XMFLOAT3(m_ppShaders[0]->m_ppObjects[i]->GetPosition()), XMFLOAT3(12.0, 12.0, 16.0), XMFLOAT4(0, 0, 0, 1));
+	for (int i = 0; i < 10; i++) m_ppNPCShaders[0]->m_ppObjects[i]->xoobb = BoundingOrientedBox(XMFLOAT3(m_ppNPCShaders[0]->m_ppObjects[i]->GetPosition()), XMFLOAT3(12.0, 12.0, 16.0), XMFLOAT4(0, 0, 0, 1));
 	m_pPlayer->xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(12.0, 12.0, 16.0), XMFLOAT4(0, 0, 0, 1));
-	for (int i = 0; i < 10; i++) if (m_ppShaders[0]->m_ppObjects[i]->xoobb.Intersects(m_pPlayer->xoobb)) m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 -= 5.0f;
 	CBulletObject** ppBullets = ((CMainPlayer*)m_pPlayer)->m_ppBullets;
 	CBulletObject** ppBulletsR = ((CMainPlayer*)m_pPlayer)->m_ppBullets2;
-	for (int j = 0; j < BULLETS; j++) { ppBullets[j]->xoobb = BoundingOrientedBox(XMFLOAT3(ppBullets[j]->GetPosition()), XMFLOAT3(13.0, 13.0, 15.0), XMFLOAT4(0, 0, 0, 1)); }
-	for (int j = 0; j < BULLETS2; j++) { ppBulletsR[j]->xoobb = BoundingOrientedBox(XMFLOAT3(ppBulletsR[j]->GetPosition()), XMFLOAT3(13.0, 13.0, 15.0), XMFLOAT4(0, 0, 0, 1)); }
+	for (int j = 0; j < BULLETS; j++) { ppBullets[j]->xoobb = BoundingOrientedBox(XMFLOAT3(ppBullets[j]->GetPosition()), XMFLOAT3(13.0, 15.0, 15.0), XMFLOAT4(0, 0, 0, 1)); }
+	for (int j = 0; j < BULLETS2; j++) { ppBulletsR[j]->xoobb = BoundingOrientedBox(XMFLOAT3(ppBulletsR[j]->GetPosition()), XMFLOAT3(13.0, 15.0, 15.0), XMFLOAT4(0, 0, 0, 1)); }
 
 	/// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	for (int i = 0; i < 10; i++)
 	{
-		if (m_ppShaders[0]->m_ppObjects[i]->xoobb.Intersects(m_pPlayer->xoobb))
+		if (m_ppNPCShaders[0]->m_ppObjects[i]->xoobb.Intersects(m_pPlayer->xoobb))
 		{
-			m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 -= 2.0f;
+			m_ppNPCShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43 -= 2.0f;
 		}
 	}
 
@@ -682,22 +701,19 @@ void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 		{
 			for (int i = 0; i < 10; i++)
 			{
-				if (ppBullets[j]->m_bActive && m_ppShaders[0]->m_ppObjects[i]->xoobb.Intersects(ppBullets[j]->xoobb))
+				if (ppBullets[j]->m_bActive && m_ppNPCShaders[0]->m_ppObjects[i]->xoobb.Intersects(ppBullets[j]->xoobb))
 				{
-
-					m_ppShaders[5]->m_bActive = true;
+					m_ppNPCShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 -= 2.0f;
+					m_ppNPCShaders[2]->m_bActive = true;
 					CollisionCheck = i;
-					m_ppParticleObjects[3]->m_xmf4x4World._43 = m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43;
-					m_ppParticleObjects[3]->m_xmf4x4World._42 = m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42;
-					m_ppParticleObjects[3]->m_xmf4x4World._41 = m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._41;
 					ppBullets[j]->Reset();
 				}
 			}
 
 			if (ppBullets[j]->m_bActive)
 			{
-				m_ppShaders[4]->m_bBulletActive = true;
-				m_ppShaders[4]->BulletPosition = ppBullets[j]->GetPosition();
+				m_ppNPCShaders[1]->m_bBulletActive = true;
+				m_ppNPCShaders[1]->BulletPosition = ppBullets[j]->GetPosition();
 			}
 		}
 	}
@@ -708,10 +724,10 @@ void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 		{
 			for (int i = 0; i < 10; i++)
 			{
-				if (ppBulletsR[j]->m_bActive && m_ppShaders[0]->m_ppObjects[i]->xoobb.Intersects(ppBulletsR[j]->xoobb))
+				if (ppBulletsR[j]->m_bActive && m_ppNPCShaders[0]->m_ppObjects[i]->xoobb.Intersects(ppBulletsR[j]->xoobb))
 				{
-
-					m_ppShaders[5]->m_bActive = true;
+					m_ppNPCShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 -= 2.0f;
+					m_ppNPCShaders[2]->m_bActive = true;
 					CollisionCheck = i;
 					ppBulletsR[j]->Reset();
 				}
@@ -719,34 +735,35 @@ void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 
 			if (ppBulletsR[j]->m_bActive)
 			{
-				m_ppShaders[4]->m_bBulletActive = true;
-				m_ppShaders[4]->BulletPositionR = ppBulletsR[j]->GetPosition();
+				m_ppNPCShaders[1]->m_bBulletActive = true;
+				m_ppNPCShaders[1]->BulletPositionR = ppBulletsR[j]->GetPosition();
 			}
 		}
 	}
 
-	if (m_ppShaders[5]->m_bActive == true)
+	if (m_ppNPCShaders[2]->m_bActive == true)
 	{
 
-		m_ppShaders[5]->m_fTime += 0.2;
-		m_ppShaders[5]->TargetPosition = m_ppShaders[0]->m_ppObjects[CollisionCheck]->GetPosition();
-		if (m_ppShaders[2]->m_fTime > 0.0)
+		m_ppNPCShaders[2]->m_fTime += 0.1;
+		m_ppNPCShaders[2]->TargetPosition = m_ppNPCShaders[0]->m_ppObjects[CollisionCheck]->GetPosition();
+
+		if (m_ppNPCShaders[2]->m_fTime > 0.0)
 		{
-			m_ppShaders[5]->m_fSpeed = 1;
+			m_ppNPCShaders[2]->m_fSpeed = 1;
 		}
-		if (m_ppShaders[5]->m_fTime > 1.0)
+		if (m_ppNPCShaders[2]->m_fTime > 1.0)
 		{
-			m_ppShaders[5]->m_fSpeed = 2;
+			m_ppNPCShaders[2]->m_fSpeed = 2;
 		}
-		if (m_ppShaders[5]->m_fTime > 2.0)
+		if (m_ppNPCShaders[2]->m_fTime > 2.0)
 		{
-			m_ppShaders[5]->m_fSpeed = 3;
+			m_ppNPCShaders[2]->m_fSpeed = 3;
 		}
-		if (m_ppShaders[5]->m_fTime > 3.0)
+		if (m_ppNPCShaders[2]->m_fTime > 3.0)
 		{
-			m_ppShaders[4]->m_bBulletActive = false;
-			m_ppShaders[5]->m_bActive = false;
-			m_ppShaders[5]->m_fTime = 0.0;
+			m_ppNPCShaders[1]->m_bBulletActive = false;
+			m_ppNPCShaders[2]->m_bActive = false;
+			m_ppNPCShaders[2]->m_fTime = 0.0;
 			CollisionCheck = 0;
 		}
 
@@ -755,10 +772,10 @@ void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 	if (m_bWarMode == true) WarMode();
 	for (int i = 0; i < 10; i++)
 	{
-		float fHeight = m_pTerrain->GetHeight(m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._41, m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43) + 4.0f;
-		if (m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 < fHeight)
+		float fHeight = m_pTerrain->GetHeight(m_ppNPCShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._41, m_ppNPCShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43) + 4.0f;
+		if (m_ppNPCShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 < fHeight)
 		{
-			m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 = fHeight + 2.0f;
+			m_ppNPCShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 = fHeight + 2.0f;
 		}
 	}
 
@@ -788,7 +805,8 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 	//for (int i = 0; i < m_nEnvironmentMappingShaders; i++)m_ppEnvironmentMappingShaders[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i])m_ppShaders[i]->Render(pd3dCommandList, pCamera, 0);
-	for (int i = 0; i < 1; i++) if (m_ppNPCShaders[i])m_ppNPCShaders[i]->Render(pd3dCommandList, pCamera, 0);
+	for (int i = 0; i < 3; i++) if (m_ppNPCShaders[i])m_ppNPCShaders[i]->Render(pd3dCommandList, pCamera, 0);
+	//for (int i = 0; i < 1; i++) if (m_ppOtherPlayers[i])m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera, 0);
 
 	if (m_pUseWaterMove) m_pUseWaterMove->Render(pd3dCommandList, pCamera);
 
@@ -846,19 +864,19 @@ void CScene::WarMode()
 
 	for (int j = 0; j < 5; j++)
 	{
-		m_ppShaders[0]->m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0, 1, 0));
-		m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._41 += (((-m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._41 + m_pPlayer->GetPosition().x) / 10.0f) - (j)+5.0) / 50;
-		m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._42 += (((-m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._42 + m_pPlayer->GetPosition().y)) / 10 + 3.5) / 100;
-		m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._43 += (((-m_ppShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._43 + m_pPlayer->GetPosition().z) / 10.0f) - (j)+3.0) / 50;
+		m_ppNPCShaders[0]->m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0, 1, 0));
+		m_ppNPCShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._41 += (((-m_ppNPCShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._41 + m_pPlayer->GetPosition().x) / 10.0f) - (j)+5.0) / 50;
+		m_ppNPCShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._42 += (((-m_ppNPCShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._42 + m_pPlayer->GetPosition().y)) / 10 + 3.5) / 100;
+		m_ppNPCShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._43 += (((-m_ppNPCShaders[0]->m_ppObjects[j]->m_xmf4x4Transform._43 + m_pPlayer->GetPosition().z) / 10.0f) - (j)+3.0) / 50;
 
 
 	}
 	for (int k = 5; k < 10; k++)
 	{
-		m_ppShaders[0]->m_ppObjects[k]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0, 1, 0));
-		m_ppShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._41 += (((-m_ppShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._41 + m_pPlayer->GetPosition().x) / 10.0f) - k + 3.0) / 50;
-		m_ppShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._42 += (((-m_ppShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._42 + m_pPlayer->GetPosition().y)) / 10 + 3.5) / 100;
-		m_ppShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._43 += (((-m_ppShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._43 + m_pPlayer->GetPosition().z) / 10.0f) - k + 5.0) / 50;
+		m_ppNPCShaders[0]->m_ppObjects[k]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0, 1, 0));
+		m_ppNPCShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._41 += (((-m_ppNPCShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._41 + m_pPlayer->GetPosition().x) / 10.0f) - k + 3.0) / 50;
+		m_ppNPCShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._42 += (((-m_ppNPCShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._42 + m_pPlayer->GetPosition().y)) / 10 + 3.5) / 100;
+		m_ppNPCShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._43 += (((-m_ppNPCShaders[0]->m_ppObjects[k]->m_xmf4x4Transform._43 + m_pPlayer->GetPosition().z) / 10.0f) - k + 5.0) / 50;
 
 
 	}

@@ -1309,7 +1309,7 @@ void CMi24Object::PrepareAnimate()
 void CMi24Object::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 	
-	xoobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(0.0, 0.0, .0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
+	xoobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(0.0, 0.0, 0.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
 
 
 		if (m_pMainRotorFrame)
@@ -1327,7 +1327,37 @@ void CMi24Object::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
+CGOObject::CGOObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(0, 0)
+{
+}
 
+CGOObject::~CGOObject()
+{
+}
+
+void CGOObject::PrepareAnimate()
+{
+	m_pMainRotorFrame = FindFrame("military_helicopter_blades");
+	m_pTailRotorFrame = FindFrame("TailRotor");
+}
+
+void CGOObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+{
+	xoobb = BoundingOrientedBox(GetPosition(), XMFLOAT3(10.0, 10.0, 12.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
+	if (m_pMainRotorFrame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 4.0) * fTimeElapsed);
+		m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
+	}
+
+	if (m_pTailRotorFrame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0) * fTimeElapsed);
+		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
+	}
+	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent);
+
+}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale, XMFLOAT3 xmf3Normal) : CGameObject(0, 1)
@@ -1719,3 +1749,5 @@ void CDynamicCubeMappingObject::OnPreRender(ID3D12GraphicsCommandList* pd3dComma
 
 	::SynchronizeResourceTransition(pd3dCommandList, m_pMaterial->m_pTexture->GetResource(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_GENERIC_READ);
 }
+
+

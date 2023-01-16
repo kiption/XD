@@ -229,7 +229,7 @@ void CPlayer::OnPrepareRender()
 void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
-	if (m_pShader) (m_pShader)->Render(pd3dCommandList, pCamera);
+	//if (m_pShader) (m_pShader)->Render(pd3dCommandList, pCamera);
 	if (nCameraMode == THIRD_PERSON_CAMERA || nCameraMode == FIRST_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
 }
 
@@ -353,7 +353,7 @@ void CSoundCallbackHandler::HandleCallback(void* pCallbackData, float fTrackPosi
 CTerrainPlayer::CTerrainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
-	m_pShader = new CEthanObjectsShader();
+	m_pShader = new CSkinnedAnimationStandardShader();
 	m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 
@@ -376,7 +376,7 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	CAnimationCallbackHandler* pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
 
-	CLoadedModelInfo* pBulletMesh = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", m_pShader);
+	CLoadedModelInfo* pBulletMesh = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", NULL);
 	for (int i = 0; i < BULLETS; i++)
 	{
 		pBulletObject = new CBulletObject(m_fBulletEffectiveRange);
@@ -397,9 +397,9 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 	SetPosition(XMFLOAT3(300.0,pTerrain->GetHeight(300.0,300.0),300.0));
 
-	OnPrepareRender();
 	if (pBulletMesh) delete pBulletMesh;
 	if (pAngrybotModel) delete pAngrybotModel;
+	OnPrepareRender();
 }
 
 CTerrainPlayer::~CTerrainPlayer()
@@ -443,7 +443,7 @@ CCamera* CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.5f);
-		m_pCamera->SetOffset(XMFLOAT3(5.0f, 5.0f, -20.0f));
+		m_pCamera->SetOffset(XMFLOAT3(5.0f, 5.0f, 15.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);

@@ -147,13 +147,13 @@ public:
 	virtual void ReleaseUploadBuffers();
 	virtual void ReleaseObjects();
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState);
-
-	float m_fTime;
-	int m_fSpeed;
-public:
-	XMFLOAT3 TargetPosition;
-	XMFLOAT3 BulletPosition;
-	XMFLOAT3 BulletPositionR;
+//
+//	float m_fTime;
+//	int m_fSpeed;
+//public:
+//	XMFLOAT3 TargetPosition;
+//	XMFLOAT3 BulletPosition;
+//	XMFLOAT3 BulletPositionR;
 	
 	int								m_nObjects = 0;
 	CGameObject						**m_ppObjects = 0;
@@ -400,7 +400,7 @@ protected:
 	CB_DYNAMICOBJECT_INFO* m_pcbMappedGameObjects = NULL;
 };
 
-class CExplosionShader : public CObjectsShader
+class CExplosionShader : public CNPCShader
 {
 public:
 	CExplosionShader() {};
@@ -421,7 +421,7 @@ public:
 };
 
 
-class CBulletMotionShader : public CObjectsShader
+class CBulletMotionShader : public CNPCShader
 {
 public:
 	CBulletMotionShader() {};

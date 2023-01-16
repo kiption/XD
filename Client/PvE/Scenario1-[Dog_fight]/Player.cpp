@@ -63,12 +63,12 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	if (dwDirection)
 	{
 		XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
-		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance * 0.05);
-		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance * 0.05);
-		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance * 0.05);
-		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance * 0.05);
-		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance * 0.15);
-		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance * 0.15);
+		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance );
+		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance );
+		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance );
+		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance );
+		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance );
+		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance );
 
 		Move(xmf3Shift, bUpdateVelocity);
 	}
@@ -283,7 +283,7 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	{
 		pBulletObject = new CBulletObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, true);
-		pBulletObject->SetMovingSpeed(5500.0f);
+		pBulletObject->SetMovingSpeed(8000.0f);
 		pBulletObject->SetActive(false);
 		m_ppBullets[i] = pBulletObject;
 	}
@@ -293,7 +293,7 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	{
 		pBulletObject2 = new CBulletObject(m_fBulletEffectiveRange);
 		pBulletObject2->SetChild(pBulletMesh2, true);
-		pBulletObject2->SetMovingSpeed(5500.0f);
+		pBulletObject2->SetMovingSpeed(8000.0f);
 		pBulletObject2->SetActive(false);
 		m_ppBullets2[i] = pBulletObject2;
 	}
@@ -310,10 +310,6 @@ void CMainPlayer::PrepareAnimate()
 {
 	m_pMainRotorFrame = FindFrame("military_helicopter_blades");
 	m_pTailRotorFrame = FindFrame("TailRotor");
-
-	m_pMissile1 = FindFrame("Nacelles_Missiles");
-	m_pCockpit = FindFrame("military_helicopter_seats");
-
 }
 
 void CMainPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
