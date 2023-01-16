@@ -6,6 +6,7 @@
 
 #include "Shader.h"
 #include "Player.h"
+#include "GameSound.h"
 
 
 #define MAX_LIGHTS			16 
@@ -90,7 +91,7 @@ public:
 	CPlayerShader* m_pPlayerShader= NULL;
 	CParticleObject** m_ppParticleObjects = NULL;
 
-
+	GameSound gamesound;
 
 	int							m_nParticleObjects;
 	CDynamicCubeMappingShader** m_ppEnvironmentMappingShaders = NULL;

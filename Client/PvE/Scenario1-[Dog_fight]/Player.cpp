@@ -417,12 +417,12 @@ void CMainPlayer::FireBullet(CGameObject* pLockedObject)
 		XMFLOAT3 xmf3Position = this->GetPosition();
 		xmf3Position.x -= 10.0f;
 		XMFLOAT3 xmf3Direction = TotalLookVector;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 80.0f, false));
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 50.0f, false));
 
 		pBulletObject->m_xmf4x4Transform = m_xmf4x4World;
 		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-		pBulletObject->SetScale(0.5, 0.5, 1.0);
+		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + 2.0, xmf3FirePosition.z));
+		pBulletObject->SetScale(1.0, 1.0, 1.5);
 		pBulletObject->SetActive(true);
 	}
 
@@ -432,12 +432,12 @@ void CMainPlayer::FireBullet(CGameObject* pLockedObject)
 		XMFLOAT3 xmf3Position = this->GetPosition();
 		xmf3Position.x += 10.0f;
 		XMFLOAT3 xmf3Direction = TotalLookVector;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 80.0f, false));
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 50.0f, false));
 	
 		pBulletObject2->m_xmf4x4Transform = m_xmf4x4World;
 		pBulletObject2->SetMovingDirection(xmf3Direction);
-		pBulletObject2->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-		pBulletObject2->SetScale(0.5, 0.5, 1.0);
+		pBulletObject2->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y+2.0, xmf3FirePosition.z));
+		pBulletObject2->SetScale(1.0, 1.0, 1.5);
 		pBulletObject2->SetActive(true);
 	}
 }

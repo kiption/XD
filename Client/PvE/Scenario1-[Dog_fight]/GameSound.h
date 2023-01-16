@@ -13,6 +13,9 @@ private:
 	FMOD::Sound* shootSound;
 	FMOD::Channel* shootChannel;
 
+	FMOD::Sound* ColliSound;
+	FMOD::Channel* ColliChannel;
+
 	FMOD::Sound* speakSound;
 	FMOD::Channel* speakChannel;
 
@@ -40,6 +43,7 @@ public:
 	void shootingSound();
 	void backGroundMusic();
 	void walkingSound();
+	void collisionSound();
 	void pauseWalking();
 	void runningSound();
 	void pauseRunning();

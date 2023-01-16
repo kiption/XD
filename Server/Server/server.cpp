@@ -278,9 +278,9 @@ void process_packet(int client_id, char* packet)
 		}
 
 		// 새로 접속한 플레이어의 초기 정보를 설정합니다.
-		clients[client_id].pos.x = 640 + client_id * 50;
-		clients[client_id].pos.y = 1000;
-		clients[client_id].pos.z = 1165 - client_id * 50;
+		clients[client_id].pos.x = 1500 + client_id * 50;
+		clients[client_id].pos.y = 1000 + client_id * 20;
+		clients[client_id].pos.z = 1265 - client_id * 50;
 		cout << "A new object is successfully created! - POS:(" << clients[client_id].pos.x
 			<< "," << clients[client_id].pos.y << "," << clients[client_id].pos.z << ")." << endl;
 

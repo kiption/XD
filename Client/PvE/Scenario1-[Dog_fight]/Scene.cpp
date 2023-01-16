@@ -679,12 +679,12 @@ void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 	for (int i = 0; i < 1; i++) if (m_ppOtherPlayers[i]) m_ppOtherPlayers[i]->AnimateObjects(fTimeElapsed);
 
 	/// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	for (int i = 0; i < 10; i++) m_ppNPCShaders[0]->m_ppObjects[i]->xoobb = BoundingOrientedBox(XMFLOAT3(m_ppNPCShaders[0]->m_ppObjects[i]->GetPosition()), XMFLOAT3(12.0, 12.0, 16.0), XMFLOAT4(0, 0, 0, 1));
-	m_pPlayer->xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(12.0, 12.0, 16.0), XMFLOAT4(0, 0, 0, 1));
+	for (int i = 0; i < 10; i++) m_ppNPCShaders[0]->m_ppObjects[i]->xoobb = BoundingOrientedBox(XMFLOAT3(m_ppNPCShaders[0]->m_ppObjects[i]->GetPosition()), XMFLOAT3(18.0, 20.0, 25.0), XMFLOAT4(0, 0, 0, 1));
+	m_pPlayer->xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(15.0, 15.0, 18.0), XMFLOAT4(0, 0, 0, 1));
 	CBulletObject** ppBullets = ((CMainPlayer*)m_pPlayer)->m_ppBullets;
 	CBulletObject** ppBulletsR = ((CMainPlayer*)m_pPlayer)->m_ppBullets2;
-	for (int j = 0; j < BULLETS; j++) { ppBullets[j]->xoobb = BoundingOrientedBox(XMFLOAT3(ppBullets[j]->GetPosition()), XMFLOAT3(13.0, 15.0, 15.0), XMFLOAT4(0, 0, 0, 1)); }
-	for (int j = 0; j < BULLETS2; j++) { ppBulletsR[j]->xoobb = BoundingOrientedBox(XMFLOAT3(ppBulletsR[j]->GetPosition()), XMFLOAT3(13.0, 15.0, 15.0), XMFLOAT4(0, 0, 0, 1)); }
+	for (int j = 0; j < BULLETS; j++) { ppBullets[j]->xoobb = BoundingOrientedBox(XMFLOAT3(ppBullets[j]->GetPosition()), XMFLOAT3(8.0, 8.0, 12.0), XMFLOAT4(0, 0, 0, 1)); }
+	for (int j = 0; j < BULLETS2; j++) { ppBulletsR[j]->xoobb = BoundingOrientedBox(XMFLOAT3(ppBulletsR[j]->GetPosition()), XMFLOAT3(8.0, 8.0, 12.0), XMFLOAT4(0, 0, 0, 1)); }
 
 	/// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	for (int i = 0; i < 10; i++)
@@ -703,6 +703,7 @@ void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 			{
 				if (ppBullets[j]->m_bActive && m_ppNPCShaders[0]->m_ppObjects[i]->xoobb.Intersects(ppBullets[j]->xoobb))
 				{
+					gamesound.collisionSound();
 					m_ppNPCShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 -= 2.0f;
 					m_ppNPCShaders[2]->m_bActive = true;
 					CollisionCheck = i;
@@ -726,6 +727,7 @@ void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 			{
 				if (ppBulletsR[j]->m_bActive && m_ppNPCShaders[0]->m_ppObjects[i]->xoobb.Intersects(ppBulletsR[j]->xoobb))
 				{
+					gamesound.collisionSound();
 					m_ppNPCShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 -= 2.0f;
 					m_ppNPCShaders[2]->m_bActive = true;
 					CollisionCheck = i;

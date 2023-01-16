@@ -5,8 +5,12 @@ GameSound::GameSound()
 	result = FMOD::System_Create(&soundSystem);
 
 	result = soundSystem->init(64, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("Sound/Valcan.wav", FMOD_DEFAULT, 0, &shootSound);
+	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_3D, 0, &shootSound);
 	result = shootSound->setMode(FMOD_LOOP_OFF);
+
+	result = soundSystem->init(64, FMOD_INIT_NORMAL, extradriverdata);
+	result = soundSystem->createSound("Sound/CollisionSound.wav", FMOD_3D, 0, &ColliSound);
+	result = ColliSound->setMode(FMOD_LOOP_OFF);
 
 	result = soundSystem->init(64, FMOD_INIT_NORMAL, extradriverdata);
 	result = soundSystem->createSound("Sound/Speaking.mp3", FMOD_DEFAULT, 0, &speakSound);
@@ -44,6 +48,7 @@ GameSound::GameSound()
 GameSound::~GameSound()
 {
 	result = shootSound->release();
+	result = ColliSound->release();
 	result = speakSound->release();
 	result = bgmSound->release();
 	result = walkSound->release();
@@ -74,6 +79,12 @@ void GameSound::SpeakMusic()
 void GameSound::walkingSound()
 {
 	walkChannel->setPaused(false);
+}
+
+void GameSound::collisionSound()
+{
+	result = soundSystem->playSound(ColliSound, 0, false, &ColliChannel);
+	ColliChannel->setVolume(0.12f);
 }
 
 void GameSound::pauseWalking()

@@ -735,7 +735,7 @@ void CGameFramework::ProcessInput()
 
 void CGameFramework::AnimateObjects()
 {
-
+	
 	if (m_pScene) m_pScene->AnimateObjects(NULL, m_GameTimer.GetTimeElapsed());
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 }
@@ -921,14 +921,16 @@ MouseInputVal CGameFramework::PopInputVal_Mouse() {
 }
 
 void CGameFramework::SetPosition_PlayerObj(XMFLOAT3 pos) {
-	m_pPlayer->SetPosition(pos);
+	m_pPlayer->m_xmf3Position = pos;
 }
 void CGameFramework::SetVectors_PlayerObj(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec) {
 	m_pPlayer->SetVectorsByServer(rightVec, upVec, lookVec);
 }
 
 void CGameFramework::SetPosition_OtherPlayerObj(int id, XMFLOAT3 pos) {
-	m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetPosition(pos);
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4Transform._41=pos.x;
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4Transform._42=pos.y;
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4Transform._43=pos.z;
 }
 void CGameFramework::SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec) {
 	m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetUp(upVec);

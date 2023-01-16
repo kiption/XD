@@ -155,7 +155,6 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjectsInfo.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="protocol.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Scenario1-[Dog_fight].h" />
     <ClInclude Include="Scene.h" />
