@@ -756,21 +756,51 @@ void timerFunc() {
 	}
 }
 
+void MoveNPC()
+{
+	for (int i{}; i < MAX_NPCS; i++) {
+		npcs[i].MovetoRotate();
+		
+		SC_ADD_OBJECT_PACKET NPC_packet;
+		NPC_packet.target = TARGET_NPC;
+		NPC_packet.id = npcs[i].GetID();
+		NPC_packet.size = sizeof(SC_ADD_OBJECT_PACKET);
+		NPC_packet.type = SC_ADD_OBJECT;
+		strcpy_s(NPC_packet.name, "NPC");
+		
+		NPC_packet.x = npcs[i].GetPosition().x;
+		NPC_packet.y = npcs[i].GetPosition().y;
+		NPC_packet.z = npcs[i].GetPosition().z;
+
+		NPC_packet.right_x = npcs[i].GetCurr_coordinate().right.x;
+		NPC_packet.right_y = npcs[i].GetCurr_coordinate().right.y;
+		NPC_packet.right_z = npcs[i].GetCurr_coordinate().right.z;
+
+		NPC_packet.up_x = npcs[i].GetCurr_coordinate().up.x;
+		NPC_packet.up_y = npcs[i].GetCurr_coordinate().up.y;
+		NPC_packet.up_z = npcs[i].GetCurr_coordinate().up.z;
+
+		NPC_packet.look_x = npcs[i].GetCurr_coordinate().look.x;
+		NPC_packet.look_y = npcs[i].GetCurr_coordinate().look.y;
+		NPC_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
+
+		cout << "[NPC_Send]";
+		
+		for (int i = 0; i < MAX_USER; i++) {
+			auto& pl = clients[i];
+			lock_guard<mutex> lg{ pl.s_lock };
+			if (pl.s_state == ST_INGAME) {
+				pl.do_send(&NPC_packet);
+			}
+		}
+	}
+}
+
+
 int main()
 {
 	init_npc();
 	shoot_time = chrono::system_clock::now();
-
-	//int cnt = 0;
-	//while (cnt < 100) {
-	//	for (int i{}; i < MAX_NPCS; ++i) {
-	//		if (i == 0) {
-	//			npcs[i].MovetoRotate();
-	//			cout << i << "th Pos: " << npcs[i].GetPosition().x << ", " << npcs[i].GetPosition().y << ", " << npcs[i].GetPosition().z << endl;
-
-	//		}
-	//	}
-	//}
 
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
@@ -800,6 +830,10 @@ int main()
 
 	thread timer_thread{ timerFunc };
 	timer_thread.join();
+
+	thread NPC_thread{};
+
+	NPC_thread.join();
 
 	for (auto& th : worker_threads)
 		th.join();

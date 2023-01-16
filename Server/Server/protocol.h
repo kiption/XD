@@ -22,7 +22,7 @@ constexpr char INPUT_KEY_E = 0b000001;
 enum PacketID { CS_LOGIN, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT };
 
 // Target Type
-enum TargetType { TARGET_PLAYER, TARGET_BULLET };
+enum TargetType { TARGET_PLAYER, TARGET_BULLET, TARGET_NPC };
 
 // Packets ( CS: Client->Server, SC: Server->Client )
 #pragma pack (push, 1)
@@ -93,5 +93,4 @@ struct SC_ROTATE_OBJECT_PACKET {
 	float up_x, up_y, up_z;
 	float look_x, look_y, look_z;
 };
-
 #pragma pack (pop)
