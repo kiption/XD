@@ -1563,7 +1563,7 @@ CLionObject::~CLionObject()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CZebraObject::CZebraObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks)
+CBuildingObject::CBuildingObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks)
 {
 	CLoadedModelInfo *pZebraModel = pModel;
 	if (!pZebraModel) pZebraModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Zebra.bin", NULL);
@@ -1572,7 +1572,7 @@ CZebraObject::CZebraObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pZebraModel);
 }
 
-CZebraObject::~CZebraObject()
+CBuildingObject::~CBuildingObject()
 {
 }
 

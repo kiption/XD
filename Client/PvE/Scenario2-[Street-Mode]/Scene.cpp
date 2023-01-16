@@ -31,7 +31,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights = new LIGHT[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
-	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
+	m_xmf4GlobalAmbient = XMFLOAT4(0.65f, 0.65f, 0.65f, 1.0f);
 
 	m_pLights[0].m_bEnable = true;
 	m_pLights[0].m_nType = POINT_LIGHT;
@@ -115,28 +115,28 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[1]->m_pSkinnedAnimationController->SetTrackWeight(1, 0.2f);
 	m_ppHierarchicalGameObjects[1]->SetPosition(350.0f, m_pTerrain->GetHeight(350.0f, 670.0f), 670.0f);
 
-	CLoadedModelInfo *pZebraModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Zebra.bin", NULL);
-	m_ppHierarchicalGameObjects[2] = new CZebraObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pZebraModel, 1);
+	CLoadedModelInfo *pBuildObject = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StyleD-Building1.bin", NULL);
+	m_ppHierarchicalGameObjects[2] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBuildObject, 1);
 	m_ppHierarchicalGameObjects[2]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[2]->SetPosition(280.0f, m_pTerrain->GetHeight(280.0f, 640.0f), 620.0f);
-	m_ppHierarchicalGameObjects[2]->SetScale(0.1f, 0.1f, 0.1f);
-	if (pZebraModel) delete pZebraModel;
+	m_ppHierarchicalGameObjects[2]->SetPosition(230.0f, m_pTerrain->GetHeight(230.0f, 640.0f), 620.0f);
+	m_ppHierarchicalGameObjects[2]->SetScale(3.1f, 3.1f, 3.1f);
+	if (pBuildObject) delete pBuildObject;
 
-	CLoadedModelInfo *pLionModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Lion.bin", NULL);
-	m_ppHierarchicalGameObjects[3] = new CLionObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pLionModel, 1);
-	m_ppHierarchicalGameObjects[3]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	CLoadedModelInfo *pLionModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StyleA-Building1_(2).bin", NULL);
+	m_ppHierarchicalGameObjects[3] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pLionModel, 1);
+	//m_ppHierarchicalGameObjects[3]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[3]->SetPosition(300.0f, m_pTerrain->GetHeight(300.0f, 650.0f), 630.0f);
 	m_ppHierarchicalGameObjects[3]->SetScale(1.0f, 1.0f, 1.0f);
-	m_ppHierarchicalGameObjects[4] = new CLionObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pLionModel, 1);
-	m_ppHierarchicalGameObjects[4]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+	m_ppHierarchicalGameObjects[4] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pLionModel, 1);
+	//m_ppHierarchicalGameObjects[4]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
 	m_ppHierarchicalGameObjects[4]->SetPosition(310.0f, m_pTerrain->GetHeight(310.0f, 630.0f), 630.0f);
 	m_ppHierarchicalGameObjects[4]->SetScale(1.0f, 1.0f, 1.0f);
-	m_ppHierarchicalGameObjects[5] = new CLionObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pLionModel, 1);
-	m_ppHierarchicalGameObjects[5]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	m_ppHierarchicalGameObjects[5] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pLionModel, 1);
+	//m_ppHierarchicalGameObjects[5]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	m_ppHierarchicalGameObjects[5]->SetPosition(250.0f, m_pTerrain->GetHeight(250.0f, 600.0f), 600.0f);
 	m_ppHierarchicalGameObjects[5]->SetScale(1.0f, 1.0f, 1.0f);
-	m_ppHierarchicalGameObjects[6] = new CLionObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pLionModel, 1);
-	m_ppHierarchicalGameObjects[6]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
+	m_ppHierarchicalGameObjects[6] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pLionModel, 1);
+	//m_ppHierarchicalGameObjects[6]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	m_ppHierarchicalGameObjects[6]->SetPosition(270.0f, m_pTerrain->GetHeight(270.0f, 620.0f), 620.0f);
 	m_ppHierarchicalGameObjects[6]->SetScale(1.0f, 1.0f, 1.0f);
 	if (pLionModel) delete pLionModel;
