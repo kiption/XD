@@ -20,6 +20,7 @@ struct Viewport
     float bottom;
 };
 
+// 사용할 광선에 대한 상수 버퍼 구조체 
 struct RayGenConstantBuffer
 {
     Viewport viewport;

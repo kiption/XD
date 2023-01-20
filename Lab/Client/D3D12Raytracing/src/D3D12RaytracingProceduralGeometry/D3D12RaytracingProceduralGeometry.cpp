@@ -665,6 +665,10 @@ void D3D12RaytracingProceduralGeometry::BuildGeometry()
 }
 
 // Build geometry descs for bottom-level AS.
+//하위수준 가속구조내에서는 D3D12_RAYTRACING_GEOMETRY_DESC의 배열을 통해, \
+// GPU 메모리에 불투명한 가속주로를 빌드하도록하며 \
+이 가속구조는 시스템이 광선을 지오메트리와 교차시키는데 사용한다.
+
 void D3D12RaytracingProceduralGeometry::BuildGeometryDescsForBottomLevelAS(array<vector<D3D12_RAYTRACING_GEOMETRY_DESC>, BottomLevelASType::Count>& geometryDescs)
 {
     // Mark the geometry as opaque. 
@@ -861,6 +865,7 @@ AccelerationStructureBuffers D3D12RaytracingProceduralGeometry::BuildTopLevelAS(
             bottomLevelAS[0].accelerationStructure->GetGPUVirtualAddress(),
             bottomLevelAS[1].accelerationStructure->GetGPUVirtualAddress()
         };
+        //여러 최상위 가속 구조를 생성하여, 시스템이 광선을 추적하는 대상을 나타낸다.
         BuildBotomLevelASInstanceDescs<D3D12_RAYTRACING_INSTANCE_DESC>(bottomLevelASaddresses, &instanceDescsResource);
     }
     
@@ -1131,6 +1136,8 @@ void D3D12RaytracingProceduralGeometry::DoRaytracing()
     auto commandList = m_deviceResources->GetCommandList();
     auto frameIndex = m_deviceResources->GetCurrentFrameIndex();
 
+    // [3] 광선 생성 셰이더 호출의 그리드를 호출하고, 각 호출된 스레드는 전체 그리드에서 해당위치를 알고 \\
+    TraceRay()를 통해 임의의 레이를 생성한다. 서로에 대해 정의된 스레드 실행순서가 없는 것이다.
     auto DispatchRays = [&](auto* raytracingCommandList, auto* stateObject, auto* dispatchDesc)
     {
         dispatchDesc->HitGroupTable.StartAddress = m_hitGroupShaderTable->GetGPUVirtualAddress();
@@ -1144,10 +1151,13 @@ void D3D12RaytracingProceduralGeometry::DoRaytracing()
         dispatchDesc->Width = m_width;
         dispatchDesc->Height = m_height;
         dispatchDesc->Depth = 1;
+        // [1] 파이프라인 상태를 통해 명력 목록에 설정되어야한다 
         raytracingCommandList->SetPipelineState1(stateObject);
 
         m_gpuTimers[GpuTimers::Raytracing].Start(commandList);
-        raytracingCommandList->DispatchRays(dispatchDesc);
+        // [2] Draw()에 의해 호출되고 Dispatch()를 통해 컴퓨팅이 호출되는것과 같다.
+
+        raytracingCommandList->DispatchRays(dispatchDesc); 
         m_gpuTimers[GpuTimers::Raytracing].Stop(commandList);
     };
 

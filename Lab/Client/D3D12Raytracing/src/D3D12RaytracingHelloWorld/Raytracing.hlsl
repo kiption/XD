@@ -14,16 +14,21 @@
 
 #include "RaytracingHlslCompat.h"
 
+// RayTracing 가속구조
 RaytracingAccelerationStructure Scene : register(t0, space0);
 RWTexture2D<float4> RenderTarget : register(u0);
 ConstantBuffer<RayGenConstantBuffer> g_rayGenCB : register(b0);
 
+// 고정 기능 삼각형과 광선의 교차를 사용하여 적중하는 타입별로(미스, 생성, 히트) 속성을 따진다.
 typedef BuiltInTriangleIntersectionAttributes MyAttributes;
+
+// 광선 색상 탑재량을 계산하기 위한 색상
 struct RayPayload
 {
     float4 color;
 };
 
+// x,y좌표가 뷰포트내에 있는지 판별
 bool IsInsideViewport(float2 p, Viewport viewport)
 {
     return (p.x >= viewport.left && p.x <= viewport.right)
