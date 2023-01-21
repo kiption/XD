@@ -357,7 +357,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 			break;
         case WM_RBUTTONDOWN:
 			m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
-			((CTerrainPlayer*)m_pPlayer)->FireBullet(NULL);
+			((CMyPlayer*)m_pPlayer)->FireBullet(NULL);
 		case WM_LBUTTONDOWN:
         case WM_LBUTTONUP:
         case WM_RBUTTONUP:
@@ -414,7 +414,7 @@ void CGameFramework::BuildObjects()
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
 #ifdef _WITH_TERRAIN_PLAYER
-	CTerrainPlayer *pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
+	CMyPlayer *pPlayer = new CMyPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
 #else
 	CAirplanePlayer *pPlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL);
 	pPlayer->SetPosition(XMFLOAT3(425.0f, 240.0f, 640.0f));
@@ -477,7 +477,7 @@ void CGameFramework::ProcessInput()
 				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
 				else
-					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+					m_pPlayer->Rotate(0.0, cyDelta, 0.0f);
 			}
 			if (dwDirection) m_pPlayer->Move(dwDirection, 10.25f, true);
 		}
