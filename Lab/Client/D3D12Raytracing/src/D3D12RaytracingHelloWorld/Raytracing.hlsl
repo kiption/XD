@@ -63,7 +63,6 @@ void MyRaygenShader()
         // Set TMin to a non-zero small value to avoid aliasing issues due to floating - point errors.
         
         // TMin should be kept small to prevent missing geometry at close contact areas.
-        
         // 부동 소수점 오류로 인한 앨리어싱 문제를 방지하려면 완전한 0이 아닌 작은 값으로 설정
         // 이렇게 작게 유지하는 이유는 광선이 가까운 영역에 접촉했을 때, 형상이 일그러지지 않게 하기 위함.
         ray.TMin = 0.001;

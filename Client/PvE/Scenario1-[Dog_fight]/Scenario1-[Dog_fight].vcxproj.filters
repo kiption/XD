@@ -1,131 +1,161 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="소스 파일">
+    <Filter Include="Client">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="헤더 파일">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    <Filter Include="Client\Camera">
+      <UniqueIdentifier>{09ddcce5-54ff-49cb-84c2-b3a8bc6a34d2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="리소스 파일">
+    <Filter Include="Client\Asset">
+      <UniqueIdentifier>{c6a4cb56-57ae-4683-919b-d2a3880debd8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Object">
+      <UniqueIdentifier>{c48352f1-0e87-4d6d-848b-fc7a6828a6a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{1b96aeee-c358-4514-9e17-9f25af0d59ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Mesh">
+      <UniqueIdentifier>{4999696d-4cb9-4c99-bea7-6e90042caa80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Shader">
+      <UniqueIdentifier>{9a4db5e9-afe9-44b8-9be9-9d304b31f098}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Scene">
+      <UniqueIdentifier>{6530918d-57a1-4dcf-a488-ee51e93937a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Asset\Sound">
+      <UniqueIdentifier>{aea36081-333a-47f5-96ab-f960b04f27ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Time">
+      <UniqueIdentifier>{9603b86e-cb7d-4acc-a13d-02951cc4695c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PCH">
+      <UniqueIdentifier>{09aef65c-3f33-4596-b2ff-2aa25d4bb875}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Player">
+      <UniqueIdentifier>{323079bb-a56b-44b4-b8e4-72c818a8e043}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{33417715-ffdb-431d-ad52-650e8cbcb287}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Framework">
+      <UniqueIdentifier>{85611613-21b5-4e9e-bcc9-59d4f84407de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource_File">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Scenario1-[Dog_fight].h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="d3dx12.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="DDSTextureLoader12.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="GameFramework.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="GameSound.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Network.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Client\Camera</Filter>
     </ClInclude>
     <ClInclude Include="Object.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Client\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Network.h">
+      <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="ObjectsInfo.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Server\Server\protocol.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Client\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Client\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Client\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSound.h">
+      <Filter>Client\Asset\Sound</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Client\Time</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>PCH</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSTextureLoader12.h">
+      <Filter>PCH</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dx12.h">
+      <Filter>PCH</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Client\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenario1-[Dog_fight].h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="GameFramework.h">
+      <Filter>Client\Framework</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Scenario1-[Dog_fight].cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="DDSTextureLoader12.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="GameFramework.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="GameSound.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Client\Camera</Filter>
     </ClCompile>
     <ClCompile Include="Object.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Client\Object</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Client\Mesh</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Client\Shader</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Client\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSound.cpp">
+      <Filter>Client\Asset\Sound</Filter>
     </ClCompile>
     <ClCompile Include="Timer.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Client\Time</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>PCH</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSTextureLoader12.cpp">
+      <Filter>PCH</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Client\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenario1-[Dog_fight].cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="GameFramework.cpp">
+      <Filter>Client\Framework</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Scenario1-[Dog_fight].rc">
-      <Filter>리소스 파일</Filter>
+      <Filter>Resource_File</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="small.ico">
-      <Filter>리소스 파일</Filter>
+      <Filter>Resource_File</Filter>
     </Image>
     <Image Include="Scenario1-[Dog_fight].ico">
-      <Filter>리소스 파일</Filter>
+      <Filter>Resource_File</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Light.hlsl" />
-    <FxCompile Include="Shaders.hlsl" />
+    <FxCompile Include="Light.hlsl">
+      <Filter>Client\Asset</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders.hlsl">
+      <Filter>Client\Asset</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

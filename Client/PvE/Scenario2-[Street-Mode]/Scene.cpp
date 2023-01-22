@@ -95,7 +95,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	XMFLOAT3 xmf3Scale(4.0f, 1.0f, 4.0f);
 	XMFLOAT3 xmf3Normal(0.0f, 0.2, 0.0);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf3Normal);
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/LargeTerrain(2049)8Bit.raw"),4000, 4000, xmf3Scale, xmf3Normal);
 
 	m_nHierarchicalGameObjects = 8;
 	m_ppHierarchicalGameObjects = new CGameObject*[m_nHierarchicalGameObjects];
