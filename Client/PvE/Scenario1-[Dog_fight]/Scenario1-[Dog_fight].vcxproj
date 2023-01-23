@@ -149,34 +149,45 @@
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="GameSound.h" />
+    <ClInclude Include="HeightMapMesh.h" />
+    <ClInclude Include="MainPlayer.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="ObjectsInfo.h" />
+    <ClInclude Include="ParticleMesh.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Scenario1-[Dog_fight].h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="SkyboxMesh.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TerrainShader.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="GameSound.cpp" />
+    <ClCompile Include="HeightMapMesh.cpp" />
+    <ClCompile Include="MainPlayer.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="ParticleMesh.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scenario1-[Dog_fight].cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="SkyboxMesh.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TerrainShader.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>

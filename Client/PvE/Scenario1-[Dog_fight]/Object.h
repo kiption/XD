@@ -5,6 +5,10 @@
 #pragma once
 
 #include "Mesh.h"
+#include "HeightMapMesh.h"
+#include "SkyboxMesh.h"
+#include "ParticleMesh.h"
+
 #include "Camera.h"
 
 

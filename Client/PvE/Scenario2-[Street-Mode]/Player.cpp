@@ -85,38 +85,35 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 void CPlayer::Rotate(float x, float y, float z)
 {
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
-	if ((nCurrentCameraMode == FIRST_PERSON_CAMERA) || (nCurrentCameraMode == THIRD_PERSON_CAMERA))
+	if ((nCurrentCameraMode == FIRST_PERSON_CAMERA))
 	{
-		if (x != 0.0f)
+		if (x != 0.0)
 		{
 			m_fPitch += x;
-			if (m_fPitch > +160.0f) { x -= (m_fPitch - 160.0f); m_fPitch = +160.0f; }
+			if (m_fPitch > +89.0f) { x -= (m_fPitch - 89.0f); m_fPitch = +89.0f; }
 			if (m_fPitch < -89.0f) { x -= (m_fPitch + 89.0f); m_fPitch = -89.0f; }
 		}
+		/*
+		if (z != 0.0f)
+		{
+			m_fRoll += z;
+			if (m_fRoll > +20.0f) { z -= (m_fRoll - 20.0f); m_fRoll = +20.0f; }
+			if (m_fRoll < -20.0f) { z -= (m_fRoll + 20.0f); m_fRoll = -20.0f; }
+		}*/
 		if (y != 0.0f)
 		{
 			m_fYaw += y;
 			if (m_fYaw > 360.0f) m_fYaw -= 360.0f;
 			if (m_fYaw < 0.0f) m_fYaw += 360.0f;
 		}
-		if (z != 0.0f)
-		{
-			m_fRoll += z;
-			if (m_fRoll > +20.0f) { z -= (m_fRoll - 20.0f); m_fRoll = +20.0f; }
-			if (m_fRoll < -20.0f) { z -= (m_fRoll + 20.0f); m_fRoll = -20.0f; }
-		}
 		m_pCamera->Rotate(x, y, z);
-		if (y != 0.0f)
-		{
-			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
-			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-		}
+
 	}
 	else if (nCurrentCameraMode == SPACESHIP_CAMERA)
 	{
-		m_pCamera->Rotate(x, y, z);
-	/*	if (x != 0.0f)
+	
+
+	/*	if (x != 0.0)
 		{
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(x));
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
@@ -128,14 +125,25 @@ void CPlayer::Rotate(float x, float y, float z)
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 		}
-	/*	if (z != 0.0f)
-		{
-			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(z));
-			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
-			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-		}*/
+		/*	if (z != 0.0f)
+			{
+				XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(z));
+				m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
+				m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+			}*/
+		m_pCamera->Rotate(x, y, z);
 	}
+	else if (nCurrentCameraMode == THIRD_PERSON_CAMERA)
+	{
+		if (y != 0.0f)
+		{
+			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
+			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
+			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+		}
+		m_pCamera->Rotate(x, y, z);
 
+	}
 	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
 	m_xmf3Right = Vector3::CrossProduct(m_xmf3Up, m_xmf3Look, true);
 	m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right, true);
@@ -224,6 +232,7 @@ void CPlayer::OnPrepareRender()
 	m_xmf4x4ToParent._41 = m_xmf3Position.x; m_xmf4x4ToParent._42 = m_xmf3Position.y; m_xmf4x4ToParent._43 = m_xmf3Position.z;
 
 	m_xmf4x4ToParent = Matrix4x4::Multiply(XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z), m_xmf4x4ToParent);
+
 }
 
 void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -262,6 +271,8 @@ CMyPlayer::CMyPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 
 	CLoadedModelInfo* pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", m_pShader);
 	SetChild(pAngrybotModel->m_pModelRootObject, true);
+	pAngrybotModel->m_pModelRootObject->OnPrepareAnimate();
+	m_pBulletFindFrame=pAngrybotModel->m_pModelRootObject->FindFrame("Bip001_Footsteps");
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 2, pAngrybotModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
@@ -301,7 +312,6 @@ CMyPlayer::CMyPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 
 	if (pBulletMesh) delete pBulletMesh;
 	if (pAngrybotModel) delete pAngrybotModel;
-	OnPrepareRender();
 }
 
 CMyPlayer::~CMyPlayer()
@@ -332,9 +342,10 @@ CCamera* CMyPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityXZ(300.0f);
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
-		m_pCamera->SetTimeLag(0.5f);
-		m_pCamera->SetOffset(XMFLOAT3(+0.5f,-2.5f, -2.5f));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 50.0f);
+		m_pCamera->SetTimeLag(0.25);
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, -15.0f, 1.5f));
+		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_pBulletFindFrame->GetPosition()), m_pCamera->GetOffset()));
+		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 70.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
@@ -460,9 +471,9 @@ void CMyPlayer::FireBullet(CGameObject* pLockedObject)
 	}
 }
 
-void CMyPlayer::OnPrepareRender()
+void CMyPlayer::OnPrepareAnimate()
 {
-	//m_pBulletFindFrame->FindFrame("Bip001_R_Finger0Nub");
+	m_pBulletFindFrame->FindFrame("Bip001_Footsteps");
 	CPlayer::OnPrepareRender();
 }
 
@@ -487,5 +498,8 @@ void CMyPlayer::Animate(float fTimeElapsed)
 			m_ppBullets[i]->Animate(fTimeElapsed);
 		}
 	}
+
+	
+	
 	CPlayer::Animate(fTimeElapsed);
 }

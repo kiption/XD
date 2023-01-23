@@ -48,6 +48,24 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Client\Mesh\Terrain">
+      <UniqueIdentifier>{cd34f57f-ab47-4991-ac20-a99170f94348}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Mesh\Skybox">
+      <UniqueIdentifier>{2db91bd7-c46e-4587-be4e-c7f37e643fd3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Mesh\Particle">
+      <UniqueIdentifier>{d66ab2c7-b1aa-4055-acda-3466badef671}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Player\PlayerInfo">
+      <UniqueIdentifier>{0bc0e2fa-1aad-46f2-a040-c536c00f38ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Player\MainPlayer">
+      <UniqueIdentifier>{639d266d-d7fe-477d-9d4a-16f77165d955}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Client\Shader\Terrain">
+      <UniqueIdentifier>{479d8c85-a6e3-456b-9c76-c7b3805191ed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -89,14 +107,32 @@
     <ClInclude Include="d3dx12.h">
       <Filter>PCH</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Client\Player</Filter>
-    </ClInclude>
     <ClInclude Include="Scenario1-[Dog_fight].h">
       <Filter>Main</Filter>
     </ClInclude>
     <ClInclude Include="GameFramework.h">
       <Filter>Client\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="HeightMapMesh.h">
+      <Filter>Client\Mesh\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyboxMesh.h">
+      <Filter>Client\Mesh\Skybox</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleMesh.h">
+      <Filter>Client\Mesh\Particle</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>Client\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Client\Player\PlayerInfo</Filter>
+    </ClInclude>
+    <ClInclude Include="MainPlayer.h">
+      <Filter>Client\Player\MainPlayer</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainShader.h">
+      <Filter>Client\Shader\Terrain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -127,14 +163,29 @@
     <ClCompile Include="DDSTextureLoader12.cpp">
       <Filter>PCH</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Client\Player</Filter>
-    </ClCompile>
     <ClCompile Include="Scenario1-[Dog_fight].cpp">
       <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="GameFramework.cpp">
       <Filter>Client\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="HeightMapMesh.cpp">
+      <Filter>Client\Mesh\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyboxMesh.cpp">
+      <Filter>Client\Mesh\Skybox</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleMesh.cpp">
+      <Filter>Client\Mesh\Particle</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Client\Player\PlayerInfo</Filter>
+    </ClCompile>
+    <ClCompile Include="MainPlayer.cpp">
+      <Filter>Client\Player\MainPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainShader.cpp">
+      <Filter>Client\Shader\Terrain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

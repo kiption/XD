@@ -110,7 +110,7 @@ public:
 	float						m_fBulletEffectiveRange = 800.0f;
 	CBulletObject* pBulletObject = NULL;
 	CBulletObject* m_ppBullets[BULLETS];
-
+	CGameObject* m_pBulletFindFrame{ NULL };
 
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 
@@ -122,7 +122,7 @@ public:
 	virtual void Update(float fTimeElapsed);
 	
 	void FireBullet(CGameObject* pLockedObject);
-	virtual void OnPrepareRender();
+	virtual void OnPrepareAnimate();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 	virtual void PrepareAnimate();

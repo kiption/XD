@@ -6,6 +6,7 @@
 
 #include "Shader.h"
 #include "Player.h"
+#include "MainPlayer.h"
 #include "GameSound.h"
 
 

@@ -155,17 +155,17 @@ CSpaceShipCamera::CSpaceShipCamera(CCamera *pCamera) : CCamera(pCamera)
 
 void CSpaceShipCamera::Rotate(float fPitch, float fYaw, float fRoll)
 {
-	if (m_pPlayer && (fPitch != 0.0f))
-	{
-		XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
-		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Right), XMConvertToRadians(fPitch));
-		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
-		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-		m_xmf3Position = Vector3::Subtract(m_xmf3Position, m_pPlayer->GetPosition());
-		m_xmf3Position = Vector3::TransformCoord(m_xmf3Position, xmmtxRotate);
-		m_xmf3Position = Vector3::Add(m_xmf3Position, m_pPlayer->GetPosition());
-	}
+	//if (m_pPlayer && (fPitch != 0.0f))
+	//{
+	//	XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
+	//	XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Right), XMConvertToRadians(fPitch));
+	//	m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+	//	m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
+	//	m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
+	//	m_xmf3Position = Vector3::Subtract(m_xmf3Position, m_pPlayer->GetPosition());
+	//	m_xmf3Position = Vector3::TransformCoord(m_xmf3Position, xmmtxRotate);
+	//	m_xmf3Position = Vector3::Add(m_xmf3Position, m_pPlayer->GetPosition());
+	//}
 	if (m_pPlayer && (fYaw != 0.0f))
 	{
 		XMFLOAT3 xmf3Up = m_pPlayer->GetUpVector();
@@ -199,11 +199,8 @@ void CSpaceShipCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
 		xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
 
-		XMFLOAT3 PlayerPos= m_pPlayer->GetPosition();
 		XMFLOAT3 xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, xmf4x4Rotate);
 		XMFLOAT3 xmf3Position = Vector3::Add(m_pPlayer->GetPosition(), xmf3Offset);
-		xmf3Position.y += 1.0f;
-		xmf3Position.z += 0.0f;
 		XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
 		float fLength = Vector3::Length(xmf3Direction);
 		xmf3Direction = Vector3::Normalize(xmf3Direction);

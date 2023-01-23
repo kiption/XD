@@ -4,7 +4,7 @@
 #include "Player.h"
 #include "Scene.h"
 #include "GameSound.h"
-
+#include "MainPlayer.h"
 #include <queue> //S
 enum MButton { L_BUTTON, R_BUTTON };
 struct MouseInputVal {

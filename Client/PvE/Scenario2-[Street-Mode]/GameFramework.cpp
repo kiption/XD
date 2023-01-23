@@ -477,7 +477,7 @@ void CGameFramework::ProcessInput()
 				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
 				else
-					m_pPlayer->Rotate(0.0, cyDelta, 0.0f);
+					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 			}
 			if (dwDirection) m_pPlayer->Move(dwDirection, 10.25f, true);
 		}
