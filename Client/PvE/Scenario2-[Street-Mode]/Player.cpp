@@ -269,10 +269,14 @@ CMyPlayer::CMyPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 
-	CLoadedModelInfo* pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", m_pShader);
+	pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", m_pShader);
+	//pAngrybotModel->m_pModelRootObject->AABBCenter = pAngrybotModel->m_pModelRootObject->m_pMesh->m_xmf3AABBCenter;
+	//pAngrybotModel->m_pModelRootObject->AABBExtents = pAngrybotModel->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents;
 	SetChild(pAngrybotModel->m_pModelRootObject, true);
 	pAngrybotModel->m_pModelRootObject->OnPrepareAnimate();
 	m_pBulletFindFrame=pAngrybotModel->m_pModelRootObject->FindFrame("Bip001_Footsteps");
+
+	
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 2, pAngrybotModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
@@ -356,7 +360,7 @@ CCamera* CMyPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.5f);
-		m_pCamera->SetOffset(XMFLOAT3(5.0f, 4.0f, -8.0f));
+		m_pCamera->SetOffset(XMFLOAT3(4.0f, 0.0f, -12.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 70.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -499,7 +503,5 @@ void CMyPlayer::Animate(float fTimeElapsed)
 		}
 	}
 
-	
-	
 	CPlayer::Animate(fTimeElapsed);
 }

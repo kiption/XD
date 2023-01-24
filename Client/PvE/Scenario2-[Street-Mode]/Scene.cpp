@@ -118,8 +118,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CLoadedModelInfo *pBuildObject = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StyleD-Building1.bin", NULL);
 	m_ppHierarchicalGameObjects[2] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBuildObject, 1);
 	m_ppHierarchicalGameObjects[2]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[2]->SetPosition(230.0f, m_pTerrain->GetHeight(230.0f, 640.0f), 620.0f);
-	m_ppHierarchicalGameObjects[2]->SetScale(3.1f, 3.1f, 3.1f);
+	m_ppHierarchicalGameObjects[2]->SetPosition(100.0f, m_pTerrain->GetHeight(100.0f, 110.0f), 110.0f);
+	m_ppHierarchicalGameObjects[2]->SetScale(1.1f, 1.1f, 1.1f);
 	if (pBuildObject) delete pBuildObject;
 
 	CLoadedModelInfo *pLionModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/StyleA-Building1_(2).bin", NULL);
@@ -148,7 +148,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	if (pEagleModel) delete pEagleModel;
 
 	m_nShaders = 2;
-	m_ppShaders = new CShader*[m_nShaders];
+	m_ppShaders = new CShader * [m_nShaders];
 
 	CEthanObjectsShader *pEthanObjectsShader = new CEthanObjectsShader();
 	pEthanObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEthanModel, m_pTerrain);
@@ -552,6 +552,23 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
 		m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
 	}
+	
+	m_ppHierarchicalGameObjects[2]->m_OOBB = BoundingOrientedBox(XMFLOAT3(m_ppHierarchicalGameObjects[2]->GetPosition()),
+		XMFLOAT3(20.0,100.0,20.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
+	
+	m_pPlayer->m_OOBB = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), 
+		XMFLOAT3(10.0,10.0,10.0), XMFLOAT4(0.0, 0.0, 0.0, 1.0));
+
+
+
+	if (m_ppHierarchicalGameObjects[2]->m_OOBB.Intersects(m_pPlayer->m_OOBB))
+	{
+		m_ppHierarchicalGameObjects[2]->Rotate(0.0, 5.0, 0.0);
+	
+		m_pPlayer->m_xmf3Velocity=XMFLOAT3(.0,.0,.0);
+		//m_pPlayer->m_xmf3Position = Vector3::Add(m_pPlayer->m_xmf3Position, XMFLOAT3(-1.0,-1.0,-1.0));
+	}
+	
 
 	static float fAngle = 0.0f;
 	fAngle -= 1.50f;
@@ -583,7 +600,7 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nShaders-1; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
 	{

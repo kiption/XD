@@ -810,7 +810,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (int i = 0; i < 3; i++) if (m_ppNPCShaders[i])m_ppNPCShaders[i]->Render(pd3dCommandList, pCamera, 0);
 	//for (int i = 0; i < 1; i++) if (m_ppOtherPlayers[i])m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera, 0);
 
-	if (m_pUseWaterMove) m_pUseWaterMove->Render(pd3dCommandList, pCamera);
+	//if (m_pUseWaterMove) m_pUseWaterMove->Render(pd3dCommandList, pCamera);
 
 	if (m_bOutlineMode)
 	{

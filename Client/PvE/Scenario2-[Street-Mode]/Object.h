@@ -361,7 +361,9 @@ public:
 	CGameObject 					*m_pParent = NULL;
 	CGameObject 					*m_pChild = NULL;
 	CGameObject 					*m_pSibling = NULL;
-
+	XMFLOAT3 AABBCenter = XMFLOAT3(0.0, 0.0, 0.0);
+	XMFLOAT3 AABBExtents = XMFLOAT3(0.0, 0.0, 0.0);
+	BoundingOrientedBox m_OOBB;
 	float m_fMovingSpeed = 0.0f;
 	float m_fMovingRange = 0.0f;
 	float m_fRotationSpeed = 0.0f;
@@ -587,8 +589,13 @@ public:
 class CBuildingObject : public CGameObject
 {
 public:
+	CLoadedModelInfo* pBuildingObject = NULL;
 	CBuildingObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks);
 	virtual ~CBuildingObject();
+	virtual void Animate(float fTimeElapsed);
+
+	
+	
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -457,8 +457,8 @@ void CGameFramework::ProcessInput()
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 1.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 1.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
@@ -524,7 +524,7 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::FrameAdvance()
 {    
-	m_GameTimer.Tick(30.0f);
+	m_GameTimer.Tick(31.0);
 	
 	ProcessInput();
 

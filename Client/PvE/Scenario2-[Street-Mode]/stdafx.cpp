@@ -24,6 +24,7 @@ CGameObject** LoadGameObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	BYTE nStrLength = 0, nObjectNameLength = 0;
 	UINT nReads = 0, nMaterials = 0;
 	size_t nConverted = 0;
+	BoundingOrientedBox xmf3AABBExtents{};
 
 	nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pFile);
 	nReads = (UINT)::fread(pstrToken, sizeof(char), nStrLength, pFile); //"<GameObjects>:"
@@ -43,8 +44,8 @@ CGameObject** LoadGameObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		nReads = (UINT)::fread(&nStrLength, sizeof(BYTE), 1, pFile);
 		nReads = (UINT)::fread(pstrToken, sizeof(char), nStrLength, pFile); //"<Materials>:"
 		nReads = (UINT)::fread(&nMaterials, sizeof(int), 1, pFile);
-		pGameObject = new CGameObject(nMaterials);
 
+		pGameObject = new CGameObject(nMaterials);
 
 		strcpy_s(pGameObject->m_pstrFrameName, 64, pstrGameObjectName);
 
@@ -55,6 +56,7 @@ CGameObject** LoadGameObjectsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 			if (!strcmp(pstrGameObjectName, ppGameObjects[j]->m_pstrFrameName))
 			{
 				pObjectFound = ppGameObjects[j];
+				
 				pGameObject->SetMesh(ppGameObjects[j]->m_pMesh);
 			
 				for (UINT k = 0; k < nMaterials; k++) pGameObject->SetMaterial(k, ppGameObjects[j]->m_ppMaterials[k]);
