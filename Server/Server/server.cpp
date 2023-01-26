@@ -479,59 +479,61 @@ void process_packet(int client_id, char* packet)
 							arr_cnt++;
 						}
 					}
-					if (new_bullet_id == -1)
-						break;
 
-					// shoot time update
-					shoot_time = chrono::system_clock::now();
+					// 벡터에 남아있는 공간이 있을 때에만 발사합니다.
+					if (new_bullet_id != -1) {
 
-					// Bullet 생성
-					bullets_arr[new_bullet_id].setId(new_bullet_id);
-					bullets_arr[new_bullet_id].setPos(clients[client_id].pos);
-					bullets_arr[new_bullet_id].setPitch(clients[client_id].pitch);
-					bullets_arr[new_bullet_id].setYaw(clients[client_id].yaw);
-					bullets_arr[new_bullet_id].setRoll(clients[client_id].roll);
-					bullets_arr[new_bullet_id].setRightvector(clients[client_id].m_rightvec);
-					bullets_arr[new_bullet_id].setUpvector(clients[client_id].m_upvec);
-					bullets_arr[new_bullet_id].setLookvector(clients[client_id].m_lookvec);
-					bullets_arr[new_bullet_id].setOwner(client_id);
-					bullets_arr[new_bullet_id].setInitialPos(bullets_arr[new_bullet_id].getPos());
+						// shoot time update
+						shoot_time = chrono::system_clock::now();
 
-					// 접속해있는 모든 클라이언트에게 새로운 Bullet정보를 보냅니다.
-					SC_ADD_OBJECT_PACKET add_bullet_packet;
-					add_bullet_packet.target = TARGET_BULLET;
-					add_bullet_packet.id = new_bullet_id;
-					strcpy_s(add_bullet_packet.name, "bullet");
-					add_bullet_packet.size = sizeof(add_bullet_packet);
-					add_bullet_packet.type = SC_ADD_OBJECT;
+						// Bullet 생성
+						bullets_arr[new_bullet_id].setId(new_bullet_id);
+						bullets_arr[new_bullet_id].setPos(clients[client_id].pos);
+						bullets_arr[new_bullet_id].setPitch(clients[client_id].pitch);
+						bullets_arr[new_bullet_id].setYaw(clients[client_id].yaw);
+						bullets_arr[new_bullet_id].setRoll(clients[client_id].roll);
+						bullets_arr[new_bullet_id].setRightvector(clients[client_id].m_rightvec);
+						bullets_arr[new_bullet_id].setUpvector(clients[client_id].m_upvec);
+						bullets_arr[new_bullet_id].setLookvector(clients[client_id].m_lookvec);
+						bullets_arr[new_bullet_id].setOwner(client_id);
+						bullets_arr[new_bullet_id].setInitialPos(bullets_arr[new_bullet_id].getPos());
 
-					add_bullet_packet.x = bullets_arr[new_bullet_id].getPos().x;
-					add_bullet_packet.y = bullets_arr[new_bullet_id].getPos().y;
-					add_bullet_packet.z = bullets_arr[new_bullet_id].getPos().z;
+						// 접속해있는 모든 클라이언트에게 새로운 Bullet정보를 보냅니다.
+						SC_ADD_OBJECT_PACKET add_bullet_packet;
+						add_bullet_packet.target = TARGET_BULLET;
+						add_bullet_packet.id = new_bullet_id;
+						strcpy_s(add_bullet_packet.name, "bullet");
+						add_bullet_packet.size = sizeof(add_bullet_packet);
+						add_bullet_packet.type = SC_ADD_OBJECT;
 
-					add_bullet_packet.right_x = bullets_arr[new_bullet_id].getRightvector().x;
-					add_bullet_packet.right_y = bullets_arr[new_bullet_id].getRightvector().y;
-					add_bullet_packet.right_z = bullets_arr[new_bullet_id].getRightvector().z;
+						add_bullet_packet.x = bullets_arr[new_bullet_id].getPos().x;
+						add_bullet_packet.y = bullets_arr[new_bullet_id].getPos().y;
+						add_bullet_packet.z = bullets_arr[new_bullet_id].getPos().z;
 
-					add_bullet_packet.up_x = bullets_arr[new_bullet_id].getUpvector().x;
-					add_bullet_packet.up_y = bullets_arr[new_bullet_id].getUpvector().y;
-					add_bullet_packet.up_z = bullets_arr[new_bullet_id].getUpvector().z;
+						add_bullet_packet.right_x = bullets_arr[new_bullet_id].getRightvector().x;
+						add_bullet_packet.right_y = bullets_arr[new_bullet_id].getRightvector().y;
+						add_bullet_packet.right_z = bullets_arr[new_bullet_id].getRightvector().z;
 
-					add_bullet_packet.look_x = bullets_arr[new_bullet_id].getLookvector().x;
-					add_bullet_packet.look_y = bullets_arr[new_bullet_id].getLookvector().y;
-					add_bullet_packet.look_z = bullets_arr[new_bullet_id].getLookvector().z;
+						add_bullet_packet.up_x = bullets_arr[new_bullet_id].getUpvector().x;
+						add_bullet_packet.up_y = bullets_arr[new_bullet_id].getUpvector().y;
+						add_bullet_packet.up_z = bullets_arr[new_bullet_id].getUpvector().z;
 
-					// server message
-					/*
-					cout << "Create New Bullet [ID: " << bullets_arr[new_bullet_id].getId()
-						<< ", Pos(" << bullets_arr[new_bullet_id].getPos().x
-						<< ", " << bullets_arr[new_bullet_id].getPos().y
-						<< ", " << bullets_arr[new_bullet_id].getPos().z << ")." << endl;
-					*/
+						add_bullet_packet.look_x = bullets_arr[new_bullet_id].getLookvector().x;
+						add_bullet_packet.look_y = bullets_arr[new_bullet_id].getLookvector().y;
+						add_bullet_packet.look_z = bullets_arr[new_bullet_id].getLookvector().z;
 
-					for (auto& pl : clients) {
-						if (pl.s_state == ST_INGAME)
-							pl.do_send(&add_bullet_packet);
+						// server message
+						/*
+						cout << "Create New Bullet [ID: " << bullets_arr[new_bullet_id].getId()
+							<< ", Pos(" << bullets_arr[new_bullet_id].getPos().x
+							<< ", " << bullets_arr[new_bullet_id].getPos().y
+							<< ", " << bullets_arr[new_bullet_id].getPos().z << ")." << endl;
+						*/
+
+						for (auto& pl : clients) {
+							if (pl.s_state == ST_INGAME)
+								pl.do_send(&add_bullet_packet);
+						}
 					}
 
 					// bullet unlock (구현 예정)
@@ -556,12 +558,12 @@ void process_packet(int client_id, char* packet)
 
 			XMFLOAT3 move_dir{ 0, 0, 0 };
 			XMFLOAT3 move_result{ 0, 0, 0 };
-			float tmp_scalar = 0.0f;
+			float move_scalar = 0.0f;
 
 			if (fabs(rt_p->delta_x) < fabs(rt_p->delta_y)) {	// 마우스 상,하 드래그: 기수를 조절합니다.기체를 x축 기준으로 회전시키고 앞뒤로 이동합니다.
 				// 1. pitch 회전
 				// pitch 설정
-				clients[client_id].pitch += -1.0f * rt_p->delta_y * SENSITIVITY * PI / 360.0f;
+				clients[client_id].pitch += -1.0f * rt_p->delta_y * PITCH_ROTATE_SCALAR * SENSITIVITY * PI / 360.0f;
 
 				// 비정상적인 회전 방지
 				if (clients[client_id].pitch > PITCH_LIMIT * PI / 360.0f)
@@ -575,12 +577,20 @@ void process_packet(int client_id, char* packet)
 				move_dir.y = clients[client_id].m_lookvec.y;
 				move_dir.z = clients[client_id].m_lookvec.z;
 
-				tmp_scalar = -1.0f * rt_p->delta_y * SENSITIVITY;
+				// 전진과 후진의 속도를 다르게 하기 위한 스칼라
+				float tmp_scalar = 0.0f;
+				if (rt_p->delta_y >= 0)
+					tmp_scalar = MOVE_BACK_SCALAR;
+				else
+					tmp_scalar = MOVE_FORWARD_SCALAR;
+
+				// 총 이동 스칼라
+				move_scalar = -1.0f * rt_p->delta_y * tmp_scalar * SENSITIVITY;
 			}
 			else {									// 마우스 좌,우 드래그: 기수의 수평을 조절합니다.기체를 z축 기준으로 회전시키고 좌우로 이동합니다.
 				// 1. roll 회전
 				// roll 설정
-				clients[client_id].roll += -1.0f * rt_p->delta_x * SENSITIVITY * PI / 360.0f;
+				clients[client_id].roll += -1.0f * rt_p->delta_x * ROLL_ROTATE_SCALAR * SENSITIVITY * PI / 360.0f;
 
 				// 비정상적인 회전 방지
 				if (clients[client_id].roll > ROLL_LIMIT * PI / 360.0f)
@@ -594,7 +604,7 @@ void process_packet(int client_id, char* packet)
 				move_dir.y = clients[client_id].m_rightvec.y;
 				move_dir.z = clients[client_id].m_rightvec.z;
 
-				tmp_scalar = rt_p->delta_x * SENSITIVITY;
+				move_scalar = rt_p->delta_x * SENSITIVITY;
 			}
 
 			// right, up, look 벡터 회전 & 업데이트
@@ -603,7 +613,7 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].m_lookvec = calcRotate(basic_coordinate.look, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
 
 			// 이동 & 좌표 업데이트
-			move_result = calcMove(clients[client_id].pos, move_dir, tmp_scalar);
+			move_result = calcMove(clients[client_id].pos, move_dir, move_scalar);
 			clients[client_id].pos = move_result;
 
 		}
