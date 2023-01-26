@@ -563,7 +563,7 @@ void CBulletMotionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 {
 	CTexture* ppSpriteTextures[3];
 	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Bullet.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/MainExplosion.dds", RESOURCE_TEXTURE2D, 0);
 	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Bullet.dds", RESOURCE_TEXTURE2D, 0);
 	ppSpriteTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -580,9 +580,9 @@ void CBulletMotionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 
 	CTexturedRectMesh* pSpriteMesh[3];
-	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 30.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 30.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	pSpriteMesh[2] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 30.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 4.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[2] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	m_nObjects = 3;
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3);
@@ -620,7 +620,7 @@ void CBulletMotionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 	CPlayer* pPlayer = pCamera->GetPlayer();
 	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
-	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 100.0f, false));
+	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 20.0f, false));
 	if (pCamera->GetMode() == THIRD_PERSON_CAMERA)
 	{
 		BulletPosition.y;
@@ -641,8 +641,11 @@ void CBulletMotionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 }
 void CBulletMotionShader::AnimateObjects(float fTimeElapsed)
 {
-	for (int i = 0; i < 2; i++) m_ppObjects[i]->SetPosition(BulletPosition);
-	for (int j = 2; j < 3; j++) m_ppObjects[j]->SetPosition(BulletPositionR);
+	////CPlayer* pPlayer = NULL;
+	////m_ppObjects[0]->SetPosition(pPlayer->GetPosition());
+	m_ppObjects[0]->SetPosition(BulletPosition);
+	m_ppObjects[1]->SetPosition(BulletPosition);
+	m_ppObjects[2]->SetPosition(BulletPositionR);
 }
 
 

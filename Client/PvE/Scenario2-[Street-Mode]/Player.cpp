@@ -293,7 +293,7 @@ CMyPlayer::CMyPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	CAnimationCallbackHandler* pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
 
-	CLoadedModelInfo* pBulletMesh = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", NULL);
+	CLoadedModelInfo* pBulletMesh = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/TEST/Bullet1(1).bin", NULL);
 	for (int i = 0; i < BULLETS; i++)
 	{
 		pBulletObject = new CBulletObject(m_fBulletEffectiveRange);
@@ -302,7 +302,7 @@ CMyPlayer::CMyPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 
 		pBulletObject->SetActive(false);
 		pBulletObject->m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 0, pBulletMesh);
-		//	pBulletObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+		//pBulletObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 		m_ppBullets[i] = pBulletObject;
 	}
 
