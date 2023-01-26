@@ -6,7 +6,9 @@
 #include "GameSound.h"
 #include "MainPlayer.h"
 #include <queue> //S
+
 enum MButton { L_BUTTON, R_BUTTON };
+
 struct MouseInputVal {
 	char button;
 	float delX, delY;
@@ -187,7 +189,7 @@ private:
 	CCamera						*m_pCamera = NULL;
 	CObjectsShader				*m_pShader = NULL;
 	POINT						m_ptOldCursorPos;
-	CGameObject* m_pLockedObject = NULL;
+
 	_TCHAR						m_pszFrameRate[70];
 
 	_TCHAR						m_pszCaption[100];

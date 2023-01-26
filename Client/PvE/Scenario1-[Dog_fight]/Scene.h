@@ -5,6 +5,16 @@
 #pragma once
 
 #include "Shader.h"
+#include "BillboardShader.h"
+#include "ParticleShader.h"
+#include "OutlineShader.h"
+#include "ObjectShader.h"
+#include "DynamicMappingShader.h"
+
+#include "ParticleObejct.h"
+#include "SkyboxObject.h"
+#include "TerrainObject.h"
+
 #include "Player.h"
 #include "MainPlayer.h"
 #include "GameSound.h"
@@ -45,6 +55,7 @@ struct MATERIALS
 	MATERIAL				m_pReflections[MAX_MATERIALS];
 };
 
+
 class CScene
 {
 public:
@@ -57,13 +68,15 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual void ReleaseShaderVariables();
+	
+	ID3D12RootSignature* GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
+	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
+
 
 	void BuildDefaultLightsAndMaterials();
 	void BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 	void ReleaseObjects();
 
-	ID3D12RootSignature *CreateGraphicsRootSignature(ID3D12Device *pd3dDevice);
-	ID3D12RootSignature *GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 
 	bool ProcessInput(UCHAR *pKeysBuffer);
     void AnimateObjects(CCamera* pCamera,float fTimeElapsed);
@@ -76,7 +89,7 @@ public:
 	void OnPostRenderParticle();
 	
 public:
-	ID3D12RootSignature					*m_pd3dGraphicsRootSignature = NULL;
+	
 
 	int									m_nGameObjects = 0;
 	CGameObject							**m_ppGameObjects = NULL;

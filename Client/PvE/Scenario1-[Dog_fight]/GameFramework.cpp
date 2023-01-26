@@ -598,6 +598,7 @@ constexpr char INPUT_KEY_D = 0b0001000;
 constexpr char INPUT_KEY_A = 0b0000100;
 constexpr char INPUT_KEY_E = 0b0000010;
 constexpr char INPUT_KEY_Q = 0b0000001;
+
 void CGameFramework::ProcessInput()
 {
 	static UCHAR pKeysBuffer[256];
@@ -620,19 +621,12 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[KEY_D] & 0xF0) {
 			inputKeyValue += INPUT_KEY_D;//S
 			dwDirection |= DIR_RIGHT;
-		/*	if (m_pCamera->GetMode() == SPACESHIP_CAMERA)
-			{
-				m_pPlayer->Rotate(0.0, 0.5, 0.0);
-			}*/
+		
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
 			inputKeyValue += INPUT_KEY_A;//S
 			dwDirection |= DIR_LEFT;
-			/*if (m_pCamera->GetMode() == SPACESHIP_CAMERA)
-			{
-				m_pPlayer->Rotate(0.0, -0.5, 0.0);
-			}*/
-
+	
 		}
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
@@ -646,8 +640,7 @@ void CGameFramework::ProcessInput()
 
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
 			inputKeyValue += INPUT_SPACEBAR;//S
-			//((CMainPlayer*)m_pPlayer)->FireBullet(NULL);
-			//m_GameSound.shootingSound();
+
 		}
 
 		// Server
@@ -683,13 +676,16 @@ void CGameFramework::ProcessInput()
 			inputMouseValue_temp.delY = 0.0f;
 
 			directionKeyPush = true;
+			
 		}
 		else if (pKeysBuffer[VK_RIGHT] & 0xF0) {
 			inputMouseValue_temp.button = L_BUTTON;
 			inputMouseValue_temp.delX = rightScalar;
 			inputMouseValue_temp.delY = 0.0f;
-
+	
+		
 			directionKeyPush = true;
+			
 		}
 
 		if (directionKeyPush) {
@@ -724,7 +720,7 @@ void CGameFramework::ProcessInput()
 				
 				inputMouseValue.delX = cxDelta;
 				inputMouseValue.delY = cyDelta;
-
+				
 				q_mouseInput.push(inputMouseValue);
 				//====
 			}

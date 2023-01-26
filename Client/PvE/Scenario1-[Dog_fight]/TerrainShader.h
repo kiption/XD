@@ -1,5 +1,6 @@
 #pragma once
 #include "Shader.h"
+#include "ObjectShader.h"
 
 class CTerrainShader : public CObjectsShader
 {

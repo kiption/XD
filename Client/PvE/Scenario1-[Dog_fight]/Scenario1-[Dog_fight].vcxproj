@@ -89,6 +89,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -104,6 +105,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -119,6 +121,7 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -134,6 +137,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -144,49 +148,75 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Server\Server\protocol.h" />
+    <ClInclude Include="BillboardObject.h" />
+    <ClInclude Include="BillboardShader.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
+    <ClInclude Include="DynamicMappingObject.h" />
+    <ClInclude Include="DynamicMappingShader.h" />
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="GameSound.h" />
     <ClInclude Include="HeightMapMesh.h" />
+    <ClInclude Include="HelicopterObejct.h" />
+    <ClInclude Include="HelicopterObjectShader.h" />
     <ClInclude Include="MainPlayer.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="MissileObject.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="ObjectShader.h" />
     <ClInclude Include="ObjectsInfo.h" />
+    <ClInclude Include="OutlineShader.h" />
     <ClInclude Include="ParticleMesh.h" />
+    <ClInclude Include="ParticleObejct.h" />
+    <ClInclude Include="ParticleShader.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Scenario1-[Dog_fight].h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SkyboxMesh.h" />
+    <ClInclude Include="SkyboxObject.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TerrainObject.h" />
     <ClInclude Include="TerrainShader.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BillboardObject.cpp" />
+    <ClCompile Include="BillboardShader.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
+    <ClCompile Include="DynamicMappingObject.cpp" />
+    <ClCompile Include="DynamicMappingShader.cpp" />
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="GameSound.cpp" />
     <ClCompile Include="HeightMapMesh.cpp" />
+    <ClCompile Include="HelicopterObejct.cpp" />
+    <ClCompile Include="HelicopterObjectShader.cpp" />
     <ClCompile Include="MainPlayer.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="MissileObject.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="ObjectShader.cpp" />
+    <ClCompile Include="OutlineShader.cpp" />
     <ClCompile Include="ParticleMesh.cpp" />
+    <ClCompile Include="ParticleObejct.cpp" />
+    <ClCompile Include="ParticleShader.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scenario1-[Dog_fight].cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SkyboxMesh.cpp" />
+    <ClCompile Include="SkyboxObject.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TerrainObject.cpp" />
     <ClCompile Include="TerrainShader.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>

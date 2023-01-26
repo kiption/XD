@@ -255,9 +255,9 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
 	
 	input.normalW = normalize(input.normalW);
-	float4 cBaseTexColor = gtxtTerrainTexture.Sample(gssWrap, input.uv0 * 1.2f);
+	float4 cBaseTexColor = gtxtTerrainTexture.Sample(gssWrap, input.uv0 * 1.0f);
 	float fAlpha = gtxtAlphaTexture.Sample(gssWrap, input.uv0).w;
-	float4 cIllumination = float4(0.4f, 0.8f, 0.4f, 1.0f);
+	float4 cIllumination = float4(1.0, 1.0, 1.0, 1.0);
 
 	float4 cDetailTexColors[4];
 	cDetailTexColors[0] = gtxtDetailTexture[0].Sample(gssWrap, input.uv1 * 1.0f);
@@ -269,7 +269,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	float4 cColor = (cBaseTexColor * cDetailTexColors[0] );
 	cColor += lerp(cDetailTexColors[1] * 0.55f, (cDetailTexColors[2]) * 0.5f, cDetailTexColors[3] * 0.5);
 
-	cColor += lerp(cColor, cIllumination, 0.7f);
+	cColor += lerp(cColor, cIllumination, 0.8f);
 
 	return(cColor);
 }
@@ -290,7 +290,7 @@ float4 PSWater(VS_TERRAIN_OUTPUT input) : SV_TARGET
 
 	float4 cColor = (cBaseTexColor * cDetailTexColors[0]);
 
-	cColor += lerp(cColor, cIllumination, 0.05);
+	cColor += lerp(cColor, cIllumination, 0.5);
 
 	return(cColor);
 }

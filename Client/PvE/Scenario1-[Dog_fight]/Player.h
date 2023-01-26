@@ -10,7 +10,10 @@
 #include "Object.h"
 #include "Camera.h"
 #include "Shader.h"
+#include "HelicopterObjectShader.h"
+
 #include "GameSound.h"
+
 class CPlayer : public CGameObject
 {
 protected:

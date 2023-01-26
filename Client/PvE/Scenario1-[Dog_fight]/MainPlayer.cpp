@@ -12,7 +12,7 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	CGameObject* pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/GO.bin", m_pShader);
 	SetChild(pGameObject);
-	pGameObject->SetScale(5.0, 5.0, 5.0);
+	pGameObject->SetScale(1.0, 1.0, 1.0);
 
 	CGameObject* pBulletMesh = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Mi24.bin", m_pShader);
 	for (int i = 0; i < BULLETS; i++)
@@ -153,11 +153,11 @@ void CMainPlayer::FireBullet(CGameObject* pLockedObject)
 		XMFLOAT3 xmf3Position = this->GetPosition();
 		xmf3Position.x -= 10.0f;
 		XMFLOAT3 xmf3Direction = TotalLookVector;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 50.0f, false));
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 100.0f, false));
 
 		pBulletObject->m_xmf4x4Transform = m_xmf4x4World;
 		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + 2.0, xmf3FirePosition.z));
+		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + .0, xmf3FirePosition.z));
 		pBulletObject->SetScale(1.0, 1.0, 1.5);
 		pBulletObject->SetActive(true);
 	}
@@ -168,11 +168,11 @@ void CMainPlayer::FireBullet(CGameObject* pLockedObject)
 		XMFLOAT3 xmf3Position = this->GetPosition();
 		xmf3Position.x += 10.0f;
 		XMFLOAT3 xmf3Direction = TotalLookVector;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 50.0f, false));
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 100.0f, false));
 
 		pBulletObject2->m_xmf4x4Transform = m_xmf4x4World;
 		pBulletObject2->SetMovingDirection(xmf3Direction);
-		pBulletObject2->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + 2.0, xmf3FirePosition.z));
+		pBulletObject2->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + .0, xmf3FirePosition.z));
 		pBulletObject2->SetScale(1.0, 1.0, 1.5);
 		pBulletObject2->SetActive(true);
 	}
@@ -190,7 +190,7 @@ CCamera* CMainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityXZ(2.5f);
 		SetMaxVelocityY(40.0f);
 		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
-		m_pCamera->SetTimeLag(0.0f);
+		m_pCamera->SetTimeLag(0.1f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, 0.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
@@ -216,9 +216,9 @@ CCamera* CMainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(20.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 90.0f, -140.0f));
-		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z), m_pCamera->GetOffset()));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 8000.0f, ASPECT_RATIO, 70.0f);
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 8.0f, -40.0f));
+		m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
+		m_pCamera->GenerateProjectionMatrix(1.01f, 8000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;

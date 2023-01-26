@@ -1,5 +1,8 @@
 #pragma once
 #include "Player.h"
+#include "MissileObject.h"
+#include "HelicopterObejct.h"
+#include "TerrainObject.h"
 
 #define BULLETS					150
 #define BULLETS2				150
