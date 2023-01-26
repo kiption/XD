@@ -659,15 +659,15 @@ void CGameFramework::ProcessInput()
 			inputMouseValue_temp.button = L_BUTTON;
 			inputMouseValue_temp.delX = 0.0f;
 			inputMouseValue_temp.delY = -1.0f * lookScalar;
-
 			directionKeyPush = true;
+			m_pCamera->SetTimeLag(0.0);
 		}
 		else if (pKeysBuffer[VK_DOWN] & 0xF0) {
 			inputMouseValue_temp.button = L_BUTTON;
 			inputMouseValue_temp.delX = 0.0f;
 			inputMouseValue_temp.delY = lookScalar;
-
 			directionKeyPush = true;
+			m_pCamera->SetTimeLag(0.0);
 		}
 
 		if (pKeysBuffer[VK_LEFT] & 0xF0) {
@@ -939,16 +939,75 @@ void CGameFramework::Remove_OtherPlayerObj(int id) {
 	}
 }
 
-void CGameFramework::Create_Bullet(int id, XMFLOAT3 pos)
+void CGameFramework::Create_Bullet(int id, XMFLOAT3 pos,XMFLOAT3 xmf3look)
 {
-	((CMainPlayer*)m_pPlayer)->FireBullet(NULL);
+	//((CMainPlayer*)m_pPlayer)->FireBullet(NULL);
 	m_GameSound.shootingSound();
 	((CMainPlayer*)m_pPlayer)->m_ppBullets[id]->m_xmf3FirePosition = pos;
+
+	CBulletObject* pBulletObjectL = NULL;
+	CBulletObject* pBulletObjectR = NULL;
+	XMFLOAT3 PlayerPos = ((CMainPlayer*)m_pPlayer)->GetLookVector() = xmf3look;
+
+	if (pBulletObjectL)
+	{
+
+		XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
+		//xmf3Position.x -= 10.0f;
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
+		pBulletObjectL->m_xmf4x4Transform = pBulletObjectL->m_xmf4x4World;
+		pBulletObjectL->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
+		pBulletObjectL->SetMovingDirection(PlayerPos);
+		pBulletObjectL->Rotate(90.0f, 0.0, 0.0);
+		pBulletObjectL->SetScale(700.0, 200.0, 700.0);
+	}
+
+	if (pBulletObjectR)
+	{
+
+		XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
+		//xmf3Position.x += 10.0f;
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
+		pBulletObjectR->m_xmf4x4Transform = pBulletObjectR->m_xmf4x4World;
+		pBulletObjectR->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
+		pBulletObjectR->SetMovingDirection(PlayerPos);
+		pBulletObjectR->Rotate(90.0f, 0.0, 0.0);
+		pBulletObjectR->SetScale(700.0, 200.0, 700.0);
+	}
 }
 
-void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos)
+void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look)
 {
-	((CMainPlayer*)m_pPlayer)->m_ppBullets[id]->m_xmf3FirePosition = pos;
+
+	CBulletObject* pBulletObjectL = NULL;
+	CBulletObject* pBulletObjectR = NULL;
+	XMFLOAT3 PlayerPos = ((CMainPlayer*)m_pPlayer)->GetLookVector() = xmf3look;
+
+	if (pBulletObjectL)
+	{
+
+		XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
+		//xmf3Position.x -= 10.0f;
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
+		pBulletObjectL->m_xmf4x4Transform = pBulletObjectL->m_xmf4x4World;
+		pBulletObjectL->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
+		pBulletObjectL->SetMovingDirection(PlayerPos);
+		pBulletObjectL->Rotate(90.0f, 0.0, 0.0);
+		pBulletObjectL->SetScale(700.0, 200.0, 700.0);
+	}
+
+	if (pBulletObjectR)
+	{
+
+		XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
+		//xmf3Position.x += 10.0f;
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
+		pBulletObjectR->m_xmf4x4Transform = pBulletObjectR->m_xmf4x4World;
+		pBulletObjectR->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
+		pBulletObjectR->SetMovingDirection(PlayerPos);
+		pBulletObjectR->Rotate(90.0f, 0.0, 0.0);
+		pBulletObjectR->SetScale(700.0, 200.0, 700.0);
+	}
 }
 
 void CGameFramework::SetPosition_NPC(int id, XMFLOAT3 pos)

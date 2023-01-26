@@ -128,7 +128,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				}
 
 				if (bullets_info[i].m_state == OBJ_ST_STANDBY) {	// Create
-					gGameFramework.Create_Bullet(i, bullets_info[i].m_pos);
+					gGameFramework.Create_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_look_vec);
 					bullets_info[i].m_state = OBJ_ST_RUNNING;
 				}
 				else if (bullets_info[i].m_state == OBJ_ST_LOGOUT) {	// Clear
@@ -140,7 +140,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					bullets_info[i].m_state = OBJ_ST_EMPTY;
 				}
 				else if (bullets_info[i].m_state == OBJ_ST_RUNNING) {	// Update
-					gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos);
+					gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_look_vec);
 				}
 			}
 

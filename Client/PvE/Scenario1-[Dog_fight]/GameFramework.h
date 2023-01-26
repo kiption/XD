@@ -78,8 +78,8 @@ public:
 	void SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void Remove_OtherPlayerObj(int id);
 
-	void Create_Bullet(int id, XMFLOAT3 pos);
-	void SetPosition_Bullet(int id, XMFLOAT3 pos);
+	void Create_Bullet(int id, XMFLOAT3 pos,XMFLOAT3 xmf3look);
+	void SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look);
 
 	void SetPosition_NPC(int id, XMFLOAT3 pos);
 	void SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
