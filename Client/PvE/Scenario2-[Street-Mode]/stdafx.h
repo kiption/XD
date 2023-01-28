@@ -319,7 +319,7 @@ namespace Matrix4x4
 		return(xmf4x4Result);
 	}
 
-	inline XMFLOAT4X4 LookAtLH(XMFLOAT3& xmf3EyePosition, XMFLOAT3& xmf3LookAtPosition, XMFLOAT3& xmf3UpDirection)
+	inline XMFLOAT4X4 LookAtLH(XMFLOAT3 xmf3EyePosition, XMFLOAT3 xmf3LookAtPosition, XMFLOAT3 xmf3UpDirection)
 	{
 		XMFLOAT4X4 xmf4x4Result;
 		XMStoreFloat4x4(&xmf4x4Result, XMMatrixLookAtLH(XMLoadFloat3(&xmf3EyePosition), XMLoadFloat3(&xmf3LookAtPosition), XMLoadFloat3(&xmf3UpDirection)));
