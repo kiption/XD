@@ -18,6 +18,8 @@ public:
 	virtual void ReleaseObjects();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 
+
+
 	float m_fTime;
 	int m_fSpeed;
 public:
@@ -29,19 +31,21 @@ public:
 	CGameObject** m_ppObjects = 0;
 	CGameObject* m_pObjects = 0;
 
+	ID3D12Resource* m_pd3dcbGameObjects = NULL;
+	CB_STREAMGAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
 };
 
 
-class COtherPlayerShader : public CStandardShader
+class COtherPlayerShader : public CTexturedShader
 {
 public:
 	COtherPlayerShader() {};
 	virtual ~COtherPlayerShader() {};
 	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState);
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
-	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
+
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual void AnimateObjects(float fTimeElapsed);
@@ -52,9 +56,9 @@ public:
 
 	int								m_nObjects = 0;
 	CGameObject** m_ppObjects = 0;
-	CGameObject* m_pObjects = 0;
 
-
+	ID3D12Resource* m_pd3dcbGameObjects = NULL;
+	CB_STREAMGAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

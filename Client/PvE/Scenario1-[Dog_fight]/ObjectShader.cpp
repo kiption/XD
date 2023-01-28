@@ -223,7 +223,10 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
 {
-
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		m_ppObjects[j]->Animate(fTimeElapsed);
+	}
 }
 
 void CObjectsShader::ReleaseObjects()
@@ -254,3 +257,5 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 		}
 	}
 }
+
+

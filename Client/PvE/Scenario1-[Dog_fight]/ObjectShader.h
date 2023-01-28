@@ -44,7 +44,7 @@ protected:
 };
 
 
-class CObjectsShader : public CStandardShader
+class CObjectsShader : public CTexturedShader
 {
 public:
 	CObjectsShader();

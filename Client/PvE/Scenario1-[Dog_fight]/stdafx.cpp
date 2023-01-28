@@ -242,7 +242,7 @@ ID3D12RootSignature* GraphicsRootSignature(ID3D12Device* pd3dDevice)
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
 #ifdef _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[18];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[19];
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 7;
@@ -346,7 +346,13 @@ ID3D12RootSignature* GraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dDescriptorRanges[17].RegisterSpace = 0;
 	pd3dDescriptorRanges[17].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[22];
+	pd3dDescriptorRanges[18].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[18].NumDescriptors = 1;
+	pd3dDescriptorRanges[18].BaseShaderRegister = 27; ///t27
+	pd3dDescriptorRanges[18].RegisterSpace = 0;
+	pd3dDescriptorRanges[18].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[23];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; //Camera
@@ -442,7 +448,7 @@ ID3D12RootSignature* GraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dRootParameters[18].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[18].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[18].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[15];
-	pd3dRootParameters[18].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dRootParameters[18].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	pd3dRootParameters[19].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[19].DescriptorTable.NumDescriptorRanges = 1;
@@ -458,6 +464,11 @@ ID3D12RootSignature* GraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dRootParameters[21].DescriptorTable.NumDescriptorRanges = 1; // Dynamic
 	pd3dRootParameters[21].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[17];
 	pd3dRootParameters[21].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[22].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[22].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[22].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[18]; //t27: 
+	pd3dRootParameters[22].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 #else
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[2];

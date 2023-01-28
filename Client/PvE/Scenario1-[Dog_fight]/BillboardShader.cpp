@@ -565,9 +565,9 @@ void CBulletMotionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/MainExplosion.dds", RESOURCE_TEXTURE2D, 0);
 	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Bullet.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/MainExplosion.dds", RESOURCE_TEXTURE2D, 0);
 	ppSpriteTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures[2]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Bullet.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures[2]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/MainExplosion.dds", RESOURCE_TEXTURE2D, 0);
 
 
 	CMaterial* ppSpriteMaterials[3];
@@ -580,7 +580,7 @@ void CBulletMotionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 
 	CTexturedRectMesh* pSpriteMesh[3];
-	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 4.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	pSpriteMesh[2] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -635,6 +635,7 @@ void CBulletMotionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 
 		for (int i = 0; i < 3; i++)
 		{
+			m_ppObjects[0]->SetPosition(xmf3Position);
 			m_ppObjects[i]->SetLookAt(xmf3Position, XMFLOAT3(0, 1, 0));
 		}
 	}
@@ -643,7 +644,7 @@ void CBulletMotionShader::AnimateObjects(float fTimeElapsed)
 {
 	////CPlayer* pPlayer = NULL;
 	////m_ppObjects[0]->SetPosition(pPlayer->GetPosition());
-	m_ppObjects[0]->SetPosition(BulletPosition);
+
 	m_ppObjects[1]->SetPosition(BulletPosition);
 	m_ppObjects[2]->SetPosition(BulletPositionR);
 }
@@ -663,7 +664,7 @@ D3D12_INPUT_LAYOUT_DESC CExplosionShader::CreateInputLayout(int nPipelineState)
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
@@ -692,21 +693,75 @@ D3D12_BLEND_DESC CExplosionShader::CreateBlendState(int nPipelineState)
 	return(d3dBlendDesc);
 }
 
+D3D12_RASTERIZER_DESC CExplosionShader::CreateRasterizerState()
+{
+	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
+	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
+	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	//	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
+	d3dRasterizerDesc.DepthBias = 0;
+	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
+	d3dRasterizerDesc.SlopeScaledDepthBias = 0.0f;
+	d3dRasterizerDesc.DepthClipEnable = TRUE;
+	d3dRasterizerDesc.MultisampleEnable = FALSE;
+	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
+	d3dRasterizerDesc.ForcedSampleCount = 0;
+	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+
+	return(d3dRasterizerDesc);
+}
+
+void CExplosionShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
+	m_pd3dcbGameObjects = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL,
+		ncbElementBytes * m_nObjects, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbGameObjects->Map(0, NULL, (void**)&m_pcbMappedGameObjects);
+}
+
+void CExplosionShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255);
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		CB_STREAMGAMEOBJECT_INFO* pbMappedcbGameObject = (CB_STREAMGAMEOBJECT_INFO*)((UINT8*)m_pcbMappedGameObjects + (j * ncbElementBytes));
+		XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->m_xmf4x4World)));
+		if (m_ppObjects[j]->m_pMaterial && m_ppObjects[j]->m_pMaterial->m_pTexture)
+		{
+			XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4Texture,
+				XMMatrixTranspose(XMLoadFloat4x4(&(m_ppObjects[j]->m_pMaterial->m_pTexture->m_xmf4x4Texture))));
+		}
+	}
+}
+
+void CExplosionShader::ReleaseShaderVariables()
+{
+	if (m_pd3dcbGameObjects)
+	{
+		m_pd3dcbGameObjects->Unmap(0, NULL);
+		m_pd3dcbGameObjects->Release();
+	}
+
+	CTexturedShader::ReleaseShaderVariables();
+}
+
 D3D12_SHADER_BYTECODE CExplosionShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSSpriteAnimation", "vs_5_1", ppd3dShaderBlob));
 }
 D3D12_SHADER_BYTECODE CExplosionShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSpriteAnimation", "ps_5_1", ppd3dShaderBlob));
 }
 void CExplosionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures[2];
-	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/MainExplosion.dds", RESOURCE_TEXTURE2D, 0);
-	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/MainExplosion.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
+	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 6, 6);
+	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Explosion_6x6.dds", RESOURCE_TEXTURE2D, 0);
 
 	CMaterial* ppSpriteMaterials[2];
 	ppSpriteMaterials[0] = new CMaterial();
@@ -715,25 +770,33 @@ void CExplosionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	ppSpriteMaterials[1]->SetTexture(ppSpriteTextures[1]);
 
 	CTexturedRectMesh* pSpriteMesh[2];
-	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 50.0, 50.0, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 50.0, 50.0, 0.0f, 0.0f, 0.0f, 0.0f);
 
+	UINT ncbElementBytes = ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255);
 	m_nObjects = 2;
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 2);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, m_nObjects, 2);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	CreateConstantBufferViews(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
+
 	for (int i = 0; i < m_nObjects; i++)
 	{
 		CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[i], 0, 12);
 	}
 
 	m_ppObjects = new CGameObject * [m_nObjects];
-	CBillboardObject* pExplodeObject = NULL;
+	XMFLOAT3 xmf3Position = XMFLOAT3(1030.0f, 180.0f, 1410.0f);
+	CMultiSpriteObject* pExplodeObject = NULL;
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		pExplodeObject = new CBillboardObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		pExplodeObject = new CMultiSpriteObject();
 		pExplodeObject->SetMesh(0, pSpriteMesh[j]);
 		pExplodeObject->SetMaterial(0, ppSpriteMaterials[j]);
+		pExplodeObject->SetPosition(XMFLOAT3(xmf3Position.x, xmf3Position.y, xmf3Position.z));
+		pExplodeObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * j));
+
+		pExplodeObject->m_fSpeed = 3.0f / (ppSpriteTextures[j]->m_nRows * ppSpriteTextures[j]->m_nCols);
 		m_ppObjects[j] = pExplodeObject;
 	}
 
@@ -742,39 +805,44 @@ void CExplosionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 void CExplosionShader::ReleaseUploadBuffers()
 {
-	CNPCShader::ReleaseUploadBuffers();
+	CObjectsShader::ReleaseUploadBuffers();
+
 }
 
 void CExplosionShader::ReleaseObjects()
 {
-	CNPCShader::ReleaseObjects();
+	CObjectsShader::ReleaseObjects();
 }
 
 void CExplosionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	if (m_bActive == true)
+	if (m_bSpriteActive)
 	{
-		for (int i = 0; i < 2; i++)
+		XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
+		CPlayer* pPlayer = pCamera->GetPlayer();
+		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
+		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
+		XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 50.0f, false));
+		CShader::Render(pd3dCommandList, pCamera, nPipelineState);
+		for (int j = 0; j < m_nObjects; j++)
 		{
-			XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
-			m_ppObjects[i]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
-			CNPCShader::Render(pd3dCommandList, pCamera, nPipelineState);
+			if (m_ppObjects[j])
+			{
+				m_ppObjects[j]->SetPosition(xmf3Position);
+				m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
+				m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+			}
 		}
+
+		CObjectsShader::Render(pd3dCommandList, pCamera,0);
 
 	}
 }
 
 void CExplosionShader::AnimateObjects(float fTimeElapsed)
 {
-	switch (m_fSpeed)
+	for (int j = 0; j < m_nObjects; j++)
 	{
-	case 1:
-		m_ppObjects[0]->SetPosition(TargetPosition.x, TargetPosition.y, TargetPosition.z);
-		break;
-	case 2:
-		m_ppObjects[1]->SetPosition(TargetPosition.x, TargetPosition.y, TargetPosition.z);
-		break;
-	default:
-		break;
+		m_ppObjects[j]->Animate(fTimeElapsed, NULL);
 	}
 }

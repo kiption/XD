@@ -608,34 +608,37 @@ void CGameFramework::ProcessInput()
 	{
 		char inputKeyValue = 0;//S
 		DWORD dwDirection = 0;
-
+		
 		if (pKeysBuffer[KEY_W] & 0xF0) {
 			inputKeyValue += INPUT_KEY_W;//S
 			dwDirection |= DIR_FORWARD;
-		
+			m_pCamera->SetTimeLag(0.2);
 		}
 		if (pKeysBuffer[KEY_S] & 0xF0) {
 			inputKeyValue += INPUT_KEY_S;//S
 			dwDirection |= DIR_BACKWARD;
+			m_pCamera->SetTimeLag(0.2);
 		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
 			inputKeyValue += INPUT_KEY_D;//S
 			dwDirection |= DIR_RIGHT;
-		
+			m_pCamera->SetTimeLag(0.2);
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
 			inputKeyValue += INPUT_KEY_A;//S
 			dwDirection |= DIR_LEFT;
-	
+			m_pCamera->SetTimeLag(0.2);
 		}
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
 			inputKeyValue += INPUT_KEY_Q;//S
 			dwDirection |= DIR_UP;
+			m_pCamera->SetTimeLag(0.2);
 		}
 		if (pKeysBuffer[KEY_E] & 0xF0) {
 			inputKeyValue += INPUT_KEY_E;//S
 			dwDirection |= DIR_DOWN;
+			m_pCamera->SetTimeLag(0.2);
 		}
 
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
@@ -659,22 +662,22 @@ void CGameFramework::ProcessInput()
 			inputMouseValue_temp.button = L_BUTTON;
 			inputMouseValue_temp.delX = 0.0f;
 			inputMouseValue_temp.delY = -1.0f * lookScalar;
+			m_pCamera->SetTimeLag(0.05);
 			directionKeyPush = true;
-			m_pCamera->SetTimeLag(0.0);
 		}
 		else if (pKeysBuffer[VK_DOWN] & 0xF0) {
 			inputMouseValue_temp.button = L_BUTTON;
 			inputMouseValue_temp.delX = 0.0f;
 			inputMouseValue_temp.delY = lookScalar;
+			m_pCamera->SetTimeLag(0.05);
 			directionKeyPush = true;
-			m_pCamera->SetTimeLag(0.0);
 		}
 
 		if (pKeysBuffer[VK_LEFT] & 0xF0) {
 			inputMouseValue_temp.button = L_BUTTON;
 			inputMouseValue_temp.delX = -1.0f * rightScalar;
 			inputMouseValue_temp.delY = 0.0f;
-
+			m_pCamera->SetTimeLag(0.2);
 			directionKeyPush = true;
 			
 		}
@@ -682,8 +685,7 @@ void CGameFramework::ProcessInput()
 			inputMouseValue_temp.button = L_BUTTON;
 			inputMouseValue_temp.delX = rightScalar;
 			inputMouseValue_temp.delY = 0.0f;
-	
-		
+			m_pCamera->SetTimeLag(0.2);
 			directionKeyPush = true;
 			
 		}
@@ -744,6 +746,7 @@ void CGameFramework::ReleaseShaderVariables()
 		m_pd3dcbFrameworkInfo->Release();
 	}
 }
+
 void CGameFramework::CreateShaderVariables()
 {
 	UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö

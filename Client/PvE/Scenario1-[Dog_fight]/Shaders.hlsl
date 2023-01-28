@@ -12,7 +12,21 @@ struct MATERIAL
 	float4				m_cDiffuse;
 	float4				m_cSpecular; //a = power
 	float4				m_cEmissive;
+
 };
+
+struct EXPLOSIONMATERIAL
+{
+	float4				m_cAmbient;
+	float4				m_cDiffuse;
+	float4				m_cSpecular; //a = power
+	float4				m_cEmissive;
+
+	matrix				gmtxTexture;
+	int2				gi2TextureTiling;
+	float2				gf2TextureOffset;
+};
+
 cbuffer cbGameObjectInfo : register(b2)
 {
 	matrix		gmtxGameObject : packoffset(c0); //16
@@ -32,6 +46,8 @@ cbuffer cbFrameworkInfo : register(b5)
 cbuffer cbStreamGameObjectInfo : register(b6)
 {
 	matrix		gmtxWorld : packoffset(c0);
+	EXPLOSIONMATERIAL	gSpriteActionMaterial : packoffset(c4); // 16
+
 };
 
 cbuffer CDynamicObjectInfo : register(b8)
@@ -193,7 +209,7 @@ struct VS_TEXTURED_INPUT
 struct VS_TEXTURED_OUTPUT
 {
 	float4 position : SV_POSITION;
-	float2 uv : TEXCOORD0;
+	float2 uv : TEXCOORD;
 };
 
 VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
@@ -204,6 +220,24 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 	output.uv = input.uv;
 
 	return(output);
+}
+
+VS_TEXTURED_OUTPUT VSSpriteAnimation(VS_TEXTURED_INPUT input)
+{
+	VS_TEXTURED_OUTPUT output;
+
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	output.uv = mul(float3(input.uv, 1.0f), (float3x3)(gSpriteActionMaterial.gmtxTexture)).xy;
+
+	return(output);
+}
+float4 PSSpriteAnimation(VS_TEXTURED_OUTPUT input) : SV_TARGET
+{
+	float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
+
+	//cColor.a = Alpha;
+
+	return (cColor);
 }
 
 float4 PSTextured(VS_TEXTURED_OUTPUT input, uint primitiveID : SV_PrimitiveID) : SV_TARGET
@@ -253,7 +287,7 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 
 float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
-	
+
 	input.normalW = normalize(input.normalW);
 	float4 cBaseTexColor = gtxtTerrainTexture.Sample(gssWrap, input.uv0 * 1.0f);
 	float fAlpha = gtxtAlphaTexture.Sample(gssWrap, input.uv0).w;
@@ -266,7 +300,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	cDetailTexColors[3] = gtxtDetailTexture[3].Sample(gssWrap, input.uv1 * 1.2f);
 
 	cIllumination = Lighting(input.positionW, input.normalW);
-	float4 cColor = (cBaseTexColor * cDetailTexColors[0] );
+	float4 cColor = (cBaseTexColor * cDetailTexColors[0]);
 	cColor += lerp(cDetailTexColors[1] * 0.55f, (cDetailTexColors[2]) * 0.5f, cDetailTexColors[3] * 0.5);
 
 	cColor += lerp(cColor, cIllumination, 0.8f);
@@ -336,7 +370,7 @@ float4 PSTerrainMoveWater(VS_WATER_OUTPUT input) : SV_TARGET
 VS_TEXTURED_OUTPUT VSBillBoardTextured(VS_TEXTURED_INPUT input)
 {
 	VS_TEXTURED_OUTPUT output;
-	output.position = mul(mul(mul(float4(input.position,1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 	return (output);
 
@@ -363,7 +397,7 @@ VS_TEXTURED_OUTPUT VSBillboard(VS_TEXTURED_INPUT input)
 
 float4 PSBillboard(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
-	
+
 		float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
 
 		return(cColor);
@@ -673,7 +707,7 @@ float4 PSCubeMapping(VS_LIGHTING_OUTPUT input) : SV_Target
 
 	//	return(float4(vReflected * 0.5f + 0.5f, 1.0f));
 		return(cCubeTextureColor);
-	//	return(cIllumination * cCubeTextureColor);
+		//	return(cIllumination * cCubeTextureColor);
 }
 
 

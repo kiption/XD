@@ -47,7 +47,7 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	CTerrainShader* pTerrainShader = new CTerrainShader();
 	pTerrainShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
 	pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 5);
-	pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	//pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	pTerrainShader->CreateShaderResourceViews(pd3dDevice, pTerrainTexture, 0, 11);
 
 	CMaterial* pTerrainMaterial = new CMaterial();
@@ -101,12 +101,10 @@ CUseWaterMoveTerrain::CUseWaterMoveTerrain(ID3D12Device* pd3dDevice, ID3D12Graph
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/DetailWater.dds", RESOURCE_TEXTURE2D, 0);
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Water.dds", RESOURCE_TEXTURE2D, 1);
 
-	//SnowMountain_Detail
-
 	CWaterMoveShader* pTerrainShader = new CWaterMoveShader();
 	pTerrainShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
 	pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 2);
-	pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	//pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	pTerrainShader->CreateShaderResourceViews(pd3dDevice, pTerrainTexture, 0, 11);
 
 	CMaterial* pTerrainMaterial = new CMaterial();

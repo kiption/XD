@@ -4,11 +4,11 @@
 
 #pragma once
 
+
 #include "Mesh.h"
 #include "HeightMapMesh.h"
 #include "SkyboxMesh.h"
 #include "ParticleMesh.h"
-
 #include "Camera.h"
 
 
@@ -39,11 +39,24 @@ struct MATERIAL
 	XMFLOAT4						m_xmf4Emissive;
 };
 
+struct EXPLOSIONMATERIAL
+{
+	XMFLOAT4						m_xmf4Ambient;
+	XMFLOAT4						m_xmf4Diffuse;
+	XMFLOAT4						m_xmf4Specular; //(r,g,b,a=power)
+	XMFLOAT4						m_xmf4Emissive;
+};
+
 struct CB_GAMEOBJECT_INFO
 {
 	XMFLOAT4X4						m_xmf4x4World;
 	MATERIAL						m_material;
 	UINT							m_nMaterial;
+
+	XMFLOAT4X4						m_xmf4x4Texture;
+	XMINT2							m_xmi2TextureTiling;
+	XMFLOAT2						m_xmf2TextureOffset;
+
 };
 struct CB_DYNAMICOBJECT_INFO
 {
@@ -54,6 +67,11 @@ struct CB_DYNAMICOBJECT_INFO
 struct CB_STREAMGAMEOBJECT_INFO
 {
 	XMFLOAT4X4						m_xmf4x4World;
+	EXPLOSIONMATERIAL				m_material;
+
+	XMFLOAT4X4						m_xmf4x4Texture;
+	XMINT2							m_xmi2TextureTiling;
+	XMFLOAT2						m_xmf2TextureOffset;
 };
 
 
@@ -89,7 +107,8 @@ private:
 	int								m_nSamplers = 0;
 	D3D12_GPU_DESCRIPTOR_HANDLE*	m_pd3dSamplerGpuDescriptorHandles = NULL;
 
-
+	int 							m_nRow = 0;
+	int 							m_nCol = 0;
 public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
@@ -127,14 +146,13 @@ public:
 
 	void CreateBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nElements, UINT nStride, DXGI_FORMAT dxgiFormat, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, UINT nIndex);
 
+
 public:
 	void AnimateRowColumn(float fTime = 0.0f);
 	XMFLOAT4X4						m_xmf4x4Texture;
 	int 							m_nRows = 1;
 	int 							m_nCols = 1;
 
-	int 							m_nRow = 0;
-	int 							m_nCol = 0;
 
 
 };
@@ -192,6 +210,7 @@ public:
 };
 
 class CGameObject;
+class CShader;
 
 class CMaterial
 {
@@ -479,6 +498,7 @@ public:
 
 	virtual void PrepareAnimate() { }
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent=NULL);
+	//virtual void Animate(float fTimeElapsed);
 	virtual void AnimateObject(CCamera* pCamera, float fDeltaTime);
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CScene* pScene) { } ///D

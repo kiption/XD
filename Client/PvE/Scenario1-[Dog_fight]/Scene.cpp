@@ -82,7 +82,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pUseWaterMove = new CUseWaterMoveTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/waterterrain8bit.raw"), 257, 257, 8, 8, xmf4ScaleW, xmf3Normal);
 	m_pUseWaterMove->SetPosition(0.0, 60.0f, 0.0);
 
-	m_nShaders = 4;
+	m_nShaders = 5;
 
 	m_ppShaders = new CObjectsShader * [m_nShaders];
 
@@ -106,6 +106,10 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pCrossHeadShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer);
 	m_ppShaders[3] = pCrossHeadShader;
 
+	CExplosionShader* pCExplosionShader = new CExplosionShader();
+	pCExplosionShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pCExplosionShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
+	m_ppShaders[4] = pCExplosionShader;
 
 	int m_nNPCShaders = 3;
 	m_ppNPCShaders = new CNPCShader * [m_nNPCShaders];
@@ -119,17 +123,18 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pCBulletMotionShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppNPCShaders[1] = pCBulletMotionShader;
 
-	CExplosionShader* pCExplosionShader = new CExplosionShader();
-	pCExplosionShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
-	pCExplosionShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	pCExplosionShader->SetActive(false);
-	m_ppNPCShaders[2] = pCExplosionShader;
+	CBulletMotionShader* pCExplosionShader1 = new CBulletMotionShader();
+	pCExplosionShader1->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pCExplosionShader1->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	pCExplosionShader1->SetActive(false);
+	m_ppNPCShaders[2] = pCExplosionShader1;
 
-	m_ppOtherPlayers = new COtherPlayerShader * [1];
-	COtherPlayerShader* pCOtherPlayerShader = new COtherPlayerShader();
-	pCOtherPlayerShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
-	pCOtherPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_ppOtherPlayers[0] = pCOtherPlayerShader;
+	m_ppExplosion = new CExplosionShader * [1];
+	CExplosionShader* pExplosionShader = new CExplosionShader();
+	pExplosionShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pExplosionShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer);
+	pExplosionShader->SetActive(false);
+	m_ppExplosion[0] = pExplosionShader;
 
 	m_nParticleObjects = 4;
 	m_ppParticleObjects = new CParticleObject * [m_nParticleObjects];
@@ -188,15 +193,15 @@ void CScene::ReleaseObjects()
 		delete[] m_ppNPCShaders;
 	}
 
-	if (m_ppOtherPlayers)
+	if (m_ppExplosion)
 	{
 		for (int i = 0; i < 1; i++)
 		{
-			m_ppOtherPlayers[i]->ReleaseShaderVariables();
-			m_ppOtherPlayers[i]->ReleaseObjects();
-			m_ppOtherPlayers[i]->Release();
+			m_ppExplosion[i]->ReleaseShaderVariables();
+			m_ppExplosion[i]->ReleaseObjects();
+			m_ppExplosion[i]->Release();
 		}
-		delete[] m_ppOtherPlayers;
+		delete[] m_ppExplosion;
 	}
 
 	if (m_pOutlineShader)
@@ -275,7 +280,7 @@ void CScene::ReleaseUploadBuffers()
 	for (int i = 0; i < m_nParticleObjects; i++) m_ppParticleObjects[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < 3; i++) m_ppNPCShaders[i]->ReleaseUploadBuffers();
-	for (int i = 0; i < 1; i++) m_ppOtherPlayers[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < 1; i++) m_ppExplosion[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nGameObjects; i++) m_ppGameObjects[i]->ReleaseUploadBuffers();
 }
 bool CScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -291,7 +296,7 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 		{
 
 		case 'F':
-			m_ppShaders[2]->SetActive(!m_ppShaders[2]->GetActive());
+			m_ppShaders[4]->m_bSpriteActive = !m_ppShaders[4]->m_bSpriteActive;
 			break;
 		case 'V':
 			m_bWarMode = !m_bWarMode;
@@ -315,11 +320,14 @@ bool CScene::ProcessInput(UCHAR* pKeysBuffer)
 void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 {
 	m_pUseWaterMove->Animate(fTimeElapsed);
+	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
+	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->UpdateTransform(NULL);
 	for (int i = 0; i < m_nEnvironmentMappingShaders; i++) m_ppEnvironmentMappingShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nParticleObjects; i++) m_ppParticleObjects[i]->AnimateObject(pCamera, fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
+	for (int i = 0; i < 1; i++) if (m_ppExplosion[i]) m_ppExplosion[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < 3; i++) if (m_ppNPCShaders[i]) m_ppNPCShaders[i]->AnimateObjects(fTimeElapsed);
-	for (int i = 0; i < 1; i++) if (m_ppOtherPlayers[i]) m_ppOtherPlayers[i]->AnimateObjects(fTimeElapsed);
+
 
 	/// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	for (int i = 0; i < 10; i++) m_ppNPCShaders[0]->m_ppObjects[i]->xoobb = BoundingOrientedBox(XMFLOAT3(m_ppNPCShaders[0]->m_ppObjects[i]->GetPosition()), XMFLOAT3(18.0, 20.0, 25.0), XMFLOAT4(0, 0, 0, 1));
@@ -448,8 +456,8 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 	//for (int i = 0; i < m_nEnvironmentMappingShaders; i++)m_ppEnvironmentMappingShaders[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i])m_ppShaders[i]->Render(pd3dCommandList, pCamera, 0);
+	for (int i = 0; i < 1; i++) if (m_ppExplosion[i])m_ppExplosion[i]-> Render(pd3dCommandList, pCamera,0);
 	for (int i = 0; i < 3; i++) if (m_ppNPCShaders[i])m_ppNPCShaders[i]->Render(pd3dCommandList, pCamera, 0);
-	//for (int i = 0; i < 1; i++) if (m_ppOtherPlayers[i])m_ppOtherPlayers[i]->Render(pd3dCommandList, pCamera, 0);
 
 	//if (m_pUseWaterMove) m_pUseWaterMove->Render(pd3dCommandList, pCamera);
 
@@ -493,6 +501,10 @@ void CScene::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 void CScene::RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	for (int i = 0; i < m_nParticleObjects; i++) m_ppParticleObjects[i]->Render(pd3dCommandList, pCamera);
+}
+void CScene::RenderSprite(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	for (int i = 0; i < m_nSpriteObjects; i++) m_ppSpriteObjects[i]->Render(pd3dCommandList, pCamera);
 }
 void CScene::OnPostRenderParticle()
 {

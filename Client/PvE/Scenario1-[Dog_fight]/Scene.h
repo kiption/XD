@@ -14,7 +14,7 @@
 #include "ParticleObejct.h"
 #include "SkyboxObject.h"
 #include "TerrainObject.h"
-
+#include "BillboardObject.h"
 #include "Player.h"
 #include "MainPlayer.h"
 #include "GameSound.h"
@@ -79,13 +79,15 @@ public:
 
 
 	bool ProcessInput(UCHAR *pKeysBuffer);
-    void AnimateObjects(CCamera* pCamera,float fTimeElapsed);
-    void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
+    virtual void AnimateObjects(CCamera* pCamera,float fTimeElapsed);
+	virtual void AnimateObjects(float fTimeElapsed) {}
+	void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 	void OnPreRender(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue, ID3D12Fence* pd3dFence, HANDLE hFenceEvent);
 	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void ReleaseUploadBuffers();
 
 	void RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	void RenderSprite(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void OnPostRenderParticle();
 	
 public:
@@ -99,15 +101,17 @@ public:
 	int									m_nOtherPlayers = 0;
 	CObjectsShader** m_ppShaders = NULL;
 	CNPCShader** m_ppNPCShaders = NULL;
-	COtherPlayerShader** m_ppOtherPlayers = NULL;
-	CShader** m_ppCShaders = NULL;
-	
+	CExplosionShader** m_ppExplosion = NULL;
+
+	CMultiSpriteObject** m_ppSpriteObjects = NULL;
+	int	m_nSpriteObjects;
+
 	CPlayerShader* m_pPlayerShader= NULL;
 	CParticleObject** m_ppParticleObjects = NULL;
+	int	m_nParticleObjects;
 
 	GameSound gamesound;
 
-	int							m_nParticleObjects;
 	CDynamicCubeMappingShader** m_ppEnvironmentMappingShaders = NULL;
 	int							m_nEnvironmentMappingShaders = 0;
 	CSkyBox								*m_pSkyBox = NULL;
@@ -124,6 +128,7 @@ public:
 	MATERIALS* m_pMaterials = NULL;
 
 	CUseWaterMoveTerrain				*m_pUseWaterMove = NULL;
+	CMultiSpriteObject *m_pCMultiSpriteObject = NULL;
 
 	CPlayer								*m_pPlayer = NULL;
 

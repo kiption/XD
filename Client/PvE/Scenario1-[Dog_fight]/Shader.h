@@ -55,7 +55,7 @@ public:
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList, int nPipelineState);
 	//virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera* pCamera, void* pContext);
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState);
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState=0);
 
 
 	virtual void BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext = NULL) { }
@@ -86,9 +86,9 @@ protected:
 	D3D12_GPU_DESCRIPTOR_HANDLE			m_d3dSrvGPUDescriptorNextHandle;
 	ID3D12Resource* m_pd3dcbGameObject = NULL;
 public:
-	int									m_nObjects;
-	CGameObject							**m_ppObjects = NULL;
+
 	bool								m_bActive = false;
+	bool								m_bSpriteActive = false;
 	bool								m_bBulletActive = false;
 	bool								m_bIntolakeCheck = false;
 	bool								GetActive() { return(m_bActive); }
