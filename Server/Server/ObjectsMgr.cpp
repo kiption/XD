@@ -23,22 +23,26 @@ XMFLOAT3 calcMove(XMFLOAT3 vec1, XMFLOAT3 vec2, float scalar)
 	return vec1;
 }
 
-XMFLOAT3 calcRotate(XMFLOAT3 vec, float roll, float pitch, float yaw)
+XMFLOAT3 calcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll)
 {
+	float cur_pitch = XMConvertToRadians(pitch);
+	float cur_yaw = XMConvertToRadians(yaw);
+	float cur_roll = XMConvertToRadians(roll);
+
 	// roll
 	float x1, y1;
-	x1 = vec.x * cos(roll) - vec.y * sin(roll);
-	y1 = vec.x * sin(roll) + vec.y * cos(roll);
+	x1 = vec.x * cos(cur_roll) - vec.y * sin(cur_roll);
+	y1 = vec.x * sin(cur_roll) + vec.y * cos(cur_roll);
 
 	// pitch
 	float y2, z1;
-	y2 = y1 * cos(pitch) - vec.z * sin(pitch);
-	z1 = y1 * sin(pitch) + vec.z * cos(pitch);
+	y2 = y1 * cos(cur_pitch) - vec.z * sin(cur_pitch);
+	z1 = y1 * sin(cur_pitch) + vec.z * cos(cur_pitch);
 
 	// yaw
 	float x2, z2;
-	z2 = z1 * cos(yaw) - x1 * sin(yaw);
-	x2 = z1 * sin(yaw) + x1 * cos(yaw);
+	z2 = z1 * cos(cur_yaw) - x1 * sin(cur_yaw);
+	x2 = z1 * sin(cur_yaw) + x1 * cos(cur_yaw);
 
 	// Update
 	vec = { x2, y2, z2 };

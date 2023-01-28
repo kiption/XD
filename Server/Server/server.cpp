@@ -114,6 +114,7 @@ public:
 	void send_rotate_packet(int client_id, short rotate_target);
 };
 
+int online_player_cnt = 0;
 array<SESSION, MAX_USER + MAX_NPCS> clients;		// 0 ~ MAX_USER-1: Player,	 MAX_USER ~ MAX_USER+MAX_NPCS: NPC
 array<NPC, MAX_NPCS> npcs;
 
@@ -223,6 +224,7 @@ void disconnect(int client_id)
 	clients[client_id].s_state = ST_FREE;
 	clients[client_id].s_lock.unlock();
 
+	online_player_cnt--;
 	cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << " is log out" << endl;	// server message
 
 	for (int i = 0; i < MAX_USER; i++) {
@@ -253,6 +255,7 @@ int get_new_client_id()
 		if (clients[i].s_state == ST_FREE) {
 			clients[i].s_state = ST_ACCEPTED;
 			clients[i].s_lock.unlock();
+			online_player_cnt++;
 			return i;
 		}
 		clients[i].s_lock.unlock();
@@ -399,15 +402,15 @@ void process_packet(int client_id, char* packet)
 				case KEY_D:
 					clients[client_id].s_lock.lock();
 					// yaw 설정
-					clients[client_id].yaw += 1.0f * sign * YAW_ROTATE_SCALAR * PI / 360.0f;
+					clients[client_id].yaw += sign * YAW_ROTATE_SCALAR;
 
 					// right, up, look 벡터 업데이트
 					clients[client_id].m_rightvec = calcRotate(basic_coordinate.right
-						, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+						, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
 					clients[client_id].m_upvec = calcRotate(basic_coordinate.up
-						, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+						, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
 					clients[client_id].m_lookvec = calcRotate(basic_coordinate.look
-						, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+						, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
 
 					// unlock
 					clients[client_id].s_lock.unlock();
@@ -430,14 +433,9 @@ void process_packet(int client_id, char* packet)
 					[[fallthrough]]
 				case KEY_W:
 					clients[client_id].s_lock.lock();
-					// 이동 방향 설정
-					XMFLOAT3 move_dir{ 0, 0, 0 };
-					move_dir.x = clients[client_id].m_upvec.x * sign;
-					move_dir.y = clients[client_id].m_upvec.y * sign;
-					move_dir.z = clients[client_id].m_upvec.z * sign;
 
 					// 이동 계산 & 결과 업데이트
-					XMFLOAT3 move_result = calcMove(clients[client_id].pos, move_dir, ENGINE_SCALAR);
+					XMFLOAT3 move_result = calcMove(clients[client_id].pos, clients[client_id].m_upvec, ENGINE_SCALAR * sign);
 					clients[client_id].pos = move_result;
 
 					// unlock
@@ -547,98 +545,55 @@ void process_packet(int client_id, char* packet)
 	case CS_INPUT_MOUSE: {
 		CS_INPUT_MOUSE_PACKET* rt_p = reinterpret_cast<CS_INPUT_MOUSE_PACKET*>(packet);
 
-		clients[client_id].s_lock.lock();
-
 		if (clients[client_id].s_state == ST_FREE) {
-			clients[client_id].s_lock.unlock();
+			//clients[client_id].s_lock.lock();
+			//clients[client_id].s_lock.unlock();
 			break;
 		}
 
 		if (rt_p->key_val == RT_LBUTTON) {			// 마우스 좌클릭 드래그
+			float rotate_scalar = 0.0f;
 
-			XMFLOAT3 move_dir{ 0, 0, 0 };
-			XMFLOAT3 move_result{ 0, 0, 0 };
-			float move_scalar = 0.0f;
+			clients[client_id].s_lock.lock();
 
-			if (fabs(rt_p->delta_x) < fabs(rt_p->delta_y)) {	// 마우스 상,하 드래그: 기수를 조절합니다.기체를 x축 기준으로 회전시키고 앞뒤로 이동합니다.
-				// 1. pitch 회전
-				// pitch 설정
-				clients[client_id].pitch += -1.0f * rt_p->delta_y * PITCH_ROTATE_SCALAR * SENSITIVITY * PI / 360.0f;
-
-				// 비정상적인 회전 방지
-				if (clients[client_id].pitch > PITCH_LIMIT * PI / 360.0f)
-					clients[client_id].pitch = (PITCH_LIMIT - 1) * PI / 360.0f;
-				else if (clients[client_id].pitch < -1.0f * PITCH_LIMIT * PI / 360.0f)
-					clients[client_id].pitch = -1.0f * (PITCH_LIMIT - 1) * PI / 360.0f;
-
-				// 2. z축 이동
-				// 이동 관련 설정
-				move_dir.x = clients[client_id].m_lookvec.x;
-				move_dir.y = clients[client_id].m_lookvec.y;
-				move_dir.z = clients[client_id].m_lookvec.z;
-
-				// 전진과 후진의 속도를 다르게 하기 위한 스칼라
-				float tmp_scalar = 0.0f;
-				if (rt_p->delta_y >= 0)
-					tmp_scalar = MOVE_BACK_SCALAR;
-				else
-					tmp_scalar = MOVE_FORWARD_SCALAR;
-
-				// 총 이동 스칼라
-				move_scalar = -1.0f * rt_p->delta_y * tmp_scalar * SENSITIVITY;
+			if (fabs(rt_p->delta_x) < fabs(rt_p->delta_y)) {	// 마우스 상,하 드래그: 기수를 조절합니다. 기체를 x축 기준 회전시킵니다.
+				rotate_scalar = -1.f * rt_p->delta_y * PITCH_ROTATE_SCALAR * SENSITIVITY;
+				if (fabs(clients[client_id].pitch + rotate_scalar) < PITCH_LIMIT) {		// 비정상적인 회전 방지
+					clients[client_id].pitch += rotate_scalar;							// pitch 설정
+				}
 			}
-			else {									// 마우스 좌,우 드래그: 기수의 수평을 조절합니다.기체를 z축 기준으로 회전시키고 좌우로 이동합니다.
-				// 1. roll 회전
-				// roll 설정
-				clients[client_id].roll += -1.0f * rt_p->delta_x * ROLL_ROTATE_SCALAR * SENSITIVITY * PI / 360.0f;
-
-				// 비정상적인 회전 방지
-				if (clients[client_id].roll > ROLL_LIMIT * PI / 360.0f)
-					clients[client_id].roll = (ROLL_LIMIT - 1) * PI / 360.0f;
-				else if (clients[client_id].roll < -1.0f * ROLL_LIMIT * PI / 360.0f)
-					clients[client_id].roll = -1.0f * (ROLL_LIMIT - 1) * PI / 360.0f;
-
-				// 2. x축 이동
-				// 이동 관련 설정
-				move_dir.x = clients[client_id].m_rightvec.x;
-				move_dir.y = clients[client_id].m_rightvec.y;
-				move_dir.z = clients[client_id].m_rightvec.z;
-
-				move_scalar = rt_p->delta_x * SENSITIVITY;
+			else {												// 마우스 좌,우 드래그: 기수의 수평을 조절합니다. 기체를 z축 기준으로 회전시킵니다.
+				rotate_scalar = -1.f * rt_p->delta_x * ROLL_ROTATE_SCALAR * SENSITIVITY;
+				if (fabs(clients[client_id].roll + rotate_scalar) < ROLL_LIMIT) {		// 비정상적인 회전 방지
+					clients[client_id].roll += rotate_scalar;							// roll 설정
+				}
 			}
 
 			// right, up, look 벡터 회전 & 업데이트
-			clients[client_id].m_rightvec = calcRotate(basic_coordinate.right, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
-			clients[client_id].m_upvec = calcRotate(basic_coordinate.up, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
-			clients[client_id].m_lookvec = calcRotate(basic_coordinate.look, clients[client_id].roll, clients[client_id].pitch, clients[client_id].yaw);
+			clients[client_id].m_rightvec = calcRotate(basic_coordinate.right, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
+			clients[client_id].m_upvec = calcRotate(basic_coordinate.up, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
+			clients[client_id].m_lookvec = calcRotate(basic_coordinate.look, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
 
-			// 이동 & 좌표 업데이트
-			move_result = calcMove(clients[client_id].pos, move_dir, move_scalar);
-			clients[client_id].pos = move_result;
+			clients[client_id].s_lock.unlock();
 
-		}
-		else if (rt_p->key_val == RT_RBUTTON) {		// 마우스 우클릭 드래그: 기능 미정.
-			cout << "마우스 우클릭 입력됨." << endl;// 임시코드
+			// server message
+			cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
+				<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
 
-		}
-
-		clients[client_id].s_lock.unlock();
-
-		// server message
-		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
-			<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
-		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] moves to ("
-			<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.z << ")." << endl;
-
-		// 작동 중인 모든 클라이언트에게 이동&회전 결과를 알려줍니다.
-		for (int i = 0; i < MAX_USER; i++) {
-			auto& pl = clients[i];
-			lock_guard<mutex> lg{ pl.s_lock };
-			if (pl.s_state == ST_INGAME) {
-				pl.send_rotate_packet(client_id, TARGET_PLAYER);
-				pl.send_move_packet(client_id, TARGET_PLAYER);
+			// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
+			for (auto& send_target : clients) {
+				lock_guard<mutex> lg{ send_target.s_lock };
+				if (send_target.s_state == ST_INGAME) {
+					send_target.send_rotate_packet(client_id, TARGET_PLAYER);
+				}
 			}
 		}
+		else if (rt_p->key_val == RT_RBUTTON) {		// 마우스 우클릭 드래그: 기능 미정.
+			//clients[client_id].s_lock.lock();
+			cout << "마우스 우클릭 입력됨." << endl;// 임시코드
+			//clients[client_id].s_lock.unlock();
+		}
+
 		break;
 	}// CS_INPUT_MOUSE end
 	}
@@ -718,15 +673,53 @@ void do_worker()
 
 void timerFunc() {
 	while (true) {
+		// Helicopter
+		for (auto& mv_target : clients) {
+			if (mv_target.s_state != ST_INGAME) continue;
+
+			// proj_x는 UP벡터를 x축에 정사영시킨 정사영벡터, proj_z는 up벡터를 z축에 정사영시킨 정사영벡터입니다.
+			float proj_x = 0.f, proj_z = 0.f;
+
+			// pitch가 0이 아니면 (= 앞or뒤로 기울어져 있다면) 헬기를 앞 또는 뒤로 이동시킵니다.
+			if (mv_target.pitch != 0.f) {
+				cout << "PITCH: " << mv_target.pitch << endl;//test
+				// proj_z = √(y^2 + z^2) cos(90˚ - pitch)
+				proj_z = sqrtf(powf(mv_target.m_upvec.y, 2) + powf(mv_target.m_upvec.z, 2)) * cos(XMConvertToRadians(90 - mv_target.pitch));
+
+				// pitch 각도에 따른 이동
+				mv_target.pos = calcMove(mv_target.pos, mv_target.m_lookvec, proj_z * MOVE_SCALAR_FB);
+			}
+
+			// roll이 0이 아니면 (= 좌or우로 기울어져 있다면) 헬기를 좌 또는 우로 이동시킵니다.
+			if (mv_target.roll != 0.f) {
+				cout << "ROLL: " << mv_target.roll << endl;//test
+				// proj_x = √(x^2 + y^2) cos(90˚ - roll)
+				proj_x = sqrtf(powf(mv_target.m_upvec.x, 2) + powf(mv_target.m_upvec.y, 2)) * cos(XMConvertToRadians(90 - mv_target.roll));
+
+				// roll 각도에 따른 이동
+				mv_target.pos = calcMove(mv_target.pos, mv_target.m_rightvec, -1.f * proj_x * MOVE_SCALAR_LR);
+			}
+
+			// 최종 이동
+			if (mv_target.pitch != 0.f || mv_target.roll != 0.f) {
+				cout << "Player[" << mv_target.id << "] moves to pos(" << mv_target.pos.x << ", " << mv_target.pos.y << ", " << mv_target.pos.z << ").";
+
+				// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
+				for (auto& send_target : clients) {
+					if (send_target.s_state != ST_INGAME) continue;
+
+					lock_guard<mutex> lg{ send_target.s_lock };
+					send_target.send_move_packet(mv_target.id, TARGET_PLAYER);
+				}
+			}
+		}
+
 		// Bullet
 		for (auto& bullet : bullets_arr) {
 			if (bullet.getId() == -1) continue;
 
 			if (bullet.calcDistance(bullet.getInitialPos()) > BULLET_RANGE) {	// 만약 총알이 초기 위치로부터 멀리 떨어졌다면 제거합니다.
-				/*cout << "[" << bullet.getId() << "]번 총알을 제거합니다.";
-				cout << "\tDist: " << bullet.calcDistance(bullet.getInitialPos())
-					<< " (CurPos:" << bullet.getPos().x << "," << bullet.getPos().y << "," << bullet.getPos().z
-					<< " , InitPos:" << bullet.getInitialPos().x << "," << bullet.getInitialPos().y << "," << bullet.getInitialPos().z << ")" << endl;*/
+				//cout << "[" << bullet.getId() << "]번 총알을 제거합니다.";
 				bullet.clear();
 
 				// 객체 제거패킷을 모든 클라이언트에게 보냅니다.
@@ -747,7 +740,7 @@ void timerFunc() {
 				/*cout << "[" << bullet.getId() << "]번 총알이 Pos("
 					<< bullet.getPos().x << ", " << bullet.getPos().y << ", " << bullet.getPos().z << ")로 이동하였습니다." << endl;*/
 
-				// 이동된 총알의 위치를 모든 클라이언트에게 전달합니다.
+					// 이동된 총알의 위치를 모든 클라이언트에게 전달합니다.
 				SC_MOVE_OBJECT_PACKET move_bullet_packet;
 				move_bullet_packet.target = TARGET_BULLET;
 				move_bullet_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
@@ -763,6 +756,7 @@ void timerFunc() {
 				}
 			}
 		}
+
 	}
 }
 

@@ -612,12 +612,12 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[KEY_W] & 0xF0) {
 			inputKeyValue += INPUT_KEY_W;//S
 			dwDirection |= DIR_FORWARD;
-			m_pCamera->SetTimeLag(0.2);
+			m_pCamera->SetTimeLag(0.02);
 		}
 		if (pKeysBuffer[KEY_S] & 0xF0) {
 			inputKeyValue += INPUT_KEY_S;//S
 			dwDirection |= DIR_BACKWARD;
-			m_pCamera->SetTimeLag(0.2);
+			m_pCamera->SetTimeLag(0.02);
 		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
 			inputKeyValue += INPUT_KEY_D;//S
@@ -650,51 +650,6 @@ void CGameFramework::ProcessInput()
 		if (inputKeyValue != 0) {
 			q_keyboardInput.push(inputKeyValue);
 		}//
-
-		// Server (temp)
-		// 마우스로 전진, 후진하는 것이 아직 어색하고 불편하여 마우스를 통한 이동 로직을 개선하기 전까지
-		// 임시로 방향키 위아래를 통해 전후 이동을 합니다.
-		float lookScalar = 2.0f, rightScalar = 0.5f;
-		bool directionKeyPush = false;
-		MouseInputVal inputMouseValue_temp;
-
-		if (pKeysBuffer[VK_UP] & 0xF0) {
-			inputMouseValue_temp.button = L_BUTTON;
-			inputMouseValue_temp.delX = 0.0f;
-			inputMouseValue_temp.delY = -1.0f * lookScalar;
-			m_pCamera->SetTimeLag(0.05);
-			directionKeyPush = true;
-		}
-		else if (pKeysBuffer[VK_DOWN] & 0xF0) {
-			inputMouseValue_temp.button = L_BUTTON;
-			inputMouseValue_temp.delX = 0.0f;
-			inputMouseValue_temp.delY = lookScalar;
-			m_pCamera->SetTimeLag(0.05);
-			directionKeyPush = true;
-		}
-
-		if (pKeysBuffer[VK_LEFT] & 0xF0) {
-			inputMouseValue_temp.button = L_BUTTON;
-			inputMouseValue_temp.delX = -1.0f * rightScalar;
-			inputMouseValue_temp.delY = 0.0f;
-			m_pCamera->SetTimeLag(0.2);
-			directionKeyPush = true;
-			
-		}
-		else if (pKeysBuffer[VK_RIGHT] & 0xF0) {
-			inputMouseValue_temp.button = L_BUTTON;
-			inputMouseValue_temp.delX = rightScalar;
-			inputMouseValue_temp.delY = 0.0f;
-			m_pCamera->SetTimeLag(0.2);
-			directionKeyPush = true;
-			
-		}
-
-		if (directionKeyPush) {
-			q_mouseInput.push(inputMouseValue_temp);
-		}
-		// ====
-
 
 		float cxDelta = 0.0f, cyDelta = 0.0f, czDelta = 0.0f;
 		POINT ptCursorPos;
