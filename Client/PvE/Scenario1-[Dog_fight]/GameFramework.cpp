@@ -622,23 +622,23 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[KEY_D] & 0xF0) {
 			inputKeyValue += INPUT_KEY_D;//S
 			dwDirection |= DIR_RIGHT;
-			m_pCamera->SetTimeLag(0.2);
+			m_pCamera->SetTimeLag(0.05);
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
 			inputKeyValue += INPUT_KEY_A;//S
 			dwDirection |= DIR_LEFT;
-			m_pCamera->SetTimeLag(0.2);
+			m_pCamera->SetTimeLag(0.05);
 		}
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
 			inputKeyValue += INPUT_KEY_Q;//S
 			dwDirection |= DIR_UP;
-			m_pCamera->SetTimeLag(0.2);
+			m_pCamera->SetTimeLag(0.05);
 		}
 		if (pKeysBuffer[KEY_E] & 0xF0) {
 			inputKeyValue += INPUT_KEY_E;//S
 			dwDirection |= DIR_DOWN;
-			m_pCamera->SetTimeLag(0.2);
+			m_pCamera->SetTimeLag(0.05);
 		}
 
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
