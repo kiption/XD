@@ -13,8 +13,8 @@ GameSound::GameSound()
 	result = ColliSound->setMode(FMOD_LOOP_OFF);
 
 	result = soundSystem->init(64, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("Sound/Speaking.mp3", FMOD_DEFAULT, 0, &speakSound);
-	result = speakSound->setMode(FMOD_LOOP_OFF);
+	result = soundSystem->createSound("Sound/Rotor.mp3", FMOD_DEFAULT, 0, &speakSound);
+	result = speakSound->setMode(FMOD_LOOP_BIDI);
 
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
 	result = soundSystem->createSound("Sound/RainingSound.mp3", FMOD_3D, 0, &bgmSound);
@@ -64,7 +64,7 @@ GameSound::~GameSound()
 void GameSound::shootingSound()
 {
 	result = soundSystem->playSound(shootSound, 0, false, &shootChannel);
-	shootChannel->setVolume(0.02f);
+	shootChannel->setVolume(0.2f);
 }
 void GameSound::backGroundMusic()
 {
@@ -73,7 +73,7 @@ void GameSound::backGroundMusic()
 }
 void GameSound::SpeakMusic()
 {
-	result = soundSystem->playSound(speakSound, 0, true, &speakChannel);
+	result = soundSystem->playSound(speakSound, 0, false, &speakChannel);
 	speakChannel->setVolume(0.25f);
 }
 void GameSound::walkingSound()
@@ -84,7 +84,7 @@ void GameSound::walkingSound()
 void GameSound::collisionSound()
 {
 	result = soundSystem->playSound(ColliSound, 0, false, &ColliChannel);
-	ColliChannel->setVolume(0.12f);
+	ColliChannel->setVolume(0.22f);
 }
 
 void GameSound::pauseWalking()
