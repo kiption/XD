@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "Scene.h"
 
-ID3D12DescriptorHeap *CScene::m_pd3dCbvSrvDescriptorHeap = NULL;
+ID3D12DescriptorHeap* CScene::m_pd3dCbvSrvDescriptorHeap = NULL;
 
 D3D12_CPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvCPUDescriptorStartHandle;
 D3D12_GPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvGPUDescriptorStartHandle;
@@ -81,13 +81,13 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 }
 
-void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
+void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 160); //SuperCobra(17), Gunship(2), Player:Mi24(1), Angrybot()
 
-	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
+	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	BuildDefaultLightsAndMaterials();
 
@@ -98,16 +98,15 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf3Normal);
 
 	m_nHierarchicalGameObjects = 63;
-	m_ppHierarchicalGameObjects = new CGameObject*[m_nHierarchicalGameObjects];
+	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 
-	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Angrybot.bin", NULL);
+	CLoadedModelInfo* pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Angrybot.bin", NULL);
 	m_ppHierarchicalGameObjects[0] = new CAngrybotObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pAngrybotModel, 1);
 	m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[0]->SetPosition(410.0f, m_pTerrain->GetHeight(410.0f, 735.0f), 735.0f);
 	if (pAngrybotModel) delete pAngrybotModel;
 
-
-	CLoadedModelInfo *pEthanModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Ethan.bin", NULL);
+	CLoadedModelInfo* pEthanModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Ethan.bin", NULL);
 	m_ppHierarchicalGameObjects[1] = new CEthanObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEthanModel, 2);
 	m_ppHierarchicalGameObjects[1]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[1]->m_pSkinnedAnimationController->SetTrackWeight(0, 0.8f);
@@ -115,394 +114,482 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppHierarchicalGameObjects[1]->m_pSkinnedAnimationController->SetTrackWeight(1, 0.2f);
 	m_ppHierarchicalGameObjects[1]->SetPosition(350.0f, m_pTerrain->GetHeight(350.0f, 670.0f), 670.0f);
 
-	CLoadedModelInfo *pGSModels = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
-	m_ppHierarchicalGameObjects[2] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGSModels, 1);
+	CLoadedModelInfo* pGSModels1 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GeneratorShed.bin", NULL);
+	m_ppHierarchicalGameObjects[2] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGSModels1, 1);
 	//m_ppHierarchicalGameObjects[2]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[2]->SetPosition(450.0f, m_pTerrain->GetHeight(230.0f, 640.0f), 450.0f);
 	m_ppHierarchicalGameObjects[2]->SetScale(3.0f, 3.0f, 3.0f);
+	//if (pGSModels1) delete pGSModels1;
 
-	m_ppHierarchicalGameObjects[3] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGSModels, 1);
+	m_ppHierarchicalGameObjects[3] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGSModels1, 1);
 	//m_ppHierarchicalGameObjects[3]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[3]->SetPosition(450.0f, m_pTerrain->GetHeight(230.0f, 640.0f), 550.0f);
 	m_ppHierarchicalGameObjects[3]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[3]->SetScale(3.0f, 3.0f, 3.0f);
+	//if (pGSModels1) delete &pGSModels1;
 
-	m_ppHierarchicalGameObjects[4] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGSModels, 1);
+	m_ppHierarchicalGameObjects[4] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGSModels1, 1);
 	//m_ppHierarchicalGameObjects[4]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[4]->SetPosition(550.0f, m_pTerrain->GetHeight(230.0f, 640.0f), 550.0f);
 	m_ppHierarchicalGameObjects[4]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[4]->SetScale(3.0f, 3.0f, 3.0f);
+	//if (pGSModels3) delete pGSModels3;
 
-	m_ppHierarchicalGameObjects[5] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGSModels, 1);
+	m_ppHierarchicalGameObjects[5] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGSModels1, 1);
 	//m_ppHierarchicalGameObjects[5]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[5]->SetPosition(550.0f, m_pTerrain->GetHeight(230.0f, 640.0f), 450.0f);
 	m_ppHierarchicalGameObjects[5]->Rotate(0.0f, 270.0f, 0.0f);
 	m_ppHierarchicalGameObjects[5]->SetScale(3.0f, 3.0f, 3.0f);
-	if (pGSModels) delete pGSModels;
+	//if (pGSModels4) delete pGSModels4;
+	if (pGSModels1) delete pGSModels1;
 
-	CLoadedModelInfo *pCSModels = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
-	m_ppHierarchicalGameObjects[6] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels, 1);
+	CLoadedModelInfo* pCSModels1 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/CementShack2.bin", NULL);
+	m_ppHierarchicalGameObjects[6] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels1, 1);
 	//m_ppHierarchicalGameObjects[6]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[6]->SetPosition(350.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 90.0f);
 	m_ppHierarchicalGameObjects[6]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[6]->SetScale(6.0f, 2.0f, 2.0f);
+	//if (pCSModels1) delete pCSModels1;
 
-	m_ppHierarchicalGameObjects[7] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels, 1);
+	m_ppHierarchicalGameObjects[7] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels1, 1);
 	//m_ppHierarchicalGameObjects[7]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
 	m_ppHierarchicalGameObjects[7]->SetPosition(300.0f, m_pTerrain->GetHeight(300.0f, 50.0f), 60.0f);
 	m_ppHierarchicalGameObjects[7]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[7]->SetScale(6.0f, 2.0f, 3.0f);
-	
-	m_ppHierarchicalGameObjects[8] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels, 1);
+	//if (pCSModels2) delete pCSModels2;
+
+	m_ppHierarchicalGameObjects[8] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels1, 1);
 	//m_ppHierarchicalGameObjects[8]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	m_ppHierarchicalGameObjects[8]->SetPosition(450.0f, m_pTerrain->GetHeight(450.0f, 40.0f), 150.0f);
 	m_ppHierarchicalGameObjects[8]->Rotate(0.0f, 270.0f, 0.0f);
 	m_ppHierarchicalGameObjects[8]->SetScale(20.0f, 2.0f, 3.0f);
-	
-	m_ppHierarchicalGameObjects[9] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels, 1);
+	//if (pCSModels3) delete pCSModels3;
+
+	m_ppHierarchicalGameObjects[9] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels1, 1);
 	//m_ppHierarchicalGameObjects[9]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	m_ppHierarchicalGameObjects[9]->SetPosition(300.0f, m_pTerrain->GetHeight(300.0f, 620.0f), 200.0f);
 	m_ppHierarchicalGameObjects[9]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[9]->SetScale(15.0f, 2.0f, 3.0f);
+	//if (pCSModels4) delete pCSModels4;
 
-	m_ppHierarchicalGameObjects[10] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels, 1);
+	m_ppHierarchicalGameObjects[10] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels1, 1);
 	//m_ppHierarchicalGameObjects[10]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	m_ppHierarchicalGameObjects[10]->SetPosition(550.0f, m_pTerrain->GetHeight(300.0f, 620.0f), 275.0f);
 	m_ppHierarchicalGameObjects[10]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[10]->SetScale(15.0f, 2.0f, 3.0f);
+	//if (pCSModels5) delete pCSModels5;
 
-	m_ppHierarchicalGameObjects[11] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels, 1);
+	m_ppHierarchicalGameObjects[11] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels1, 1);
 	//m_ppHierarchicalGameObjects[11]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	m_ppHierarchicalGameObjects[11]->SetPosition(150.0f, m_pTerrain->GetHeight(300.0f, 620.0f), 200.0f);
 	m_ppHierarchicalGameObjects[11]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[11]->SetScale(12.0f, 2.0f, 3.0f);
+	//if (pCSModels6) delete pCSModels6;
 
-	m_ppHierarchicalGameObjects[12] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels, 1);
+	m_ppHierarchicalGameObjects[12] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels1, 1);
 	//m_ppHierarchicalGameObjects[12]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	m_ppHierarchicalGameObjects[12]->SetPosition(150.0f, m_pTerrain->GetHeight(300.0f, 620.0f), 100.0f);
 	m_ppHierarchicalGameObjects[12]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[12]->SetScale(15.0f, 1.5f, 3.0f);
+	//if (pCSModels7) delete pCSModels7;
 
-	m_ppHierarchicalGameObjects[13] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels, 1);
+	m_ppHierarchicalGameObjects[13] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels1, 1);
 	//m_ppHierarchicalGameObjects[13]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	m_ppHierarchicalGameObjects[13]->SetPosition(110.0f, m_pTerrain->GetHeight(300.0f, 620.0f), 240.0f);
 	m_ppHierarchicalGameObjects[13]->Rotate(0.0f, 300.0f, 0.0f);
 	m_ppHierarchicalGameObjects[13]->SetScale(8.0f, 2.0f, 3.0f);
+	//if (pCSModels8) delete pCSModels8;
 
-	m_ppHierarchicalGameObjects[14] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels, 1);
+	m_ppHierarchicalGameObjects[14] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels1, 1);
 	//m_ppHierarchicalGameObjects[14]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	m_ppHierarchicalGameObjects[14]->SetPosition(250.0f, m_pTerrain->GetHeight(300.0f, 620.0f), 350.0f);
 	m_ppHierarchicalGameObjects[14]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[14]->SetScale(10.0f, 2.0f, 3.0f);
+	//if (pCSModels9) delete pCSModels9;
 
-	m_ppHierarchicalGameObjects[15] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels, 1);
+	m_ppHierarchicalGameObjects[15] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels1, 1);
 	//m_ppHierarchicalGameObjects[15]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	m_ppHierarchicalGameObjects[15]->SetPosition(350.0f, m_pTerrain->GetHeight(300.0f, 620.0f), 320.0f);
 	m_ppHierarchicalGameObjects[15]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[15]->SetScale(15.0f, 2.0f, 3.0f);
+	//if (pCSModels10) delete pCSModels10;
 
-	m_ppHierarchicalGameObjects[16] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels, 1);
+	m_ppHierarchicalGameObjects[16] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels1, 1);
 	//m_ppHierarchicalGameObjects[16]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	m_ppHierarchicalGameObjects[16]->SetPosition(760.0f, m_pTerrain->GetHeight(300.0f, 620.0f), 215.0f);
 	m_ppHierarchicalGameObjects[16]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[16]->SetScale(10.0f, 2.0f, 3.0f);
+	//if (pCSModels11) delete pCSModels11;
 
-	m_ppHierarchicalGameObjects[17] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels, 1);
+	m_ppHierarchicalGameObjects[17] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels1, 1);
 	//m_ppHierarchicalGameObjects[17]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	m_ppHierarchicalGameObjects[17]->SetPosition(710.0f, m_pTerrain->GetHeight(300.0f, 620.0f), 130.0f);
 	m_ppHierarchicalGameObjects[17]->Rotate(0.0f, 270.0f, 0.0f);
 	m_ppHierarchicalGameObjects[17]->SetScale(8.0f, 2.0f, 3.0f);
+	//if (pCSModels12) delete pCSModels12;
 
-	m_ppHierarchicalGameObjects[18] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels, 1);
+	m_ppHierarchicalGameObjects[18] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pCSModels1, 1);
 	//m_ppHierarchicalGameObjects[18]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	m_ppHierarchicalGameObjects[18]->SetPosition(640.0f, m_pTerrain->GetHeight(300.0f, 620.0f), 335.0f);
 	m_ppHierarchicalGameObjects[18]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[18]->SetScale(6.0f, 2.0f, 3.0f);
+	if (pCSModels1) delete pCSModels1;
 
-	if (pCSModels) delete pCSModels;
-
-	CLoadedModelInfo* pBasicBuilding = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
-	m_ppHierarchicalGameObjects[19] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBasicBuilding, 1);
+	CLoadedModelInfo* pBasicBuilding1 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
+	m_ppHierarchicalGameObjects[19] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBasicBuilding1, 1);
 	//m_ppHierarchicalGameObjects[19]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[19]->SetPosition(420.0f, m_pTerrain->GetHeight(300.0f, 300.0f) + 16.0f, 400.0f);
+	m_ppHierarchicalGameObjects[19]->SetPosition(420.0f, m_pTerrain->GetHeight(300.0f, 300.0f), 400.0f);
 	m_ppHierarchicalGameObjects[19]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[19]->SetScale(30.0f, 10.0f, 8.0f);
+	//if (pBasicBuilding1) delete pBasicBuilding1;
 
-	m_ppHierarchicalGameObjects[20] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBasicBuilding, 1);
+	//CLoadedModelInfo* pBasicBuilding2 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
+	m_ppHierarchicalGameObjects[20] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBasicBuilding1, 1);
 	//m_ppHierarchicalGameObjects[20]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[20]->SetPosition(650.0f, m_pTerrain->GetHeight(300.0f, 300.0f) + 16.0f, 200.0f);
-	m_ppHierarchicalGameObjects[20]->Rotate(270.0f, 180.0f, 0.0f);
+	m_ppHierarchicalGameObjects[20]->SetPosition(650.0f, m_pTerrain->GetHeight(300.0f, 300.0f), 200.0f);
+	m_ppHierarchicalGameObjects[20]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[20]->SetScale(40.0f, 10.0f, 8.0f);
+	//if (pBasicBuilding2) delete pBasicBuilding2;
 
-	m_ppHierarchicalGameObjects[21] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBasicBuilding, 1);
+	//CLoadedModelInfo* pBasicBuilding3 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
+	m_ppHierarchicalGameObjects[21] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBasicBuilding1, 1);
 	//m_ppHierarchicalGameObjects[21]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[21]->SetPosition(700.0f, m_pTerrain->GetHeight(300.0f, 300.0f) + 16.0f, 400.0f);
-	m_ppHierarchicalGameObjects[21]->Rotate(270.0f, 90.0f, 0.0f);
+	m_ppHierarchicalGameObjects[21]->SetPosition(700.0f, m_pTerrain->GetHeight(300.0f, 300.0f), 400.0f);
+	m_ppHierarchicalGameObjects[21]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[21]->SetScale(15.0f, 6.0f, 8.0f);
+	//if (pBasicBuilding3) delete pBasicBuilding3;
 
-	m_ppHierarchicalGameObjects[22] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBasicBuilding, 1);
+	//CLoadedModelInfo* pBasicBuilding4 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
+	m_ppHierarchicalGameObjects[22] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBasicBuilding1, 1);
 	//m_ppHierarchicalGameObjects[22]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[22]->SetPosition(450.0f, m_pTerrain->GetHeight(300.0f, 300.0f) + 16.0f, 350.0f);
-	m_ppHierarchicalGameObjects[22]->Rotate(270.0f, 180.0f, 0.0f);
+	m_ppHierarchicalGameObjects[22]->SetPosition(450.0f, m_pTerrain->GetHeight(300.0f, 300.0f), 350.0f);
+	m_ppHierarchicalGameObjects[22]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[22]->SetScale(30.0f, 5.0f, 8.0f);
+	//if (pBasicBuilding4) delete pBasicBuilding4;
 
-	m_ppHierarchicalGameObjects[23] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBasicBuilding, 1);
+	//CLoadedModelInfo* pBasicBuilding5 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
+	m_ppHierarchicalGameObjects[23] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBasicBuilding1, 1);
 	//m_ppHierarchicalGameObjects[23]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[23]->SetPosition(200.0f, m_pTerrain->GetHeight(300.0f, 300.0f) + 16.0f, 500.0f);
-	m_ppHierarchicalGameObjects[23]->Rotate(270.0f, 90.0f, 0.0f);
+	m_ppHierarchicalGameObjects[23]->SetPosition(200.0f, m_pTerrain->GetHeight(300.0f, 300.0f), 500.0f);
+	m_ppHierarchicalGameObjects[23]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[23]->SetScale(30.0f, 10.0f, 8.0f);
+	//if (pBasicBuilding5) delete pBasicBuilding5;
 
-	m_ppHierarchicalGameObjects[24] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBasicBuilding, 1);
+	//CLoadedModelInfo* pBasicBuilding6 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
+	m_ppHierarchicalGameObjects[24] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBasicBuilding1, 1);
 	//m_ppHierarchicalGameObjects[24]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[24]->SetPosition(550.0f, m_pTerrain->GetHeight(300.0f, 300.0f) + 16.0f, 400.0f);
-	m_ppHierarchicalGameObjects[24]->Rotate(270.0f, 0.0f, 0.0f);
+	m_ppHierarchicalGameObjects[24]->SetPosition(550.0f, m_pTerrain->GetHeight(300.0f, 300.0f), 400.0f);
+	m_ppHierarchicalGameObjects[24]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[24]->SetScale(30.0f, 10.0f, 8.0f);
+	//if (pBasicBuilding6) delete pBasicBuilding6;
 
-	m_ppHierarchicalGameObjects[25] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBasicBuilding, 1);
+	//CLoadedModelInfo* pBasicBuilding7 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
+	m_ppHierarchicalGameObjects[25] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBasicBuilding1, 1);
 	//m_ppHierarchicalGameObjects[25]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[25]->SetPosition(800.0f, m_pTerrain->GetHeight(300.0f, 300.0f) + 16.0f, 300.0f);
-	m_ppHierarchicalGameObjects[25]->Rotate(270.0f, 180.0f, 0.0f);
+	m_ppHierarchicalGameObjects[25]->SetPosition(800.0f, m_pTerrain->GetHeight(300.0f, 300.0f), 300.0f);
+	m_ppHierarchicalGameObjects[25]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[25]->SetScale(30.0f, 10.0f, 8.0f);
+	if (pBasicBuilding1) delete pBasicBuilding1;
 
-	if (pBasicBuilding) delete pBasicBuilding;
-
-	CLoadedModelInfo* pWallModels = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
-	m_ppHierarchicalGameObjects[26] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels, 1);
+	CLoadedModelInfo* pWallModels1 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
+	m_ppHierarchicalGameObjects[26] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels1, 1);
 	//m_ppHierarchicalGameObjects[26]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[26]->SetPosition(850.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 250.0f);
 	m_ppHierarchicalGameObjects[26]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[26]->SetScale(6.0f, 2.0f, 4.0f);
+	//if (pWallModels1) delete pWallModels1;
 
-	m_ppHierarchicalGameObjects[27] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels, 1);
+	//CLoadedModelInfo* pWallModels2 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
+	m_ppHierarchicalGameObjects[27] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels1, 1);
 	//m_ppHierarchicalGameObjects[27]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[27]->SetPosition(875.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 150.0f);
 	m_ppHierarchicalGameObjects[27]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[27]->SetScale(10.0f, 2.0f, 8.0f);
+	//if (pWallModels2) delete pWallModels2;
 
-	m_ppHierarchicalGameObjects[28] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels, 1);
+	//CLoadedModelInfo* pWallModels3 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
+	m_ppHierarchicalGameObjects[28] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels1, 1);
 	//m_ppHierarchicalGameObjects[28]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[28]->SetPosition(120.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 325.0f);
 	m_ppHierarchicalGameObjects[28]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[28]->SetScale(8.0f, 2.0f, 8.0f);
+	//if (pWallModels3) delete pWallModels3;
 
-	m_ppHierarchicalGameObjects[29] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels, 1);
+	//CLoadedModelInfo* pWallModels4 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
+	m_ppHierarchicalGameObjects[29] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels1, 1);
 	//m_ppHierarchicalGameObjects[29]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[29]->SetPosition(900.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 400.0f);
 	m_ppHierarchicalGameObjects[29]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[29]->SetScale(10.0f, 2.0f, 8.0f);
+	//if (pWallModels4) delete pWallModels4;
 
-	m_ppHierarchicalGameObjects[30] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels, 1);
+	//CLoadedModelInfo* pWallModels5 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
+	m_ppHierarchicalGameObjects[30] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels1, 1);
 	//m_ppHierarchicalGameObjects[30]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[30]->SetPosition(160.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 605.0f);
 	m_ppHierarchicalGameObjects[30]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[30]->SetScale(10.0f, 2.0f, 8.0f);
+	//if (pWallModels5) delete pWallModels5;
 
-	m_ppHierarchicalGameObjects[31] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels, 1);
+	//CLoadedModelInfo* pWallModels6 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
+	m_ppHierarchicalGameObjects[31] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels1, 1);
 	//m_ppHierarchicalGameObjects[31]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[31]->SetPosition(600.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 500.0f);
 	m_ppHierarchicalGameObjects[31]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[31]->SetScale(10.0f, 2.0f, 8.0f);
+	//if (pWallModels6) delete pWallModels6;
 
-	m_ppHierarchicalGameObjects[32] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels, 1);
+	//CLoadedModelInfo* pWallModels7 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
+	m_ppHierarchicalGameObjects[32] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels1, 1);
 	//m_ppHierarchicalGameObjects[32]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[32]->SetPosition(525.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 650.0f);
 	m_ppHierarchicalGameObjects[32]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[32]->SetScale(8.0f, 2.0f, 8.0f);
+	//if (pWallModels7) delete pWallModels7;
 
-	m_ppHierarchicalGameObjects[33] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels, 1);
+	//CLoadedModelInfo* pWallModels8 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
+	m_ppHierarchicalGameObjects[33] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels1, 1);
 	//m_ppHierarchicalGameObjects[33]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[33]->SetPosition(750.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 800.0f);
 	m_ppHierarchicalGameObjects[33]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[33]->SetScale(10.0f, 2.0f, 8.0f);
+	//if (pWallModels8) delete pWallModels8;
 
-	m_ppHierarchicalGameObjects[34] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels, 1);
+	//CLoadedModelInfo* pWallModels9 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
+	m_ppHierarchicalGameObjects[34] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels1, 1);
 	//m_ppHierarchicalGameObjects[34]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[34]->SetPosition(400.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 500.0f);
 	m_ppHierarchicalGameObjects[34]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[34]->SetScale(10.0f, 2.0f, 8.0f);
+	//if (pWallModels9) delete pWallModels9;
 
-	m_ppHierarchicalGameObjects[35] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels, 1);
+	//CLoadedModelInfo* pWallModels10 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
+	m_ppHierarchicalGameObjects[35] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModels1, 1);
 	//m_ppHierarchicalGameObjects[35]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[35]->SetPosition(250.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 795.0f);
 	m_ppHierarchicalGameObjects[35]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[35]->SetScale(10.0f, 2.0f, 8.0f);
+	if (pWallModels1) delete pWallModels1;
 
-	if (pWallModels) delete pWallModels;
-
-	CLoadedModelInfo* pEnemyBuildingModels = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
-	m_ppHierarchicalGameObjects[36] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels, 1);
+	CLoadedModelInfo* pEnemyBuildingModels1 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/CementShack2.bin", NULL);
+	m_ppHierarchicalGameObjects[36] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels1, 1);
 	//m_ppHierarchicalGameObjects[36]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[36]->SetPosition(500.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 850.0f);
 	m_ppHierarchicalGameObjects[36]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[36]->SetScale(20.0f, 2.0f, 4.0f);
+	//if (pEnemyBuildingModels1) delete pEnemyBuildingModels1;
 
-	m_ppHierarchicalGameObjects[37] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels, 1);
+	//CLoadedModelInfo* pEnemyBuildingModels2 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/CementShack2.bin", NULL);
+	m_ppHierarchicalGameObjects[37] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels1, 1);
 	//m_ppHierarchicalGameObjects[37]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[37]->SetPosition(380.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 940.0f);
 	m_ppHierarchicalGameObjects[37]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[37]->SetScale(6.0f, 2.0f, 3.0f);
+	//if (pEnemyBuildingModels2) delete pEnemyBuildingModels2;
 
-	m_ppHierarchicalGameObjects[38] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels, 1);
+	//CLoadedModelInfo* pEnemyBuildingModels3 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/CementShack2.bin", NULL);
+	m_ppHierarchicalGameObjects[38] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels1, 1);
 	//m_ppHierarchicalGameObjects[38]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[38]->SetPosition(600.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 940.0f);
 	m_ppHierarchicalGameObjects[38]->Rotate(0.0f, 270.0f, 0.0f);
 	m_ppHierarchicalGameObjects[38]->SetScale(6.0f, 2.0f, 3.0f);
+	//if (pEnemyBuildingModels3) delete pEnemyBuildingModels3;
 
-	m_ppHierarchicalGameObjects[39] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels, 1);
+	//CLoadedModelInfo* pEnemyBuildingModels4 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/CementShack2.bin", NULL);
+	m_ppHierarchicalGameObjects[39] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels1, 1);
 	//m_ppHierarchicalGameObjects[39]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[39]->SetPosition(500.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 775.0f);
 	m_ppHierarchicalGameObjects[39]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[39]->SetScale(15.0f, 2.0f, 4.0f);
+	//if (pEnemyBuildingModels4) delete pEnemyBuildingModels4;
 
-	m_ppHierarchicalGameObjects[40] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels, 1);
+	//CLoadedModelInfo* pEnemyBuildingModels5 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/CementShack2.bin", NULL);
+	m_ppHierarchicalGameObjects[40] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels1, 1);
 	//m_ppHierarchicalGameObjects[40]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[40]->SetPosition(150.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 850.0f);
 	m_ppHierarchicalGameObjects[40]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[40]->SetScale(15.0f, 2.0f, 2.0f);
+	//if (pEnemyBuildingModels5) delete pEnemyBuildingModels5;
 
-	m_ppHierarchicalGameObjects[41] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels, 1);
+	//CLoadedModelInfo* pEnemyBuildingModels6 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/CementShack2.bin", NULL);
+	m_ppHierarchicalGameObjects[41] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels1, 1);
 	//m_ppHierarchicalGameObjects[41]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[41]->SetPosition(685.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 875.0f);
 	m_ppHierarchicalGameObjects[41]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[41]->SetScale(8.0f, 2.0f, 3.0f);
+	//if (pEnemyBuildingModels6) delete pEnemyBuildingModels6;
 
-	m_ppHierarchicalGameObjects[42] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels, 1);
+	//CLoadedModelInfo* pEnemyBuildingModels7 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/CementShack2.bin", NULL);
+	m_ppHierarchicalGameObjects[42] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels1, 1);
 	//m_ppHierarchicalGameObjects[42]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[42]->SetPosition(850.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 900.0f);
 	m_ppHierarchicalGameObjects[42]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[42]->SetScale(15.0f, 2.0f, 2.0f);
+	//if (pEnemyBuildingModels7) delete pEnemyBuildingModels7;
 
-	m_ppHierarchicalGameObjects[43] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels, 1);
+	//CLoadedModelInfo* pEnemyBuildingModels8 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/CementShack2.bin", NULL);
+	m_ppHierarchicalGameObjects[43] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels1, 1);
 	//m_ppHierarchicalGameObjects[43]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[43]->SetPosition(850.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 750.0f);
 	m_ppHierarchicalGameObjects[43]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[43]->SetScale(12.0f, 2.0f, 3.0f);
+	//if (pEnemyBuildingModels8) delete pEnemyBuildingModels8;
 
-	m_ppHierarchicalGameObjects[44] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels, 1);
+	//CLoadedModelInfo* pEnemyBuildingModels9 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/CementShack2.bin", NULL);
+	m_ppHierarchicalGameObjects[44] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels1, 1);
 	//m_ppHierarchicalGameObjects[44]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[44]->SetPosition(750.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 335.0f);
 	m_ppHierarchicalGameObjects[44]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[44]->SetScale(12.0f, 2.0f, 2.0f);
+	//if (pEnemyBuildingModels9) delete pEnemyBuildingModels9;
 
-	m_ppHierarchicalGameObjects[45] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels, 1);
+	//CLoadedModelInfo* pEnemyBuildingModels10 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/CementShack2.bin", NULL);
+	m_ppHierarchicalGameObjects[45] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels1, 1);
 	//m_ppHierarchicalGameObjects[45]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[45]->SetPosition(700.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 515.0f);
 	m_ppHierarchicalGameObjects[45]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[45]->SetScale(12.0f, 2.0f, 2.0f);
+	//if (pEnemyBuildingModels10) delete pEnemyBuildingModels10;
 
-	m_ppHierarchicalGameObjects[46] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels, 1);
+	//CLoadedModelInfo* pEnemyBuildingModels11 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/CementShack2.bin", NULL);
+	m_ppHierarchicalGameObjects[46] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEnemyBuildingModels1, 1);
 	//m_ppHierarchicalGameObjects[46]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[46]->SetPosition(750.0f, m_pTerrain->GetHeight(350.0f, 80.0f), 650.0f);
 	m_ppHierarchicalGameObjects[46]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[46]->SetScale(14.0f, 2.0f, 2.0f);
-	
-	if (pEnemyBuildingModels) delete pEnemyBuildingModels;
+	//if (pEnemyBuildingModels11) delete pEnemyBuildingModels11;
+	if (pEnemyBuildingModels1) delete pEnemyBuildingModels1;
 
-	CLoadedModelInfo* pGreatModels = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
-	m_ppHierarchicalGameObjects[47] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels, 1);
+	CLoadedModelInfo* pGreatModels1 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GeneratorShed.bin", NULL);
+	m_ppHierarchicalGameObjects[47] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels1, 1);
 	//m_ppHierarchicalGameObjects[47]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[47]->SetPosition(650.0f, m_pTerrain->GetHeight(230.0f, 640.0f), 450.0f);
 	m_ppHierarchicalGameObjects[47]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[47]->SetScale(3.0f, 3.0f, 3.0f);
+	//if (pGreatModels1) delete pGreatModels1;
 
-	m_ppHierarchicalGameObjects[48] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels, 1);
+	//CLoadedModelInfo* pGreatModels2 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GeneratorShed.bin", NULL);
+	m_ppHierarchicalGameObjects[48] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels1, 1);
 	//m_ppHierarchicalGameObjects[48]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[48]->SetPosition(920.0f, m_pTerrain->GetHeight(230.0f, 640.0f), 125.0f);
 	m_ppHierarchicalGameObjects[48]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[48]->SetScale(3.0f, 2.0f, 3.0f);
+	//if (pGreatModels2) delete pGreatModels2;
 
-	m_ppHierarchicalGameObjects[49] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels, 1);
+	//CLoadedModelInfo* pGreatModels3 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GeneratorShed.bin", NULL);
+	m_ppHierarchicalGameObjects[49] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels1, 1);
 	//m_ppHierarchicalGameObjects[49]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[49]->SetPosition(250.0f, m_pTerrain->GetHeight(230.0f, 640.0f), 800.0f);
 	m_ppHierarchicalGameObjects[49]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[49]->SetScale(3.0f, 2.0f, 3.0f);
+	//if (pGreatModels3) delete pGreatModels3;
 
-	m_ppHierarchicalGameObjects[50] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels, 1);
+	//CLoadedModelInfo* pGreatModels4 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GeneratorShed.bin", NULL);
+	m_ppHierarchicalGameObjects[50] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels1, 1);
 	//m_ppHierarchicalGameObjects[50]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[50]->SetPosition(850.0f, m_pTerrain->GetHeight(230.0f, 640.0f), 550.0f);
 	m_ppHierarchicalGameObjects[50]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[50]->SetScale(6.0f, 2.0f, 6.0f);
+	//if (pGreatModels4) delete pGreatModels4;
 
-	m_ppHierarchicalGameObjects[51] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels, 1);
+	//CLoadedModelInfo* pGreatModels5 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GeneratorShed.bin", NULL);
+	m_ppHierarchicalGameObjects[51] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels1, 1);
 	//m_ppHierarchicalGameObjects[51]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[51]->SetPosition(100.0f, m_pTerrain->GetHeight(230.0f, 640.0f), 800.0f);
 	m_ppHierarchicalGameObjects[51]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[51]->SetScale(2.0f, 2.0f, 2.0f);
+	//if (pGreatModels5) delete pGreatModels5;
 
-	m_ppHierarchicalGameObjects[52] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels, 1);
+	//CLoadedModelInfo* pGreatModels6 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GeneratorShed.bin", NULL);
+	m_ppHierarchicalGameObjects[52] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels1, 1);
 	//m_ppHierarchicalGameObjects[52]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[52]->SetPosition(250.0f, m_pTerrain->GetHeight(230.0f, 640.0f), 675.0f);
 	m_ppHierarchicalGameObjects[52]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[52]->SetScale(2.0f, 2.0f, 2.0f);
+	//if (pGreatModels6) delete pGreatModels6;
 
-	m_ppHierarchicalGameObjects[53] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels, 1);
+	//CLoadedModelInfo* pGreatModels7 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GeneratorShed.bin", NULL);
+	m_ppHierarchicalGameObjects[53] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels1, 1);
 	//m_ppHierarchicalGameObjects[53]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[53]->SetPosition(100.0f, m_pTerrain->GetHeight(230.0f, 640.0f), 675.0f);
 	m_ppHierarchicalGameObjects[53]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[53]->SetScale(2.0f, 2.0f, 2.0f);
+	//if (pGreatModels7) delete pGreatModels7;
 
-	m_ppHierarchicalGameObjects[54] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels, 1);
+	//CLoadedModelInfo* pGreatModels8 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GeneratorShed.bin", NULL);
+	m_ppHierarchicalGameObjects[54] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels1, 1);
 	//m_ppHierarchicalGameObjects[54]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[54]->SetPosition(125.0f, m_pTerrain->GetHeight(230.0f, 640.0f), 400.0f);
 	m_ppHierarchicalGameObjects[54]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[54]->SetScale(4.0f, 2.0f, 4.0f);
+	//if (pGreatModels8) delete pGreatModels8;
 
-	m_ppHierarchicalGameObjects[55] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels, 1);
+	//CLoadedModelInfo* pGreatModels9 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GeneratorShed.bin", NULL);
+	m_ppHierarchicalGameObjects[55] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pGreatModels1, 1);
 	//m_ppHierarchicalGameObjects[55]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[55]->SetPosition(325.0f, m_pTerrain->GetHeight(230.0f, 640.0f), 550.0f);
 	m_ppHierarchicalGameObjects[55]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[55]->SetScale(4.0f, 2.0f, 4.0f);
+	if (pGreatModels1) delete pGreatModels1;
 
-	if (pGreatModels) delete pGreatModels;
-
-	CLoadedModelInfo* pArtBuilding = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
-	m_ppHierarchicalGameObjects[56] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pArtBuilding, 1);
+	CLoadedModelInfo* pArtBuilding1 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
+	m_ppHierarchicalGameObjects[56] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pArtBuilding1, 1);
 	//m_ppHierarchicalGameObjects[56]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[56]->SetPosition(150.0f, m_pTerrain->GetHeight(300.0f, 300.0f) + 16.0f, 465.0f);
-	m_ppHierarchicalGameObjects[56]->Rotate(270.0f, 180.0f, 0.0f);
+	m_ppHierarchicalGameObjects[56]->SetPosition(150.0f, m_pTerrain->GetHeight(300.0f, 300.0f), 465.0f);
+	m_ppHierarchicalGameObjects[56]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[56]->SetScale(20.0f, 5.0f, 8.0f);
+	//if (pArtBuilding1) delete pArtBuilding1;
 
-	m_ppHierarchicalGameObjects[57] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pArtBuilding, 1);
+	//CLoadedModelInfo* pArtBuilding2 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
+	m_ppHierarchicalGameObjects[57] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pArtBuilding1, 1);
 	//m_ppHierarchicalGameObjects[57]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[57]->SetPosition(450.0f, m_pTerrain->GetHeight(300.0f, 300.0f) + 16.0f, 700.0f);
-	m_ppHierarchicalGameObjects[57]->Rotate(270.0f, 0.0f, 0.0f);
+	m_ppHierarchicalGameObjects[57]->SetPosition(450.0f, m_pTerrain->GetHeight(300.0f, 300.0f), 700.0f);
+	m_ppHierarchicalGameObjects[57]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[57]->SetScale(20.0f, 4.0f, 8.0f);
+	//if (pArtBuilding2) delete pArtBuilding2;
 
-	m_ppHierarchicalGameObjects[58] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pArtBuilding, 1);
+	//CLoadedModelInfo* pArtBuilding3 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
+	m_ppHierarchicalGameObjects[58] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pArtBuilding1, 1);
 	//m_ppHierarchicalGameObjects[58]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[58]->SetPosition(75.0f, m_pTerrain->GetHeight(300.0f, 300.0f) + 16.0f, 750.0f);
-	m_ppHierarchicalGameObjects[58]->Rotate(270.0f, 180.0f, 0.0f);
+	m_ppHierarchicalGameObjects[58]->SetPosition(75.0f, m_pTerrain->GetHeight(300.0f, 300.0f), 750.0f);
+	m_ppHierarchicalGameObjects[58]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[58]->SetScale(20.0f, 4.0f, 8.0f);
+	//if (pArtBuilding3) delete pArtBuilding3;
 
-	m_ppHierarchicalGameObjects[59] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pArtBuilding, 1);
+	//CLoadedModelInfo* pArtBuilding4 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
+	m_ppHierarchicalGameObjects[59] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pArtBuilding1, 1);
 	//m_ppHierarchicalGameObjects[59]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[59]->SetPosition(125.0f, m_pTerrain->GetHeight(300.0f, 300.0f) + 16.0f, 500.0f);
-	m_ppHierarchicalGameObjects[59]->Rotate(270.0f, 90.0f, 0.0f);
+	m_ppHierarchicalGameObjects[59]->SetPosition(125.0f, m_pTerrain->GetHeight(300.0f, 300.0f), 500.0f);
+	m_ppHierarchicalGameObjects[59]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppHierarchicalGameObjects[59]->SetScale(15.0f, 8.0f, 8.0f);
+	//if (pArtBuilding4) delete pArtBuilding4;
 
-	m_ppHierarchicalGameObjects[60] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pArtBuilding, 1);
+	//CLoadedModelInfo* pArtBuilding5 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
+	m_ppHierarchicalGameObjects[60] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pArtBuilding1, 1);
 	//m_ppHierarchicalGameObjects[60]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[60]->SetPosition(745.0f, m_pTerrain->GetHeight(300.0f, 300.0f) + 16.0f, 440.0f);
-	m_ppHierarchicalGameObjects[60]->Rotate(270.0f, 180.0f, 0.0f);
+	m_ppHierarchicalGameObjects[60]->SetPosition(745.0f, m_pTerrain->GetHeight(300.0f, 300.0f), 440.0f);
+	m_ppHierarchicalGameObjects[60]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppHierarchicalGameObjects[60]->SetScale(20.0f, 10.0f, 8.0f);
+	//if (pArtBuilding5) delete pArtBuilding5;
 
-	m_ppHierarchicalGameObjects[61] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pArtBuilding, 1);
+	//CLoadedModelInfo* pArtBuilding6 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
+	m_ppHierarchicalGameObjects[61] = new CBuildingObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pArtBuilding1, 1);
 	//m_ppHierarchicalGameObjects[61]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[61]->SetPosition(350.0f, m_pTerrain->GetHeight(300.0f, 300.0f) + 16.0f, 600.0f);
-	m_ppHierarchicalGameObjects[61]->Rotate(270.0f, 0.0f, 0.0f);
+	m_ppHierarchicalGameObjects[61]->SetPosition(350.0f, m_pTerrain->GetHeight(300.0f, 300.0f), 600.0f);
+	m_ppHierarchicalGameObjects[61]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[61]->SetScale(40.0f, 4.0f, 8.0f);
-	if (pArtBuilding) delete pArtBuilding;
+	if (pArtBuilding1) delete pArtBuilding1;
 
-	CLoadedModelInfo *pEagleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Eagle.bin", NULL);
+	CLoadedModelInfo* pEagleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Eagle.bin", NULL);
 	m_ppHierarchicalGameObjects[62] = new CEagleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEagleModel, 1);
 	m_ppHierarchicalGameObjects[62]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_ppHierarchicalGameObjects[62]->SetPosition(330.0f, m_pTerrain->GetHeight(330.0f, 590.0f) + 20.0f, 590.0f);
 	if (pEagleModel) delete pEagleModel;
 
 	m_nShaders = 1;
-	m_ppShaders = new CShader*[m_nShaders];
+	m_ppShaders = new CShader * [m_nShaders];
 
-	CEthanObjectsShader *pEthanObjectsShader = new CEthanObjectsShader();
+	CEthanObjectsShader* pEthanObjectsShader = new CEthanObjectsShader();
 	pEthanObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEthanModel, m_pTerrain);
 	m_ppShaders[0] = pEthanObjectsShader;
 	if (pEthanModel) delete pEthanModel;
@@ -552,9 +639,9 @@ void CScene::ReleaseObjects()
 	if (m_pLights) delete[] m_pLights;
 }
 
-ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevice)
+ID3D12RootSignature* CScene::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
 {
-	ID3D12RootSignature *pd3dGraphicsRootSignature = NULL;
+	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[10];
 
@@ -733,24 +820,24 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	d3dRootSignatureDesc.pStaticSamplers = pd3dSamplerDescs;
 	d3dRootSignatureDesc.Flags = d3dRootSignatureFlags;
 
-	ID3DBlob *pd3dSignatureBlob = NULL;
-	ID3DBlob *pd3dErrorBlob = NULL;
+	ID3DBlob* pd3dSignatureBlob = NULL;
+	ID3DBlob* pd3dErrorBlob = NULL;
 	D3D12SerializeRootSignature(&d3dRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &pd3dSignatureBlob, &pd3dErrorBlob);
-	pd3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(), pd3dSignatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void **)&pd3dGraphicsRootSignature);
+	pd3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(), pd3dSignatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void**)&pd3dGraphicsRootSignature);
 	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
 	if (pd3dErrorBlob) pd3dErrorBlob->Release();
 
 	return(pd3dGraphicsRootSignature);
 }
 
-void CScene::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
+void CScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-	m_pd3dcbLights->Map(0, NULL, (void **)&m_pcbMappedLights);
+	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 }
 
-void CScene::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
+void CScene::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	::memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(LIGHT) * m_nLights);
 	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
@@ -776,14 +863,14 @@ void CScene::ReleaseUploadBuffers()
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++) m_ppHierarchicalGameObjects[i]->ReleaseUploadBuffers();
 }
 
-void CScene::CreateCbvSrvDescriptorHeaps(ID3D12Device *pd3dDevice, int nConstantBufferViews, int nShaderResourceViews)
+void CScene::CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews)
 {
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
 	d3dDescriptorHeapDesc.NumDescriptors = nConstantBufferViews + nShaderResourceViews; //CBVs + SRVs 
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	d3dDescriptorHeapDesc.NodeMask = 0;
-	pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void **)&m_pd3dCbvSrvDescriptorHeap);
+	pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dCbvSrvDescriptorHeap);
 
 	m_d3dCbvCPUDescriptorNextHandle = m_d3dCbvCPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	m_d3dCbvGPUDescriptorNextHandle = m_d3dCbvGPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
@@ -791,7 +878,7 @@ void CScene::CreateCbvSrvDescriptorHeaps(ID3D12Device *pd3dDevice, int nConstant
 	m_d3dSrvGPUDescriptorNextHandle.ptr = m_d3dSrvGPUDescriptorStartHandle.ptr = m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * nConstantBufferViews);
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE CScene::CreateConstantBufferViews(ID3D12Device *pd3dDevice, int nConstantBufferViews, ID3D12Resource *pd3dConstantBuffers, UINT nStride)
+D3D12_GPU_DESCRIPTOR_HANDLE CScene::CreateConstantBufferViews(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride)
 {
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle = m_d3dCbvGPUDescriptorNextHandle;
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = pd3dConstantBuffers->GetGPUVirtualAddress();
@@ -814,41 +901,41 @@ D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(D3D12_RESOURCE_DESC d3
 	d3dShaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	switch (nTextureType)
 	{
-		case RESOURCE_TEXTURE2D: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize == 1)
-		case RESOURCE_TEXTURE2D_ARRAY:
-			d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-			d3dShaderResourceViewDesc.Texture2D.MipLevels = -1;
-			d3dShaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
-			d3dShaderResourceViewDesc.Texture2D.PlaneSlice = 0;
-			d3dShaderResourceViewDesc.Texture2D.ResourceMinLODClamp = 0.0f;
-			break;
-		case RESOURCE_TEXTURE2DARRAY: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize != 1)
-			d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
-			d3dShaderResourceViewDesc.Texture2DArray.MipLevels = -1;
-			d3dShaderResourceViewDesc.Texture2DArray.MostDetailedMip = 0;
-			d3dShaderResourceViewDesc.Texture2DArray.PlaneSlice = 0;
-			d3dShaderResourceViewDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
-			d3dShaderResourceViewDesc.Texture2DArray.FirstArraySlice = 0;
-			d3dShaderResourceViewDesc.Texture2DArray.ArraySize = d3dResourceDesc.DepthOrArraySize;
-			break;
-		case RESOURCE_TEXTURE_CUBE: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize == 6)
-			d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
-			d3dShaderResourceViewDesc.TextureCube.MipLevels = -1;
-			d3dShaderResourceViewDesc.TextureCube.MostDetailedMip = 0;
-			d3dShaderResourceViewDesc.TextureCube.ResourceMinLODClamp = 0.0f;
-			break;
-		case RESOURCE_BUFFER: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER)
-			d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-			d3dShaderResourceViewDesc.Buffer.FirstElement = 0;
-			d3dShaderResourceViewDesc.Buffer.NumElements = 0;
-			d3dShaderResourceViewDesc.Buffer.StructureByteStride = 0;
-			d3dShaderResourceViewDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-			break;
+	case RESOURCE_TEXTURE2D: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize == 1)
+	case RESOURCE_TEXTURE2D_ARRAY:
+		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		d3dShaderResourceViewDesc.Texture2D.MipLevels = -1;
+		d3dShaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+		d3dShaderResourceViewDesc.Texture2D.PlaneSlice = 0;
+		d3dShaderResourceViewDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+		break;
+	case RESOURCE_TEXTURE2DARRAY: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize != 1)
+		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+		d3dShaderResourceViewDesc.Texture2DArray.MipLevels = -1;
+		d3dShaderResourceViewDesc.Texture2DArray.MostDetailedMip = 0;
+		d3dShaderResourceViewDesc.Texture2DArray.PlaneSlice = 0;
+		d3dShaderResourceViewDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
+		d3dShaderResourceViewDesc.Texture2DArray.FirstArraySlice = 0;
+		d3dShaderResourceViewDesc.Texture2DArray.ArraySize = d3dResourceDesc.DepthOrArraySize;
+		break;
+	case RESOURCE_TEXTURE_CUBE: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize == 6)
+		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+		d3dShaderResourceViewDesc.TextureCube.MipLevels = -1;
+		d3dShaderResourceViewDesc.TextureCube.MostDetailedMip = 0;
+		d3dShaderResourceViewDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+		break;
+	case RESOURCE_BUFFER: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER)
+		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		d3dShaderResourceViewDesc.Buffer.FirstElement = 0;
+		d3dShaderResourceViewDesc.Buffer.NumElements = 0;
+		d3dShaderResourceViewDesc.Buffer.StructureByteStride = 0;
+		d3dShaderResourceViewDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+		break;
 	}
 	return(d3dShaderResourceViewDesc);
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE CScene::CreateShaderResourceViews(ID3D12Device *pd3dDevice, CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement)
+D3D12_GPU_DESCRIPTOR_HANDLE CScene::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nRootParameter, bool bAutoIncrement)
 {
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGPUDescriptorHandle = m_d3dSrvGPUDescriptorNextHandle;
 	if (pTexture)
@@ -857,7 +944,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE CScene::CreateShaderResourceViews(ID3D12Device *pd3d
 		int nTextureType = pTexture->GetTextureType();
 		for (int i = 0; i < nTextures; i++)
 		{
-			ID3D12Resource *pShaderResource = pTexture->GetTexture(i);
+			ID3D12Resource* pShaderResource = pTexture->GetTexture(i);
 			D3D12_RESOURCE_DESC d3dResourceDesc = pShaderResource->GetDesc();
 			D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = GetShaderResourceViewDesc(d3dResourceDesc, nTextureType);
 			pd3dDevice->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, m_d3dSrvCPUDescriptorNextHandle);
@@ -887,7 +974,7 @@ bool CScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	return(false);
 }
 
-bool CScene::ProcessInput(UCHAR *pKeysBuffer)
+bool CScene::ProcessInput(UCHAR* pKeysBuffer)
 {
 	return(false);
 }
@@ -897,7 +984,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	m_fElapsedTime = fTimeElapsed;
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
-	
+
 	if (m_pLights)
 	{
 		m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
@@ -909,11 +996,11 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::RotationYawPitchRoll(0.0, -fAngle, 0.0f);
 	XMFLOAT3 xmfPosition = Vector3::TransformCoord(XMFLOAT3(50.0, 0.0, 0.0), xmf4x4Rotate);
 
-	theta += fTimeElapsed /10.0f;
+	theta += fTimeElapsed / 10.0f;
 
 }
 
-void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
+void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
@@ -942,4 +1029,3 @@ void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera
 		}
 	}
 }
-

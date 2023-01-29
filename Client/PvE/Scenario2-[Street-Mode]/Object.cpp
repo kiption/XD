@@ -1565,9 +1565,9 @@ CLionObject::~CLionObject()
 //
 CBuildingObject::CBuildingObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks)
 {
-	pBuildingObject = pModel;
-	if (!pBuildingObject) pBuildingObject = 
-		CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Zebra.bin", NULL);
+	CLoadedModelInfo* pBuildingObject = pModel;
+	if (!pBuildingObject) 
+		pBuildingObject = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Zebra.bin", NULL);
 
 	SetChild(pBuildingObject->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pBuildingObject);
