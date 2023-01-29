@@ -125,11 +125,11 @@ void CBillboardObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphi
 {
 	CTexture* ppTreeTextures[3];
 	ppTreeTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTreeTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/DeadTree1.dds", RESOURCE_TEXTURE2D, 0);
+	ppTreeTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/ReafTree.dds", RESOURCE_TEXTURE2D, 0);
 	ppTreeTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppTreeTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/ReafTree.dds", RESOURCE_TEXTURE2D, 0);
 	ppTreeTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppTreeTextures[2]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/DeadTree2.dds", RESOURCE_TEXTURE2D, 0);
+	ppTreeTextures[2]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/ReafTree.dds", RESOURCE_TEXTURE2D, 0);
 
 	CMaterial* ppTreeMaterials[3];
 	ppTreeMaterials[0] = new CMaterial();
@@ -143,7 +143,7 @@ void CBillboardObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphi
 	CTexturedRectMesh* pTreeMesh01 = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 100.0f, TreeHeight(dre), 0.0f, 0.0f, 0.0f, 0.0f);
 	CTexturedRectMesh* pTreeMesh02 = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 60.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-	CRawFormatImage* pRawFormatImage = new CRawFormatImage(L"Image/ObjectsMap.raw", 257, 257, true);
+	CRawFormatImage* pRawFormatImage = new CRawFormatImage(L"Image/terrain.raw", 257, 257, true);
 
 	int nGrassObjects = 0, nFlowerObjects = 0, nBlacks = 0, nOthers = 0, nTreeObjects[3] = { 0, 0, 0 };
 	for (int z = 2; z <= 254; z++)
@@ -194,22 +194,22 @@ void CBillboardObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphi
 			case 160:
 				pMesh = pTreeMesh01;
 				pMaterial = ppTreeMaterials[1];
-				fyOffset = 43.0f * 0.5f;
+				fyOffset = 23.0f * 0.5f;
 				break;
 			case 190:
 				pMesh = pTreeMesh01;
 				pMaterial = ppTreeMaterials[1];
-				fyOffset = 43.0f * 0.5f;
+				fyOffset = 23.0f * 0.5f;
 				break;
 			case 230:
 				pMesh = pTreeMesh00;
 				pMaterial = ppTreeMaterials[2];
-				fyOffset = 33.0f * 0.5f;
+				fyOffset = 13.0f * 0.5f;
 				break;
 			case 252:
 				pMesh = pTreeMesh02;
 				pMaterial = ppTreeMaterials[0];
-				fyOffset = 45.0f * 0.5f;
+				fyOffset = 25.0f * 0.5f;
 				break;
 			default:
 				break;
@@ -713,40 +713,6 @@ D3D12_RASTERIZER_DESC CExplosionShader::CreateRasterizerState()
 	return(d3dRasterizerDesc);
 }
 
-void CExplosionShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	UINT ncbElementBytes = ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
-	m_pd3dcbGameObjects = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL,
-		ncbElementBytes * m_nObjects, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-	m_pd3dcbGameObjects->Map(0, NULL, (void**)&m_pcbMappedGameObjects);
-}
-
-void CExplosionShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	UINT ncbElementBytes = ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255);
-	for (int j = 0; j < m_nObjects; j++)
-	{
-		CB_STREAMGAMEOBJECT_INFO* pbMappedcbGameObject = (CB_STREAMGAMEOBJECT_INFO*)((UINT8*)m_pcbMappedGameObjects + (j * ncbElementBytes));
-		XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->m_xmf4x4World)));
-		if (m_ppObjects[j]->m_pMaterial && m_ppObjects[j]->m_pMaterial->m_pTexture)
-		{
-			XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4Texture,
-				XMMatrixTranspose(XMLoadFloat4x4(&(m_ppObjects[j]->m_pMaterial->m_pTexture->m_xmf4x4Texture))));
-		}
-	}
-}
-
-void CExplosionShader::ReleaseShaderVariables()
-{
-	if (m_pd3dcbGameObjects)
-	{
-		m_pd3dcbGameObjects->Unmap(0, NULL);
-		m_pd3dcbGameObjects->Release();
-	}
-
-	CTexturedShader::ReleaseShaderVariables();
-}
-
 D3D12_SHADER_BYTECODE CExplosionShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSSpriteAnimation", "vs_5_1", ppd3dShaderBlob));
@@ -769,20 +735,15 @@ void CExplosionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	ppSpriteMaterials[1] = new CMaterial();
 	ppSpriteMaterials[1]->SetTexture(ppSpriteTextures[1]);
 
-	CTexturedRectMesh* pSpriteMesh[2];
-	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 50.0, 50.0, 0.0f, 0.0f, 0.0f, 0.0f);
-	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 50.0, 50.0, 0.0f, 0.0f, 0.0f, 0.0f);
+	CSpriteTexturedRectMesh* pSpriteMesh = new CSpriteTexturedRectMesh(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-	UINT ncbElementBytes = ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255);
+	UINT ncbElementBytes = ((sizeof(CB_SPRITEBILLBOARD_INFO) + 255) & ~255);
 	m_nObjects = 2;
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, m_nObjects, 2);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	CreateConstantBufferViews(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
-
-	for (int i = 0; i < m_nObjects; i++)
-	{
-		CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[i], 0, 12);
-	}
+	CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[0], 0, 12);
+	CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[1], 0, 12);
 
 	m_ppObjects = new CGameObject * [m_nObjects];
 	XMFLOAT3 xmf3Position = XMFLOAT3(1030.0f, 180.0f, 1410.0f);
@@ -790,12 +751,11 @@ void CExplosionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		pExplodeObject = new CMultiSpriteObject();
-		pExplodeObject->SetMesh(0, pSpriteMesh[j]);
+		pExplodeObject = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		pExplodeObject->SetMesh(0, pSpriteMesh);
 		pExplodeObject->SetMaterial(0, ppSpriteMaterials[j]);
 		pExplodeObject->SetPosition(XMFLOAT3(xmf3Position.x, xmf3Position.y, xmf3Position.z));
 		pExplodeObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * j));
-
 		pExplodeObject->m_fSpeed = 3.0f / (ppSpriteTextures[j]->m_nRows * ppSpriteTextures[j]->m_nCols);
 		m_ppObjects[j] = pExplodeObject;
 	}
@@ -805,13 +765,17 @@ void CExplosionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 void CExplosionShader::ReleaseUploadBuffers()
 {
-	CObjectsShader::ReleaseUploadBuffers();
+	CSpriteObjectShader::ReleaseUploadBuffers();
 
 }
 
 void CExplosionShader::ReleaseObjects()
 {
-	CObjectsShader::ReleaseObjects();
+	CSpriteObjectShader::ReleaseObjects();
+}
+
+void CExplosionShader::AnimateObjects(float fTimeElapsed)
+{
 }
 
 void CExplosionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
@@ -823,7 +787,7 @@ void CExplosionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
 		XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 50.0f, false));
-		CShader::Render(pd3dCommandList, pCamera, nPipelineState);
+		
 		for (int j = 0; j < m_nObjects; j++)
 		{
 			if (m_ppObjects[j])
@@ -834,15 +798,9 @@ void CExplosionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 			}
 		}
 
-		CObjectsShader::Render(pd3dCommandList, pCamera,0);
+		CSpriteObjectShader::Render(pd3dCommandList, pCamera,0);
 
 	}
 }
 
-void CExplosionShader::AnimateObjects(float fTimeElapsed)
-{
-	for (int j = 0; j < m_nObjects; j++)
-	{
-		m_ppObjects[j]->Animate(fTimeElapsed, NULL);
-	}
-}
+

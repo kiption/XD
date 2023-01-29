@@ -74,6 +74,15 @@ struct CB_STREAMGAMEOBJECT_INFO
 	XMFLOAT2						m_xmf2TextureOffset;
 };
 
+struct CB_SPRITEBILLBOARD_INFO
+{
+	XMFLOAT4X4						m_xmf4x4World;
+	EXPLOSIONMATERIAL				m_material;
+
+	XMFLOAT4X4						m_xmf4x4Texture;
+	XMINT2							m_xmi2TextureTiling;
+	XMFLOAT2						m_xmf2TextureOffset;
+};
 
 class CGameObject;
 class CStandardShader;
@@ -468,6 +477,9 @@ public:
 protected:
 	ID3D12Resource* m_pd3dcbGameObject = NULL;
 	CB_STREAMGAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
+
+	ID3D12Resource* m_pd3dcbSpriteObject = NULL;
+	CB_SPRITEBILLBOARD_INFO* m_pcbMappedSpriteGameObject = NULL;
 
 	ID3D12Resource* m_pd3dcbDynamicGameObject = NULL;
 	CB_DYNAMICOBJECT_INFO* m_pcbDynamicMappedGameObject = NULL;

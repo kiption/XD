@@ -259,3 +259,116 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 }
 
 
+CSpriteObjectShader::CSpriteObjectShader()
+{
+}
+
+CSpriteObjectShader::~CSpriteObjectShader()
+{
+}
+
+void CSpriteObjectShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
+{
+	m_nPipelineStates = 1;
+	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
+}
+
+void CSpriteObjectShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_SPRITEBILLBOARD_INFO) + 255) & ~255); //256의 배수
+	m_pd3dcbGameObjects = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL,ncbElementBytes * m_nObjects, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	m_pd3dcbGameObjects->Map(0, NULL, (void**)&m_pcbMappedGameObjects);
+}
+
+void CSpriteObjectShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	//UINT ncbElementBytes = ((sizeof(CB_SPRITEBILLBOARD_INFO) + 255) & ~255);
+	//for (int j = 0; j < m_nObjects; j++)
+	//{
+	//	CB_SPRITEBILLBOARD_INFO* pbMappedcbGameObject = (CB_SPRITEBILLBOARD_INFO*)((UINT8*)m_pcbMappedGameObjects + (j * ncbElementBytes));
+	//	XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->m_xmf4x4World)));
+	//	if (m_ppObjects[j]->m_pMaterial && m_ppObjects[j]->m_pMaterial->m_pTexture)
+	//	{
+	//		XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&(m_ppObjects[j]->m_pMaterial->m_pTexture->m_xmf4x4Texture))));
+	//	}
+	//}
+
+	UINT ncbElementBytes = ((sizeof(CB_SPRITEBILLBOARD_INFO) + 255) & ~255);
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		
+			CB_SPRITEBILLBOARD_INFO* pbMappedcbGameObject = (CB_SPRITEBILLBOARD_INFO*)((UINT8*)m_pcbMappedGameObjects + (j * ncbElementBytes));
+			XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->m_xmf4x4World)));
+			if (m_ppObjects[j]->m_ppMaterials)
+			{
+				if (m_ppObjects[j]->m_ppMaterials[0] && m_ppObjects[j]->m_ppMaterials[0]->m_pTexture)//오류
+				{
+					XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4Texture, 
+						XMMatrixTranspose(XMLoadFloat4x4(&(m_ppObjects[j]->m_ppMaterials[0]->m_pTexture->m_xmf4x4Texture))));
+				}
+			}
+		
+	}
+}
+
+void CSpriteObjectShader::ReleaseShaderVariables()
+{
+	if (m_pd3dcbGameObjects)
+	{
+		m_pd3dcbGameObjects->Unmap(0, NULL);
+		m_pd3dcbGameObjects->Release();
+	}
+
+	CTexturedShader::ReleaseShaderVariables();
+}
+
+void CSpriteObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+}
+
+void CSpriteObjectShader::ReleaseObjects()
+{
+	if (m_ppObjects)
+	{
+		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) delete m_ppObjects[j];
+		delete[] m_ppObjects;
+	}
+
+#ifdef _WITH_BATCH_MATERIAL
+	if (m_pMaterial) delete m_pMaterial;
+#endif
+}
+
+void CSpriteObjectShader::AnimateObjects(float fTimeElapsed)
+{
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		m_ppObjects[j]->Animate(fTimeElapsed);
+	}
+}
+
+void CSpriteObjectShader::ReleaseUploadBuffers()
+{
+	if (m_ppObjects)
+	{
+		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
+	}
+}
+
+void CSpriteObjectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+{
+	CTexturedShader::Render(pd3dCommandList, pCamera);
+	//CTexturedShader::Render(pd3dCommandList, pCamera, nPipelineState);
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			
+			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+
+		}
+	}
+}

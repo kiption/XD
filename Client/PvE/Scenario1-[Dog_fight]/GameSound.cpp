@@ -69,12 +69,12 @@ void GameSound::shootingSound()
 void GameSound::backGroundMusic()
 {
 	result = soundSystem->playSound(bgmSound, 0, false, &bgmChannel);
-	bgmChannel->setVolume(0.36f);
+	bgmChannel->setVolume(0.26f);
 }
 void GameSound::SpeakMusic()
 {
 	result = soundSystem->playSound(speakSound, 0, false, &speakChannel);
-	speakChannel->setVolume(0.25f);
+	speakChannel->setVolume(0.10f);
 }
 void GameSound::walkingSound()
 {

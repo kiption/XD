@@ -99,6 +99,9 @@ public:
 	int									m_nShaders = 0;
 	int									m_nCShaders = 0;
 	int									m_nOtherPlayers = 0;
+
+	int									m_nSpriteShaders = 0;
+	CSpriteObjectShader** m_ppSpriteShaders = NULL;
 	CObjectsShader** m_ppShaders = NULL;
 	CNPCShader** m_ppNPCShaders = NULL;
 	CExplosionShader** m_ppExplosion = NULL;

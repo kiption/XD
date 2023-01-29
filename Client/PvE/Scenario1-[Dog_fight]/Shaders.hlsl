@@ -46,7 +46,6 @@ cbuffer cbFrameworkInfo : register(b5)
 cbuffer cbStreamGameObjectInfo : register(b6)
 {
 	matrix		gmtxWorld : packoffset(c0);
-	EXPLOSIONMATERIAL	gSpriteActionMaterial : packoffset(c4); // 16
 
 };
 
@@ -57,6 +56,11 @@ cbuffer CDynamicObjectInfo : register(b8)
 
 };
 
+cbuffer cbStreamGameObjectInfo : register(b9)
+{
+	matrix		gmtxSpriteWorld : packoffset(c0);
+	EXPLOSIONMATERIAL	gSpriteActionMaterial : packoffset(c4); // 16
+};
 #include "Light.hlsl"
 
 
@@ -216,22 +220,27 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 {
 	VS_TEXTURED_OUTPUT output;
 
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxSpriteWorld), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 
 	return(output);
 }
+float4 PSTextured(VS_TEXTURED_OUTPUT input, uint primitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
 
+	return(cColor);
+}
 VS_TEXTURED_OUTPUT VSSpriteAnimation(VS_TEXTURED_INPUT input)
 {
 	VS_TEXTURED_OUTPUT output;
 
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxSpriteWorld), gmtxView), gmtxProjection);
 	output.uv = mul(float3(input.uv, 1.0f), (float3x3)(gSpriteActionMaterial.gmtxTexture)).xy;
 
 	return(output);
 }
-float4 PSSpriteAnimation(VS_TEXTURED_OUTPUT input) : SV_TARGET
+float4 PSSpriteAnimation(VS_TEXTURED_OUTPUT input, uint primitiveID : SV_PrimitiveID) : SV_TARGET
 {
 	float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
 
@@ -240,12 +249,8 @@ float4 PSSpriteAnimation(VS_TEXTURED_OUTPUT input) : SV_TARGET
 	return (cColor);
 }
 
-float4 PSTextured(VS_TEXTURED_OUTPUT input, uint primitiveID : SV_PrimitiveID) : SV_TARGET
-{
-	float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
 
-	return(cColor);
-}
+
 
 Texture2D gtxtTerrainTexture : register(t14);
 Texture2D gtxtDetailTexture[3]:register(t15);

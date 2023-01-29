@@ -87,7 +87,7 @@ public:
 
 	virtual void ReleaseUploadBuffers();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList) ;
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) ;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
 	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) { }
 	virtual void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) { }
 	virtual void OnPostRender(int nPipelineState) { }
@@ -112,7 +112,22 @@ public:
 	virtual void ReleaseUploadBuffers();
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, int nPipelineState);
 };
+class CSpriteTexturedRectMesh : public CMesh
+{
+public:
+	CSpriteTexturedRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 20.0f, float fHeight = 20.0f, float fDepth = 20.0f, float fxPosition = 0.0f, float fyPosition = 0.0f, float fzPosition = 0.0f);
+	virtual ~CSpriteTexturedRectMesh();
+protected:
+	XMFLOAT2* m_pxmf2TextureCoords0 = NULL;
 
+	ID3D12Resource* m_pd3dTextureCoord0Buffer = NULL;
+	ID3D12Resource* m_pd3dTextureCoord0UploadBuffer = NULL;
+	D3D12_VERTEX_BUFFER_VIEW		m_d3dTextureCoord0BufferView;
+
+public:
+	virtual void ReleaseUploadBuffers();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet);
+};
 class CMeshIlluminated : public CMesh
 {
 public:

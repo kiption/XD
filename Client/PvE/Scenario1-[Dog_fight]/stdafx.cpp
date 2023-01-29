@@ -242,7 +242,7 @@ ID3D12RootSignature* GraphicsRootSignature(ID3D12Device* pd3dDevice)
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
 #ifdef _WITH_STANDARD_TEXTURE_MULTIPLE_DESCRIPTORS
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[19];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[20];
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 7;
@@ -352,7 +352,13 @@ ID3D12RootSignature* GraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dDescriptorRanges[18].RegisterSpace = 0;
 	pd3dDescriptorRanges[18].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[23];
+	pd3dDescriptorRanges[19].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+	pd3dDescriptorRanges[19].NumDescriptors = 1;
+	pd3dDescriptorRanges[19].BaseShaderRegister = 9; // SPRITE b9
+	pd3dDescriptorRanges[19].RegisterSpace = 0;
+	pd3dDescriptorRanges[19].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[24];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; //Camera
@@ -469,6 +475,11 @@ ID3D12RootSignature* GraphicsRootSignature(ID3D12Device* pd3dDevice)
 	pd3dRootParameters[22].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[22].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[18]; //t27: 
 	pd3dRootParameters[22].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	pd3dRootParameters[23].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[23].DescriptorTable.NumDescriptorRanges = 1;	
+	pd3dRootParameters[23].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[19]; //SPRITE b9
+	pd3dRootParameters[23].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 #else
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[2];
