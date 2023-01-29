@@ -97,7 +97,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	XMFLOAT3 xmf3Normal(0.0f, 0.2, 0.0);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf3Normal);
 
-	m_nHierarchicalGameObjects = 63;
+	m_nHierarchicalGameObjects = 27;
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 
 	CLoadedModelInfo* pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GeneratorShed.bin", NULL);
@@ -280,7 +280,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_ppHierarchicalGameObjects[25]->SetScale(30.0f, 10.0f, 8.0f);
 	if (pBasicBuilding7) delete pBasicBuilding7;
 
-	CLoadedModelInfo* pWallModels1 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
+	/*CLoadedModelInfo* pWallModels1 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
 	CLoadedModelInfo* pWallModels2 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
 	CLoadedModelInfo* pWallModels3 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
 	CLoadedModelInfo* pWallModels4 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
@@ -531,12 +531,12 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_ppHierarchicalGameObjects[61]->SetPosition(0.0f, m_pTerrain->GetHeight(350.0f, 600.0f), 0.0f);
 	m_ppHierarchicalGameObjects[61]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppHierarchicalGameObjects[61]->SetScale(40.0f, 4.0f, 8.0f);
-	if (pArtBuilding6) delete pArtBuilding6;
+	if (pArtBuilding6) delete pArtBuilding6;*/
 
 	CLoadedModelInfo* pEagleModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Eagle.bin", NULL);
-	m_ppHierarchicalGameObjects[62] = new CEagleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEagleModel, 1);
-	m_ppHierarchicalGameObjects[62]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_ppHierarchicalGameObjects[62]->SetPosition(330.0f, m_pTerrain->GetHeight(330.0f, 590.0f) + 20.0f, 590.0f);
+	m_ppHierarchicalGameObjects[26] = new CEagleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEagleModel, 1);
+	m_ppHierarchicalGameObjects[26]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	m_ppHierarchicalGameObjects[26]->SetPosition(330.0f, m_pTerrain->GetHeight(330.0f, 590.0f) + 20.0f, 590.0f);
 	if (pEagleModel) delete pEagleModel;
 
 	//m_nShaders = 1;
@@ -951,8 +951,8 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	XMFLOAT3 xmfPosition = Vector3::TransformCoord(XMFLOAT3(50.0, 0.0, 0.0), xmf4x4Rotate);
 
 	theta += fTimeElapsed / 10.0f;
-	for (int i = 47; i < 56; i++)
-		m_ppHierarchicalGameObjects[i]->Rotate(0.0,0.0,0.0);
+	/*for (int i = 47; i < 56; i++)
+		m_ppHierarchicalGameObjects[i]->Rotate(0.0,0.0,0.0);*/
 }
 
 void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -974,7 +974,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 
-	for (int i = 0; i < 63; i++)
+	for (int i = 0; i < 27; i++)
 	{
 		if (m_ppHierarchicalGameObjects[i])
 		{
