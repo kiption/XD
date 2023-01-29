@@ -200,6 +200,33 @@ public:
 	virtual void BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, void *pContext = NULL);
 };
 
+class CWallObjectShader : public CSkinnedAnimationObjectsShader
+{
+public:
+	CWallObjectShader() {};
+	virtual ~CWallObjectShader() {};
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext = NULL);
+};
+
+class CBuildingObjectShader : public CSkinnedAnimationObjectsShader
+{
+public:
+	CBuildingObjectShader() {};
+	virtual ~CBuildingObjectShader() {};
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext = NULL);
+};
+
+class CGeneratorShedShader : public CSkinnedAnimationObjectsShader
+{
+public:
+	CGeneratorShedShader() {};
+	virtual ~CGeneratorShedShader() {};
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext = NULL);
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 class CObjectsShader : public CStandardShader

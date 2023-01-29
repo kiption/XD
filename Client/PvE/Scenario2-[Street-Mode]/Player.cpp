@@ -265,13 +265,11 @@ void CSoundCallbackHandler::HandleCallback(void* pCallbackData, float fTrackPosi
 CMyPlayer::CMyPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
-	m_pShader = new CSkinnedAnimationStandardShader();
-	m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
+	//m_pShader = new CSkinnedAnimationStandardShader();
+	//m_pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	//m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 5);
 
-	pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", m_pShader);
-	//pAngrybotModel->m_pModelRootObject->AABBCenter = pAngrybotModel->m_pModelRootObject->m_pMesh->m_xmf3AABBCenter;
-	//pAngrybotModel->m_pModelRootObject->AABBExtents = pAngrybotModel->m_pModelRootObject->m_pMesh->m_xmf3AABBExtents;
+	pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL);
 	SetChild(pAngrybotModel->m_pModelRootObject, true);
 	pAngrybotModel->m_pModelRootObject->OnPrepareAnimate();
 	m_pBulletFindFrame=pAngrybotModel->m_pModelRootObject->FindFrame("Bip001_Footsteps");
@@ -302,7 +300,6 @@ CMyPlayer::CMyPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 
 		pBulletObject->SetActive(false);
 		pBulletObject->m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 0, pBulletMesh);
-		//	pBulletObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 		m_ppBullets[i] = pBulletObject;
 	}
 

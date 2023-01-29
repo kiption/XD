@@ -143,7 +143,7 @@ void CBillboardObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphi
 	CTexturedRectMesh* pTreeMesh01 = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 100.0f, TreeHeight(dre), 0.0f, 0.0f, 0.0f, 0.0f);
 	CTexturedRectMesh* pTreeMesh02 = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 60.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-	CRawFormatImage* pRawFormatImage = new CRawFormatImage(L"Image/terrain.raw", 257, 257, true);
+	CRawFormatImage* pRawFormatImage = new CRawFormatImage(L"Image/terrain033.raw", 513, 513, true);
 
 	int nGrassObjects = 0, nFlowerObjects = 0, nBlacks = 0, nOthers = 0, nTreeObjects[3] = { 0, 0, 0 };
 	for (int z = 2; z <= 254; z++)

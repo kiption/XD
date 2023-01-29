@@ -1565,12 +1565,11 @@ CLionObject::~CLionObject()
 //
 CBuildingObject::CBuildingObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks)
 {
-	CLoadedModelInfo* pBuildingObject = pModel;
-	if (!pBuildingObject) 
-		pBuildingObject = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Zebra.bin", NULL);
+	CLoadedModelInfo* pEthanModel = pModel;
+	if (!pEthanModel) pEthanModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Ethan.bin", NULL);
 
-	SetChild(pBuildingObject->m_pModelRootObject, true);
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pBuildingObject);
+	SetChild(pEthanModel->m_pModelRootObject, true);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pEthanModel);
 	
 }
 
@@ -1580,8 +1579,6 @@ CBuildingObject::~CBuildingObject()
 
 void CBuildingObject::Animate(float fTimeElapsed)
 {
-	
-	//pBuildingObject->m_pModelRootObject->m_OOBB = BoundingOrientedBox(AABBCenter,AABBExtents,XMFLOAT4(0, 0, 0, 1));
 
 }
 

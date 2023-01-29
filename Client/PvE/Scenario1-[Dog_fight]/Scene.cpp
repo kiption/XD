@@ -73,10 +73,10 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	XMFLOAT3 xmf3Scale(14.0f, 3.0f, 14.0f);
+	XMFLOAT3 xmf3Scale(10.0f, 3.0f, 10.0f);
 	XMFLOAT3 xmf3Normal(0.0f, 0.5f, 0.0f);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/terrain.raw"), 257, 257, 257, 257, xmf3Scale, xmf3Normal);
-	m_pTerrain->SetPosition(0.0, -200.0, 0.0);
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/terrain033.raw"), 513, 513, 513, 513, xmf3Scale, xmf3Normal);
+	m_pTerrain->SetPosition(0.0, 0.0, 0.0);
 
 	XMFLOAT3 xmf4ScaleW(80.0f, 2.5f, 80.0);
 	m_pUseWaterMove = new CUseWaterMoveTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/waterterrain8bit.raw"), 257, 257, 8, 8, xmf4ScaleW, xmf3Normal);

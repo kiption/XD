@@ -98,6 +98,8 @@ public:
 
 	float								m_fElapsedTime = 0.0f;
 
+	CLoadedModelInfo** m_ppModelObjects = NULL;
+
 	int									m_nGameObjects = 0;
 	CGameObject							**m_ppGameObjects = NULL;
 
