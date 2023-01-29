@@ -356,12 +356,13 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 		case WM_SIZE:
 			break;
         case WM_RBUTTONDOWN:
-			m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+			//m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 			((CMyPlayer*)m_pPlayer)->FireBullet(NULL);
 		case WM_LBUTTONDOWN:
+			m_pPlayer->m_pSkinnedAnimationController->SetTrackEnable(2, false);
         case WM_LBUTTONUP:
         case WM_RBUTTONUP:
-			/*m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);*/
+			
         case WM_MOUSEMOVE:
 			OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
             break;
@@ -463,12 +464,12 @@ void CGameFramework::ProcessInput()
 		}
 
 		DWORD dwDirection = 0;
-		if (pKeysBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
-		if (pKeysBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
-		if (pKeysBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
-		if (pKeysBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
-		if (pKeysBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
-		if (pKeysBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
+		if (pKeysBuffer[KEY_W] & 0xF0) dwDirection |= DIR_FORWARD;
+		if (pKeysBuffer[KEY_S] & 0xF0) dwDirection |= DIR_BACKWARD;
+		if (pKeysBuffer[KEY_A] & 0xF0) dwDirection |= DIR_LEFT;
+		if (pKeysBuffer[KEY_D] & 0xF0) dwDirection |= DIR_RIGHT;
+		if (pKeysBuffer[KEY_Q] & 0xF0) dwDirection |= DIR_UP;
+		if (pKeysBuffer[KEY_E] & 0xF0) dwDirection |= DIR_DOWN;
 
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
@@ -479,7 +480,7 @@ void CGameFramework::ProcessInput()
 				else
 					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 10.25f, true);
+			if (dwDirection) m_pPlayer->Move(dwDirection, 8.5f, true);
 		}
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());

@@ -272,21 +272,21 @@ CMyPlayer::CMyPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL);
 	SetChild(pAngrybotModel->m_pModelRootObject, true);
 	pAngrybotModel->m_pModelRootObject->OnPrepareAnimate();
-	m_pBulletFindFrame=pAngrybotModel->m_pModelRootObject->FindFrame("Bip001_Footsteps");
-
-	
+	m_pBulletFindFrame=pAngrybotModel->m_pModelRootObject->FindFrame("Bip001_R_Finger0Nub");
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 2, pAngrybotModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
 
-	m_pSkinnedAnimationController->SetCallbackKeys(1, 3);
+	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
+	m_pSkinnedAnimationController->SetCallbackKeys(2, 1);
 #ifdef _WITH_SOUND_RESOURCE
 	m_pSkinnedAnimationController->SetCallbackKey(1, 0.5f, _T("Footstep02"));	m_pSkinnedAnimationController->SetCallbackKey(2, 0.9f, _T("Footstep03"));
 #else
-	m_pSkinnedAnimationController->SetCallbackKey(1, 0, 0.6, _T("Sound/Footstep01.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.9, _T("Sound/Footstep02.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(1, 0, 1.4, _T("Sound/Footstep03.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(1, 1, 1.6, _T("Sound/Footstep04.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(2, 0, 0.9, _T("Sound/Jump.wav"));
 #endif
 	CAnimationCallbackHandler* pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
@@ -309,7 +309,7 @@ CMyPlayer::CMyPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	SetCameraUpdatedContext(pContext);
 
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-	SetPosition(XMFLOAT3(350.0, pTerrain->GetHeight(300.0, 300.0), 10.0));
+	SetPosition(XMFLOAT3(350.0, pTerrain->GetHeight(300.0, 150), 150.0));
 
 	if (pBulletMesh) delete pBulletMesh;
 	if (pAngrybotModel) delete pAngrybotModel;
@@ -357,8 +357,8 @@ CCamera* CMyPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.5f);
-		m_pCamera->SetOffset(XMFLOAT3(4.0f, 0.0f, -12.0f));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 70.0f);
+		m_pCamera->SetOffset(XMFLOAT3(4.0f, +5.0f, -8.5f));
+		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 70.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
@@ -446,6 +446,7 @@ void CMyPlayer::FireBullet(CGameObject* pLockedObject)
 	{
 		if (!m_ppBullets[i]->m_bActive)
 		{
+			m_pSkinnedAnimationController->SetTrackAnimationSet(0,2);
 			pBulletObject = m_ppBullets[i];
 			pBulletObject->Reset();
 			break;
@@ -458,12 +459,12 @@ void CMyPlayer::FireBullet(CGameObject* pLockedObject)
 
 	if (pBulletObject)
 	{
-		XMFLOAT3 xmf3Position = this->GetPosition();
+		XMFLOAT3 xmf3Position = m_pBulletFindFrame->GetPosition();
 		XMFLOAT3 xmf3Direction = PlayerLook;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction,0.5f, false));
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + 3., xmf3FirePosition.z));
+		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y , xmf3FirePosition.z));
 		pBulletObject->SetScale(1.0, 1.0, 1.0);
 		pBulletObject->Rotate(120.0, 0.0, 0.0);
 		pBulletObject->SetActive(true);
@@ -472,7 +473,7 @@ void CMyPlayer::FireBullet(CGameObject* pLockedObject)
 
 void CMyPlayer::OnPrepareAnimate()
 {
-	m_pBulletFindFrame->FindFrame("Bip001_Footsteps");
+	m_pBulletFindFrame->FindFrame("Bip001_R_Finger0Nub");
 	CPlayer::OnPrepareRender();
 }
 
@@ -493,8 +494,9 @@ void CMyPlayer::Animate(float fTimeElapsed)
 	for (int i = 0; i < BULLETS; i++)
 	{
 		if (m_ppBullets[i]->m_bActive) {
-
+			m_pSkinnedAnimationController->SetTrackEnable(2, true);
 			m_ppBullets[i]->Animate(fTimeElapsed);
+			
 		}
 	}
 

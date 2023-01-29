@@ -18,10 +18,6 @@ class CPlayer;
 class CCamera
 {
 protected:
-	XMFLOAT3						m_xmf3Right;
-	XMFLOAT3						m_xmf3Up;
-	XMFLOAT3						m_xmf3Look;
-
 	float           				m_fPitch;
 	float           				m_fRoll;
 	float           				m_fYaw;
@@ -44,6 +40,9 @@ protected:
 	VS_CB_CAMERA_INFO				*m_pcbMappedCamera = NULL;
 
 public:
+	XMFLOAT3						m_xmf3Right;
+	XMFLOAT3						m_xmf3Up;
+	XMFLOAT3						m_xmf3Look;
 	XMFLOAT3						m_xmf3Position;
 	CCamera();
 	CCamera(CCamera *pCamera);
