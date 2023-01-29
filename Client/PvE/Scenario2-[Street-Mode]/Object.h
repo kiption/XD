@@ -589,13 +589,10 @@ public:
 class CBuildingObject : public CGameObject
 {
 public:
-	CLoadedModelInfo* pBuildingObject = NULL;
 	CBuildingObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks);
 	virtual ~CBuildingObject();
 	virtual void Animate(float fTimeElapsed);
 
-	
-	
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

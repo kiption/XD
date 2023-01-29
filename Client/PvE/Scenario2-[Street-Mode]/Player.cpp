@@ -330,7 +330,7 @@ CCamera* CMyPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	{
 	case FIRST_PERSON_CAMERA:
 		SetFriction(250.0f);
-		SetGravity(XMFLOAT3(0.0f, -400.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, 10.0f, 0.0f));
 		SetMaxVelocityXZ(300.0f);
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
@@ -456,16 +456,14 @@ void CMyPlayer::FireBullet(CGameObject* pLockedObject)
 
 	}
 	XMFLOAT3 PlayerLook = this->GetLookVector();
-	PlayerLook.y += 0.5;
 	XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
 	XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
 
 	if (pBulletObject)
 	{
 		XMFLOAT3 xmf3Position = this->GetPosition();
-		XMFLOAT3 xmf3Direction = TotalLookVector;
+		XMFLOAT3 xmf3Direction = PlayerLook;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction,0.5f, false));
-
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + 3., xmf3FirePosition.z));
