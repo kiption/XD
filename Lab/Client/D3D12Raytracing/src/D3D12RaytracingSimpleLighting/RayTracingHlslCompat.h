@@ -41,4 +41,9 @@ struct Vertex
     XMFLOAT3 normal;
 };
 
+
+
+
+  
+
 #endif // RAYTRACINGHLSLCOMPAT_H

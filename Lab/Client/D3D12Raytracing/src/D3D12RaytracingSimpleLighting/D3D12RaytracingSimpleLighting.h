@@ -14,6 +14,7 @@
 #include "DXSample.h"
 #include "StepTimer.h"
 #include "RaytracingHlslCompat.h"
+#include "Object.h"
 
 namespace GlobalRootSignatureParams {
     enum Value {
@@ -140,4 +141,6 @@ private:
     void CalculateFrameStats();
     UINT AllocateDescriptor(D3D12_CPU_DESCRIPTOR_HANDLE* cpuDescriptor, UINT descriptorIndexToUse = UINT_MAX);
     UINT CreateBufferSRV(D3DBuffer* buffer, UINT numElements, UINT elementSize);
+
+   
 };

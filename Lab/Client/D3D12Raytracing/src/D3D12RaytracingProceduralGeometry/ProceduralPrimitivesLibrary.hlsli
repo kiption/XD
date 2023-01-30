@@ -74,7 +74,7 @@ float GetDistanceFromSignedDistancePrimitive(in float3 position, in SignedDistan
         return sdTorus82(position, float2(0.75, 0.15));
     
     case SignedDistancePrimitive::TwistedTorus: 
-        return sdTorus(opTwist(position), float2(0.6, 0.2));
+        return sdTorus(opTwist(position), float2(0.1, 0.2));
         
     case SignedDistancePrimitive::Cog:
         return opS( sdTorus82(position, float2(0.60, 0.3)),
