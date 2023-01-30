@@ -199,7 +199,7 @@ void init_npc()
 		random_device rd;
 		default_random_engine dre(rd());
 		uniform_real_distribution<float>AirHigh(350, 650);
-		uniform_real_distribution<float>AirPos(500, 2000);
+		uniform_real_distribution<float>AirPos(2500, 3500);
 
 		npcs[i].SetPosition(AirPos(dre), AirHigh(dre), AirPos(dre));
 		npcs[i].SetOrgPosition(npcs[i].GetPosition());
