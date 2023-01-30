@@ -198,8 +198,8 @@ void init_npc()
 
 		random_device rd;
 		default_random_engine dre(rd());
-		uniform_real_distribution<float>AirHigh(750, 850);
-		uniform_real_distribution<float>AirPos(900, 2000);
+		uniform_real_distribution<float>AirHigh(350, 650);
+		uniform_real_distribution<float>AirPos(500, 2000);
 
 		npcs[i].SetPosition(AirPos(dre), AirHigh(dre), AirPos(dre));
 		npcs[i].SetOrgPosition(npcs[i].GetPosition());
@@ -282,7 +282,7 @@ void process_packet(int client_id, char* packet)
 
 		// 새로 접속한 플레이어의 초기 정보를 설정합니다.
 		clients[client_id].pos.x = 1500 + client_id * 50;
-		clients[client_id].pos.y = 800 + client_id * 20;
+		clients[client_id].pos.y = 400 + client_id * 20;
 		clients[client_id].pos.z = 1265 - client_id * 50;
 		cout << "A new object is successfully created! - POS:(" << clients[client_id].pos.x
 			<< "," << clients[client_id].pos.y << "," << clients[client_id].pos.z << ")." << endl;
