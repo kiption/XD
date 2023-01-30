@@ -130,7 +130,7 @@ public:
 	MATERIAL* m_pcbMappedMaterials = NULL;
 	MATERIALS* m_pMaterials = NULL;
 
-	CUseWaterMoveTerrain				*m_pUseWaterMove = NULL;
+	CUseWaterMoveTerrain				**m_pUseWaterMove = NULL;
 	CMultiSpriteObject *m_pCMultiSpriteObject = NULL;
 
 	CPlayer								*m_pPlayer = NULL;

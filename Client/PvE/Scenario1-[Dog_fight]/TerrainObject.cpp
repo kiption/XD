@@ -118,23 +118,23 @@ CUseWaterMoveTerrain::~CUseWaterMoveTerrain()
 
 void CUseWaterMoveTerrain::Animate(float fTimeElapsed)
 {
-	float MAX_MoveWavePoint = 100.0;
-	float Min_MoveWavePoint = -100.0;
+	float MAX_MoveWavePoint = 67.0;
+	float Min_MoveWavePoint = 65.0;
 	if (m_bSurfacePoint == false)
 	{
 
-		this->m_xmf4x4World._41 += fTimeElapsed * 10.5f;
-		this->m_xmf4x4World._42 -= fTimeElapsed * 5.5f;
-		if (this->m_xmf4x4World._41 > MAX_MoveWavePoint)
+		//this->m_xmf4x4World._41 += fTimeElapsed * 10.5f;
+		this->m_xmf4x4World._42 += fTimeElapsed * 0.5f;
+		if (this->m_xmf4x4World._42 > MAX_MoveWavePoint)
 		{
 			m_bSurfacePoint = true;
 		}
 	}
 	if (m_bSurfacePoint == true)
 	{
-		this->m_xmf4x4World._41 -= fTimeElapsed * 10.5f;
-		this->m_xmf4x4World._42 += fTimeElapsed * 5.5f;
-		if (this->m_xmf4x4World._41 < Min_MoveWavePoint)
+		//this->m_xmf4x4World._41 -= fTimeElapsed * 10.5f;
+		this->m_xmf4x4World._42 -= fTimeElapsed * 0.5f;
+		if (this->m_xmf4x4World._42 < Min_MoveWavePoint)
 		{
 			m_bSurfacePoint = false;
 		}

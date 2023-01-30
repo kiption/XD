@@ -392,7 +392,7 @@ CGameObject::CGameObject(int nMeshes, int nMaterials)
 
 CGameObject::~CGameObject()
 {
-	//ReleaseShaderVariables();
+	ReleaseShaderVariables();
 	if (m_pMesh) m_pMesh->Release();
 	if (m_ppMeshes)
 	{

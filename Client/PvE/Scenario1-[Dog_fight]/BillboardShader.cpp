@@ -359,7 +359,7 @@ void CCrossHairShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
 		XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 80.0f, false));
-		xmf3Position.y += 6.0f;
+		xmf3Position.y += 3.0f;
 		m_fWidth = 70.0; m_fHeight = 70.0f;
 		m_ppObjects[0]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
 		m_ppObjects[0]->SetPosition(xmf3Position);

@@ -36,7 +36,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[1].m_xmf3Position = XMFLOAT3(0.0f, 10.0f, 2.0f);
 	m_pLights[1].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights[1].m_fFalloff = 8.5f;
+	m_pLights[1].m_fFalloff = 5.5f;
 	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(60.0f));
 	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights[1].m_bEnable = true;
@@ -73,14 +73,17 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	XMFLOAT3 xmf3Scale(10.0f, 3.0f, 10.0f);
+	XMFLOAT3 xmf3Scale(40.0f, 3.0f, 40.0f);
 	XMFLOAT3 xmf3Normal(0.0f, 0.5f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/terrain033.raw"), 513, 513, 513, 513, xmf3Scale, xmf3Normal);
 	m_pTerrain->SetPosition(0.0, 0.0, 0.0);
 
-	XMFLOAT3 xmf4ScaleW(80.0f, 2.5f, 80.0);
-	m_pUseWaterMove = new CUseWaterMoveTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/waterterrain8bit.raw"), 257, 257, 8, 8, xmf4ScaleW, xmf3Normal);
-	m_pUseWaterMove->SetPosition(0.0, 60.0f, 0.0);
+	XMFLOAT3 xmf4ScaleW(25.0f, 2.0f, 25.0);
+	m_pUseWaterMove = new CUseWaterMoveTerrain * [2];
+	m_pUseWaterMove[0] = new CUseWaterMoveTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/waterterrain8bit.raw"), 257, 257, 8, 8, xmf4ScaleW, xmf3Normal);
+	m_pUseWaterMove[0]->SetPosition(2500.0, 65.0f, 2500.0);
+	m_pUseWaterMove[1] = new CUseWaterMoveTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/waterterrain8bit.raw"), 257, 257, 8, 8, xmf4ScaleW, xmf3Normal);
+	m_pUseWaterMove[1]->SetPosition(4000.0, 66.0f, 8000.0);
 
 	m_nShaders = 4;
 
@@ -267,13 +270,13 @@ void CScene::ReleaseShaderVariables()
 		m_pd3dcbMaterials->Unmap(0, NULL);
 		m_pd3dcbMaterials->Release();
 	}
-	if (m_pUseWaterMove) m_pUseWaterMove->ReleaseShaderVariables();
+	for (int i = 0; i < 2; i++) if (m_pUseWaterMove) m_pUseWaterMove[i]->ReleaseShaderVariables();
 	if (m_pTerrain) m_pTerrain->ReleaseShaderVariables();
 	if (m_pSkyBox) m_pSkyBox->ReleaseShaderVariables();
 }
 void CScene::ReleaseUploadBuffers()
 {
-	if (m_pUseWaterMove) m_pUseWaterMove->ReleaseUploadBuffers();
+	for (int i = 0; i < 2; i++)if (m_pUseWaterMove) m_pUseWaterMove[i]->ReleaseUploadBuffers();
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
@@ -321,7 +324,7 @@ bool CScene::ProcessInput(UCHAR* pKeysBuffer)
 }
 void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 {
-	m_pUseWaterMove->Animate(fTimeElapsed);
+	for (int i = 0; i < 2; i++)m_pUseWaterMove[i]->Animate(fTimeElapsed);
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->UpdateTransform(NULL);
 	for (int i = 0; i < m_nEnvironmentMappingShaders; i++) m_ppEnvironmentMappingShaders[i]->AnimateObjects(fTimeElapsed);
@@ -461,7 +464,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (int i = 0; i < 1; i++) if (m_ppSpriteShaders[i])m_ppSpriteShaders[i]-> Render(pd3dCommandList, pCamera,0);
 	for (int i = 0; i < 3; i++) if (m_ppNPCShaders[i])m_ppNPCShaders[i]->Render(pd3dCommandList, pCamera, 0);
 
-	//if (m_pUseWaterMove) m_pUseWaterMove->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < 2; i++)if (m_pUseWaterMove) m_pUseWaterMove[i]->Render(pd3dCommandList, pCamera);
 
 	if (m_bOutlineMode)
 	{
