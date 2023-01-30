@@ -647,47 +647,72 @@ CEthanObjectsShader::~CEthanObjectsShader()
 
 void CEthanObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, void *pContext)
 {
-	m_nObjects = 7;
+	m_nObjects = 13;
 
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
 	CLoadedModelInfo* pBuildingModel = pModel;
-	if (!pBuildingModel) pBuildingModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/GeneratorShed.bin", NULL);
+	if (!pBuildingModel) pBuildingModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
 
 	for (int i = 0; i < m_nObjects; i++)
 	{
 		m_ppObjects[i] = new CEthanObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pBuildingModel, 1);
 		m_ppObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	}
-	m_ppObjects[0]->SetPosition(150.0f, pTerrain->GetHeight(150.0f, 465.0f), 465.0f);
-	m_ppObjects[0]->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppObjects[0]->SetScale(2.0f, 5.0f, 8.0f);
 
-	m_ppObjects[1]->SetPosition(450.0f, pTerrain->GetHeight(450.0f, 700.0f), 700.0f);
-	m_ppObjects[1]->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppObjects[1]->SetScale(2.0f, 4.0f, 8.0f);
+	m_ppObjects[0]->SetPosition(420.0f, pTerrain->GetHeight(420.0f, 400.0f) + 16.0f, 400.0f);
+	m_ppObjects[0]->Rotate(270.0f, 0.0f, 0.0f);
+	m_ppObjects[0]->SetScale(30.0f, 10.0f, 8.0f);
 
-	m_ppObjects[2]->SetPosition(75.0f, pTerrain->GetHeight(75.0f, 750.0f), 750.0f);
-	m_ppObjects[2]->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppObjects[2]->SetScale(2.0f, 4.0f, 8.0f);
+	m_ppObjects[1]->SetPosition(650.0f, pTerrain->GetHeight(650.0f, 200.0f) + 16.0f, 200.0f);
+	m_ppObjects[1]->Rotate(270.0f, 180.0f, 0.0f);
+	m_ppObjects[1]->SetScale(40.0f, 10.0f, 8.0f);
 
-	m_ppObjects[3]->SetPosition(125.0f, pTerrain->GetHeight(125.0f, 500.0f), 500.0f);
-	m_ppObjects[3]->Rotate(0.0f, 90.0f, 0.0f);
-	m_ppObjects[3]->SetScale(5.0f, 8.0f, 8.0f);
+	m_ppObjects[2]->SetPosition(700.0f, pTerrain->GetHeight(700.0f, 400.0f) + 16.0f, 400.0f);
+	m_ppObjects[2]->Rotate(270.0f, 90.0f, 0.0f);
+	m_ppObjects[2]->SetScale(15.0f, 6.0f, 8.0f);
 
-	m_ppObjects[4]->SetPosition(100.0f, pTerrain->GetHeight(100.0f, 800.0f), 800.0f);
-	m_ppObjects[4]->Rotate(0.0f, 90.0f, 0.0f);
-	m_ppObjects[4]->SetScale(2.0f, 2.0f, 2.0f);
+	m_ppObjects[3]->SetPosition(450.0f, pTerrain->GetHeight(450.0f, 350.0f) + 16.0f, 350.0f);
+	m_ppObjects[3]->Rotate(270.0f, 180.0f, 0.0f);
+	m_ppObjects[3]->SetScale(30.0f, 5.0f, 8.0f);
 
-	m_ppObjects[5]->SetPosition(70.0, pTerrain->GetHeight(70.0, 240.0f), 240.0f);
-	m_ppObjects[5]->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppObjects[5]->SetScale(6.0f, 5.0f, 8.0f);
+	m_ppObjects[4]->SetPosition(200.0f, pTerrain->GetHeight(200.0f, 500.0f) + 16.0f, 500.0f);
+	m_ppObjects[4]->Rotate(270.0f, 90.0f, 0.0f);
+	m_ppObjects[4]->SetScale(30.0f, 10.0f, 8.0f);
 
-	m_ppObjects[6]->SetPosition(100.0f, pTerrain->GetHeight(100.0f, 100.0f), 100.0f);
-	m_ppObjects[6]->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppObjects[6]->SetScale(4.0f, 4.0f, 8.0f);
+	m_ppObjects[5]->SetPosition(550.0f, pTerrain->GetHeight(550.0f, 400.0f) + 16.0f, 400.0f);
+	m_ppObjects[5]->Rotate(270.0f, 0.0f, 0.0f);
+	m_ppObjects[5]->SetScale(30.0f, 10.0f, 8.0f);
+
+	m_ppObjects[6]->SetPosition(800.0f, pTerrain->GetHeight(800.0f, 300.0f) + 16.0f, 300.0f);
+	m_ppObjects[6]->Rotate(270.0f, 180.0f, 0.0f);
+	m_ppObjects[6]->SetScale(30.0f, 10.0f, 8.0f);
+
+	m_ppObjects[7]->SetPosition(150.0f, pTerrain->GetHeight(150.0f, 465.0f) + 16.0f, 465.0f);
+	m_ppObjects[7]->Rotate(270.0f, 180.0f, 0.0f);
+	m_ppObjects[7]->SetScale(20.0f, 5.0f, 8.0f);
+
+	m_ppObjects[8]->SetPosition(450.0f, pTerrain->GetHeight(450.0f, 700.0f) + 16.0f, 700.0f);
+	m_ppObjects[8]->Rotate(270.0f, 0.0f, 0.0f);
+	m_ppObjects[8]->SetScale(20.0f, 4.0f, 8.0f);
+
+	m_ppObjects[9]->SetPosition(75.0f, pTerrain->GetHeight(75.0f, 750.0f) + 16.0f, 750.0f);
+	m_ppObjects[9]->Rotate(270.0f, 180.0f, 0.0f);
+	m_ppObjects[9]->SetScale(20.0f, 4.0f, 8.0f);
+
+	m_ppObjects[10]->SetPosition(125.0f, pTerrain->GetHeight(125.0f, 500.0f) + 16.0f, 500.0f);
+	m_ppObjects[10]->Rotate(270.0f, 90.0f, 0.0f);
+	m_ppObjects[10]->SetScale(15.0f, 8.0f, 8.0f);
+
+	m_ppObjects[11]->SetPosition(745.0f, pTerrain->GetHeight(745.0f, 440.0f) + 16.0f, 440.0f);
+	m_ppObjects[11]->Rotate(270.0f, 180.0f, 0.0f);
+	m_ppObjects[11]->SetScale(20.0f, 10.0f, 8.0f);
+
+	m_ppObjects[12]->SetPosition(350.0f, pTerrain->GetHeight(350.0f, 600.0f) + 16.0f, 600.0f);
+	m_ppObjects[12]->Rotate(270.0f, 0.0f, 0.0f);
+	m_ppObjects[12]->SetScale(40.0f, 4.0f, 8.0f);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -858,6 +883,7 @@ void CWallObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		m_ppObjects[i] = new CEthanObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pBuildingModel, 1);
 		m_ppObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	}
+
 	m_ppObjects[0]->SetPosition(850.0f, pTerrain->GetHeight(850.0f, 250.0f), 250.0f);
 	m_ppObjects[0]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppObjects[0]->SetScale(6.0f, 2.0f, 4.0f);
@@ -871,6 +897,7 @@ void CWallObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	m_ppObjects[2]->SetScale(8.0f, 2.0f, 8.0f);
 
 	m_ppObjects[3]->SetPosition(900.0f, pTerrain->GetHeight(900.0f, 400.0f), 400.0f);
+	m_ppObjects[3]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppObjects[3]->SetScale(10.0f, 2.0f, 8.0f);
 
 	m_ppObjects[4]->SetPosition(160.0f, pTerrain->GetHeight(160.0f, 605.0f), 605.0f);
@@ -878,14 +905,15 @@ void CWallObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	m_ppObjects[4]->SetScale(10.0f, 2.0f, 8.0f);
 
 	m_ppObjects[5]->SetPosition(600.0f, pTerrain->GetHeight(600.0f, 500.0f), 500.0f);
-	m_ppObjects[5]->Rotate(0.0f, 90.0f, 0.0f);
+	m_ppObjects[5]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppObjects[5]->SetScale(10.0f, 2.0f, 8.0f);
 
 	m_ppObjects[6]->SetPosition(525.0f, pTerrain->GetHeight(525.0f, 650.0f), 650.0f);
 	m_ppObjects[6]->Rotate(0.0f, 180.0f, 0.0f);
 	m_ppObjects[6]->SetScale(8.0f, 2.0f, 8.0f);
-			
+
 	m_ppObjects[7]->SetPosition(750.0f, pTerrain->GetHeight(750.0f, 800.0f), 800.0f);
+	m_ppObjects[7]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppObjects[7]->SetScale(10.0f, 2.0f, 8.0f);
 
 	m_ppObjects[8]->SetPosition(400.0f, pTerrain->GetHeight(400.0f, 500.0f), 500.0f);
@@ -918,88 +946,101 @@ void CBuildingObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 		m_ppObjects[i] = new CEthanObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pBuildingModel, 1);
 		m_ppObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	}
-	m_ppObjects[0]->SetPosition(500.0f, pTerrain->GetHeight(500.0f, 850.0f), 850.0f);
-	m_ppObjects[0]->SetScale(20.0f, 2.0f, 4.0f);
+	m_ppObjects[0]->SetPosition(350.0f, pTerrain->GetHeight(350.0f, 90.0f), 90.0f);
+	m_ppObjects[0]->Rotate(0.0f, 180.0f, 0.0f);
+	m_ppObjects[0]->SetScale(6.0f, 2.0f, 2.0f);
 
-	m_ppObjects[1]->SetPosition(380.0f, pTerrain->GetHeight(380.0f, 940.0f), 940.0f);
+	m_ppObjects[1]->SetPosition(300.0f, pTerrain->GetHeight(300.0f, 60.0f), 60.0f);
 	m_ppObjects[1]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppObjects[1]->SetScale(6.0f, 2.0f, 3.0f);
 
-	m_ppObjects[2]->SetPosition(600.0f, pTerrain->GetHeight(600.0f, 940.0f), 940.0f);
+	m_ppObjects[2]->SetPosition(450.0f, pTerrain->GetHeight(450.0f, 150.0f), 150.0f);
 	m_ppObjects[2]->Rotate(0.0f, 270.0f, 0.0f);
-	m_ppObjects[2]->SetScale(6.0f, 2.0f, 3.0f);
+	m_ppObjects[2]->SetScale(20.0f, 2.0f, 3.0f);
 
-	m_ppObjects[3]->SetPosition(500.0f, pTerrain->GetHeight(500.0f, 775.0f), 775.0f);
-	m_ppObjects[3]->SetScale(15.0f, 2.0f, 4.0f);
+	m_ppObjects[3]->SetPosition(300.0f, pTerrain->GetHeight(300.0f, 200.0f), 200.0f);
+	m_ppObjects[3]->Rotate(0.0f, 0.0f, 0.0f);
+	m_ppObjects[3]->SetScale(15.0f, 2.0f, 3.0f);
+	
+	m_ppObjects[4]->SetPosition(550.0f, pTerrain->GetHeight(550.0f, 275.0f), 275.0f);
+	m_ppObjects[4]->Rotate(0.0f, 180.0f, 0.0f);
+	m_ppObjects[4]->SetScale(15.0f, 2.0f, 3.0f);
 
-	m_ppObjects[4]->SetPosition(150.0f, pTerrain->GetHeight(150.0f, 850.0f), 850.0f);
-	m_ppObjects[4]->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppObjects[4]->SetScale(15.0f, 2.0f, 2.0f);
-
-	m_ppObjects[5]->SetPosition(685.0f, pTerrain->GetHeight(685.0f, 875.0f), 875.0f);
+	m_ppObjects[5]->SetPosition(150.0f, pTerrain->GetHeight(150.0f, 200.0f), 200.0f);
 	m_ppObjects[5]->Rotate(0.0f, 90.0f, 0.0f);
-	m_ppObjects[5]->SetScale(8.0f, 2.0f, 3.0f);
+	m_ppObjects[5]->SetScale(12.0f, 2.0f, 3.0f);
 
-	m_ppObjects[6]->SetPosition(850.0f, pTerrain->GetHeight(850.0f, 900.0f), 900.0f);
+	m_ppObjects[6]->SetPosition(150.0f, pTerrain->GetHeight(150.0f, 100.0f), 100.0f);
 	m_ppObjects[6]->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppObjects[6]->SetScale(15.0f, 2.0f, 2.0f);
+	m_ppObjects[6]->SetScale(15.0f, 1.5f, 3.0f);
 
-	m_ppObjects[7]->SetPosition(850.0f, pTerrain->GetHeight(850.0f, 750.0f), 750.0f);
-	m_ppObjects[7]->SetScale(12.0f, 2.0f, 3.0f);
+	m_ppObjects[7]->SetPosition(110.0f, pTerrain->GetHeight(110.0f, 240.0f), 240.0f);
+	m_ppObjects[7]->Rotate(0.0f, 300.0f, 0.0f);
+	m_ppObjects[7]->SetScale(8.0f, 2.0f, 3.0f);
 
-	m_ppObjects[8]->SetPosition(750.0f, pTerrain->GetHeight(750.0f, 335.0f), 335.0f);
-	m_ppObjects[8]->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppObjects[8]->SetScale(12.0f, 2.0f, 2.0f);
+	m_ppObjects[8]->SetPosition(250.0f, pTerrain->GetHeight(250.0f, 350.0f), 350.0f);
+	m_ppObjects[8]->Rotate(0.0f, 90.0f, 0.0f);
+	m_ppObjects[8]->SetScale(10.0f, 2.0f, 3.0f);
 
-	m_ppObjects[9]->SetPosition(700.0f, pTerrain->GetHeight(700.0f, 515.0f), 515.0f);
+	m_ppObjects[9]->SetPosition(350.0f, pTerrain->GetHeight(350.0f, 320.0f), 320.0f);
 	m_ppObjects[9]->Rotate(0.0f, 90.0f, 0.0f);
-	m_ppObjects[9]->SetScale(12.0f, 2.0f, 2.0f);
+	m_ppObjects[9]->SetScale(15.0f, 2.0f, 3.0f);
 
-	m_ppObjects[10]->SetPosition(750.0f, pTerrain->GetHeight(750.0f, 650.0f), 650.0f);
-	m_ppObjects[10]->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppObjects[10]->SetScale(14.0f, 2.0f, 2.0f);
+	m_ppObjects[10]->SetPosition(760.0f, pTerrain->GetHeight(760.0f, 215.0f), 215.0f);
+	m_ppObjects[10]->Rotate(0.0f, 90.0f, 0.0f);
+	m_ppObjects[10]->SetScale(10.0f, 2.0f, 3.0f);
 
-	m_ppObjects[11]->SetPosition(350.0f, pTerrain->GetHeight(350.0f, 80.0f), 90.0f);
-	m_ppObjects[11]->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppObjects[11]->SetScale(6.0f, 2.0f, 2.0f);
+	m_ppObjects[11]->SetPosition(710.0f, pTerrain->GetHeight(710.0f, 130.0f), 130.0f);
+	m_ppObjects[11]->Rotate(0.0f, 270.0f, 0.0f);
+	m_ppObjects[11]->SetScale(8.0f, 2.0f, 3.0f);
 
-	m_ppObjects[12]->SetPosition(300.0f, pTerrain->GetHeight(300.0f, 60.0f), 60.0f);
+	m_ppObjects[12]->SetPosition(640.0f, pTerrain->GetHeight(640.0f, 335.0f), 335.0f);
 	m_ppObjects[12]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppObjects[12]->SetScale(6.0f, 2.0f, 3.0f);
 
-	m_ppObjects[13]->SetPosition(450.0f, pTerrain->GetHeight(450.0f, 150.0f), 150.0f);
-	m_ppObjects[13]->Rotate(0.0f, 270.0f, 0.0f);
-	m_ppObjects[13]->SetScale(20.0f, 2.0f, 3.0f);
-	m_ppObjects[14]->SetPosition(300.0f, pTerrain->GetHeight(300.0f, 200.0f), 200.0f);
-	m_ppObjects[14]->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppObjects[14]->SetScale(15.0f, 2.0f, 3.0f);
-	m_ppObjects[15]->SetPosition(550.0f, pTerrain->GetHeight(550.0f, 275.0f), 275.0f);
-	m_ppObjects[15]->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppObjects[15]->SetScale(15.0f, 2.0f, 3.0f);
-	m_ppObjects[16]->SetPosition(150.0f, pTerrain->GetHeight(150.0f, 200.0f), 200.0f);
-	m_ppObjects[16]->Rotate(0.0f, 90.0f, 0.0f);
-	m_ppObjects[16]->SetScale(12.0f, 2.0f, 3.0f);
-	m_ppObjects[17]->SetPosition(150.0f, pTerrain->GetHeight(150.0f, 100.0f), 100.0f);
+	m_ppObjects[13]->SetPosition(500.0f, pTerrain->GetHeight(500.0f, 850.0f), 850.0f);
+	m_ppObjects[13]->Rotate(0.0f, 0.0f, 0.0f);
+	m_ppObjects[13]->SetScale(20.0f, 2.0f, 4.0f);
+
+	m_ppObjects[14]->SetPosition(380.0f, pTerrain->GetHeight(380.0f, 940.0f), 940.0f);
+	m_ppObjects[14]->Rotate(0.0f, 90.0f, 0.0f);
+	m_ppObjects[14]->SetScale(6.0f, 2.0f, 3.0f);
+
+	m_ppObjects[15]->SetPosition(600.0f, pTerrain->GetHeight(600.0f, 940.0f), 940.0f);
+	m_ppObjects[15]->Rotate(0.0f, 270.0f, 0.0f);
+	m_ppObjects[15]->SetScale(6.0f, 2.0f, 3.0f);
+	
+	m_ppObjects[16]->SetPosition(500.0f, pTerrain->GetHeight(500.0f, 775.0f), 775.0f);
+	m_ppObjects[16]->Rotate(0.0f, 0.0f, 0.0f);
+	m_ppObjects[16]->SetScale(15.0f, 2.0f, 4.0f);
+
+	m_ppObjects[17]->SetPosition(150.0f, pTerrain->GetHeight(150.0f, 850.0f), 850.0f);
 	m_ppObjects[17]->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppObjects[17]->SetScale(15.0f, 1.5f, 3.0f);
-	m_ppObjects[18]->SetPosition(110.0f, pTerrain->GetHeight(110.0f, 240.0f), 240.0f);
-	m_ppObjects[18]->Rotate(0.0f, 300.0f, 0.0f);
+	m_ppObjects[17]->SetScale(15.0f, 2.0f, 2.0f);
+
+	m_ppObjects[18]->SetPosition(685.0f, pTerrain->GetHeight(685.0f, 875.0f), 875.0f);
+	m_ppObjects[18]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppObjects[18]->SetScale(8.0f, 2.0f, 3.0f);
-	m_ppObjects[19]->SetPosition(250.0f, pTerrain->GetHeight(250.0f, 350.0f), 350.0f);
-	m_ppObjects[19]->Rotate(0.0f, 90.0f, 0.0f);
-	m_ppObjects[19]->SetScale(10.0f, 2.0f, 3.0f);
-	m_ppObjects[20]->SetPosition(350.0f, pTerrain->GetHeight(350.0f, 320.0f), 320.0f);
-	m_ppObjects[20]->Rotate(0.0f, 90.0f, 0.0f);
-	m_ppObjects[20]->SetScale(15.0f, 2.0f, 3.0f);
-	m_ppObjects[21]->SetPosition(760.0f, pTerrain->GetHeight(760.0f, 215.0f), 215.0f);
-	m_ppObjects[21]->Rotate(0.0f, 90.0f, 0.0f);
-	m_ppObjects[21]->SetScale(10.0f, 2.0f, 3.0f);
-	m_ppObjects[22]->SetPosition(710.0f, pTerrain->GetHeight(710.0f, 130.0f), 130.0f);
-	m_ppObjects[22]->Rotate(0.0f, 270.0f, 0.0f);
-	m_ppObjects[22]->SetScale(8.0f, 2.0f, 3.0f);
-	m_ppObjects[23]->SetPosition(640.0f, pTerrain->GetHeight(640.0f, 335.0f), 335.0f);
-	m_ppObjects[23]->Rotate(0.0f, 90.0f, 0.0f);
-	m_ppObjects[23]->SetScale(6.0f, 2.0f, 3.0f);
+
+	m_ppObjects[19]->SetPosition(850.0f, pTerrain->GetHeight(850.0f, 900.0f), 900.0f);
+	m_ppObjects[19]->Rotate(0.0f, 0.0f, 0.0f);
+	m_ppObjects[19]->SetScale(15.0f, 2.0f, 2.0f);
+
+	m_ppObjects[20]->SetPosition(850.0f, pTerrain->GetHeight(850.0f, 750.0f), 750.0f);
+	m_ppObjects[20]->Rotate(0.0f, 0.0f, 0.0f);
+	m_ppObjects[20]->SetScale(12.0f, 2.0f, 3.0f);
+
+	m_ppObjects[21]->SetPosition(750.0f, pTerrain->GetHeight(750.0f, 335.0f), 335.0f);
+	m_ppObjects[21]->Rotate(0.0f, 0.0f, 0.0f);
+	m_ppObjects[21]->SetScale(12.0f, 2.0f, 2.0f);
+
+	m_ppObjects[22]->SetPosition(700.0f, pTerrain->GetHeight(700.0f, 515.0f), 515.0f);
+	m_ppObjects[22]->Rotate(0.0f, 90.0f, 0.0f);
+	m_ppObjects[22]->SetScale(12.0f, 2.0f, 2.0f);
+
+	m_ppObjects[23]->SetPosition(750.0f, pTerrain->GetHeight(750.0f, 650.0f), 650.0f);
+	m_ppObjects[23]->Rotate(0.0f, 0.0f, 0.0f);
+	m_ppObjects[23]->SetScale(14.0f, 2.0f, 2.0f);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -1008,7 +1049,7 @@ void CBuildingObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 
 void CGeneratorShedShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
 {
-	m_nObjects = 9;
+	m_nObjects = 13;
 
 	m_ppObjects = new CGameObject * [m_nObjects];
 
@@ -1022,41 +1063,57 @@ void CGeneratorShedShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 		m_ppObjects[i] = new CEthanObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pBuildingModel, 1);
 		m_ppObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	}
-	m_ppObjects[0]->SetPosition(650.0f, pTerrain->GetHeight(650.0f, 450.0f), 450.0f);
-	m_ppObjects[0]->Rotate(0.0f, 180.0f, 0.0f);
+	m_ppObjects[0]->SetPosition(450.0f, pTerrain->GetHeight(450.0f, 450.0f), 450.0f);
+	m_ppObjects[0]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppObjects[0]->SetScale(3.0f, 3.0f, 3.0f);
 
-	m_ppObjects[1]->SetPosition(920.0f, pTerrain->GetHeight(920.0f, 125.0f), 125.0f);
-	m_ppObjects[1]->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppObjects[1]->SetScale(3.0f, 2.0f, 3.0f);
+	m_ppObjects[1]->SetPosition(450.0f, pTerrain->GetHeight(450.0f, 550.0f), 550.0f);
+	m_ppObjects[1]->Rotate(0.0f, 90.0f, 0.0f);
+	m_ppObjects[1]->SetScale(3.0f, 3.0f, 3.0f);
 
-	m_ppObjects[2]->SetPosition(250.0f, pTerrain->GetHeight(250.0f, 800.0f), 800.0f);
-	m_ppObjects[2]->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppObjects[2]->SetScale(3.0f, 2.0f, 3.0f);
+	m_ppObjects[2]->SetPosition(550.0f, pTerrain->GetHeight(550.0f, 550.0f), 550.0f);
+	m_ppObjects[2]->Rotate(0.0f, 180.0f, 0.0f);
+	m_ppObjects[2]->SetScale(3.0f, 3.0f, 3.0f);
 
-	m_ppObjects[3]->SetPosition(850.0f, pTerrain->GetHeight(850.0f, 550.0f), 550.0f);
-	m_ppObjects[3]->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppObjects[3]->SetScale(6.0f, 2.0f, 6.0f);
+	m_ppObjects[3]->SetPosition(550.0f, pTerrain->GetHeight(550.0f, 450.0f), 450.0f);
+	m_ppObjects[3]->Rotate(0.0f, 270.0f, 0.0f);
+	m_ppObjects[3]->SetScale(3.0f, 3.0f, 3.0f);
 
-	m_ppObjects[4]->SetPosition(100.0f, pTerrain->GetHeight(100.0f, 800.0f), 800.0f);
-	m_ppObjects[4]->Rotate(0.0f, 90.0f, 0.0f);
-	m_ppObjects[4]->SetScale(2.0f, 2.0f, 2.0f);
+	m_ppObjects[4]->SetPosition(650.0f, pTerrain->GetHeight(650.0f, 450.0f), 450.0f);
+	m_ppObjects[4]->Rotate(0.0f, 180.0f, 0.0f);
+	m_ppObjects[4]->SetScale(3.0f, 3.0f, 3.0f);
 
-	m_ppObjects[5]->SetPosition(250.0f, pTerrain->GetHeight(250.0f, 675.0f), 675.0f);
-	m_ppObjects[5]->Rotate(0.0f, 90.0f, 0.0f);
-	m_ppObjects[5]->SetScale(2.0f, 2.0f, 2.0f);
+	m_ppObjects[5]->SetPosition(920.0f, pTerrain->GetHeight(920.0f, 125.0f), 125.0f);
+	m_ppObjects[5]->Rotate(0.0f, 180.0f, 0.0f);
+	m_ppObjects[5]->SetScale(3.0f, 2.0f, 3.0f);
 
-	m_ppObjects[6]->SetPosition(100.0f, pTerrain->GetHeight(100.0f, 675.0f), 675.0f);
-	m_ppObjects[6]->Rotate(0.0f, 90.0f, 0.0f);
-	m_ppObjects[6]->SetScale(2.0f, 2.0f, 2.0f);
+	m_ppObjects[6]->SetPosition(250.0f, pTerrain->GetHeight(250.0f, 800.0f), 800.0f);
+	m_ppObjects[6]->Rotate(0.0f, 0.0f, 0.0f);
+	m_ppObjects[6]->SetScale(3.0f, 2.0f, 3.0f);
 
-	m_ppObjects[7]->SetPosition(125.0f, pTerrain->GetHeight(125.0f, 400.0f), 400.0f);
+	m_ppObjects[7]->SetPosition(850.0f, pTerrain->GetHeight(850.0f, 550.0f), 550.0f);
 	m_ppObjects[7]->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppObjects[7]->SetScale(4.0f, 2.0f, 4.0f);
+	m_ppObjects[7]->SetScale(6.0f, 2.0f, 6.0f);
 
-	m_ppObjects[8]->SetPosition(325.0f, pTerrain->GetHeight(325.0f, 550.0f), 550.0f);
-	m_ppObjects[8]->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppObjects[8]->SetScale(4.0f, 2.0f, 4.0f);
+	m_ppObjects[8]->SetPosition(100.0f, pTerrain->GetHeight(100.0f, 800.0f), 800.0f);
+	m_ppObjects[8]->Rotate(0.0f, 90.0f, 0.0f);
+	m_ppObjects[8]->SetScale(2.0f, 2.0f, 2.0f);
+
+	m_ppObjects[9]->SetPosition(250.0f, pTerrain->GetHeight(250.0f, 675.0f), 675.0f);
+	m_ppObjects[9]->Rotate(0.0f, 90.0f, 0.0f);
+	m_ppObjects[9]->SetScale(2.0f, 2.0f, 2.0f);
+
+	m_ppObjects[10]->SetPosition(100.0f, pTerrain->GetHeight(100.0f, 675.0f), 675.0f);
+	m_ppObjects[10]->Rotate(0.0f, 90.0f, 0.0f);
+	m_ppObjects[10]->SetScale(2.0f, 2.0f, 2.0f);
+
+	m_ppObjects[11]->SetPosition(125.0f, pTerrain->GetHeight(125.0f, 400.0f), 400.0f);
+	m_ppObjects[11]->Rotate(0.0f, 180.0f, 0.0f);
+	m_ppObjects[11]->SetScale(4.0f, 2.0f, 4.0f);
+
+	m_ppObjects[12]->SetPosition(325.0f, pTerrain->GetHeight(325.0f, 550.0f), 550.0f);
+	m_ppObjects[12]->Rotate(0.0f, 0.0f, 0.0f);
+	m_ppObjects[12]->SetScale(4.0f, 2.0f, 4.0f);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
