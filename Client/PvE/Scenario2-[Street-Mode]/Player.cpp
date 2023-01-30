@@ -309,7 +309,7 @@ CMyPlayer::CMyPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	SetCameraUpdatedContext(pContext);
 
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-	SetPosition(XMFLOAT3(350.0, pTerrain->GetHeight(300.0, 150), 150.0));
+	SetPosition(XMFLOAT3(350.0, pTerrain->GetHeight(300.0, 150), 20.0));
 
 	if (pBulletMesh) delete pBulletMesh;
 	if (pAngrybotModel) delete pAngrybotModel;

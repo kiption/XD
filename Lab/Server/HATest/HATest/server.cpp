@@ -1,0 +1,171 @@
+#include <iostream>
+#include "Common.h"
+using namespace std;
+
+#define SERVERPORT 9000
+#define BUFSIZE    512
+
+char* WATCHDOG_IP = (char*)"127.0.0.1";
+#define WATCHDOG_PORT 8000
+
+DWORD WINAPI Heartbeat2Wathdog(LPVOID arg)
+{
+	int retval;
+	// 윈속 초기화
+	WSADATA wsa;
+	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+		return 1;
+
+	// 소켓 생성
+	SOCKET watchdog_sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (watchdog_sock == INVALID_SOCKET) err_quit("socket()");
+
+	// connect()
+	struct sockaddr_in serveraddr;
+	memset(&serveraddr, 0, sizeof(serveraddr));
+	serveraddr.sin_family = AF_INET;
+	inet_pton(AF_INET, WATCHDOG_IP, &serveraddr.sin_addr);
+	serveraddr.sin_port = htons(WATCHDOG_PORT);
+	retval = connect(watchdog_sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
+	if (retval == SOCKET_ERROR) err_quit("connect()");
+
+	/*
+	int retval;
+	SOCKET watchdog_sock = (SOCKET)arg;
+	struct sockaddr_in clientaddr;
+	char addr[INET_ADDRSTRLEN];
+	int addrlen;
+	char buf[BUFSIZE + 1];
+
+	// 클라이언트 정보 얻기
+	addrlen = sizeof(clientaddr);
+	getpeername(watchdog_sock, (struct sockaddr*)&clientaddr, &addrlen);
+	inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
+	*/
+
+	while (1) {
+		// Send Heartbeat
+		char heartbeat = 1;
+		retval = send(watchdog_sock, &heartbeat, sizeof(heartbeat), 0);
+
+		// Delay (1 sec)
+		Sleep(1000);
+	}
+}
+
+// 클라이언트와 데이터 통신
+DWORD WINAPI ProcessClient(LPVOID arg)
+{
+	int retval;
+	SOCKET client_sock = (SOCKET)arg;
+	struct sockaddr_in clientaddr;
+	char addr[INET_ADDRSTRLEN];
+	int addrlen;
+	char buf[BUFSIZE + 1];
+
+	// 클라이언트 정보 얻기
+	addrlen = sizeof(clientaddr);
+	getpeername(client_sock, (struct sockaddr*)&clientaddr, &addrlen);
+	inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
+
+	while (1) {
+		// 데이터 받기
+		retval = recv(client_sock, buf, BUFSIZE, 0);
+		if (retval == SOCKET_ERROR) {
+			err_display("recv()");
+			break;
+		}
+		else if (retval == 0)
+			break;
+
+		// 받은 데이터 출력
+		buf[retval] = '\0';
+		printf("[TCP/%s:%d] %s\n", addr, ntohs(clientaddr.sin_port), buf);
+
+		// 데이터 보내기
+		retval = send(client_sock, buf, retval, 0);
+		if (retval == SOCKET_ERROR) {
+			err_display("send()");
+			break;
+		}
+	}
+
+	// 소켓 닫기
+	closesocket(client_sock);
+	printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
+		addr, ntohs(clientaddr.sin_port));
+	return 0;
+}
+
+int main(int argc, char* argv[])
+{
+	int retval;
+
+	// 윈속 초기화
+	WSADATA wsa;
+	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+		return 1;
+
+	// 하트비트 스레드 생성
+	HANDLE hWatchdogThread = CreateThread(NULL, 0, Heartbeat2Wathdog, NULL, 0, NULL);
+	if (hWatchdogThread != NULL) {
+		CloseHandle(hWatchdogThread);
+	}
+	//===
+
+
+	// 클라이언트 통신 소켓 생성
+	SOCKET listen_sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (listen_sock == INVALID_SOCKET) err_quit("socket()");
+
+	// bind()
+	struct sockaddr_in serveraddr;
+	memset(&serveraddr, 0, sizeof(serveraddr));
+	serveraddr.sin_family = AF_INET;
+	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	serveraddr.sin_port = htons(SERVERPORT);
+	retval = bind(listen_sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
+	if (retval == SOCKET_ERROR) err_quit("bind()");
+
+	// listen()
+	retval = listen(listen_sock, SOMAXCONN);
+	if (retval == SOCKET_ERROR) err_quit("listen()");
+
+	// 데이터 통신에 사용할 변수
+	SOCKET client_sock;
+	struct sockaddr_in clientaddr;
+	int addrlen;
+	HANDLE hThread;
+
+	while (1) {
+		// accept()
+		addrlen = sizeof(clientaddr);
+		client_sock = accept(listen_sock, (struct sockaddr*)&clientaddr, &addrlen);
+		if (client_sock == INVALID_SOCKET) {
+			err_display("accept()");
+			break;
+		}
+
+		if (ntohs(clientaddr.sin_port) == 9000 || ntohs(clientaddr.sin_port) == 10000) {
+			cout << "다른 서버가 연결되었습니다." << endl;
+		}
+		else {
+			// 접속한 클라이언트 정보 출력
+			char addr[INET_ADDRSTRLEN];
+			inet_ntop(AF_INET, &clientaddr.sin_addr, addr, sizeof(addr));
+			cout << "\n[TCP 서버] 클라이언트 접속: IP 주소=" << addr << ", 포트 번호 = " << ntohs(clientaddr.sin_port) << endl;
+
+			// 통신 스레드 생성
+			hThread = CreateThread(NULL, 0, ProcessClient, (LPVOID)client_sock, 0, NULL);
+			if (hThread == NULL) { closesocket(client_sock); }
+			else { CloseHandle(hThread); }
+		}
+	}
+
+	// 소켓 닫기
+	closesocket(listen_sock);
+
+	// 윈속 종료
+	WSACleanup();
+	return 0;
+}

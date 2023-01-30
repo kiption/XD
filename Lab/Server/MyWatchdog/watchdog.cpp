@@ -25,16 +25,14 @@ DWORD WINAPI ServerWatch(LPVOID arg)
 		retval = recv(client_sock, &heartbeat, sizeof(heartbeat), 0);
 
 		if (heartbeat) {
-			cout << "Target is Working." << endl;
+			cout << "감시대상이 정상 작동 중입니다." << endl;
 		}
 		else {
-			cout << "Target is Dead." << endl;
-			printf("대상 감시를 종료합니다: IP 주소=%s, 포트 번호=%d\n", addr, ntohs(clientaddr.sin_port));
+			cout << "감시대상의 서비스 중단이 감지되었습니다." << endl;
+			cout << "대상을 재실행합니다." << endl;
 			ShellExecute(NULL, "open", "WatchTargetTest", NULL, "../WatchTargetTest/x64/Release", SW_SHOW);
 			return 0;
 		}
-
-		cout << "Thread Work is Done." << endl;
 	}
 
 	return 0;
@@ -56,7 +54,7 @@ int main(int argc, char* argv[])
 	memset(&serveraddr, 0, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
 	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	serveraddr.sin_port = htons(SERVER_PORT);
+	serveraddr.sin_port = htons(WATCHDOG_PORT);
 	retval = bind(listen_sock, (struct sockaddr*)&serveraddr, sizeof(serveraddr));
 	if (retval == SOCKET_ERROR) err_quit("bind()");
 
