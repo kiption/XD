@@ -110,4 +110,6 @@ public:
 	CGameObject* m_pChild = NULL;
 	CGameObject* m_pSibling = NULL;
 	static CGameObject* LoadGeometryFromFile(char* pstrFileName);
+	static CGameObject* LoadFrameHierarchyFromFile(FILE* pInFile);
+
 };

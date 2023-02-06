@@ -113,6 +113,8 @@ public:
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
+	void ChangeScene(DWORD nMode);
+	DWORD						m_nMode = SCENE1STAGE;
 private:
 	HINSTANCE					m_hInstance;
 	HWND						m_hWnd; 
@@ -184,10 +186,9 @@ private:
 
 	CGameTimer					m_GameTimer;
 
-	CScene						*m_pScene = NULL;
+	CScene1						*m_pScene = NULL;
 	CPlayer						*m_pPlayer = NULL;
 	CCamera						*m_pCamera = NULL;
-	CObjectsShader				*m_pShader = NULL;
 	POINT						m_ptOldCursorPos;
 
 	_TCHAR						m_pszFrameRate[70];

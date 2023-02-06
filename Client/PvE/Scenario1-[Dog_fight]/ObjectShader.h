@@ -44,7 +44,7 @@ protected:
 };
 
 
-class CObjectsShader : public CTexturedShader
+class CObjectsShader : public CStandardShader
 {
 public:
 	CObjectsShader();
@@ -63,7 +63,7 @@ public:
 
 	int								m_nObjects = 0;
 	CGameObject** m_ppObjects = 0;
-	CGameObject* m_pObjects = 0;
+	//CGameObject* m_pObjects = 0;
 
 };
 
@@ -86,8 +86,8 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 
 	int								m_nObjects = 0;
-	CGameObject** m_ppObjects = 0;
-	CGameObject* m_pObjects = 0;
+	//CGameObject** m_ppObjects = 0;
+	//* m_pObjects = 0;
 
 	ID3D12Resource* m_pd3dcbGameObjects = NULL;
 	CB_SPRITEBILLBOARD_INFO* m_pcbMappedGameObjects = NULL;

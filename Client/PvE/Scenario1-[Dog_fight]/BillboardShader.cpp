@@ -723,42 +723,42 @@ D3D12_SHADER_BYTECODE CExplosionShader::CreatePixelShader(ID3DBlob** ppd3dShader
 }
 void CExplosionShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	CTexture* ppSpriteTextures[2];
-	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
-	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
-	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 6, 6);
-	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Explosion_6x6.dds", RESOURCE_TEXTURE2D, 0);
+	//CTexture* ppSpriteTextures[2];
+	//ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
+	//ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
+	//ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 6, 6);
+	//ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Explosion_6x6.dds", RESOURCE_TEXTURE2D, 0);
 
-	CMaterial* ppSpriteMaterials[2];
-	ppSpriteMaterials[0] = new CMaterial();
-	ppSpriteMaterials[0]->SetTexture(ppSpriteTextures[0]);
-	ppSpriteMaterials[1] = new CMaterial();
-	ppSpriteMaterials[1]->SetTexture(ppSpriteTextures[1]);
+	//CMaterial* ppSpriteMaterials[2];
+	//ppSpriteMaterials[0] = new CMaterial();
+	//ppSpriteMaterials[0]->SetTexture(ppSpriteTextures[0]);
+	//ppSpriteMaterials[1] = new CMaterial();
+	//ppSpriteMaterials[1]->SetTexture(ppSpriteTextures[1]);
 
-	CSpriteTexturedRectMesh* pSpriteMesh = new CSpriteTexturedRectMesh(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	//CSpriteTexturedRectMesh* pSpriteMesh = new CSpriteTexturedRectMesh(pd3dDevice, pd3dCommandList, 50.0f, 50.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-	UINT ncbElementBytes = ((sizeof(CB_SPRITEBILLBOARD_INFO) + 255) & ~255);
-	m_nObjects = 2;
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, m_nObjects, 2);
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	CreateConstantBufferViews(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
-	CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[0], 0, 12);
-	CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[1], 0, 12);
+	//UINT ncbElementBytes = ((sizeof(CB_SPRITEBILLBOARD_INFO) + 255) & ~255);
+	//m_nObjects = 2;
+	//CreateCbvSrvDescriptorHeaps(pd3dDevice, m_nObjects, 2);
+	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	//CreateConstantBufferViews(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
+	//CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[0], 0, 12);
+	//CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[1], 0, 12);
 
-	m_ppObjects = new CGameObject * [m_nObjects];
-	XMFLOAT3 xmf3Position = XMFLOAT3(1030.0f, 180.0f, 1410.0f);
-	CMultiSpriteObject* pExplodeObject = NULL;
+	//m_ppObjects = new CGameObject * [m_nObjects];
+	//XMFLOAT3 xmf3Position = XMFLOAT3(1030.0f, 180.0f, 1410.0f);
+	//CMultiSpriteObject* pExplodeObject = NULL;
 
-	for (int j = 0; j < m_nObjects; j++)
-	{
-		pExplodeObject = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		pExplodeObject->SetMesh(0, pSpriteMesh);
-		pExplodeObject->SetMaterial(0, ppSpriteMaterials[j]);
-		pExplodeObject->SetPosition(XMFLOAT3(xmf3Position.x, xmf3Position.y, xmf3Position.z));
-		pExplodeObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * j));
-		pExplodeObject->m_fSpeed = 3.0f / (ppSpriteTextures[j]->m_nRows * ppSpriteTextures[j]->m_nCols);
-		m_ppObjects[j] = pExplodeObject;
-	}
+	//for (int j = 0; j < m_nObjects; j++)
+	//{
+	//	pExplodeObject = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	//	pExplodeObject->SetMesh(0, pSpriteMesh);
+	//	pExplodeObject->SetMaterial(0, ppSpriteMaterials[j]);
+	//	pExplodeObject->SetPosition(XMFLOAT3(xmf3Position.x, xmf3Position.y, xmf3Position.z));
+	//	pExplodeObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * j));
+	//	pExplodeObject->m_fSpeed = 3.0f / (ppSpriteTextures[j]->m_nRows * ppSpriteTextures[j]->m_nCols);
+	//	m_ppObjects[j] = pExplodeObject;
+	//}
 
 
 }
@@ -788,7 +788,7 @@ void CExplosionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
 		XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 50.0f, false));
 		
-		for (int j = 0; j < m_nObjects; j++)
+	/*	for (int j = 0; j < m_nObjects; j++)
 		{
 			if (m_ppObjects[j])
 			{
@@ -796,7 +796,7 @@ void CExplosionShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 				m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
 				m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 			}
-		}
+		}*/
 
 		CSpriteObjectShader::Render(pd3dCommandList, pCamera,0);
 

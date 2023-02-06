@@ -39,8 +39,8 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	PrepareAnimate();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	if (pBulletMesh) delete pBulletMesh;
-	if (pBulletMesh2) delete pBulletMesh2;
+
+
 }
 
 CMainPlayer::~CMainPlayer()

@@ -44,33 +44,33 @@ void CMultiSpriteObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 
 void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	OnPrepareRender();
+	//OnPrepareRender();
 
-	if (m_ppMaterials)
-	{
-		if (m_ppMaterials[0]->m_pShader)//->½¦ÀÌ´õ 
-		{
-			m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera);
-			m_ppMaterials[0]->m_pShader->UpdateShaderVariables(pd3dCommandList);
+	//if (m_ppMaterials)
+	//{
+	//	if (m_ppMaterials[0]->m_pShader)//->½¦ÀÌ´õ 
+	//	{
+	//		m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera);
+	//		m_ppMaterials[0]->m_pShader->UpdateShaderVariables(pd3dCommandList);
 
-			UpdateShaderVariables(pd3dCommandList);
-		}
-		if (m_ppMaterials[0]->m_pTexture)
-		{
-			m_ppMaterials[0]->m_pTexture->UpdateShaderVariables(pd3dCommandList);
-			if (m_pcbMappedSpriteGameObject) XMStoreFloat4x4(&m_pcbMappedSpriteGameObject->m_xmf4x4Texture,
-				XMMatrixTranspose(XMLoadFloat4x4(&m_ppMaterials[0]->m_pTexture->m_xmf4x4Texture)));
-		}
-	}
+	//		UpdateShaderVariables(pd3dCommandList);
+	//	}
+	//	if (m_ppMaterials[0]->m_pTexture)
+	//	{
+	//		m_ppMaterials[0]->m_pTexture->UpdateShaderVariables(pd3dCommandList);
+	//		if (m_pcbMappedSpriteGameObject) XMStoreFloat4x4(&m_pcbMappedSpriteGameObject->m_xmf4x4Texture,
+	//			XMMatrixTranspose(XMLoadFloat4x4(&m_ppMaterials[0]->m_pTexture->m_xmf4x4Texture)));
+	//	}
+	//}
 
-	pd3dCommandList->SetGraphicsRootDescriptorTable(23, m_d3dCbvGPUDescriptorHandle);
-	if (m_ppMeshes)
-	{
-		for (int i = 0; i < m_nMeshes; i++)
-		{
-			if (m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dCommandList);
-		}
-	}
+	//pd3dCommandList->SetGraphicsRootDescriptorTable(23, m_d3dCbvGPUDescriptorHandle);
+	//if (m_ppMeshes)
+	//{
+	//	for (int i = 0; i < m_nMeshes; i++)
+	//	{
+	//		if (m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dCommandList);
+	//	}
+	//}
 
 
 }

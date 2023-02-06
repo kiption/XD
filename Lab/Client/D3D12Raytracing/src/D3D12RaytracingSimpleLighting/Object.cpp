@@ -192,3 +192,10 @@ CGameObject* pGameObject = NULL;
 //	}
 	return(pGameObject);
 }
+
+CGameObject* CGameObject::LoadFrameHierarchyFromFile(FILE* pInFile)
+{
+
+	CGameObject* pGameObject = NULL;
+	return(pGameObject);
+}

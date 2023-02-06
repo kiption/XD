@@ -296,22 +296,22 @@ void CSpriteObjectShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dC
 	//	}
 	//}
 
-	UINT ncbElementBytes = ((sizeof(CB_SPRITEBILLBOARD_INFO) + 255) & ~255);
-	for (int j = 0; j < m_nObjects; j++)
-	{
-		
-			CB_SPRITEBILLBOARD_INFO* pbMappedcbGameObject = (CB_SPRITEBILLBOARD_INFO*)((UINT8*)m_pcbMappedGameObjects + (j * ncbElementBytes));
-			XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->m_xmf4x4World)));
-			if (m_ppObjects[j]->m_ppMaterials)
-			{
-				if (m_ppObjects[j]->m_ppMaterials[0] && m_ppObjects[j]->m_ppMaterials[0]->m_pTexture)//오류
-				{
-					XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4Texture, 
-						XMMatrixTranspose(XMLoadFloat4x4(&(m_ppObjects[j]->m_ppMaterials[0]->m_pTexture->m_xmf4x4Texture))));
-				}
-			}
-		
-	}
+	//UINT ncbElementBytes = ((sizeof(CB_SPRITEBILLBOARD_INFO) + 255) & ~255);
+	//for (int j = 0; j < m_nObjects; j++)
+	//{
+	//	
+	//		CB_SPRITEBILLBOARD_INFO* pbMappedcbGameObject = (CB_SPRITEBILLBOARD_INFO*)((UINT8*)m_pcbMappedGameObjects + (j * ncbElementBytes));
+	//		XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->m_xmf4x4World)));
+	//		if (m_ppObjects[j]->m_ppMaterials)
+	//		{
+	//			if (m_ppObjects[j]->m_ppMaterials[0] && m_ppObjects[j]->m_ppMaterials[0]->m_pTexture)//오류
+	//			{
+	//				XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4Texture, 
+	//					XMMatrixTranspose(XMLoadFloat4x4(&(m_ppObjects[j]->m_ppMaterials[0]->m_pTexture->m_xmf4x4Texture))));
+	//			}
+	//		}
+	//	
+	//}
 }
 
 void CSpriteObjectShader::ReleaseShaderVariables()
@@ -331,11 +331,11 @@ void CSpriteObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 void CSpriteObjectShader::ReleaseObjects()
 {
-	if (m_ppObjects)
+	/*if (m_ppObjects)
 	{
 		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) delete m_ppObjects[j];
 		delete[] m_ppObjects;
-	}
+	}*/
 
 #ifdef _WITH_BATCH_MATERIAL
 	if (m_pMaterial) delete m_pMaterial;
@@ -344,25 +344,25 @@ void CSpriteObjectShader::ReleaseObjects()
 
 void CSpriteObjectShader::AnimateObjects(float fTimeElapsed)
 {
-	for (int j = 0; j < m_nObjects; j++)
+	/*for (int j = 0; j < m_nObjects; j++)
 	{
 		m_ppObjects[j]->Animate(fTimeElapsed);
-	}
+	}*/
 }
 
 void CSpriteObjectShader::ReleaseUploadBuffers()
 {
-	if (m_ppObjects)
+	/*if (m_ppObjects)
 	{
 		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
-	}
+	}*/
 }
 
 void CSpriteObjectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
 	CTexturedShader::Render(pd3dCommandList, pCamera);
 	//CTexturedShader::Render(pd3dCommandList, pCamera, nPipelineState);
-	for (int j = 0; j < m_nObjects; j++)
+	/*for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
 		{
@@ -370,5 +370,5 @@ void CSpriteObjectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 
 		}
-	}
+	}*/
 }

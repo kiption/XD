@@ -85,8 +85,9 @@ protected:
 	D3D12_CPU_DESCRIPTOR_HANDLE			m_d3dSrvCPUDescriptorNextHandle;
 	D3D12_GPU_DESCRIPTOR_HANDLE			m_d3dSrvGPUDescriptorNextHandle;
 	ID3D12Resource* m_pd3dcbGameObject = NULL;
+	int								m_nCurScene = SCENE1STAGE;
 public:
-
+	void SetCurScene(int nCurScene) { m_nCurScene = nCurScene; }
 	bool								m_bActive = false;
 	bool								m_bSpriteActive = false;
 	bool								m_bBulletActive = false;
