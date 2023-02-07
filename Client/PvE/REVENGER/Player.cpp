@@ -379,7 +379,7 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	
 	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL);
 	SetChild(pAngrybotModel->m_pModelRootObject, true);
-	pAngrybotModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
+	
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 2, pAngrybotModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
@@ -398,17 +398,13 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	CAnimationCallbackHandler *pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
 
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	
 	SetPlayerUpdatedContext(pContext);
 	SetCameraUpdatedContext(pContext);
-
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	
-
-	//if(SCENE1STAGE)SetPosition(XMFLOAT3(310.0f, pTerrain->GetHeight(310.0f,590.0f), 590.0f));
-	//if(SCENE2STAGE)SetPosition(XMFLOAT3(310.0f, pTerrain->GetHeight(310.0f,590.0f), 590.0f));
-	SetPosition(XMFLOAT3(310.0f, 590.0f, 590.0f));
 	SetScale(XMFLOAT3(10.0f, 10.0f, 10.0f));
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+	SetPosition(XMFLOAT3(310.0f, 290.0f, 590.0f));
 
 	if (pAngrybotModel) delete pAngrybotModel;
 }
@@ -449,7 +445,7 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 			break;
 		case THIRD_PERSON_CAMERA:
 			SetFriction(250.0f);
-			SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
+			SetGravity(XMFLOAT3(0.0f, -5.0f, 0.0f));
 			SetMaxVelocityXZ(300.0f);
 			SetMaxVelocityY(400.0f);
 			m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);

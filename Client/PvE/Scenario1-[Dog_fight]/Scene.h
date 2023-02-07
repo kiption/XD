@@ -104,12 +104,12 @@ public:
 	CSpriteObjectShader** m_ppSpriteShaders = NULL;
 	CObjectsShader** m_ppShaders = NULL;
 	CNPCShader** m_ppNPCShaders = NULL;
-	CExplosionShader** m_ppExplosion = NULL;
+	
 
 	CMultiSpriteObject** m_ppSpriteObjects = NULL;
 	int	m_nSpriteObjects;
 
-	CPlayerShader* m_pPlayerShader= NULL;
+	
 	CParticleObject** m_ppParticleObjects = NULL;
 	int	m_nParticleObjects;
 

@@ -68,9 +68,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 
 void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	SetCurScene(SCENE1STAGE);
 	m_pd3dGraphicsRootSignature = ::GraphicsRootSignature(pd3dDevice);
-
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
@@ -131,13 +129,6 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pCExplosionShader1->SetActive(false);
 	m_ppNPCShaders[2] = pCExplosionShader1;
 
-	m_ppExplosion = new CExplosionShader * [1];
-	CExplosionShader* pExplosionShader = new CExplosionShader();
-	pExplosionShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
-	pExplosionShader->SetCurScene(SCENE1STAGE);
-	pExplosionShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer);
-	pExplosionShader->SetActive(false);
-	m_ppExplosion[0] = pExplosionShader;
 
 	//m_nParticleObjects = 4;
 	//m_ppParticleObjects = new CParticleObject * [m_nParticleObjects];
@@ -175,7 +166,6 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	m_pOutlineShader = new COutlineShader();
 	m_pOutlineShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
-	m_pOutlineShader->SetCurScene(SCENE1STAGE);
 	m_pOutlineShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }
@@ -617,7 +607,7 @@ void CScene1::BuildDefaultLightsAndMaterials()
 
 void CScene1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	SetCurScene(SCENE2STAGE);
+
 	m_pd3dGraphicsRootSignature = ::GraphicsRootSignature(pd3dDevice);
 
 
@@ -627,6 +617,7 @@ void CScene1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	XMFLOAT3 xmf3Normal(0.0f, 0.5f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/terrain033.raw"), 513, 513, 513, 513, xmf3Scale, xmf3Normal);
 	m_pTerrain->SetPosition(0.0, 0.0, 0.0);
+	
 
 	XMFLOAT3 xmf4ScaleW(25.0f, 2.0f, 25.0);
 	m_pUseWaterMove = new CUseWaterMoveTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/waterterrain8bit.raw"), 257, 257, 8, 8, xmf4ScaleW, xmf3Normal);
@@ -665,7 +656,7 @@ void CScene1::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 
 	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256ÀÇ ¹è¼ö
-	m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbMaterialBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbMaterialBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbMaterials->Map(0, NULL, (void**)&m_pcbMappedMaterials);
 }
 void CScene1::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -712,8 +703,6 @@ bool CScene1::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-
-		
 		default:
 			break;
 		}
@@ -729,10 +718,10 @@ bool CScene1::ProcessInput(UCHAR* pKeysBuffer)
 }
 void CScene1::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 {
-	m_pUseWaterMove->Animate(fTimeElapsed);
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->UpdateTransform(NULL);
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
+	
+	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
+	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->UpdateTransform(NULL);
+	//for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 
 
 	/// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -757,6 +746,17 @@ void CScene1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 	UpdateShaderVariables(pd3dCommandList);
 
+	if (m_pd3dcbLights)
+	{
+		D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+		pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
+	}
+	//if (m_pd3dcbMaterials)
+	//{
+	//	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
+	//	pd3dCommandList->SetGraphicsRootConstantBufferView(20, d3dcbMaterialsGpuVirtualAddress); //Materials
+	//}
+
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i])m_ppShaders[i]->Render(pd3dCommandList, pCamera, 0);
@@ -771,21 +771,7 @@ void CScene1::OnPreRender(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dComm
 }
 void CScene1::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
-
-	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
-	pCamera->UpdateShaderVariables(pd3dCommandList);
-
-	if (m_pd3dcbLights)
-	{
-		D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-		pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
-	}
-	if (m_pd3dcbMaterials)
-	{
-		D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
-		pd3dCommandList->SetGraphicsRootConstantBufferView(20, d3dcbMaterialsGpuVirtualAddress); //Materials
-	}
+	
 }
 void CScene1::RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {

@@ -276,7 +276,7 @@ public:
 	int									m_nShaders = 0;
 	CShader** m_ppShaders = NULL;
 
-	CSkyBox* m_pSkyBox = NULL;
+	CSkyBox2* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;
 
 	LIGHT* m_pLights = NULL;

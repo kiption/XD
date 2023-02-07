@@ -87,7 +87,7 @@ public:
 //
 class CHeightMapImage
 {
-private:
+public:
 	BYTE							*m_pHeightMapPixels;
 
 	int								m_nWidth;

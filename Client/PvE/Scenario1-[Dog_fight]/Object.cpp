@@ -412,7 +412,7 @@ CGameObject::~CGameObject()
 		}
 		delete[] m_ppMaterials;
 	}
-	if (m_ppMaterials) delete[] m_ppMaterials;
+//	if (m_ppMaterials) delete[] m_ppMaterials;
 }
 
 void CGameObject::AddRef()
@@ -527,58 +527,25 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		{
 			if (m_ppMaterials[i])
 			{
-				if (m_ppMaterials[i]->m_pShader)
-				{
-					m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
-					m_ppMaterials[i]->UpdateShaderVariables(pd3dCommandList);
-
-				//	UpdateShaderVariables(pd3dCommandList);
-				}
-
+				if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0);
 				m_ppMaterials[i]->UpdateShaderVariables(pd3dCommandList);
-				
-				if (m_ppMaterials[i]->m_pTexture)
-				{
-					m_ppMaterials[i]->m_pTexture->UpdateShaderVariables(pd3dCommandList);
-					if (m_pcbMappedSpriteGameObject) {
-						XMStoreFloat4x4(&m_pcbMappedSpriteGameObject->m_xmf4x4Texture,
-							XMMatrixTranspose(XMLoadFloat4x4(&m_ppMaterials[i]->m_pTexture->m_xmf4x4Texture)));
-					}
-				}
 			}
-
-			if (m_ppMeshes)
-			{
-				for (int i = 0; i < m_nMeshes; i++)
-				{
-					if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList);
-				}
-			}
-		
 			if (m_nMeshes == 1)
 			{
 				if (m_ppMeshes[0]) m_ppMeshes[0]->Render(pd3dCommandList, i);
+
 			}
 		}
 	}
 	else
 	{
-		
 		if ((m_nMaterials == 1) && (m_ppMaterials[0]))
 		{
-			if (m_ppMaterials[0]->m_pShader) {
-				m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera, 0);
-				m_ppMaterials[0]->m_pShader->UpdateShaderVariables(pd3dCommandList);
-			}
-			if (m_ppMaterials[0]->m_pTexture)
-			{
-				m_ppMaterials[0]->m_pTexture->UpdateShaderVariables(pd3dCommandList);
-				if (m_pcbMappedSpriteGameObject) XMStoreFloat4x4(&m_pcbMappedSpriteGameObject->m_xmf4x4Texture,
-					XMMatrixTranspose(XMLoadFloat4x4(&m_ppMaterials[0]->m_pTexture->m_xmf4x4Texture)));
-			}
+			if (m_ppMaterials[0]->m_pShader) m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera, 0);
 			m_ppMaterials[0]->UpdateShaderVariables(pd3dCommandList);
 		}
 
+		
 		if (m_ppMeshes)
 		{
 			for (int i = 0; i < m_nMeshes; i++)
@@ -613,14 +580,14 @@ void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	if (m_pcbMappedSpriteGameObject) XMStoreFloat4x4(&m_pcbMappedSpriteGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
-	pd3dCommandList->SetGraphicsRootDescriptorTable(23, m_d3dCbvGPUDescriptorHandle);
+	/*if (m_pcbMappedSpriteGameObject) XMStoreFloat4x4(&m_pcbMappedSpriteGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	pd3dCommandList->SetGraphicsRootDescriptorTable(23, m_d3dCbvGPUDescriptorHandle);*/
 
-	if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
-	pd3dCommandList->SetGraphicsRootDescriptorTable(18, m_d3dCbvGPUDescriptorHandle);
+	//if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	//pd3dCommandList->SetGraphicsRootDescriptorTable(18, m_d3dCbvGPUDescriptorHandle);
 
-	if (m_pcbDynamicMappedGameObject) XMStoreFloat4x4(&m_pcbDynamicMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
-	pd3dCommandList->SetGraphicsRootDescriptorTable(21, m_d3dCbvGPUDescriptorHandle);
+	//if (m_pcbDynamicMappedGameObject) XMStoreFloat4x4(&m_pcbDynamicMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	//pd3dCommandList->SetGraphicsRootDescriptorTable(21, m_d3dCbvGPUDescriptorHandle);
 }
 
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
@@ -636,11 +603,11 @@ void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandLis
 
 void CGameObject::ReleaseShaderVariables()
 {
-	if (m_pd3dcbGameObject)
+	/*if (m_pd3dcbGameObject)
 	{
 		m_pd3dcbGameObject->Unmap(0, NULL);
 		m_pd3dcbGameObject->Release();
-	}
+	}*/
 	if (m_pMaterial) m_pMaterial->ReleaseShaderVariables();
 
 	for (int i = 0; i < m_nMaterials; i++)

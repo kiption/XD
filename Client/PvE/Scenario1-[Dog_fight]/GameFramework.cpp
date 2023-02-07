@@ -601,7 +601,7 @@ void CGameFramework::BuildObjects()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-	m_pScene = new CScene1();
+	m_pScene = new CScene();
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
 	CMainPlayer* pMainPlayer = new CMainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
@@ -623,7 +623,6 @@ void CGameFramework::BuildObjects()
 void CGameFramework::ReleaseObjects()
 {
 	ReleaseShaderVariables();
-
 
 	if (m_pPlayer) m_pPlayer->Release();
 	if (m_pScene) m_pScene->ReleaseObjects();
@@ -806,7 +805,7 @@ void CGameFramework::FrameAdvance()
 
 	AnimateObjects();
 
-	m_pScene->OnPreRender(m_pd3dDevice, m_pd3dCommandQueue, m_pd3dFence, m_hFenceEvent);
+	//m_pScene->OnPreRender(m_pd3dDevice, m_pd3dCommandQueue, m_pd3dFence, m_hFenceEvent);
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 	::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -940,39 +939,39 @@ void CGameFramework::Remove_OtherPlayerObj(int id) {
 
 void CGameFramework::Create_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look)
 {
-	//((CMainPlayer*)m_pPlayer)->FireBullet(NULL);
-	//m_GameSound.shootingSound();
-	//((CMainPlayer*)m_pPlayer)->m_ppBullets[id]->m_xmf3FirePosition = pos;
+	((CMainPlayer*)m_pPlayer)->FireBullet(NULL);
+	m_GameSound.shootingSound();
+	((CMainPlayer*)m_pPlayer)->m_ppBullets[id]->m_xmf3FirePosition = pos;
 
-	//CBulletObject* pBulletObjectL = NULL;
-	//CBulletObject* pBulletObjectR = NULL;
-	//XMFLOAT3 PlayerPos = ((CMainPlayer*)m_pPlayer)->GetLookVector() = xmf3look;
+	CBulletObject* pBulletObjectL = NULL;
+	CBulletObject* pBulletObjectR = NULL;
+	XMFLOAT3 PlayerPos = ((CMainPlayer*)m_pPlayer)->GetLookVector() = xmf3look;
 
-	//if (pBulletObjectL)
-	//{
+	if (pBulletObjectL)
+	{
 
-	//	XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
-	//	//xmf3Position.x -= 10.0f;
-	//	XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
-	//	pBulletObjectL->m_xmf4x4Transform = pBulletObjectL->m_xmf4x4World;
-	//	pBulletObjectL->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-	//	pBulletObjectL->SetMovingDirection(PlayerPos);
-	//	pBulletObjectL->Rotate(90.0f, 0.0, 0.0);
-	//	pBulletObjectL->SetScale(700.0, 200.0, 700.0);
-	//}
+		XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
+		//xmf3Position.x -= 10.0f;
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
+		pBulletObjectL->m_xmf4x4Transform = pBulletObjectL->m_xmf4x4World;
+		pBulletObjectL->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
+		pBulletObjectL->SetMovingDirection(PlayerPos);
+		pBulletObjectL->Rotate(90.0f, 0.0, 0.0);
+		pBulletObjectL->SetScale(700.0, 200.0, 700.0);
+	}
 
-	//if (pBulletObjectR)
-	//{
+	if (pBulletObjectR)
+	{
 
-	//	XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
-	//	//xmf3Position.x += 10.0f;
-	//	XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
-	//	pBulletObjectR->m_xmf4x4Transform = pBulletObjectR->m_xmf4x4World;
-	//	pBulletObjectR->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-	//	pBulletObjectR->SetMovingDirection(PlayerPos);
-	//	pBulletObjectR->Rotate(90.0f, 0.0, 0.0);
-	//	pBulletObjectR->SetScale(700.0, 200.0, 700.0);
-	//}
+		XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
+		//xmf3Position.x += 10.0f;
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
+		pBulletObjectR->m_xmf4x4Transform = pBulletObjectR->m_xmf4x4World;
+		pBulletObjectR->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
+		pBulletObjectR->SetMovingDirection(PlayerPos);
+		pBulletObjectR->Rotate(90.0f, 0.0, 0.0);
+		pBulletObjectR->SetScale(700.0, 200.0, 700.0);
+	}
 }
 
 void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look)
