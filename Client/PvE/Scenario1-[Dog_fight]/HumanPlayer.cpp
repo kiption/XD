@@ -1,8 +1,8 @@
 #include "stdafx.h"
-#include "MainPlayer.h"
+#include "HumanPlayer.h"
 
 
-CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
@@ -10,10 +10,16 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
 	m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 4 + 1 + 1);
 
-	
-	CGameObject* pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/GO.bin", m_pShader);
-	SetChild(pGameObject,false);
-	pGameObject->SetScale(1.0, 1.0, 1.0);
+	CLoadedModelInfo* pGameObject = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", m_pShader);
+	SetChild(pGameObject->m_pModelRootObject,true);
+	pGameObject->m_pModelRootObject->SetScale(7.0,7.0,7.0);
+	pGameObject->m_pModelRootObject->m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 2, pGameObject);
+	pGameObject->m_pModelRootObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	pGameObject->m_pModelRootObject->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
+	pGameObject->m_pModelRootObject->m_pSkinnedAnimationController->SetTrackEnable(1, true);
+	pGameObject->m_pModelRootObject->m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
+	pGameObject->m_pModelRootObject->m_pSkinnedAnimationController->SetCallbackKeys(2, 1);
+
 	CLoadedModelInfo* pBulletMesh = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", m_pShader);
 	for (int i = 0; i < BULLETS; i++)
 	{
@@ -40,20 +46,22 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 
-
+	if (pBulletMesh) delete pBulletMesh;
+	if (pBulletMesh2) delete pBulletMesh2;
+	if (pGameObject) delete pGameObject;
 }
 
-CMainPlayer::~CMainPlayer()
+CHumanPlayer::~CHumanPlayer()
 {
 }
 
-void CMainPlayer::PrepareAnimate()
+void CHumanPlayer::PrepareAnimate()
 {
 	m_pMainRotorFrame = FindFrame("military_helicopter_blades");
 	m_pTailRotorFrame = FindFrame("TailRotor");
 }
 
-void CMainPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+void CHumanPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 
 	for (int i = 0; i < BULLETS; i++)
@@ -84,7 +92,7 @@ void CMainPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
-void CMainPlayer::OnPlayerUpdateCallback(float fTimeElapsed)
+void CHumanPlayer::OnPlayerUpdateCallback(float fTimeElapsed)
 {
 	XMFLOAT3 xmf3PlayerPosition = GetPosition();
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pPlayerUpdatedContext;
@@ -103,12 +111,12 @@ void CMainPlayer::OnPlayerUpdateCallback(float fTimeElapsed)
 
 
 
-void CMainPlayer::OnPrepareRender()
+void CHumanPlayer::OnPrepareRender()
 {
 	CPlayer::OnPrepareRender();
 }
 
-void CMainPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	CPlayer::Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < BULLETS; i++) {
@@ -116,7 +124,34 @@ void CMainPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		if (m_ppBullets2[i]->m_bActive) { m_ppBullets2[i]->Render(pd3dCommandList, pCamera); }
 	}
 }
-void CMainPlayer::FireBullet(CGameObject* pLockedObject)
+void CHumanPlayer::Move(ULONG nDirection, float fDistance, bool bVelocity)
+{
+	if (nDirection)
+	{
+		m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		m_pSkinnedAnimationController->SetTrackEnable(1, true);
+		m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	}
+
+	CPlayer::Move(nDirection, fDistance, bVelocity);
+}
+void CHumanPlayer::Update(float fTimeElapsed)
+{
+	CPlayer::Update(fTimeElapsed);
+
+	if (m_pSkinnedAnimationController)
+	{
+		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+		if (::IsZero(fLength))
+		{
+			m_pSkinnedAnimationController->SetTrackEnable(0, true);
+			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+		}
+	}
+}
+void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 {
 
 	if (pLockedObject)
@@ -185,7 +220,7 @@ void CMainPlayer::FireBullet(CGameObject* pLockedObject)
 	}
 }
 
-CCamera* CMainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
+CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 {
 	DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00;
 	if (nCurrentCameraMode == nNewCameraMode) return(m_pCamera);
@@ -217,10 +252,10 @@ CCamera* CMainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
 	case THIRD_PERSON_CAMERA:
-		SetFriction(0.5f);
-		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(25.5f);
-		SetMaxVelocityY(20.0f);
+		SetFriction(250.0f);
+		SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
+		SetMaxVelocityXZ(300.0f);
+		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.2f);
 		m_pCamera->SetOffset(XMFLOAT3(5.0f, 8.0f, -40.0f));

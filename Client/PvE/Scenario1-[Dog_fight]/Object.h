@@ -436,6 +436,7 @@ public:
 	void SetAnimationCallbackHandler(int nAnimationSet, CAnimationCallbackHandler* pCallbackHandler);
 
 	void AdvanceTime(float fElapsedTime, CGameObject* pRootGameObject);
+
 };
 
 
@@ -505,6 +506,7 @@ public:
 
 	
 	virtual void SetChild(CGameObject* pChild);
+	virtual void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
 
 	virtual void BuildMaterials(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList) { }
 
@@ -570,6 +572,9 @@ public:
 
 	void FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnSkinnedMesh);
 
+	virtual void SetCurScene(int nCurScene) { m_nCurScene = nCurScene; }
+	int GetCurScene() { return m_nCurScene; }
+	int m_nCurScene = SCENE1STAGE;
 	// Server
 	void SetUp(XMFLOAT3 xmf3Up) { m_xmf4x4Transform._21 = xmf3Up.x, m_xmf4x4Transform._22 = xmf3Up.y, m_xmf4x4Transform._23 = xmf3Up.z; }
 	void SetRight(XMFLOAT3 xmf3right) { m_xmf4x4Transform._11 = xmf3right.x; m_xmf4x4Transform._12 = xmf3right.y; m_xmf4x4Transform._13 = xmf3right.z; }

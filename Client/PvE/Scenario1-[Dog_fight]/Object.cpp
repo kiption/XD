@@ -448,6 +448,24 @@ void CGameObject::SetChild(CGameObject* pChild)
 	}
 }
 
+void CGameObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
+{
+	if (pChild)
+	{
+		pChild->m_pParent = this;
+		if (bReferenceUpdate) pChild->AddRef();
+	}
+	if (m_pChild)
+	{
+		if (pChild) pChild->m_pSibling = m_pChild->m_pSibling;
+		m_pChild->m_pSibling = pChild;
+	}
+	else
+	{
+		m_pChild = pChild;
+	}
+}
+
 void CGameObject::SetMovingDirection(const XMFLOAT3& xmf3MovingDirection)
 {
 	XMStoreFloat3(&m_xmf3MovingDirection, XMVector3Normalize(XMLoadFloat3(&xmf3MovingDirection)));
@@ -938,7 +956,7 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 				for (int i = 0; i < nChilds; i++)
 				{
 					CGameObject* pChild = CGameObject::LoadFrameHierarchyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pGameObject, pInFile, pShader, NULL);
-					if (pChild) pGameObject->SetChild(pChild);
+					if (pChild) pGameObject->SetChild(pChild,NULL);
 #ifdef _WITH_DEBUG_FRAME_HIERARCHY
 					TCHAR pstrDebug[256] = { 0 };
 					_stprintf_s(pstrDebug, 256, _T("(Frame: %p) (Parent: %p)\n"), pChild, pGameObject);

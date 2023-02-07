@@ -200,7 +200,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	for (int i = 0; i < m_nObjects / 2; i++)
 	{
 		m_ppObjects[i] = new CGOObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		m_ppObjects[i]->SetChild(pSuperCobraModel);
+		m_ppObjects[i]->SetChild(pSuperCobraModel,NULL);
 		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
 		m_ppObjects[i]->SetScale(0.1f, 1.05f, 1.1f);
 
@@ -211,7 +211,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	for (int i = m_nObjects / 2; i < m_nObjects; i++)
 	{
 		m_ppObjects[i] = new CGOObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		m_ppObjects[i]->SetChild(pGunshipModel);
+		m_ppObjects[i]->SetChild(pGunshipModel, NULL);
 		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
 		m_ppObjects[i]->SetScale(0.1, 1.05f, 1.1f);
 		m_ppObjects[i]->PrepareAnimate();

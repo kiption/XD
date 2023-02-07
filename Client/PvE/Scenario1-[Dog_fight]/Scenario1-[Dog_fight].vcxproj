@@ -160,6 +160,7 @@
     <ClInclude Include="HeightMapMesh.h" />
     <ClInclude Include="HelicopterObejct.h" />
     <ClInclude Include="HelicopterObjectShader.h" />
+    <ClInclude Include="HumanPlayer.h" />
     <ClInclude Include="MainPlayer.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MissileObject.h" />
@@ -195,6 +196,7 @@
     <ClCompile Include="HeightMapMesh.cpp" />
     <ClCompile Include="HelicopterObejct.cpp" />
     <ClCompile Include="HelicopterObjectShader.cpp" />
+    <ClCompile Include="HumanPlayer.cpp" />
     <ClCompile Include="MainPlayer.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MissileObject.cpp" />

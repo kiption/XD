@@ -197,6 +197,9 @@
     <ClInclude Include="SkyboxObject.h">
       <Filter>Client\Object</Filter>
     </ClInclude>
+    <ClInclude Include="HumanPlayer.h">
+      <Filter>Client\Player\MainPlayer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -288,6 +291,9 @@
     </ClCompile>
     <ClCompile Include="SkyboxObject.cpp">
       <Filter>Client\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="HumanPlayer.cpp">
+      <Filter>Client\Player\MainPlayer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

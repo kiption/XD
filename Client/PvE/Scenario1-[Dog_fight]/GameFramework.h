@@ -5,6 +5,7 @@
 #include "Scene.h"
 #include "GameSound.h"
 #include "MainPlayer.h"
+#include "HumanPlayer.h"
 #include <queue> //S
 
 enum MButton { L_BUTTON, R_BUTTON };
@@ -113,7 +114,7 @@ public:
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
-	void ChangeScene(DWORD nMode);
+	virtual void ChangeScene(DWORD nMode);
 	DWORD						m_nMode = SCENE1STAGE;
 private:
 	HINSTANCE					m_hInstance;

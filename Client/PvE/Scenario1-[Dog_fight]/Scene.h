@@ -145,11 +145,11 @@ public:
 	bool m_bOutlineMode = false;
 };
 
-class CScene1 :public CScene
+class CStage2 :public CScene
 {
 public:
-	CScene1();
-	~CScene1();
+	CStage2();
+	~CStage2();
 
 	bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);

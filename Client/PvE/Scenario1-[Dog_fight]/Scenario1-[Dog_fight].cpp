@@ -72,87 +72,91 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		}
 		else
 		{
-			//==================================================
-			//		새로운 키 입력을 서버에게 전달합니다.
-			//==================================================
-			if (!gGameFramework.CheckNewInputExist_Keyboard()) {
-				short keyValue = gGameFramework.PopInputVal_Keyboard();
-				CS_INPUT_KEYBOARD_PACKET keyinput_pack;
-				keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
-				keyinput_pack.type = CS_INPUT_KEYBOARD;
-				keyinput_pack.direction = keyValue;
+			if (gGameFramework.m_nMode != SCENE2STAGE)
+			{
 
-				cout << "[Keyboard] Send KeyValue - " << keyinput_pack.direction << endl;//test
-				sendPacket(&keyinput_pack);
+				//==================================================
+				//		새로운 키 입력을 서버에게 전달합니다.
+				//==================================================
+				if (!gGameFramework.CheckNewInputExist_Keyboard()) {
+					short keyValue = gGameFramework.PopInputVal_Keyboard();
+					CS_INPUT_KEYBOARD_PACKET keyinput_pack;
+					keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+					keyinput_pack.type = CS_INPUT_KEYBOARD;
+					keyinput_pack.direction = keyValue;
+
+					cout << "[Keyboard] Send KeyValue - " << keyinput_pack.direction << endl;//test
+					sendPacket(&keyinput_pack);
+				}
+
+				if (!gGameFramework.CheckNewInputExist_Mouse()) {
+					MouseInputVal mouseValue = gGameFramework.PopInputVal_Mouse();
+					CS_INPUT_MOUSE_PACKET mouseinput_pack;
+					mouseinput_pack.size = sizeof(CS_INPUT_MOUSE_PACKET);
+					mouseinput_pack.type = CS_INPUT_MOUSE;
+					mouseinput_pack.key_val = mouseValue.button;
+					mouseinput_pack.delta_x = mouseValue.delX;
+					mouseinput_pack.delta_y = mouseValue.delY;
+
+					cout << "[Mouse] Send KeyValue - " << mouseinput_pack.key_val << endl;//test
+					sendPacket(&mouseinput_pack);
+				}
+				//==================================================
+
+				//==================================================
+				//	    서버로부터 받은 값으로 최신화해줍니다.
+				//==================================================
+				// 1. 자기자신 Player 객체 최신화
+				gGameFramework.SetPosition_PlayerObj(my_info.m_pos);
+				gGameFramework.SetVectors_PlayerObj(my_info.m_right_vec, my_info.m_up_vec, my_info.m_look_vec);
+
+				// 2. 다른 Player 객체 최신화
+				for (int i = 0; i < MAX_USER; i++) {
+					if (i == my_info.m_id || other_players[i].m_state == OBJ_ST_EMPTY) continue;
+
+					if (other_players[i].m_state == OBJ_ST_RUNNING) {
+						gGameFramework.SetPosition_OtherPlayerObj(i, other_players[i].m_pos);
+						gGameFramework.SetVectors_OtherPlayerObj(i, other_players[i].m_right_vec, other_players[i].m_up_vec, other_players[i].m_look_vec);
+					}
+					else if (other_players[i].m_state == OBJ_ST_LOGOUT) {
+						other_players[i].m_state = OBJ_ST_EMPTY;
+						gGameFramework.Remove_OtherPlayerObj(i);
+					}
+				}
+
+				// 3. Bullet 객체 최신화
+				for (int i = 0; i < MAX_BULLET; i++) {
+					if (bullets_info[i].m_state == OBJ_ST_EMPTY) {
+						continue;
+					}
+
+					if (bullets_info[i].m_state == OBJ_ST_STANDBY) {	// Create
+						gGameFramework.Create_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_look_vec);
+						bullets_info[i].m_state = OBJ_ST_RUNNING;
+					}
+					else if (bullets_info[i].m_state == OBJ_ST_LOGOUT) {	// Clear
+						bullets_info[i].m_id = -1;
+						bullets_info[i].m_pos = { 0.0f, 0.0f, 0.0f };
+						bullets_info[i].m_right_vec = { 1.0f, 0.0f, 0.0f };
+						bullets_info[i].m_up_vec = { 0.0f, 1.0f, 0.0f };
+						bullets_info[i].m_look_vec = { 0.0f, 0.0f, 1.0f };
+						bullets_info[i].m_state = OBJ_ST_EMPTY;
+					}
+					else if (bullets_info[i].m_state == OBJ_ST_RUNNING) {	// Update
+						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_look_vec);
+					}
+				}
+
+				// 4. NPC 객체 최신화
+				for (int i{}; i < MAX_NPCS; i++) {
+					if (npcs_info[i].m_state == OBJ_ST_RUNNING) {
+						gGameFramework.SetPosition_NPC(i, npcs_info[i].m_pos);
+						gGameFramework.SetVectors_NPC(i, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
+					}
+
+				}
+
 			}
-
-			if (!gGameFramework.CheckNewInputExist_Mouse()) {
-				MouseInputVal mouseValue = gGameFramework.PopInputVal_Mouse();
-				CS_INPUT_MOUSE_PACKET mouseinput_pack;
-				mouseinput_pack.size = sizeof(CS_INPUT_MOUSE_PACKET);
-				mouseinput_pack.type = CS_INPUT_MOUSE;
-				mouseinput_pack.key_val = mouseValue.button;
-				mouseinput_pack.delta_x = mouseValue.delX;
-				mouseinput_pack.delta_y = mouseValue.delY;
-
-				cout << "[Mouse] Send KeyValue - " << mouseinput_pack.key_val << endl;//test
-				sendPacket(&mouseinput_pack);
-			}
-			//==================================================
-
-			//==================================================
-			//	    서버로부터 받은 값으로 최신화해줍니다.
-			//==================================================
-			// 1. 자기자신 Player 객체 최신화
-			gGameFramework.SetPosition_PlayerObj(my_info.m_pos);
-			gGameFramework.SetVectors_PlayerObj(my_info.m_right_vec, my_info.m_up_vec, my_info.m_look_vec);
-
-			// 2. 다른 Player 객체 최신화
-			for (int i = 0; i < MAX_USER; i++) {
-				if (i == my_info.m_id || other_players[i].m_state == OBJ_ST_EMPTY) continue;
-
-				if (other_players[i].m_state == OBJ_ST_RUNNING) {
-					gGameFramework.SetPosition_OtherPlayerObj(i, other_players[i].m_pos);
-					gGameFramework.SetVectors_OtherPlayerObj(i, other_players[i].m_right_vec, other_players[i].m_up_vec, other_players[i].m_look_vec);
-				}
-				else if (other_players[i].m_state == OBJ_ST_LOGOUT) {
-					other_players[i].m_state = OBJ_ST_EMPTY;
-					gGameFramework.Remove_OtherPlayerObj(i);
-				}
-			}
-
-			// 3. Bullet 객체 최신화
-			for (int i = 0; i < MAX_BULLET; i++) {
-				if (bullets_info[i].m_state == OBJ_ST_EMPTY) {
-					continue;
-				}
-
-				if (bullets_info[i].m_state == OBJ_ST_STANDBY) {	// Create
-					gGameFramework.Create_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_look_vec);
-					bullets_info[i].m_state = OBJ_ST_RUNNING;
-				}
-				else if (bullets_info[i].m_state == OBJ_ST_LOGOUT) {	// Clear
-					bullets_info[i].m_id = -1;
-					bullets_info[i].m_pos = { 0.0f, 0.0f, 0.0f };
-					bullets_info[i].m_right_vec = { 1.0f, 0.0f, 0.0f };
-					bullets_info[i].m_up_vec = { 0.0f, 1.0f, 0.0f };
-					bullets_info[i].m_look_vec = { 0.0f, 0.0f, 1.0f };
-					bullets_info[i].m_state = OBJ_ST_EMPTY;
-				}
-				else if (bullets_info[i].m_state == OBJ_ST_RUNNING) {	// Update
-					gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_look_vec);
-				}
-			}
-
-			// 4. NPC 객체 최신화
-			for (int i{}; i < MAX_NPCS; i++) {
-				if (npcs_info[i].m_state == OBJ_ST_RUNNING) {
-					gGameFramework.SetPosition_NPC(i, npcs_info[i].m_pos);
-					gGameFramework.SetVectors_NPC(i, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
-				}
-
-			}
-
 
 			//==================================================
 

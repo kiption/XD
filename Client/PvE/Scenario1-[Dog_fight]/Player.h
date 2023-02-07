@@ -13,7 +13,15 @@
 #include "HelicopterObjectShader.h"
 
 #include "GameSound.h"
+class CSoundCallbackHandler : public CAnimationCallbackHandler
+{
+public:
+	CSoundCallbackHandler() { }
+	~CSoundCallbackHandler() { }
 
+public:
+	virtual void HandleCallback(void* pCallbackData, float fTrackPosition);
+};
 class CPlayer : public CGameObject
 {
 protected:

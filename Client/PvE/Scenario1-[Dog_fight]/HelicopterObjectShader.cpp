@@ -61,7 +61,7 @@ void CNPCShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	{
 		pModel[i] = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Mi24.bin", this);
 		m_ppObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		m_ppObjects[i]->SetChild(pModel[i]);
+		m_ppObjects[i]->SetChild(pModel[i],NULL);
 		m_ppObjects[i]->SetPosition(XMFLOAT3(StartState_xz(dre), StartState_y(dre), StartState_xz(dre)));
 		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
 		m_ppObjects[i]->SetScale(2.0f, 2.0f, 2.0f);
@@ -73,7 +73,7 @@ void CNPCShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	{
 		pModel[i] = CGameObject::LoadGeometryFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Mi24.bin", this);
 		m_ppObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		m_ppObjects[i]->SetChild(pModel[i]);
+		m_ppObjects[i]->SetChild(pModel[i],NULL);
 		m_ppObjects[i]->SetPosition(XMFLOAT3(StartState_xz(dre), StartState_y(dre), StartState_xz(dre)));
 		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
 		m_ppObjects[i]->SetScale(2.0, 2.0f, 2.0f);

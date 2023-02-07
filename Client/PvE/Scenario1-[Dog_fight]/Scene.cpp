@@ -541,15 +541,15 @@ void CScene::WarMode()
 #include "stdafx.h"
 #include "Scene.h"
 
-CScene1::CScene1()
+CStage2::CStage2()
 {
 }
 
-CScene1::~CScene1()
+CStage2::~CStage2()
 {
 }
 
-void CScene1::BuildDefaultLightsAndMaterials()
+void CStage2::BuildDefaultLightsAndMaterials()
 {
 	m_nLights = 3;
 	m_pLights = new LIGHT[m_nLights];
@@ -605,7 +605,7 @@ void CScene1::BuildDefaultLightsAndMaterials()
 }
 
 
-void CScene1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CStage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
 	m_pd3dGraphicsRootSignature = ::GraphicsRootSignature(pd3dDevice);
@@ -613,20 +613,22 @@ void CScene1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	XMFLOAT3 xmf3Scale(35.0f, 3.0f, 35.0f);
+	XMFLOAT3 xmf3Scale(15.0f, 3.0f, 15.0f);
 	XMFLOAT3 xmf3Normal(0.0f, 0.5f, 0.0f);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/terrain033.raw"), 513, 513, 513, 513, xmf3Scale, xmf3Normal);
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/Stage2.raw"), 257, 257, 257, 257, xmf3Scale, xmf3Normal);
 	m_pTerrain->SetPosition(0.0, 0.0, 0.0);
+	m_pTerrain->SetCurScene(SCENE2STAGE);
 	
 
 	XMFLOAT3 xmf4ScaleW(25.0f, 2.0f, 25.0);
 	m_pUseWaterMove = new CUseWaterMoveTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/waterterrain8bit.raw"), 257, 257, 8, 8, xmf4ScaleW, xmf3Normal);
 	m_pUseWaterMove->SetPosition(2500.0, 65.0f, 2500.0);
+	m_pUseWaterMove->SetCurScene(SCENE2STAGE);
 	
 
 }
 
-void CScene1::ReleaseObjects()
+void CStage2::ReleaseObjects()
 {
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
 
@@ -649,41 +651,41 @@ void CScene1::ReleaseObjects()
 	if (m_pLights) delete[] m_pLights;
 	if (m_pMaterials) delete m_pMaterials;
 }
-void CScene1::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void CStage2::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256의 배수
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 
-	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256의 배수
-m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbMaterialBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-	m_pd3dcbMaterials->Map(0, NULL, (void**)&m_pcbMappedMaterials);
+	//UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256의 배수
+	//m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbMaterialBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	//m_pd3dcbMaterials->Map(0, NULL, (void**)&m_pcbMappedMaterials);
 }
-void CScene1::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+void CStage2::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	::memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(LIGHTS) * m_nLights);
 	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
 	::memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
 
-	if (m_pcbMappedMaterials) ::memcpy(m_pcbMappedMaterials, m_pMaterials, sizeof(MATERIALS));
+//	if (m_pcbMappedMaterials) ::memcpy(m_pcbMappedMaterials, m_pMaterials, sizeof(MATERIALS));
 }
-void CScene1::ReleaseShaderVariables()
+void CStage2::ReleaseShaderVariables()
 {
 	if (m_pd3dcbLights)
 	{
 		m_pd3dcbLights->Unmap(0, NULL);
 		m_pd3dcbLights->Release();
 	}
-	if (m_pd3dcbMaterials)
-	{
-		m_pd3dcbMaterials->Unmap(0, NULL);
-		m_pd3dcbMaterials->Release();
-	}
+	//if (m_pd3dcbMaterials)
+	//{
+	//	m_pd3dcbMaterials->Unmap(0, NULL);
+	//	m_pd3dcbMaterials->Release();
+	//}
 	if (m_pUseWaterMove) m_pUseWaterMove->ReleaseShaderVariables();
 	if (m_pTerrain) m_pTerrain->ReleaseShaderVariables();
 	if (m_pSkyBox) m_pSkyBox->ReleaseShaderVariables();
 }
-void CScene1::ReleaseUploadBuffers()
+void CStage2::ReleaseUploadBuffers()
 {
 	if (m_pUseWaterMove) m_pUseWaterMove->ReleaseUploadBuffers();
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
@@ -692,11 +694,11 @@ void CScene1::ReleaseUploadBuffers()
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nGameObjects; i++) m_ppGameObjects[i]->ReleaseUploadBuffers();
 }
-bool CScene1::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CStage2::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	return(false);
 }
-bool CScene1::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
+bool CStage2::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
 	{
@@ -712,16 +714,16 @@ bool CScene1::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	}
 	return(false);
 }
-bool CScene1::ProcessInput(UCHAR* pKeysBuffer)
+bool CStage2::ProcessInput(UCHAR* pKeysBuffer)
 {
 	return(false);
 }
-void CScene1::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
+void CStage2::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 {
 	
 	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
 	//for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->UpdateTransform(NULL);
-	//for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
+	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 
 
 	/// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -739,7 +741,7 @@ void CScene1::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 		m_pLights[1].m_xmf3Direction = TotalLookVector;
 	}
 }
-void CScene1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CStage2::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
@@ -759,35 +761,35 @@ void CScene1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i])m_ppShaders[i]->Render(pd3dCommandList, pCamera, 0);
+//	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i])m_ppShaders[i]->Render(pd3dCommandList, pCamera, 0);
 
 	if (m_pUseWaterMove) m_pUseWaterMove->Render(pd3dCommandList, pCamera);
 
 	
 }
-void CScene1::OnPreRender(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue, ID3D12Fence* pd3dFence, HANDLE hFenceEvent)
+void CStage2::OnPreRender(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue, ID3D12Fence* pd3dFence, HANDLE hFenceEvent)
 {
 
 }
-void CScene1::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CStage2::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	
 }
-void CScene1::RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CStage2::RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	
 }
-void CScene1::RenderSprite(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CStage2::RenderSprite(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	
 }
-void CScene1::OnPostRenderParticle()
+void CStage2::OnPostRenderParticle()
 {
 	
 }
 
 
-void CScene1::WarMode()
+void CStage2::WarMode()
 {
 	
 }
