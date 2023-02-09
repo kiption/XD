@@ -9,7 +9,7 @@
 
 #include "Object.h"
 #include "Camera.h"
-
+class CGameObject;
 class CPlayer : public CGameObject
 {
 protected:
@@ -37,6 +37,7 @@ protected:
 	CHeightMapTerrain* pTerrain = NULL;
 public:
 	CPlayer();
+	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual ~CPlayer();
 	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
@@ -88,19 +89,21 @@ public:
 class CAirplanePlayer : public CPlayer
 {
 public:
-	CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext=NULL);
+	CAirplanePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual ~CAirplanePlayer();
-
-	CGameObject					*m_pMainRotorFrame = NULL;
-	CGameObject					*m_pTailRotorFrame = NULL;
-
-private:
-	virtual void OnPrepareAnimate();
-	virtual void Animate(float fTimeElapsed);
-
+	CLoadedModelInfo* m_pMainRotorFrame = NULL;
+	CGameObject* m_pTailRotorFrame = NULL;
+	CLoadedModelInfo* pAngrybotModel = NULL;
 public:
-	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
-	virtual void OnPrepareRender();
+	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
+
+	virtual void OnPrepareAnimate();
+	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
+	virtual void OnCameraUpdateCallback(float fTimeElapsed);
+	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
+	virtual void Animate(float fTimeElapsed);
+	virtual void Update(float fTimeElapsed);
 };
 
 class CSoundCallbackHandler : public CAnimationCallbackHandler
@@ -113,11 +116,11 @@ public:
 	virtual void HandleCallback(void *pCallbackData, float fTrackPosition); 
 };
 
-class CTerrainPlayer : public CPlayer
+class CHumanPlayer : public CPlayer
 {
 public:
-	CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext=NULL);
-	virtual ~CTerrainPlayer();
+	CHumanPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext=NULL);
+	virtual ~CHumanPlayer();
 
 public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);

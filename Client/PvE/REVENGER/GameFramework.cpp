@@ -42,7 +42,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 {
 	m_hInstance = hInstance;
 	m_hWnd = hMainWnd;
-
+	m_nMode = SCENE1STAGE;
 	CreateDirect3DDevice();
 	CreateCommandQueueAndList();
 	CreateRtvAndDsvDescriptorHeaps();
@@ -408,28 +408,15 @@ void CGameFramework::BuildObjects()
 {
 
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-	if (m_nMode == SCENE2STAGE)
-	{
-		m_pScene = new CScene2();
-		if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+	
+	m_pScene = new CScene();
+	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
-		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
+	CAirplanePlayer* pPlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
 		
-		m_pScene->m_pPlayer = m_pPlayer = pPlayer;
-		m_pCamera = m_pPlayer->GetCamera();
-	}
-	else
-	{
-		m_pScene = new CScene();
-		if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
-
-		CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
-
-		m_pScene->m_pPlayer = m_pPlayer = pPlayer;
-		m_pCamera = m_pPlayer->GetCamera();
-
-	}
-
+	m_pScene->m_pPlayer = m_pPlayer = pPlayer;
+	m_pCamera = m_pPlayer->GetCamera();
+	m_pScene->m_pPlayer->SetPosition(XMFLOAT3(500.0,200.0,500.0));
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
@@ -498,6 +485,7 @@ void CGameFramework::AnimateObjects()
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
 	m_pPlayer->Animate(fTimeElapsed);
+	m_pPlayer->Animate(fTimeElapsed,NULL);
 }
 
 void CGameFramework::WaitForGpuComplete()
@@ -617,7 +605,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 			m_pScene = new CScene1();
 			if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
-			CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
+			CAirplanePlayer* pPlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((CScene1*)m_pScene)->m_pTerrain);
 			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 			m_pCamera = m_pPlayer->GetCamera();
 			m_pScene->SetCurScene(SCENE1STAGE);
@@ -630,7 +618,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 			m_pScene = new CScene2();
 			if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
-			CTerrainPlayer* pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
+			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((CScene2*)m_pScene)->m_pTerrain);
 			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 			m_pCamera = m_pPlayer->GetCamera();
 			m_pScene->SetCurScene(SCENE2STAGE);
