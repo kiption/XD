@@ -176,7 +176,8 @@ Texture2D gtxtTerrainDetailTexture : register(t2);
 struct VS_TERRAIN_INPUT
 {
 	float3 position : POSITION;
-	float4 color : COLOR;
+	//float4 color : COLOR;
+	float3 normal : NORMAL;
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
 };
@@ -184,7 +185,9 @@ struct VS_TERRAIN_INPUT
 struct VS_TERRAIN_OUTPUT
 {
 	float4 position : SV_POSITION;
-	float4 color : COLOR;
+	float3 positionW : POSITION;
+	//float4 color : COLOR;
+	float3 normalW : NORMAL;
 	float2 uv0 : TEXCOORD0;
 	float2 uv1 : TEXCOORD1;
 };
@@ -193,8 +196,11 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 {
 	VS_TERRAIN_OUTPUT output;
 
+	output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
+	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
+
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
-	output.color = input.color;
+	//output.color = input.color;
 	output.uv0 = input.uv0;
 	output.uv1 = input.uv1;
 
@@ -203,11 +209,14 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 
 float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 {
+	float4 cIllumination = float4(1.0, 1.0, 1.0, 1.0);
+	input.normalW = normalize(input.normalW);
 	float4 cBaseTexColor = gtxtTerrainBaseTexture.Sample(gssWrap, input.uv0);
 	float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gssWrap, input.uv1);
-//	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
-	float4 cColor = input.color * saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
-
+	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
+//	float4 cColor = (cBaseTexColor * cDetailTexColor);
+	cIllumination = Lighting(input.positionW, input.normalW);
+	cColor += lerp(cColor, cIllumination, 0.0f);
 	return(cColor);
 }
 

@@ -59,7 +59,7 @@ extern HINSTANCE						ghAppInstance;
 
 #define SCENE1STAGE 0x00
 #define SCENE2STAGE 0x01
-
+#define BULLETS					150
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 
 extern UINT	gnCbvSrvDescriptorIncrementSize;
@@ -288,7 +288,12 @@ namespace Matrix4x4
 		XMStoreFloat4x4(&xmf4x4Result, XMMatrixRotationAxis(XMLoadFloat3(&xmf3Axis), XMConvertToRadians(fAngle)));
 		return(xmf4x4Result);
 	}
-
+	inline XMFLOAT4X4 RotationYawPitchRoll(float fPitch, float fYaw, float fRoll)
+	{
+		XMFLOAT4X4 xmmtx4x4Result;
+		XMStoreFloat4x4(&xmmtx4x4Result, XMMatrixRotationRollPitchYaw(XMConvertToRadians(fPitch), XMConvertToRadians(fYaw), XMConvertToRadians(fRoll)));
+		return(xmmtx4x4Result);
+	}
 	inline XMFLOAT4X4 Rotate(float x, float y, float z)
 	{
 		XMFLOAT4X4 xmf4x4Result;

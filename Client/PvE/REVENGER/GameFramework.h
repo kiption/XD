@@ -3,7 +3,11 @@
 
 #include "Timer.h"
 #include "Player.h"
+#include "HumanPlayer.h"
+#include "HelicopterPlayer.h"
 #include "Scene.h"
+#include "Stage1.h"
+#include "Stage2.h"
 
 class CGameFramework
 {
@@ -79,7 +83,7 @@ private:
 
 	CGameTimer					m_GameTimer;
 
-	CScene						*m_pScene = NULL;
+	SceneManager						*m_pScene = NULL;
 	CPlayer						*m_pPlayer = NULL;
 	CCamera						*m_pCamera = NULL;
 

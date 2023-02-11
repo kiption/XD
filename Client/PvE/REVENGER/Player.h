@@ -8,8 +8,10 @@
 #define DIR_DOWN				0x20
 
 #include "Object.h"
+#include "Terrain.h"
 #include "Camera.h"
-class CGameObject;
+
+
 class CPlayer : public CGameObject
 {
 protected:
@@ -86,26 +88,6 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 };
 
-class CAirplanePlayer : public CPlayer
-{
-public:
-	CAirplanePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
-	virtual ~CAirplanePlayer();
-	CLoadedModelInfo* m_pMainRotorFrame = NULL;
-	CGameObject* m_pTailRotorFrame = NULL;
-	CLoadedModelInfo* pAngrybotModel = NULL;
-public:
-	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
-
-	virtual void OnPrepareAnimate();
-	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
-	virtual void OnCameraUpdateCallback(float fTimeElapsed);
-	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
-	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
-	virtual void Animate(float fTimeElapsed);
-	virtual void Update(float fTimeElapsed);
-};
-
 class CSoundCallbackHandler : public CAnimationCallbackHandler
 {
 public:
@@ -116,20 +98,5 @@ public:
 	virtual void HandleCallback(void *pCallbackData, float fTrackPosition); 
 };
 
-class CHumanPlayer : public CPlayer
-{
-public:
-	CHumanPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext=NULL);
-	virtual ~CHumanPlayer();
 
-public:
-	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
-
-	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
-	virtual void OnCameraUpdateCallback(float fTimeElapsed);
-
-	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
-
-	virtual void Update(float fTimeElapsed);
-};
 

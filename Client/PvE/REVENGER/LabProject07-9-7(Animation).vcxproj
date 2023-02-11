@@ -24,6 +24,7 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>LabProject0797Animation</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>REVENGER</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -149,37 +150,67 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AnimateInfo.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="MissileObject.h" />
+    <ClInclude Include="Skybox.h" />
+    <ClInclude Include="Stage2.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="GameFramework.h" />
-    <ClInclude Include="LabProject07-9-7(Animation).h" />
+    <ClInclude Include="GameSound.h" />
+    <ClInclude Include="HelicopterPlayer.h" />
+    <ClInclude Include="HumanPlayer.h" />
+    <ClInclude Include="ObjcetsShaderList.h" />
+    <ClInclude Include="REVENGER.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="Resource.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="SkinAnimationShader.h" />
+    <ClInclude Include="SkinMesh.h" />
+    <ClInclude Include="SkyboxShader.h" />
+    <ClInclude Include="StandardShader.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
+    <ClInclude Include="Stage1.h" />
+    <ClInclude Include="Terrain.h" />
+    <ClInclude Include="TerrainMesh.h" />
+    <ClInclude Include="TerrainShader.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AnimateInfo.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="MissileObject.cpp" />
+    <ClCompile Include="Skybox.cpp" />
+    <ClCompile Include="Stage2.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="GameFramework.cpp" />
-    <ClCompile Include="LabProject07-9-7(Animation).cpp" />
+    <ClCompile Include="GameSound.cpp" />
+    <ClCompile Include="HelicopterPlayer.cpp" />
+    <ClCompile Include="HumanPlayer.cpp" />
+    <ClCompile Include="ObjcetsShaderList.cpp" />
+    <ClCompile Include="REVENGER.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="SkinAnimationShader.cpp" />
+    <ClCompile Include="SkinMesh.cpp" />
+    <ClCompile Include="SkyboxShader.cpp" />
+    <ClCompile Include="StandardShader.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Stage1.cpp" />
+    <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="TerrainMesh.cpp" />
+    <ClCompile Include="TerrainShader.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="WICTextureLoader12.cpp" />
   </ItemGroup>
