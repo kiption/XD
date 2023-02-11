@@ -160,7 +160,7 @@ void NPC::Move()
 
 void NPC::MovetoRotate()
 {
-	m_roll += 1.0f * PI * m_theta / 360.0f;
+	m_yaw += 1.0f * PI * m_theta / 360.0f;
 	Coordinate base_coordinate;
 	m_curr_coordinate.right = NPCcalcRotate(base_coordinate.right, m_roll, m_pitch, m_yaw);
 	m_curr_coordinate.up = NPCcalcRotate(base_coordinate.up, m_roll, m_pitch, m_yaw);

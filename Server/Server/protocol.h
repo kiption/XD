@@ -19,13 +19,17 @@ constexpr char INPUT_KEY_Q = 0b000010;
 constexpr char INPUT_KEY_E = 0b000001;
 
 // Packet ID
-enum PacketID { CS_LOGIN, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT };
+enum PacketID { CS_LOGIN, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE
+	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_BULLET_COUNT };
 
 // Target Type
 enum TargetType { TARGET_PLAYER, TARGET_BULLET, TARGET_NPC };
 
 // Packets ( CS: Client->Server, SC: Server->Client )
 #pragma pack (push, 1)
+// ================================
+//			1. CS Packet
+// ================================
 struct CS_LOGIN_PACKET {
 	unsigned char size;
 	char type;
@@ -47,6 +51,9 @@ struct CS_INPUT_MOUSE_PACKET {
 	//float roll, pitch, yaw;
 };
 
+// ================================
+//			2. SC Packet
+// ================================
 struct SC_LOGIN_INFO_PACKET {
 	unsigned char size;
 	char type;
@@ -92,5 +99,12 @@ struct SC_ROTATE_OBJECT_PACKET {
 	float right_x, right_y, right_z;
 	float up_x, up_y, up_z;
 	float look_x, look_y, look_z;
+};
+
+struct SC_BULLET_COUNT_PACKET {
+	unsigned char size;
+	char type;
+	short id;
+	short bullet_cnt;
 };
 #pragma pack (pop)

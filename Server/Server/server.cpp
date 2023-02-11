@@ -58,6 +58,7 @@ public:
 	int id;
 	SOCKET socket;
 	int hp;
+	int bullet;
 	XMFLOAT3 pos;								// Position (x, y, z)
 	float pitch, yaw, roll;						// Rotated Degree
 	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;	// 현재 Look, Right, Up Vectors
@@ -70,6 +71,7 @@ public:
 		id = -1;
 		socket = 0;
 		hp = 100;
+		bullet = 100;
 		pos = { 0.0f, 0.0f, 0.0f };
 		pitch = yaw = roll = 0.0f;
 		m_rightvec = { 1.0f, 0.0f, 0.0f };
@@ -296,6 +298,7 @@ void process_packet(int client_id, char* packet)
 
 		clients[client_id].send_login_info_packet();
 		clients[client_id].s_state = ST_INGAME;
+
 		clients[client_id].s_lock.unlock();
 
 		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is log in" << endl;	// server message
@@ -468,70 +471,92 @@ void process_packet(int client_id, char* packet)
 					// empty space check
 					int new_bullet_id = -1;
 					int arr_cnt = 0;
-					while (arr_cnt < MAX_BULLET) {
-						if (bullets_arr[arr_cnt].getId() == -1) {
-							new_bullet_id = arr_cnt;
-							break;
+					if (clients[client_id].bullet > 0) {		// 남은 총알이 있을 때에만
+						while (arr_cnt < MAX_BULLET) {
+							if (bullets_arr[arr_cnt].getId() == -1) {
+								new_bullet_id = arr_cnt;
+
+								clients[client_id].s_lock.lock();
+								// 총알 하나 사용
+								clients[client_id].bullet -= 1;
+
+								// 발사한 사용자에게 총알 사용했음을 알려줍니다.
+								SC_BULLET_COUNT_PACKET bullet_packet;
+								bullet_packet.size = sizeof(bullet_packet);
+								bullet_packet.type = SC_BULLET_COUNT;
+								bullet_packet.id = client_id;
+								bullet_packet.bullet_cnt = clients[client_id].bullet;
+								clients[client_id].do_send(&bullet_packet);
+
+								clients[client_id].s_lock.unlock();
+								break;
+							}
+							else {
+								arr_cnt++;
+							}
 						}
-						else {
-							arr_cnt++;
+
+						// 벡터에 남아있는 공간이 있을 때에만 발사합니다.
+						if (0 <= new_bullet_id && new_bullet_id < MAX_BULLET) {
+							// shoot time update
+							shoot_time = chrono::system_clock::now();
+
+							// Bullet 생성
+							bullets_arr[new_bullet_id].setId(new_bullet_id);
+							bullets_arr[new_bullet_id].setPos(clients[client_id].pos);
+							bullets_arr[new_bullet_id].setPitch(clients[client_id].pitch);
+							bullets_arr[new_bullet_id].setYaw(clients[client_id].yaw);
+							bullets_arr[new_bullet_id].setRoll(clients[client_id].roll);
+							bullets_arr[new_bullet_id].setRightvector(clients[client_id].m_rightvec);
+							bullets_arr[new_bullet_id].setUpvector(clients[client_id].m_upvec);
+							bullets_arr[new_bullet_id].setLookvector(clients[client_id].m_lookvec);
+							bullets_arr[new_bullet_id].setOwner(client_id);
+							bullets_arr[new_bullet_id].setInitialPos(bullets_arr[new_bullet_id].getPos());
+
+							// 접속해있는 모든 클라이언트에게 새로운 Bullet정보를 보냅니다.
+							SC_ADD_OBJECT_PACKET add_bullet_packet;
+							add_bullet_packet.target = TARGET_BULLET;
+							add_bullet_packet.id = new_bullet_id;
+							strcpy_s(add_bullet_packet.name, "bullet");
+							add_bullet_packet.size = sizeof(add_bullet_packet);
+							add_bullet_packet.type = SC_ADD_OBJECT;
+
+							add_bullet_packet.x = bullets_arr[new_bullet_id].getPos().x;
+							add_bullet_packet.y = bullets_arr[new_bullet_id].getPos().y;
+							add_bullet_packet.z = bullets_arr[new_bullet_id].getPos().z;
+
+							add_bullet_packet.right_x = bullets_arr[new_bullet_id].getRightvector().x;
+							add_bullet_packet.right_y = bullets_arr[new_bullet_id].getRightvector().y;
+							add_bullet_packet.right_z = bullets_arr[new_bullet_id].getRightvector().z;
+
+							add_bullet_packet.up_x = bullets_arr[new_bullet_id].getUpvector().x;
+							add_bullet_packet.up_y = bullets_arr[new_bullet_id].getUpvector().y;
+							add_bullet_packet.up_z = bullets_arr[new_bullet_id].getUpvector().z;
+
+							add_bullet_packet.look_x = bullets_arr[new_bullet_id].getLookvector().x;
+							add_bullet_packet.look_y = bullets_arr[new_bullet_id].getLookvector().y;
+							add_bullet_packet.look_z = bullets_arr[new_bullet_id].getLookvector().z;
+
+							for (auto& pl : clients) {
+								if (pl.s_state == ST_INGAME)
+									pl.do_send(&add_bullet_packet);
+							}
 						}
 					}
+					else {	// 남은 탄환이 0이라면 재장전
+						clients[client_id].s_lock.lock();
 
-					// 벡터에 남아있는 공간이 있을 때에만 발사합니다.
-					if (new_bullet_id != -1) {
+						clients[client_id].bullet = 100;
 
-						// shoot time update
-						shoot_time = chrono::system_clock::now();
+						// 발사한 사용자에게 총알 사용했음을 알려줍니다.
+						SC_BULLET_COUNT_PACKET bullet_packet;
+						bullet_packet.size = sizeof(bullet_packet);
+						bullet_packet.type = SC_BULLET_COUNT;
+						bullet_packet.id = client_id;
+						bullet_packet.bullet_cnt = clients[client_id].bullet;
+						clients[client_id].do_send(&bullet_packet);
 
-						// Bullet 생성
-						bullets_arr[new_bullet_id].setId(new_bullet_id);
-						bullets_arr[new_bullet_id].setPos(clients[client_id].pos);
-						bullets_arr[new_bullet_id].setPitch(clients[client_id].pitch);
-						bullets_arr[new_bullet_id].setYaw(clients[client_id].yaw);
-						bullets_arr[new_bullet_id].setRoll(clients[client_id].roll);
-						bullets_arr[new_bullet_id].setRightvector(clients[client_id].m_rightvec);
-						bullets_arr[new_bullet_id].setUpvector(clients[client_id].m_upvec);
-						bullets_arr[new_bullet_id].setLookvector(clients[client_id].m_lookvec);
-						bullets_arr[new_bullet_id].setOwner(client_id);
-						bullets_arr[new_bullet_id].setInitialPos(bullets_arr[new_bullet_id].getPos());
-
-						// 접속해있는 모든 클라이언트에게 새로운 Bullet정보를 보냅니다.
-						SC_ADD_OBJECT_PACKET add_bullet_packet;
-						add_bullet_packet.target = TARGET_BULLET;
-						add_bullet_packet.id = new_bullet_id;
-						strcpy_s(add_bullet_packet.name, "bullet");
-						add_bullet_packet.size = sizeof(add_bullet_packet);
-						add_bullet_packet.type = SC_ADD_OBJECT;
-
-						add_bullet_packet.x = bullets_arr[new_bullet_id].getPos().x;
-						add_bullet_packet.y = bullets_arr[new_bullet_id].getPos().y;
-						add_bullet_packet.z = bullets_arr[new_bullet_id].getPos().z;
-
-						add_bullet_packet.right_x = bullets_arr[new_bullet_id].getRightvector().x;
-						add_bullet_packet.right_y = bullets_arr[new_bullet_id].getRightvector().y;
-						add_bullet_packet.right_z = bullets_arr[new_bullet_id].getRightvector().z;
-
-						add_bullet_packet.up_x = bullets_arr[new_bullet_id].getUpvector().x;
-						add_bullet_packet.up_y = bullets_arr[new_bullet_id].getUpvector().y;
-						add_bullet_packet.up_z = bullets_arr[new_bullet_id].getUpvector().z;
-
-						add_bullet_packet.look_x = bullets_arr[new_bullet_id].getLookvector().x;
-						add_bullet_packet.look_y = bullets_arr[new_bullet_id].getLookvector().y;
-						add_bullet_packet.look_z = bullets_arr[new_bullet_id].getLookvector().z;
-
-						// server message
-						/*
-						cout << "Create New Bullet [ID: " << bullets_arr[new_bullet_id].getId()
-							<< ", Pos(" << bullets_arr[new_bullet_id].getPos().x
-							<< ", " << bullets_arr[new_bullet_id].getPos().y
-							<< ", " << bullets_arr[new_bullet_id].getPos().z << ")." << endl;
-						*/
-
-						for (auto& pl : clients) {
-							if (pl.s_state == ST_INGAME)
-								pl.do_send(&add_bullet_packet);
-						}
+						clients[client_id].s_lock.unlock();
 					}
 
 					// bullet unlock (구현 예정)
@@ -757,45 +782,114 @@ void timerFunc() {
 			}
 		}
 
+		/*
+		// NPC
+		for (int i = 0; i < MAX_NPCS; i++) {
+			npcs[i].MovetoRotate();
+
+			// Move Send
+			SC_MOVE_OBJECT_PACKET npc_move_packet;
+			npc_move_packet.target = TARGET_NPC;
+			npc_move_packet.id = npcs[i].GetID();
+			npc_move_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
+			npc_move_packet.type = SC_MOVE_OBJECT;
+
+			npc_move_packet.x = npcs[i].GetPosition().x;
+			npc_move_packet.y = npcs[i].GetPosition().y;
+			npc_move_packet.z = npcs[i].GetPosition().z;
+
+			for (auto& send_target : clients) {
+				lock_guard<mutex> lg{ send_target.s_lock };
+				if (send_target.s_state == ST_INGAME) {
+					send_target.do_send(&npc_move_packet);
+				}
+			}
+
+			// Rotate Send
+			SC_ROTATE_OBJECT_PACKET npc_rotate_packet;
+			npc_rotate_packet.target = TARGET_NPC;
+			npc_rotate_packet.id = npcs[i].GetID();
+			npc_rotate_packet.size = sizeof(SC_ROTATE_OBJECT_PACKET);
+			npc_rotate_packet.type = SC_ROTATE_OBJECT;
+
+			npc_rotate_packet.right_x = npcs[i].GetCurr_coordinate().right.x;
+			npc_rotate_packet.right_y = npcs[i].GetCurr_coordinate().right.y;
+			npc_rotate_packet.right_z = npcs[i].GetCurr_coordinate().right.z;
+
+			npc_rotate_packet.up_x = npcs[i].GetCurr_coordinate().up.x;
+			npc_rotate_packet.up_y = npcs[i].GetCurr_coordinate().up.y;
+			npc_rotate_packet.up_z = npcs[i].GetCurr_coordinate().up.z;
+
+			npc_rotate_packet.look_x = npcs[i].GetCurr_coordinate().look.x;
+			npc_rotate_packet.look_y = npcs[i].GetCurr_coordinate().look.y;
+			npc_rotate_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
+
+			for (auto& send_target : clients) {
+				lock_guard<mutex> lg{ send_target.s_lock };
+				if (send_target.s_state == ST_INGAME) {
+					send_target.do_send(&npc_rotate_packet);
+				}
+			}
+
+			cout << "NPC[" << npcs[i].GetID() << "] moves to POS("
+				<< npcs[i].GetPosition().x << ", " << npcs[i].GetPosition().y << ", " << npcs[i].GetPosition().z << ")" << endl;
+		}
+		*/
 	}
 }
 
 void MoveNPC()
 {
-	for (int i{}; i < MAX_NPCS; i++) {
-		npcs[i].MovetoRotate();
-		
-		SC_ADD_OBJECT_PACKET NPC_packet;
-		NPC_packet.target = TARGET_NPC;
-		NPC_packet.id = npcs[i].GetID();
-		NPC_packet.size = sizeof(SC_ADD_OBJECT_PACKET);
-		NPC_packet.type = SC_ADD_OBJECT;
-		strcpy_s(NPC_packet.name, "NPC");
-		
-		NPC_packet.x = npcs[i].GetPosition().x;
-		NPC_packet.y = npcs[i].GetPosition().y;
-		NPC_packet.z = npcs[i].GetPosition().z;
+	while (true) {
+		for (int i = 0; i < MAX_NPCS; i++) {
+			npcs[i].MovetoRotate();
 
-		NPC_packet.right_x = npcs[i].GetCurr_coordinate().right.x;
-		NPC_packet.right_y = npcs[i].GetCurr_coordinate().right.y;
-		NPC_packet.right_z = npcs[i].GetCurr_coordinate().right.z;
+			// Move Send
+			SC_MOVE_OBJECT_PACKET npc_move_packet;
+			npc_move_packet.target = TARGET_NPC;
+			npc_move_packet.id = npcs[i].GetID();
+			npc_move_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
+			npc_move_packet.type = SC_MOVE_OBJECT;
 
-		NPC_packet.up_x = npcs[i].GetCurr_coordinate().up.x;
-		NPC_packet.up_y = npcs[i].GetCurr_coordinate().up.y;
-		NPC_packet.up_z = npcs[i].GetCurr_coordinate().up.z;
+			npc_move_packet.x = npcs[i].GetPosition().x;
+			npc_move_packet.y = npcs[i].GetPosition().y;
+			npc_move_packet.z = npcs[i].GetPosition().z;
 
-		NPC_packet.look_x = npcs[i].GetCurr_coordinate().look.x;
-		NPC_packet.look_y = npcs[i].GetCurr_coordinate().look.y;
-		NPC_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
-
-		cout << "[NPC_Send]";
-		
-		for (int i = 0; i < MAX_USER; i++) {
-			auto& pl = clients[i];
-			lock_guard<mutex> lg{ pl.s_lock };
-			if (pl.s_state == ST_INGAME) {
-				pl.do_send(&NPC_packet);
+			for (auto& send_target : clients) {
+				lock_guard<mutex> lg{ send_target.s_lock };
+				if (send_target.s_state == ST_INGAME) {
+					send_target.do_send(&npc_move_packet);
+				}
 			}
+
+			// Rotate Send
+			SC_ROTATE_OBJECT_PACKET npc_rotate_packet;
+			npc_rotate_packet.target = TARGET_NPC;
+			npc_rotate_packet.id = npcs[i].GetID();
+			npc_rotate_packet.size = sizeof(SC_ROTATE_OBJECT_PACKET);
+			npc_rotate_packet.type = SC_ROTATE_OBJECT;
+
+			npc_rotate_packet.right_x = npcs[i].GetCurr_coordinate().right.x;
+			npc_rotate_packet.right_y = npcs[i].GetCurr_coordinate().right.y;
+			npc_rotate_packet.right_z = npcs[i].GetCurr_coordinate().right.z;
+
+			npc_rotate_packet.up_x = npcs[i].GetCurr_coordinate().up.x;
+			npc_rotate_packet.up_y = npcs[i].GetCurr_coordinate().up.y;
+			npc_rotate_packet.up_z = npcs[i].GetCurr_coordinate().up.z;
+
+			npc_rotate_packet.look_x = npcs[i].GetCurr_coordinate().look.x;
+			npc_rotate_packet.look_y = npcs[i].GetCurr_coordinate().look.y;
+			npc_rotate_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
+
+			for (auto& send_target : clients) {
+				lock_guard<mutex> lg{ send_target.s_lock };
+				if (send_target.s_state == ST_INGAME) {
+					send_target.do_send(&npc_rotate_packet);
+				}
+			}
+
+			cout << "NPC[" << npcs[i].GetID() << "] moves to POS("
+				<< npcs[i].GetPosition().x << ", " << npcs[i].GetPosition().y << ", " << npcs[i].GetPosition().z << ")" << endl;
 		}
 	}
 }
@@ -835,8 +929,7 @@ int main()
 	thread timer_thread{ timerFunc };
 	timer_thread.join();
 
-	thread NPC_thread{};
-
+	thread NPC_thread{ MoveNPC };
 	NPC_thread.join();
 
 	for (auto& th : worker_threads)

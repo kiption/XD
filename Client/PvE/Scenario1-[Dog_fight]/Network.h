@@ -106,7 +106,7 @@ void processPacket(char* ptr)
 		cout << "Init My Info - id: " << my_info.m_id << ", Pos(x: " << my_info.m_pos.x << ", y : " << my_info.m_pos.y << ", z : " << my_info.m_pos.z << ")." << endl;
 
 		break;
-	}// SC_LOGIN_INFO end
+	}// SC_LOGIN_INFO case end
 	case SC_ADD_OBJECT:
 	{
 		SC_ADD_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_ADD_OBJECT_PACKET*>(ptr);
@@ -159,6 +159,7 @@ void processPacket(char* ptr)
 			cout << "Create New Bullet - id: " << bullets_info[recv_id].m_id
 				<< ", Pos(x: " << bullets_info[recv_id].m_pos.x << ", y : " << bullets_info[recv_id].m_pos.y << ", z : " << bullets_info[recv_id].m_pos.z << ")." << endl;
 		}
+		// 3. Add NPC (Helicopter)
 		else if (recv_packet->target == TARGET_NPC) {
 			npcs_info[recv_id].m_id = recv_id;
 			npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
@@ -174,7 +175,7 @@ void processPacket(char* ptr)
 			cout << "[ADD ERROR] Unknown Target!" << endl;
 		}
 		break;
-	}// SC_ADD_OBJECT end
+	}// SC_ADD_OBJECT case end
 	case SC_MOVE_OBJECT:
 	{
 		SC_MOVE_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_MOVE_OBJECT_PACKET*>(ptr);
@@ -215,7 +216,7 @@ void processPacket(char* ptr)
 		}
 
 		break;
-	}// SC_MOVE_OBJECT end
+	}// SC_MOVE_OBJECT case end
 	case SC_ROTATE_OBJECT:
 	{
 		SC_ROTATE_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_ROTATE_OBJECT_PACKET*>(ptr);
@@ -254,7 +255,7 @@ void processPacket(char* ptr)
 		}
 
 		break;
-	}// SC_ROTATE_PLAYER end
+	}// SC_ROTATE_PLAYER case end
 	case SC_REMOVE_OBJECT:
 	{
 		SC_REMOVE_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_REMOVE_OBJECT_PACKET*>(ptr);
@@ -297,7 +298,15 @@ void processPacket(char* ptr)
 		}
 
 		break;
-	}//SC_REMOVE_PLAYER end
+	}//SC_REMOVE_PLAYER case end
+	case SC_BULLET_COUNT:
+	{
+		SC_BULLET_COUNT_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COUNT_PACKET*>(ptr);
+		my_info.m_bullet = recv_packet->bullet_cnt;
+		cout << "My Bullet Left: " << my_info.m_bullet << endl;
+
+		break;
+	}//SC_BULLET_COUNT case end
 	}
 }
 
