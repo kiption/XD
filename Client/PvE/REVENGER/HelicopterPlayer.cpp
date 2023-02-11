@@ -39,7 +39,7 @@ CAirplanePlayer::~CAirplanePlayer()
 {
 }
 
-void CAirplanePlayer::FireBullet(CGameObject* pLockedObject)
+void CAirplanePlayer::Firevalkan(CGameObject* pLockedObject)
 {
 	CBulletObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS; i++)
@@ -65,7 +65,7 @@ void CAirplanePlayer::FireBullet(CGameObject* pLockedObject)
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-		pBulletObject->Rotate(120.0, 0.0, 0.0);
+		pBulletObject->Rotate(130.0, 0.0, 0.0);
 		pBulletObject->SetScale(15.0, 15.0, 25.0);
 		pBulletObject->SetActive(true);
 	

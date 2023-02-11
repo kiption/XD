@@ -93,7 +93,7 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(40.0f, 18.0f, -60.0f));
+		m_pCamera->SetOffset(XMFLOAT3(20.0f, 15.0f, -40.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -101,7 +101,7 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	default:
 		break;
 	}
-	m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
+	m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z), m_pCamera->GetOffset()));
 	Update(fTimeElapsed);
 
 	return(m_pCamera);
@@ -190,7 +190,7 @@ void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 		if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
 }
 
-void CHumanPlayer::Firevalkan(CGameObject* pLockedObject)
+void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 {
 	CValkanObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS; i++)
@@ -217,7 +217,7 @@ void CHumanPlayer::Firevalkan(CGameObject* pLockedObject)
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + 0.0, xmf3FirePosition.z));
 		pBulletObject->Rotate(130.0, 0.0, 0.0);
-		pBulletObject->SetScale(1.5, 1.5, 2.0);
+		pBulletObject->SetScale(1.0, 1.0, 1.5);
 		pBulletObject->SetActive(true);
 	
 	}

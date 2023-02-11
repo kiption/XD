@@ -14,7 +14,7 @@ public:
 	float m_fBulletEffectiveRange = 2000.0f;
 	CBulletObject* pBulletObject = NULL;
 	CBulletObject* m_ppBullets[BULLETS];
-	void FireBullet(CGameObject* pLockedObject);
+	void Firevalkan(CGameObject* pLockedObject);
 public:
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 

@@ -127,6 +127,12 @@
     <ClInclude Include="MissileObject.h">
       <Filter>Client\Object</Filter>
     </ClInclude>
+    <ClInclude Include="BillboardObjects.h">
+      <Filter>Client\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="BillboardObjectsShader.h">
+      <Filter>Client\Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSound.cpp">
@@ -212,6 +218,12 @@
     </ClCompile>
     <ClCompile Include="MissileObject.cpp">
       <Filter>Client\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="BillboardObjects.cpp">
+      <Filter>Client\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="BillboardObjectsShader.cpp">
+      <Filter>Client\Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

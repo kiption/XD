@@ -8,6 +8,7 @@
 #include "Skybox.h"
 
 #include "ObjcetsShaderList.h"
+#include "BillboardObjectsShader.h"
 #include "SkyboxShader.h"
 #include "TerrainShader.h"
 #include "Player.h"

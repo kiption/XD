@@ -339,8 +339,8 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		switch (wParam)
 		{
 		case VK_SPACE:
-			if (m_nMode == SCENE2STAGE)((CHumanPlayer*)m_pPlayer)->Firevalkan(NULL);
-			if (m_nMode == SCENE1STAGE)((CAirplanePlayer*)m_pPlayer)->FireBullet(NULL);
+			if (m_nMode == SCENE2STAGE)((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
+			if (m_nMode == SCENE1STAGE)((CAirplanePlayer*)m_pPlayer)->Firevalkan(NULL);
 			break;
 		default:
 			break;
@@ -607,6 +607,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 	if (nMode != m_nMode)
 	{
 		ReleaseObjects();
+		m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 		switch (nMode)
 		{
 		case SCENE1STAGE:
@@ -625,7 +626,6 @@ void CGameFramework::ChangeScene(DWORD nMode)
 		case SCENE2STAGE:
 		{
 			m_nMode = nMode;
-			m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 			m_pScene = new Stage2();
 			if (m_pScene) ((Stage2*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((Stage2*)m_pScene)->m_pTerrain);

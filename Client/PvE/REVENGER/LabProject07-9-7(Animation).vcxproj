@@ -151,6 +151,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AnimateInfo.h" />
+    <ClInclude Include="BillboardObjects.h" />
+    <ClInclude Include="BillboardObjectsShader.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="MissileObject.h" />
     <ClInclude Include="Skybox.h" />
@@ -181,6 +183,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AnimateInfo.cpp" />
+    <ClCompile Include="BillboardObjects.cpp" />
+    <ClCompile Include="BillboardObjectsShader.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="MissileObject.cpp" />
     <ClCompile Include="Skybox.cpp" />

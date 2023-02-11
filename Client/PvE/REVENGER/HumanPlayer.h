@@ -26,5 +26,5 @@ public:
 	float m_fBulletEffectiveRange = 2000.0f;
 	CValkanObject* pBulletObject = NULL;
 	CValkanObject* m_ppBullets[BULLETS];
-	void Firevalkan(CGameObject* pLockedObject);
+	void FireBullet(CGameObject* pLockedObject);
 };
