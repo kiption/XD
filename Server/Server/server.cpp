@@ -89,7 +89,7 @@ public:
 		m_upvec = { 0.0f, 1.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 1.0f };
 
-		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(1.5f, 1.5f, 1.5f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(heli_bbsize_x, heli_bbsize_y, heli_bbsize_z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	}
 
 	~SESSION() {}
@@ -125,7 +125,7 @@ public:
 	void send_move_packet(int client_id, short move_target);
 	void send_rotate_packet(int client_id, short rotate_target);
 
-	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(1.5f, 1.5f, 1.5f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
+	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(heli_bbsize_x, heli_bbsize_y, heli_bbsize_z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 };
 
 int online_player_cnt = 0;
@@ -491,25 +491,11 @@ void process_packet(int client_id, char* packet)
 
 					// empty space check
 					int new_bullet_id = -1;
-					int arr_cnt = 0;
+					int arr_cnt = -1;
 					if (clients[client_id].bullet > 0) {		// 남은 총알이 있을 때에만
-						while (arr_cnt < MAX_BULLET) {
+						while (arr_cnt < MAX_BULLET / MAX_USER) {
 							if (bullets_arr[arr_cnt].getId() == -1) {
-								new_bullet_id = arr_cnt;
-
-								clients[client_id].s_lock.lock();
-								// 총알 하나 사용
-								clients[client_id].bullet -= 1;
-
-								// 발사한 사용자에게 총알 사용했음을 알려줍니다.
-								SC_BULLET_COUNT_PACKET bullet_packet;
-								bullet_packet.size = sizeof(bullet_packet);
-								bullet_packet.type = SC_BULLET_COUNT;
-								bullet_packet.id = client_id;
-								bullet_packet.bullet_cnt = clients[client_id].bullet;
-								clients[client_id].do_send(&bullet_packet);
-
-								clients[client_id].s_lock.unlock();
+								new_bullet_id = arr_cnt + 10 * client_id;	// 0번 클라: 0-99, 1번 클라: 100-199, 2번 클라: 200-299
 								break;
 							}
 							else {
@@ -518,9 +504,23 @@ void process_packet(int client_id, char* packet)
 						}
 
 						// 벡터에 남아있는 공간이 있을 때에만 발사합니다.
-						if (0 <= new_bullet_id && new_bullet_id < MAX_BULLET) {
+						if (new_bullet_id != -1) {
 							// shoot time update
 							shoot_time = chrono::system_clock::now();
+
+							// 총알 하나 사용
+							clients[client_id].s_lock.lock();
+							clients[client_id].bullet -= 1;
+
+							// 발사한 사용자에게 총알 사용했음을 알려줍니다.
+							SC_BULLET_COUNT_PACKET bullet_packet;
+							bullet_packet.size = sizeof(bullet_packet);
+							bullet_packet.type = SC_BULLET_COUNT;
+							bullet_packet.id = client_id;
+							bullet_packet.bullet_cnt = clients[client_id].bullet;
+							clients[client_id].do_send(&bullet_packet);
+
+							clients[client_id].s_lock.unlock();
 
 							// Bullet 생성
 							bullets_arr[new_bullet_id].setId(new_bullet_id);
@@ -534,6 +534,7 @@ void process_packet(int client_id, char* packet)
 								, bullets_arr[new_bullet_id].getPitch(), 0.f, 0.f));
 							bullets_arr[new_bullet_id].setOwner(client_id);
 							bullets_arr[new_bullet_id].setInitialPos(bullets_arr[new_bullet_id].getPos());
+							bullets_arr[new_bullet_id].setBB_ex(XMFLOAT3{ vulcan_bullet_bbsize_x, vulcan_bullet_bbsize_y, vulcan_bullet_bbsize_z });
 
 							// 접속해있는 모든 클라이언트에게 새로운 Bullet정보를 보냅니다.
 							SC_ADD_OBJECT_PACKET add_bullet_packet;
@@ -821,31 +822,48 @@ void timerFunc() {
 			if (bullet.getId() == -1) continue;
 
 			if (bullet.calcDistance(bullet.getInitialPos()) > BULLET_RANGE) {	// 만약 총알이 초기 위치로부터 멀리 떨어졌다면 제거합니다.
-				//cout << "[" << bullet.getId() << "]번 총알을 제거합니다.";
-				bullet.clear();
-
 				// 객체 제거패킷을 모든 클라이언트에게 보냅니다.
 				SC_REMOVE_OBJECT_PACKET remove_bullet_packet;
 				remove_bullet_packet.target = TARGET_BULLET;
 				remove_bullet_packet.size = sizeof(SC_REMOVE_OBJECT_PACKET);
 				remove_bullet_packet.id = bullet.getId();
 				remove_bullet_packet.type = SC_REMOVE_OBJECT;
+
 				for (auto& cl : clients) {
 					if (cl.s_state == ST_INGAME)
 						cl.do_send(&remove_bullet_packet);
 				}
+
+				bullet.clear();
 			}
 			else {
 				// 총알을 앞으로 이동시킵니다.
 				bullet.moveObj(bullet.getLookvector(), BULLET_MOVE_SCALAR);
-				/*cout << "[" << bullet.getId() << "]번 총알이 Pos("
-					<< bullet.getPos().x << ", " << bullet.getPos().y << ", " << bullet.getPos().z << ")로 이동하였습니다." << endl;*/
+				//cout << "[" << bullet.getId() << "]번 총알이 Pos("
+				//	<< bullet.getPos().x << ", " << bullet.getPos().y << ", " << bullet.getPos().z << ")로 이동하였습니다." << endl;
+
+				// 바운딩박스 업데이트
+				bullet.setBB_ex(XMFLOAT3(vulcan_bullet_bbsize_x, vulcan_bullet_bbsize_y, vulcan_bullet_bbsize_z));
 
 				// 충돌검사
 				for (auto& pl : clients) {
-					if (bullet.calcDistance(pl.pos) > BULLET_MOVE_SCALAR)	continue;	// 총알 사거리보다 멀리 떨어진 플레이어는 충돌체크 X
+					if (bullet.getOwner() == pl.id) continue;							// 총을 쏜 사람은 충돌체크 X
+					if (bullet.calcDistance(pl.pos) > BULLET_RANGE)	continue;			// 총알 사거리보다 멀리 떨어진 플레이어는 충돌체크 X
 
 					if (bullet.intersectsCheck(pl.m_xoobb)) {
+						// 우선 총알 객체를 없애고
+						SC_REMOVE_OBJECT_PACKET remove_bullet_packet;
+						remove_bullet_packet.target = TARGET_BULLET;
+						remove_bullet_packet.size = sizeof(SC_REMOVE_OBJECT_PACKET);
+						remove_bullet_packet.id = bullet.getId();
+						remove_bullet_packet.type = SC_REMOVE_OBJECT;
+
+						for (auto& cl : clients) {
+							if (cl.s_state == ST_INGAME)
+								cl.do_send(&remove_bullet_packet);
+						}
+
+						// 충돌한 플레이어의 HP를 감소시킵니다.
 						pl.s_lock.lock();
 						pl.hp -= BULLET_DAMAGE;
 						pl.s_lock.unlock();
@@ -878,6 +896,9 @@ void timerFunc() {
 
 							pl.do_send(&damaged_packet);
 						}
+
+						// 마지막으로 총알의 정보를 초기화합니다.
+						bullet.clear();
 					}
 				}
 

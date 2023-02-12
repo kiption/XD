@@ -89,6 +89,11 @@ float Objects::calcDistance(XMFLOAT3 others_pos)
 	return dist;
 }
 
+void Objects::setBB_ex(XMFLOAT3 extent)
+{
+	m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pos.x, m_pos.y, m_pos.z), extent, XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+}
+
 bool Objects::intersectsCheck(BoundingOrientedBox other_bb)
 {
 	if (m_xoobb.Intersects(other_bb)) {

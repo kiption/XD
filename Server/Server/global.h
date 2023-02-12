@@ -20,8 +20,21 @@
 #define COLLIDE_PLAYER_DAMAGE 100		// ÇÃ·¹ÀÌ¾î°£ Ãæµ¹µ¥¹ÌÁö
 
 #define SHOOT_COOLDOWN_BULLET 200		// ÃÑ¾Ë ¹ß»ç ÄðÅ¸ÀÓ(ms)
-#define BULLET_MOVE_SCALAR 0.005f		// ÃÑ¾Ë ÀÌµ¿ Èû
-#define BULLET_RANGE 300.f				// ÃÑ¾Ë »çÁ¤°Å¸®
+#define BULLET_MOVE_SCALAR 0.008f		// ÃÑ¾Ë ÀÌµ¿ Èû
+#define BULLET_RANGE 200.f				// ÃÑ¾Ë »çÁ¤°Å¸®
 #define BULLET_DAMAGE 10				// ÃÑ¾Ë ÇÇ°Ýµ¥¹ÌÁö
 
 #define RESPAWN_TIME 10000.f			// ¸®½ºÆù ½Ã°£ (ms)
+
+#define heli_bbsize_x 2.0f				// Çï±â BBÅ©±â
+#define heli_bbsize_y 2.0f
+#define heli_bbsize_z 2.0f
+
+#define vulcan_bullet_bbsize_x 1.5f		// °øÁßÀü(±â°üÃÑ) Åº BBÅ©±â
+#define vulcan_bullet_bbsize_y 1.5f
+#define vulcan_bullet_bbsize_z 1.5f
+
+#define riffle_bullet_bbsize_x 3.5f		// Áö»óÀü(¼ÒÃÑ) Åº BBÅ©±â
+#define riffle_bullet_bbsize_y 3.5f
+#define riffle_bullet_bbsize_z 3.5f
+

@@ -24,6 +24,17 @@ struct ObjectsInfo
 		m_look_vec = { 0.0f, 0.0f, 1.0f };
 		m_state = OBJ_ST_EMPTY;
 	}
+
+	void returnToInitialState() {
+		m_id = -1;
+		m_hp = 100;
+		m_bullet = 100;
+		m_pos = { 0.0f, 0.0f, 0.0f };
+		m_right_vec = { 1.0f, 0.0f, 0.0f };
+		m_up_vec = { 0.0f, 1.0f, 0.0f };
+		m_look_vec = { 0.0f, 0.0f, 1.0f };
+		m_state = OBJ_ST_EMPTY;
+	}
 };
 
 ObjectsInfo my_info;

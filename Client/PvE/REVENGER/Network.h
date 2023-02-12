@@ -155,7 +155,7 @@ void processPacket(char* ptr)
 			bullets_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 			bullets_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
 
-			bullets_info[recv_id].m_state = OBJ_ST_STANDBY;                       
+			bullets_info[recv_id].m_state = OBJ_ST_RUNNING;
 			cout << "Create New Bullet - id: " << bullets_info[recv_id].m_id
 				<< ", Pos(x: " << bullets_info[recv_id].m_pos.x << ", y : " << bullets_info[recv_id].m_pos.y << ", z : " << bullets_info[recv_id].m_pos.z << ")." << endl;
 		}
@@ -287,8 +287,7 @@ void processPacket(char* ptr)
 		}
 		// 2. Remove Bullet
 		else if (recv_packet->target == TARGET_BULLET) {
-			bullets_info[recv_id].m_id = -1;
-			bullets_info[recv_id].m_pos = { 0.f ,0.f ,0.f };
+			bullets_info[recv_id].m_pos = { 0.f , -100.f ,0.f };
 			bullets_info[recv_id].m_state = OBJ_ST_LOGOUT;
 
 			cout << "Bullet[" << recv_id << "] is removed" << endl;
@@ -335,7 +334,8 @@ void processPacket(char* ptr)
 	case SC_BULLET_COUNT:
 	{
 		SC_BULLET_COUNT_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COUNT_PACKET*>(ptr);
-		my_info.m_bullet = recv_packet->bullet_cnt;
+		int cnt = recv_packet->bullet_cnt;
+		my_info.m_bullet = cnt;
 		cout << "My Bullet Left: " << my_info.m_bullet << endl;
 
 		break;

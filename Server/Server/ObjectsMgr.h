@@ -33,7 +33,7 @@ public:
 		m_upvec = { 0.0f, 0.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 0.0f };
 
-		m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pos.x, m_pos.y, m_pos.z), XMFLOAT3(6.0f, 6.0f, 6.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pos.x, m_pos.y, m_pos.z), XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	}
 	Objects(int id, XMFLOAT3 pos, float pitch, float yaw, float roll, XMFLOAT3 right, XMFLOAT3 up, XMFLOAT3 look) {
 		m_id = id;
@@ -45,7 +45,7 @@ public:
 		m_upvec = up;
 		m_lookvec = look;
 
-		m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pos.x, m_pos.y, m_pos.z), XMFLOAT3(6.0f, 6.0f, 6.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pos.x, m_pos.y, m_pos.z), XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	}
 	~Objects() {
 	}
@@ -79,5 +79,6 @@ public:
 
 	float calcDistance(XMFLOAT3 others_pos);
 
+	void setBB_ex(XMFLOAT3 extent);
 	bool intersectsCheck(BoundingOrientedBox other_bb);
 };
