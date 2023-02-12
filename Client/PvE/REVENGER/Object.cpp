@@ -1477,8 +1477,8 @@ CGunshipObject::~CGunshipObject()
 
 void CGunshipObject::OnPrepareAnimate()
 {
-	m_pMainRotorFrame = FindFrame("military_helicopter_blades");
-	m_pTailRotorFrame = FindFrame("Back_Rotor");
+	m_pMainRotorFrame = FindFrame("rescue_1");
+	m_pTailRotorFrame = FindFrame("rescue_2");
 }
 
 void CGunshipObject::Animate(float fTimeElapsed)

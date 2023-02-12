@@ -7,7 +7,7 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
-	CGameObject* pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/GO.bin", NULL);
+	CGameObject* pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 	SetChild(pGameObject, false);
 	pGameObject->SetScale(1.0, 1.0, 1.0);
 	pGameObject->SetCurScene(SCENE1STAGE);
@@ -125,8 +125,8 @@ CCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 
 void CAirplanePlayer::OnPrepareAnimate()
 {
-	m_pTailRotorFrame = FindFrame("military_helicopter_blades");
-	m_pMainRotorFrame = FindFrame("military_helicopter_body");
+	m_pTailRotorFrame = FindFrame("rescue_2");
+	m_pMainRotorFrame = FindFrame("rescue_1");
 
 	CPlayer::OnPrepareAnimate();
 }
@@ -145,9 +145,14 @@ void CAirplanePlayer::Animate(float fTimeElapsed)
 
 void CAirplanePlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 {
-	if (m_pTailRotorFrame)
+	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 6.0f) * fTimeElapse);
+		m_pMainRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4ToParent);
+	}
+	if (m_pTailRotorFrame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 6.0f) * fTimeElapse);
 		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
 	}
 	CPlayer::Animate(fTimeElapse, pxmf4x4Parent);
