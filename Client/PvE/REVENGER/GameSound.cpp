@@ -4,8 +4,8 @@ GameSound::GameSound()
 {
 	result = FMOD::System_Create(&soundSystem);
 
-	result = soundSystem->init(64, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_3D, 0, &shootSound);
+	result = soundSystem->init(128, FMOD_INIT_NORMAL, extradriverdata);
+	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_DEFAULT, 0, &shootSound);
 	result = shootSound->setMode(FMOD_LOOP_OFF);
 
 	result = soundSystem->init(64, FMOD_INIT_NORMAL, extradriverdata);

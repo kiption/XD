@@ -5,6 +5,7 @@
 #include "REVENGER.h"
 #include "GameFramework.h"
 #include "Network.h"
+#include "GameSound.h"
 #define MAX_LOADSTRING 100
 
 HINSTANCE						ghAppInstance;
@@ -12,6 +13,7 @@ TCHAR							szTitle[MAX_LOADSTRING];
 TCHAR							szWindowClass[MAX_LOADSTRING];
 
 CGameFramework					gGameFramework;
+GameSound					gamesound;
 
 ATOM MyRegisterClass(HINSTANCE hInstance);
 BOOL InitInstance(HINSTANCE, int);
@@ -132,13 +134,16 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
 						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(0.1f, 0.1f, 0.1f);
 						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(130.0, 0.0, 0.0);
-
+						gamesound.shootingSound();
 						bullets_info[i].returnToInitialState();
 					}
 					else if (bullets_info[i].m_state == OBJ_ST_RUNNING) {	// Update
 						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
-						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(15.0, 15.0, 25.0);
-						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(130.0, 0.0, 0.0);
+
+						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(5.0, 5.0, 11.0);
+						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(125.0,0.0,0.0);
+
+
 					}
 				}
 
