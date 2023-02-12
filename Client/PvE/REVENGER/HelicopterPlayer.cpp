@@ -30,7 +30,7 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 	SetPosition(XMFLOAT3(310.0f, 590.0f, 590.0f));
-	SetScale(XMFLOAT3(1.0, 1.0, 1.0));
+	SetScale(XMFLOAT3(1.2, 1.2, 1.2));
 
 	if (pBulletMesh) delete pBulletMesh;
 }

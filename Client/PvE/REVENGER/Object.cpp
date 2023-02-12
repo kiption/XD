@@ -1469,6 +1469,7 @@ void CSuperCobraObject::Animate(float fTimeElapsed)
 //
 CGunshipObject::CGunshipObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
+	SetScale(1.2,1.2,1.2);
 }
 
 CGunshipObject::~CGunshipObject()
