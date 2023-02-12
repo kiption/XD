@@ -95,7 +95,7 @@ void BillboardObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, 
 
 void BillboardObjectsShader::AnimateObjects(float fTimeElapsed)
 {
-	//BillboardShader::AnimateObjects(fTimeElapsed);
+	BillboardShader::AnimateObjects(fTimeElapsed);
 }
 
 void BillboardObjectsShader::ReleaseUploadBuffers()

@@ -115,11 +115,12 @@ public:
 	XMFLOAT3							m_xmf3RotatePosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	int									m_nShaders = 0;
-	CShader** m_ppShaders = NULL;
+	CStandardObjectsShader** m_ppShaders = NULL;
 
 	CSkyBox* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;
-
+	int									m_nBillboardShaders = 0;
+	CShader** m_pBillboardShader = NULL;
 	int									m_nLights = 0;
 	LIGHT* m_pLights = NULL;
 	

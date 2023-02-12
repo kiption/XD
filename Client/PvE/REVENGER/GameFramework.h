@@ -8,7 +8,20 @@
 #include "Scene.h"
 #include "Stage1.h"
 #include "Stage2.h"
+#include <queue> //S
+enum MButton { L_BUTTON, R_BUTTON };
 
+struct MouseInputVal {
+	char button;
+	float delX, delY;
+};
+//S
+#define KEY_A         0x41
+#define KEY_D         0x44
+#define KEY_S         0x53
+#define KEY_W         0x57
+#define KEY_Q         0x51
+#define KEY_E		  0x45
 class CGameFramework
 {
 public:
@@ -43,6 +56,7 @@ public:
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void ChangeScene(DWORD nMode);
+	DWORD						m_nMode = SCENE1STAGE;
 
 private:
 	HINSTANCE					m_hInstance;
@@ -74,7 +88,6 @@ private:
 	ID3D12Fence					*m_pd3dFence = NULL;
 	UINT64						m_nFenceValues[m_nSwapChainBuffers];
 	HANDLE						m_hFenceEvent;
-	DWORD						m_nMode = SCENE1STAGE;
 
 
 #if defined(_DEBUG)
@@ -90,5 +103,47 @@ private:
 	POINT						m_ptOldCursorPos;
 
 	_TCHAR						m_pszFrameRate[70];
+
+
+
+//==================================================
+//			  서버 통신을 위한 것들...
+//==================================================
+public:
+	// 서버로 보낼 키보드 입력값
+	queue<short> q_keyboardInput;
+
+	// 서버로 보낼 마우스 입력값
+	queue<MouseInputVal> q_mouseInput;
+	//==================================================
+
+	//==================================================
+	//			  서버 통신에 필요한 함수들
+	//==================================================
+public:
+	// 새로운 입력이 있는지 확인하는 함수입니다.
+	bool CheckNewInputExist_Keyboard();
+	bool CheckNewInputExist_Mouse();
+
+	// 키입력 큐에서 값을 하나 꺼내옵니다.
+	short PopInputVal_Keyboard();
+	MouseInputVal PopInputVal_Mouse();
+
+	// 객체 값 최신화 함수입니다.
+	void SetPosition_PlayerObj(XMFLOAT3 pos);
+	void SetVectors_PlayerObj(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+
+	void SetPosition_OtherPlayerObj(int id, XMFLOAT3 pos);
+	void SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+	void Remove_OtherPlayerObj(int id);
+
+	void Create_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look);
+	void SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look);
+
+	void SetPosition_NPC(int id, XMFLOAT3 pos);
+	void SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+
+	//==================================================
+
 };
 

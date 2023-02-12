@@ -59,7 +59,9 @@ protected:
 	float								m_fElapsedTime = 0.0f;
 
 	int								m_nCurScene = SCENE1STAGE;
-
+public:
+	CGameObject** m_ppObjects = 0;
+	int								m_nObjects = 0;
 };
 
 

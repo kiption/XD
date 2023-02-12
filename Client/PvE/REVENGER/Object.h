@@ -461,17 +461,16 @@ public:
 	static CGameObject* LoadGeometryHierachyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName, CShader* pShader);
 
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
+
+public:
+	// Server
+	void SetUp(XMFLOAT3 xmf3Up) { m_xmf4x4ToParent._21 = xmf3Up.x, m_xmf4x4ToParent._22 = xmf3Up.y, m_xmf4x4ToParent._23 = xmf3Up.z; }
+	void SetRight(XMFLOAT3 xmf3right) { m_xmf4x4ToParent._11 = xmf3right.x; m_xmf4x4ToParent._12 = xmf3right.y; m_xmf4x4ToParent._13 = xmf3right.z; }
+	void SetLook(XMFLOAT3 xmf3look) { m_xmf4x4ToParent._31 = xmf3look.x; m_xmf4x4ToParent._32 = xmf3look.y; m_xmf4x4ToParent._33 = xmf3look.z; }
+
 };
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 class CSuperCobraObject : public CGameObject
 {
 public:

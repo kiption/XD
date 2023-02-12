@@ -36,11 +36,10 @@ XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn,
 
 void CHellicopterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
 {
-	m_nObjects = 40;
+	m_nObjects = 20;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
-	CLoadedModelInfo* pSuperCobraModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/SuperCobra.bin", this);
-	CLoadedModelInfo* pGunshipModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Gunship.bin", this);
+	CLoadedModelInfo* pGunshipModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/GO.bin", this);
 
 	int nColumnSpace = 5, nColumnSize = 30;
 	int nFirstPassColumnSize = (m_nObjects % nColumnSize) > 0 ? (nColumnSize - 1) : nColumnSize;
@@ -52,16 +51,9 @@ void CHellicopterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 	{
 		for (int i = 0; i < floor(float(m_nObjects) / float(nColumnSize)); i++)
 		{
-			if (nObjects % 2)
-			{
-				m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pSuperCobraModel->m_pModelRootObject, true);
-			}
-			else
-			{
-				m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pGunshipModel->m_pModelRootObject, true);
-			}
+			
+			m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			m_ppObjects[nObjects]->SetChild(pGunshipModel->m_pModelRootObject, true);
 			float fHeight = pTerrain->GetHeight(390.0f, 670.0f);
 			XMFLOAT3 xmf3Position = RandomPositionInSphere(XMFLOAT3(390.0f, fHeight + 35.0f, 670.0f), Random(20.0f, 100.0f), h - int(floor(nColumnSize / 2.0f)), nColumnSpace);
 			xmf3Position.y = pTerrain->GetHeight(xmf3Position.x, xmf3Position.z) + Random(0.0f, 25.0f);
@@ -75,16 +67,10 @@ void CHellicopterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 	{
 		for (int i = 0; i < m_nObjects - int(floor(float(m_nObjects) / float(nColumnSize)) * nFirstPassColumnSize); i++)
 		{
-			if (nObjects % 2)
-			{
-				m_ppObjects[nObjects] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pSuperCobraModel->m_pModelRootObject, true);
-			}
-			else
-			{
-				m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-				m_ppObjects[nObjects]->SetChild(pGunshipModel->m_pModelRootObject, true);
-			}
+			
+			
+			m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			m_ppObjects[nObjects]->SetChild(pGunshipModel->m_pModelRootObject, true);
 			m_ppObjects[nObjects]->SetPosition(RandomPositionInSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), Random(20.0f, 100.0f), nColumnSize - int(floor(nColumnSize / 2.0f)), nColumnSpace));
 			m_ppObjects[nObjects]->Rotate(0.0f, 90.0f, 0.0f);
 			m_ppObjects[nObjects++]->OnPrepareAnimate();
@@ -93,7 +79,6 @@ void CHellicopterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	if (pSuperCobraModel) delete pSuperCobraModel;
 	if (pGunshipModel) delete pGunshipModel;
 }
 
@@ -230,6 +215,45 @@ void CEthanObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 			xmf3Position.y = pTerrain->GetHeight(xmf3Position.x, xmf3Position.z);
 			m_ppObjects[nObjects++]->SetPosition(xmf3Position);
 		}
+	}
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	if (!pModel && pEthanModel) delete pEthanModel;
+}
+
+CHumanObjectsShader::CHumanObjectsShader()
+{
+}
+
+CHumanObjectsShader::~CHumanObjectsShader()
+{
+}
+
+void CHumanObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
+{
+
+	m_nObjects = 10;
+
+	m_ppObjects = new CGameObject * [m_nObjects];
+
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+
+	CLoadedModelInfo* pEthanModel = pModel;
+	if (!pEthanModel) pEthanModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL);
+
+	for (int x = 0; x <= m_nObjects; x++)
+	{
+		
+			m_ppObjects[x] = new CEthanObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pEthanModel, 1);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(0,0);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.25f);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackPosition(0, 0);
+			XMFLOAT3 xmf3Position = XMFLOAT3(1610.0, 146.0f, 2250.0f);
+			xmf3Position.y = pTerrain->GetHeight(xmf3Position.x, xmf3Position.z);
+			m_ppObjects[x]->SetScale(7.0,7.0,7.0);
+			m_ppObjects[x]->SetPosition(xmf3Position);
+		
 	}
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);

@@ -442,11 +442,21 @@ void CGameFramework::BuildObjects()
 
 void CGameFramework::ReleaseObjects()
 {
+
 	if (m_pPlayer) m_pPlayer->Release();
 
 	if (m_pScene) m_pScene->ReleaseObjects();
 	if (m_pScene) delete m_pScene;
 }
+
+// key value
+constexpr char INPUT_SPACEBAR = 0b1000000;
+constexpr char INPUT_KEY_W = 0b0100000;
+constexpr char INPUT_KEY_S = 0b0010000;
+constexpr char INPUT_KEY_D = 0b0001000;
+constexpr char INPUT_KEY_A = 0b0000100;
+constexpr char INPUT_KEY_E = 0b0000010;
+constexpr char INPUT_KEY_Q = 0b0000001;
 
 void CGameFramework::ProcessInput()
 {
@@ -455,35 +465,115 @@ void CGameFramework::ProcessInput()
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
 	if (!bProcessedByScene)
 	{
-		float cxDelta = 0.0f, cyDelta = 0.0f;
+		char inputKeyValue = 0;//S
+		DWORD dwDirection = 0;
+
+		if (pKeysBuffer[KEY_W] & 0xF0) {
+			dwDirection |= DIR_FORWARD;
+			if (m_nMode == SCENE2STAGE)
+			{
+			}
+			if (m_nMode != SCENE2STAGE)
+			{
+				inputKeyValue += INPUT_KEY_W;//S
+				m_pCamera->SetTimeLag(0.02);
+			}
+		}
+		if (pKeysBuffer[KEY_S] & 0xF0) {
+			dwDirection |= DIR_BACKWARD;
+			if (m_nMode == SCENE2STAGE)
+			{
+			}
+			if (m_nMode != SCENE2STAGE)
+			{
+				inputKeyValue += INPUT_KEY_S;//S
+				m_pCamera->SetTimeLag(0.02);
+			}
+		}
+		if (pKeysBuffer[KEY_D] & 0xF0) {
+				
+			if (m_nMode == SCENE2STAGE)
+			{
+			}
+			dwDirection |= DIR_RIGHT;
+			if (m_nMode != SCENE2STAGE)
+			{
+				inputKeyValue += INPUT_KEY_D;//S
+				m_pCamera->SetTimeLag(0.05);
+			}
+		}
+		if (pKeysBuffer[KEY_A] & 0xF0) {
+			if (m_nMode == SCENE2STAGE)
+			{
+			}
+			dwDirection |= DIR_LEFT;
+			
+			inputKeyValue += INPUT_KEY_A;//S
+			m_pCamera->SetTimeLag(0.05);
+			
+		}
+
+		if (pKeysBuffer[KEY_Q] & 0xF0) {
+			inputKeyValue += INPUT_KEY_Q;//S
+			dwDirection |= DIR_UP;
+			m_pCamera->SetTimeLag(0.05);
+		}
+		if (pKeysBuffer[KEY_E] & 0xF0) {
+			inputKeyValue += INPUT_KEY_E;//S
+			dwDirection |= DIR_DOWN;
+			m_pCamera->SetTimeLag(0.05);
+		}
+
+		if (pKeysBuffer[VK_SPACE] & 0xF0) {
+			inputKeyValue += INPUT_SPACEBAR;//S
+
+		}
+
+		// Server
+		if (inputKeyValue != 0) {
+			q_keyboardInput.push(inputKeyValue);
+		}//
+
+		float cxDelta = 0.0f, cyDelta = 0.0f, czDelta = 0.0f;
 		POINT ptCursorPos;
 		if (GetCapture() == m_hWnd)
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 2.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 2.0f;
+			czDelta = ((float)(ptCursorPos.y - m_ptOldCursorPos.y) + (float)(ptCursorPos.x - m_ptOldCursorPos.x)) / 3.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
-
-		DWORD dwDirection = 0;
-		if (pKeysBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
-		if (pKeysBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
-		if (pKeysBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
-		if (pKeysBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
-		if (pKeysBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
-		if (pKeysBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
 
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
 			if (cxDelta || cyDelta)
 			{
-				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				else
-					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				// Server
+				MouseInputVal inputMouseValue;
+
+				if (pKeysBuffer[VK_LBUTTON] & 0xF0)
+					inputMouseValue.button = L_BUTTON;
+				else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+					inputMouseValue.button = R_BUTTON;
+
+				inputMouseValue.delX = cxDelta;
+				inputMouseValue.delY = cyDelta;
+
+				q_mouseInput.push(inputMouseValue);
+				//====
+				if (m_nMode==SCENE2STAGE)
+				{
+					if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+						m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+					else
+						m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				}
 			}
-			if (dwDirection) m_pPlayer->Move(dwDirection, 12.25f, true);
+			if (m_nMode == SCENE2STAGE)
+				if (dwDirection) m_pPlayer->Move(dwDirection, 12.25f, true);
+
 		}
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
@@ -526,9 +616,12 @@ void CGameFramework::MoveToNextFrame()
 }
 
 //#define _WITH_PLAYER_TOP
-
+#define _WITH_PLAYER_TOP
+float g_time = 0.0f;
+float g_reverse_time = 0.0f;
 void CGameFramework::FrameAdvance()
 {
+	SleepEx(1, TRUE);//Server
 	m_GameTimer.Tick(30.0f);
 
 	ProcessInput();
@@ -637,3 +730,145 @@ void CGameFramework::ChangeScene(DWORD nMode)
 		}
 	}
 }
+
+
+
+
+//==================================================
+//			    Function for Networking
+//==================================================
+bool CGameFramework::CheckNewInputExist_Keyboard() {
+	return q_keyboardInput.empty();
+}
+bool CGameFramework::CheckNewInputExist_Mouse() {
+	return q_mouseInput.empty();
+}
+
+short CGameFramework::PopInputVal_Keyboard() {
+	short val = q_keyboardInput.front();
+	q_keyboardInput.pop();
+
+	return val;
+}
+MouseInputVal CGameFramework::PopInputVal_Mouse() {
+	MouseInputVal val = q_mouseInput.front();
+	q_mouseInput.pop();
+
+	return val;
+}
+
+void CGameFramework::SetPosition_PlayerObj(XMFLOAT3 pos) {
+	m_pPlayer->m_xmf3Position = pos;
+}
+void CGameFramework::SetVectors_PlayerObj(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec) {
+	m_pPlayer->SetVectorsByServer(rightVec, upVec, lookVec);
+}
+
+void CGameFramework::SetPosition_OtherPlayerObj(int id, XMFLOAT3 pos) {
+
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._41 = pos.x;
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._42 = pos.y;
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._43 = pos.z;
+	if (m_nMode == SCENE2STAGE)
+	{
+		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._41 = pos.x;
+		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._42 = pos.y;
+		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._43 = pos.z;
+	}
+}
+void CGameFramework::SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec) {
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetUp(upVec);
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetRight(rightVec);
+	m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetLook(lookVec);
+	if (m_nMode == SCENE2STAGE)
+	{
+		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->SetUp(upVec);
+		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->SetRight(rightVec);
+		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->SetLook(lookVec);
+	}
+}
+void CGameFramework::Remove_OtherPlayerObj(int id) {
+	if (m_pScene->m_ppShaders[0]->m_ppObjects[id] ) {
+		m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetScale(0.0, 0.0, 0.0);
+	}
+}
+
+void CGameFramework::Create_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look)
+{
+	((CAirplanePlayer*)m_pPlayer)->Firevalkan(NULL);
+	//m_GameSound.shootingSound();
+	((CAirplanePlayer*)m_pPlayer)->m_ppBullets[id]->m_xmf3FirePosition = pos;
+
+	CBulletObject* pBulletObjectL = NULL;
+	CBulletObject* pBulletObjectR = NULL;
+	XMFLOAT3 PlayerPos = ((CAirplanePlayer*)m_pPlayer)->GetLookVector() = xmf3look;
+
+	if (pBulletObjectL)
+	{
+
+		XMFLOAT3 xmf3Position = ((CAirplanePlayer*)m_pPlayer)->GetPosition() = pos;
+		//xmf3Position.x -= 10.0f;
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
+		pBulletObjectL->m_xmf4x4ToParent = pBulletObjectL->m_xmf4x4World;
+		pBulletObjectL->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
+		pBulletObjectL->SetMovingDirection(PlayerPos);
+		pBulletObjectL->Rotate(90.0f, 0.0, 0.0);
+		pBulletObjectL->SetScale(700.0, 200.0, 700.0);
+	}
+
+	if (pBulletObjectR)
+	{
+
+		XMFLOAT3 xmf3Position = ((CAirplanePlayer*)m_pPlayer)->GetPosition() = pos;
+		//xmf3Position.x += 10.0f;
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
+		pBulletObjectR->m_xmf4x4ToParent = pBulletObjectR->m_xmf4x4World;
+		pBulletObjectR->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
+		pBulletObjectR->SetMovingDirection(PlayerPos);
+		pBulletObjectR->Rotate(90.0f, 0.0, 0.0);
+		pBulletObjectR->SetScale(700.0, 200.0, 700.0);
+	}
+}
+
+void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look)
+{
+
+	//CBulletObject* pBulletObjectL = NULL;
+	//CBulletObject* pBulletObjectR = NULL;
+	//XMFLOAT3 PlayerPos = ((CMainPlayer*)m_pPlayer)->GetLookVector() = xmf3look;
+
+	//if (pBulletObjectL)
+	//{
+
+	//	XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
+	//	//xmf3Position.x -= 10.0f;
+	//	XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
+	//	pBulletObjectL->m_xmf4x4Transform = pBulletObjectL->m_xmf4x4World;
+	//	pBulletObjectL->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
+	//	pBulletObjectL->SetMovingDirection(PlayerPos);
+	//	pBulletObjectL->Rotate(90.0f, 0.0, 0.0);
+	//	pBulletObjectL->SetScale(700.0, 200.0, 700.0);
+	//}
+
+	//if (pBulletObjectR)
+	//{
+
+	//	XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
+	//	//xmf3Position.x += 10.0f;
+	//	XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
+	//	pBulletObjectR->m_xmf4x4Transform = pBulletObjectR->m_xmf4x4World;
+	//	pBulletObjectR->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
+	//	pBulletObjectR->SetMovingDirection(PlayerPos);
+	//	pBulletObjectR->Rotate(90.0f, 0.0, 0.0);
+	//	pBulletObjectR->SetScale(700.0, 200.0, 700.0);
+	//}
+}
+
+void CGameFramework::SetPosition_NPC(int id, XMFLOAT3 pos)
+{
+}
+
+void CGameFramework::SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
+{
+}
+//==================================================

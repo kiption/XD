@@ -155,6 +155,8 @@
     <ClInclude Include="BillboardObjectsShader.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="MissileObject.h" />
+    <ClInclude Include="Network.h" />
+    <ClInclude Include="ObjectsInfo.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Stage2.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
@@ -180,6 +182,7 @@
     <ClInclude Include="TerrainShader.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="WICTextureLoader12.h" />
+    <ClInclude Include="protocol.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AnimateInfo.cpp" />
@@ -219,10 +222,10 @@
     <ClCompile Include="WICTextureLoader12.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="LabProject07-9-7(Animation).rc" />
+    <ResourceCompile Include="REVENGER.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="LabProject07-9-7(Animation).ico" />
+    <Image Include="REVENGER.ico" />
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>

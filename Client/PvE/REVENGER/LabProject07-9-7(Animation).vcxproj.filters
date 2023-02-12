@@ -41,6 +41,9 @@
     <Filter Include="Client\GameTime">
       <UniqueIdentifier>{a904e15a-95f7-4b33-8ae7-49ca06677536}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Server">
+      <UniqueIdentifier>{17fece3a-1223-4615-bf79-938648c788aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSound.h">
@@ -132,6 +135,15 @@
     </ClInclude>
     <ClInclude Include="BillboardObjectsShader.h">
       <Filter>Client\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectsInfo.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="Network.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="protocol.h">
+      <Filter>Server</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -227,7 +239,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="LabProject07-9-7(Animation).rc">
+    <ResourceCompile Include="REVENGER.rc">
       <Filter>Resource_File</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -235,7 +247,7 @@
     <Image Include="small.ico">
       <Filter>Resource_File</Filter>
     </Image>
-    <Image Include="LabProject07-9-7(Animation).ico">
+    <Image Include="REVENGER.ico">
       <Filter>Resource_File</Filter>
     </Image>
   </ItemGroup>

@@ -8,7 +8,7 @@
 #define WIN32_LEAN_AND_MEAN             // 거의 사용되지 않는 내용은 Windows 헤더에서 제외합니다.
 // Windows 헤더 파일:
 #include <windows.h>
-
+#include <SDKDDKVer.h>
 // C의 런타임 헤더 파일입니다.
 #include <stdlib.h>
 #include <malloc.h>
@@ -39,6 +39,21 @@ using namespace std;
 #include <dxgidebug.h>
 #endif
 
+
+#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d2d1.lib")
+#pragma comment(lib, "dwrite.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "windowscodecs.lib")
+#pragma comment(lib, "Winmm.lib")
+#ifdef _DEBUG
+#include <dxgidebug.h>
+#endif
+
+using namespace std;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 

@@ -97,14 +97,25 @@ void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	m_nHierarchicalGameObjects = 0;
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
-	m_nShaders = 1;
-	m_ppShaders = new CShader * [m_nShaders];
 
+	m_nBillboardShaders = 1;
+	m_pBillboardShader = new CShader * [m_nBillboardShaders];
 	BillboardObjectsShader* pCrossHairShader = new BillboardObjectsShader();
 	pCrossHairShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	pCrossHairShader->SetCurScene(SCENE2STAGE);
 	pCrossHairShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_ppShaders[0] = pCrossHairShader;
+	m_pBillboardShader[0] = pCrossHairShader;
+
+	m_nShaders = 1;
+	m_ppShaders = new CSkinnedAnimationObjectsShader * [m_nShaders];
+
+
+	CHumanObjectsShader* pOtherPlayerShader = new CHumanObjectsShader();
+	pOtherPlayerShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pOtherPlayerShader->SetCurScene(SCENE2STAGE);
+	pOtherPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL,m_pTerrain);
+	m_ppShaders[0] = pOtherPlayerShader;
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -119,6 +130,16 @@ void Stage2::ReleaseObjects()
 		delete[] m_ppGameObjects;
 	}
 
+	if (m_pBillboardShader)
+	{
+		for (int i = 0; i < m_nBillboardShaders; i++)
+		{
+			m_pBillboardShader[i]->ReleaseShaderVariables();
+			m_pBillboardShader[i]->ReleaseObjects();
+			m_pBillboardShader[i]->Release();
+		}
+		delete[] m_pBillboardShader;
+	}
 	if (m_ppShaders)
 	{
 		for (int i = 0; i < m_nShaders; i++)
@@ -129,7 +150,6 @@ void Stage2::ReleaseObjects()
 		}
 		delete[] m_ppShaders;
 	}
-
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
 
@@ -373,6 +393,7 @@ void Stage2::ReleaseUploadBuffers()
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++) m_ppHierarchicalGameObjects[i]->ReleaseUploadBuffers();
 }
 
@@ -477,6 +498,7 @@ void Stage2::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera);
 
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
 	{
