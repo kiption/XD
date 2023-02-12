@@ -90,6 +90,9 @@
     <Filter Include="Client\Shader\BaseShader">
       <UniqueIdentifier>{e4f702b1-e057-420d-a141-9905ed753e36}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Client\UI">
+      <UniqueIdentifier>{a091a4e2-7e24-4dae-a168-0cefab3c2655}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -200,6 +203,9 @@
     <ClInclude Include="HumanPlayer.h">
       <Filter>Client\Player\MainPlayer</Filter>
     </ClInclude>
+    <ClInclude Include="UILayer.h">
+      <Filter>Client\UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -294,6 +300,9 @@
     </ClCompile>
     <ClCompile Include="HumanPlayer.cpp">
       <Filter>Client\Player\MainPlayer</Filter>
+    </ClCompile>
+    <ClCompile Include="UILayer.cpp">
+      <Filter>Client\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

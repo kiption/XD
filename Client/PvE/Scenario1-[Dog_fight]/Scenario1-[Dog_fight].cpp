@@ -156,6 +156,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 				}
 
+				// 5. 자신의 총알 개수 최신화
+				wchar_t MyBullet[20];
+				_itow_s(my_info.m_bullet, MyBullet, sizeof(MyBullet), 10);
+				wcscpy_s(gGameFramework.m_myBullet, MyBullet);
+
+				// 6. HP 최신화
+
+
 			}
 
 			//==================================================

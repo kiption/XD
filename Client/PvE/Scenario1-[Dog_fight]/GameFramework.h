@@ -10,6 +10,8 @@
 
 enum MButton { L_BUTTON, R_BUTTON };
 
+class UILayer;
+
 struct MouseInputVal {
 	char button;
 	float delX, delY;
@@ -57,6 +59,9 @@ public:
 
 	// 서버로 보낼 마우스 입력값
 	queue<MouseInputVal> q_mouseInput;
+
+	// 서버에서 받은 총알 개수
+	WCHAR						m_myBullet[20];
 //==================================================
 
 //==================================================
@@ -84,7 +89,8 @@ public:
 
 	void SetPosition_NPC(int id, XMFLOAT3 pos);
 	void SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
-
+	
+	void UpdateUI();
 //==================================================
 
 #ifdef _WITH_DIRECT2D
@@ -130,7 +136,7 @@ private:
 	bool						m_bMsaa4xEnable = false;
 	UINT						m_nMsaa4xQualityLevels = 0;
 
-	static const UINT			m_nSwapChainBuffers = 2;
+	static const UINT			m_nSwapChainBuffers = 3;
 	UINT						m_nSwapChainBufferIndex;
 
 	ID3D12Resource				*m_ppd3dSwapChainBackBuffers[m_nSwapChainBuffers];
@@ -195,6 +201,9 @@ private:
 	_TCHAR						m_pszFrameRate[70];
 
 	_TCHAR						m_pszCaption[100];
+
+	UILayer						*m_pUILayer = NULL;
+
 protected:
 	ID3D12Resource* m_pd3dcbFrameworkInfo = NULL;
 	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;

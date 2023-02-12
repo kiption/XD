@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "GameFramework.h"
-
+#include "UILayer.h"
 
 
 uniform_real_distribution<float> uidx(640.0, 690.0);
@@ -601,6 +601,51 @@ void CGameFramework::OnDestroy()
 
 void CGameFramework::BuildObjects()
 {
+	//m_pUILayer = new UILayer(m_nSwapChainBuffers, 2, m_pd3dDevice, m_pd3dCommandQueue, m_ppd3dSwapChainBackBuffers, m_nWndClientWidth, m_nWndClientHeight);
+
+	//// ==========현재 총알 개수 출력=======
+	//ID2D1SolidColorBrush* pd2dBrush = m_pUILayer->CreateBrush(D2D1::ColorF(D2D1::ColorF::Black, 1.0f));
+	//WCHAR TextForm[20];
+	//wcscpy_s(TextForm, L"돋움체");
+
+	//IDWriteTextFormat* pdwTextFormat = m_pUILayer->CreateTextFormat(TextForm, m_nWndClientHeight / 10.0f);
+	//D2D1_RECT_F d2dRect = D2D1::RectF(400.0f, 300.0f, (float)m_nWndClientWidth, (float)m_nWndClientHeight);
+
+	//m_pUILayer->UpdateTextOutputs(0, NULL, &d2dRect, pdwTextFormat, pd2dBrush);
+	// ==========================================
+
+	//// ===============현재 체력 출력=============
+	//pd2dBrush = m_pUILayer->CreateBrush(D2D1::ColorF(D2D1::ColorF::BlanchedAlmond, 1.0f));
+	//pdwTextFormat = m_pUILayer->CreateTextFormat((wchar_t*)"Verdana", m_nWndClientHeight / 25.0f);
+	//d2dRect = D2D1::RectF(700.0f, 600.0f, (float)m_nWndClientWidth, (float)m_nWndClientHeight);
+
+	//m_pUILayer->UpdateTextOutputs(1, NULL, &d2dRect, pdwTextFormat, pd2dBrush);
+	//// ==========================================
+
+	//// ==============User Lap 숫자 출력==========
+	//pd2dBrush = m_pUILayer->CreateBrush(D2D1::ColorF(D2D1::ColorF::BlanchedAlmond, 1.0f));
+	//pdwTextFormat = m_pUILayer->CreateTextFormat(L"Verdana", m_nWndClientHeight / 25.0f);
+	//d2dRect = D2D1::RectF(700.0f, 0.0f, (float)m_nWndClientWidth, (float)m_nWndClientHeight);
+
+	//m_pUILayer->UpdateTextOutputs(2, NULL, &d2dRect, pdwTextFormat, pd2dBrush);
+	//// ==========================================
+
+	//// ==============User Lap 글자 출력==========
+	//pd2dBrush = m_pUILayer->CreateBrush(D2D1::ColorF(D2D1::ColorF::BlanchedAlmond, 1.0f));
+	//pdwTextFormat = m_pUILayer->CreateTextFormat(L"Verdana", m_nWndClientHeight / 25.0f);
+	//d2dRect = D2D1::RectF(850.0f, 0.0f, (float)m_nWndClientWidth, (float)m_nWndClientHeight);
+
+	//m_pUILayer->UpdateTextOutputs(3, NULL, &d2dRect, pdwTextFormat, pd2dBrush);
+	//// ==========================================
+
+	//// ============도착 시 최종 시간 출력=======
+	//pd2dBrush = m_pUILayer->CreateBrush(D2D1::ColorF(D2D1::ColorF::OrangeRed, 1.0f));
+	//pdwTextFormat = m_pUILayer->CreateTextFormat((wchar_t *)"Verdana", m_nWndClientHeight / 15.0f);
+	//d2dRect = D2D1::RectF(0.0f, 300.0f, (float)m_nWndClientWidth, (float)m_nWndClientHeight);
+
+	//m_pUILayer->UpdateTextOutputs(4, NULL, &d2dRect, pdwTextFormat, pd2dBrush);
+	//// ==========================================
+
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
 	m_pScene = new CScene();
@@ -847,6 +892,7 @@ void CGameFramework::FrameAdvance()
 	ProcessInput();
 
 	AnimateObjects();
+	//UpdateUI();
 
 	//m_pScene->OnPreRender(m_pd3dDevice, m_pd3dCommandQueue, m_pd3dFence, m_hFenceEvent);
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
@@ -898,6 +944,13 @@ void CGameFramework::FrameAdvance()
 	D2D1_RECT_F rcLowerText = D2D1::RectF(0, szRenderTarget.height * 0.8f, szRenderTarget.width, szRenderTarget.height);
 	m_pd2dDeviceContext->DrawTextW(L" ", (UINT32)wcslen(L" "), m_pdwFont, &rcLowerText, m_pd2dbrText);
 
+	D2D1_RECT_F rcBulletText = D2D1::RectF(750, 650, szRenderTarget.width, szRenderTarget.height * 0.5f);
+	m_pd2dDeviceContext->DrawTextW(m_myBullet, (UINT32)wcslen(m_myBullet), m_pdwFont, &rcBulletText, m_pd2dbrText);
+
+	D2D1_RECT_F rcMaxBulletText = D2D1::RectF(850, 650, szRenderTarget.width, szRenderTarget.height * 0.5f);
+	m_pd2dDeviceContext->DrawTextW(L"/100" , (UINT32)wcslen(L"/100"), m_pdwFont, &rcMaxBulletText, m_pd2dbrText);
+
+
 	m_pd2dDeviceContext->EndDraw();
 
 	m_pd3d11On12Device->ReleaseWrappedResources(ppd3dResources, _countof(ppd3dResources));
@@ -931,6 +984,16 @@ void CGameFramework::FrameAdvance()
 	size_t nLength = _tcslen(m_pszCaption);
 	_stprintf_s(m_pszCaption + nLength, 100 - nLength, _T("(%5.1f, %5.1f, %5.1f) Particles = %d"), m_pPlayer->m_xmf3Position.x, m_pPlayer->m_xmf3Position.y, m_pPlayer->m_xmf3Position.z, ::gnCurrentParticles);
 	::SetWindowText(m_hWnd, m_pszCaption);
+}
+
+void CGameFramework::UpdateUI()
+{
+	m_pUILayer->UpdateTextOutputs(0, m_myBullet, NULL, NULL, NULL);
+	//m_pUILayer->UpdateTextOutputs(1, m_InputName, NULL, NULL, NULL);
+	/*m_pUILayer->UpdateTextOutputs(2, m_mylapnum, NULL, NULL, NULL);
+	m_pUILayer->UpdateTextOutputs(3, m_lapmark, NULL, NULL, NULL);
+	m_pUILayer->UpdateTextOutputs(4, m_endTime, NULL, NULL, NULL);*/
+
 }
 
 

@@ -716,6 +716,12 @@ void CGameFramework::FrameAdvance()
 	D2D1_RECT_F rcLowerText = D2D1::RectF(0, szRenderTarget.height * 0.8f, szRenderTarget.width, szRenderTarget.height);
 	m_pd2dDeviceContext->DrawTextW(L" ", (UINT32)wcslen(L" "), m_pdwFont, &rcLowerText, m_pd2dbrText);
 
+	D2D1_RECT_F rcBulletText = D2D1::RectF(750, 750, szRenderTarget.width, szRenderTarget.height * 0.5f);
+	m_pd2dDeviceContext->DrawTextW(m_myBullet, (UINT32)wcslen(m_myBullet), m_pdwFont, &rcBulletText, m_pd2dbrText);
+
+	D2D1_RECT_F rcMaxBulletText = D2D1::RectF(850, 750, szRenderTarget.width, szRenderTarget.height * 0.5f);
+	m_pd2dDeviceContext->DrawTextW(L"/100", (UINT32)wcslen(L"/100"), m_pdwFont, &rcMaxBulletText, m_pd2dbrText);
+
 	m_pd2dDeviceContext->EndDraw();
 
 	m_pd3d11On12Device->ReleaseWrappedResources(ppd3dResources, _countof(ppd3dResources));
