@@ -781,6 +781,7 @@ void timerFunc() {
 					if (pl.m_xoobb.Intersects(other_pl.m_xoobb)) {
 						pl.s_lock.lock();
 						pl.hp -= COLLIDE_PLAYER_DAMAGE;
+						other_pl.hp -= COLLIDE_PLAYER_DAMAGE;
 
 						if (pl.hp <= 0) {
 							pl.pl_state = PL_ST_DEAD;
@@ -792,6 +793,35 @@ void timerFunc() {
 							SC_PLAYER_STATE_PACKET hpzero_packet;
 							hpzero_packet.size = sizeof(SC_PLAYER_STATE_PACKET);
 							hpzero_packet.id = pl.id;
+							hpzero_packet.type = SC_PLAYER_STATE;
+							hpzero_packet.state = ST_PACK_DEAD;
+
+							pl.do_send(&hpzero_packet);
+						}
+						else {
+							cout << "Player[" << pl.id << "] is Damaged by Player[" << other_pl.id << "]!" << endl; //server message
+
+							// 충돌한 플레이어에게 충돌 사실을 알립니다.
+							SC_HP_COUNT_PACKET damaged_packet;
+							damaged_packet.size = sizeof(SC_HP_COUNT_PACKET);
+							damaged_packet.id = pl.id;
+							damaged_packet.type = SC_HP_COUNT;
+							damaged_packet.hp = pl.hp;
+							damaged_packet.change_cause = CAUSE_DAMAGED_BY_PLAYER;
+
+							pl.do_send(&damaged_packet);
+						}
+
+						if (other_pl.hp <= 0) {
+							other_pl.pl_state = PL_ST_DEAD;
+							other_pl.death_time = chrono::system_clock::now();
+
+							cout << "Player[" << pl.id << "] is Killed by Player[" << other_pl.id << "]!" << endl; //server message
+
+							// 사망한 플레이어에게 게임오버 사실을 알립니다.
+							SC_PLAYER_STATE_PACKET hpzero_packet;
+							hpzero_packet.size = sizeof(SC_PLAYER_STATE_PACKET);
+							hpzero_packet.id = other_pl.id;
 							hpzero_packet.type = SC_PLAYER_STATE;
 							hpzero_packet.state = ST_PACK_DEAD;
 
