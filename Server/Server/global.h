@@ -24,7 +24,7 @@
 #define BULLET_RANGE 200.f				// 총알 사정거리
 #define BULLET_DAMAGE 10				// 총알 피격데미지
 
-#define RESPAWN_TIME 10000.f			// 리스폰 시간 (ms)
+#define RESPAWN_TIME 10000			// 리스폰 시간 (ms)
 
 #define heli_bbsize_x 2.0f				// 헬기 BB크기
 #define heli_bbsize_y 2.0f

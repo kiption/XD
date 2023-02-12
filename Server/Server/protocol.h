@@ -113,7 +113,7 @@ struct SC_HP_COUNT_PACKET {
 	int change_cause;
 };
 
-enum player_state { ST_PACK_ALIVE, ST_PACK_DEAD };
+enum player_state { ST_PACK_REVIVAL, ST_PACK_DEAD };
 struct SC_PLAYER_STATE_PACKET {
 	unsigned char size;
 	char type;
