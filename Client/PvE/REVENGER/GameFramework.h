@@ -60,6 +60,38 @@ public:
 	void ChangeScene(DWORD nMode);
 	DWORD						m_nMode = SCENE1STAGE;
 
+#ifdef _WITH_DIRECT2D
+	void CreateDirect2DDevice();
+#endif
+	static const UINT			m_nSwapChainBuffers = 2;
+
+#ifdef _WITH_DIRECT2D
+	ID3D11On12Device* m_pd3d11On12Device = NULL;
+	ID3D11DeviceContext* m_pd3d11DeviceContext = NULL;
+	ID2D1Factory3* m_pd2dFactory = NULL;
+	IDWriteFactory* m_pdWriteFactory = NULL;
+	ID2D1Device2* m_pd2dDevice = NULL;
+	ID2D1DeviceContext2* m_pd2dDeviceContext = NULL;
+
+	ID3D11Resource* m_ppd3d11WrappedBackBuffers[m_nSwapChainBuffers];
+	ID2D1Bitmap1* m_ppd2dRenderTargets[m_nSwapChainBuffers];
+
+	ID2D1SolidColorBrush* m_pd2dbrBackground = NULL;
+	ID2D1SolidColorBrush* m_pd2dbrBorder = NULL;
+	IDWriteTextFormat* m_pdwFont = NULL;
+	IDWriteTextLayout* m_pdwTextLayout = NULL;
+	ID2D1SolidColorBrush* m_pd2dbrText = NULL;
+
+#ifdef _WITH_DIRECT2D_IMAGE_EFFECT
+	IWICImagingFactory* m_pwicImagingFactory = NULL;
+	ID2D1Effect* m_pd2dfxBitmapSource = NULL;
+	ID2D1Effect* m_pd2dfxGaussianBlur = NULL;
+	ID2D1Effect* m_pd2dfxEdgeDetection = NULL;
+	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState = NULL;
+	IWICFormatConverter* m_pwicFormatConverter = NULL;
+	int							m_nDrawEffectImage = 0;
+#endif
+#endif
 private:
 	HINSTANCE					m_hInstance;
 	HWND						m_hWnd; 
@@ -74,7 +106,6 @@ private:
 	bool						m_bMsaa4xEnable = false;
 	UINT						m_nMsaa4xQualityLevels = 0;
 
-	static const UINT			m_nSwapChainBuffers = 2;
 	UINT						m_nSwapChainBufferIndex;
 
 	ID3D12Resource				*m_ppd3dSwapChainBackBuffers[m_nSwapChainBuffers];
@@ -90,7 +121,8 @@ private:
 	ID3D12Fence					*m_pd3dFence = NULL;
 	UINT64						m_nFenceValues[m_nSwapChainBuffers];
 	HANDLE						m_hFenceEvent;
-
+	D3D12_VIEWPORT				m_d3dViewport;
+	D3D12_RECT					m_d3dScissorRect;
 
 #if defined(_DEBUG)
 	ID3D12Debug					*m_pd3dDebugController;

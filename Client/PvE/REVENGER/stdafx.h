@@ -19,7 +19,7 @@
 #include <string>
 #include <wrl.h>
 #include <shellapi.h>
-
+#include <iostream>
 #include <fstream>
 #include <vector>
 #include <random>
@@ -39,7 +39,14 @@ using namespace std;
 #include <dxgidebug.h>
 #endif
 
+#include <d2d1_3.h>
+#include <dwrite.h>
+#include <dwrite_1.h>
+#include <d3d11on12.h>
+#include <d2d1_1helper.h>
 
+#include <d2d1effects.h>
+#include <wincodec.h>
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -66,11 +73,12 @@ extern HINSTANCE						ghAppInstance;
 #define FRAME_BUFFER_WIDTH				1280
 #define FRAME_BUFFER_HEIGHT				960
 
-#pragma comment(lib, "d3dcompiler.lib")
-#pragma comment(lib, "d3d12.lib")
-#pragma comment(lib, "dxgi.lib")
 
-#pragma comment(lib, "dxguid.lib")
+#define _WITH_DIRECT2D
+
+#ifdef _WITH_DIRECT2D
+#define _WITH_DIRECT2D_IMAGE_EFFECT
+#endif
 
 #define SCENE1STAGE 0x00
 #define SCENE2STAGE 0x01

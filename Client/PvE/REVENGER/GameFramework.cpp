@@ -25,6 +25,15 @@ CGameFramework::CGameFramework()
 	m_pd3dFence = NULL;
 	for (int i = 0; i < m_nSwapChainBuffers; i++) m_nFenceValues[i] = 0;
 
+	for (int i = 0; i < m_nSwapChainBuffers; i++)
+	{
+#ifdef _WITH_DIRECT2D
+		m_ppd3d11WrappedBackBuffers[i] = NULL;
+		m_ppd2dRenderTargets[i] = NULL;
+#endif
+
+	}
+
 	m_nWndClientWidth = FRAME_BUFFER_WIDTH;
 	m_nWndClientHeight = FRAME_BUFFER_HEIGHT;
 
@@ -50,7 +59,9 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CreateDepthStencilView();
 
 	CoInitialize(NULL);
-
+#ifdef _WITH_DIRECT2D
+	CreateDirect2DDevice();
+#endif
 	BuildObjects();
 
 	return(true);
@@ -142,7 +153,11 @@ void CGameFramework::CreateDirect3DDevice()
 		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
 		if (SUCCEEDED(D3D12CreateDevice(pd3dAdapter, D3D_FEATURE_LEVEL_12_0, _uuidof(ID3D12Device), (void**)&m_pd3dDevice))) break;
 	}
-
+	if (!m_pd3dDevice)
+	{
+		hResult = m_pdxgiFactory->EnumWarpAdapter(_uuidof(IDXGIAdapter1), (void**)&pd3dAdapter);
+		hResult = D3D12CreateDevice(pd3dAdapter, D3D_FEATURE_LEVEL_11_0, _uuidof(ID3D12Device), (void**)&m_pd3dDevice);
+	}
 	if (!pd3dAdapter)
 	{
 		m_pdxgiFactory->EnumWarpAdapter(_uuidof(IDXGIFactory4), (void**)&pd3dAdapter);
@@ -168,6 +183,15 @@ void CGameFramework::CreateDirect3DDevice()
 	::gnDsvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
 	if (pd3dAdapter) pd3dAdapter->Release();
+
+	m_d3dViewport.TopLeftX = 0;
+	m_d3dViewport.TopLeftY = 0;
+	m_d3dViewport.Width = static_cast<float>(m_nWndClientWidth);
+	m_d3dViewport.Height = static_cast<float>(m_nWndClientHeight);
+	m_d3dViewport.MinDepth = 0.0f;
+	m_d3dViewport.MaxDepth = 1.0f;
+
+	m_d3dScissorRect = { 0, 0, m_nWndClientWidth, m_nWndClientHeight };
 }
 
 void CGameFramework::CreateCommandQueueAndList()
@@ -671,6 +695,33 @@ void CGameFramework::FrameAdvance()
 
 	WaitForGpuComplete();
 
+#ifdef _WITH_DIRECT2D
+	//Direct2D Drawing
+	m_pd2dDeviceContext->SetTarget(m_ppd2dRenderTargets[m_nSwapChainBufferIndex]);
+	ID3D11Resource* ppd3dResources[] = { m_ppd3d11WrappedBackBuffers[m_nSwapChainBufferIndex] };
+	m_pd3d11On12Device->AcquireWrappedResources(ppd3dResources, _countof(ppd3dResources));
+
+	m_pd2dDeviceContext->BeginDraw();
+
+	m_pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+#ifdef _WITH_DIRECT2D_IMAGE_EFFECT
+	D2D_POINT_2F d2dPoint = { 0.0f, 0.0f };
+	D2D_RECT_F d2dRect = { 100.0f, 100.0f, 250.0f, 250.0f };
+	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxGaussianBlur, &d2dPoint, &d2dRect);
+#endif
+	D2D1_SIZE_F szRenderTarget = m_ppd2dRenderTargets[m_nSwapChainBufferIndex]->GetSize();
+	D2D1_RECT_F rcUpperText = D2D1::RectF(0, 0, szRenderTarget.width, szRenderTarget.height * 0.25f);
+	m_pd2dDeviceContext->DrawTextW(L"Locking...", (UINT32)wcslen(L"Locking..."), m_pdwFont, &rcUpperText, m_pd2dbrText);
+
+	D2D1_RECT_F rcLowerText = D2D1::RectF(0, szRenderTarget.height * 0.8f, szRenderTarget.width, szRenderTarget.height);
+	m_pd2dDeviceContext->DrawTextW(L" ", (UINT32)wcslen(L" "), m_pdwFont, &rcLowerText, m_pd2dbrText);
+
+	m_pd2dDeviceContext->EndDraw();
+
+	m_pd3d11On12Device->ReleaseWrappedResources(ppd3dResources, _countof(ppd3dResources));
+
+	m_pd3d11DeviceContext->Flush();
+#endif
 #ifdef _WITH_PRESENT_PARAMETERS
 	DXGI_PRESENT_PARAMETERS dxgiPresentParameters;
 	dxgiPresentParameters.DirtyRectsCount = 0;
@@ -731,6 +782,114 @@ void CGameFramework::ChangeScene(DWORD nMode)
 		}
 	}
 }
+
+#ifdef _WITH_DIRECT2D
+void CGameFramework::CreateDirect2DDevice()
+{
+	UINT nD3D11DeviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+#if defined(_DEBUG) || defined(DBG)
+	nD3D11DeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+	ID3D11Device* pd3d11Device = NULL;
+	ID3D12CommandQueue* ppd3dCommandQueues[] = { m_pd3dCommandQueue };
+	HRESULT hResult = ::D3D11On12CreateDevice(m_pd3dDevice, nD3D11DeviceFlags, NULL, 0, reinterpret_cast<IUnknown**>(ppd3dCommandQueues), _countof(ppd3dCommandQueues), 0, &pd3d11Device, &m_pd3d11DeviceContext, NULL);
+	hResult = pd3d11Device->QueryInterface(__uuidof(ID3D11On12Device), (void**)&m_pd3d11On12Device);
+	if (pd3d11Device) pd3d11Device->Release();
+
+	D2D1_FACTORY_OPTIONS nD2DFactoryOptions = { D2D1_DEBUG_LEVEL_NONE };
+#if defined(_DEBUG) || defined(DBG)
+	nD2DFactoryOptions.debugLevel = D2D1_DEBUG_LEVEL_INFORMATION;
+	ID3D12InfoQueue* pd3dInfoQueue = NULL;
+	if (SUCCEEDED(m_pd3dDevice->QueryInterface(IID_PPV_ARGS(&pd3dInfoQueue))))
+	{
+		D3D12_MESSAGE_SEVERITY pd3dSeverities[] =
+		{
+			D3D12_MESSAGE_SEVERITY_INFO,
+		};
+
+		D3D12_MESSAGE_ID pd3dDenyIds[] =
+		{
+			D3D12_MESSAGE_ID_INVALID_DESCRIPTOR_HANDLE,
+		};
+
+		D3D12_INFO_QUEUE_FILTER d3dInforQueueFilter = { };
+		d3dInforQueueFilter.DenyList.NumSeverities = _countof(pd3dSeverities);
+		d3dInforQueueFilter.DenyList.pSeverityList = pd3dSeverities;
+		d3dInforQueueFilter.DenyList.NumIDs = _countof(pd3dDenyIds);
+		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
+
+		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
+	}
+	pd3dInfoQueue->Release();
+#endif
+
+	hResult = ::D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory3), &nD2DFactoryOptions, (void**)&m_pd2dFactory);
+
+	IDXGIDevice* pdxgiDevice = NULL;
+	hResult = m_pd3d11On12Device->QueryInterface(__uuidof(IDXGIDevice), (void**)&pdxgiDevice);
+	hResult = m_pd2dFactory->CreateDevice(pdxgiDevice, &m_pd2dDevice);
+	hResult = m_pd2dDevice->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &m_pd2dDeviceContext);
+	hResult = ::DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), (IUnknown**)&m_pdWriteFactory);
+	if (pdxgiDevice) pdxgiDevice->Release();
+
+	m_pd2dDeviceContext->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
+
+	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(0.3f, 0.0f, 0.0f, 0.5f), &m_pd2dbrBackground);
+	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF(0x9ACD32, 1.0f)), &m_pd2dbrBorder);
+
+	hResult = m_pdWriteFactory->CreateTextFormat(L"텍스트 레이아웃", NULL, DWRITE_FONT_WEIGHT_DEMI_BOLD, DWRITE_FONT_STYLE_OBLIQUE, DWRITE_FONT_STRETCH_NORMAL, 24.0f, L"en-US", &m_pdwFont);
+	hResult = m_pdwFont->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	hResult = m_pdwFont->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::DarkBlue, 0.8f), &m_pd2dbrText);
+	hResult = m_pdWriteFactory->CreateTextLayout(L"텍스트 레이아웃", 6, m_pdwFont, 1024, 1024, &m_pdwTextLayout);
+
+	float fDpi = (float)GetDpiForWindow(m_hWnd);
+	D2D1_BITMAP_PROPERTIES1 d2dBitmapProperties = D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW, D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED), fDpi, fDpi);
+
+	for (UINT i = 0; i < m_nSwapChainBuffers; i++)
+	{
+		D3D11_RESOURCE_FLAGS d3d11Flags = { D3D11_BIND_RENDER_TARGET };
+		m_pd3d11On12Device->CreateWrappedResource(m_ppd3dSwapChainBackBuffers[i], &d3d11Flags, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT, IID_PPV_ARGS(&m_ppd3d11WrappedBackBuffers[i]));
+		IDXGISurface* pdxgiSurface = NULL;
+		m_ppd3d11WrappedBackBuffers[i]->QueryInterface(__uuidof(IDXGISurface), (void**)&pdxgiSurface);
+		m_pd2dDeviceContext->CreateBitmapFromDxgiSurface(pdxgiSurface, &d2dBitmapProperties, &m_ppd2dRenderTargets[i]);
+		if (pdxgiSurface) pdxgiSurface->Release();
+	}
+
+#ifdef _WITH_DIRECT2D_IMAGE_EFFECT
+	CoInitialize(NULL);
+	hResult = ::CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, __uuidof(IWICImagingFactory), (void**)&m_pwicImagingFactory);
+
+	hResult = m_pd2dFactory->CreateDrawingStateBlock(&m_pd2dsbDrawingState);
+	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1BitmapSource, &m_pd2dfxBitmapSource);
+	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1GaussianBlur, &m_pd2dfxGaussianBlur);
+	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1EdgeDetection, &m_pd2dfxEdgeDetection);
+
+	IWICBitmapDecoder* pwicBitmapDecoder;
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/MiniMap.jpg", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	IWICBitmapFrameDecode* pwicFrameDecode;
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur->SetInputEffect(0, m_pd2dfxBitmapSource);
+	m_pd2dfxGaussianBlur->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection->SetInputEffect(0, m_pd2dfxBitmapSource);
+	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
+	if (pwicFrameDecode) pwicFrameDecode->Release();
+#endif
+}
+#endif
 
 
 
