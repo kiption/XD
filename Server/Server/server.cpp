@@ -21,6 +21,7 @@ using namespace std;
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
+enum PLAYER_STATE { PL_ST_ALIVE, PL_ST_DEAD };
 
 Coordinate basic_coordinate;	// 기본(초기) 좌표계
 
@@ -57,19 +58,29 @@ public:
 	SESSION_STATE s_state;
 	int id;
 	SOCKET socket;
+	int remain_size;
+	char name[NAME_SIZE];
+
+	PLAYER_STATE pl_state;
 	int hp;
 	int bullet;
 	XMFLOAT3 pos;								// Position (x, y, z)
 	float pitch, yaw, roll;						// Rotated Degree
 	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;	// 현재 Look, Right, Up Vectors
-	char name[NAME_SIZE];
-	int remain_size;
+	chrono::system_clock::time_point death_time;
+
+	BoundingOrientedBox m_xoobb;	// Bounding Box
 
 public:
 	SESSION()
 	{
+		s_state = ST_FREE;
 		id = -1;
 		socket = 0;
+		remain_size = 0;
+		name[0] = 0;
+
+		pl_state = PL_ST_ALIVE;
 		hp = 100;
 		bullet = 100;
 		pos = { 0.0f, 0.0f, 0.0f };
@@ -77,9 +88,8 @@ public:
 		m_rightvec = { 1.0f, 0.0f, 0.0f };
 		m_upvec = { 0.0f, 1.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 1.0f };
-		name[0] = 0;
-		s_state = ST_FREE;
-		remain_size = 0;
+
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(1.5f, 1.5f, 1.5f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	}
 
 	~SESSION() {}
@@ -103,9 +113,9 @@ public:
 		OVER_EXP* s_data = new OVER_EXP{ reinterpret_cast<char*>(packet) };
 		ZeroMemory(&s_data->overlapped, sizeof(s_data->overlapped));
 
-		cout << "[do_send] Target ID: " << id << "\n" << endl;
+		//cout << "[do_send] Target ID: " << id << "\n" << endl;
 		int ret = WSASend(socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, 0);
-		if (ret != 0) {
+		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
 			cout << "WSASend Error - " << ret << endl;
 			cout << GetLastError() << endl;
 		}
@@ -114,6 +124,8 @@ public:
 	void send_login_info_packet();
 	void send_move_packet(int client_id, short move_target);
 	void send_rotate_packet(int client_id, short rotate_target);
+
+	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(1.5f, 1.5f, 1.5f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 };
 
 int online_player_cnt = 0;
@@ -148,7 +160,10 @@ void SESSION::send_login_info_packet()
 	login_info_packet.look_y = basic_coordinate.look.y;
 	login_info_packet.look_z = basic_coordinate.look.z;
 
-	cout << "[SC_LOGIN_INFO]";
+	login_info_packet.hp = hp;
+	login_info_packet.remain_bullet = bullet;
+
+	//cout << "[SC_LOGIN_INFO]";
 	do_send(&login_info_packet);
 }
 void SESSION::send_move_packet(int client_id, short move_target)
@@ -162,7 +177,7 @@ void SESSION::send_move_packet(int client_id, short move_target)
 	move_pl_packet.y = clients[client_id].pos.y;
 	move_pl_packet.z = clients[client_id].pos.z;
 
-	cout << "[SC_MOVE]";
+	//cout << "[SC_MOVE]";
 	do_send(&move_pl_packet);
 }
 void SESSION::send_rotate_packet(int client_id, short rotate_target)
@@ -185,7 +200,7 @@ void SESSION::send_rotate_packet(int client_id, short rotate_target)
 	rotate_pl_packet.look_y = clients[client_id].m_lookvec.y;
 	rotate_pl_packet.look_z = clients[client_id].m_lookvec.z;
 
-	cout << "[SC_ROTATE]";
+	//cout << "[SC_ROTATE]";
 	do_send(&rotate_pl_packet);
 }
 
@@ -283,6 +298,7 @@ void process_packet(int client_id, char* packet)
 		}
 
 		// 새로 접속한 플레이어의 초기 정보를 설정합니다.
+		clients[client_id].pl_state = PL_ST_ALIVE;
 		clients[client_id].pos.x = 1500 + client_id * 50;
 		clients[client_id].pos.y = 400 + client_id * 20;
 		clients[client_id].pos.z = 1265 - client_id * 50;
@@ -293,6 +309,8 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].m_rightvec = basic_coordinate.right;
 		clients[client_id].m_upvec = basic_coordinate.up;
 		clients[client_id].m_lookvec = basic_coordinate.look;
+
+		clients[client_id].setBB();
 
 		strcpy_s(clients[client_id].name, login_packet->name);
 
@@ -337,7 +355,7 @@ void process_packet(int client_id, char* packet)
 			add_pl_packet.look_z = clients[client_id].m_lookvec.z;
 
 			cout << "Send new client's info to client[" << pl.id << "]." << endl;
-			cout << "[SC_ADD]";
+			//cout << "[SC_ADD]";
 			pl.do_send(&add_pl_packet);
 			pl.s_lock.unlock();
 		}
@@ -375,7 +393,7 @@ void process_packet(int client_id, char* packet)
 			add_pl_packet.look_z = pl.m_lookvec.z;
 
 			cout << "Send client[" << pl.id << "]'s info to new client" << endl;
-			cout << "[SC_ADD]";
+			//cout << "[SC_ADD]";
 			clients[client_id].do_send(&add_pl_packet);
 			pl.s_lock.unlock();
 		}
@@ -440,6 +458,9 @@ void process_packet(int client_id, char* packet)
 					// 이동 계산 & 결과 업데이트
 					XMFLOAT3 move_result = calcMove(clients[client_id].pos, clients[client_id].m_upvec, ENGINE_SCALAR * sign);
 					clients[client_id].pos = move_result;
+
+					// 바운딩 박스 업데이트
+					clients[client_id].setBB();
 
 					// unlock
 					clients[client_id].s_lock.unlock();
@@ -506,10 +527,11 @@ void process_packet(int client_id, char* packet)
 							bullets_arr[new_bullet_id].setPos(clients[client_id].pos);
 							bullets_arr[new_bullet_id].setPitch(clients[client_id].pitch);
 							bullets_arr[new_bullet_id].setYaw(clients[client_id].yaw);
-							bullets_arr[new_bullet_id].setRoll(clients[client_id].roll);
+							bullets_arr[new_bullet_id].setRoll(clients[client_id].roll - 20);
 							bullets_arr[new_bullet_id].setRightvector(clients[client_id].m_rightvec);
 							bullets_arr[new_bullet_id].setUpvector(clients[client_id].m_upvec);
-							bullets_arr[new_bullet_id].setLookvector(clients[client_id].m_lookvec);
+							bullets_arr[new_bullet_id].setLookvector(calcRotate(clients[client_id].m_lookvec
+								, bullets_arr[new_bullet_id].getPitch(), 0.f, 0.f));
 							bullets_arr[new_bullet_id].setOwner(client_id);
 							bullets_arr[new_bullet_id].setInitialPos(bullets_arr[new_bullet_id].getPos());
 
@@ -543,12 +565,12 @@ void process_packet(int client_id, char* packet)
 							}
 						}
 					}
-					else {	// 남은 탄환이 0이라면 재장전
+					else {	// 남은 탄환이 0이라면 reload
 						clients[client_id].s_lock.lock();
 
 						clients[client_id].bullet = 100;
 
-						// 발사한 사용자에게 총알 사용했음을 알려줍니다.
+						// 발사한 사용자에게 총알 장전했음을 알려줍니다.
 						SC_BULLET_COUNT_PACKET bullet_packet;
 						bullet_packet.size = sizeof(bullet_packet);
 						bullet_packet.type = SC_BULLET_COUNT;
@@ -635,7 +657,7 @@ void do_worker()
 		if (FALSE == ret) {
 			if (ex_over->process_type == OP_ACCEPT) cout << "Accept Error";
 			else {
-				cout << "GQCS Error ( client[" << key << "] )" << endl;
+				//cout << "GQCS Error ( client[" << key << "] )" << endl;
 				disconnect(static_cast<int>(key));
 				if (ex_over->process_type == OP_SEND) delete ex_over;
 				continue;
@@ -701,33 +723,30 @@ void timerFunc() {
 		// Helicopter
 		for (auto& mv_target : clients) {
 			if (mv_target.s_state != ST_INGAME) continue;
+			if (mv_target.pl_state == PL_ST_DEAD) continue;
 
-			// proj_x는 UP벡터를 x축에 정사영시킨 정사영벡터, proj_z는 up벡터를 z축에 정사영시킨 정사영벡터입니다.
-			float proj_x = 0.f, proj_z = 0.f;
+			float proj_x = 0.f, proj_z = 0.f;		// proj_x는 UP벡터를 x축에 정사영시킨 정사영벡터, proj_z는 up벡터를 z축에 정사영시킨 정사영벡터입니다.
 
-			// pitch가 0이 아니면 (= 앞or뒤로 기울어져 있다면) 헬기를 앞 또는 뒤로 이동시킵니다.
+			// pitch가 0이 아니면(= 앞or뒤로 기울어져 있다면) 헬기를 앞 또는 뒤로 이동시킵니다.
 			if (mv_target.pitch != 0.f) {
-				cout << "PITCH: " << mv_target.pitch << endl;//test
-				// proj_z = √(y^2 + z^2) cos(90˚ - pitch)
+				// pitch 각도에 따른 이동: proj_z = √(y^2 + z^2) cos(90˚ - pitch)
 				proj_z = sqrtf(powf(mv_target.m_upvec.y, 2) + powf(mv_target.m_upvec.z, 2)) * cos(XMConvertToRadians(90 - mv_target.pitch));
-
-				// pitch 각도에 따른 이동
 				mv_target.pos = calcMove(mv_target.pos, mv_target.m_lookvec, proj_z * MOVE_SCALAR_FB);
 			}
 
-			// roll이 0이 아니면 (= 좌or우로 기울어져 있다면) 헬기를 좌 또는 우로 이동시킵니다.
+			// roll이 0이 아니면(= 좌or우로 기울어져 있다면) 헬기를 좌 또는 우로 이동시킵니다.
 			if (mv_target.roll != 0.f) {
-				cout << "ROLL: " << mv_target.roll << endl;//test
-				// proj_x = √(x^2 + y^2) cos(90˚ - roll)
+				// roll 각도에 따른 이동: proj_x = √(x^2 + y^2) cos(90˚ - roll)
 				proj_x = sqrtf(powf(mv_target.m_upvec.x, 2) + powf(mv_target.m_upvec.y, 2)) * cos(XMConvertToRadians(90 - mv_target.roll));
-
-				// roll 각도에 따른 이동
 				mv_target.pos = calcMove(mv_target.pos, mv_target.m_rightvec, -1.f * proj_x * MOVE_SCALAR_LR);
 			}
 
+			// 바운딩 박스 업데이트
+			mv_target.setBB();
+
 			// 최종 이동
 			if (mv_target.pitch != 0.f || mv_target.roll != 0.f) {
-				cout << "Player[" << mv_target.id << "] moves to pos(" << mv_target.pos.x << ", " << mv_target.pos.y << ", " << mv_target.pos.z << ").";
+				//cout << "Player[" << mv_target.id << "] moves to pos(" << mv_target.pos.x << ", " << mv_target.pos.y << ", " << mv_target.pos.z << ").";
 
 				// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
 				for (auto& send_target : clients) {
@@ -735,6 +754,64 @@ void timerFunc() {
 
 					lock_guard<mutex> lg{ send_target.s_lock };
 					send_target.send_move_packet(mv_target.id, TARGET_PLAYER);
+				}
+			}
+
+			// 충돌검사
+			for (auto& pl : clients) {
+				if (pl.s_state != ST_INGAME) continue;
+				if (pl.pl_state == PL_ST_DEAD) continue;
+
+				for (auto& other_pl : clients) {
+					// 사망한 플레이어와는 충돌검사 X
+					if (other_pl.pl_state == PL_ST_DEAD) continue;
+					// 접속 중이 아닌 대상을 충돌검사 X
+					if (other_pl.s_state != ST_INGAME) continue;
+					// 이미 검사한 대상끼리, 자기자신과는 충돌검사 X
+					if (pl.id <= other_pl.id) continue;
+					// 멀리 떨어진 플레이어는 충돌검사 X
+					float dist = 0;
+					float x_difference = pow(other_pl.pos.x - pl.pos.x, 2);
+					float y_difference = pow(other_pl.pos.y - pl.pos.y, 2);
+					float z_difference = pow(other_pl.pos.z - pl.pos.z, 2);
+					dist = sqrtf(x_difference + y_difference + z_difference);
+					if (dist > 500.f)	continue;
+
+					if (pl.m_xoobb.Intersects(other_pl.m_xoobb)) {
+						pl.s_lock.lock();
+						pl.hp -= COLLIDE_PLAYER_DAMAGE;
+
+						if (pl.hp <= 0) {
+							pl.pl_state = PL_ST_DEAD;
+							pl.death_time = chrono::system_clock::now();
+
+							cout << "Player[" << pl.id << "] is Killed by Player[" << other_pl.id << "]!" << endl; //server message
+
+							// 사망한 플레이어에게 게임오버 사실을 알립니다.
+							SC_PLAYER_STATE_PACKET hpzero_packet;
+							hpzero_packet.size = sizeof(SC_PLAYER_STATE_PACKET);
+							hpzero_packet.id = pl.id;
+							hpzero_packet.type = SC_PLAYER_STATE;
+							hpzero_packet.state = ST_PACK_DEAD;
+
+							pl.do_send(&hpzero_packet);
+						}
+						else {
+							cout << "Player[" << pl.id << "] is Damaged by Player[" << other_pl.id << "]!" << endl; //server message
+
+							// 충돌한 플레이어에게 충돌 사실을 알립니다.
+							SC_HP_COUNT_PACKET damaged_packet;
+							damaged_packet.size = sizeof(SC_HP_COUNT_PACKET);
+							damaged_packet.id = pl.id;
+							damaged_packet.type = SC_HP_COUNT;
+							damaged_packet.hp = pl.hp;
+							damaged_packet.change_cause = CAUSE_DAMAGED_BY_PLAYER;
+
+							pl.do_send(&damaged_packet);
+						}
+
+						pl.s_lock.unlock();
+					}//if (pl.m_xoobb.Intersects(other_pl.m_xoobb)) end
 				}
 			}
 		}
@@ -753,7 +830,6 @@ void timerFunc() {
 				remove_bullet_packet.size = sizeof(SC_REMOVE_OBJECT_PACKET);
 				remove_bullet_packet.id = bullet.getId();
 				remove_bullet_packet.type = SC_REMOVE_OBJECT;
-
 				for (auto& cl : clients) {
 					if (cl.s_state == ST_INGAME)
 						cl.do_send(&remove_bullet_packet);
@@ -765,7 +841,47 @@ void timerFunc() {
 				/*cout << "[" << bullet.getId() << "]번 총알이 Pos("
 					<< bullet.getPos().x << ", " << bullet.getPos().y << ", " << bullet.getPos().z << ")로 이동하였습니다." << endl;*/
 
-					// 이동된 총알의 위치를 모든 클라이언트에게 전달합니다.
+				// 충돌검사
+				for (auto& pl : clients) {
+					if (bullet.calcDistance(pl.pos) > BULLET_MOVE_SCALAR)	continue;	// 총알 사거리보다 멀리 떨어진 플레이어는 충돌체크 X
+
+					if (bullet.intersectsCheck(pl.m_xoobb)) {
+						pl.s_lock.lock();
+						pl.hp -= BULLET_DAMAGE;
+						pl.s_lock.unlock();
+
+						if (pl.hp <= 0) {
+							pl.pl_state = PL_ST_DEAD;
+							pl.death_time = chrono::system_clock::now();
+
+							cout << "Player[" << pl.id << "] is Killed by Player[" << bullet.getOwner() << "]'s Bullet!" << endl; //server message
+
+							// 사망한 플레이어에게 게임오버 사실을 알립니다.
+							SC_PLAYER_STATE_PACKET hpzero_packet;
+							hpzero_packet.size = sizeof(SC_PLAYER_STATE_PACKET);
+							hpzero_packet.id = pl.id;
+							hpzero_packet.type = SC_PLAYER_STATE;
+							hpzero_packet.state = ST_PACK_DEAD;
+
+							pl.do_send(&hpzero_packet);
+						}
+						else {
+							cout << "Player[" << pl.id << "] is Damaged by Bullet!" << endl; //server message
+
+							// 충돌한 플레이어에게 충돌 사실을 알립니다.
+							SC_HP_COUNT_PACKET damaged_packet;
+							damaged_packet.size = sizeof(SC_HP_COUNT_PACKET);
+							damaged_packet.id = pl.id;
+							damaged_packet.type = SC_HP_COUNT;
+							damaged_packet.hp = pl.hp;
+							damaged_packet.change_cause = CAUSE_DAMAGED_BY_BULLET;
+
+							pl.do_send(&damaged_packet);
+						}
+					}
+				}
+
+				// 이동된 총알의 위치를 모든 클라이언트에게 전달합니다.
 				SC_MOVE_OBJECT_PACKET move_bullet_packet;
 				move_bullet_packet.target = TARGET_BULLET;
 				move_bullet_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);

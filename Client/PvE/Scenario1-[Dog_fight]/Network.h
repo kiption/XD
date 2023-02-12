@@ -299,6 +299,24 @@ void processPacket(char* ptr)
 
 		break;
 	}//SC_REMOVE_PLAYER case end
+	case SC_HP_COUNT:
+	{
+		SC_HP_COUNT_PACKET* recv_packet = reinterpret_cast<SC_HP_COUNT_PACKET*>(ptr);
+		my_info.m_hp = recv_packet->hp;
+
+		int cause = recv_packet->change_cause;
+		if (cause == CAUSE_DAMAGED_BY_BULLET) {
+			cout << "Damaged by Bullet!" << endl;
+		}
+		else if (cause == CAUSE_DAMAGED_BY_PLAYER) {
+			cout << "Damaged by Player!" << endl;
+		}
+		else if (cause == CAUSE_HEAL) {
+			cout << "Heal" << endl;
+		}
+
+		break;
+	}//SC_HP_COUNT case end
 	case SC_BULLET_COUNT:
 	{
 		SC_BULLET_COUNT_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COUNT_PACKET*>(ptr);

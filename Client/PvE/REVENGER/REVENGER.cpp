@@ -147,16 +147,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(130.0,0.0,0.0);
 					}
 				}
-
-				// 4. NPC 객체 최신화
-				for (int i{}; i < MAX_NPCS; i++) {
-					if (npcs_info[i].m_state == OBJ_ST_RUNNING) {
-						gGameFramework.SetPosition_NPC(i, npcs_info[i].m_pos);
-						//gGameFramework.SetVectors_NPC(i, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
-					}
-
-				}
-
 			}
 
 			//==================================================

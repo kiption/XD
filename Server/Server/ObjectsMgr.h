@@ -22,6 +22,8 @@ private:
 	float m_pitch, m_yaw, m_roll;				// Rotated Degree
 	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;	// ÇöÀç Look, Right, Up Vectors
 
+	BoundingOrientedBox m_xoobb;				// Bounding Box
+
 public:
 	Objects() {
 		m_id = -1;
@@ -30,6 +32,8 @@ public:
 		m_rightvec = { 0.0f, 0.0f, 0.0f };
 		m_upvec = { 0.0f, 0.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 0.0f };
+
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pos.x, m_pos.y, m_pos.z), XMFLOAT3(6.0f, 6.0f, 6.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	}
 	Objects(int id, XMFLOAT3 pos, float pitch, float yaw, float roll, XMFLOAT3 right, XMFLOAT3 up, XMFLOAT3 look) {
 		m_id = id;
@@ -40,6 +44,8 @@ public:
 		m_rightvec = right;
 		m_upvec = up;
 		m_lookvec = look;
+
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pos.x, m_pos.y, m_pos.z), XMFLOAT3(6.0f, 6.0f, 6.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	}
 	~Objects() {
 	}
@@ -72,4 +78,6 @@ public:
 	void rotateObj(float roll, float pitch, float yaw);
 
 	float calcDistance(XMFLOAT3 others_pos);
+
+	bool intersectsCheck(BoundingOrientedBox other_bb);
 };

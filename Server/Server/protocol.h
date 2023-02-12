@@ -4,7 +4,7 @@ constexpr int NAME_SIZE = 20;
 
 constexpr int MAX_USER = 10;
 constexpr int MAX_NPCS = 10;
-constexpr int MAX_BULLET = 50;
+constexpr int MAX_BULLET = 100;
 
 constexpr int WORLD_X_POS = 2000;
 constexpr int WORLD_Y_POS = 2000;
@@ -20,7 +20,8 @@ constexpr char INPUT_KEY_E = 0b000001;
 
 // Packet ID
 enum PacketID { CS_LOGIN, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE
-	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_BULLET_COUNT };
+	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT
+	, SC_HP_COUNT, SC_PLAYER_STATE, SC_BULLET_COUNT };
 
 // Target Type
 enum TargetType { TARGET_PLAYER, TARGET_BULLET, TARGET_NPC };
@@ -62,6 +63,8 @@ struct SC_LOGIN_INFO_PACKET {
 	float right_x, right_y, right_z;
 	float up_x, up_y, up_z;
 	float look_x, look_y, look_z;
+	int hp;
+	int remain_bullet;
 };
 
 struct SC_ADD_OBJECT_PACKET {
@@ -101,10 +104,27 @@ struct SC_ROTATE_OBJECT_PACKET {
 	float look_x, look_y, look_z;
 };
 
+enum hp_change_cause { CAUSE_DAMAGED_BY_BULLET, CAUSE_DAMAGED_BY_PLAYER, CAUSE_HEAL };
+struct SC_HP_COUNT_PACKET {
+	unsigned char size;
+	char type;
+	short id;
+	int hp;
+	int change_cause;
+};
+
+enum player_state { ST_PACK_ALIVE, ST_PACK_DEAD };
+struct SC_PLAYER_STATE_PACKET {
+	unsigned char size;
+	char type;
+	short id;
+	char state;
+};
+
 struct SC_BULLET_COUNT_PACKET {
 	unsigned char size;
 	char type;
 	short id;
-	short bullet_cnt;
+	int bullet_cnt;
 };
 #pragma pack (pop)
