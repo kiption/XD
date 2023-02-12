@@ -128,32 +128,26 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						continue;
 					}
 
-					if (bullets_info[i].m_state == OBJ_ST_STANDBY) {	// Create
-						//gGameFramework.Create_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_look_vec);
+					if (bullets_info[i].m_state == OBJ_ST_LOGOUT) {	// Clear
+						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
+						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(0.1f, 0.1f, 0.1f);
+						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(130.0, 0.0, 0.0);
 
-						bullets_info[i].m_state = OBJ_ST_RUNNING;
-					}
-					else if (bullets_info[i].m_state == OBJ_ST_LOGOUT) {	// Clear
-						bullets_info[i].m_id = -1;
-						bullets_info[i].m_pos = { 0.0f, 0.0f, 0.0f };
-						bullets_info[i].m_right_vec = { 1.0f, 0.0f, 0.0f };
-						bullets_info[i].m_up_vec = { 0.0f, 1.0f, 0.0f };
-						bullets_info[i].m_look_vec = { 0.0f, 0.0f, 1.0f };
-						bullets_info[i].m_state = OBJ_ST_EMPTY;
+						bullets_info[i].returnToInitialState();
 					}
 					else if (bullets_info[i].m_state == OBJ_ST_RUNNING) {	// Update
 						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
 						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(15.0, 15.0, 25.0);
-						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(130.0,0.0,0.0);
+						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(130.0, 0.0, 0.0);
 					}
 				}
 
-				// 4. 자신의 총알 개수 최신화
+				// 4. 자신의 총알 개수 최신화 (UI)
 				wchar_t MyBullet[20];
 				_itow_s(my_info.m_bullet, MyBullet, sizeof(MyBullet), 10);
 				wcscpy_s(gGameFramework.m_myBullet, MyBullet);
 
-				// 5. HP 최신화
+				// 5. HP 최신화	(UI)
 
 
 			}
