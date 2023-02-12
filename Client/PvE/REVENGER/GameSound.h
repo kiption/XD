@@ -39,6 +39,7 @@ public:
 	~GameSound();
 public:
 
+	bool m_bStopSound = false;
 	void SpeakMusic();
 	void shootingSound();
 	void backGroundMusic();

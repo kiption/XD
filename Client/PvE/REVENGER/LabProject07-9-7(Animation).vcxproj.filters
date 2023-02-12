@@ -145,6 +145,9 @@
     <ClInclude Include="protocol.h">
       <Filter>Server</Filter>
     </ClInclude>
+    <ClInclude Include="MapObjectShaders.h">
+      <Filter>Client\Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSound.cpp">
@@ -235,6 +238,9 @@
       <Filter>Client\Object</Filter>
     </ClCompile>
     <ClCompile Include="BillboardObjectsShader.cpp">
+      <Filter>Client\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="MapObjectShaders.cpp">
       <Filter>Client\Shader</Filter>
     </ClCompile>
   </ItemGroup>

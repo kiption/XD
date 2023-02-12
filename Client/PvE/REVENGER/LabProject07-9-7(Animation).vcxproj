@@ -154,6 +154,7 @@
     <ClInclude Include="BillboardObjects.h" />
     <ClInclude Include="BillboardObjectsShader.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="MapObjectShaders.h" />
     <ClInclude Include="MissileObject.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="ObjectsInfo.h" />
@@ -189,6 +190,7 @@
     <ClCompile Include="BillboardObjects.cpp" />
     <ClCompile Include="BillboardObjectsShader.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="MapObjectShaders.cpp" />
     <ClCompile Include="MissileObject.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Stage2.cpp" />

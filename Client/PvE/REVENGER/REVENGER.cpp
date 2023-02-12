@@ -114,6 +114,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					if (other_players[i].m_state == OBJ_ST_RUNNING) {
 						gGameFramework.SetPosition_OtherPlayerObj(i, other_players[i].m_pos);
 						gGameFramework.SetVectors_OtherPlayerObj(i, other_players[i].m_right_vec, other_players[i].m_up_vec, other_players[i].m_look_vec);
+						
 					}
 					else if (other_players[i].m_state == OBJ_ST_LOGOUT) {
 						other_players[i].m_state = OBJ_ST_EMPTY;
@@ -128,7 +129,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 
 					if (bullets_info[i].m_state == OBJ_ST_STANDBY) {	// Create
-						gGameFramework.Create_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_look_vec);
+						//gGameFramework.Create_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_look_vec);
+
 						bullets_info[i].m_state = OBJ_ST_RUNNING;
 					}
 					else if (bullets_info[i].m_state == OBJ_ST_LOGOUT) {	// Clear
@@ -140,7 +142,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						bullets_info[i].m_state = OBJ_ST_EMPTY;
 					}
 					else if (bullets_info[i].m_state == OBJ_ST_RUNNING) {	// Update
-						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_look_vec);
+						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
+						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(15.0, 15.0, 25.0);
+						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(130.0,0.0,0.0);
 					}
 				}
 
@@ -148,7 +152,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				for (int i{}; i < MAX_NPCS; i++) {
 					if (npcs_info[i].m_state == OBJ_ST_RUNNING) {
 						gGameFramework.SetPosition_NPC(i, npcs_info[i].m_pos);
-						gGameFramework.SetVectors_NPC(i, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
+						//gGameFramework.SetVectors_NPC(i, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
 					}
 
 				}

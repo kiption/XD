@@ -11,8 +11,11 @@
 #include "BillboardObjectsShader.h"
 #include "SkyboxShader.h"
 #include "TerrainShader.h"
+#include "MapObjectShaders.h"
 #include "Player.h"
-
+#include "Object.h"
+#include "MissileObject.h"
+#include "GameSound.h"
 #define MAX_LIGHTS						16 
 #define POINT_LIGHT						1
 #define SPOT_LIGHT						2
@@ -67,7 +70,7 @@ public:
 	int GetCurScene() { return m_nCurScene; }
 	void SetCurScene(int nCurScene) { m_nCurScene = nCurScene; }
 
-
+	GameSound gamesound;
 
 public:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
@@ -101,13 +104,15 @@ public:
 	static D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferViews(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride);
 	static void CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex);
 
-
+	float m_fBulletEffectiveRange = 2000.0f;
+	CBulletObject* pBulletObject = NULL;
+	CBulletObject* m_ppBullets[BULLETS];
 	CPlayer* m_pPlayer = NULL;
 
 	float								m_fElapsedTime = 0.0f;
 
-	int									m_nGameObjects = 0;
-	CGameObject** m_ppGameObjects = NULL;
+	//int									m_nGameObjects = 0;
+	//CGameObject** m_ppGameObjects = NULL;
 
 	int									m_nHierarchicalGameObjects = 0;
 	CGameObject** m_ppHierarchicalGameObjects = NULL;
@@ -116,11 +121,14 @@ public:
 
 	int									m_nShaders = 0;
 	CStandardObjectsShader** m_ppShaders = NULL;
-
+	
+	int									m_nMapShaders = 0;
+	CShader** m_ppMapShaders = NULL;
+	
 	CSkyBox* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;
 	int									m_nBillboardShaders = 0;
-	CShader** m_pBillboardShader = NULL;
+	BillboardShader** m_pBillboardShader = NULL;
 	int									m_nLights = 0;
 	LIGHT* m_pLights = NULL;
 	

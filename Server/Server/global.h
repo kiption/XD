@@ -19,5 +19,5 @@
 
 #define SHOOT_COOLDOWN_BULLET 200		// 총알 발사 쿨타임(ms)
 
-#define BULLET_MOVE_SCALAR 0.8f			// 총알 이동 힘
+#define BULLET_MOVE_SCALAR 1.5f			// 총알 이동 힘
 #define BULLET_RANGE 200.f				// 총알 사정거리

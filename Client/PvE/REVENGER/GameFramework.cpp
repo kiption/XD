@@ -31,7 +31,7 @@ CGameFramework::CGameFramework()
 	m_pScene = NULL;
 	m_pPlayer = NULL;
 
-	_tcscpy_s(m_pszFrameRate, _T("LabProject ("));
+	_tcscpy_s(m_pszFrameRate, _T("REVENGER :"));
 }
 
 CGameFramework::~CGameFramework()
@@ -338,9 +338,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case VK_SPACE:
+		case VK_SPACE:/*
 			if (m_nMode == SCENE2STAGE)((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
-			if (m_nMode == SCENE1STAGE)((CAirplanePlayer*)m_pPlayer)->Firevalkan(NULL);
+			if (m_nMode == SCENE1STAGE)((CAirplanePlayer*)m_pPlayer)->Firevalkan(NULL);*/
 			break;
 		default:
 			break;
@@ -420,6 +420,7 @@ void CGameFramework::BuildObjects()
 
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 	
+	
 	m_pScene = new SceneManager();
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
@@ -433,10 +434,9 @@ void CGameFramework::BuildObjects()
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 
 	WaitForGpuComplete();
-
+	gamesound.backGroundMusic();
 	if (m_pScene) m_pScene->ReleaseUploadBuffers();
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
-
 	m_GameTimer.Reset();
 }
 
@@ -719,6 +719,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 		case SCENE2STAGE:
 		{
 			m_nMode = nMode;
+			gamesound.m_bStopSound = true;
 			m_pScene = new Stage2();
 			if (m_pScene) ((Stage2*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((Stage2*)m_pScene)->m_pTerrain);
@@ -795,80 +796,21 @@ void CGameFramework::Remove_OtherPlayerObj(int id) {
 
 void CGameFramework::Create_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look)
 {
-	((CAirplanePlayer*)m_pPlayer)->Firevalkan(NULL);
-	//m_GameSound.shootingSound();
-	((CAirplanePlayer*)m_pPlayer)->m_ppBullets[id]->m_xmf3FirePosition = pos;
 
-	CBulletObject* pBulletObjectL = NULL;
-	CBulletObject* pBulletObjectR = NULL;
-	XMFLOAT3 PlayerPos = ((CAirplanePlayer*)m_pPlayer)->GetLookVector() = xmf3look;
-
-	if (pBulletObjectL)
-	{
-
-		XMFLOAT3 xmf3Position = ((CAirplanePlayer*)m_pPlayer)->GetPosition() = pos;
-		//xmf3Position.x -= 10.0f;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
-		pBulletObjectL->m_xmf4x4ToParent = pBulletObjectL->m_xmf4x4World;
-		pBulletObjectL->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-		pBulletObjectL->SetMovingDirection(PlayerPos);
-		pBulletObjectL->Rotate(90.0f, 0.0, 0.0);
-		pBulletObjectL->SetScale(700.0, 200.0, 700.0);
-	}
-
-	if (pBulletObjectR)
-	{
-
-		XMFLOAT3 xmf3Position = ((CAirplanePlayer*)m_pPlayer)->GetPosition() = pos;
-		//xmf3Position.x += 10.0f;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
-		pBulletObjectR->m_xmf4x4ToParent = pBulletObjectR->m_xmf4x4World;
-		pBulletObjectR->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-		pBulletObjectR->SetMovingDirection(PlayerPos);
-		pBulletObjectR->Rotate(90.0f, 0.0, 0.0);
-		pBulletObjectR->SetScale(700.0, 200.0, 700.0);
-	}
 }
 
-void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look)
+void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3right, XMFLOAT3 xmf3up, XMFLOAT3 xmf3look)
 {
-
-	//CBulletObject* pBulletObjectL = NULL;
-	//CBulletObject* pBulletObjectR = NULL;
-	//XMFLOAT3 PlayerPos = ((CMainPlayer*)m_pPlayer)->GetLookVector() = xmf3look;
-
-	//if (pBulletObjectL)
-	//{
-
-	//	XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
-	//	//xmf3Position.x -= 10.0f;
-	//	XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
-	//	pBulletObjectL->m_xmf4x4Transform = pBulletObjectL->m_xmf4x4World;
-	//	pBulletObjectL->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-	//	pBulletObjectL->SetMovingDirection(PlayerPos);
-	//	pBulletObjectL->Rotate(90.0f, 0.0, 0.0);
-	//	pBulletObjectL->SetScale(700.0, 200.0, 700.0);
-	//}
-
-	//if (pBulletObjectR)
-	//{
-
-	//	XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
-	//	//xmf3Position.x += 10.0f;
-	//	XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
-	//	pBulletObjectR->m_xmf4x4Transform = pBulletObjectR->m_xmf4x4World;
-	//	pBulletObjectR->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-	//	pBulletObjectR->SetMovingDirection(PlayerPos);
-	//	pBulletObjectR->Rotate(90.0f, 0.0, 0.0);
-	//	pBulletObjectR->SetScale(700.0, 200.0, 700.0);
-	//}
+	m_pScene->m_ppBullets[id]->SetPosition(pos);
+	m_pScene->m_ppBullets[id]->SetRight(xmf3right);
+	m_pScene->m_ppBullets[id]->SetUp(xmf3up);
+	m_pScene->m_ppBullets[id]->SetLook(xmf3look);
 }
 
 void CGameFramework::SetPosition_NPC(int id, XMFLOAT3 pos)
 {
 }
 
-void CGameFramework::SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
-{
-}
-//==================================================
+//void CGameFramework::SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
+//{
+//}

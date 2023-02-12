@@ -1,14 +1,5 @@
 #include "stdafx.h"
 #include "ObjcetsShaderList.h"
-
-CHellicopterObjectsShader::CHellicopterObjectsShader()
-{
-}
-
-CHellicopterObjectsShader::~CHellicopterObjectsShader()
-{
-}
-
 float Random(float fMin, float fMax)
 {
 	float fRandomValue = (float)rand();
@@ -33,6 +24,15 @@ XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn,
 
 	return(xmf3Position);
 }
+CHellicopterObjectsShader::CHellicopterObjectsShader()
+{
+}
+
+CHellicopterObjectsShader::~CHellicopterObjectsShader()
+{
+}
+
+
 
 void CHellicopterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
 {
@@ -67,8 +67,6 @@ void CHellicopterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 	{
 		for (int i = 0; i < m_nObjects - int(floor(float(m_nObjects) / float(nColumnSize)) * nFirstPassColumnSize); i++)
 		{
-			
-			
 			m_ppObjects[nObjects] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			m_ppObjects[nObjects]->SetChild(pGunshipModel->m_pModelRootObject, true);
 			m_ppObjects[nObjects]->SetPosition(RandomPositionInSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), Random(20.0f, 100.0f), nColumnSize - int(floor(nColumnSize / 2.0f)), nColumnSpace));

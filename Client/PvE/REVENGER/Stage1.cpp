@@ -97,7 +97,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_nShaders = 1;
 	m_ppShaders = new CShader * [m_nShaders];
 
-	BillboardObjectsShader* pCrossHairShader = new BillboardObjectsShader();
+	CrossHairShader* pCrossHairShader = new CrossHairShader();
 	pCrossHairShader->SetCurScene(SCENE1STAGE);
 	pCrossHairShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 

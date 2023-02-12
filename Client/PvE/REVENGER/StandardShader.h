@@ -53,6 +53,5 @@ public:
 
 	int								m_nObjects = 0;
 	CGameObject** m_ppObjects = 0;
-	//CGameObject* m_pObjects = 0;
 
 };

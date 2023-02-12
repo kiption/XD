@@ -8,6 +8,8 @@
 #include "Scene.h"
 #include "Stage1.h"
 #include "Stage2.h"
+#include "GameSound.h"
+
 #include <queue> //S
 enum MButton { L_BUTTON, R_BUTTON };
 
@@ -96,7 +98,7 @@ private:
 
 	CGameTimer					m_GameTimer;
 
-	SceneManager						*m_pScene = NULL;
+
 	CPlayer						*m_pPlayer = NULL;
 	CCamera						*m_pCamera = NULL;
 
@@ -104,12 +106,13 @@ private:
 
 	_TCHAR						m_pszFrameRate[70];
 
-
+	GameSound gamesound;
 
 //==================================================
 //			  서버 통신을 위한 것들...
 //==================================================
 public:
+	SceneManager* m_pScene = NULL;
 	// 서버로 보낼 키보드 입력값
 	queue<short> q_keyboardInput;
 
@@ -138,10 +141,10 @@ public:
 	void Remove_OtherPlayerObj(int id);
 
 	void Create_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look);
-	void SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look);
+
 
 	void SetPosition_NPC(int id, XMFLOAT3 pos);
-	void SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+	void SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3right, XMFLOAT3 xmf3up, XMFLOAT3 xmf3look);
 
 	//==================================================
 
