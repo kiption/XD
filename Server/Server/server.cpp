@@ -724,99 +724,98 @@ void timerFunc() {
 		// Helicopter
 		for (auto& mv_target : clients) {
 			if (mv_target.s_state != ST_INGAME) continue;
-			if (mv_target.pl_state == PL_ST_DEAD) continue;
 
-			float proj_x = 0.f, proj_z = 0.f;		// proj_x는 UP벡터를 x축에 정사영시킨 정사영벡터, proj_z는 up벡터를 z축에 정사영시킨 정사영벡터입니다.
+			if (mv_target.pl_state == PL_ST_ALIVE) {
+				float proj_x = 0.f, proj_z = 0.f;		// proj_x는 UP벡터를 x축에 정사영시킨 정사영벡터, proj_z는 up벡터를 z축에 정사영시킨 정사영벡터입니다.
 
-			// pitch가 0이 아니면(= 앞or뒤로 기울어져 있다면) 헬기를 앞 또는 뒤로 이동시킵니다.
-			if (mv_target.pitch != 0.f) {
-				// pitch 각도에 따른 이동: proj_z = √(y^2 + z^2) cos(90˚ - pitch)
-				proj_z = sqrtf(powf(mv_target.m_upvec.y, 2) + powf(mv_target.m_upvec.z, 2)) * cos(XMConvertToRadians(90 - mv_target.pitch));
-				mv_target.pos = calcMove(mv_target.pos, mv_target.m_lookvec, proj_z * MOVE_SCALAR_FB);
-			}
-
-			// roll이 0이 아니면(= 좌or우로 기울어져 있다면) 헬기를 좌 또는 우로 이동시킵니다.
-			if (mv_target.roll != 0.f) {
-				// roll 각도에 따른 이동: proj_x = √(x^2 + y^2) cos(90˚ - roll)
-				proj_x = sqrtf(powf(mv_target.m_upvec.x, 2) + powf(mv_target.m_upvec.y, 2)) * cos(XMConvertToRadians(90 - mv_target.roll));
-				mv_target.pos = calcMove(mv_target.pos, mv_target.m_rightvec, -1.f * proj_x * MOVE_SCALAR_LR);
-			}
-
-			// 바운딩 박스 업데이트
-			mv_target.setBB();
-
-			// 최종 이동
-			if (mv_target.pitch != 0.f || mv_target.roll != 0.f) {
-				//cout << "Player[" << mv_target.id << "] moves to pos(" << mv_target.pos.x << ", " << mv_target.pos.y << ", " << mv_target.pos.z << ").";
-
-				// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
-				for (auto& send_target : clients) {
-					if (send_target.s_state != ST_INGAME) continue;
-
-					lock_guard<mutex> lg{ send_target.s_lock };
-					send_target.send_move_packet(mv_target.id, TARGET_PLAYER);
+				// pitch가 0이 아니면(= 앞or뒤로 기울어져 있다면) 헬기를 앞 또는 뒤로 이동시킵니다.
+				if (mv_target.pitch != 0.f) {
+					// pitch 각도에 따른 이동: proj_z = √(y^2 + z^2) cos(90˚ - pitch)
+					proj_z = sqrtf(powf(mv_target.m_upvec.y, 2) + powf(mv_target.m_upvec.z, 2)) * cos(XMConvertToRadians(90 - mv_target.pitch));
+					mv_target.pos = calcMove(mv_target.pos, mv_target.m_lookvec, proj_z * MOVE_SCALAR_FB);
 				}
-			}
 
-			// 충돌검사
-			for (auto& pl : clients) {
-				if (pl.s_state != ST_INGAME) continue;
-				if (pl.pl_state == PL_ST_DEAD) continue;
+				// roll이 0이 아니면(= 좌or우로 기울어져 있다면) 헬기를 좌 또는 우로 이동시킵니다.
+				if (mv_target.roll != 0.f) {
+					// roll 각도에 따른 이동: proj_x = √(x^2 + y^2) cos(90˚ - roll)
+					proj_x = sqrtf(powf(mv_target.m_upvec.x, 2) + powf(mv_target.m_upvec.y, 2)) * cos(XMConvertToRadians(90 - mv_target.roll));
+					mv_target.pos = calcMove(mv_target.pos, mv_target.m_rightvec, -1.f * proj_x * MOVE_SCALAR_LR);
+				}
 
+				// 바운딩 박스 업데이트
+				mv_target.setBB();
+
+				// 최종 이동
+				if (mv_target.pitch != 0.f || mv_target.roll != 0.f) {
+					//cout << "Player[" << mv_target.id << "] moves to pos(" << mv_target.pos.x << ", " << mv_target.pos.y << ", " << mv_target.pos.z << ").";
+
+					// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
+					for (auto& send_target : clients) {
+						if (send_target.s_state != ST_INGAME) continue;
+
+						lock_guard<mutex> lg{ send_target.s_lock };
+						send_target.send_move_packet(mv_target.id, TARGET_PLAYER);
+					}
+				}
+
+				// 충돌체크
 				for (auto& other_pl : clients) {
 					// 사망한 플레이어와는 충돌검사 X
 					if (other_pl.pl_state == PL_ST_DEAD) continue;
 					// 접속 중이 아닌 대상을 충돌검사 X
 					if (other_pl.s_state != ST_INGAME) continue;
 					// 이미 검사한 대상끼리, 자기자신과는 충돌검사 X
-					if (pl.id <= other_pl.id) continue;
+					if (mv_target.id <= other_pl.id) continue;
 					// 멀리 떨어진 플레이어는 충돌검사 X
 					float dist = 0;
-					float x_difference = pow(other_pl.pos.x - pl.pos.x, 2);
-					float y_difference = pow(other_pl.pos.y - pl.pos.y, 2);
-					float z_difference = pow(other_pl.pos.z - pl.pos.z, 2);
+					float x_difference = pow(other_pl.pos.x - mv_target.pos.x, 2);
+					float y_difference = pow(other_pl.pos.y - mv_target.pos.y, 2);
+					float z_difference = pow(other_pl.pos.z - mv_target.pos.z, 2);
 					dist = sqrtf(x_difference + y_difference + z_difference);
 					if (dist > 500.f)	continue;
 
-					if (pl.m_xoobb.Intersects(other_pl.m_xoobb)) {
-						pl.s_lock.lock();
-						pl.hp -= COLLIDE_PLAYER_DAMAGE;
-						other_pl.hp -= COLLIDE_PLAYER_DAMAGE;
+					if (mv_target.m_xoobb.Intersects(other_pl.m_xoobb)) {
+						mv_target.s_lock.lock();
+						mv_target.hp -= COLLIDE_PLAYER_DAMAGE;
 
-						if (pl.hp <= 0) {
-							pl.pl_state = PL_ST_DEAD;
-							pl.death_time = chrono::system_clock::now();
+						if (mv_target.hp <= 0) {
+							mv_target.pl_state = PL_ST_DEAD;
+							mv_target.death_time = chrono::system_clock::now();
 
-							cout << "Player[" << pl.id << "] is Killed by Player[" << other_pl.id << "]!" << endl; //server message
+							cout << "Player[" << mv_target.id << "] is Killed by Player[" << other_pl.id << "]!" << endl; //server message
 
 							// 사망한 플레이어에게 게임오버 사실을 알립니다.
 							SC_PLAYER_STATE_PACKET hpzero_packet;
 							hpzero_packet.size = sizeof(SC_PLAYER_STATE_PACKET);
-							hpzero_packet.id = pl.id;
+							hpzero_packet.id = mv_target.id;
 							hpzero_packet.type = SC_PLAYER_STATE;
 							hpzero_packet.state = ST_PACK_DEAD;
 
-							pl.do_send(&hpzero_packet);
+							mv_target.do_send(&hpzero_packet);
 						}
 						else {
-							cout << "Player[" << pl.id << "] is Damaged by Player[" << other_pl.id << "]!" << endl; //server message
+							cout << "Player[" << mv_target.id << "] is Damaged by Player[" << other_pl.id << "]!" << endl; //server message
 
 							// 충돌한 플레이어에게 충돌 사실을 알립니다.
 							SC_HP_COUNT_PACKET damaged_packet;
 							damaged_packet.size = sizeof(SC_HP_COUNT_PACKET);
-							damaged_packet.id = pl.id;
+							damaged_packet.id = mv_target.id;
 							damaged_packet.type = SC_HP_COUNT;
-							damaged_packet.hp = pl.hp;
+							damaged_packet.hp = mv_target.hp;
 							damaged_packet.change_cause = CAUSE_DAMAGED_BY_PLAYER;
 
-							pl.do_send(&damaged_packet);
+							mv_target.do_send(&damaged_packet);
 						}
+						mv_target.s_lock.unlock();
+
+						other_pl.s_lock.lock();
+						other_pl.hp -= COLLIDE_PLAYER_DAMAGE;
 
 						if (other_pl.hp <= 0) {
 							other_pl.pl_state = PL_ST_DEAD;
 							other_pl.death_time = chrono::system_clock::now();
 
-							cout << "Player[" << pl.id << "] is Killed by Player[" << other_pl.id << "]!" << endl; //server message
+							cout << "Player[" << other_pl.id << "] is Killed by Player[" << mv_target.id << "]!" << endl; //server message
 
 							// 사망한 플레이어에게 게임오버 사실을 알립니다.
 							SC_PLAYER_STATE_PACKET hpzero_packet;
@@ -825,24 +824,80 @@ void timerFunc() {
 							hpzero_packet.type = SC_PLAYER_STATE;
 							hpzero_packet.state = ST_PACK_DEAD;
 
-							pl.do_send(&hpzero_packet);
+							other_pl.do_send(&hpzero_packet);
 						}
 						else {
-							cout << "Player[" << pl.id << "] is Damaged by Player[" << other_pl.id << "]!" << endl; //server message
+							cout << "Player[" << other_pl.id << "] is Damaged by Player[" << mv_target.id << "]!" << endl; //server message
 
 							// 충돌한 플레이어에게 충돌 사실을 알립니다.
 							SC_HP_COUNT_PACKET damaged_packet;
 							damaged_packet.size = sizeof(SC_HP_COUNT_PACKET);
-							damaged_packet.id = pl.id;
+							damaged_packet.id = other_pl.id;
 							damaged_packet.type = SC_HP_COUNT;
-							damaged_packet.hp = pl.hp;
+							damaged_packet.hp = other_pl.hp;
 							damaged_packet.change_cause = CAUSE_DAMAGED_BY_PLAYER;
 
-							pl.do_send(&damaged_packet);
+							other_pl.do_send(&damaged_packet);
 						}
-
-						pl.s_lock.unlock();
+						other_pl.s_lock.unlock();
 					}//if (pl.m_xoobb.Intersects(other_pl.m_xoobb)) end
+				}//for (auto& other_pl : clients) end
+			}
+			else if (mv_target.pl_state == PL_ST_DEAD) {
+				if (chrono::system_clock::now() > mv_target.death_time + milliseconds(RESPAWN_TIME)) {	// 리스폰 시간이 지나면
+					mv_target.s_lock.lock();
+
+					mv_target.pl_state = PL_ST_ALIVE;
+					mv_target.pos.x = 1500 + mv_target.id * 50;
+					mv_target.pos.y = 400 + mv_target.id * 20;
+					mv_target.pos.z = 1265 - mv_target.id * 50;
+					mv_target.pitch = mv_target.yaw = mv_target.roll = 0.0f;
+					mv_target.m_rightvec = basic_coordinate.right;
+					mv_target.m_upvec = basic_coordinate.up;
+					mv_target.m_lookvec = basic_coordinate.look;
+					mv_target.setBB();
+					cout << "Player[" << mv_target.id << "] Revived and Move to Respawn Area." << endl;
+
+					// 부활한 플레이어에게 부활 사실을 알립니다.
+					SC_PLAYER_STATE_PACKET revival_packet;
+					revival_packet.size = sizeof(SC_PLAYER_STATE_PACKET);
+					revival_packet.id = mv_target.id;
+					revival_packet.type = SC_PLAYER_STATE;
+					revival_packet.state = ST_PACK_REVIVAL;
+
+					mv_target.do_send(&revival_packet);
+
+					// 부활구역으로 이동한 결과를 모든 클라이언트들에게 알립니다.
+					for (auto& cl : clients) {
+						if (cl.s_state == ST_INGAME) {
+							cl.send_move_packet(mv_target.id, TARGET_PLAYER);
+							cl.send_rotate_packet(mv_target.id, TARGET_PLAYER);
+						}
+					}
+
+					mv_target.s_lock.unlock();
+				}
+				else {	// 아직 리스폰 대기중일때
+					mv_target.s_lock.lock();
+
+					if (mv_target.pos.y > 100) {
+						// 떨어지면서 빙글빙글도는 연출
+						mv_target.pos.y -= 0.005f;
+
+						mv_target.yaw += 2.f;
+						mv_target.m_rightvec = calcRotate(basic_coordinate.right, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.m_upvec = calcRotate(basic_coordinate.up, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.m_lookvec = calcRotate(basic_coordinate.look, mv_target.roll, mv_target.yaw, mv_target.pitch);
+
+						for (auto& cl : clients) {
+							if (cl.s_state == ST_INGAME) {
+								cl.send_move_packet(mv_target.id, TARGET_PLAYER);
+								cl.send_rotate_packet(mv_target.id, TARGET_PLAYER);
+							}
+						}
+					}
+
+					mv_target.s_lock.unlock();
 				}
 			}
 		}

@@ -321,8 +321,9 @@ void processPacket(char* ptr)
 		SC_PLAYER_STATE_PACKET* recv_packet = reinterpret_cast<SC_PLAYER_STATE_PACKET*>(ptr);
 
 		int pl_state = recv_packet->state;
-		if (pl_state == ST_PACK_ALIVE) {
-			cout << "ALIVE" << endl;
+		if (pl_state == ST_PACK_REVIVAL) {
+			cout << "REVIVAL" << endl;
+			my_info.m_hp = 100;
 		}
 		else if (pl_state == ST_PACK_DEAD) {
 			my_info.m_hp = 0;
