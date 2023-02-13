@@ -89,9 +89,9 @@ void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pSkyBox = new CSkyBox2(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pSkyBox->SetCurScene(SCENE2STAGE);
 
-	XMFLOAT3 xmf3Scale(30.0f, 2.0f, 30.0f);
+	XMFLOAT3 xmf3Scale(15.0f, 4.0f, 15.0);
 	XMFLOAT3 xmf3Normal(0.0f, 0.3f, 0.0f);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/terrain033.raw"), 513, 513, xmf3Scale, xmf3Normal);
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf3Normal);
 	m_pTerrain->SetCurScene(SCENE2STAGE);
 
 
@@ -193,8 +193,8 @@ void Stage2::ReleaseObjects()
 	}
 
 	ReleaseShaderVariables();
-
 	if (m_pLights) delete[] m_pLights;
+
 }
 
 ID3D12RootSignature* Stage2::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
@@ -397,14 +397,15 @@ ID3D12RootSignature* Stage2::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 
 void Stage2::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	SceneManager::CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 }
 
 void Stage2::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	SceneManager::UpdateShaderVariables(pd3dCommandList);
 	::memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(LIGHT) * m_nLights);
 	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
 	::memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
@@ -417,6 +418,7 @@ void Stage2::ReleaseShaderVariables()
 		m_pd3dcbLights->Unmap(0, NULL);
 		m_pd3dcbLights->Release();
 	}
+	SceneManager::ReleaseShaderVariables();
 }
 
 void Stage2::ReleaseUploadBuffers()
@@ -518,11 +520,11 @@ void Stage2::AnimateObjects(float fTimeElapsed)
 	//for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
 	//for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->AnimateObjects(fTimeElapsed);
 
-	//if (m_pLights)
-	//{
-	//	m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
-	//	m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
-	//}
+	/*if (m_pLights)
+	{
+		m_pLights[1].m_xmf3Position = m_pPlayer->m_xmf3Position;
+		m_pLights[1].m_xmf3Direction = XMFLOAT3(m_pPlayer->m_xmf4x4ToParent._31, m_pPlayer->m_xmf4x4ToParent._32, m_pPlayer->m_xmf4x4ToParent._33);
+	}*/
 
 }
 
@@ -542,11 +544,10 @@ void Stage2::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->Render(pd3dCommandList, pCamera);
 
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
-
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera);
 
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++)

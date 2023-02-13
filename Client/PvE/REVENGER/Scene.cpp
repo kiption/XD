@@ -238,9 +238,9 @@ void SceneManager::ReleaseObjects()
 		delete[] m_ppHierarchicalGameObjects;
 	}
 
+	if (m_pLights) delete[] m_pLights;
 	ReleaseShaderVariables();
 
-	if (m_pLights) delete[] m_pLights;
 }
 
 ID3D12RootSignature* SceneManager::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)

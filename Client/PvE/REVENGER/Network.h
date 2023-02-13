@@ -3,6 +3,9 @@
 #include <WS2tcpip.h>
 #include <MSWSock.h>
 #include "ObjectsInfo.h"
+#include "GameSound.h"
+
+GameSound gamesound;
 #pragma comment (lib, "WS2_32.LIB")
 #pragma comment(lib, "MSWSock.lib")
 
@@ -149,6 +152,7 @@ void processPacket(char* ptr)
 		}
 		// 2. Add Bullet
 		else if (recv_packet->target == TARGET_BULLET) {
+			gamesound.shootingSound();
 			bullets_info[recv_id].m_id = recv_id;
 			bullets_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 			bullets_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
@@ -158,6 +162,8 @@ void processPacket(char* ptr)
 			bullets_info[recv_id].m_state = OBJ_ST_RUNNING;
 			cout << "Create New Bullet - id: " << bullets_info[recv_id].m_id
 				<< ", Pos(x: " << bullets_info[recv_id].m_pos.x << ", y : " << bullets_info[recv_id].m_pos.y << ", z : " << bullets_info[recv_id].m_pos.z << ")." << endl;
+		
+		
 		}
 		// 3. Add NPC (Helicopter)
 		else if (recv_packet->target == TARGET_NPC) {
@@ -300,7 +306,7 @@ void processPacket(char* ptr)
 	{
 		SC_HP_COUNT_PACKET* recv_packet = reinterpret_cast<SC_HP_COUNT_PACKET*>(ptr);
 		my_info.m_hp = recv_packet->hp;
-
+		gamesound.collisionSound();
 		int cause = recv_packet->change_cause;
 		if (cause == CAUSE_DAMAGED_BY_BULLET) {
 			cout << "Damaged by Bullet!" << endl;

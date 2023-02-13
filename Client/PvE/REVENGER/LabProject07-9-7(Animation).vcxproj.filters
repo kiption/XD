@@ -142,11 +142,11 @@
     <ClInclude Include="Network.h">
       <Filter>Server</Filter>
     </ClInclude>
-    <ClInclude Include="protocol.h">
-      <Filter>Server</Filter>
-    </ClInclude>
     <ClInclude Include="MapObjectShaders.h">
       <Filter>Client\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Server\Server\protocol.h">
+      <Filter>Server</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -23,7 +23,7 @@ void WallObjectShaders::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	for (int i = 0; i < m_nObjects; i++)
 	{
 		m_ppObjects[i] = new CEthanObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pBuildingModel, 1);
-	
+
 	}
 
 	m_ppObjects[0]->SetPosition(850.0f, pTerrain->GetHeight(850.0f, 1250.0f), 1250.0f);
@@ -160,19 +160,18 @@ void BunkerObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	{
 		m_ppObjects[i] = new CEthanObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pBuildingModel, 1);
 		m_ppObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+		m_ppObjects[i]->SetScale(40.0, 35.0f, 40.0f);
 	}
 
-	m_ppObjects[0]->SetPosition(420.0f, pTerrain->GetHeight(420.0f, 400.0f)-50.0f + 0.0f, 400.0f);
-	m_ppObjects[0]->Rotate(0.0, 0.0f, 0.0f);
-	m_ppObjects[0]->SetScale(30.0f, 10.0f, 30.0f);
+	m_ppObjects[0]->SetPosition(420.0f, pTerrain->GetHeight(420.0f, 1100.0f)-15.0f, 1100.0f);
+	m_ppObjects[0]->Rotate(55.0, 0.0f, 0.0f);
 
-	m_ppObjects[1]->SetPosition(650.0f, pTerrain->GetHeight(650.0f, 200.0f) - 50.0f + 0.0f, 200.0f);
-	m_ppObjects[1]->Rotate(0.0, 180.0f, 0.0f);
-	m_ppObjects[1]->SetScale(40.0f, 10.0f, 40.0f);
+	m_ppObjects[1]->SetPosition(650.0f, pTerrain->GetHeight(650.0f, 1800.0f) - 15.0f, 1800.0f);
+	m_ppObjects[1]->Rotate(55.0, 0.0f, 0.0f);
 
-	m_ppObjects[2]->SetPosition(700.0f, pTerrain->GetHeight(700.0f, 400.0f) - 50.0f + 0.0f, 400.0f);
-	m_ppObjects[2]->Rotate(0.0, 90.0f, 0.0f);
-	m_ppObjects[2]->SetScale(15.0f, 6.0f, 15.0f);
+	m_ppObjects[2]->SetPosition(1700.0f, pTerrain->GetHeight(1700.0f, 1400.0f) - 15.0f, 1400.0f);
+	m_ppObjects[2]->Rotate(55.0, 0.0f, 0.0f);
+
 
 
 
