@@ -13,6 +13,7 @@
 #include "TerrainShader.h"
 #include "MapObjectShaders.h"
 #include "Player.h"
+#include "HumanPlayer.h"
 #include "Object.h"
 #include "MissileObject.h"
 #include "GameSound.h"

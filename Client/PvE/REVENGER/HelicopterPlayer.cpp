@@ -58,7 +58,6 @@ void CAirplanePlayer::Firevalkan(CGameObject* pLockedObject)
 	{
 
 		XMFLOAT3 xmf3Position = this->GetPosition();
-		
 		XMFLOAT3 xmf3Direction = PlayerLook;
 		xmf3Direction.y -= 0.1f;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));

@@ -355,6 +355,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case '2':
 			ChangeScene(SCENE2STAGE);
 			break;
+		case VK_SPACE:
+			if (m_nMode == SCENE2STAGE)((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+			break;
 		default:
 			break;
 		}
@@ -362,9 +365,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case VK_SPACE:/*
+		case VK_SPACE:
+			if (m_nMode == SCENE2STAGE)((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 			if (m_nMode == SCENE2STAGE)((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
-			if (m_nMode == SCENE1STAGE)((CAirplanePlayer*)m_pPlayer)->Firevalkan(NULL);*/
+			//if (m_nMode == SCENE1STAGE)((CAirplanePlayer*)m_pPlayer)->Firevalkan(NULL);
 			break;
 		default:
 			break;
@@ -972,6 +976,8 @@ void CGameFramework::Create_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look)
 
 void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3right, XMFLOAT3 xmf3up, XMFLOAT3 xmf3look)
 {
+	
+
 	m_pScene->m_ppBullets[id]->SetPosition(pos);
 	m_pScene->m_ppBullets[id]->SetRight(xmf3right);
 	m_pScene->m_ppBullets[id]->SetUp(xmf3up);

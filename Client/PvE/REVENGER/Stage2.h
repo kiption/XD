@@ -1,7 +1,8 @@
 #pragma once
 #include "Scene.h"
 
-
+class Player;
+class CHumanPlayer;
 class Stage2 : public SceneManager
 {
 public:
@@ -28,7 +29,7 @@ public:
 
 	void ReleaseUploadBuffers();
 
-	CPlayer* m_pPlayer = NULL;
+	
 
 public:
 	static void CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
@@ -74,7 +75,7 @@ public:
 
 	CSkyBox2* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;
-	LIGHT* m_pLights = NULL;
+
 	int									m_nLights = 0;
 
 	XMFLOAT4							m_xmf4GlobalAmbient;

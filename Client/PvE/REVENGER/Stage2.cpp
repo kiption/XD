@@ -13,7 +13,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE	Stage2::m_d3dCbvGPUDescriptorNextHandle;
 D3D12_CPU_DESCRIPTOR_HANDLE	Stage2::m_d3dSrvCPUDescriptorNextHandle;
 D3D12_GPU_DESCRIPTOR_HANDLE	Stage2::m_d3dSrvGPUDescriptorNextHandle;
 
-Stage2::Stage2()
+Stage2::Stage2() : SceneManager()
 {
 }
 
@@ -23,7 +23,7 @@ Stage2::~Stage2()
 
 void Stage2::BuildDefaultLightsAndMaterials()
 {
-	m_nLights = 5;
+	m_nLights = 6;
 	m_pLights = new LIGHT[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
@@ -75,6 +75,17 @@ void Stage2::BuildDefaultLightsAndMaterials()
 	m_pLights[4].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
 	m_pLights[4].m_xmf3Position = XMFLOAT3(600.0f, 250.0f, 700.0f);
 	m_pLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+	m_pLights[5].m_nType = SPOT_LIGHT;
+	m_pLights[5].m_fRange = 1500.0f;
+	m_pLights[5].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_pLights[5].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+	m_pLights[5].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+	m_pLights[5].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
+	m_pLights[5].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_pLights[5].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights[5].m_fFalloff = 8.0f;
+	m_pLights[5].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	m_pLights[5].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 }
 
 void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -516,15 +527,17 @@ void Stage2::AnimateObjects(float fTimeElapsed)
 	SceneManager::AnimateObjects(fTimeElapsed);
 	m_fElapsedTime = fTimeElapsed;
 
-	//for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
-	//for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
-	//for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->AnimateObjects(fTimeElapsed);
-
-	/*if (m_pLights)
+	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
+	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
+	for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->AnimateObjects(fTimeElapsed);
+	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();;
+	if (m_pLights)
 	{
-		m_pLights[1].m_xmf3Position = m_pPlayer->m_xmf3Position;
-		m_pLights[1].m_xmf3Direction = XMFLOAT3(m_pPlayer->m_xmf4x4ToParent._31, m_pPlayer->m_xmf4x4ToParent._32, m_pPlayer->m_xmf4x4ToParent._33);
-	}*/
+		m_pLights[1].m_xmf3Position = xmfPosition;
+		m_pLights[1].m_xmf3Direction = m_pPlayer->GetLook();
+		m_pLights[5].m_xmf3Position = XMFLOAT3(420.0f, m_pTerrain->GetHeight(420.0f, 1100.0f), 1100.0f);
+		m_pLights[5].m_xmf3Direction.x += 0.5;
+	}
 
 }
 

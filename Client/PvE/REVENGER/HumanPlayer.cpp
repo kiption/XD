@@ -10,19 +10,23 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	SetScale(XMFLOAT3(7.0,7.0,7.0));
 	m_pBulletFindFrame = pAngrybotModel->m_pModelRootObject->FindFrame("Bip001_R_Finger0Nub");
 
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 2, pAngrybotModel);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 3, pAngrybotModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
+	
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
+	m_pSkinnedAnimationController->SetCallbackKeys(2, 1);
 #ifdef _WITH_SOUND_RESOURCE
 	m_pSkinnedAnimationController->SetCallbackKey(0, 0.1f, _T("Footstep01"));
 	m_pSkinnedAnimationController->SetCallbackKey(1, 0.5f, _T("Footstep02"));
 	m_pSkinnedAnimationController->SetCallbackKey(2, 0.9f, _T("Footstep03"));
 #else
-	m_pSkinnedAnimationController->SetCallbackKey(1, 0, 0.2f, _T("Sound/Footstep01.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.5f, _T("Sound/Footstep02.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(1, 0,  1.4f, _T("Sound/Footstep01.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(1, 1,  1.6f, _T("Sound/Footstep02.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(2, 0, 0.5f, _T("Sound/Shooting.wav"));
 	//	m_pSkinnedAnimationController->SetCallbackKey(1, 2, 0.39f, _T("Sound/Footstep03.wav"));
 #endif
 	CAnimationCallbackHandler* pAnimationCallbackHandler = new CSoundCallbackHandler();
@@ -151,6 +155,7 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 	{
 		m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		m_pSkinnedAnimationController->SetTrackEnable(1, true);
+		m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	}
 
 	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
@@ -161,6 +166,7 @@ void CHumanPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	for (int i = 0; i < BULLETS; i++)
 	{
 		if (m_ppBullets[i]->m_bActive) {
+			
 			m_ppBullets[i]->Animate(fTimeElapsed);
 		}
 	}
@@ -178,6 +184,7 @@ void CHumanPlayer::Update(float fTimeElapsed)
 		{
 			m_pSkinnedAnimationController->SetTrackEnable(0, true);
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
 			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
 		}
 	}
@@ -197,10 +204,13 @@ void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 	{
 		if (!m_ppBullets[i]->m_bActive)
 		{
+			
 			pBulletObject = m_ppBullets[i];
 			pBulletObject->Reset();
 			break;
 		}
+		
+		
 	}
 	XMFLOAT3 PlayerLook = this->GetLookVector();
 	XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
