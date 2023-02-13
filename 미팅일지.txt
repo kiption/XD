@@ -345,3 +345,91 @@
  - 서버 이중화
   * 이중화 한번 해볼것 : 서버 하나가 죽었다 살아났을 때 원상 회복 가능    (사망 탐지와 복구 기능 구현)
  - 개인전투 맵의 텍스쳐 손볼 것.
+
+2023-02-13
+-------------
+1. 진행상황
+ - 중점연구과제
+  * 레이트레이싱
+   - 1단계 : 폴리곤모델을 레이트레이싱으로 그리기
+     수업에서 배운것 : FBX->Binary변환->Binary를 로딩해서 CommandList에 넣기
+     RayTracing에 필요한것   Binary에서 폴리곤리스트를 뽑아내기 (이미 기존 프로그램에서 다 뽑아서 쓰고 있으니 그대로 가져와서 사용하면 됨)
+                  VertexList : Mesh.cpp:52 m_d3dPositionBufferView
+                  IndexList : Mesh.cpp:65  m_pd3dSubSetIndexBufferViews[nSubSet]  // 배열인데 하나로 합쳐서 사용하면 됨
+  * 서버 이중화
+   - 소스코드를 두카피 관리하는 것인 에바.
+    * 서버 실행 할 때 scanf해서 1을 입력하면 1번서버 2를 입력하면 2번서버로 동작시키면 됨.
+   - 서버끼리 연결할때 문제가 생김
+       이웃서버와 연결은 했는데, IOCP연결을 하지않고 do_recv도 하지 않아서 보내주는 패킷을 받지 못함.
+   - 비동기 Connect
+      *** WorkerThread ******
+  if (ex_over->_comp_type == OP_CONNECT) {
+	std::cout << "Control Server is connected.\n";
+	_prev_remain = 0;
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(_cs_socket), _iocp, 1, 0);
+	delete ex_over;
+	do_recv();
+     }
+    
+  ***** Main Thread ***********
+  	SOCKET temp_s = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	GUID guid = WSAID_CONNECTEX;
+	DWORD bytes = 0;
+	LPFN_CONNECTEX fn_conn;
+	::WSAIoctl(temp_s, SIO_GET_EXTENSION_FUNCTION_POINTER, &guid, sizeof(guid), &fn_conn, sizeof(fn_conn), &bytes, nullptr, nullptr);
+	closesocket(temp_s);
+
+
+	SOCKADDR_IN server_addr;
+	ZeroMemory(&server_addr, sizeof(server_addr));
+	server_addr.sin_family = AF_INET;
+	_cs_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);     // 실제 연결할 소켓
+	int ret = ::bind(_cs_socket, reinterpret_cast<LPSOCKADDR>(& server_addr), sizeof(server_addr));
+	if (ret != 0) {
+		err_disp("Error bind : ", WSAGetLastError());
+		exit(-1);
+	}
+
+	OVER_EXP* con_over = new OVER_EXP;
+	con_over->_comp_type = OP_CONNECT;
+	HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(_cs_socket), _iocp, -1, 0);
+	if (NULL == hret) {
+		err_disp("Error CreateIoCompletoinPort : ", WSAGetLastError());
+		exit(-1);
+	}
+
+	ZeroMemory(&server_addr, sizeof(server_addr));
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(net_port);
+	inet_pton(AF_INET, net_addr.c_str(), &server_addr.sin_addr);
+
+	BOOL bret = fn_conn(_cs_socket, reinterpret_cast<sockaddr *>(&server_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over->_over);
+	if (FALSE == bret) {
+		int err_no = GetLastError();
+		if (ERROR_IO_PENDING == err_no)
+			std::cout << "Trying Server Connection.\n";
+		else
+			err_disp("ConnectEX : ", GetLastError());
+	}
+
+ - 컨텐츠
+ * 헬기전투 구현 : 조작 UI개선, HP/장탄수 UI 추가,  로켓발사/피격/HP/Respawn 구현
+ * 각개전투 구현 : 조작 UI개선, 서버 연동 미구현.
+
+2. 작업일지
+ - 일주일 단위로, 샘플을 보고 작성
+
+3. ToDo
+ - 중점연구과제
+  * 헬기모델을 RayTracing으로 그려보기
+  * 서버 이중화 서버들끼리 연동시켜서 죽였다 켰을 때 제대로 동작 시키기
+ - 컨텐츠
+  * 각개전투 서버 동기화
+  * 그림자 구현
+  * 로켓 맞았을 떄 불꽃이 튀고, 연기가 계속 나도록
+
+4. 다음미팅
+ - 2월 27일 월요일 4시 30분
+
+5. QnA
+ - 컴퓨터 재시작시 자동실행방법은?  services.msc를 실행하고 거기에 서버스 프로그램으로 등록하면 된다.
