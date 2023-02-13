@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "MissileObject.h"
 
+
 class CHumanPlayer : public CPlayer
 {
 public:
@@ -23,7 +24,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 public:
-	float m_fBulletEffectiveRange = 2000.0f;
+	float m_fBulletEffectiveRange = 1600.0f;
 	CValkanObject* pBulletObject = NULL;
 	CValkanObject* m_ppBullets[BULLETS];
 	void FireBullet(CGameObject* pLockedObject);

@@ -8,10 +8,10 @@
 #include "Scene.h"
 #include "Stage1.h"
 #include "Stage2.h"
-#include "GameSound.h"
 
 #include <queue> //S
 enum MButton { L_BUTTON, R_BUTTON };
+#include "GameSound.h"
 
 struct MouseInputVal {
 	char button;
@@ -59,7 +59,7 @@ public:
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void ChangeScene(DWORD nMode);
 	DWORD						m_nMode = SCENE1STAGE;
-
+	GameSound gamesound;
 #ifdef _WITH_DIRECT2D
 	void CreateDirect2DDevice();
 #endif
@@ -138,7 +138,7 @@ private:
 
 	_TCHAR						m_pszFrameRate[70];
 
-	GameSound gamesound;
+
 
 //==================================================
 //			  서버 통신을 위한 것들...

@@ -312,13 +312,21 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	if (m_pScene) m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 	switch (nMessageID)
 	{
-	case WM_LBUTTONDOWN:
 	case WM_RBUTTONDOWN:
+		if (m_nMode == SCENE2STAGE)((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+		if (m_nMode == SCENE2STAGE)gamesound.shootingSound();
+		if (m_nMode == SCENE2STAGE)((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
+	case WM_LBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
 		break;
-	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
+	
+		if (m_nMode == SCENE2STAGE)
+		{
+			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+		}
+	case WM_LBUTTONUP:
 		::ReleaseCapture();
 		break;
 	case WM_MOUSEMOVE:
@@ -356,7 +364,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			ChangeScene(SCENE2STAGE);
 			break;
 		case VK_SPACE:
-			if (m_nMode == SCENE2STAGE)((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+			
 			break;
 		default:
 			break;
@@ -366,8 +374,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		switch (wParam)
 		{
 		case VK_SPACE:
-			if (m_nMode == SCENE2STAGE)((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
-			if (m_nMode == SCENE2STAGE)((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
+			
 			//if (m_nMode == SCENE1STAGE)((CAirplanePlayer*)m_pPlayer)->Firevalkan(NULL);
 			break;
 		default:
@@ -600,7 +607,7 @@ void CGameFramework::ProcessInput()
 				}
 			}
 			if (m_nMode == SCENE2STAGE)
-				if (dwDirection) m_pPlayer->Move(dwDirection, 12.25f, true);
+				if (dwDirection) m_pPlayer->Move(dwDirection, 9.25f, true);
 
 		}
 	}

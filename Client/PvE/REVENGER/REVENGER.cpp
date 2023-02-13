@@ -5,7 +5,7 @@
 #include "REVENGER.h"
 #include "GameFramework.h"
 #include "Network.h"
-#include "GameSound.h"
+
 #define MAX_LOADSTRING 100
 
 HINSTANCE						ghAppInstance;
@@ -122,8 +122,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						other_players[i].m_state = OBJ_ST_EMPTY;
 						gGameFramework.Remove_OtherPlayerObj(i);
 					}
+				if (gGameFramework.m_nMode==SCENE2STAGE)
+				{
+					other_players[i].m_state == OBJ_ST_LOGOUT;
+					gGameFramework.Remove_OtherPlayerObj(i);
 				}
-
+				}
 				// 3. Bullet 객체 최신화
 				for (int i = 0; i < MAX_BULLET; i++) {
 					if (bullets_info[i].m_state == OBJ_ST_EMPTY) {

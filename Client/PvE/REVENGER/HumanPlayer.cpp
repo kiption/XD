@@ -24,10 +24,9 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pSkinnedAnimationController->SetCallbackKey(1, 0.5f, _T("Footstep02"));
 	m_pSkinnedAnimationController->SetCallbackKey(2, 0.9f, _T("Footstep03"));
 #else
-	m_pSkinnedAnimationController->SetCallbackKey(1, 0,  1.4f, _T("Sound/Footstep01.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(1, 1,  1.6f, _T("Sound/Footstep02.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(2, 0, 0.5f, _T("Sound/Shooting.wav"));
-	//	m_pSkinnedAnimationController->SetCallbackKey(1, 2, 0.39f, _T("Sound/Footstep03.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(1, 0,  0.8f, _T("Sound/Footstep01.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(1, 1,  1.2f, _T("Sound/Footstep02.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(2, 0, 0.8f, _T("Sound/Shooting.wav"));
 #endif
 	CAnimationCallbackHandler* pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
@@ -38,7 +37,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh->m_pModelRootObject, true);
 		pBulletObject->SetScale(1.0,1.0,1.0);
-		pBulletObject->SetMovingSpeed(500.0f);
+		pBulletObject->SetMovingSpeed(800.0f);
 		pBulletObject->SetActive(false);
 		pBulletObject->m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 0, pBulletMesh);
 		m_ppBullets[i] = pBulletObject;
@@ -199,6 +198,7 @@ void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 
 void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 {
+	
 	CValkanObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS; i++)
 	{

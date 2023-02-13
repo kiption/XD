@@ -4,8 +4,9 @@
 #include <MSWSock.h>
 #include "ObjectsInfo.h"
 #include "GameSound.h"
-
 GameSound gamesound;
+
+
 #pragma comment (lib, "WS2_32.LIB")
 #pragma comment(lib, "MSWSock.lib")
 
