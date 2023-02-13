@@ -152,7 +152,8 @@ public:
 	queue<MouseInputVal> q_mouseInput;
 
 	// 서버에서 받은 총알 개수
-	WCHAR						m_myBullet[20];
+	WCHAR m_myBullet[20];
+	WCHAR m_myhp[20];
 
 	//==================================================
 

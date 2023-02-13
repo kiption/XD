@@ -1,4 +1,6 @@
-constexpr int PORT_NUM = 4000;
+constexpr int PORT_NUM = 9000;
+constexpr int PORT_NUM2 = 9001;
+
 constexpr int BUF_SIZE = 200;
 constexpr int NAME_SIZE = 20;
 

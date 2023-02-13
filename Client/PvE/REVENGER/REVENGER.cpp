@@ -22,7 +22,7 @@ INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-	//==================================================
+//==================================================
 //					Server Code
 //==================================================
 	wcout.imbue(locale("korean"));
@@ -153,7 +153,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				wcscpy_s(gGameFramework.m_myBullet, MyBullet);
 
 				// 5. HP 최신화	(UI)
-
+				wchar_t MyHp[20];
+				_itow_s(my_info.m_hp, MyHp, sizeof(MyHp), 10);
+				wcscpy_s(gGameFramework.m_myhp, MyHp);
 
 			}
 

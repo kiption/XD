@@ -848,6 +848,8 @@ void timerFunc() {
 					mv_target.s_lock.lock();
 
 					mv_target.pl_state = PL_ST_ALIVE;
+					mv_target.hp = 100;
+					mv_target.bullet = 100;
 					mv_target.pos.x = 1500 + mv_target.id * 50;
 					mv_target.pos.y = 400 + mv_target.id * 20;
 					mv_target.pos.z = 1265 - mv_target.id * 50;
@@ -882,9 +884,9 @@ void timerFunc() {
 
 					if (mv_target.pos.y > 100) {
 						// ¶³¾îÁö¸é¼­ ºù±Ûºù±Ûµµ´Â ¿¬Ãâ
-						mv_target.pos.y -= 0.005f;
+						mv_target.pos.y -= 0.0002;
 
-						mv_target.yaw += 2.f;
+						mv_target.yaw += 0.005f;
 						mv_target.m_rightvec = calcRotate(basic_coordinate.right, mv_target.roll, mv_target.yaw, mv_target.pitch);
 						mv_target.m_upvec = calcRotate(basic_coordinate.up, mv_target.roll, mv_target.yaw, mv_target.pitch);
 						mv_target.m_lookvec = calcRotate(basic_coordinate.look, mv_target.roll, mv_target.yaw, mv_target.pitch);

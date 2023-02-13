@@ -193,8 +193,6 @@ void processPacket(char* ptr)
 				other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 				cout << "Player[" << recv_id << "]'s object moves to("
 					<< other_players[recv_id].m_pos.x << ", " << other_players[recv_id].m_pos.y << ", " << other_players[recv_id].m_pos.z << ")." << endl;
-
-				cout << "[TEST] R_PACK POS: " << recv_packet->x << ", " << recv_packet->y << ", " << recv_packet->z << endl;
 			}
 			else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
 				// Npc ÀÌµ¿
