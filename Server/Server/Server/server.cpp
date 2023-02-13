@@ -668,7 +668,7 @@ void process_packet(int client_id, char* packet)
 		SS_HEARTBEAT_PACKET send_heartbeat_pack;
 		send_heartbeat_pack.size = sizeof(SS_HEARTBEAT_PACKET);
 		send_heartbeat_pack.type = SS_HEARTBEAT;
-		send_heartbeat_pack.server_id = 0;
+		send_heartbeat_pack.server_id = 1;
 		cout << "Send Heartbeat to Server[1]." << endl;
 		extended_servers[server_id].do_send(&send_heartbeat_pack);
 		break;

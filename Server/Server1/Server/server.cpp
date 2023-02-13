@@ -655,7 +655,7 @@ void process_packet(int client_id, char* packet)
 		extended_servers[server_id].hp = HEARTBEAT_CYCLE * HEARTBEAT_SUSPENSION;		// heartbeat 주기 * 보류횟수 ms 동안 heartbeat가 오지 않으면 서버다운으로 간주.
 		extended_servers[server_id].bullet = connect_pack->port_num;					// 포트 번호로 대체
 		extended_servers[server_id].s_state = ST_RUNNING_SERVER;
-		cout << "Server[1] Connected." << endl;
+		cout << "Server[0] Connected." << endl;
 		break;
 	}// SS_CONNECT end
 	case SS_HEARTBEAT:
@@ -663,14 +663,14 @@ void process_packet(int client_id, char* packet)
 		SS_HEARTBEAT_PACKET* heartbeat_pack = reinterpret_cast<SS_HEARTBEAT_PACKET*>(packet);
 		int server_id = heartbeat_pack->server_id;
 
-		extended_servers[server_id].hp = HEARTBEAT_CYCLE * HEARTBEAT_SUSPENSION;
-		cout << "Recv Heartbeat from Server[1]." << endl;
+		extended_servers[0].hp = HEARTBEAT_CYCLE * HEARTBEAT_SUSPENSION;
+		cout << "Recv Heartbeat from Server[0]." << endl;
 
 		SS_HEARTBEAT_PACKET send_heartbeat_pack;
 		send_heartbeat_pack.size = sizeof(SS_HEARTBEAT_PACKET);
 		send_heartbeat_pack.type = SS_HEARTBEAT;
 		send_heartbeat_pack.server_id = 0;
-		cout << "Send Heartbeat to Server[1]." << endl;
+		cout << "Send Heartbeat to Server[0]." << endl;
 		extended_servers[server_id].do_send(&send_heartbeat_pack);
 		break;
 	}// SS_HEARTBEAT end
@@ -1198,6 +1198,10 @@ int main()
 	server_addr_S0.sin_port = htons(PORT_NUM_S0);
 	inet_pton(AF_INET, SERVER_ADDR, &server_addr_S0.sin_addr);
 	connect(s0_socket, reinterpret_cast<sockaddr*>(&server_addr_S0), sizeof(server_addr_S0));
+	extended_servers[0].id = 0;
+	extended_servers[0].name[0] = 0;
+	extended_servers[0].remain_size = 0;
+	extended_servers[0].socket = s0_socket;
 	// HA end
 
 	vector <thread> worker_threads;
