@@ -10,7 +10,7 @@
 
 #include "global.h"
 #include "BulletsMgr.h"
-#include "../../Server/Server/protocol.h"
+#include "protocol.h"
 #include "NPC.h"
 #include "Timer.h"
 
@@ -20,8 +20,7 @@
 using namespace std;
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
-enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_RUNNING_SERVER, ST_DOWN_SERVER
-};
+enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_RUNNING_SERVER, ST_DOWN_SERVER };
 enum PLAYER_STATE { PL_ST_ALIVE, PL_ST_DEAD };
 
 Coordinate basic_coordinate;	// 기본(초기) 좌표계
@@ -655,7 +654,7 @@ void process_packet(int client_id, char* packet)
 		extended_servers[server_id].hp = HEARTBEAT_CYCLE * HEARTBEAT_SUSPENSION;		// heartbeat 주기 * 보류횟수 ms 동안 heartbeat가 오지 않으면 서버다운으로 간주.
 		extended_servers[server_id].bullet = connect_pack->port_num;					// 포트 번호로 대체
 		extended_servers[server_id].s_state = ST_RUNNING_SERVER;
-		cout << "Server[0] Connected." << endl;
+		cout << "Server[1] Connected." << endl;
 		break;
 	}// SS_CONNECT end
 	case SS_HEARTBEAT:
@@ -663,14 +662,14 @@ void process_packet(int client_id, char* packet)
 		SS_HEARTBEAT_PACKET* heartbeat_pack = reinterpret_cast<SS_HEARTBEAT_PACKET*>(packet);
 		int server_id = heartbeat_pack->server_id;
 
-		extended_servers[0].hp = HEARTBEAT_CYCLE * HEARTBEAT_SUSPENSION;
-		cout << "Recv Heartbeat from Server[0]." << endl;
+		extended_servers[server_id].hp = HEARTBEAT_CYCLE * HEARTBEAT_SUSPENSION;
+		cout << "Recv Heartbeat from Server[1]." << endl;
 
 		SS_HEARTBEAT_PACKET send_heartbeat_pack;
 		send_heartbeat_pack.size = sizeof(SS_HEARTBEAT_PACKET);
 		send_heartbeat_pack.type = SS_HEARTBEAT;
-		send_heartbeat_pack.server_id = 0;
-		cout << "Send Heartbeat to Server[0]." << endl;
+		send_heartbeat_pack.server_id = 1;
+		cout << "Send Heartbeat to Server[1]." << endl;
 		extended_servers[server_id].do_send(&send_heartbeat_pack);
 		break;
 	}// SS_HEARTBEAT end
@@ -749,7 +748,6 @@ void do_worker()
 	}
 }
 
-chrono::system_clock::time_point heartbeat_time;
 void timerFunc() {
 	while (true) {
 		// Helicopter
@@ -1037,18 +1035,6 @@ void timerFunc() {
 			}
 		}
 
-		// Heartbeat
-		if (chrono::system_clock::now() > heartbeat_time + milliseconds(HEARTBEAT_CYCLE)) {
-			SS_HEARTBEAT_PACKET heartbeat_pack;
-			heartbeat_pack.size = sizeof(SS_HEARTBEAT_PACKET);
-			heartbeat_pack.type = SS_HEARTBEAT;
-			heartbeat_pack.server_id = 0;
-			extended_servers[0].do_send(&heartbeat_pack);
-			cout << "Send Heartbeat to Server[0]." << endl;
-
-			heartbeat_time = chrono::system_clock::now();
-		}
-
 		/*
 		// NPC
 		for (int i = 0; i < MAX_NPCS; i++) {
@@ -1162,8 +1148,33 @@ void MoveNPC()
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
+	// 어떤 서버를 가동할 것인지를 명령행 인수로 입력받아서 그 서버에 포트 번호를 부여합니다.
+	int server_portnum = -1;
+	int server_num = 0;
+	if (argc > 1) {		// 입력된 명령행 인수가 있다면...
+		server_num = atoi(argv[1]);
+		while (server_portnum == -1) {
+			switch (server_num) {
+			case 0:	// 1번 서버
+				server_portnum = PORT_NUM_S0;
+				break;
+			case 1:
+				server_portnum = PORT_NUM_S1;
+				break;
+			default:
+				server_portnum = -1;
+				cout << "잘못된 값을 입력하였습니다. 프로그램을 종료합니다." << endl;
+				return 0;
+			}
+		}
+	}
+	else {					// 만약 입력된 명령행 인수가 없다면 디폴트값(포트번호 9000)으로 실행됩니다.
+		server_portnum = PORT_NUM_S0;
+	}
+	cout << "Server[" << server_num << "] is Running. - Port Num: " << server_portnum << endl;
+
 	init_npc();
 	shoot_time = chrono::system_clock::now();
 
@@ -1173,7 +1184,7 @@ int main()
 	SOCKADDR_IN server_addr;
 	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(PORT_NUM_S1);
+	server_addr.sin_port = htons(PORT_NUM_S0);
 	server_addr.sin_addr.S_un.S_addr = INADDR_ANY;
 	bind(g_s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 	listen(g_s_socket, SOMAXCONN);
@@ -1188,21 +1199,6 @@ int main()
 	a_over.process_type = OP_ACCEPT;
 	a_over.wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
 	AcceptEx(g_s_socket, c_socket, a_over.send_buf, 0, addr_size + 16, addr_size + 16, 0, &a_over.overlapped);
-
-	// HA
-	const char* SERVER_ADDR = "127.0.0.1";
-	SOCKET s0_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-	SOCKADDR_IN server_addr_S0;
-	ZeroMemory(&server_addr_S0, sizeof(server_addr_S0));
-	server_addr_S0.sin_family = AF_INET;
-	server_addr_S0.sin_port = htons(PORT_NUM_S0);
-	inet_pton(AF_INET, SERVER_ADDR, &server_addr_S0.sin_addr);
-	connect(s0_socket, reinterpret_cast<sockaddr*>(&server_addr_S0), sizeof(server_addr_S0));
-	extended_servers[0].id = 0;
-	extended_servers[0].name[0] = 0;
-	extended_servers[0].remain_size = 0;
-	extended_servers[0].socket = s0_socket;
-	// HA end
 
 	vector <thread> worker_threads;
 	for (int i = 0; i < 6; ++i)

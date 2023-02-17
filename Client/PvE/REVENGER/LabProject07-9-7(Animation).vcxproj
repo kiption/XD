@@ -150,7 +150,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Server\Server\Server\protocol.h" />
+    <ClInclude Include="..\..\..\Server\Server\protocol.h" />
     <ClInclude Include="AnimateInfo.h" />
     <ClInclude Include="BillboardObjects.h" />
     <ClInclude Include="BillboardObjectsShader.h" />
