@@ -160,7 +160,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				wchar_t MyHp[20];
 				_itow_s(my_info.m_hp, MyHp, sizeof(MyHp), 10);
 				wcscpy_s(gGameFramework.m_myhp, MyHp);
-
+				gGameFramework.m_currHp = my_info.m_hp;
 			}
 
 			//==================================================

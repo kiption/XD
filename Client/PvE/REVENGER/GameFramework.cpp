@@ -716,9 +716,15 @@ void CGameFramework::FrameAdvance()
 
 	m_pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
-	D2D_POINT_2F d2dPoint = { 0.0f, 0.0f };
+	/*D2D_POINT_2F d2dPoint = { 0.0f, 0.0f };
 	D2D_RECT_F d2dRect = { 100.0f, 100.0f, 250.0f, 250.0f };
-	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxGaussianBlur, &d2dPoint, &d2dRect);
+	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxGaussianBlur, &d2dPoint, &d2dRect);*/
+
+	D2D_POINT_2F d2HpPoint = { 60.0f, 650.0f };
+	D2D_RECT_F d2HpRect = { 0.0f, 0.0f, m_currHp * 1.9, 45.0f };
+	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxGaussianBlur, &d2HpPoint, &d2HpRect);
+	
+
 #endif
 	D2D1_SIZE_F szRenderTarget = m_ppd2dRenderTargets[m_nSwapChainBufferIndex]->GetSize();
 	D2D1_RECT_F rcUpperText = D2D1::RectF(0, 0, szRenderTarget.width, szRenderTarget.height * 0.25f);
@@ -733,10 +739,10 @@ void CGameFramework::FrameAdvance()
 	D2D1_RECT_F rcMaxBulletText = D2D1::RectF(850, 750, szRenderTarget.width, szRenderTarget.height * 0.5f);
 	m_pd2dDeviceContext->DrawTextW(L"/100", (UINT32)wcslen(L"/100"), m_pdwFont, &rcMaxBulletText, m_pd2dbrText);
 
-	D2D1_RECT_F rcCurrHpText = D2D1::RectF(-750, 750, szRenderTarget.width, szRenderTarget.height * 0.5f);
+	D2D1_RECT_F rcCurrHpText = D2D1::RectF(-1025, 920, szRenderTarget.width, szRenderTarget.height * 0.5f);
 	m_pd2dDeviceContext->DrawTextW(m_myhp, (UINT32)wcslen(m_myhp), m_pdwFont, &rcCurrHpText, m_pd2dbrText);
 
-	D2D1_RECT_F rcMaxHpText = D2D1::RectF(-650, 750, szRenderTarget.width, szRenderTarget.height * 0.5f);
+	D2D1_RECT_F rcMaxHpText = D2D1::RectF(-925, 920, szRenderTarget.width, szRenderTarget.height * 0.5f);
 	m_pd2dDeviceContext->DrawTextW(L"/100", (UINT32)wcslen(L"/100"), m_pdwFont, &rcMaxHpText, m_pd2dbrText);
 
 	m_pd2dDeviceContext->EndDraw();
@@ -890,13 +896,22 @@ void CGameFramework::CreateDirect2DDevice()
 	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1EdgeDetection, &m_pd2dfxEdgeDetection);
 
 	IWICBitmapDecoder* pwicBitmapDecoder;
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/MiniMap.jpg", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-	IWICBitmapFrameDecode* pwicFrameDecode;
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/green_button05.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	IWICBitmapFrameDecode* pwicFrameDecode; 
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
 	m_pd2dfxBitmapSource->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
 	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	/*IWICBitmapDecoder* pwicBitmap2Decoder;
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/MiniMap.jpg", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmap2Decoder);
+	IWICBitmapFrameDecode* pwicFrame2Decode;
+	pwicBitmap2Decoder->GetFrame(0, &pwicFrame2Decode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrame2Decode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmap2Decoder);*/
 
 	m_pd2dfxGaussianBlur->SetInputEffect(0, m_pd2dfxBitmapSource);
 	m_pd2dfxGaussianBlur->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
