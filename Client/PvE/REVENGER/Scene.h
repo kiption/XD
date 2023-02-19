@@ -28,6 +28,7 @@ struct LIGHT
 	XMFLOAT4							m_xmf4Ambient;
 	XMFLOAT4							m_xmf4Diffuse;
 	XMFLOAT4							m_xmf4Specular;
+	XMFLOAT4							m_xmf4Emissive;
 	XMFLOAT3							m_xmf3Position;
 	float 								m_fFalloff;
 	XMFLOAT3							m_xmf3Direction;
@@ -122,7 +123,7 @@ public:
 
 	int									m_nShaders = 0;
 	CStandardObjectsShader** m_ppShaders = NULL;
-	
+	CBulletEffectShader* m_pBulletEffect = NULL;
 	int									m_nMapShaders = 0;
 	CShader** m_ppMapShaders = NULL;
 	

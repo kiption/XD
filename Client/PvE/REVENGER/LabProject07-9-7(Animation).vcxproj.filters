@@ -261,5 +261,11 @@
     <FxCompile Include="Shaders.hlsl">
       <Filter>Asset</Filter>
     </FxCompile>
+    <FxCompile Include="Light.hlsl">
+      <Filter>Asset</Filter>
+    </FxCompile>
+    <FxCompile Include="LightShader.hlsl">
+      <Filter>Asset</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

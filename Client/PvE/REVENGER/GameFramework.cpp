@@ -728,7 +728,7 @@ void CGameFramework::FrameAdvance()
 #endif
 	D2D1_SIZE_F szRenderTarget = m_ppd2dRenderTargets[m_nSwapChainBufferIndex]->GetSize();
 	D2D1_RECT_F rcUpperText = D2D1::RectF(0, 0, szRenderTarget.width, szRenderTarget.height * 0.25f);
-	m_pd2dDeviceContext->DrawTextW(L"Locking...", (UINT32)wcslen(L"Locking..."), m_pdwFont, &rcUpperText, m_pd2dbrText);
+	m_pd2dDeviceContext->DrawTextW(L"", (UINT32)wcslen(L""), m_pdwFont, &rcUpperText, m_pd2dbrText);
 
 	D2D1_RECT_F rcLowerText = D2D1::RectF(0, szRenderTarget.height * 0.8f, szRenderTarget.width, szRenderTarget.height);
 	m_pd2dDeviceContext->DrawTextW(L" ", (UINT32)wcslen(L" "), m_pdwFont, &rcLowerText, m_pd2dbrText);

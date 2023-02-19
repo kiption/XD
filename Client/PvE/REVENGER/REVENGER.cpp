@@ -146,7 +146,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(5.0, 5.0, 11.0);
 						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(125.0,0.0,0.0);
-
+						gGameFramework.m_pScene->m_pLights[3].m_xmf3Position = XMFLOAT3(bullets_info[i].m_pos);
+						gGameFramework.m_pScene->m_pLights[3].m_xmf3Direction= XMFLOAT3(bullets_info[i].m_look_vec);
 
 					}
 				}

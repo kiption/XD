@@ -96,17 +96,18 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 	m_pLights[2].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
 	m_pLights[2].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
 	m_pLights[3].m_bEnable = true;
-	m_pLights[3].m_nType = SPOT_LIGHT;
-	m_pLights[3].m_fRange = 600.0f;
-	m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	m_pLights[3].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
-	m_pLights[3].m_xmf3Position = XMFLOAT3(550.0f, 330.0f, 530.0f);
-	m_pLights[3].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 1.0f);
+	m_pLights[3].m_nType = POINT_LIGHT;
+	m_pLights[3].m_fRange = 200.0f;
+	m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.9f, 0.5f, 0.2f, 1.0f);
+	m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.5f, 0.2f, 1.0f);
+	m_pLights[3].m_xmf4Emissive = XMFLOAT4(0.9f,0.4f,0.3f,1.0f);
+	m_pLights[3].m_xmf4Specular = XMFLOAT4(0.9f, 0.5f, 0.2f, 1.0f);
+	m_pLights[3].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_pLights[3].m_xmf3Direction = XMFLOAT3(1.0f, 1.0f, 1.0f);
 	m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights[3].m_fFalloff = 8.0f;
-	m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(90.0f));
-	m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
+	m_pLights[3].m_fFalloff = 4.0f;
+	m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(5.0f));
+	m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(10.0f));
 	m_pLights[4].m_bEnable = true;
 	m_pLights[4].m_nType = POINT_LIGHT;
 	m_pLights[4].m_fRange = 200.0f;
@@ -178,7 +179,12 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	pBuildingObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, m_pTerrain);
 	m_ppMapShaders[1] = pBuildingObjectShader;
 	
-	CLoadedModelInfo* pBulletMesh = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", NULL);
+	//CBulletEffectShader* pBCBulletEffectShader = new CBulletEffectShader();
+	//pBCBulletEffectShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	//pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
+	//m_pBulletEffect = pBCBulletEffectShader;
+
+	CLoadedModelInfo* pBulletMesh = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", m_pBulletEffect);
 	for (int i = 0; i < 50; i++)
 	{
 		pBulletObject = new CBulletObject(NULL);
@@ -479,8 +485,9 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 
-	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) m_ppBullets[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	//if (m_pBulletEffect) m_pBulletEffect->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) m_ppBullets[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->Render(pd3dCommandList, pCamera);
 

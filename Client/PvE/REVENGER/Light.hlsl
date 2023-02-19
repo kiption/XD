@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------
 #define MAX_LIGHTS			16 
-#define MAX_MATERIALS		16 
+#define MAX_MATERIALS		16
 
 #define POINT_LIGHT			1
 #define SPOT_LIGHT			2
@@ -15,6 +15,7 @@ struct LIGHT
 	float4					m_cAmbient;
 	float4					m_cDiffuse;
 	float4					m_cSpecular;
+	float4					m_cEmissive;
 	float3					m_vPosition;
 	float 					m_fFalloff;
 	float3					m_vDirection;
@@ -136,6 +137,8 @@ float4 Lighting(float3 vPosition, float3 vNormal)
 {
 	float3 vCameraPosition = float3(gvCameraPosition.x, gvCameraPosition.y, gvCameraPosition.z);
 	float3 vToCamera = normalize(vCameraPosition - vPosition);
+	// Emissive Color: 텍스처로 제공된 물체의 색상 정보를 가져옴
+
 
 	float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	[unroll(MAX_LIGHTS)] for (int i = 0; i < gnLights; i++)
@@ -156,9 +159,44 @@ float4 Lighting(float3 vPosition, float3 vNormal)
 			}
 		}
 	}
+
 	cColor += (gcGlobalAmbientLight * gMaterial.m_cAmbient);
 	cColor.a = gMaterial.m_cDiffuse.a;
 
 	return(cColor);
 }
 
+
+
+float4 Lightings(float3 vPosition, float3 vNormal,float4 vEmissive)
+{
+	float3 vCameraPosition = float3(gvCameraPosition.x, gvCameraPosition.y, gvCameraPosition.z);
+	float3 vToCamera = normalize(vCameraPosition - vPosition);
+	// Emissive Color: 텍스처로 제공된 물체의 색상 정보를 가져옴
+
+	float cEmissive = vEmissive;
+	float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	[unroll(MAX_LIGHTS)] for (int i = 0; i < gnLights; i++)
+	{
+		if (gLights[i].m_bEnable)
+		{
+			if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
+			{
+				cColor += DirectionalLight(i, vNormal, vToCamera);
+			}
+			else if (gLights[i].m_nType == POINT_LIGHT)
+			{
+				cColor += PointLight(i, vPosition, vNormal, vToCamera);
+			}
+			else if (gLights[i].m_nType == SPOT_LIGHT)
+			{
+				cColor += SpotLight(i, vPosition, vNormal, vToCamera);
+			}
+		}
+	}
+	cColor += cEmissive;
+	cColor += (gcGlobalAmbientLight * gMaterial.m_cAmbient);
+	cColor.a = gMaterial.m_cDiffuse.a;
+
+	return(cColor);
+}
