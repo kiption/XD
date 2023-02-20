@@ -137,18 +137,32 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					if (bullets_info[i].m_state == OBJ_ST_LOGOUT) {	// Clear
 						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
 						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(0.1f, 0.1f, 0.1f);
-						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(130.0, 0.0, 0.0);
-						
+						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(45.0, 0.0, 0.0);
+						gGameFramework.m_pScene->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.4, 0.4f, 0.4f, 1.0f);
+						gGameFramework.m_pScene->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.0, 0.0f, 0.0f, 1.0f);
 						bullets_info[i].returnToInitialState();
 					}
 					else if (bullets_info[i].m_state == OBJ_ST_RUNNING) {	// Update
 						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
 
 						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(5.0, 5.0, 11.0);
-						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(125.0,0.0,0.0);
+						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(75.0,0.0,0.0);
 						gGameFramework.m_pScene->m_pLights[3].m_xmf3Position = XMFLOAT3(bullets_info[i].m_pos);
 						gGameFramework.m_pScene->m_pLights[3].m_xmf3Direction= XMFLOAT3(bullets_info[i].m_look_vec);
-
+						gGameFramework.m_pScene->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.6f, 0.4f, 1.0f);
+						gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerPosition = bullets_info[i].m_pos;
+						gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerLook= my_info.m_look_vec;
+						XMFLOAT3 xmf3bulletPosition = bullets_info[i].m_pos;
+						XMFLOAT3 xmf3bulletLook = my_info.m_look_vec;
+						XMFLOAT3 xmf3Position= Vector3::Add(gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerPosition, Vector3::ScalarProduct(gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerLook, 60.0f, false));
+						gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(bullets_info[i].m_pos);
+						gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetLook(my_info.m_look_vec);
+						gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetLookAt(xmf3Position, XMFLOAT3(0.0f, 0.1, 0.0f));
+						
+						//CPlayer* pPlayer = pCamera->GetPlayer();
+//XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
+//XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
+//XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 0.0f, false));
 					}
 				}
 

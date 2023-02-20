@@ -295,3 +295,8 @@ D3D12_SHADER_BYTECODE CBulletEffectShader::CreatePixelShader()
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBulletStandard", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
+
+void CBulletEffectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CStandardObjectsShader::Render(pd3dCommandList,pCamera);
+}

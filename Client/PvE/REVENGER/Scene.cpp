@@ -80,13 +80,13 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 	m_pLights[1].m_bEnable = true;
 	m_pLights[1].m_nType = SPOT_LIGHT;
 	m_pLights[1].m_fRange = 500.0f;
-	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	m_pLights[1].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
-	m_pLights[1].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
-	m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_pLights[1].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 1.0f);
 	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights[1].m_fFalloff = 8.0f;
+	m_pLights[1].m_fFalloff = 9.0f;
 	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 	m_pLights[2].m_bEnable = true;
@@ -97,25 +97,23 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 	m_pLights[2].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
 	m_pLights[3].m_bEnable = true;
 	m_pLights[3].m_nType = POINT_LIGHT;
-	m_pLights[3].m_fRange = 200.0f;
-	m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.9f, 0.5f, 0.2f, 1.0f);
-	m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.5f, 0.2f, 1.0f);
-	m_pLights[3].m_xmf4Emissive = XMFLOAT4(0.9f,0.4f,0.3f,1.0f);
-	m_pLights[3].m_xmf4Specular = XMFLOAT4(0.9f, 0.5f, 0.2f, 1.0f);
-	m_pLights[3].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_pLights[3].m_xmf3Direction = XMFLOAT3(1.0f, 1.0f, 1.0f);
-	m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights[3].m_fFalloff = 4.0f;
-	m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(5.0f));
-	m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(10.0f));
-	m_pLights[4].m_bEnable = true;
-	m_pLights[4].m_nType = POINT_LIGHT;
-	m_pLights[4].m_fRange = 200.0f;
-	m_pLights[4].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	m_pLights[4].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.3f, 0.3f, 1.0f);
-	m_pLights[4].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
-	m_pLights[4].m_xmf3Position = XMFLOAT3(600.0f, 250.0f, 700.0f);
-	m_pLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+	m_pLights[3].m_fRange = 300.0f;
+	m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.9f, 0.4f, 0.2f, 1.0f);
+	m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.3f, 0.1, 1.0f);
+	m_pLights[3].m_xmf4Specular = XMFLOAT4(0.9f, 0.5f, 0.1f, 0.0f);
+	m_pLights[3].m_xmf3Position = XMFLOAT3(0.0, 0.0, 0.0);
+	m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+	m_pLights[4].m_nType = SPOT_LIGHT;
+	m_pLights[4].m_fRange = 500.0f;
+	m_pLights[4].m_xmf4Ambient = XMFLOAT4(0.9f, 0.4f, 0.1f, 1.0f);
+	m_pLights[4].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.4f, 0.4f, 1.0f);
+	m_pLights[4].m_xmf4Specular = XMFLOAT4(0.9f, 0.4f, 0.3f, 0.0f);
+	m_pLights[4].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
+	m_pLights[4].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_pLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights[4].m_fFalloff = 6.0f;
+	m_pLights[4].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	m_pLights[4].m_fTheta = (float)cos(XMConvertToRadians(22.0f));
 }
 
 void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -140,7 +138,7 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	m_nHierarchicalGameObjects = 0;
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 
-	m_nBillboardShaders = 1;
+	m_nBillboardShaders = 2;
 	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
 
 	CrossHairShader* pCrossHairShader = new CrossHairShader();
@@ -154,6 +152,11 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	//pRainShader->SetCurScene(SCENE1STAGE);
 	//pRainShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	//m_pBillboardShader[1] = pRainShader;
+	ValkanEffectShader* pValkanEffectShader = new ValkanEffectShader();
+	pValkanEffectShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pValkanEffectShader->SetCurScene(SCENE1STAGE);
+	pValkanEffectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_pBillboardShader[1] = pValkanEffectShader;
 
 	m_nShaders = 1;
 	m_ppShaders = new CStandardObjectsShader * [m_nShaders];
@@ -179,10 +182,10 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	pBuildingObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, m_pTerrain);
 	m_ppMapShaders[1] = pBuildingObjectShader;
 	
-	//CBulletEffectShader* pBCBulletEffectShader = new CBulletEffectShader();
-	//pBCBulletEffectShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	//pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
-	//m_pBulletEffect = pBCBulletEffectShader;
+	CBulletEffectShader* pBCBulletEffectShader = new CBulletEffectShader();
+	pBCBulletEffectShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
+	m_pBulletEffect = pBCBulletEffectShader;
 
 	CLoadedModelInfo* pBulletMesh = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", m_pBulletEffect);
 	for (int i = 0; i < 50; i++)
@@ -487,9 +490,9 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 	//if (m_pBulletEffect) m_pBulletEffect->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) m_ppBullets[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) m_ppBullets[i]->Render(pd3dCommandList, pCamera);
 
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
 	{

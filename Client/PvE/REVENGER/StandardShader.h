@@ -39,7 +39,8 @@ class BillboardShader : public CStandardShader
 public:
 	BillboardShader();
 	virtual ~BillboardShader();
-
+	XMFLOAT3 xmf3PlayerPosition;
+	XMFLOAT3 xmf3PlayerLook;
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader();

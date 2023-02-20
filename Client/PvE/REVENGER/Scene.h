@@ -124,6 +124,7 @@ public:
 	int									m_nShaders = 0;
 	CStandardObjectsShader** m_ppShaders = NULL;
 	CBulletEffectShader* m_pBulletEffect = NULL;
+	ValkanEffectShader* m_pValkanEffect = NULL;
 	int									m_nMapShaders = 0;
 	CShader** m_ppMapShaders = NULL;
 	

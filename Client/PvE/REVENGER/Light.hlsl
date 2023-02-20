@@ -174,12 +174,13 @@ float4 Lightings(float3 vPosition, float3 vNormal,float4 vEmissive)
 	float3 vToCamera = normalize(vCameraPosition - vPosition);
 	// Emissive Color: 텍스처로 제공된 물체의 색상 정보를 가져옴
 
-	float cEmissive = vEmissive;
+
 	float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	[unroll(MAX_LIGHTS)] for (int i = 0; i < gnLights; i++)
 	{
 		if (gLights[i].m_bEnable)
 		{
+			vEmissive = gLights[i].m_cEmissive;
 			if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
 			{
 				cColor += DirectionalLight(i, vNormal, vToCamera);
@@ -194,7 +195,8 @@ float4 Lightings(float3 vPosition, float3 vNormal,float4 vEmissive)
 			}
 		}
 	}
-	cColor += cEmissive;
+	vEmissive += gMaterial.m_cEmissive;
+	cColor += vEmissive;
 	cColor += (gcGlobalAmbientLight * gMaterial.m_cAmbient);
 	cColor.a = gMaterial.m_cDiffuse.a;
 

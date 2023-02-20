@@ -125,13 +125,16 @@ float4 PSBulletStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
 
 	float3 normalW;
-
+	cEmissionColor = float4(0.9,0.2,0.1,1.0);
+	cSpecularColor = float4(0.9,0.2,0.1,1.0);
+	cAlbedoColor = float4(0.9,0.2,0.1,1.0);
+	cMetallicColor = float4(0.9,0.2,0.1,1.0);
 	float4 cColor = cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
 
 	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	{
 		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
-		float3 vNormal = normalize(cNormalColor.rgb * 2.0f + 1.0f); //[0, 1] ¡æ [-1, 1]
+		float3 vNormal = normalize(cNormalColor.rgb * +2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
 		normalW = normalize(mul(vNormal, TBN));
 	}
 	else
@@ -139,8 +142,7 @@ float4 PSBulletStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 		normalW = normalize(input.normalW);
 	}
 
-
-	float4 cIllumination = Lighting(input.positionW, normalW);
+	float4 cIllumination = Lightings(input.positionW, normalW, cEmissionColor);
 
 	return(lerp(cColor, cIllumination, 0.5f));
 }
@@ -235,7 +237,7 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 	VS_TERRAIN_OUTPUT output;
 
 	output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
-	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
+	output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
 
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
 	//output.color = input.color;
@@ -254,7 +256,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
 //	float4 cColor = (cBaseTexColor * cDetailTexColor);
 	cIllumination = Lighting(input.positionW, input.normalW);
-	cColor += lerp(cColor, cIllumination, 0.0f);
+	cColor += lerp(cColor, cIllumination, 0.6f);
 	return(cColor);
 }
 
