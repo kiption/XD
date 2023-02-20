@@ -19,7 +19,7 @@
 
 using namespace std;
 
-enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
+enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_CONNECT };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_RUNNING_SERVER, ST_DOWN_SERVER };
 enum PLAYER_STATE { PL_ST_ALIVE, PL_ST_DEAD };
 
@@ -131,13 +131,16 @@ public:
 int online_player_cnt = 0;
 array<SESSION, MAX_USER + MAX_NPCS> clients;		// 0 ~ MAX_USER-1: Player,	 MAX_USER ~ MAX_USER+MAX_NPCS: NPC
 array<NPC, MAX_NPCS> npcs;
-array<SESSION, MAX_SERVER> extended_servers;		// HA구현을 위한 서버들
 
 array<Bullets, MAX_BULLET> bullets_arr;
 chrono::system_clock::time_point shoot_time;
 
 HANDLE g_h_iocp;
-SOCKET g_s_socket;
+SOCKET g_listen_sock;		// 클라이언트 listen소켓
+
+array<SESSION, MAX_SERVER> extended_servers;		// HA구현을 위해 수평확장된 서버들
+SOCKET EXTENDED_SERVER_SOCK_LEFT;					// 이전 번호의 서버
+SOCKET EXTENDED_SERVER_SOCK_RIGHT;					// 다음 번호의 서버
 
 void SESSION::send_login_info_packet()
 {
@@ -654,7 +657,7 @@ void process_packet(int client_id, char* packet)
 		extended_servers[server_id].hp = HEARTBEAT_CYCLE * HEARTBEAT_SUSPENSION;		// heartbeat 주기 * 보류횟수 ms 동안 heartbeat가 오지 않으면 서버다운으로 간주.
 		extended_servers[server_id].bullet = connect_pack->port_num;					// 포트 번호로 대체
 		extended_servers[server_id].s_state = ST_RUNNING_SERVER;
-		cout << "Server[1] Connected." << endl;
+		cout << "Server[" << server_id << "] Connected." << endl;
 		break;
 	}// SS_CONNECT end
 	case SS_HEARTBEAT:
@@ -669,7 +672,7 @@ void process_packet(int client_id, char* packet)
 		send_heartbeat_pack.size = sizeof(SS_HEARTBEAT_PACKET);
 		send_heartbeat_pack.type = SS_HEARTBEAT;
 		send_heartbeat_pack.server_id = 1;
-		cout << "Send Heartbeat to Server[1]." << endl;
+		cout << "Send Heartbeat to Server[" << server_id << "]." << endl;
 		extended_servers[server_id].do_send(&send_heartbeat_pack);
 		break;
 	}// SS_HEARTBEAT end
@@ -715,7 +718,7 @@ void do_worker()
 			ZeroMemory(&ex_over->overlapped, sizeof(ex_over->overlapped));
 			ex_over->wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
 			int addr_size = sizeof(SOCKADDR_IN);
-			AcceptEx(g_s_socket, c_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
+			AcceptEx(g_listen_sock, c_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
 			break;
 		}
 		case OP_RECV: {
@@ -739,10 +742,18 @@ void do_worker()
 			clients[key].do_recv();
 			break;
 		}
-		case OP_SEND:
+		case OP_SEND: {
 			if (0 == num_bytes) disconnect(key);
 			delete ex_over;
 			break;
+		}
+		case OP_CONNECT: {
+			std::cout << "Control Server is connected.\n";
+			extended_servers[key].remain_size = 0;
+			CreateIoCompletionPort(reinterpret_cast<HANDLE>(EXTENDED_SERVER_SOCK_RIGHT), g_h_iocp, 1, 0);
+			delete ex_over;
+			extended_servers[key].do_recv();
+		}
 		}
 
 	}
@@ -1150,6 +1161,12 @@ void MoveNPC()
 
 int main(int argc, char* argv[])
 {
+	WSADATA WSAData;
+	WSAStartup(MAKEWORD(2, 2), &WSAData);
+
+	// ========================================
+	//			HA(서버 이중화) 코드
+	// ========================================
 	// 어떤 서버를 가동할 것인지를 명령행 인수로 입력받아서 그 서버에 포트 번호를 부여합니다.
 	int server_portnum = -1;
 	int server_num = 0;
@@ -1157,10 +1174,10 @@ int main(int argc, char* argv[])
 		server_num = atoi(argv[1]);
 		while (server_portnum == -1) {
 			switch (server_num) {
-			case 0:	// 1번 서버
+			case 0:	// 0번 서버
 				server_portnum = PORT_NUM_S0;
 				break;
-			case 1:
+			case 1:	// 1번 서버
 				server_portnum = PORT_NUM_S1;
 				break;
 			default:
@@ -1170,35 +1187,92 @@ int main(int argc, char* argv[])
 			}
 		}
 	}
-	else {					// 만약 입력된 명령행 인수가 없다면 디폴트값(포트번호 9000)으로 실행됩니다.
+	else {				// 만약 입력된 명령행 인수가 없다면 디폴트값(포트번호 9000)으로 실행됩니다.
 		server_portnum = PORT_NUM_S0;
 	}
-	cout << "Server[" << server_num << "] is Running. - Port Num: " << server_portnum << endl;
+	cout << "Server[" << server_num << "] 가 가동되었습니다.(PORT: " << server_portnum << ")" << endl;
+
+	if (server_num == MAX_SERVER - 1) {		// 자신이 수평확장된 서버들 중 마지막 서버라면, 가만히 있습니다.
+		cout << "서버군의 마지막 서버입니다." << endl;
+
+		cout << "\nServer[" << server_num - 1 << "] - PORT: " << server_portnum - 1 << " 의 연결요청 Accept 성공." << endl;//test
+	}
+	else {									// 수평확장된 다른 서버에 비동기connect 요청을 보냅니다.
+		cout << "다른 이중화 서버에 비동기Connect를 요청합니다. (Server[" << server_num + 1 << "] - PORT: " << server_portnum + 1 << " 에 요청 중...)" << endl;
+		// ConnectEx
+		SOCKET temp_s = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+		GUID guid = WSAID_CONNECTEX;
+		DWORD bytes = 0;
+		LPFN_CONNECTEX connectExFP;
+		::WSAIoctl(temp_s, SIO_GET_EXTENSION_FUNCTION_POINTER, &guid, sizeof(guid), &connectExFP, sizeof(connectExFP), &bytes, nullptr, nullptr);
+		closesocket(temp_s);
+
+		SOCKADDR_IN serverEx_addr;
+		ZeroMemory(&serverEx_addr, sizeof(serverEx_addr));
+		serverEx_addr.sin_family = AF_INET;
+		EXTENDED_SERVER_SOCK_RIGHT = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);     // 실제 연결할 소켓
+		int ret = ::bind(EXTENDED_SERVER_SOCK_RIGHT, reinterpret_cast<LPSOCKADDR>(&serverEx_addr), sizeof(serverEx_addr));
+		if (ret != 0) {
+			cout << "Bind Error - " << ret << endl;
+			cout << WSAGetLastError() << endl;
+			exit(-1);
+		}
+
+		OVER_EXP* con_over = new OVER_EXP;
+		con_over->process_type = OP_CONNECT;
+		HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(EXTENDED_SERVER_SOCK_RIGHT), g_h_iocp, server_num, 0);
+		if (NULL == hret) {
+			cout << "CreateIoCompletoinPort Error - " << ret << endl;
+			cout << WSAGetLastError() << endl;
+			exit(-1);
+		}
+
+		ZeroMemory(&serverEx_addr, sizeof(serverEx_addr));
+		serverEx_addr.sin_family = AF_INET;
+		serverEx_addr.sin_port = htons(server_portnum + 1);	// 수평확장된 서버군에서 자기 오른쪽에 있는 서버
+		inet_pton(AF_INET, "127.0.0.1", &serverEx_addr.sin_addr);
+
+		BOOL bret = connectExFP(EXTENDED_SERVER_SOCK_RIGHT, reinterpret_cast<sockaddr*>(&serverEx_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over->overlapped);
+		if (FALSE == bret) {
+			int err_no = GetLastError();
+			if (ERROR_IO_PENDING == err_no)
+				cout << "Server Connect 시도 중..." << endl;
+			else {
+				cout << "ConnectEX Error - " << err_no << endl;
+				cout << WSAGetLastError() << endl;
+			}
+		}
+
+		cout << "\nServer[" << server_num + 1 << "] - PORT: " << server_portnum + 1 << " 와 Connect 성공." << endl;//test
+	}
+	// ================[HA END]================
 
 	init_npc();
 	shoot_time = chrono::system_clock::now();
 
-	WSADATA WSAData;
-	WSAStartup(MAKEWORD(2, 2), &WSAData);
-	g_s_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	//WSADATA WSAData;
+	//WSAStartup(MAKEWORD(2, 2), &WSAData);
+
+	// Client Listen Socket
+	g_listen_sock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	SOCKADDR_IN server_addr;
 	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(PORT_NUM_S0);
 	server_addr.sin_addr.S_un.S_addr = INADDR_ANY;
-	bind(g_s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
-	listen(g_s_socket, SOMAXCONN);
+	bind(g_listen_sock, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+	listen(g_listen_sock, SOMAXCONN);
 	SOCKADDR_IN cl_addr;
 	int addr_size = sizeof(cl_addr);
 	int client_id = 0;
 
 	g_h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
-	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_s_socket), g_h_iocp, 9999, 0);
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_listen_sock), g_h_iocp, 9999, 0);
 	SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	OVER_EXP a_over;
 	a_over.process_type = OP_ACCEPT;
 	a_over.wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
-	AcceptEx(g_s_socket, c_socket, a_over.send_buf, 0, addr_size + 16, addr_size + 16, 0, &a_over.overlapped);
+	AcceptEx(g_listen_sock, c_socket, a_over.send_buf, 0, addr_size + 16, addr_size + 16, 0, &a_over.overlapped);
 
 	vector <thread> worker_threads;
 	for (int i = 0; i < 6; ++i)
@@ -1213,6 +1287,6 @@ int main(int argc, char* argv[])
 	for (auto& th : worker_threads)
 		th.join();
 
-	closesocket(g_s_socket);
+	closesocket(g_listen_sock);
 	WSACleanup();
 }
