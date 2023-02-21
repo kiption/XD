@@ -647,7 +647,7 @@ CEthanObjectsShader::~CEthanObjectsShader()
 
 void CEthanObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, void *pContext)
 {
-	m_nObjects = 13;
+	m_nObjects = 1;
 
 	m_ppObjects = new CGameObject * [m_nObjects];
 
@@ -663,10 +663,10 @@ void CEthanObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsC
 	}
 
 	m_ppObjects[0]->SetPosition(420.0f, pTerrain->GetHeight(420.0f, 400.0f) + 16.0f, 400.0f);
-	m_ppObjects[0]->Rotate(270.0f, 0.0f, 0.0f);
-	m_ppObjects[0]->SetScale(30.0f, 10.0f, 8.0f);
+	m_ppObjects[0]->Rotate(0.0f, 0.0f, 0.0f);
+	m_ppObjects[0]->SetScale(2.0f, 2.0f, 2.0f);
 
-	m_ppObjects[1]->SetPosition(650.0f, pTerrain->GetHeight(650.0f, 200.0f) + 16.0f, 200.0f);
+	/*m_ppObjects[1]->SetPosition(650.0f, pTerrain->GetHeight(650.0f, 200.0f) + 16.0f, 200.0f);
 	m_ppObjects[1]->Rotate(270.0f, 180.0f, 0.0f);
 	m_ppObjects[1]->SetScale(40.0f, 10.0f, 8.0f);
 
@@ -712,7 +712,7 @@ void CEthanObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsC
 
 	m_ppObjects[12]->SetPosition(350.0f, pTerrain->GetHeight(350.0f, 600.0f) + 16.0f, 600.0f);
 	m_ppObjects[12]->Rotate(270.0f, 0.0f, 0.0f);
-	m_ppObjects[12]->SetScale(40.0f, 4.0f, 8.0f);
+	m_ppObjects[12]->SetScale(40.0f, 4.0f, 8.0f);*/
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -1049,7 +1049,7 @@ void CBuildingObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 
 void CGeneratorShedShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
 {
-	m_nObjects = 13;
+	m_nObjects = 1;
 
 	m_ppObjects = new CGameObject * [m_nObjects];
 
@@ -1067,7 +1067,7 @@ void CGeneratorShedShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	m_ppObjects[0]->Rotate(0.0f, 0.0f, 0.0f);
 	m_ppObjects[0]->SetScale(3.0f, 3.0f, 3.0f);
 
-	m_ppObjects[1]->SetPosition(450.0f, pTerrain->GetHeight(450.0f, 550.0f), 550.0f);
+	/*m_ppObjects[1]->SetPosition(450.0f, pTerrain->GetHeight(450.0f, 550.0f), 550.0f);
 	m_ppObjects[1]->Rotate(0.0f, 90.0f, 0.0f);
 	m_ppObjects[1]->SetScale(3.0f, 3.0f, 3.0f);
 
@@ -1113,7 +1113,7 @@ void CGeneratorShedShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 	m_ppObjects[12]->SetPosition(325.0f, pTerrain->GetHeight(325.0f, 550.0f), 550.0f);
 	m_ppObjects[12]->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppObjects[12]->SetScale(4.0f, 2.0f, 4.0f);
+	m_ppObjects[12]->SetScale(4.0f, 2.0f, 4.0f);*/
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 

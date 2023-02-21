@@ -236,10 +236,10 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 {
 	VS_TERRAIN_OUTPUT output;
 
-	output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
-	output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
+	output.normalW = (float3)mul(input.normal, (float3x3)gmtxProjection);
+	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
 
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	//output.color = input.color;
 	output.uv0 = input.uv0;
 	output.uv1 = input.uv1;
@@ -255,13 +255,11 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gssWrap, input.uv1);
 	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
 //	float4 cColor = (cBaseTexColor * cDetailTexColor);
-	cIllumination = Lighting(input.positionW, input.normalW);
-	cColor += lerp(cColor, cIllumination, 0.6f);
+	cIllumination =Lighting(input.positionW, input.normalW);
+	cColor = lerp(cColor, cIllumination, 0.15f);
 	return(cColor);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 struct VS_SKYBOX_CUBEMAP_INPUT
 {
 	float3 position : POSITION;

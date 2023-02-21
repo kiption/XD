@@ -77,24 +77,27 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
 	m_pLights[0].m_xmf3Position = XMFLOAT3(0.0, 0.0, 0.0);
 	m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+
 	m_pLights[1].m_bEnable = true;
 	m_pLights[1].m_nType = SPOT_LIGHT;
-	m_pLights[1].m_fRange = 500.0f;
+	m_pLights[1].m_fRange = 600.0f;
 	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	m_pLights[1].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
 	m_pLights[1].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 1.0f);
 	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights[1].m_fFalloff = 9.0f;
-	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
-	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights[1].m_fFalloff = 7.0f;
+	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(50.0f));
+	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
+
 	m_pLights[2].m_bEnable = true;
 	m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
 	m_pLights[2].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
 	m_pLights[2].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
+
 	m_pLights[3].m_bEnable = true;
 	m_pLights[3].m_nType = POINT_LIGHT;
 	m_pLights[3].m_fRange = 300.0f;
@@ -103,6 +106,7 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 	m_pLights[3].m_xmf4Specular = XMFLOAT4(0.9f, 0.5f, 0.1f, 0.0f);
 	m_pLights[3].m_xmf3Position = XMFLOAT3(0.0, 0.0, 0.0);
 	m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+
 	m_pLights[4].m_nType = SPOT_LIGHT;
 	m_pLights[4].m_fRange = 500.0f;
 	m_pLights[4].m_xmf4Ambient = XMFLOAT4(0.9f, 0.4f, 0.1f, 1.0f);
@@ -121,7 +125,7 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 20+4+2); //SuperCobra(17), Gunship(2), Player:Mi24(1), Angrybot()
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1 + 2 + 1 + 1 + 4 + 2 + 4 + 50);//SuperCobra(17), Gunship(2), Player:Mi24(1), Angrybot()
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
@@ -129,14 +133,25 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pSkyBox->SetCurScene(SCENE1STAGE);
 
-	XMFLOAT3 xmf3Scale(8.0f, 2.0f, 8.0f);
+	XMFLOAT3 xmf3Scale(10.0f, 4.0f, 10.0f);
 	XMFLOAT3 xmf3Normal(1.0f, 1.0f, 1.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/terrain033.raw"), 513, 513, xmf3Scale, xmf3Normal);
 	m_pTerrain->SetCurScene(SCENE1STAGE);
 
 
-	m_nHierarchicalGameObjects = 0;
+	m_nHierarchicalGameObjects = 2;
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
+
+	CGameObject* pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GameObject.bin", NULL);
+	CGameObject* pGameObject2= CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GameObject.bin", NULL);
+	m_ppHierarchicalGameObjects[0] = new CMi24Object(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_ppHierarchicalGameObjects[0]->SetChild(pGameObject, false);
+	m_ppHierarchicalGameObjects[0]->SetPosition(1000.0, m_pTerrain->GetHeight(1000.0,1000.0),1000.0);
+	m_ppHierarchicalGameObjects[0]->SetScale(5.0, 5.0, 5.0);
+	m_ppHierarchicalGameObjects[1] = new CMi24Object(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_ppHierarchicalGameObjects[1]->SetChild(pGameObject2, false);
+	m_ppHierarchicalGameObjects[1]->SetPosition(2000.0, m_pTerrain->GetHeight(2000.0, 2000.0), 2000.0);
+	m_ppHierarchicalGameObjects[1]->SetScale(5.0, 5.0, 5.0);
 
 	m_nBillboardShaders = 2;
 	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
@@ -152,6 +167,7 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	//pRainShader->SetCurScene(SCENE1STAGE);
 	//pRainShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	//m_pBillboardShader[1] = pRainShader;
+
 	ValkanEffectShader* pValkanEffectShader = new ValkanEffectShader();
 	pValkanEffectShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	pValkanEffectShader->SetCurScene(SCENE1STAGE);
@@ -167,6 +183,7 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	pOtherPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL,m_pTerrain);
 	m_ppShaders[0] = pOtherPlayerShader;
 
+
 	m_nMapShaders = 2;
 	m_ppMapShaders = new CShader * [m_nMapShaders];
 
@@ -181,7 +198,8 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	pBuildingObjectShader->SetCurScene(SCENE1STAGE);
 	pBuildingObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, m_pTerrain);
 	m_ppMapShaders[1] = pBuildingObjectShader;
-	
+
+
 	CBulletEffectShader* pBCBulletEffectShader = new CBulletEffectShader();
 	pBCBulletEffectShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
@@ -247,8 +265,8 @@ void SceneManager::ReleaseObjects()
 		delete[] m_ppHierarchicalGameObjects;
 	}
 
-	if (m_pLights) delete[] m_pLights;
 	ReleaseShaderVariables();
+	if (m_pLights) delete[] m_pLights;
 
 }
 
@@ -488,18 +506,19 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 
+	for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+
 	//if (m_pBulletEffect) m_pBulletEffect->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) m_ppBullets[i]->Render(pd3dCommandList, pCamera);
 
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
 	{
 		if (m_ppHierarchicalGameObjects[i])
 		{
-			m_ppHierarchicalGameObjects[i]->Animate(m_fElapsedTime);
-			if (!m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController) m_ppHierarchicalGameObjects[i]->UpdateTransform(NULL);
+			//m_ppHierarchicalGameObjects[i]->Animate(m_fElapsedTime);
+			//if (!m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController) m_ppHierarchicalGameObjects[i]->UpdateTransform(NULL);
 			m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
 		}
 	}

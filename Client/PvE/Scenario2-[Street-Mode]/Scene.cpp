@@ -85,7 +85,7 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3 * 24 + 3 * 13 + 1 * 13 + 4 * 10); //SuperCobra(17), Gunship(2), Player:Mi24(1), Angrybot()
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 3 * 24 + 3 * 13 + 1 * 13 + 4 * 10 + 30); //SuperCobra(17), Gunship(2), Player:Mi24(1), Angrybot()
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
@@ -100,31 +100,31 @@ void CScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_nHierarchicalGameObjects = 0;
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 
-	CLoadedModelInfo* pEthanModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
+	CLoadedModelInfo* pEthanModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GameObject.bin", NULL);
 	CLoadedModelInfo* pModel2 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
 	CLoadedModelInfo* pModel3 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/CementShack2.bin", NULL);
-	CLoadedModelInfo* pModel4 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GeneratorShed.bin", NULL);
+	CLoadedModelInfo* pModel4 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GameObject.bin", NULL);
 
-	m_nShaders = 4;
+	m_nShaders = 1;
 	m_ppShaders = new CShader * [m_nShaders];
 
-	CEthanObjectsShader* pEthanObjectsShader = new CEthanObjectsShader();
-	pEthanObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEthanModel, m_pTerrain);
-	m_ppShaders[0] = pEthanObjectsShader;
-	if (pEthanModel) delete pEthanModel;
+	//CEthanObjectsShader* pEthanObjectsShader = new CEthanObjectsShader();
+	//pEthanObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pEthanModel, m_pTerrain);
+	//m_ppShaders[0] = pEthanObjectsShader;
+	//if (pEthanModel) delete pEthanModel;
 
-	CWallObjectShader* pCWallObjectShader = new CWallObjectShader();
-	pCWallObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pModel2, m_pTerrain);
-	m_ppShaders[1] = pCWallObjectShader;
+	//CWallObjectShader* pCWallObjectShader = new CWallObjectShader();
+	//pCWallObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pModel2, m_pTerrain);
+	//m_ppShaders[1] = pCWallObjectShader;
 
-	CBuildingObjectShader* pCBuildingObjectShader = new CBuildingObjectShader();
-	pCBuildingObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pModel3, m_pTerrain);
-	m_ppShaders[2] = pCBuildingObjectShader;
+	//CBuildingObjectShader* pCBuildingObjectShader = new CBuildingObjectShader();
+	//pCBuildingObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pModel3, m_pTerrain);
+	//m_ppShaders[2] = pCBuildingObjectShader;
 
-	CGeneratorShedShader* pCGeneratorShedShader = new CGeneratorShedShader();
+	CEthanObjectsShader* pCGeneratorShedShader = new CEthanObjectsShader();
 	pCGeneratorShedShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pModel4, m_pTerrain);
-	m_ppShaders[3] = pCGeneratorShedShader;
-
+	m_ppShaders[0] = pCGeneratorShedShader;
+	if (pModel4)delete pModel4;
 
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
