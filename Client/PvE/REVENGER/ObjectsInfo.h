@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <queue>
 #include "../../../Server/Server/protocol.h"
 
 enum OBJECT_STATE { OBJ_ST_EMPTY, OBJ_ST_STANDBY, OBJ_ST_LOGOUT, OBJ_ST_RUNNING };
@@ -42,3 +43,7 @@ std::array<ObjectsInfo, MAX_USER> other_players;
 std::array<ObjectsInfo, MAX_NPCS> npcs_info;
 
 std::array<ObjectsInfo, MAX_BULLET> bullets_info;
+
+
+// Collision Info
+std::queue<XMFLOAT3> coll_info;

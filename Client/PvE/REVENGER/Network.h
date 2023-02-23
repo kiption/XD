@@ -303,20 +303,17 @@ void processPacket(char* ptr)
 
 		break;
 	}//SC_REMOVE_PLAYER case end
-	case SC_HP_COUNT:
+	case SC_DAMAGED:
 	{
-		SC_HP_COUNT_PACKET* recv_packet = reinterpret_cast<SC_HP_COUNT_PACKET*>(ptr);
-		my_info.m_hp = recv_packet->hp;
-		gamesound.collisionSound();
-		int cause = recv_packet->change_cause;
-		if (cause == CAUSE_DAMAGED_BY_BULLET) {
-			cout << "Damaged by Bullet!" << endl;
-		}
-		else if (cause == CAUSE_DAMAGED_BY_PLAYER) {
-			cout << "Damaged by Player!" << endl;
-		}
-		else if (cause == CAUSE_HEAL) {
-			cout << "Heal" << endl;
+		SC_DAMAGED_PACKET* recv_packet = reinterpret_cast<SC_DAMAGED_PACKET*>(ptr);
+
+		if (recv_packet->target == TARGET_PLAYER && recv_packet->id == my_id) {
+			my_info.m_hp = my_info.m_hp - recv_packet->dec_hp;
+
+			XMFLOAT3 coll_pos = { recv_packet->col_pos_x, recv_packet->col_pos_y, recv_packet->col_pos_z };
+			coll_info.push(coll_pos);
+
+			gamesound.collisionSound();
 		}
 
 		break;
