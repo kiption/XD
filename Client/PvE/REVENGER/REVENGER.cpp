@@ -145,7 +145,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					else if (bullets_info[i].m_state == OBJ_ST_RUNNING) {	// Update
 						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
 
-						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(5.0, 5.0, 11.0);
+						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(2.0, 2.0, 15.0);
 						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(75.0,0.0,0.0);
 						gGameFramework.m_pScene->m_pLights[3].m_xmf3Position = XMFLOAT3(bullets_info[i].m_pos);
 						gGameFramework.m_pScene->m_pLights[3].m_xmf3Direction= XMFLOAT3(bullets_info[i].m_look_vec);

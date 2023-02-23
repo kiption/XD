@@ -293,7 +293,7 @@ void ValkanEffectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.0f, 14.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	m_nObjects = 1;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
