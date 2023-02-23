@@ -87,7 +87,7 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 	m_pLights[1].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 1.0f);
 	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights[1].m_fFalloff = 7.0f;
+	m_pLights[1].m_fFalloff = 5.5f;
 	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(50.0f));
 	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
 
@@ -139,19 +139,9 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	m_pTerrain->SetCurScene(SCENE1STAGE);
 
 
-	m_nHierarchicalGameObjects = 2;
+	m_nHierarchicalGameObjects = 0;
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 
-	CGameObject* pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Barrel4.bin", NULL);
-	CGameObject* pGameObject2= CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GameObject.bin", NULL);
-	m_ppHierarchicalGameObjects[0] = new CMi24Object(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	m_ppHierarchicalGameObjects[0]->SetChild(pGameObject, false);
-	m_ppHierarchicalGameObjects[0]->SetPosition(1000.0, m_pTerrain->GetHeight(1000.0,1000.0)+1000.0,1000.0);
-	m_ppHierarchicalGameObjects[0]->SetScale(10.0,10.0, 10.0);
-	m_ppHierarchicalGameObjects[1] = new CMi24Object(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	m_ppHierarchicalGameObjects[1]->SetChild(pGameObject2, false);
-	m_ppHierarchicalGameObjects[1]->SetPosition(2000.0, m_pTerrain->GetHeight(2000.0, 2000.0)+100.0, 2000.0);
-	m_ppHierarchicalGameObjects[1]->SetScale(10.0, 10.0, 10.0);
 
 	m_nBillboardShaders = 2;
 	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
@@ -183,21 +173,16 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	pOtherPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL,m_pTerrain);
 	m_ppShaders[0] = pOtherPlayerShader;
 
+	m_nMapShaders = 1;
+	m_ppMapShaders = new CMapObjectShader * [m_nMapShaders];
 
-	m_nMapShaders = 2;
-	m_ppMapShaders = new CShader * [m_nMapShaders];
+	CMapObjectShader* pMapObjectShader = new CMapObjectShader();
+	pMapObjectShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pMapObjectShader->SetCurScene(SCENE1STAGE);
+	pMapObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
+	m_ppMapShaders[0] = pMapObjectShader;
 
-	WallObjectShaders* pWallObjectShaders = new WallObjectShaders();
-	pWallObjectShaders->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	pWallObjectShaders->SetCurScene(SCENE1STAGE);
-	pWallObjectShaders->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, m_pTerrain);
-	m_ppMapShaders[0] = pWallObjectShaders;
 
-	BuildingObjectShader* pBuildingObjectShader = new BuildingObjectShader();
-	pBuildingObjectShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	pBuildingObjectShader->SetCurScene(SCENE1STAGE);
-	pBuildingObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, m_pTerrain);
-	m_ppMapShaders[1] = pBuildingObjectShader;
 
 
 	CBulletEffectShader* pBCBulletEffectShader = new CBulletEffectShader();
@@ -206,7 +191,7 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	m_pBulletEffect = pBCBulletEffectShader;
 
 	CLoadedModelInfo* pBulletMesh = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", m_pBulletEffect);
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 100; i++)
 	{
 		pBulletObject = new CBulletObject(NULL);
 		pBulletObject->SetChild(pBulletMesh->m_pModelRootObject, true);

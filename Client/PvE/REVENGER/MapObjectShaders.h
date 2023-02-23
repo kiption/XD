@@ -1,5 +1,6 @@
 #pragma once
 #include "SkinAnimationShader.h"
+#include "StandardShader.h"
 #include "Terrain.h"
 
 class WallObjectShaders : public CSkinnedAnimationObjectsShader
@@ -11,7 +12,7 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext = NULL);
 };
 
-class BuildingObjectShader : public CSkinnedAnimationObjectsShader
+class BuildingObjectShader : public CStandardObjectsShader
 {
 public:
 	BuildingObjectShader() {};
@@ -28,4 +29,18 @@ public:
 	virtual ~BunkerObjectShader() {};
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext = NULL);
+};
+
+class CMapObjectShader : public CStandardShader
+{
+public:
+	CMapObjectShader() {};
+	virtual ~CMapObjectShader() {};
+
+	virtual D3D12_BLEND_DESC CreateBlendState();
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
+	virtual void ReleaseObjects();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void ReleaseUploadBuffers();
 };

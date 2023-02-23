@@ -132,24 +132,14 @@ void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pOtherPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL,m_pTerrain);
 	m_ppShaders[0] = pOtherPlayerShader;
 
-	m_nMapShaders = 2;
-	m_ppMapShaders = new CShader * [m_nMapShaders];
+	m_nMapShaders = 0;
+	m_ppMapShaders = new CMapObjectShader * [m_nMapShaders];
 
-	CLoadedModelInfo* pBuildingModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/bunker_1_fbx.bin", NULL);
-	CLoadedModelInfo* pWallModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
-
-	BunkerObjectShader* pBunkerObjectShader = new BunkerObjectShader();
-	pBunkerObjectShader->SetCurScene(SCENE2STAGE);
-	pBunkerObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBuildingModel, m_pTerrain);
-	m_ppMapShaders[0] = pBunkerObjectShader;
-	if (pBuildingModel)delete pBuildingModel;
-
-	WallObjectShaders* pWallObjectShaders = new WallObjectShaders();
-	pWallObjectShaders->SetCurScene(SCENE2STAGE);
-	pWallObjectShaders->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pWallModel, m_pTerrain);
-	m_ppMapShaders[1] = pWallObjectShaders;
-	if (pWallModel)delete pWallModel;
-
+	//CMapObjectShader* pBunkerObjectShader = new BunkerObjectShader();
+	//pBunkerObjectShader->SetCurScene(SCENE2STAGE);
+	//pBunkerObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pBuildingModel, m_pTerrain);
+	//m_ppMapShaders[0] = pBunkerObjectShader;
+	//if (pBuildingModel)delete pBuildingModel;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

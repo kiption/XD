@@ -126,7 +126,7 @@ public:
 	CBulletEffectShader* m_pBulletEffect = NULL;
 	ValkanEffectShader* m_pValkanEffect = NULL;
 	int									m_nMapShaders = 0;
-	CShader** m_ppMapShaders = NULL;
+	CMapObjectShader** m_ppMapShaders = NULL;
 	
 	CSkyBox* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;
