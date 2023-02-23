@@ -142,16 +142,16 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	m_nHierarchicalGameObjects = 2;
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 
-	CGameObject* pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GameObject.bin", NULL);
+	CGameObject* pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Barrel4.bin", NULL);
 	CGameObject* pGameObject2= CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/GameObject.bin", NULL);
 	m_ppHierarchicalGameObjects[0] = new CMi24Object(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_ppHierarchicalGameObjects[0]->SetChild(pGameObject, false);
-	m_ppHierarchicalGameObjects[0]->SetPosition(1000.0, m_pTerrain->GetHeight(1000.0,1000.0),1000.0);
-	m_ppHierarchicalGameObjects[0]->SetScale(5.0, 5.0, 5.0);
+	m_ppHierarchicalGameObjects[0]->SetPosition(1000.0, m_pTerrain->GetHeight(1000.0,1000.0)+1000.0,1000.0);
+	m_ppHierarchicalGameObjects[0]->SetScale(10.0,10.0, 10.0);
 	m_ppHierarchicalGameObjects[1] = new CMi24Object(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_ppHierarchicalGameObjects[1]->SetChild(pGameObject2, false);
-	m_ppHierarchicalGameObjects[1]->SetPosition(2000.0, m_pTerrain->GetHeight(2000.0, 2000.0), 2000.0);
-	m_ppHierarchicalGameObjects[1]->SetScale(5.0, 5.0, 5.0);
+	m_ppHierarchicalGameObjects[1]->SetPosition(2000.0, m_pTerrain->GetHeight(2000.0, 2000.0)+100.0, 2000.0);
+	m_ppHierarchicalGameObjects[1]->SetScale(10.0, 10.0, 10.0);
 
 	m_nBillboardShaders = 2;
 	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
