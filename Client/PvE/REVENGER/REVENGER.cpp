@@ -173,6 +173,17 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				wcscpy_s(gGameFramework.m_myhp, MyHp);
 				gGameFramework.m_currHp = my_info.m_hp;
 			}
+			//==================================================
+
+			//==================================================
+			//				충돌 이펙트 구현 코드
+			//==================================================
+			if (!coll_info.empty()) {
+				XMFLOAT3 collision_effect_pos = coll_info.front();
+				coll_info.pop();
+
+				std::cout << collision_effect_pos.x << ", " << collision_effect_pos.y << ", " << collision_effect_pos.z << endl;
+			}
 
 			//==================================================
 

@@ -837,14 +837,17 @@ void timerFunc() {
 							cout << "Player[" << mv_target.id << "] is Damaged by Player[" << other_pl.id << "]!" << endl; //server message
 
 							// 충돌한 플레이어에게 충돌 사실을 알립니다.
-							SC_HP_COUNT_PACKET damaged_packet;
-							damaged_packet.size = sizeof(SC_HP_COUNT_PACKET);
-							damaged_packet.id = mv_target.id;
-							damaged_packet.type = SC_HP_COUNT;
-							damaged_packet.hp = mv_target.hp;
-							damaged_packet.change_cause = CAUSE_DAMAGED_BY_PLAYER;
+							SC_DAMAGED_PACKET damaged_by_player_packet;
+							damaged_by_player_packet.size = sizeof(SC_DAMAGED_PACKET);
+							damaged_by_player_packet.target = TARGET_PLAYER;
+							damaged_by_player_packet.id = mv_target.id;
+							damaged_by_player_packet.type = SC_DAMAGED;
+							damaged_by_player_packet.dec_hp = COLLIDE_PLAYER_DAMAGE;
+							damaged_by_player_packet.col_pos_x = mv_target.pos.x;
+							damaged_by_player_packet.col_pos_y = mv_target.pos.y;
+							damaged_by_player_packet.col_pos_z = mv_target.pos.z;
 
-							mv_target.do_send(&damaged_packet);
+							mv_target.do_send(&damaged_by_player_packet);
 						}
 						mv_target.s_lock.unlock();
 
@@ -870,14 +873,17 @@ void timerFunc() {
 							cout << "Player[" << other_pl.id << "] is Damaged by Player[" << mv_target.id << "]!" << endl; //server message
 
 							// 충돌한 플레이어에게 충돌 사실을 알립니다.
-							SC_HP_COUNT_PACKET damaged_packet;
-							damaged_packet.size = sizeof(SC_HP_COUNT_PACKET);
-							damaged_packet.id = other_pl.id;
-							damaged_packet.type = SC_HP_COUNT;
-							damaged_packet.hp = other_pl.hp;
-							damaged_packet.change_cause = CAUSE_DAMAGED_BY_PLAYER;
+							SC_DAMAGED_PACKET damaged_by_player_packet;
+							damaged_by_player_packet.size = sizeof(SC_DAMAGED_PACKET);
+							damaged_by_player_packet.target = TARGET_PLAYER;
+							damaged_by_player_packet.id = other_pl.id;
+							damaged_by_player_packet.type = SC_DAMAGED;
+							damaged_by_player_packet.dec_hp = COLLIDE_PLAYER_DAMAGE;
+							damaged_by_player_packet.col_pos_x = other_pl.pos.x;
+							damaged_by_player_packet.col_pos_y = other_pl.pos.y;
+							damaged_by_player_packet.col_pos_z = other_pl.pos.z;
 
-							other_pl.do_send(&damaged_packet);
+							other_pl.do_send(&damaged_by_player_packet);
 						}
 						other_pl.s_lock.unlock();
 					}//if (pl.m_xoobb.Intersects(other_pl.m_xoobb)) end
@@ -1014,14 +1020,17 @@ void timerFunc() {
 							cout << "Player[" << pl.id << "] is Damaged by Bullet!" << endl; //server message
 
 							// 충돌한 플레이어에게 충돌 사실을 알립니다.
-							SC_HP_COUNT_PACKET damaged_packet;
-							damaged_packet.size = sizeof(SC_HP_COUNT_PACKET);
-							damaged_packet.id = pl.id;
-							damaged_packet.type = SC_HP_COUNT;
-							damaged_packet.hp = pl.hp;
-							damaged_packet.change_cause = CAUSE_DAMAGED_BY_BULLET;
+							SC_DAMAGED_PACKET damaged_by_bullet_packet;
+							damaged_by_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
+							damaged_by_bullet_packet.target = TARGET_PLAYER;
+							damaged_by_bullet_packet.id = pl.id;
+							damaged_by_bullet_packet.type = SC_DAMAGED;
+							damaged_by_bullet_packet.dec_hp = BULLET_DAMAGE;
+							damaged_by_bullet_packet.col_pos_x = pl.pos.x;
+							damaged_by_bullet_packet.col_pos_y = pl.pos.y;
+							damaged_by_bullet_packet.col_pos_z = pl.pos.z;
 
-							pl.do_send(&damaged_packet);
+							pl.do_send(&damaged_by_bullet_packet);
 						}
 
 						// 마지막으로 총알의 정보를 초기화합니다.
@@ -1194,8 +1203,6 @@ int main(int argc, char* argv[])
 
 	if (server_num == MAX_SERVER - 1) {		// 자신이 수평확장된 서버들 중 마지막 서버라면, 가만히 있습니다.
 		cout << "서버군의 마지막 서버입니다." << endl;
-
-		cout << "\nServer[" << server_num - 1 << "] - PORT: " << server_portnum - 1 << " 의 연결요청 Accept 성공." << endl;//test
 	}
 	else {									// 수평확장된 다른 서버에 비동기connect 요청을 보냅니다.
 		cout << "다른 이중화 서버에 비동기Connect를 요청합니다. (Server[" << server_num + 1 << "] - PORT: " << server_portnum + 1 << " 에 요청 중...)" << endl;
@@ -1236,14 +1243,12 @@ int main(int argc, char* argv[])
 		if (FALSE == bret) {
 			int err_no = GetLastError();
 			if (ERROR_IO_PENDING == err_no)
-				cout << "Server Connect 시도 중..." << endl;
+				cout << "Server Connect 시도 중...\n" << endl;
 			else {
 				cout << "ConnectEX Error - " << err_no << endl;
 				cout << WSAGetLastError() << endl;
 			}
 		}
-
-		cout << "\nServer[" << server_num + 1 << "] - PORT: " << server_portnum + 1 << " 와 Connect 성공." << endl;//test
 	}
 	// ================[HA END]================
 

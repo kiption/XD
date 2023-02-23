@@ -27,7 +27,7 @@ constexpr char INPUT_KEY_E = 0b000001;
 // Packet ID
 enum PacketID { CS_LOGIN, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT
-	, SC_HP_COUNT, SC_PLAYER_STATE, SC_BULLET_COUNT
+	, SC_DAMAGED, SC_PLAYER_STATE, SC_BULLET_COUNT
 	, SS_CONNECT, SS_HEARTBEAT };
 
 // Target Type
@@ -111,13 +111,13 @@ struct SC_ROTATE_OBJECT_PACKET {
 	float look_x, look_y, look_z;
 };
 
-enum hp_change_cause { CAUSE_DAMAGED_BY_BULLET, CAUSE_DAMAGED_BY_PLAYER, CAUSE_HEAL };
-struct SC_HP_COUNT_PACKET {
+struct SC_DAMAGED_PACKET {
 	unsigned char size;
 	char type;
+	short target;
 	short id;
-	int hp;
-	int change_cause;
+	int dec_hp;
+	float col_pos_x, col_pos_y, col_pos_z;
 };
 
 enum player_state { ST_PACK_REVIVAL, ST_PACK_DEAD };
