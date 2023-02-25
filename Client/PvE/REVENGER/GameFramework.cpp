@@ -620,6 +620,7 @@ void CGameFramework::AnimateObjects()
 
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
+
 	m_pPlayer->Animate(fTimeElapsed);
 	m_pPlayer->Animate(fTimeElapsed,NULL);
 }
@@ -964,30 +965,32 @@ void CGameFramework::SetVectors_PlayerObj(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMF
 
 void CGameFramework::SetPosition_OtherPlayerObj(int id, XMFLOAT3 pos) {
 
-	m_pScene->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._41 = pos.x;
-	m_pScene->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._42 = pos.y;
-	m_pScene->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._43 = pos.z;
-	if (m_nMode == SCENE2STAGE)
+	m_pScene->m_ppHierarchicalGameObjects[id]->m_xmf4x4ToParent._41 = pos.x;
+	m_pScene->m_ppHierarchicalGameObjects[id]->m_xmf4x4ToParent._42 = pos.y;
+	m_pScene->m_ppHierarchicalGameObjects[id]->m_xmf4x4ToParent._43 = pos.z;
+	
+	/*if (m_nMode == SCENE2STAGE)
 	{
 		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._41 = pos.x;
 		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._42 = pos.y;
 		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._43 = pos.z;
-	}
+	}*/
 }
 void CGameFramework::SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec) {
-	m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetUp(upVec);
-	m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetRight(rightVec);
-	m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetLook(lookVec);
-	if (m_nMode == SCENE2STAGE)
-	{
-		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->SetUp(upVec);
-		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->SetRight(rightVec);
-		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->SetLook(lookVec);
-	}
+	m_pScene->m_ppHierarchicalGameObjects[id]->SetUp(upVec);
+	m_pScene->m_ppHierarchicalGameObjects[id]->SetRight(rightVec);
+	m_pScene->m_ppHierarchicalGameObjects[id]->SetLook(lookVec);
+	m_pScene->m_ppHierarchicalGameObjects[id]->SetScale(1.0,1.0,1.0);
+	//if (m_nMode == SCENE2STAGE)
+	//{
+	//	((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->SetUp(upVec);
+	//	((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->SetRight(rightVec);
+	//	((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->SetLook(lookVec);
+	//}
 }
 void CGameFramework::Remove_OtherPlayerObj(int id) {
-	if (m_pScene->m_ppShaders[0]->m_ppObjects[id] ) {
-		m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetScale(0.0, 0.0, 0.0);
+	if (m_pScene->m_ppHierarchicalGameObjects[id] ) {
+		m_pScene->m_ppHierarchicalGameObjects[id]->SetScale(0.0, 0.0, 0.0);
 	}
 }
 

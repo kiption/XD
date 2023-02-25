@@ -125,7 +125,7 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1 + 2 + 1 + 1 + 4 + 2 + 4 + 50);//SuperCobra(17), Gunship(2), Player:Mi24(1), Angrybot()
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1 + 2 + 1 + 1 + 4 * 5 + 2 + 4 + 50);
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
@@ -164,14 +164,29 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	pValkanEffectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[1] = pValkanEffectShader;
 
-	m_nShaders = 1;
+	/*m_nShaders = 1;
 	m_ppShaders = new CStandardObjectsShader * [m_nShaders];
 
 	CHellicopterObjectsShader* pOtherPlayerShader = new CHellicopterObjectsShader();
 	pOtherPlayerShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	pOtherPlayerShader->SetCurScene(SCENE1STAGE);
 	pOtherPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL,m_pTerrain);
-	m_ppShaders[0] = pOtherPlayerShader;
+	m_ppShaders[0] = pOtherPlayerShader;*/
+
+	m_nHierarchicalGameObjects = 5;
+	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
+	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
+	{
+
+		m_ppHierarchicalGameObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+		CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
+		m_ppHierarchicalGameObjects[i]->SetChild(pOtherPlayerModel, false);
+		m_ppHierarchicalGameObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
+		m_ppHierarchicalGameObjects[i]->SetScale(10.0, 10.0, 10.0);
+		m_ppHierarchicalGameObjects[i]->OnPrepareAnimate();
+		pOtherPlayerModel->AddRef();
+		//m_ppHierarchicalGameObjects[i]->SetPosition(1000.0, 450.0, 1500.0);
+	}
 
 	m_nMapShaders = 1;
 	m_ppMapShaders = new CMapObjectShader * [m_nMapShaders];
@@ -181,8 +196,6 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	pMapObjectShader->SetCurScene(SCENE1STAGE);
 	pMapObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 	m_ppMapShaders[0] = pMapObjectShader;
-
-
 
 
 	CBulletEffectShader* pBCBulletEffectShader = new CBulletEffectShader();
@@ -209,7 +222,7 @@ void SceneManager::ReleaseObjects()
 	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
 
 
-	
+
 	if (m_pBillboardShader)
 	{
 		for (int i = 0; i < m_nBillboardShaders; i++)
@@ -466,6 +479,7 @@ void SceneManager::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->AnimateObjects(fTimeElapsed);
+	for (int i = 0; i < m_nHierarchicalGameObjects; i++) if (m_ppHierarchicalGameObjects[i]) m_ppHierarchicalGameObjects[i]->Animate(fTimeElapsed);
 
 	if (m_pLights)
 	{
@@ -490,9 +504,9 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 
 	for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 
 	//if (m_pBulletEffect) m_pBulletEffect->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera);
@@ -502,8 +516,7 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	{
 		if (m_ppHierarchicalGameObjects[i])
 		{
-			//m_ppHierarchicalGameObjects[i]->Animate(m_fElapsedTime);
-			//if (!m_ppHierarchicalGameObjects[i]->m_pSkinnedAnimationController) m_ppHierarchicalGameObjects[i]->UpdateTransform(NULL);
+			m_ppHierarchicalGameObjects[i]->AnimateObject(pCamera,m_fElapsedTime);
 			m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
 		}
 	}

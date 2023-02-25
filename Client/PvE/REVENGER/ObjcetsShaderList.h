@@ -1,6 +1,7 @@
 #pragma once
 #include "SkinAnimationShader.h"
 #include "Terrain.h"
+
 class CHellicopterObjectsShader : public CStandardObjectsShader
 {
 public:

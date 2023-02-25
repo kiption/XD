@@ -113,8 +113,8 @@ public:
 
 	float								m_fElapsedTime = 0.0f;
 
-	//int									m_nGameObjects = 0;
-	//CGameObject** m_ppGameObjects = NULL;
+	int									m_nGameObjects = 0;
+	CGameObject** m_ppGameObjects = NULL;
 
 	int									m_nHierarchicalGameObjects = 0;
 	CGameObject** m_ppHierarchicalGameObjects = NULL;
