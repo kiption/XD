@@ -1,9 +1,13 @@
 constexpr int MAX_SERVER = 2;
 constexpr int PORT_NUM_S0 = 9000;
 constexpr int PORT_NUM_S1 = 9001;
+constexpr int HA_PORTNUM_S0 = 10000;
+constexpr int HA_PORTNUM_S1 = 10001;
 
-constexpr int HEARTBEAT_CYCLE = 3000;
-constexpr int HEARTBEAT_SUSPENSION = 3;
+constexpr int SERIAL_NUM_CLIENT = 0;
+constexpr int SERIAL_NUM_EXSERVER = 1000;
+
+constexpr int HB_SEND_CYCLE = 1000;		// Heartbeat를 보내는 주기 (단위: millisec)
 
 constexpr int BUF_SIZE = 200;
 constexpr int NAME_SIZE = 20;
@@ -145,10 +149,9 @@ struct SS_CONNECT_PACKET {
 	int port_num;
 };
 
-constexpr int MY_HEARTBEAT = 1;
 struct SS_HEARTBEAT_PACKET {
 	unsigned char size;
 	char type;
-	short server_id;
+	short sender_id;
 };
 #pragma pack (pop)
