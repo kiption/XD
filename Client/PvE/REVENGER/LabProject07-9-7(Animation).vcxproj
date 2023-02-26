@@ -159,6 +159,9 @@
     <ClInclude Include="MissileObject.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="ObjectsInfo.h" />
+    <ClInclude Include="ParticleMesh.h" />
+    <ClInclude Include="ParticleObject.h" />
+    <ClInclude Include="ParticleShader.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Stage2.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
@@ -192,6 +195,9 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="MapObjectShaders.cpp" />
     <ClCompile Include="MissileObject.cpp" />
+    <ClCompile Include="ParticleMesh.cpp" />
+    <ClCompile Include="ParticleObject.cpp" />
+    <ClCompile Include="ParticleShader.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Stage2.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />

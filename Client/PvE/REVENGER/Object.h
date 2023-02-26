@@ -16,12 +16,30 @@
 #define DIR_UP						0x10
 #define DIR_DOWN					0x20
 
-#define RESOURCE_TEXTURE2D			0x01
-#define RESOURCE_TEXTURE2D_ARRAY	0x02	//[]
-#define RESOURCE_TEXTURE2DARRAY		0x03
-#define RESOURCE_TEXTURE_CUBE		0x04
-#define RESOURCE_BUFFER				0x05
+#define RESOURCE_TEXTURE1D			0x01
+#define RESOURCE_TEXTURE2D			0x02
+#define RESOURCE_TEXTURE2D_ARRAY	0x03	//[]
+#define RESOURCE_TEXTURE2DARRAY		0x04
+#define RESOURCE_TEXTURE_CUBE		0x05
+#define RESOURCE_BUFFER				0x06
+#define RESOURCE_STRUCTURED_BUFFER	0x07
 
+struct EXPLOSIONMATERIAL
+{
+	XMFLOAT4						m_xmf4Ambient;
+	XMFLOAT4						m_xmf4Diffuse;
+	XMFLOAT4						m_xmf4Specular; //(r,g,b,a=power)
+	XMFLOAT4						m_xmf4Emissive;
+};
+struct CB_STREAMGAMEOBJECT_INFO
+{
+	XMFLOAT4X4						m_xmf4x4World;
+	EXPLOSIONMATERIAL				m_material;
+
+	XMFLOAT4X4						m_xmf4x4Texture;
+	XMINT2							m_xmi2TextureTiling;
+	XMFLOAT2						m_xmf2TextureOffset;
+};
 class CShader;
 class CStandardShader;
 class CPlayer;
@@ -40,11 +58,12 @@ private:
 	int								m_nTextures = 0;
 	ID3D12Resource** m_ppd3dTextures = NULL;
 	ID3D12Resource** m_ppd3dTextureUploadBuffers;
-
+	_TCHAR(*m_ppstrTextureNames)[64] = NULL;
 	UINT* m_pnResourceTypes = NULL;
 
 	DXGI_FORMAT* m_pdxgiBufferFormats = NULL;
 	int* m_pnBufferElements = NULL;
+	int* m_pnBufferStrides = NULL;
 
 	int								m_nRootParameters = 0;
 	UINT* m_pnRootParameterIndices = NULL;
@@ -52,6 +71,8 @@ private:
 
 	int								m_nSamplers = 0;
 	D3D12_GPU_DESCRIPTOR_HANDLE* m_pd3dSamplerGpuDescriptorHandles = NULL;
+
+	XMFLOAT4X4						m_xmf4x4Texture;
 
 public:
 	void AddRef() { m_nReferences++; }
@@ -82,6 +103,7 @@ public:
 	int GetBufferElements(int nIndex) { return(m_pnBufferElements[nIndex]); }
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(int nIndex);
+	void CreateBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nElements, UINT nStride, DXGI_FORMAT dxgiFormat, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, UINT nIndex);
 
 	void ReleaseUploadBuffers();
 };
@@ -152,6 +174,8 @@ public:
 
 	void SetStandardShader() { CMaterial::SetShader(m_pStandardShader); }
 	void SetSkinnedAnimationShader() { CMaterial::SetShader(m_pSkinnedAnimationShader); }
+
+
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -353,6 +377,8 @@ public:
 	char							m_pstrFrameName[64];
 
 	CMesh							*m_pMesh = NULL;
+	CMesh							**m_ppMeshes = NULL;
+	int m_nMeshes = NULL;
 
 	int								m_nMaterials = 0;
 	CMaterial						**m_ppMaterials = NULL;
@@ -364,7 +390,10 @@ public:
 	CGameObject 					*m_pParent = NULL;
 	CGameObject 					*m_pChild = NULL;
 	CGameObject 					*m_pSibling = NULL;
-
+	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
+protected:
+	ID3D12Resource* m_pd3dcbGameObject = NULL;
+	CB_STREAMGAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
 public:
 	float m_fMovingSpeed = 0.0f;
 	float m_fMovingRange = 0.0f;
@@ -461,7 +490,8 @@ public:
 	static CGameObject* LoadGeometryHierachyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName, CShader* pShader);
 
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
-
+	void SetCbvGPUDescriptorHandle(D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle) { m_d3dCbvGPUDescriptorHandle = d3dCbvGPUDescriptorHandle; }
+	void SetCbvGPUDescriptorHandlePtr(UINT64 nCbvGPUDescriptorHandlePtr) { m_d3dCbvGPUDescriptorHandle.ptr = nCbvGPUDescriptorHandlePtr; }
 public:
 	// Server
 	void SetUp(XMFLOAT3 xmf3Up) { m_xmf4x4ToParent._21 = xmf3Up.x, m_xmf4x4ToParent._22 = xmf3Up.y, m_xmf4x4ToParent._23 = xmf3Up.z; }

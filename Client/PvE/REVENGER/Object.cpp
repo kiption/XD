@@ -17,20 +17,32 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 	if (m_nTextures > 0)
 	{
 		m_ppd3dTextureUploadBuffers = new ID3D12Resource * [m_nTextures];
+		
 		m_ppd3dTextures = new ID3D12Resource * [m_nTextures];
 		for (int i = 0; i < m_nTextures; i++) m_ppd3dTextureUploadBuffers[i] = m_ppd3dTextures[i] = NULL;
-
+		m_ppstrTextureNames = new _TCHAR[m_nTextures][64];
+		for (int i = 0; i < m_nTextures; i++) m_ppstrTextureNames[i][0] = '\0';
 		m_pd3dSrvGpuDescriptorHandles = new D3D12_GPU_DESCRIPTOR_HANDLE[m_nTextures];
-
+		for (int i = 0; i < m_nTextures; i++) m_pd3dSrvGpuDescriptorHandles[i].ptr = NULL;
 		m_pnResourceTypes = new UINT[m_nTextures];
+		for (int i = 0; i < m_nTextures; i++) m_pnResourceTypes[i] = 0;
+
 		m_pdxgiBufferFormats = new DXGI_FORMAT[m_nTextures];
-		m_pnBufferElements = new int[m_nTextures];
+		for (int i = 0; i < m_nTextures; i++) m_pdxgiBufferFormats[i] = DXGI_FORMAT_UNKNOWN;
+
+		m_pnBufferElements = new int[m_nTextures];		
+		for (int i = 0; i < m_nTextures; i++) m_pnBufferElements[i] = 0;
+		m_pnBufferStrides = new int[m_nTextures];
+		for (int i = 0; i < m_nTextures; i++) m_pnBufferStrides[i] = 0;
 	}
 	m_nRootParameters = nRootParameters;
 	if (nRootParameters > 0) m_pnRootParameterIndices = new UINT[nRootParameters];
 
 	m_nSamplers = nSamplers;
 	if (m_nSamplers > 0) m_pd3dSamplerGpuDescriptorHandles = new D3D12_GPU_DESCRIPTOR_HANDLE[m_nSamplers];
+	m_xmf4x4Texture = Matrix4x4::Identity();
+
+
 }
 
 CTexture::~CTexture()
@@ -43,7 +55,7 @@ CTexture::~CTexture()
 	if (m_pnResourceTypes) delete[] m_pnResourceTypes;
 	if (m_pdxgiBufferFormats) delete[] m_pdxgiBufferFormats;
 	if (m_pnBufferElements) delete[] m_pnBufferElements;
-
+	if (m_pnBufferStrides) delete[] m_pnBufferStrides;
 	if (m_pnRootParameterIndices) delete[] m_pnRootParameterIndices;
 	if (m_pd3dSrvGpuDescriptorHandles) delete[] m_pd3dSrvGpuDescriptorHandles;
 
@@ -136,6 +148,13 @@ D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetShaderResourceViewDesc(int nIndex)
 	int nTextureType = GetTextureType(nIndex);
 	switch (nTextureType)
 	{
+	case RESOURCE_TEXTURE1D: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize == 1)
+		d3dShaderResourceViewDesc.Format = d3dResourceDesc.Format;
+		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE1D;
+		d3dShaderResourceViewDesc.Texture1D.MipLevels = -1;
+		d3dShaderResourceViewDesc.Texture1D.MostDetailedMip = 0;
+		d3dShaderResourceViewDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+		break;
 	case RESOURCE_TEXTURE2D: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize == 1)
 	case RESOURCE_TEXTURE2D_ARRAY: //[]
 		d3dShaderResourceViewDesc.Format = d3dResourceDesc.Format;
@@ -170,8 +189,26 @@ D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetShaderResourceViewDesc(int nIndex)
 		d3dShaderResourceViewDesc.Buffer.StructureByteStride = 0;
 		d3dShaderResourceViewDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 		break;
+	case RESOURCE_STRUCTURED_BUFFER: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER)
+		d3dShaderResourceViewDesc.Format = m_pdxgiBufferFormats[nIndex];
+		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		d3dShaderResourceViewDesc.Buffer.FirstElement = 0;
+		d3dShaderResourceViewDesc.Buffer.NumElements = m_pnBufferElements[nIndex];
+		d3dShaderResourceViewDesc.Buffer.StructureByteStride = m_pnBufferStrides[nIndex];
+		d3dShaderResourceViewDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+		break;
 	}
 	return(d3dShaderResourceViewDesc);
+}
+
+void CTexture::CreateBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nElements, UINT nStride, DXGI_FORMAT dxgiFormat, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, UINT nIndex)
+{
+	m_pnResourceTypes[nIndex] = RESOURCE_BUFFER;
+	m_pdxgiBufferFormats[nIndex] = dxgiFormat;
+	m_pnBufferElements[nIndex] = nElements;
+	m_pnBufferStrides[nIndex] = nStride;
+	m_ppd3dTextures[nIndex] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pData, nElements * nStride, d3dHeapType, d3dResourceStates, &m_ppd3dTextureUploadBuffers[nIndex]);
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

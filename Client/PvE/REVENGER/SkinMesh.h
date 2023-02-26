@@ -47,6 +47,6 @@ public:
 	virtual void ReleaseShaderVariables();
 
 	virtual void ReleaseUploadBuffers();
-
+	
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
 };

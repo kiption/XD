@@ -6,7 +6,7 @@
 #include "Mesh.h"
 #include "Object.h"
 
-CMesh::CMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
+CMesh::CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
 
@@ -47,12 +47,12 @@ void CMesh::ReleaseUploadBuffers()
 	}
 }
 
-void CMesh::OnPreRender(ID3D12GraphicsCommandList *pd3dCommandList, void *pContext)
+void CMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
 {
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 }
 
-void CMesh::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet)
+void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
 {
 	UpdateShaderVariables(pd3dCommandList);
 
@@ -60,7 +60,12 @@ void CMesh::Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet)
 
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 
-	if((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
+	if (m_pd3dIndexBuffer)
+	{
+		pd3dCommandList->IASetIndexBuffer(&m_d3dIndexBufferView);
+		pd3dCommandList->DrawIndexedInstanced(m_nIndices, 1, 0, 0, 0);
+	}
+	if ((m_nSubMeshes > 0) && (nSubSet < m_nSubMeshes))
 	{
 		pd3dCommandList->IASetIndexBuffer(&(m_pd3dSubSetIndexBufferViews[nSubSet]));
 		pd3dCommandList->DrawIndexedInstanced(m_pnSubSetIndices[nSubSet], 1, 0, 0, 0);
@@ -87,7 +92,7 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 }
 
-void CMesh::OnPostRender(ID3D12GraphicsCommandList *pd3dCommandList, void *pContext)
+void CMesh::OnPostRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
 {
 }
 
@@ -95,7 +100,7 @@ void CMesh::OnPostRender(ID3D12GraphicsCommandList *pd3dCommandList, void *pCont
 // 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CSkyBoxMesh::CSkyBoxMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice, pd3dCommandList)
+CSkyBoxMesh::CSkyBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = 36;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -159,7 +164,7 @@ CSkyBoxMesh::~CSkyBoxMesh()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CStandardMesh::CStandardMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
+CStandardMesh::CStandardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
 {
 }
 
@@ -195,7 +200,7 @@ void CStandardMesh::ReleaseUploadBuffers()
 	m_pd3dBiTangentUploadBuffer = NULL;
 }
 
-void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, FILE *pInFile)
+void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile)
 {
 	char pstrToken[64] = { '\0' };
 	int nPositions = 0, nColors = 0, nNormals = 0, nTangents = 0, nBiTangents = 0, nTextureCoords = 0, nIndices = 0, nSubMeshes = 0, nSubIndices = 0;
@@ -204,7 +209,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 
 	::ReadStringFromFile(pInFile, m_pstrMeshName);
 
-	for ( ; ; )
+	for (; ; )
 	{
 		::ReadStringFromFile(pInFile, pstrToken);
 		if (!strcmp(pstrToken, "<Bounds>:"))
@@ -323,10 +328,10 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 			if (m_nSubMeshes > 0)
 			{
 				m_pnSubSetIndices = new int[m_nSubMeshes];
-				m_ppnSubSetIndices = new UINT*[m_nSubMeshes];
+				m_ppnSubSetIndices = new UINT * [m_nSubMeshes];
 
-				m_ppd3dSubSetIndexBuffers = new ID3D12Resource*[m_nSubMeshes];
-				m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource*[m_nSubMeshes];
+				m_ppd3dSubSetIndexBuffers = new ID3D12Resource * [m_nSubMeshes];
+				m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource * [m_nSubMeshes];
 				m_pd3dSubSetIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[m_nSubMeshes];
 
 				for (int i = 0; i < m_nSubMeshes; i++)
@@ -359,7 +364,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 	}
 }
 
-void CStandardMesh::OnPreRender(ID3D12GraphicsCommandList *pd3dCommandList, void *pContext)
+void CStandardMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
 {
 	D3D12_VERTEX_BUFFER_VIEW pVertexBufferViews[5] = { m_d3dPositionBufferView, m_d3dTextureCoord0BufferView, m_d3dNormalBufferView, m_d3dTangentBufferView, m_d3dBiTangentBufferView };
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 5, pVertexBufferViews);

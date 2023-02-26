@@ -123,6 +123,15 @@ void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pRainShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[0] = pRainShader;
 
+	m_nMapShaders = 1;
+	m_ppMapShaders = new CMapObjectShader * [m_nMapShaders];
+
+	CMapObjectShader* pMapObjectShader = new CMapObjectShader();
+	pMapObjectShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pMapObjectShader->SetCurScene(SCENE1STAGE);
+	pMapObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
+	m_ppMapShaders[0] = pMapObjectShader;
+
 	m_nShaders = 1;
 	m_ppShaders = new CSkinnedAnimationObjectsShader * [m_nShaders];
 
@@ -132,8 +141,6 @@ void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pOtherPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL,m_pTerrain);
 	m_ppShaders[0] = pOtherPlayerShader;
 
-	m_nMapShaders = 0;
-	m_ppMapShaders = new CMapObjectShader * [m_nMapShaders];
 
 	//CMapObjectShader* pBunkerObjectShader = new BunkerObjectShader();
 	//pBunkerObjectShader->SetCurScene(SCENE2STAGE);
@@ -520,7 +527,7 @@ void Stage2::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->AnimateObjects(fTimeElapsed);
-	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();;
+	XMFLOAT3 xmfPosition = (XMFLOAT3(m_pPlayer->GetPosition().x, m_pPlayer->GetPosition().y + 7.0, m_pPlayer->GetPosition().z));
 	if (m_pLights)
 	{
 		m_pLights[1].m_xmf3Position = xmfPosition;

@@ -85,9 +85,15 @@ extern HINSTANCE						ghAppInstance;
 #define BULLETS					150
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 
+extern int gnCurrentParticles;
 extern UINT	gnCbvSrvDescriptorIncrementSize;
 extern UINT	gnRtvDescriptorIncrementSize;
 extern UINT gnDsvDescriptorIncrementSize;
+
+extern void OutputString(_TCHAR* pString, int nValue);
+extern void OutputString(_TCHAR* pString, UINT64 nValue);
+extern void OutputString(_TCHAR* pString, float fValue);
+extern void SwapResourcePointer(ID3D12Resource** ppd3dResourceA, ID3D12Resource** ppd3dResourceB);
 
 extern void SynchronizeResourceTransition(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dResource, D3D12_RESOURCE_STATES d3dStateBefore, D3D12_RESOURCE_STATES d3dStateAfter);
 extern void WaitForGpuComplete(ID3D12CommandQueue* pd3dCommandQueue, ID3D12Fence* pd3dFence, UINT64 nFenceValue, HANDLE hFenceEvent);

@@ -62,6 +62,8 @@ void CSkinnedMesh::ReleaseUploadBuffers()
 	m_pd3dBoneWeightUploadBuffer = NULL;
 }
 
+
+
 void CSkinnedMesh::PrepareSkinning(CGameObject* pModelRootObject)
 {
 	for (int j = 0; j < m_nSkinningBones; j++)

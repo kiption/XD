@@ -148,6 +148,15 @@
     <ClInclude Include="..\..\..\Server\Server\protocol.h">
       <Filter>Server</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleMesh.h">
+      <Filter>Client\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleObject.h">
+      <Filter>Client\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleShader.h">
+      <Filter>Client\Shader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSound.cpp">
@@ -241,6 +250,15 @@
       <Filter>Client\Shader</Filter>
     </ClCompile>
     <ClCompile Include="MapObjectShaders.cpp">
+      <Filter>Client\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleMesh.cpp">
+      <Filter>Client\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleObject.cpp">
+      <Filter>Client\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleShader.cpp">
       <Filter>Client\Shader</Filter>
     </ClCompile>
   </ItemGroup>

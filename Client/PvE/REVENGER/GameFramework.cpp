@@ -658,7 +658,8 @@ float g_reverse_time = 0.0f;
 void CGameFramework::FrameAdvance()
 {
 	SleepEx(1, TRUE);//Server
-	m_GameTimer.Tick(30.0f);
+	if (m_nMode==SCENE2STAGE)m_GameTimer.Tick(30.0f);
+	if (m_nMode != SCENE2STAGE) m_GameTimer.Tick(60.0f);
 
 	ProcessInput();
 

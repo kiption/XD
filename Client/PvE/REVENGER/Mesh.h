@@ -26,6 +26,17 @@ class CGameObject;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+class CVertex
+{
+public:
+	XMFLOAT3						m_xmf3Position;
+
+public:
+	CVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); }
+	CVertex(XMFLOAT3 xmf3Position) { m_xmf3Position = xmf3Position; }
+	~CVertex() { }
+};
+
 class CMesh
 {
 public:
@@ -51,6 +62,7 @@ protected:
 	D3D12_PRIMITIVE_TOPOLOGY		m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT							m_nSlot = 0;
 	UINT							m_nOffset = 0;
+	INT								m_nStride = 0;
 
 protected:
 	int								m_nVertices = 0;
@@ -83,9 +95,14 @@ public:
 	virtual void ReleaseUploadBuffers();
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList *pd3dCommandList, void *pContext);
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet);
+//	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void OnPostRender(ID3D12GraphicsCommandList *pd3dCommandList, void *pContext);
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
+	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) { }
+	virtual void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) { }
+	virtual void OnPostRender(int nPipelineState) { }
 };
 
 class CStandardMesh : public CMesh

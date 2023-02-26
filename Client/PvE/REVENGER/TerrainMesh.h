@@ -63,6 +63,7 @@ public:
 	virtual XMFLOAT4 OnGetColor(int x, int z, void* pContext);
 
 	virtual void ReleaseUploadBuffers();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
 
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
 };
