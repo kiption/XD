@@ -44,3 +44,17 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void ReleaseUploadBuffers();
 };
+
+class CStage2MapObjectShader : public CStandardShader
+{
+public:
+	CStage2MapObjectShader() {};
+	virtual ~CStage2MapObjectShader() {};
+
+	virtual D3D12_BLEND_DESC CreateBlendState();
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
+	virtual void ReleaseObjects();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void AnimateObjects(float fTimeElapsed);
+	virtual void ReleaseUploadBuffers();
+};

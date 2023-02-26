@@ -469,7 +469,7 @@ void CGameFramework::BuildObjects()
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 
 	WaitForGpuComplete();
-	gamesound.backGroundMusic();
+	//gamesound.backGroundMusic();
 	if (m_pScene) m_pScene->ReleaseUploadBuffers();
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 	m_GameTimer.Reset();
@@ -652,7 +652,7 @@ void CGameFramework::MoveToNextFrame()
 }
 
 //#define _WITH_PLAYER_TOP
-#define _WITH_PLAYER_TOP
+
 float g_time = 0.0f;
 float g_reverse_time = 0.0f;
 void CGameFramework::FrameAdvance()
