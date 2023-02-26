@@ -151,17 +151,17 @@ void CMapObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	m_nObjects = GeneratorModels + WallModels;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	
-	CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/GameObject.bin", NULL);
+	CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Generator_Room.bin", NULL);
 	for (int i = 0; i < GeneratorModels; i++)
 	{
 		m_ppObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pGeneratorModel,false);
 
 		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-		m_ppObjects[i]->SetScale(10.0, 10.0, 10.0);
+		m_ppObjects[i]->SetScale(50.0, 50.0, 50.0);
 		pGeneratorModel->AddRef();
 	}
-	m_ppObjects[0]->SetPosition(XMFLOAT3(3000.0f , pTerrain->GetHeight( 3000.0,2000.0f), 2000.0f));
+	m_ppObjects[0]->SetPosition(XMFLOAT3(3000.0f , pTerrain->GetHeight(3000.0,2000.0f) + 700.0f, 2000.0f));
 	m_ppObjects[1]->SetPosition(XMFLOAT3(1200.0f , pTerrain->GetHeight(1200.0f, 2700.0f), 2700.0f));
 	m_ppObjects[2]->SetPosition(XMFLOAT3(2000.0f , pTerrain->GetHeight(2000.0f, 1500.0f), 1500.0f));
 	m_ppObjects[3]->SetPosition(XMFLOAT3(750.0f , pTerrain->GetHeight(750.0f, 2400.0f), 2400.0f));

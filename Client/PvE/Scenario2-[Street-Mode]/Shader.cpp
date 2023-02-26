@@ -654,7 +654,7 @@ void CEthanObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsC
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
 	CLoadedModelInfo* pBuildingModel = pModel;
-	if (!pBuildingModel) pBuildingModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Building.bin", NULL);
+	if (!pBuildingModel) pBuildingModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Jerrycan.bin", NULL);
 
 	for (int i = 0; i < m_nObjects; i++)
 	{

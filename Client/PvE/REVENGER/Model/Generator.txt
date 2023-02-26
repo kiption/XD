@@ -1,0 +1,173 @@
+<Hierarchy>:
+	<Frame>: 0 6 Generator
+		<Transform>: 0 0 0 0 89.99999 0 1 1 1 0 0.7071067 0 0.7071068  
+		<TransformMatrix>: 1.788139E-07 0 -0.9999999 0 0 1 0 0 0.9999999 0 1.788139E-07 0 0 0 0 1  
+		<Children>: 4
+			<Frame>: 1 0 Generator_Fan
+				<Transform>: 4.056167 1.964351 0.003801055 0.0002074102 180 -7.01671E-15 1 1 1 -6.123234E-17 1 -1.809995E-06 1.108302E-22  
+				<TransformMatrix>: -1 -1.224647E-16 0 0 -1.224647E-16 1 -3.61999E-06 0 4.433209E-22 -3.61999E-06 -1 0 4.056167 1.964351 0.003801055 1  
+				<Mesh>: 26999 Combined_Mesh_(root:_scene)_2
+					<Bounds>: 0.01404256 1.717421 -0.6652347 1.801489 1.717421 3.735669
+					<Positions>: 0  
+					<Colors>: 0  
+					<TextureCoords0>: 0  
+					<TextureCoords1>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 6
+						<SubMesh>: 0 0  
+						<SubMesh>: 1 0  
+						<SubMesh>: 2 0  
+						<SubMesh>: 3 0  
+						<SubMesh>: 4 0  
+						<SubMesh>: 5 0  
+				</Mesh>
+				<Materials>: 1
+					<Material>: 0
+						<AlbedoColor>: 0.8 0.8 0.8 1
+						<EmissiveColor>: 0 0 0 1
+						<Glossiness>: 0.5
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+						<AlbedoMap>: Generator_Albedo
+						<MetallicMap>: Generator_metallic
+						<NormalMap>: Generator_normal
+						<EmissionMap>: null
+						<DetailAlbedoMap>: null
+						<DetailNormalMap>: null
+				</Materials>
+				<Children>: 0
+			</Frame>
+			<Frame>: 2 0 Generator_LOD0
+				<Transform>: 0 0 0.015 0.0002074102 180 -7.01671E-15 1 1 1 -6.123234E-17 1 -1.809995E-06 1.108302E-22  
+				<TransformMatrix>: -1 -1.224647E-16 0 0 -1.224647E-16 1 -3.61999E-06 0 4.433209E-22 -3.61999E-06 -1 0 0 0 0.015 1  
+				<Mesh>: 26999 Combined_Mesh_(root:_scene)_2
+					<Bounds>: 0.01404256 1.717421 -0.6652347 1.801489 1.717421 3.735669
+					<Positions>: 0  
+					<Colors>: 0  
+					<TextureCoords0>: 0  
+					<TextureCoords1>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 6
+						<SubMesh>: 0 0  
+						<SubMesh>: 1 0  
+						<SubMesh>: 2 0  
+						<SubMesh>: 3 0  
+						<SubMesh>: 4 0  
+						<SubMesh>: 5 0  
+				</Mesh>
+				<Materials>: 3
+					<Material>: 0
+						<AlbedoColor>: 0.8 0.8 0.8 1
+						<EmissiveColor>: 0 0 0 1
+						<Glossiness>: 0.616
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+						<AlbedoMap>: Addons_Albedo
+						<MetallicMap>: Addons_Metallic
+						<NormalMap>: Addons_NRM
+						<EmissionMap>: null
+						<DetailAlbedoMap>: null
+						<DetailNormalMap>: null
+					<Material>: 1
+						<AlbedoColor>: 0.8 0.8 0.8 1
+						<EmissiveColor>: 5 5 5 1
+						<Glossiness>: 0.5
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+						<AlbedoMap>: null
+						<MetallicMap>: null
+						<NormalMap>: null
+						<EmissionMap>: @Addons_Albedo
+						<DetailAlbedoMap>: null
+						<DetailNormalMap>: null
+					<Material>: 2
+						<AlbedoColor>: 0.8 0.8 0.8 1
+						<EmissiveColor>: 0 0 0 1
+						<Glossiness>: 0.5
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+						<AlbedoMap>: @Generator_Albedo
+						<MetallicMap>: @Generator_metallic
+						<NormalMap>: @Generator_normal
+						<EmissionMap>: null
+						<DetailAlbedoMap>: null
+						<DetailNormalMap>: null
+				</Materials>
+				<Children>: 0
+			</Frame>
+			<Frame>: 3 0 Generator_LOD1
+				<Transform>: 0 0 0 0.0002074102 180 -7.01671E-15 1 1 1 -6.123234E-17 1 -1.809995E-06 1.108302E-22  
+				<TransformMatrix>: -1 -1.224647E-16 0 0 -1.224647E-16 1 -3.61999E-06 0 4.433209E-22 -3.61999E-06 -1 0 0 0 0 1  
+				<Mesh>: 26999 Combined_Mesh_(root:_scene)_2
+					<Bounds>: 0.01404256 1.717421 -0.6652347 1.801489 1.717421 3.735669
+					<Positions>: 0  
+					<Colors>: 0  
+					<TextureCoords0>: 0  
+					<TextureCoords1>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 6
+						<SubMesh>: 0 0  
+						<SubMesh>: 1 0  
+						<SubMesh>: 2 0  
+						<SubMesh>: 3 0  
+						<SubMesh>: 4 0  
+						<SubMesh>: 5 0  
+				</Mesh>
+				<Materials>: 1
+					<Material>: 0
+						<AlbedoColor>: 0.8 0.8 0.8 1
+						<EmissiveColor>: 0 0 0 1
+						<Glossiness>: 0.5
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+						<AlbedoMap>: @Generator_Albedo
+						<MetallicMap>: @Generator_metallic
+						<NormalMap>: @Generator_normal
+						<EmissionMap>: null
+						<DetailAlbedoMap>: null
+						<DetailNormalMap>: null
+				</Materials>
+				<Children>: 0
+			</Frame>
+			<Frame>: 4 0 Generator_LOD2
+				<Transform>: 0 0 0 0.0002074102 180 -7.01671E-15 1 1 1 -6.123234E-17 1 -1.809995E-06 1.108302E-22  
+				<TransformMatrix>: -1 -1.224647E-16 0 0 -1.224647E-16 1 -3.61999E-06 0 4.433209E-22 -3.61999E-06 -1 0 0 0 0 1  
+				<Mesh>: 26999 Combined_Mesh_(root:_scene)_2
+					<Bounds>: 0.01404256 1.717421 -0.6652347 1.801489 1.717421 3.735669
+					<Positions>: 0  
+					<Colors>: 0  
+					<TextureCoords0>: 0  
+					<TextureCoords1>: 0  
+					<Normals>: 0  
+					<SubMeshes>: 6
+						<SubMesh>: 0 0  
+						<SubMesh>: 1 0  
+						<SubMesh>: 2 0  
+						<SubMesh>: 3 0  
+						<SubMesh>: 4 0  
+						<SubMesh>: 5 0  
+				</Mesh>
+				<Materials>: 1
+					<Material>: 0
+						<AlbedoColor>: 0.8 0.8 0.8 1
+						<EmissiveColor>: 0 0 0 1
+						<Glossiness>: 0.5
+						<Metallic>: 0
+						<SpecularHighlight>: 1
+						<GlossyReflection>: 1
+						<AlbedoMap>: @Generator_Albedo
+						<MetallicMap>: @Generator_metallic
+						<NormalMap>: @Generator_normal
+						<EmissionMap>: null
+						<DetailAlbedoMap>: null
+						<DetailNormalMap>: null
+				</Materials>
+				<Children>: 0
+			</Frame>
+	</Frame>
+</Hierarchy>
