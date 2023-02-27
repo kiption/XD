@@ -50,6 +50,7 @@ public:
     virtual void OnDestroy();
     virtual IDXGISwapChain* GetSwapchain() { return m_deviceResources->GetSwapChain(); }
 
+    void LoadModelDataFromFile(const char* fileName, std::vector<Vertex>& vertices, std::vector<int>& indices);
 private:
     static const UINT FrameCount = 3;
 
@@ -89,6 +90,7 @@ private:
         D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptorHandle;
         D3D12_GPU_DESCRIPTOR_HANDLE gpuDescriptorHandle;
     };
+
     D3DBuffer m_indexBuffer;
     D3DBuffer m_vertexBuffer;
 

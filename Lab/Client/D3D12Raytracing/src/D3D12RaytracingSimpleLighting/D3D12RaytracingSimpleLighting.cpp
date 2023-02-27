@@ -389,119 +389,58 @@ BYTE ReadStringFromFile(FILE* pInFile, char* pstrToken)
 
 	return(nStrLength);
 }
+
+void D3D12RaytracingSimpleLighting::LoadModelDataFromFile(const char* fileName, std::vector<Vertex>& vertices, std::vector<int>& indices)
+{
+	// 모델 파일에서 정점 정보와 인덱스 정보를 읽기 위한 코드를 작성합니다.
+	// 파일 형식에 따라 다릅니다. 이 예시에서는 각 파일에서 각각 12바이트(4바이트 x 3)와 4바이트의 데이터를 읽어들입니다.
+	
+}
 // Build geometry used in the sample.
+
 void D3D12RaytracingSimpleLighting::BuildGeometry()
 {
 	auto device = m_deviceResources->GetD3DDevice();
-	FILE* pInFile = NULL;
-	::fopen_s(&pInFile, "Model/Military_Helicopter.bin", "rb");
-	::rewind(pInFile);
-	char pstrToken[64] = { '\0' };
-	XMFLOAT3 position = {};
-	XMFLOAT3 normal = {};
-	Vertex vertices[] = { {XMFLOAT3(position),XMFLOAT3(normal) }, };
-	Index indices[] = { 0, };
-	UINT nReads = (UINT)::fread(&vertices, sizeof(int), 1, pInFile);
-	for (; ; )
-	{
-		::ReadStringFromFile(pInFile, pstrToken);
-		if (::ReadStringFromFile(pInFile, pstrToken))
-		{
-			if (!strcmp(pstrToken, "<Hierarchy>:"))
-			{
 
-				if (!strcmp(pstrToken, "<Positions>:"))
-				{
-					nReads = (UINT)::fread(&vertices, sizeof(int), 1, pInFile);
-					nReads = (UINT)::fread(&m_vertexBuffer, sizeof(XMFLOAT3), sizeof(position), pInFile);
-				}
-				if (!strcmp(pstrToken, "<Normals>:"))
-				{
-					nReads = (UINT)::fread(&vertices, sizeof(int), 1, pInFile);
-					nReads = (UINT)::fread(&m_vertexBuffer, sizeof(XMFLOAT3), sizeof(normal), pInFile);
-
-				}
-				if (!strcmp(pstrToken, "<SubMeshes>:"))
-				{
-
-					nReads = (UINT)::fread(&indices, sizeof(int), 1, pInFile);
-					nReads = (UINT)::fread(&m_indexBuffer, sizeof(int), sizeof(indices), pInFile); //i
-				}
-				::ReadStringFromFile(pInFile, pstrToken);
-			}
-		}
-		else
-		{
-			break;
-		}
+	std::ifstream binFile(L"Model/Military_Helicopter.bin", std::ios::binary);
+	
+	if (!binFile.is_open()) {
+		std::cout<<"실패"<<endl;
 	}
 
-	// Cube indices.
-	//Index indices[] =
-	//{
-	//	3,1,0,
-	//	2,1,3,
+	// 정점 데이터를 읽어옵니다.
+	vector<Vertex> vertices;
+	binFile.read(reinterpret_cast<char*>(vertices.data()), vertices.size() * sizeof(Vertex));
 
-	//	6,4,5,
-	//	7,4,6,
+	// 인덱스 데이터를 읽어옵니다.
+	std::vector<int> indices;
+	binFile.read(reinterpret_cast<char*>(indices.data()), indices.size() * sizeof(int));
 
-	//	11,9,8,
-	//	10,9,11,
+	// 정점 정보를 m_vertexbuffer에 연결합니다.
+	// Vertex, Index, NumVertices, NumIndices를 선언과 동시에 초기화합니다.
 
-	//	14,12,13,
-	//	15,12,14,
+	int numVertices = 0;
+	int numIndices = 0;
+  // 파일에서 데이터를 읽어와 변수들에 저장합니다.
+	if (binFile.good())
+	{
+		binFile.read(reinterpret_cast<char*>(&numVertices), sizeof(int));
+		binFile.read(reinterpret_cast<char*>(&vertices), numVertices * sizeof(Vertex));
+		binFile.read(reinterpret_cast<char*>(&numIndices), sizeof(int));
+		binFile.read(reinterpret_cast<char*>(&indices), numIndices * sizeof(Index));
+	}
 
-	//	19,17,16,
-	//	18,17,19,
+	int vertexBufferSize = numVertices * sizeof(Vertex);
+	AllocateUploadBuffer(device, vertices.data(), vertexBufferSize, &m_vertexBuffer.resource);
+	UINT descriptorIndexVB = CreateBufferSRV(&m_vertexBuffer, numVertices, sizeof(Vertex));
 
-	//	22,20,21,
-	//	23,20,22
-	//};
+	int indexBufferSize = numIndices * sizeof(int);
+	AllocateUploadBuffer(device, indices.data(), indexBufferSize, &m_indexBuffer.resource);
+	UINT descriptorIndexIB = CreateBufferSRV(&m_indexBuffer, numIndices, sizeof(int));
 
-
-	//// Cube vertices positions and corresponding triangle normals.
-	//Vertex vertices[] =
-	//{
-	//	{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
-	//	{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
-	//	{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
-	//	{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
-
-	//	{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f) },
-	//	{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f) },
-	//	{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f) },
-	//	{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(0.0f, -1.0f, 0.0f) },
-
-	//	{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-	//	{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-	//	{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-	//	{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(-1.0f, 0.0f, 0.0f) },
-
-	//	{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-	//	{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-	//	{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-	//	{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-
-	//	{ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f) },
-	//	{ XMFLOAT3(1.0f, -1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f) },
-	//	{ XMFLOAT3(1.0f, 1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f) },
-	//	{ XMFLOAT3(-1.0f, 1.0f, -1.0f), XMFLOAT3(0.0f, 0.0f, -1.0f) },
-
-	//	{ XMFLOAT3(-1.0f, -1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-	//	{ XMFLOAT3(1.0f, -1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-	//	{ XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-	//	{ XMFLOAT3(-1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-	//};
-
-	AllocateUploadBuffer(device, indices, sizeof(indices), &m_indexBuffer.resource);
-	AllocateUploadBuffer(device, vertices, sizeof(vertices), &m_vertexBuffer.resource);
-
-	// Vertex buffer is passed to the shader along with index buffer as a descriptor table.
-	// Vertex buffer descriptor must follow index buffer descriptor in the descriptor heap.
-	UINT descriptorIndexIB = CreateBufferSRV(&m_indexBuffer, sizeof(indices) / 4, 0);
-	UINT descriptorIndexVB = CreateBufferSRV(&m_vertexBuffer, ARRAYSIZE(vertices), sizeof(vertices[0]));
 	ThrowIfFalse(descriptorIndexVB == descriptorIndexIB + 1, L"Vertex Buffer descriptor index must follow that of Index Buffer descriptor index!");
 }
+
 
 // Build acceleration structures needed for raytracing.
 void D3D12RaytracingSimpleLighting::BuildAccelerationStructures()

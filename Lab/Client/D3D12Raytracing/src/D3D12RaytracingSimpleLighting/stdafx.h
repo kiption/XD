@@ -21,11 +21,13 @@
 
 #include <windows.h>
 
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
 // C RunTime Header Files
 #include <stdlib.h>
 #include <sstream>
 #include <iomanip>
-
+#include <d3dx12.h>
 #include <list>
 #include <string>
 #include <wrl.h>
@@ -35,12 +37,13 @@
 #include <vector>
 #include <atlbase.h>
 #include <assert.h>
-
+#include <d3d12.h>
 #include <dxgi1_6.h>
 #include <d3d12.h>
 #include <atlbase.h>
 #include "d3dx12.h"
-
+#include <iostream>
+#include <fstream>
 #include <DirectXMath.h>
 
 #ifdef _DEBUG
@@ -54,8 +57,7 @@ using namespace std;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
-#define VERTEXT_POSITION			0x01
+#define T_POSITION			0x01
 #define VERTEXT_COLOR				0x02
 #define VERTEXT_NORMAL				0x04
-
 
