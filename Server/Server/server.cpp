@@ -911,6 +911,7 @@ void do_ha_worker() {
 			extended_servers[server_id].id = server_id;
 			extended_servers[server_id].remain_size = 0;
 			extended_servers[server_id].socket = right_ex_server_sock;
+			extended_servers[server_id].s_state = ST_ACCEPTED;
 			CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_ss_iocp, NULL, 0);
 			delete ex_over;
 			extended_servers[server_id].do_recv();
@@ -1237,21 +1238,22 @@ void sendHeartBeat() {	// 오른쪽 서버에게 Heartbeat를 전달하는 함수
 }
 void checkHeartbeat() {	// 인접해있는 서버구성원에게서 Heartbeat를 받았는 지 확인하는 함수
 	while (true) {
-		int check_target = 0;
 		if (my_server_id != 0) {	// 가장 왼쪽에 있는 서버 구성원만 제외
-			check_target = my_server_id - 1;	// 오른쪽의 서버 검사
-			if (extended_servers[check_target].s_state == ST_ACCEPTED) {
-				if (chrono::system_clock::now() > extended_servers[check_target].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD))
-					cout << "Server[" << check_target << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
+			// 오른쪽의 서버 검사
+			if (extended_servers[my_server_id - 1].s_state == ST_ACCEPTED) {
+				if (chrono::system_clock::now() > extended_servers[my_server_id - 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
+					cout << "Server[" << my_server_id - 1 << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
+					disconnect(my_server_id - 1, SESSION_EXTENDED_SERVER);
+				}
 			}
 		}
 
 		if (my_server_id != MAX_SERVER - 1) {	// 가장 오른쪽에 있는 서버 구성원만 제외
-			check_target = my_server_id + 1;	// 왼쪽의 서버 검사
-			{
-				if (extended_servers[check_target].s_state == ST_ACCEPTED) continue; {
-					if (chrono::system_clock::now() > extended_servers[check_target].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD))
-						cout << "Server[" << check_target << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
+			// 왼쪽의 서버 검사
+			if (extended_servers[my_server_id + 1].s_state == ST_ACCEPTED) continue; {
+				if (chrono::system_clock::now() > extended_servers[my_server_id + 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
+					cout << "Server[" << my_server_id + 1 << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
+					disconnect(my_server_id + 1, SESSION_EXTENDED_SERVER);
 				}
 			}
 		}
