@@ -598,7 +598,7 @@ bool Stage2::CheckCollision( DirectX::BoundingOrientedBox& box1,  DirectX::Bound
 	if (isIntersecting)
 	{
 
-		DirectX::BoundingOrientedBox boxIntersection = BoundingOrientedBox{};
+		BoundingOrientedBox boxIntersection = BoundingOrientedBox{};
 		XMFLOAT3 vector3 = XMFLOAT3(0.0,0.0,1.0);
 		float depth = box1.Intersects((box2, boxIntersection));
 
