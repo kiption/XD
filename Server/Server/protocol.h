@@ -8,6 +8,7 @@ constexpr int SERIAL_NUM_CLIENT = 0;
 constexpr int SERIAL_NUM_EXSERVER = 1000;
 
 constexpr int HB_SEND_CYCLE = 1000;		// Heartbeat를 보내는 주기 (단위: millisec)
+constexpr int HB_GRACE_PERIOD = 3000;	// Heartbeat가 몇 초 넘어도 오지 않으면 서버다운으로 간주함 (단위: millisec)
 
 constexpr int BUF_SIZE = 200;
 constexpr int NAME_SIZE = 20;

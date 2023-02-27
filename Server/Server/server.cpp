@@ -333,7 +333,12 @@ void disconnect(int target_id, int target)
 		extended_servers[target_id].s_state = ST_FREE;
 		extended_servers[target_id].s_lock.unlock();
 
-		cout << "Server[" << extended_servers[target_id].id << "] is Disconnected" << endl;	// server message
+		cout << "Server[" << extended_servers[target_id].id << "]이 다운되었습니다. 서버를 재실행합니다." << endl;	// server message
+
+		// 서버 재실행
+		wchar_t wchar_buf[10];
+		wsprintfW(wchar_buf, L"%d", target_id);
+		ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L"../x64/Release", SW_SHOW);
 		break;
 	}
 
@@ -721,11 +726,22 @@ void process_packet(int client_id, char* packet)
 	case SS_HEARTBEAT:
 	{
 		SS_HEARTBEAT_PACKET* heartbeat_pack = reinterpret_cast<SS_HEARTBEAT_PACKET*>(packet);
-		int server_id = heartbeat_pack->sender_id;
+		int recv_id = heartbeat_pack->sender_id;
 
-		cout << "Recv Server[" << server_id << "]'s Heartbeat." << endl;
-		extended_servers[server_id].heartbeat_recv_time = chrono::system_clock::now();
+		cout << "Server[" << recv_id << "]로 부터 Heartbeat를 받았습니다." << endl;
+		extended_servers[recv_id].heartbeat_recv_time = chrono::system_clock::now();
 
+		if (recv_id < my_server_id) {	// A->B->A로 heartbeat의 한 사이클이 끝나도록하기 위함. (즉, 오른쪽 서버로부터 Heartbeat를 받으면 한 사이클의 끝으로 판단)
+			// Heartbeat를 먼저 보낸 서버에게 자신의 Heartbeat를 전송합니다.
+			SS_HEARTBEAT_PACKET hb_packet;
+			hb_packet.size = sizeof(SS_HEARTBEAT_PACKET);
+			hb_packet.type = SS_HEARTBEAT;
+			hb_packet.sender_id = my_server_id;
+			extended_servers[recv_id].do_send(&hb_packet);										// 자신에게 Heartbeat를 보낸 서버에게 전송합니다.
+			extended_servers[my_server_id].heartbeat_send_time = chrono::system_clock::now();	// 전송한 시간을 업데이트
+
+			cout << "Heartbeat를 먼저 보낸 Server[" << recv_id << "]에게 자신의 Heartbeat를 보냅니다." << endl;
+		}
 		break;
 	}// SS_HEARTBEAT end
 	}
@@ -842,7 +858,7 @@ void do_ha_worker() {
 			left_ex_server_sock = extended_server_socket;
 			int new_id = find_empty_extended_server();
 			if (new_id != -1) {
-				cout << "Sever[" << new_id << "]의 연결요청을 받았습니다." << endl;
+				cout << "Sever[" << new_id << "]의 연결요청을 받았습니다.\n" << endl;
 				extended_servers[new_id].id = new_id;
 				extended_servers[new_id].remain_size = 0;
 				extended_servers[new_id].socket = extended_server_socket;
@@ -852,7 +868,7 @@ void do_ha_worker() {
 				extended_server_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 			}
 			else {
-				cout << "다른 Sever의 연결요청을 받았으나, 현재 서버가 꽉 찼습니다." << endl;
+				cout << "다른 Sever의 연결요청을 받았으나, 현재 서버가 꽉 찼습니다.\n" << endl;
 			}
 
 			ZeroMemory(&ex_over->overlapped, sizeof(ex_over->overlapped));
@@ -891,7 +907,7 @@ void do_ha_worker() {
 		}
 		case OP_CONNECT: {
 			int server_id = key - SERIAL_NUM_EXSERVER;
-			std::cout << "성공적으로 Server[" << server_id << "]에 연결되었습니다.";
+			std::cout << "성공적으로 Server[" << server_id << "]에 연결되었습니다.\n" << endl;
 			extended_servers[server_id].id = server_id;
 			extended_servers[server_id].remain_size = 0;
 			extended_servers[server_id].socket = right_ex_server_sock;
@@ -1201,13 +1217,13 @@ void timerFunc() {
 	}
 }
 
-void sendHeartBeat() {
+void sendHeartBeat() {	// 오른쪽 서버에게 Heartbeat를 전달하는 함수
 	while (true) {
 		if (my_server_id != MAX_SERVER - 1) {	// 왼쪽 서버가 오른쪽 서버로 전송하기 때문에 가장 마지막 서버는 전송하지 않습니다.
 			if (extended_servers[my_server_id].s_state != ST_ACCEPTED)	continue;
 
 			if (chrono::system_clock::now() > extended_servers[my_server_id].heartbeat_send_time + chrono::milliseconds(HB_SEND_CYCLE)) {
-				cout << "Send My Heartbeat to Server[" << my_server_id + 1 << "]." << endl;
+				cout << "자신의 Heartbeat를 Server[" << my_server_id + 1 << "]에게 보냅니다." << endl;
 				SS_HEARTBEAT_PACKET hb_packet;
 				hb_packet.size = sizeof(SS_HEARTBEAT_PACKET);
 				hb_packet.type = SS_HEARTBEAT;
@@ -1217,6 +1233,30 @@ void sendHeartBeat() {
 				extended_servers[my_server_id].heartbeat_send_time = chrono::system_clock::now();	// 전송한 시간을 업데이트
 			}
 		}
+	}
+}
+void checkHeartbeat() {	// 인접해있는 서버구성원에게서 Heartbeat를 받았는 지 확인하는 함수
+	while (true) {
+		int check_target = 0;
+		if (my_server_id != 0) {	// 가장 왼쪽에 있는 서버 구성원만 제외
+			check_target = my_server_id - 1;	// 오른쪽의 서버 검사
+			if (extended_servers[check_target].s_state == ST_ACCEPTED) {
+				if (chrono::system_clock::now() > extended_servers[check_target].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD))
+					cout << "Server[" << check_target << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
+			}
+		}
+
+		if (my_server_id != MAX_SERVER - 1) {	// 가장 오른쪽에 있는 서버 구성원만 제외
+			check_target = my_server_id + 1;	// 왼쪽의 서버 검사
+			{
+				if (extended_servers[check_target].s_state == ST_ACCEPTED) continue; {
+					if (chrono::system_clock::now() > extended_servers[check_target].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD))
+						cout << "Server[" << check_target << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
+				}
+			}
+		}
+
+		Sleep(1000);
 	}
 }
 
@@ -1426,6 +1466,7 @@ int main(int argc, char* argv[])
 	vector<thread> timer_threads;
 	timer_threads.emplace_back(timerFunc);			// 클라이언트 로직 타이머스레드
 	timer_threads.emplace_back(sendHeartBeat);		// 서버 간 Heartbeat교환 스레드
+	timer_threads.emplace_back(checkHeartbeat);		// 서버 간 다운여부 검사 스레드
 
 	//thread NPC_thread{ MoveNPC };
 	//NPC_thread.join();
