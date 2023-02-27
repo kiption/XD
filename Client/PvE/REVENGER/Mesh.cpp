@@ -216,6 +216,9 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		{
 			nReads = (UINT)::fread(&m_xmf3AABBCenter, sizeof(XMFLOAT3), 1, pInFile);
 			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
+
+			m_xmeshoobb = BoundingOrientedBox(XMFLOAT3(m_xmf3AABBCenter), XMFLOAT3(m_xmf3AABBExtents),XMFLOAT4(0,0,0,1));
+
 		}
 		else if (!strcmp(pstrToken, "<Positions>:"))
 		{

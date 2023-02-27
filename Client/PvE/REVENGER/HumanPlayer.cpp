@@ -51,6 +51,8 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 	SetPosition(XMFLOAT3(1250.0, 14.0f, 1750.0));
 
+	m_xoobb = BoundingOrientedBox(XMFLOAT3(this->GetPosition()), XMFLOAT3(15.0, 18.0, 13.0), XMFLOAT4(0, 0, 0, 1));
+
 	if (pAngrybotModel) delete pAngrybotModel;
 	if (pBulletMesh) delete pBulletMesh;
 }
@@ -170,6 +172,9 @@ void CHumanPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 			m_ppBullets[i]->Animate(fTimeElapsed);
 		}
 	}
+
+
+
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 

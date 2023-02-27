@@ -85,6 +85,9 @@ protected:
 	ID3D12Resource* m_pd3dIndexUploadBuffer = NULL;
 	D3D12_INDEX_BUFFER_VIEW			m_d3dIndexBufferView;
 	UINT							m_nIndices = 0;
+
+	BoundingOrientedBox m_xmeshoobb = BoundingOrientedBox(XMFLOAT3(), XMFLOAT3(), XMFLOAT4());
+
 public:
 	UINT GetType() { return(m_nType); }
 

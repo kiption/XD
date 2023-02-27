@@ -29,8 +29,8 @@ public:
 
 	void ReleaseUploadBuffers();
 
-	
-
+	bool IsIntersecting(BoundingOrientedBox box1, BoundingOrientedBox box2);
+	bool CheckCollision( DirectX::BoundingOrientedBox& box1,  DirectX::BoundingOrientedBox& box2, DirectX::XMFLOAT3& posA, DirectX::XMFLOAT3& lookA, DirectX::XMFLOAT3& upA, DirectX::XMFLOAT3& rightA);
 public:
 	static void CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
 

@@ -408,7 +408,7 @@ public:
 
 	XMFLOAT3 m_xmf3RotationAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	XMFLOAT3 m_xmf3MovingDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
-
+	BoundingOrientedBox m_xoobb = BoundingOrientedBox(XMFLOAT3(),XMFLOAT3(),XMFLOAT4());
 	CAnimationController*			m_pSkinnedAnimationController = NULL;
 
 	virtual void SetMesh(CMesh *pMesh);

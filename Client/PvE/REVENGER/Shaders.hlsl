@@ -23,7 +23,8 @@ cbuffer cbCameraInfo : register(b1)
 {
 	matrix					gmtxView : packoffset(c0);
 	matrix					gmtxProjection : packoffset(c4);
-	float3					gvCameraPosition : packoffset(c8);
+	matrix		gmtxInverseView : packoffset(c8);
+	float3		gvCameraPosition : packoffset(c12);
 };
 
 cbuffer cbGameObjectInfo : register(b2)
@@ -308,7 +309,9 @@ VS_SKYBOX_CUBEMAP_OUTPUT VSSkyBox(VS_SKYBOX_CUBEMAP_INPUT input)
 
 TextureCube gtxtSkyCubeTexture : register(t13);
 SamplerState gssClamp : register(s1);
-
+Texture2D<float4> gtxtParticleTexture : register(t15);
+Buffer<float4> gRandomBuffer : register(t16);
+Buffer<float4> gRandomSphereBuffer : register(t17);
 float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtSkyCubeTexture.Sample(gssClamp, input.positionL);
@@ -424,195 +427,195 @@ void GetPositions(float3 position, float2 f2Size, out float3 pf3Positions[8])
 }
 //
 //// 랜덤 값들
-//float4 RandomDirection(float fOffset)
-//{
-//	int u = uint(gfCurrentTime + fOffset + frac(gfCurrentTime) * 1000.0f) % 1024;
-//	return(normalize(gRandomBuffer.Load(u)));
-//}
+float4 RandomDirection(float fOffset)
+{
+	int u = uint(gfCurrentTime + fOffset + frac(gfCurrentTime) * 1000.0f) % 1024;
+	return(normalize(gRandomBuffer.Load(u)));
+}
 //
-//float4 RandomDirectionOnSphere(float fOffset)
-//{
-//	int u = uint(gfCurrentTime + fOffset + frac(gfCurrentTime) * 1000.0f) % 256;
-//	return(normalize(gRandomSphereBuffer.Load(u)));
-//}
-//
-//void OutputParticleToStream(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
-//{
-//	input.position += input.velocity * gfElapsedTime;
-//	input.velocity += gf3Gravity * gfElapsedTime;
-//	input.lifetime -= gfElapsedTime;
-//
-//	output.Append(input);
-//}
+float4 RandomDirectionOnSphere(float fOffset)
+{
+	int u = uint(gfCurrentTime + fOffset + frac(gfCurrentTime) * 1000.0f) % 256;
+	return(normalize(gRandomSphereBuffer.Load(u)));
+}
 
-//void EmmitParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
-//{
-//	float4 f4Random = RandomDirection(input.type);
-//	if (input.lifetime <= 0.0f)						// 수명이 다 할때
-//	{
-//		VS_PARTICLE_INPUT particle = input;
-//
-//		particle.type = PARTICLE_TYPE_SHELL;
-//		particle.position = input.position + (input.velocity * gfElapsedTime * f4Random.xyz);
-//		particle.velocity = input.velocity + (f4Random.xyz * 16.0f);
-//		particle.lifetime = SHELL_PARTICLE_LIFETIME + (f4Random.y * 0.5f);
-//
-//		output.Append(particle);					// 새로운 파티클을 형성
-//
-//		input.lifetime = gfSecondsPerFirework * 0.2f + (f4Random.x * 0.4f);
-//	}
-//	else
-//	{
-//		input.lifetime -= gfElapsedTime;
-//	}
-//
-//	output.Append(input);
-//}
-//
+void OutputParticleToStream(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
+{
+	input.position += input.velocity * gfElapsedTime;
+	input.velocity += gf3Gravity * gfElapsedTime;
+	input.lifetime -= gfElapsedTime;
 
-//void ShellParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
-//{
-//	if (input.lifetime <= 0.0f)
-//	{
-//		VS_PARTICLE_INPUT particle = input;
-//		float4 f4Random = float4(0.0f, 0.0f, 0.0f, 0.0f);
-//
-//		particle.type = PARTICLE_TYPE_FLARE01;
-//		particle.position = input.position + (input.velocity * gfElapsedTime * 2.0f);
-//		particle.lifetime = FLARE01_PARTICLE_LIFETIME;
-//
-//		for (int i = 0; i < gnFlareParticlesToEmit; i++)
-//		{
-//			f4Random = RandomDirection(input.type + i);
-//			particle.velocity = input.velocity + (f4Random.xyz * 18.0f);
-//
-//			output.Append(particle);
-//		}
-//
-//		particle.type = PARTICLE_TYPE_FLARE02;
-//		particle.position = input.position + (input.velocity * gfElapsedTime);
-//		for (int j = 0; j < abs(f4Random.x) * gnMaxFlareType2Particles; j++)
-//		{
-//			f4Random = RandomDirection(input.type + j);
-//			particle.velocity = input.velocity + (f4Random.xyz * 10.0f);
-//			particle.lifetime = FLARE02_PARTICLE_LIFETIME + (f4Random.x * 0.4f);
-//
-//			output.Append(particle);
-//		}
-//	}
-//	else
-//	{
-//		OutputParticleToStream(input, output);
-//	}
-//}
-//
-//
-//void OutputEmberParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
-//{
-//	if (input.lifetime > 0.0f)
-//	{
-//		OutputParticleToStream(input, output);
-//	}
-//}
+	output.Append(input);
+}
 
-//void GenerateEmberParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
-//{
-//	if (input.lifetime <= 0.0f)
-//	{
-//		VS_PARTICLE_INPUT particle = input;
-//
-//		particle.type = PARTICLE_TYPE_FLARE03;
-//		particle.position = input.position + (input.velocity * gfElapsedTime);
-//		particle.lifetime = FLARE03_PARTICLE_LIFETIME;
-//		for (int i = 0; i < 64; i++)
-//		{
-//			float4 f4Random = RandomDirectionOnSphere(input.type + i);
-//			particle.velocity = input.velocity + (f4Random.xyz * 25.0f);
-//
-//			output.Append(particle);
-//		}
-//	}
-//	else
-//	{
-//		OutputParticleToStream(input, output);
-//	}
-//}
+void EmmitParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
+{
+	float4 f4Random = RandomDirection(input.type);
+	if (input.lifetime <= 0.0f)						// 수명이 다 할때
+	{
+		VS_PARTICLE_INPUT particle = input;
 
-//[maxvertexcount(128)]
-//void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
-//{
-//	VS_PARTICLE_INPUT particle = input[0];
+		particle.type = PARTICLE_TYPE_SHELL;
+		particle.position = input.position + (input.velocity * gfElapsedTime * f4Random.xyz);
+		particle.velocity = input.velocity + (f4Random.xyz * 16.0f);
+		particle.lifetime = SHELL_PARTICLE_LIFETIME + (f4Random.y * 0.5f);
+
+		output.Append(particle);					// 새로운 파티클을 형성
+
+		input.lifetime = gfSecondsPerFirework * 0.2f + (f4Random.x * 0.4f);
+	}
+	else
+	{
+		input.lifetime -= gfElapsedTime;
+	}
+
+	output.Append(input);
+}
+
+
+void ShellParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
+{
+	if (input.lifetime <= 0.0f)
+	{
+		VS_PARTICLE_INPUT particle = input;
+		float4 f4Random = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+		particle.type = PARTICLE_TYPE_FLARE01;
+		particle.position = input.position + (input.velocity * gfElapsedTime * 2.0f);
+		particle.lifetime = FLARE01_PARTICLE_LIFETIME;
+
+		for (int i = 0; i < gnFlareParticlesToEmit; i++)
+		{
+			f4Random = RandomDirection(input.type + i);
+			particle.velocity = input.velocity + (f4Random.xyz * 18.0f);
+
+			output.Append(particle);
+		}
+
+		particle.type = PARTICLE_TYPE_FLARE02;
+		particle.position = input.position + (input.velocity * gfElapsedTime);
+		for (int j = 0; j < abs(f4Random.x) * gnMaxFlareType2Particles; j++)
+		{
+			f4Random = RandomDirection(input.type + j);
+			particle.velocity = input.velocity + (f4Random.xyz * 10.0f);
+			particle.lifetime = FLARE02_PARTICLE_LIFETIME + (f4Random.x * 0.4f);
+
+			output.Append(particle);
+		}
+	}
+	else
+	{
+		OutputParticleToStream(input, output);
+	}
+}
+
 //
-//	if (particle.type == PARTICLE_TYPE_EMITTER) EmmitParticles(particle, output);
-//	else if (particle.type == PARTICLE_TYPE_SHELL) ShellParticles(particle, output);			// Shell 타입은 파티클의 수명이 다 할떄, FLAR 파티클을 만든다.
-//	else if ((particle.type == PARTICLE_TYPE_FLARE01) || (particle.type == PARTICLE_TYPE_FLARE03)) OutputEmberParticles(particle, output);
-//	else if (particle.type == PARTICLE_TYPE_FLARE02) GenerateEmberParticles(particle, output);
-//}
+void OutputEmberParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
+{
+	if (input.lifetime > 0.0f)
+	{
+		OutputParticleToStream(input, output);
+	}
+}
+
+void GenerateEmberParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
+{
+	if (input.lifetime <= 0.0f)
+	{
+		VS_PARTICLE_INPUT particle = input;
+
+		particle.type = PARTICLE_TYPE_FLARE03;
+		particle.position = input.position + (input.velocity * gfElapsedTime);
+		particle.lifetime = FLARE03_PARTICLE_LIFETIME;
+		for (int i = 0; i < 64; i++)
+		{
+			float4 f4Random = RandomDirectionOnSphere(input.type + i);
+			particle.velocity = input.velocity + (f4Random.xyz * 25.0f);
+
+			output.Append(particle);
+		}
+	}
+	else
+	{
+		OutputParticleToStream(input, output);
+	}
+}
+
+[maxvertexcount(128)]
+void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
+{
+	VS_PARTICLE_INPUT particle = input[0];
+
+	if (particle.type == PARTICLE_TYPE_EMITTER) EmmitParticles(particle, output);
+	else if (particle.type == PARTICLE_TYPE_SHELL) ShellParticles(particle, output);			// Shell 타입은 파티클의 수명이 다 할떄, FLAR 파티클을 만든다.
+	else if ((particle.type == PARTICLE_TYPE_FLARE01) || (particle.type == PARTICLE_TYPE_FLARE03)) OutputEmberParticles(particle, output);
+	else if (particle.type == PARTICLE_TYPE_FLARE02) GenerateEmberParticles(particle, output);
+}
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////
-//struct VS_PARTICLE_DRAW_OUTPUT
-//{
-//	float3 position : POSITION;
-//	float4 color : COLOR;
-//	float size : SCALE;
-//	uint type : PARTICLETYPE;
-//};
+struct VS_PARTICLE_DRAW_OUTPUT
+{
+	float3 position : POSITION;
+	float4 color : COLOR;
+	float size : SCALE;
+	uint type : PARTICLETYPE;
+};
+
+struct GS_PARTICLE_DRAW_OUTPUT
+{
+	float4 position : SV_Position;
+	float4 color : COLOR;
+	float2 uv : TEXTURE;
+	uint type : PARTICLETYPE;
+};
+
+VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
+{
+	VS_PARTICLE_DRAW_OUTPUT output = (VS_PARTICLE_DRAW_OUTPUT)0;
+
+	output.position = input.position;
+	output.size = 3.5f;
+	output.type = input.type;
+
+	if (input.type == PARTICLE_TYPE_EMITTER) { output.color = float4(1.01f, 0.01f, 0.01f, 1.0f); output.size = 3.0f; }
+	else if (input.type == PARTICLE_TYPE_SHELL) { output.color = float4(1.03f, 0.0f, 0.1f, 1.0f); output.size = 3.0f; }
+	else if (input.type == PARTICLE_TYPE_FLARE01) { output.color = float4(1.02f, 0.01f, 0.01f, 1.0f); output.color *= (input.lifetime / FLARE01_PARTICLE_LIFETIME); }
+	else if (input.type == PARTICLE_TYPE_FLARE02) output.color = float4(1.01f, 0.0f, 0.01f, 1.0f);
+	else if (input.type == PARTICLE_TYPE_FLARE03) { output.color = float4(1.01, 0.0f, 0.0f, 1.0f); output.color *= (input.lifetime / FLARE03_PARTICLE_LIFETIME); }
+
+	return(output);
+}
 //
-//struct GS_PARTICLE_DRAW_OUTPUT
-//{
-//	float4 position : SV_Position;
-//	float4 color : COLOR;
-//	float2 uv : TEXTURE;
-//	uint type : PARTICLETYPE;
-//};
-//
-//VS_PARTICLE_DRAW_OUTPUT VSParticleDraw(VS_PARTICLE_INPUT input)
-//{
-//	VS_PARTICLE_DRAW_OUTPUT output = (VS_PARTICLE_DRAW_OUTPUT)0;
-//
-//	output.position = input.position;
-//	output.size = 3.5f;
-//	output.type = input.type;
-//
-//	if (input.type == PARTICLE_TYPE_EMITTER) { output.color = float4(1.01f, 0.01f, 0.01f, 1.0f); output.size = 3.0f; }
-//	else if (input.type == PARTICLE_TYPE_SHELL) { output.color = float4(1.03f, 0.0f, 0.1f, 1.0f); output.size = 3.0f; }
-//	else if (input.type == PARTICLE_TYPE_FLARE01) { output.color = float4(1.02f, 0.01f, 0.01f, 1.0f); output.color *= (input.lifetime / FLARE01_PARTICLE_LIFETIME); }
-//	else if (input.type == PARTICLE_TYPE_FLARE02) output.color = float4(1.01f, 0.0f, 0.01f, 1.0f);
-//	else if (input.type == PARTICLE_TYPE_FLARE03) { output.color = float4(1.01, 0.0f, 0.0f, 1.0f); output.color *= (input.lifetime / FLARE03_PARTICLE_LIFETIME); }
-//
-//	return(output);
-//}
-//
-//static float3 gf3Positions[4] = { float3(-1.0f, +1.0f, 0.5f), float3(+1.0f, +1.0f, 0.5f), float3(-1.0f, -1.0f, 0.5f), float3(+1.0f, -1.0f, 0.5f) };
-//static float2 gf2QuadUVs[4] = { float2(0.0f, 0.0f), float2(1.0f, 0.0f), float2(0.0f, 1.0f), float2(1.0f, 1.0f) };
+static float3 gf3Positions[4] = { float3(-1.0f, +1.0f, 0.5f), float3(+1.0f, +1.0f, 0.5f), float3(-1.0f, -1.0f, 0.5f), float3(+1.0f, -1.0f, 0.5f) };
+static float2 gf2QuadUVs[4] = { float2(0.0f, 0.0f), float2(1.0f, 0.0f), float2(0.0f, 1.0f), float2(1.0f, 1.0f) };
 //
 //
-//[maxvertexcount(4)]
-//void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream<GS_PARTICLE_DRAW_OUTPUT> outputStream)
-//{
-//	GS_PARTICLE_DRAW_OUTPUT output = (GS_PARTICLE_DRAW_OUTPUT)0;
+[maxvertexcount(4)]
+void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream<GS_PARTICLE_DRAW_OUTPUT> outputStream)
+{
+	GS_PARTICLE_DRAW_OUTPUT output = (GS_PARTICLE_DRAW_OUTPUT)0;
+
+	output.type = input[0].type;
+	output.color = input[0].color;
+	for (int i = 0; i < 4; i++)
+	{
+		float3 positionW = mul(gf3Positions[i] * input[0].size, (float3x3)gmtxInverseView) + input[0].position;
+		output.position = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
+		output.uv = gf2QuadUVs[i];
+
+		outputStream.Append(output);
+	}
+	outputStream.RestartStrip();
+}
 //
-//	output.type = input[0].type;
-//	output.color = input[0].color;
-//	for (int i = 0; i < 4; i++)
-//	{
-//		float3 positionW = mul(gf3Positions[i] * input[0].size, (float3x3)gmtxInverseView) + input[0].position;
-//		output.position = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
-//		output.uv = gf2QuadUVs[i];
-//
-//		outputStream.Append(output);
-//	}
-//	outputStream.RestartStrip();
-//}
-//
-//float4 PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) : SV_TARGET
-//{
-//	float4 cColor = gtxtParticleTexture.Sample(gssWrap, input.uv);
-//	cColor *= input.color;
-//
-//	return(cColor);
-//}
+float4 PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) : SV_TARGET
+{
+	float4 cColor = gtxtParticleTexture.Sample(gssWrap, input.uv);
+	cColor *= input.color;
+
+	return(cColor);
+}
 
 
 

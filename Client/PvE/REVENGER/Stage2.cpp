@@ -138,7 +138,7 @@ void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	CHumanObjectsShader* pOtherPlayerShader = new CHumanObjectsShader();
 	pOtherPlayerShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	pOtherPlayerShader->SetCurScene(SCENE2STAGE);
-	pOtherPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL,m_pTerrain);
+	pOtherPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, m_pTerrain);
 	m_ppShaders[0] = pOtherPlayerShader;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -521,7 +521,27 @@ void Stage2::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nStageMapShaders; i++) if (m_ppStageMapShaders[i]) m_ppStageMapShaders[i]->AnimateObjects(fTimeElapsed);
 
+	m_ppStageMapShaders[0]->m_ppObjects[0]->m_xoobb = BoundingOrientedBox(XMFLOAT3(1220.0, 12.0, 760.0), XMFLOAT3(80.0, 80.0, 80.0), XMFLOAT4(0, 0, 0, 1));
+	((CHumanPlayer*)m_pPlayer)->m_xoobb = BoundingOrientedBox(XMFLOAT3(((CHumanPlayer*)m_pPlayer)->GetPosition()), XMFLOAT3(15.0, 20.0, 15.0), XMFLOAT4(0, 0, 0, 1));
+	XMFLOAT3 PlayerLook = ((CHumanPlayer*)m_pPlayer)->GetLookVector();
+	XMFLOAT3 PlayerUp = ((CHumanPlayer*)m_pPlayer)->GetUpVector();
+	XMFLOAT3 PlayerRight = ((CHumanPlayer*)m_pPlayer)->GetRightVector();
+	//for (int j = 0; j < 8; j++)
+	//{
+	//	if (m_ppStageMapShaders[0]->m_ppObjects[0]->m_xoobb.Intersects(((CHumanPlayer*)m_pPlayer)->m_xoobb))
+	//	{
+	//		PlayerLook.x *= (-1.0); PlayerLook.y *= (-1.0); PlayerLook.z *= (-1.0);
+	//		PlayerUp.x *= (-1.0); PlayerUp.y *= (-1.0); PlayerUp.z *= (-1.0);
+	//		PlayerRight.x *= (-1.0); PlayerRight.y *= (-1.0); PlayerRight.z *= (-1.0);
 
+	//	}
+	//}
+	XMFLOAT3 lookA = ((CHumanPlayer*)m_pPlayer)->GetLookVector();
+	XMFLOAT3 posA = ((CHumanPlayer*)m_pPlayer)->GetPosition();
+	XMFLOAT3 upA = ((CHumanPlayer*)m_pPlayer)->GetUpVector();
+	XMFLOAT3 rightA = ((CHumanPlayer*)m_pPlayer)->GetRightVector();
+
+	CheckCollision(((CHumanPlayer*)m_pPlayer)->m_xoobb,m_ppStageMapShaders[0]->m_ppObjects[0]->m_xoobb, posA, lookA, upA, rightA);
 
 	XMFLOAT3 xmfPosition = (XMFLOAT3(m_pPlayer->GetPosition().x, m_pPlayer->GetPosition().y + 7.0, m_pPlayer->GetPosition().z));
 	if (m_pLights)
@@ -567,4 +587,90 @@ void Stage2::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	}
 
 
+}
+
+bool Stage2::CheckCollision( DirectX::BoundingOrientedBox& box1,  DirectX::BoundingOrientedBox& box2, DirectX::XMFLOAT3& posA, DirectX::XMFLOAT3& lookA, DirectX::XMFLOAT3& upA, DirectX::XMFLOAT3& rightA)
+{
+	// BoundingOrientedBox 간 충돌 검사 수행
+	bool isIntersecting = box1.Intersects(box2);
+
+	//XMFLOAT3 BoxOrient = boxIntersection.Orientation();
+	if (isIntersecting)
+	{
+
+		DirectX::BoundingOrientedBox boxIntersection = BoundingOrientedBox{};
+		XMFLOAT3 vector3 = XMFLOAT3(0.0,0.0,1.0);
+		float depth = box1.Intersects((box2, boxIntersection));
+
+		// 'A' 객체의 이전 위치와 현재 위치를 이용하여 충돌 지점을 통해 반사 벡터 계산
+		XMVECTOR posPrev = DirectX::XMLoadFloat3(&posA);
+		XMVECTOR posCurr = DirectX::XMVectorAdd(posPrev, DirectX::XMVectorScale(DirectX::XMLoadFloat3(&lookA), depth));
+		XMVECTOR normal = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(DirectX::XMVectorSetW(XMLoadFloat3(&vector3), 0.f), posCurr));
+		XMVECTOR incident = DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&lookA));
+		XMVECTOR reflected = DirectX::XMVector3Reflect(incident, normal);
+
+		// 'A' 객체의 위치를 업데이트
+		XMStoreFloat3(&posA, XMVectorAdd(posCurr, DirectX::XMVectorScale(reflected, depth)));
+		XMStoreFloat3(&lookA, ::XMVector3Normalize(DirectX::XMVectorSubtract(::XMVectorSetW(XMLoadFloat3(&vector3), 0.f), ::XMLoadFloat3(&posA))));
+		XMStoreFloat3(&upA, ::XMVector3Normalize(DirectX::XMVector3Cross(::XMLoadFloat3(&rightA), ::XMLoadFloat3(&lookA))));
+		XMStoreFloat3(&rightA, ::XMVector3Cross(DirectX::XMLoadFloat3(&lookA), ::XMLoadFloat3(&upA)));
+	}
+
+	return isIntersecting;
+}
+
+// 두 개의 BoundingOrientedBox 간 충돌 검사 함수
+bool Stage2::IsIntersecting(BoundingOrientedBox box1, BoundingOrientedBox box2)
+{
+	XMVECTOR center1 = XMLoadFloat3(&box1.Center);
+	XMVECTOR center2 = XMLoadFloat3(&box2.Center);
+
+	XMVECTOR extents1 = XMLoadFloat3(&box1.Extents);
+	XMVECTOR extents2 = XMLoadFloat3(&box2.Extents);
+
+	XMVECTOR orientation1 = XMLoadFloat4(&box1.Orientation);
+	XMVECTOR orientation2 = XMLoadFloat4(&box2.Orientation);
+
+	// 두 객체 간의 최소 거리 벡터 계산
+	XMVECTOR distance = center2 - center1;
+
+	// 두 객체 간의 축을 계산하여 행렬에 저장
+	XMMATRIX rotation1 = XMMatrixRotationQuaternion(orientation1);
+	XMMATRIX rotation2 = XMMatrixRotationQuaternion(orientation2);
+	XMMATRIX rotation1_T = XMMatrixTranspose(rotation1);
+	XMMATRIX rotation2_T = XMMatrixTranspose(rotation2);
+
+	XMMATRIX axes1 = rotation1 * rotation2_T;
+	XMMATRIX axes2 = rotation2 * rotation1_T;
+
+	// 충돌 검사를 위한 축의 벡터 계산
+	XMVECTOR axes[15];
+	axes[0] = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+	axes[1] = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	axes[2] = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+	for (int i = 0; i < 3; i++)
+	{
+		axes[i + 3] = XMVector3Normalize(XMVector3Transform(axes[i], axes1));
+		axes[i + 6] = XMVector3Normalize(XMVector3Transform(axes[i], axes2));
+	}
+	axes[9] = XMVector3Cross(axes[0], axes[3]);
+	axes[10] = XMVector3Cross(axes[0], axes[4]);
+	axes[11] = XMVector3Cross(axes[0], axes[5]);
+	axes[12] = XMVector3Cross(axes[1], axes[3]);
+	axes[13] = XMVector3Cross(axes[1], axes[4]);
+	axes[14] = XMVector3Cross(axes[1], axes[5]);
+
+	// 충돌 검사 수행
+	for (int i = 0; i < 15; i++)
+	{
+		float projection1 = XMVectorGetX(XMVector3Dot(distance, axes[i]));
+		float projection2 = XMVectorGetX(XMVector3Length(XMVector3Transform(extents1, axes1)));
+		float projection3 = XMVectorGetX(XMVector3Length(XMVector3Transform(extents2, axes2)));
+		if (projection1 >= projection2 + projection3)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }

@@ -94,7 +94,7 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 	m_pLights[2].m_bEnable = true;
 	m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	m_pLights[2].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
 	m_pLights[2].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
 
@@ -536,6 +536,31 @@ void SceneManager::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++) if (m_ppHierarchicalGameObjects[i]) m_ppHierarchicalGameObjects[i]->Animate(fTimeElapsed);
+
+	/*for (int i = 0; i < m_ppMapShaders[0]->m_ppObjects[0]->m_nMeshes; i++)
+	{
+		m_ppMapShaders[0]->m_ppObjects[0]->m_xoobb = BoundingOrientedBox(
+			XMFLOAT3(m_ppMapShaders[0]->m_ppObjects[0]->m_ppMeshes[i]->m_xmf3AABBCenter),
+			XMFLOAT3(m_ppMapShaders[0]->m_ppObjects[0]->m_ppMeshes[i]->m_xmf3AABBExtents),
+			XMFLOAT4(0, 0, 0, 1));
+	}
+	for (int j = 0; j < ((HeliPlayer*)m_pPlayer)->m_nMeshes; j++)
+	{
+		((HeliPlayer*)m_pPlayer)->m_xoobb = BoundingOrientedBox(
+			XMFLOAT3(((HeliPlayer*)m_pPlayer)->m_ppMeshes[j]->m_xmf3AABBCenter),
+			XMFLOAT3(((HeliPlayer*)m_pPlayer)->m_ppMeshes[j]->m_xmf3AABBExtents),
+			XMFLOAT4(0, 0, 0, 1));
+	}
+	for (int j = 0; j < ((HeliPlayer*)m_pPlayer)->m_nMeshes; j++)for (int i = 0; i < m_ppMapShaders[0]->m_ppObjects[0]->m_nMeshes; i++)
+	if (((HeliPlayer*)m_pPlayer)->m_ppMeshes[j]->m_xmf3AABBExtents.x >= m_ppMapShaders[0]->m_ppObjects[0]->m_ppMeshes[i]->m_xmf3AABBExtents.x||
+		((HeliPlayer*)m_pPlayer)->m_ppMeshes[j]->m_xmf3AABBExtents.y >= m_ppMapShaders[0]->m_ppObjects[0]->m_ppMeshes[i]->m_xmf3AABBExtents.y ||
+		((HeliPlayer*)m_pPlayer)->m_ppMeshes[j]->m_xmf3AABBExtents.z >= m_ppMapShaders[0]->m_ppObjects[0]->m_ppMeshes[i]->m_xmf3AABBExtents.z ||
+		((HeliPlayer*)m_pPlayer)->m_ppMeshes[j]->m_xmf3AABBCenter.x >= m_ppMapShaders[0]->m_ppObjects[0]->m_ppMeshes[i]->m_xmf3AABBCenter.x||
+		((HeliPlayer*)m_pPlayer)->m_ppMeshes[j]->m_xmf3AABBCenter.y >= m_ppMapShaders[0]->m_ppObjects[0]->m_ppMeshes[i]->m_xmf3AABBCenter.y||
+		((HeliPlayer*)m_pPlayer)->m_ppMeshes[j]->m_xmf3AABBCenter.z >= m_ppMapShaders[0]->m_ppObjects[0]->m_ppMeshes[i]->m_xmf3AABBCenter.z)
+	{
+		exit(0);
+	}*/
 
 	if (m_pLights)
 	{

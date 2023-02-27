@@ -23,6 +23,7 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
+	BoundingOrientedBox m_xoobb = BoundingOrientedBox(XMFLOAT3(), XMFLOAT3(), XMFLOAT4());
 public:
 	float m_fBulletEffectiveRange = 1600.0f;
 	CValkanObject* pBulletObject = NULL;

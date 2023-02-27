@@ -2,11 +2,11 @@
 #include "Player.h"
 #include "MissileObject.h"
 #define BULLETS					150
-class CAirplanePlayer : public CPlayer
+class HeliPlayer : public CPlayer
 {
 public:
-	CAirplanePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
-	virtual ~CAirplanePlayer();
+	HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
+	virtual ~HeliPlayer();
 	CGameObject* m_pMainRotorFrame = NULL;
 	CGameObject* m_pTailRotorFrame = NULL;
 
@@ -26,4 +26,6 @@ public:
 	virtual void Animate(float fTimeElapsed);
 	virtual void Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent);
 	virtual void Update(float fTimeElapsed);
+
+	BoundingOrientedBox m_xoobb = BoundingOrientedBox(XMFLOAT3(),XMFLOAT3(),XMFLOAT4());
 };

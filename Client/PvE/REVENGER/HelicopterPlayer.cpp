@@ -3,7 +3,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
-CAirplanePlayer::CAirplanePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
@@ -32,14 +32,16 @@ CAirplanePlayer::CAirplanePlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	SetPosition(XMFLOAT3(310.0f, 590.0f, 590.0f));
 	SetScale(XMFLOAT3(1.2, 1.2, 1.2));
 
+	m_xoobb = BoundingOrientedBox(XMFLOAT3(this->GetPosition()), XMFLOAT3(15.0, 13.0, 20.0), XMFLOAT4(0, 0, 0, 1));
+
 	if (pBulletMesh) delete pBulletMesh;
 }
 
-CAirplanePlayer::~CAirplanePlayer()
+HeliPlayer::~HeliPlayer()
 {
 }
 
-void CAirplanePlayer::Firevalkan(CGameObject* pLockedObject)
+void HeliPlayer::Firevalkan(CGameObject* pLockedObject)
 {
 	CBulletObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS; i++)
@@ -72,7 +74,7 @@ void CAirplanePlayer::Firevalkan(CGameObject* pLockedObject)
 	}
 }
 
-CCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
+CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 {
 	DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00;
 	if (nCurrentCameraMode == nNewCameraMode) return(m_pCamera);
@@ -123,14 +125,14 @@ CCamera* CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	return(m_pCamera);
 }
 
-void CAirplanePlayer::OnPrepareAnimate()
+void HeliPlayer::OnPrepareAnimate()
 {
 	m_pTailRotorFrame = FindFrame("rescue_2");
 	m_pMainRotorFrame = FindFrame("rescue_1");
 
 	CPlayer::OnPrepareAnimate();
 }
-void CAirplanePlayer::Animate(float fTimeElapsed)
+void HeliPlayer::Animate(float fTimeElapsed)
 {
 	for (int i = 0; i < BULLETS; i++)
 	{
@@ -142,7 +144,7 @@ void CAirplanePlayer::Animate(float fTimeElapsed)
 	CPlayer::Animate(fTimeElapsed);
 }
 
-void CAirplanePlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
+void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 {
 	if (m_pMainRotorFrame)
 	{
@@ -157,7 +159,7 @@ void CAirplanePlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 	CPlayer::Animate(fTimeElapse, pxmf4x4Parent);
 }
 
-void CAirplanePlayer::OnPlayerUpdateCallback(float fTimeElapsed)
+void HeliPlayer::OnPlayerUpdateCallback(float fTimeElapsed)
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pPlayerUpdatedContext;
 	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
@@ -175,7 +177,7 @@ void CAirplanePlayer::OnPlayerUpdateCallback(float fTimeElapsed)
 	}
 }
 
-void CAirplanePlayer::OnCameraUpdateCallback(float fTimeElapsed)
+void HeliPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pCameraUpdatedContext;
 	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
@@ -196,7 +198,7 @@ void CAirplanePlayer::OnCameraUpdateCallback(float fTimeElapsed)
 }
 
 
-void CAirplanePlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void HeliPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	CPlayer::Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < BULLETS; i++) {
@@ -204,7 +206,7 @@ void CAirplanePlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	}
 }
 
-void CAirplanePlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
+void HeliPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
 	//if (dwDirection)
 	//{
@@ -216,7 +218,7 @@ void CAirplanePlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloc
 }
 
 
-void CAirplanePlayer::Update(float fTimeElapsed)
+void HeliPlayer::Update(float fTimeElapsed)
 {
 	CPlayer::Update(fTimeElapsed);
 

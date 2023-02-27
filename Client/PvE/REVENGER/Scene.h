@@ -14,6 +14,7 @@
 #include "MapObjectShaders.h"
 #include "Player.h"
 #include "HumanPlayer.h"
+#include "HelicopterPlayer.h"
 #include "Object.h"
 #include "MissileObject.h"
 #include "GameSound.h"

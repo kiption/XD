@@ -95,8 +95,8 @@ void BuildingObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	for (int i = 0; i < m_nObjects; i++)
 	{
 		m_ppObjects[i] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		m_ppObjects[i]->SetChild(pSuperCobraModel,false);
-		m_ppObjects[i]->SetPosition(1000.0+(i*50), 500.0, 1000.0);
+		m_ppObjects[i]->SetChild(pSuperCobraModel, false);
+		m_ppObjects[i]->SetPosition(1000.0 + (i * 50), 500.0, 1000.0);
 		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
 		m_ppObjects[i]->SetScale(5.0f, 5.0f, 5.0f);
 		pSuperCobraModel->AddRef();
@@ -124,7 +124,7 @@ void BunkerObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		m_ppObjects[i]->SetScale(40.0, 35.0f, 40.0f);
 	}
 
-	m_ppObjects[0]->SetPosition(420.0f, pTerrain->GetHeight(420.0f, 1100.0f)-15.0f, 1100.0f);
+	m_ppObjects[0]->SetPosition(420.0f, pTerrain->GetHeight(420.0f, 1100.0f) - 15.0f, 1100.0f);
 	m_ppObjects[0]->Rotate(55.0, 0.0f, 0.0f);
 
 	m_ppObjects[1]->SetPosition(650.0f, pTerrain->GetHeight(650.0f, 1800.0f) - 15.0f, 1800.0f);
@@ -150,22 +150,22 @@ void CMapObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	m_nObjects = GeneratorModels;
 	m_ppObjects = new CGameObject * [m_nObjects];
-	
+
 	CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Generator_Room_retest.bin", NULL);
 	for (int i = 0; i < GeneratorModels; i++)
 	{
 		m_ppObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		m_ppObjects[i]->SetChild(pGeneratorModel,false);
+		m_ppObjects[i]->SetChild(pGeneratorModel, false);
 
 		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
 		m_ppObjects[i]->SetScale(10.0, 10.0, 10.0);
 		pGeneratorModel->AddRef();
 	}
-	m_ppObjects[0]->SetPosition(XMFLOAT3(3000.0f , pTerrain->GetHeight(3000.0,2000.0f), 2000.0f));
-	m_ppObjects[1]->SetPosition(XMFLOAT3(1200.0f , pTerrain->GetHeight(1200.0f, 2700.0f), 2700.0f));
-	m_ppObjects[2]->SetPosition(XMFLOAT3(2000.0f , pTerrain->GetHeight(2000.0f, 1500.0f), 1500.0f));
-	m_ppObjects[3]->SetPosition(XMFLOAT3(750.0f , pTerrain->GetHeight(750.0f, 2400.0f), 2400.0f));
-	m_ppObjects[3]->SetPosition(XMFLOAT3(3750.0f , pTerrain->GetHeight(3750.0f, 2400.0f), 2400.0f));
+	m_ppObjects[0]->SetPosition(XMFLOAT3(3000.0f, pTerrain->GetHeight(3000.0, 2000.0f), 2000.0f));
+	m_ppObjects[1]->SetPosition(XMFLOAT3(1200.0f, pTerrain->GetHeight(1200.0f, 2700.0f), 2700.0f));
+	m_ppObjects[2]->SetPosition(XMFLOAT3(2000.0f, pTerrain->GetHeight(2000.0f, 1500.0f), 1500.0f));
+	m_ppObjects[3]->SetPosition(XMFLOAT3(750.0f, pTerrain->GetHeight(750.0f, 2400.0f), 2400.0f));
+	m_ppObjects[3]->SetPosition(XMFLOAT3(3750.0f, pTerrain->GetHeight(3750.0f, 2400.0f), 2400.0f));
 
 
 
@@ -231,13 +231,12 @@ void CMapObjectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 
 /////////////////////////////////////////////////////////////////////
 
-/////////////////////////////////////////////
 void CStage2MapObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
 
-	m_nObjects =2;
+	m_nObjects = 2;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 
@@ -253,8 +252,7 @@ void CStage2MapObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphi
 	m_ppObjects[0]->SetPosition(XMFLOAT3(1000.0f, pTerrain->GetHeight(1000.0f, 1500.0f) - 9.8f, 1500.0f));
 	m_ppObjects[1]->SetPosition(XMFLOAT3(2500.0f, pTerrain->GetHeight(2500.0f, 2500.0f) + 120.0f, 2500.0f));
 
-
-
+	
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
