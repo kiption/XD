@@ -841,7 +841,56 @@ void do_ha_worker() {
 		BOOL ret = GetQueuedCompletionStatus(h_ss_iocp, &num_bytes, &key, &over, INFINITE);
 		OVER_EXP* ex_over = reinterpret_cast<OVER_EXP*>(over);
 		if (FALSE == ret) {
-			if (ex_over->process_type == OP_ACCEPT) cout << "Accept Error";
+			if (ex_over->process_type == OP_ACCEPT)
+				cout << "Accept Error";
+			if (ex_over->process_type == OP_CONNECT) {
+				cout << "Connect Error" << endl;
+
+				// ConnectEx
+				SOCKET temp_s = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+				GUID guid = WSAID_CONNECTEX;
+				DWORD bytes = 0;
+				LPFN_CONNECTEX connectExFP;
+				::WSAIoctl(temp_s, SIO_GET_EXTENSION_FUNCTION_POINTER, &guid, sizeof(guid), &connectExFP, sizeof(connectExFP), &bytes, nullptr, nullptr);
+				closesocket(temp_s);
+
+				SOCKADDR_IN ha_server_addr;
+				ZeroMemory(&ha_server_addr, sizeof(ha_server_addr));
+				ha_server_addr.sin_family = AF_INET;
+				right_ex_server_sock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);     // 실제 연결할 소켓
+				int ret = ::bind(right_ex_server_sock, reinterpret_cast<LPSOCKADDR>(&ha_server_addr), sizeof(ha_server_addr));
+				if (ret != 0) {
+					cout << "Bind Error - " << ret << endl;
+					cout << WSAGetLastError() << endl;
+					exit(-1);
+				}
+
+				OVER_EXP* con_over = new OVER_EXP;
+				con_over->process_type = OP_CONNECT;
+				HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_ss_iocp, key, 0);
+				if (NULL == hret) {
+					cout << "CreateIoCompletoinPort Error - " << ret << endl;
+					cout << WSAGetLastError() << endl;
+					exit(-1);
+				}
+
+				int target_portnum = key - SERIAL_NUM_EXSERVER + HA_PORTNUM_S0;
+				ZeroMemory(&ha_server_addr, sizeof(ha_server_addr));
+				ha_server_addr.sin_family = AF_INET;
+				ha_server_addr.sin_port = htons(target_portnum);	// 수평확장된 서버군에서 자기 오른쪽에 있는 서버
+				inet_pton(AF_INET, "127.0.0.1", &ha_server_addr.sin_addr);
+
+				BOOL bret = connectExFP(right_ex_server_sock, reinterpret_cast<sockaddr*>(&ha_server_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over->overlapped);
+				if (FALSE == bret) {
+					int err_no = GetLastError();
+					if (ERROR_IO_PENDING == err_no)
+						cout << "Server Connect 재시도 중...\n" << endl;
+					else {
+						cout << "ConnectEX Error - " << err_no << endl;
+						cout << WSAGetLastError() << endl;
+					}
+				}
+			}
 			else {
 				//cout << "GQCS Error ( client[" << key << "] )" << endl;
 				cout << WSAGetLastError() << endl;
@@ -906,15 +955,17 @@ void do_ha_worker() {
 			break;
 		}
 		case OP_CONNECT: {
-			int server_id = key - SERIAL_NUM_EXSERVER;
-			std::cout << "성공적으로 Server[" << server_id << "]에 연결되었습니다.\n" << endl;
-			extended_servers[server_id].id = server_id;
-			extended_servers[server_id].remain_size = 0;
-			extended_servers[server_id].socket = right_ex_server_sock;
-			extended_servers[server_id].s_state = ST_ACCEPTED;
-			CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_ss_iocp, NULL, 0);
-			delete ex_over;
-			extended_servers[server_id].do_recv();
+			if (FALSE != ret) {
+				int server_id = key - SERIAL_NUM_EXSERVER;
+				std::cout << "성공적으로 Server[" << server_id << "]에 연결되었습니다.\n" << endl;
+				extended_servers[server_id].id = server_id;
+				extended_servers[server_id].remain_size = 0;
+				extended_servers[server_id].socket = right_ex_server_sock;
+				extended_servers[server_id].s_state = ST_ACCEPTED;
+				CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_ss_iocp, NULL, 0);
+				delete ex_over;
+				extended_servers[server_id].do_recv();
+			}
 		}
 		}
 	}
@@ -1222,6 +1273,7 @@ void sendHeartBeat() {	// 오른쪽 서버에게 Heartbeat를 전달하는 함수
 	while (true) {
 		if (my_server_id != MAX_SERVER - 1) {	// 왼쪽 서버가 오른쪽 서버로 전송하기 때문에 가장 마지막 서버는 전송하지 않습니다.
 			if (extended_servers[my_server_id].s_state != ST_ACCEPTED)	continue;
+			if (extended_servers[my_server_id + 1].s_state != ST_ACCEPTED) continue;
 
 			if (chrono::system_clock::now() > extended_servers[my_server_id].heartbeat_send_time + chrono::milliseconds(HB_SEND_CYCLE)) {
 				cout << "자신의 Heartbeat를 Server[" << my_server_id + 1 << "]에게 보냅니다." << endl;
@@ -1250,7 +1302,7 @@ void checkHeartbeat() {	// 인접해있는 서버구성원에게서 Heartbeat를 받았는 지 확�
 
 		if (my_server_id != MAX_SERVER - 1) {	// 가장 오른쪽에 있는 서버 구성원만 제외
 			// 왼쪽의 서버 검사
-			if (extended_servers[my_server_id + 1].s_state == ST_ACCEPTED) continue; {
+			if (extended_servers[my_server_id + 1].s_state == ST_ACCEPTED) {
 				if (chrono::system_clock::now() > extended_servers[my_server_id + 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
 					cout << "Server[" << my_server_id + 1 << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
 					disconnect(my_server_id + 1, SESSION_EXTENDED_SERVER);
