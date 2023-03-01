@@ -167,7 +167,7 @@ void CMapObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	m_ppObjects[3]->SetPosition(XMFLOAT3(750.0f, pTerrain->GetHeight(750.0f, 2400.0f), 2400.0f));
 	m_ppObjects[3]->SetPosition(XMFLOAT3(3750.0f, pTerrain->GetHeight(3750.0f, 2400.0f), 2400.0f));
 
-
+	//
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
