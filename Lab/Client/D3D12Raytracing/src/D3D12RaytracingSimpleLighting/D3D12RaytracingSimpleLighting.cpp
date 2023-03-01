@@ -402,44 +402,41 @@ void D3D12RaytracingSimpleLighting::BuildGeometry()
 {
 	auto device = m_deviceResources->GetD3DDevice();
 
-	std::ifstream binFile(L"Model/Military_Helicopter.bin", std::ios::binary);
-	
+	std::ifstream binFile(L"Model/Military_Helicopter.bin", std::ios::in | std::ios::binary);
+
 	if (!binFile.is_open()) {
-		std::cout<<"실패"<<endl;
+		std::cout << "File Open Fail!" << std::endl;
 	}
 
-	// 정점 데이터를 읽어옵니다.
-	vector<Vertex> vertices;
-	binFile.read(reinterpret_cast<char*>(vertices.data()), vertices.size() * sizeof(Vertex));
-
-	// 인덱스 데이터를 읽어옵니다.
+	// 정점 데이터를 읽어온다.
+	std::vector<Vertex> vertices;
 	std::vector<int> indices;
-	binFile.read(reinterpret_cast<char*>(indices.data()), indices.size() * sizeof(int));
+	UINT numVertices = 0;
+	UINT numIndices = 0;
 
-	// 정점 정보를 m_vertexbuffer에 연결합니다.
-	// Vertex, Index, NumVertices, NumIndices를 선언과 동시에 초기화합니다.
-
-	int numVertices = 0;
-	int numIndices = 0;
-  // 파일에서 데이터를 읽어와 변수들에 저장합니다.
 	if (binFile.good())
 	{
 		binFile.read(reinterpret_cast<char*>(&numVertices), sizeof(int));
-		binFile.read(reinterpret_cast<char*>(&vertices), numVertices * sizeof(Vertex));
+		vertices.resize(numVertices);
+		binFile.read(reinterpret_cast<char*>(vertices.data()), numVertices * sizeof(Vertex));
 		binFile.read(reinterpret_cast<char*>(&numIndices), sizeof(int));
-		binFile.read(reinterpret_cast<char*>(&indices), numIndices * sizeof(Index));
+		indices.resize(numIndices);
+		binFile.read(reinterpret_cast<char*>(indices.data()), numIndices * sizeof(int));
 	}
 
-	int vertexBufferSize = numVertices * sizeof(Vertex);
+	// 정점 정보를 m_vertexbuffer에 연결
+	UINT vertexBufferSize = numVertices * sizeof(Vertex);
 	AllocateUploadBuffer(device, vertices.data(), vertexBufferSize, &m_vertexBuffer.resource);
 	UINT descriptorIndexVB = CreateBufferSRV(&m_vertexBuffer, numVertices, sizeof(Vertex));
 
-	int indexBufferSize = numIndices * sizeof(int);
+	// 인덱스 정보를 m_indexbuffer에 연결
+	UINT indexBufferSize = numIndices * sizeof(int);
 	AllocateUploadBuffer(device, indices.data(), indexBufferSize, &m_indexBuffer.resource);
 	UINT descriptorIndexIB = CreateBufferSRV(&m_indexBuffer, numIndices, sizeof(int));
 
 	ThrowIfFalse(descriptorIndexVB == descriptorIndexIB + 1, L"Vertex Buffer descriptor index must follow that of Index Buffer descriptor index!");
 }
+
 
 
 // Build acceleration structures needed for raytracing.
