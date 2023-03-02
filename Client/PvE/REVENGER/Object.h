@@ -31,6 +31,7 @@ struct EXPLOSIONMATERIAL
 	XMFLOAT4						m_xmf4Specular; //(r,g,b,a=power)
 	XMFLOAT4						m_xmf4Emissive;
 };
+
 struct CB_STREAMGAMEOBJECT_INFO
 {
 	XMFLOAT4X4						m_xmf4x4World;
@@ -146,7 +147,7 @@ public:
 	void SetTexture(CTexture *pTexture, UINT nTexture = 0);
 
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList);
-
+	virtual void ReleaseShaderVariables();
 	virtual void ReleaseUploadBuffers();
 
 public:
@@ -415,6 +416,7 @@ public:
 	void SetShader(CShader *pShader);
 	void SetShader(int nMaterial, CShader *pShader);
 	virtual void SetMaterial(int nMaterial, CMaterial *pMaterial);
+	virtual void SetMaterial(CMaterial* pMaterial);
 
 
 	void SetChild(CGameObject *pChild, bool bReferenceUpdate=false);
@@ -492,6 +494,8 @@ public:
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
 	void SetCbvGPUDescriptorHandle(D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle) { m_d3dCbvGPUDescriptorHandle = d3dCbvGPUDescriptorHandle; }
 	void SetCbvGPUDescriptorHandlePtr(UINT64 nCbvGPUDescriptorHandlePtr) { m_d3dCbvGPUDescriptorHandle.ptr = nCbvGPUDescriptorHandlePtr; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetCbvGPUDescriptorHandle() { return(m_d3dCbvGPUDescriptorHandle); }
+
 public:
 	// Server
 	void SetUp(XMFLOAT3 xmf3Up) { m_xmf4x4ToParent._21 = xmf3Up.x, m_xmf4x4ToParent._22 = xmf3Up.y, m_xmf4x4ToParent._23 = xmf3Up.z; }

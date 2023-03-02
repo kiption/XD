@@ -17,13 +17,17 @@
 #include "HelicopterPlayer.h"
 #include "Object.h"
 #include "MissileObject.h"
+#include "ParticleObject.h"
 #include "GameSound.h"
 #define MAX_LIGHTS						16 
 #define POINT_LIGHT						1
 #define SPOT_LIGHT						2
 #define DIRECTIONAL_LIGHT				3
 
-
+struct MATERIALS
+{
+	EXPLOSIONMATERIAL				m_pReflections[MAX_MATERIALS];
+};
 struct LIGHT
 {
 	XMFLOAT4							m_xmf4Ambient;
@@ -70,11 +74,19 @@ public:
 	
 	virtual void ReleaseUploadBuffers();
 
+	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	void RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	void OnPostRenderParticle();
 	int GetCurScene() { return m_nCurScene; }
 	void SetCurScene(int nCurScene) { m_nCurScene = nCurScene; }
 
 	GameSound gamesound;
 
+	CParticleObject** m_ppParticleObjects = NULL;
+	int							m_nParticleObjects;
+	ID3D12Resource* m_pd3dcbMaterials = NULL;
+	EXPLOSIONMATERIAL* m_pcbMappedMaterials = NULL;
+	MATERIALS* m_pMaterials = NULL;
 public:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 
