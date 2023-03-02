@@ -14,12 +14,6 @@ CShader::~CShader()
 	ReleaseShaderVariables();
 
 	if (m_pd3dPipelineState) m_pd3dPipelineState->Release();
-
-	//if (m_ppd3dPipelineStates)
-	//{
-	//	for (int i = 0; i < m_nPipelineStates; i++) if (m_ppd3dPipelineStates[i]) m_ppd3dPipelineStates[i]->Release();
-	//	delete[] m_ppd3dPipelineStates;
-	//}
 }
 D3D12_SHADER_BYTECODE CShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
@@ -31,15 +25,6 @@ D3D12_SHADER_BYTECODE CShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, in
 }
 
 D3D12_SHADER_BYTECODE CShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
-{
-	D3D12_SHADER_BYTECODE d3dShaderByteCode;
-	d3dShaderByteCode.BytecodeLength = 0;
-	d3dShaderByteCode.pShaderBytecode = NULL;
-
-	return(d3dShaderByteCode);
-}
-
-D3D12_SHADER_BYTECODE CShader::CreateComputeShader(ID3DBlob** ppd3dShaderBlob)
 {
 	D3D12_SHADER_BYTECODE d3dShaderByteCode;
 	d3dShaderByteCode.BytecodeLength = 0;
@@ -374,9 +359,6 @@ void CShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSi
 void CShader::OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList, int nPipelineState)
 {
 	if (m_pd3dPipelineState) pd3dCommandList->SetPipelineState(m_pd3dPipelineState);
-
-	UpdateShaderVariables(pd3dCommandList);
-
 }
 
 void CShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)

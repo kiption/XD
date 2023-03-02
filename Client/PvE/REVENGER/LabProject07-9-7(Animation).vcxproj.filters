@@ -44,24 +44,6 @@
     <Filter Include="Server">
       <UniqueIdentifier>{17fece3a-1223-4615-bf79-938648c788aa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Client\Shader\Header">
-      <UniqueIdentifier>{34b10498-57b7-4056-9c9f-65dfeb52cd31}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Client\Shader\Source">
-      <UniqueIdentifier>{3356c926-99e3-4425-bde3-b83ccc8b1bb9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Client\Object\Header">
-      <UniqueIdentifier>{b1fc585e-8ef8-41f2-9518-d2050459e91e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Client\Object\Source">
-      <UniqueIdentifier>{0d2df881-4628-4fcd-929a-92af016d7b38}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Client\Mesh\Source">
-      <UniqueIdentifier>{3d688e5d-6d6e-4729-b530-2b00d78ecbb2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Client\Mesh\Header">
-      <UniqueIdentifier>{ecf0ae2a-561f-4ecb-822d-85198d646bb9}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameSound.h">
@@ -82,11 +64,20 @@
     <ClInclude Include="REVENGER.h">
       <Filter>Client\Main</Filter>
     </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Client\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Client\Object</Filter>
+    </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Client\Player</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
       <Filter>Client\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Client\Shader</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>PCH</Filter>
@@ -100,11 +91,50 @@
     <ClInclude Include="HelicopterPlayer.h">
       <Filter>Client\Player</Filter>
     </ClInclude>
+    <ClInclude Include="TerrainMesh.h">
+      <Filter>Client\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinMesh.h">
+      <Filter>Client\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainShader.h">
+      <Filter>Client\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyboxShader.h">
+      <Filter>Client\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardShader.h">
+      <Filter>Client\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinAnimationShader.h">
+      <Filter>Client\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjcetsShaderList.h">
+      <Filter>Client\Shader</Filter>
+    </ClInclude>
     <ClInclude Include="Stage2.h">
       <Filter>Client\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Stage1.h">
       <Filter>Client\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimateInfo.h">
+      <Filter>Client\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>Client\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Skybox.h">
+      <Filter>Client\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="MissileObject.h">
+      <Filter>Client\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="BillboardObjects.h">
+      <Filter>Client\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="BillboardObjectsShader.h">
+      <Filter>Client\Shader</Filter>
     </ClInclude>
     <ClInclude Include="ObjectsInfo.h">
       <Filter>Server</Filter>
@@ -112,68 +142,20 @@
     <ClInclude Include="Network.h">
       <Filter>Server</Filter>
     </ClInclude>
+    <ClInclude Include="MapObjectShaders.h">
+      <Filter>Client\Shader</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\Server\Server\protocol.h">
       <Filter>Server</Filter>
     </ClInclude>
-    <ClInclude Include="BillboardObjectsShader.h">
-      <Filter>Client\Shader\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="MapObjectShaders.h">
-      <Filter>Client\Shader\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjcetsShaderList.h">
-      <Filter>Client\Shader\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="ParticleShader.h">
-      <Filter>Client\Shader\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="SkinAnimationShader.h">
-      <Filter>Client\Shader\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="SkyboxShader.h">
-      <Filter>Client\Shader\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="StandardShader.h">
-      <Filter>Client\Shader\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="TerrainShader.h">
-      <Filter>Client\Shader\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Client\Shader\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="AnimateInfo.h">
-      <Filter>Client\Object\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="BillboardObjects.h">
-      <Filter>Client\Object\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="MissileObject.h">
-      <Filter>Client\Object\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Client\Object\Header</Filter>
+    <ClInclude Include="ParticleMesh.h">
+      <Filter>Client\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="ParticleObject.h">
-      <Filter>Client\Object\Header</Filter>
+      <Filter>Client\Object</Filter>
     </ClInclude>
-    <ClInclude Include="Skybox.h">
-      <Filter>Client\Object\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Terrain.h">
-      <Filter>Client\Object\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Client\Mesh\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="ParticleMesh.h">
-      <Filter>Client\Mesh\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="SkinMesh.h">
-      <Filter>Client\Mesh\Header</Filter>
-    </ClInclude>
-    <ClInclude Include="TerrainMesh.h">
-      <Filter>Client\Mesh\Header</Filter>
+    <ClInclude Include="ParticleShader.h">
+      <Filter>Client\Shader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -195,11 +177,20 @@
     <ClCompile Include="REVENGER.cpp">
       <Filter>Client\Main</Filter>
     </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Client\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Client\Object</Filter>
+    </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Client\Player</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>Client\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Client\Shader</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>PCH</Filter>
@@ -213,71 +204,62 @@
     <ClCompile Include="HumanPlayer.cpp">
       <Filter>Client\Player</Filter>
     </ClCompile>
+    <ClCompile Include="TerrainMesh.cpp">
+      <Filter>Client\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinMesh.cpp">
+      <Filter>Client\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainShader.cpp">
+      <Filter>Client\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyboxShader.cpp">
+      <Filter>Client\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="StandardShader.cpp">
+      <Filter>Client\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinAnimationShader.cpp">
+      <Filter>Client\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjcetsShaderList.cpp">
+      <Filter>Client\Shader</Filter>
+    </ClCompile>
     <ClCompile Include="Stage2.cpp">
       <Filter>Client\Scene</Filter>
     </ClCompile>
     <ClCompile Include="Stage1.cpp">
       <Filter>Client\Scene</Filter>
     </ClCompile>
-    <ClCompile Include="BillboardObjectsShader.cpp">
-      <Filter>Client\Shader\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="MapObjectShaders.cpp">
-      <Filter>Client\Shader\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjcetsShaderList.cpp">
-      <Filter>Client\Shader\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="SkinAnimationShader.cpp">
-      <Filter>Client\Shader\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="StandardShader.cpp">
-      <Filter>Client\Shader\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="TerrainShader.cpp">
-      <Filter>Client\Shader\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="Shader.cpp">
-      <Filter>Client\Shader\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="ParticleShader.cpp">
-      <Filter>Client\Shader\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="SkyboxShader.cpp">
-      <Filter>Client\Shader\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="MissileObject.cpp">
-      <Filter>Client\Object\Source</Filter>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>Client\Object</Filter>
     </ClCompile>
     <ClCompile Include="AnimateInfo.cpp">
-      <Filter>Client\Object\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="BillboardObjects.cpp">
-      <Filter>Client\Object\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="ParticleObject.cpp">
-      <Filter>Client\Object\Source</Filter>
+      <Filter>Client\Object</Filter>
     </ClCompile>
     <ClCompile Include="Skybox.cpp">
-      <Filter>Client\Object\Source</Filter>
+      <Filter>Client\Object</Filter>
     </ClCompile>
-    <ClCompile Include="Terrain.cpp">
-      <Filter>Client\Object\Source</Filter>
+    <ClCompile Include="MissileObject.cpp">
+      <Filter>Client\Object</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Client\Object\Header</Filter>
+    <ClCompile Include="BillboardObjects.cpp">
+      <Filter>Client\Object</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>Client\Mesh\Source</Filter>
+    <ClCompile Include="BillboardObjectsShader.cpp">
+      <Filter>Client\Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="MapObjectShaders.cpp">
+      <Filter>Client\Shader</Filter>
     </ClCompile>
     <ClCompile Include="ParticleMesh.cpp">
-      <Filter>Client\Mesh\Source</Filter>
+      <Filter>Client\Mesh</Filter>
     </ClCompile>
-    <ClCompile Include="SkinMesh.cpp">
-      <Filter>Client\Mesh\Source</Filter>
+    <ClCompile Include="ParticleObject.cpp">
+      <Filter>Client\Object</Filter>
     </ClCompile>
-    <ClCompile Include="TerrainMesh.cpp">
-      <Filter>Client\Mesh\Source</Filter>
+    <ClCompile Include="ParticleShader.cpp">
+      <Filter>Client\Shader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

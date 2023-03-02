@@ -24,20 +24,6 @@ struct MouseInputVal {
 #define KEY_W         0x57
 #define KEY_Q         0x51
 #define KEY_E		  0x45
-
-
-struct CB_FRAMEWORK_INFO
-{
-	float					m_fCurrentTime = 0.0f;
-	float					m_fElapsedTime = 0.0f;
-	float					m_fSecondsPerFirework = 0.1f;
-	int						m_nFlareParticlesToEmit = 30;
-	XMFLOAT3				m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
-	int						m_nMaxFlareType2Particles = 15;
-};
-
-
-
 class CGameFramework
 {
 public:
@@ -68,21 +54,12 @@ public:
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
 
-	void CreateShaderVariables();
-	void ReleaseShaderVariables();
-	void UpdateShaderVariables();
-
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void ChangeScene(DWORD nMode);
 	DWORD						m_nMode = SCENE1STAGE;
 	GameSound gamesound;
-
-protected:
-	ID3D12Resource* m_pd3dcbFrameworkInfo = NULL;
-	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;
-
 #ifdef _WITH_DIRECT2D
 	void CreateDirect2DDevice();
 #endif
