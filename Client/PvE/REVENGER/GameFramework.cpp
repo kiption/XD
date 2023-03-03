@@ -321,7 +321,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		::GetCursorPos(&m_ptOldCursorPos);
 		break;
 	case WM_RBUTTONUP:
-	
+
 		if (m_nMode == SCENE2STAGE)
 		{
 			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
@@ -364,7 +364,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			ChangeScene(SCENE2STAGE);
 			break;
 		case VK_SPACE:
-			
+
 			break;
 		default:
 			break;
@@ -374,7 +374,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		switch (wParam)
 		{
 		case VK_SPACE:
-			
+
 			//if (m_nMode == SCENE1STAGE)((CAirplanePlayer*)m_pPlayer)->Firevalkan(NULL);
 			break;
 		default:
@@ -454,20 +454,20 @@ void CGameFramework::BuildObjects()
 {
 
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-	
-	
+
+
 	m_pScene = new SceneManager();
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
 	HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
-		
+
 	m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 	m_pCamera = m_pPlayer->GetCamera();
-	m_pScene->m_pPlayer->SetPosition(XMFLOAT3(500.0,200.0,500.0));
+	m_pScene->m_pPlayer->SetPosition(XMFLOAT3(500.0, 200.0, 500.0));
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
-	
+
 	CreateShaderVariables();
 
 	WaitForGpuComplete();
@@ -529,7 +529,7 @@ void CGameFramework::ProcessInput()
 			}
 		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
-				
+
 			if (m_nMode == SCENE2STAGE)
 			{
 			}
@@ -545,10 +545,10 @@ void CGameFramework::ProcessInput()
 			{
 			}
 			dwDirection |= DIR_LEFT;
-			
+
 			inputKeyValue += INPUT_KEY_A;//S
 			m_pCamera->SetTimeLag(0.05);
-			
+
 		}
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
@@ -564,7 +564,7 @@ void CGameFramework::ProcessInput()
 
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
 			inputKeyValue += INPUT_SPACEBAR;//S
-			
+
 		}
 
 		// Server
@@ -601,7 +601,7 @@ void CGameFramework::ProcessInput()
 
 				q_mouseInput.push(inputMouseValue);
 				//====
-				if (m_nMode==SCENE2STAGE)
+				if (m_nMode == SCENE2STAGE)
 				{
 					if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 						m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
@@ -625,7 +625,7 @@ void CGameFramework::AnimateObjects()
 
 
 	m_pPlayer->Animate(fTimeElapsed);
-	m_pPlayer->Animate(fTimeElapsed,NULL);
+	m_pPlayer->Animate(fTimeElapsed, NULL);
 }
 
 void CGameFramework::WaitForGpuComplete()
@@ -686,14 +686,14 @@ void CGameFramework::UpdateShaderVariables()
 
 }
 
-//#define _WITH_PLAYER_TOP
+#define _WITH_PLAYER_TOP
 
 float g_time = 0.0f;
 float g_reverse_time = 0.0f;
 void CGameFramework::FrameAdvance()
 {
 	SleepEx(1, TRUE);//Server
-	if (m_nMode==SCENE2STAGE)m_GameTimer.Tick(30.0f);
+	if (m_nMode == SCENE2STAGE)m_GameTimer.Tick(30.0f);
 	if (m_nMode != SCENE2STAGE) m_GameTimer.Tick(60.0f);
 
 	ProcessInput();
@@ -725,16 +725,19 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 	if (m_nMode != SCENE2STAGE)
 	{
-	m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
-	UpdateShaderVariables();
-
+		m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
+		UpdateShaderVariables();
 	}
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
 
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-#endif
 	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+#endif
+	m_pScene->RenderParticle(m_pd3dCommandList, m_pCamera);
+	::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	::ExecuteCommandList(m_pd3dCommandList, m_pd3dCommandQueue, m_pd3dFence, ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
+	m_pScene->OnPostRenderParticle();
 
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -765,7 +768,7 @@ void CGameFramework::FrameAdvance()
 	D2D_POINT_2F d2HpPoint = { 60.0f, 650.0f };
 	D2D_RECT_F d2HpRect = { 0.0f, 0.0f, m_currHp * 1.9, 45.0f };
 	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxGaussianBlur, &d2HpPoint, &d2HpRect);
-	
+
 
 #endif
 	D2D1_SIZE_F szRenderTarget = m_ppd2dRenderTargets[m_nSwapChainBufferIndex]->GetSize();
@@ -831,7 +834,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 
 			m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 			m_pScene = new Stage1();
-			if (m_pScene) ((Stage1 *)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 			HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((Stage1*)m_pScene)->m_pTerrain);
 			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 			m_pCamera = m_pPlayer->GetCamera();
@@ -939,7 +942,7 @@ void CGameFramework::CreateDirect2DDevice()
 
 	IWICBitmapDecoder* pwicBitmapDecoder;
 	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/green_button05.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-	IWICBitmapFrameDecode* pwicFrameDecode; 
+	IWICBitmapFrameDecode* pwicFrameDecode;
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -1009,7 +1012,7 @@ void CGameFramework::SetPosition_OtherPlayerObj(int id, XMFLOAT3 pos) {
 	m_pScene->m_ppHierarchicalGameObjects[id]->m_xmf4x4ToParent._41 = pos.x;
 	m_pScene->m_ppHierarchicalGameObjects[id]->m_xmf4x4ToParent._42 = pos.y;
 	m_pScene->m_ppHierarchicalGameObjects[id]->m_xmf4x4ToParent._43 = pos.z;
-	
+
 	/*if (m_nMode == SCENE2STAGE)
 	{
 		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._41 = pos.x;
@@ -1021,7 +1024,7 @@ void CGameFramework::SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOA
 	m_pScene->m_ppHierarchicalGameObjects[id]->SetUp(upVec);
 	m_pScene->m_ppHierarchicalGameObjects[id]->SetRight(rightVec);
 	m_pScene->m_ppHierarchicalGameObjects[id]->SetLook(lookVec);
-	m_pScene->m_ppHierarchicalGameObjects[id]->SetScale(1.0,1.0,1.0);
+	m_pScene->m_ppHierarchicalGameObjects[id]->SetScale(1.0, 1.0, 1.0);
 	//if (m_nMode == SCENE2STAGE)
 	//{
 	//	((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->SetUp(upVec);
@@ -1030,25 +1033,25 @@ void CGameFramework::SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOA
 	//}
 }
 void CGameFramework::Remove_OtherPlayerObj(int id) {
-	if (m_pScene->m_ppHierarchicalGameObjects[id] ) {
+	if (m_pScene->m_ppHierarchicalGameObjects[id]) {
 		m_pScene->m_ppHierarchicalGameObjects[id]->SetScale(0.0, 0.0, 0.0);
 	}
 }
 
 void CGameFramework::Create_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look)
 {
-	
+
 }
 
 void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3right, XMFLOAT3 xmf3up, XMFLOAT3 xmf3look)
 {
-	
+
 
 	m_pScene->m_ppBullets[id]->SetPosition(pos);
 	m_pScene->m_ppBullets[id]->SetRight(xmf3right);
 	m_pScene->m_ppBullets[id]->SetUp(xmf3up);
 	m_pScene->m_ppBullets[id]->SetLook(xmf3look);
-	
+
 }
 
 void CGameFramework::SetPosition_NPC(int id, XMFLOAT3 pos)
