@@ -151,9 +151,9 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pSkyBox->SetCurScene(SCENE1STAGE);
 
-	XMFLOAT3 xmf3Scale(10.0f, 4.0f, 10.0f);
+	XMFLOAT3 xmf3Scale(20.0f, 4.0f, 20.0f);
 	XMFLOAT3 xmf3Normal(1.0f, 1.0f, 1.0f);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/terrain033.raw"), 513, 513, xmf3Scale, xmf3Normal);
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf3Normal);
 	m_pTerrain->SetCurScene(SCENE1STAGE);
 
 
