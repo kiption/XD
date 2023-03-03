@@ -411,12 +411,12 @@ void Stage2::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 void Stage2::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	//SceneManager::UpdateShaderVariables(pd3dCommandList);
+	SceneManager::UpdateShaderVariables(pd3dCommandList);
 	::memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(LIGHT) * m_nLights);
 	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
 	::memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
 
-	if (m_pcbMappedMaterials) ::memcpy(m_pcbMappedMaterials, m_pMaterials, sizeof(MATERIALS));
+	//if (m_pcbMappedMaterials) ::memcpy(m_pcbMappedMaterials, m_pMaterials, sizeof(MATERIALS));
 }
 
 void Stage2::ReleaseShaderVariables()
