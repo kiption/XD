@@ -54,6 +54,8 @@ public:
 	char							m_pstrMeshName[64] = { 0 };
 	XMFLOAT3						m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3						m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
+public:
+	BoundingBox						m_xmBoundingBox;
 protected:
 	UINT							m_nType = 0x00;
 
@@ -106,6 +108,9 @@ public:
 	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) { }
 	virtual void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) { }
 	virtual void OnPostRender(int nPipelineState) { }
+	void CalculateBoundingBox(XMFLOAT3* pxmf3Points, UINT nStride);
+
+
 };
 
 class CStandardMesh : public CMesh

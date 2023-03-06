@@ -145,11 +145,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					else if (bullets_info[i].m_state == OBJ_ST_RUNNING) {	// Update
 						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
 
-						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(3.0, 3.0, 17.0);
+						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(4.0, 4.0, 18.0);
 						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(100.0,0.0,0.0);
 						gGameFramework.m_pScene->m_pLights[3].m_xmf3Position = XMFLOAT3(bullets_info[i].m_pos);
 						gGameFramework.m_pScene->m_pLights[3].m_xmf3Direction= XMFLOAT3(bullets_info[i].m_look_vec);
 						gGameFramework.m_pScene->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.6f, 0.4f, 1.0f);
+						gGameFramework.m_pScene->m_pLights[1].m_xmf4Emissive = XMFLOAT4(0.9f, 0.6f, 0.4f, 1.0f);
 						gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerPosition = bullets_info[i].m_pos;
 						gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerLook= my_info.m_look_vec;
 

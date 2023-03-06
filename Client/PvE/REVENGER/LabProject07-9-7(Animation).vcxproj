@@ -155,6 +155,7 @@
     <ClInclude Include="BillboardObjects.h" />
     <ClInclude Include="BillboardObjectsShader.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="IlluminateMesh.h" />
     <ClInclude Include="MapObjectShaders.h" />
     <ClInclude Include="MissileObject.h" />
     <ClInclude Include="Network.h" />
@@ -162,6 +163,7 @@
     <ClInclude Include="ParticleMesh.h" />
     <ClInclude Include="ParticleObject.h" />
     <ClInclude Include="ParticleShader.h" />
+    <ClInclude Include="ShadowShader.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Stage2.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
@@ -193,11 +195,13 @@
     <ClCompile Include="BillboardObjects.cpp" />
     <ClCompile Include="BillboardObjectsShader.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="IlluminateMesh.cpp" />
     <ClCompile Include="MapObjectShaders.cpp" />
     <ClCompile Include="MissileObject.cpp" />
     <ClCompile Include="ParticleMesh.cpp" />
     <ClCompile Include="ParticleObject.cpp" />
     <ClCompile Include="ParticleShader.cpp" />
+    <ClCompile Include="ShadowShader.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Stage2.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
@@ -254,6 +258,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VSStandard</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.1</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">VSStandard</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.1</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VSStandard</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VSStandard</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

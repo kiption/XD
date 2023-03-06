@@ -88,7 +88,7 @@ void Stage2::BuildDefaultLightsAndMaterials()
 	m_pLights[5].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 }
 
-void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle, ID3D12Resource* pd3dDepthStencilBuffer)
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -399,7 +399,7 @@ ID3D12RootSignature* Stage2::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 
 void Stage2::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	SceneManager::CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
 	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256ÀÇ ¹è¼ö
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
@@ -411,16 +411,17 @@ void Stage2::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 void Stage2::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	SceneManager::UpdateShaderVariables(pd3dCommandList);
+	
 	::memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(LIGHT) * m_nLights);
 	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
 	::memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
 
-	//if (m_pcbMappedMaterials) ::memcpy(m_pcbMappedMaterials, m_pMaterials, sizeof(MATERIALS));
+	::memcpy(m_pcbMappedMaterials, &m_pMaterials, sizeof(MATERIALS));
 }
 
 void Stage2::ReleaseShaderVariables()
 {
+
 	if (m_pd3dcbLights)
 	{
 		m_pd3dcbLights->Unmap(0, NULL);
@@ -431,7 +432,6 @@ void Stage2::ReleaseShaderVariables()
 		m_pd3dcbMaterials->Unmap(0, NULL);
 		m_pd3dcbMaterials->Release();
 	}
-	SceneManager::ReleaseShaderVariables();
 }
 
 void Stage2::ReleaseUploadBuffers()
@@ -526,7 +526,7 @@ bool Stage2::ProcessInput(UCHAR* pKeysBuffer)
 
 void Stage2::AnimateObjects(float fTimeElapsed)
 {
-	SceneManager::AnimateObjects(fTimeElapsed);
+	//SceneManager::AnimateObjects(fTimeElapsed);
 	m_fElapsedTime = fTimeElapsed;
 
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);

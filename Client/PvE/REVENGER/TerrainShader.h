@@ -12,3 +12,11 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
 };
+
+class CWaterShader : public CTerrainShader
+{
+public:
+	CWaterShader() {};
+	virtual ~CWaterShader() {};
+	virtual D3D12_BLEND_DESC CreateBlendState();
+};

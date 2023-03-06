@@ -9,7 +9,7 @@
 #define _WITH_LOCAL_VIEWER_HIGHLIGHTING
 #define _WITH_THETA_PHI_CONES
 #define _WITH_REFLECT
-
+#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
 struct LIGHT
 {
 	float4					m_cAmbient;
@@ -34,6 +34,10 @@ cbuffer cbLights : register(b4)
 	float4					gcGlobalAmbientLight;
 	int						gnLights;
 };
+
+Texture2D<float> gtxtDepthTextures[MAX_DEPTH_TEXTURES] : register(t19);
+SamplerComparisonState gssComparisonPCFShadow : register(s2);
+
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
 {
@@ -197,6 +201,48 @@ float4 Lightings(float3 vPosition, float3 vNormal,float4 vEmissive)
 	}
 	vEmissive += gMaterial.m_cEmissive;
 	cColor += vEmissive;
+	cColor += (gcGlobalAmbientLight * gMaterial.m_cAmbient);
+	cColor.a = gMaterial.m_cDiffuse.a;
+
+	return(cColor);
+}
+
+
+float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_LIGHTS])
+{
+	float3 vCameraPosition = float3(gvCameraPosition.x, gvCameraPosition.y, gvCameraPosition.z);
+	float3 vToCamera = normalize(vCameraPosition - vPosition);
+
+	float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	[unroll]
+	for (int i = 0; i < MAX_LIGHTS; i++)
+	{
+		if (gLights[i].m_bEnable)
+		{
+			float fShadowFactor = 1.0f;
+#ifdef _WITH_PCF_FILTERING
+			if (bShadow) fShadowFactor = Compute3x3ShadowFactor(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
+#else
+			if (bShadow) fShadowFactor = gtxtDepthTextures[i].SampleCmpLevelZero(gssComparisonPCFShadow, uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w).r;
+#endif
+
+			if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
+			{
+				cColor += DirectionalLight(i, vNormal, vToCamera) * fShadowFactor;
+			}
+			else if (gLights[i].m_nType == POINT_LIGHT)
+			{
+				cColor += PointLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
+			}
+			else if (gLights[i].m_nType == SPOT_LIGHT)
+			{
+				cColor += SpotLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
+				//				cColor += SpotLight(i, vPosition, vNormal, vToCamera);
+			}
+			cColor += gLights[i].m_cAmbient * gMaterial.m_cAmbient;;
+		}
+	}
+
 	cColor += (gcGlobalAmbientLight * gMaterial.m_cAmbient);
 	cColor.a = gMaterial.m_cDiffuse.a;
 

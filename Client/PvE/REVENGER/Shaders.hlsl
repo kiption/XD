@@ -1,4 +1,4 @@
-
+#define MAX_LIGHTS 16
 struct MATERIAL
 {
 	float4					m_cAmbient;
@@ -47,6 +47,23 @@ cbuffer cbStreamGameObjectInfo : register(b9)
 	matrix		gmtxWorld : packoffset(c0);
 
 };
+
+struct CB_TOOBJECTSPACE
+{
+	matrix		mtxToTexture;
+	float4		f4Position;
+};
+
+cbuffer cbProjectorSpace : register(b12)
+{
+	CB_TOOBJECTSPACE gcbToProjectorSpaces[MAX_LIGHTS];
+};
+//
+cbuffer cbToLightSpace : register(b13)
+{
+	CB_TOOBJECTSPACE gcbToLightSpaces[MAX_LIGHTS];
+};
+
 #include "Light.hlsl"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -236,6 +253,8 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+
+
 Texture2D gtxtTerrainBaseTexture : register(t1);
 Texture2D gtxtTerrainDetailTexture : register(t2);
 
@@ -312,6 +331,7 @@ SamplerState gssClamp : register(s1);
 Texture2D<float4> gtxtParticleTexture : register(t15);
 Buffer<float4> gRandomBuffer : register(t16);
 Buffer<float4> gRandomSphereBuffer : register(t17);
+
 float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtSkyCubeTexture.Sample(gssClamp, input.positionL);
@@ -551,9 +571,9 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
 	else if ((particle.type == PARTICLE_TYPE_FLARE01) || (particle.type == PARTICLE_TYPE_FLARE03)) OutputEmberParticles(particle, output);
 	else if (particle.type == PARTICLE_TYPE_FLARE02) GenerateEmberParticles(particle, output);
 }
-//
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////
+
 struct VS_PARTICLE_DRAW_OUTPUT
 {
 	float3 position : POSITION;
@@ -608,7 +628,7 @@ void GSParticleDraw(point VS_PARTICLE_DRAW_OUTPUT input[1], inout TriangleStream
 	}
 	outputStream.RestartStrip();
 }
-//
+
 float4 PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtParticleTexture.Sample(gssWrap, input.uv);
@@ -618,5 +638,180 @@ float4 PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) : SV_TARGET
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+struct VS_LIGHTING_INPUT
+{
+	float3 position : POSITION;
+	float3 normal : NORMAL;
+};
+
+struct VS_LIGHTING_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float3 positionW : POSITION;
+	float3 normalW : NORMAL;
+};
+
+VS_LIGHTING_OUTPUT VSLighting(VS_LIGHTING_INPUT input)
+{
+	VS_LIGHTING_OUTPUT output;
+
+	output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
+	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
+	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+
+	return(output);
+}
+
+float4 PSLighting(VS_LIGHTING_OUTPUT input) : SV_TARGET
+{
+	input.normalW = normalize(input.normalW);
+	float4 uvs[MAX_LIGHTS];
+	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
+
+	//	return(cIllumination);
+		return(float4(input.normalW * 0.5f + 0.5f, 1.0f));
+}
+struct VS_CIRCULAR_SHADOW_INPUT
+{
+	float3 center : POSITION;
+	float2 size : TEXCOORD;
+};
+ 
+VS_CIRCULAR_SHADOW_INPUT VSCircularShadow(VS_CIRCULAR_SHADOW_INPUT input)
+{
+	return(input);
+}
+struct GS_CIRCULAR_SHADOW_GEOMETRY_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float2 uv : TEXCOORD;
+};
+static float2 pf2UVs[4] = { float2(0.0f,1.0f), float2(0.0f,0.0f), float2(1.0f,1.0f), float2(1.0f,0.0f) };
+Buffer<float4> gtxtCircularShadowTexture : register(t18);
+
+void GSCircularShadow(point VS_CIRCULAR_SHADOW_INPUT input[1], inout TriangleStream<GS_CIRCULAR_SHADOW_GEOMETRY_OUTPUT> outStream)
+{
+	float fHalfWidth = input[0].size.x * 0.5f;
+	float fHalfDepth = input[0].size.y * 0.5f;
+
+	float3 f3Right = float3(1.0f, 0.0f, 0.0f);
+	float3 f3Look = float3(0.0f, 0.0f, 1.0f);
+
+	float4 pf4Vertices[4];
+	pf4Vertices[0] = float4(input[0].center.xyz - (fHalfWidth * f3Right) - (fHalfDepth * f3Look), 1.0f);
+	pf4Vertices[1] = float4(input[0].center.xyz - (fHalfWidth * f3Right) + (fHalfDepth * f3Look), 1.0f);
+	pf4Vertices[2] = float4(input[0].center.xyz + (fHalfWidth * f3Right) - (fHalfDepth * f3Look), 1.0f);
+	pf4Vertices[3] = float4(input[0].center.xyz + (fHalfWidth * f3Right) + (fHalfDepth * f3Look), 1.0f);
+
+	GS_CIRCULAR_SHADOW_GEOMETRY_OUTPUT output;
+	for (int i = 0; i < 4; i++)
+	{
+		output.position = mul(mul(pf4Vertices[i], gmtxView), gmtxProjection);
+		output.uv = pf2UVs[i];
+
+		outStream.Append(output);
+	}
+}
+
+VS_TEXTURED_OUTPUT VSTextureToViewport(uint nVertexID : SV_VertexID)
+{
+	VS_TEXTURED_OUTPUT output = (VS_TEXTURED_OUTPUT)0;
+
+	if (nVertexID == 0) { output.position = float4(-1.0f, +1.0f, 0.0f, 1.0f); output.uv = float2(0.0f, 0.0f); }
+	if (nVertexID == 1) { output.position = float4(+1.0f, +1.0f, 0.0f, 1.0f); output.uv = float2(1.0f, 0.0f); }
+	if (nVertexID == 2) { output.position = float4(+1.0f, -1.0f, 0.0f, 1.0f); output.uv = float2(1.0f, 1.0f); }
+	if (nVertexID == 3) { output.position = float4(-1.0f, +1.0f, 0.0f, 1.0f); output.uv = float2(0.0f, 0.0f); }
+	if (nVertexID == 4) { output.position = float4(+1.0f, -1.0f, 0.0f, 1.0f); output.uv = float2(1.0f, 1.0f); }
+	if (nVertexID == 5) { output.position = float4(-1.0f, -1.0f, 0.0f, 1.0f); output.uv = float2(0.0f, 1.0f); }
+
+	return(output);
+}
+
+float4 GetColorFromDepth(float fDepth)
+{
+	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	if (fDepth < 0.00625f) cColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
+	else if (fDepth < 0.0125f) cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
+	else if (fDepth < 0.025f) cColor = float4(0.0f, 0.0f, 1.0f, 1.0f);
+	else if (fDepth < 0.05f) cColor = float4(1.0f, 1.0f, 0.0f, 1.0f);
+	else if (fDepth < 0.075f) cColor = float4(0.0f, 1.0f, 1.0f, 1.0f);
+	else if (fDepth < 0.1f) cColor = float4(1.0f, 0.5f, 0.5f, 1.0f);
+	else if (fDepth < 0.4f) cColor = float4(0.5f, 1.0f, 1.0f, 1.0f);
+	else if (fDepth < 0.6f) cColor = float4(1.0f, 0.0f, 1.0f, 1.0f);
+	else if (fDepth < 0.8f) cColor = float4(0.5f, 0.5f, 1.0f, 1.0f);
+	else if (fDepth < 0.9f) cColor = float4(0.5f, 1.0f, 0.5f, 1.0f);
+	else if (fDepth < 0.95f) cColor = float4(0.5f, 0.0f, 0.5f, 1.0f);
+	else if (fDepth < 0.99f) cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
+	else if (fDepth < 0.999f) cColor = float4(1.0f, 0.0f, 1.0f, 1.0f);
+	else if (fDepth == 1.0f) cColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
+	else if (fDepth > 1.0f) cColor = float4(0.0f, 0.0f, 0.5f, 1.0f);
+	else cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	return(cColor);
+}
+//
+SamplerState gssBorder : register(s3);
+//
+float4 PSTextureToViewport(VS_TEXTURED_OUTPUT input) : SV_Target
+{
+	float4 cColor = gtxtDepthTextures[1].SampleLevel(gssBorder, input.uv, 0).r * 1.0f;
+
+	//	cColor = GetColorFromDepth(cColor.r);
+
+	return(cColor);
+}
+
+struct PS_DEPTH_OUTPUT
+{
+	float fzPosition : SV_Target;
+	float fDepth : SV_Depth;
+};
+
+PS_DEPTH_OUTPUT PSDepthWriteShader(VS_LIGHTING_OUTPUT input)
+{
+	PS_DEPTH_OUTPUT output;
+
+	output.fzPosition = input.position.z;
+	output.fDepth = input.position.z;
+
+	return(output);
+}
 
 
+////////////////////////////////////////////////////////////////
+struct VS_SHADOW_MAP_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float3 positionW : POSITION;
+	float3 normalW : NORMAL;
+
+	float4 uvs[MAX_LIGHTS] : TEXCOORD0;
+};
+
+VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
+{
+	VS_SHADOW_MAP_OUTPUT output = (VS_SHADOW_MAP_OUTPUT)0;
+
+	float4 positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
+	output.positionW = positionW.xyz;
+	output.position = mul(mul(positionW, gmtxView), gmtxProjection);
+	output.normalW = mul(float4(input.normal, 0.0f), gmtxGameObject).xyz;
+
+	for (int i = 0; i < MAX_LIGHTS; i++)
+	{
+		if (gcbToLightSpaces[i].f4Position.w != 0.0f) output.uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
+	}
+
+	return(output);
+}
+
+float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
+{
+	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
+
+	//	cIllumination = saturate(gtxtDepthTextures[3].SampleLevel(gssProjector, f3uvw.xy, 0).r);
+
+		return(cIllumination);
+}

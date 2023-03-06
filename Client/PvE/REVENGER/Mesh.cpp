@@ -76,6 +76,12 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
 	}
 }
 
+void CMesh::CalculateBoundingBox(XMFLOAT3* pxmf3Points, UINT nStride)
+{
+	BoundingBox::CreateFromPoints(m_xmBoundingBox, m_nVertices, pxmf3Points, nStride);
+
+}
+
 void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);

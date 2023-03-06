@@ -60,7 +60,7 @@ void SceneManager::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandL
 	::memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
 	
 	
-	//if (m_pcbMappedMaterials) ::memcpy(m_pcbMappedMaterials, m_pMaterials, sizeof(MATERIALS));
+	::memcpy(m_pcbMappedMaterials, &m_pMaterials, sizeof(MATERIALS));
 
 
 }
@@ -77,6 +77,10 @@ void SceneManager::ReleaseShaderVariables()
 		m_pd3dcbMaterials->Unmap(0, NULL);
 		m_pd3dcbMaterials->Release();
 	}
+
+	//if (m_pUseWaterMove) m_pUseWaterMove->ReleaseShaderVariables();
+
+
 }
 
 void SceneManager::BuildDefaultLightsAndMaterials()
@@ -85,7 +89,7 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 	m_pLights = new LIGHT[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
-	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
+	m_xmf4GlobalAmbient = XMFLOAT4(0.015f, 0.015f, 0.015f, 1.0f);
 
 	m_pLights[0].m_bEnable = true;
 	m_pLights[0].m_nType = POINT_LIGHT;
@@ -114,7 +118,7 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 	m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	m_pLights[2].m_xmf4Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 0.0f);
-	m_pLights[2].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
+	m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.0f);
 
 	m_pLights[3].m_bEnable = true;
 	m_pLights[3].m_nType = POINT_LIGHT;
@@ -138,7 +142,7 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 	m_pLights[4].m_fTheta = (float)cos(XMConvertToRadians(22.0f));
 }
 
-void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle, ID3D12Resource* pd3dDepthStencilBuffer)
 {
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
@@ -156,6 +160,10 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf3Normal);
 	m_pTerrain->SetCurScene(SCENE1STAGE);
 
+	XMFLOAT3 xmf4ScaleW(18.0f, 1.5f, 18.0);
+	m_pUseWaterMove = new CUseWaterMoveTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/waterterrain8bit.raw"), 257, 257, 8, 8, xmf4ScaleW, xmf3Normal);
+	m_pUseWaterMove->SetPosition(0.0, 50.0f, 0.0);
+	m_pUseWaterMove->SetCurScene(SCENE1STAGE);
 
 	m_nHierarchicalGameObjects = 0;
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
@@ -234,6 +242,22 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	m_ppParticleObjects[0] = new CParticleObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
 	XMFLOAT3(1955.0, 620.0, 1933.0), XMFLOAT3(0.0f, 65.0f, 0.0f), 0.0f, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(10.0f, 10.0f), MAX_PARTICLES);
 
+	//m_nShaders = 1;
+	//m_ppShaders = new CShader * [m_nShaders];
+	//CObjectsShader* pObjectShader = new CObjectsShader();
+	//pObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT);
+	//pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	//m_xmBoundingBox = pObjectShader->CalculateBoundingBox();
+	//m_ppShaders[0] = pObjectShader;
+
+	//m_pDepthRenderShader = new CDepthRenderShader(pObjectShader, m_pcbMappedLights->m_pLights);
+	//DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
+	//m_pDepthRenderShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT);
+	//m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+
+	//m_pShadowShader = new CShadowMapShader(pObjectShader);
+	//m_pShadowShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT);
+	//m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
 	gamesound.SpeakMusic();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -277,9 +301,21 @@ void SceneManager::ReleaseObjects()
 		}
 		delete[] m_ppShaders;
 	}
+	if (m_pDepthRenderShader)
+	{
+		m_pDepthRenderShader->ReleaseShaderVariables();
+		m_pDepthRenderShader->ReleaseObjects();
+		m_pDepthRenderShader->Release();
+	}
+	if (m_pShadowShader)
+	{
+		m_pShadowShader->ReleaseShaderVariables();
+		m_pShadowShader->ReleaseObjects();
+		m_pShadowShader->Release();
+	}
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
-
+	if (m_pUseWaterMove) delete m_pUseWaterMove;
 	if (m_ppHierarchicalGameObjects)
 	{
 		for (int i = 0; i < m_nHierarchicalGameObjects; i++) if (m_ppHierarchicalGameObjects[i]) m_ppHierarchicalGameObjects[i]->Release();
@@ -299,7 +335,7 @@ ID3D12RootSignature* SceneManager::CreateGraphicsRootSignature(ID3D12Device* pd3
 {
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[15];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[18];
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 1;
@@ -391,7 +427,25 @@ ID3D12RootSignature* SceneManager::CreateGraphicsRootSignature(ID3D12Device* pd3
 	pd3dDescriptorRanges[14].RegisterSpace = 0;
 	pd3dDescriptorRanges[14].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[22];
+	pd3dDescriptorRanges[15].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[15].NumDescriptors = MAX_DEPTH_TEXTURES;
+	pd3dDescriptorRanges[15].BaseShaderRegister = 18; //t18~ (18+MAX LIGHT): Depth Buffer
+	pd3dDescriptorRanges[15].RegisterSpace = 0;
+	pd3dDescriptorRanges[15].OffsetInDescriptorsFromTableStart = 0;
+
+	pd3dDescriptorRanges[16].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+	pd3dDescriptorRanges[16].NumDescriptors = 1;
+	pd3dDescriptorRanges[16].BaseShaderRegister = 12;	//ToProjector b12
+	pd3dDescriptorRanges[16].RegisterSpace = 0;
+	pd3dDescriptorRanges[16].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	pd3dDescriptorRanges[17].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+	pd3dDescriptorRanges[17].NumDescriptors = 1;
+	pd3dDescriptorRanges[17].BaseShaderRegister = 13;	//ToLight b13
+	pd3dDescriptorRanges[17].RegisterSpace = 0;
+	pd3dDescriptorRanges[17].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[25];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; //Camera
@@ -504,7 +558,22 @@ ID3D12RootSignature* SceneManager::CreateGraphicsRootSignature(ID3D12Device* pd3
 	pd3dRootParameters[21].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[21].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];
+	pd3dRootParameters[22].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[22].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[22].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[15]; //Depth Buffer
+	pd3dRootParameters[22].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	pd3dRootParameters[23].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[23].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[23].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[16]); //ToProjector
+	pd3dRootParameters[23].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[24].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[24].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[24].DescriptorTable.pDescriptorRanges = &(pd3dDescriptorRanges[17]); //ToLight
+	pd3dRootParameters[24].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[4];
 
 	pd3dSamplerDescs[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -531,6 +600,35 @@ ID3D12RootSignature* SceneManager::CreateGraphicsRootSignature(ID3D12Device* pd3
 	pd3dSamplerDescs[1].ShaderRegister = 1;
 	pd3dSamplerDescs[1].RegisterSpace = 0;
 	pd3dSamplerDescs[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dSamplerDescs[2].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	pd3dSamplerDescs[2].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[2].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[2].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[2].MipLODBias = 0.0f;
+	pd3dSamplerDescs[2].MaxAnisotropy = 1;
+	pd3dSamplerDescs[2].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL; //D3D12_COMPARISON_FUNC_LESS
+	pd3dSamplerDescs[2].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE; // D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+	pd3dSamplerDescs[2].MinLOD = 0;
+	pd3dSamplerDescs[2].MaxLOD = D3D12_FLOAT32_MAX;
+	pd3dSamplerDescs[2].ShaderRegister = 2;
+	pd3dSamplerDescs[2].RegisterSpace = 0;
+	pd3dSamplerDescs[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	pd3dSamplerDescs[3].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	pd3dSamplerDescs[3].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[3].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[3].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[3].MipLODBias = 0.0f;
+	pd3dSamplerDescs[3].MaxAnisotropy = 1;
+	pd3dSamplerDescs[3].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	pd3dSamplerDescs[3].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+	pd3dSamplerDescs[3].MinLOD = 0;
+	pd3dSamplerDescs[3].MaxLOD = D3D12_FLOAT32_MAX;
+	pd3dSamplerDescs[3].ShaderRegister = 3;
+	pd3dSamplerDescs[3].RegisterSpace = 0;
+	pd3dSamplerDescs[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = 
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_ALLOW_STREAM_OUTPUT
@@ -568,6 +666,7 @@ void SceneManager::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++) if (m_ppHierarchicalGameObjects[i]) m_ppHierarchicalGameObjects[i]->Animate(fTimeElapsed);
+	m_pUseWaterMove->Animate(fTimeElapsed);
 
 	/*for (int i = 0; i < m_ppMapShaders[0]->m_ppObjects[0]->m_nMeshes; i++)
 	{
@@ -610,6 +709,8 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
+	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
+
 	UpdateShaderVariables(pd3dCommandList);
 
 	//D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
@@ -621,6 +722,7 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->Render(pd3dCommandList, pCamera);
+	if (m_pUseWaterMove) m_pUseWaterMove->Render(pd3dCommandList, pCamera);
 
 
 	//if (m_pBulletEffect) m_pBulletEffect->Render(pd3dCommandList, pCamera);
@@ -641,14 +743,22 @@ void SceneManager::ReleaseUploadBuffers()
 {
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
-
-	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
+	if (m_pUseWaterMove) m_pUseWaterMove->ReleaseUploadBuffers();
 	//for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) m_ppBullets[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nBillboardShaders; i++) m_pBillboardShader[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nMapShaders; i++) m_ppMapShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++) m_ppHierarchicalGameObjects[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nParticleObjects; i++) m_ppParticleObjects[i]->ReleaseUploadBuffers();
 
+	//for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
+	//if (m_pShadowShader) m_pShadowShader->ReleaseUploadBuffers();
+	//if (m_pDepthRenderShader) m_pDepthRenderShader->ReleaseUploadBuffers();
+
+}
+
+void SceneManager::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	//m_pDepthRenderShader->PrepareShadowMap(pd3dCommandList);
 }
 
 void SceneManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)

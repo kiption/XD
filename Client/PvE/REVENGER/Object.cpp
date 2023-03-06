@@ -137,6 +137,8 @@ ID3D12Resource* CTexture::CreateTexture(ID3D12Device* pd3dDevice, ID3D12Graphics
 	return(m_ppd3dTextures[nIndex]);
 }
 
+
+
 D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetShaderResourceViewDesc(int nIndex)
 {
 	ID3D12Resource* pShaderResource = GetResource(nIndex);
@@ -920,7 +922,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
-	//OnPrepareRender();
+	OnPrepareRender();
 	
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 	if (m_pMesh)
@@ -1044,6 +1046,14 @@ void CGameObject::SetScale(float x, float y, float z)
 	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
 
 	UpdateTransform(NULL);
+}
+
+void CGameObject::CalculateBoundingBox()
+{
+	m_xmBoundingBox = m_pMesh->m_xmBoundingBox;
+	/*for (int i = 1; i < m_nMeshes; i++)*/BoundingBox::CreateMerged(m_xmBoundingBox, m_xmBoundingBox, m_pMesh->m_xmBoundingBox);
+
+	m_xmBoundingBox.Transform(m_xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
 }
 
 XMFLOAT3 CGameObject::GetPosition()

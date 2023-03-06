@@ -275,7 +275,8 @@ void CGameFramework::CreateDepthStencilView()
 	d3dDepthStencilViewDesc.Flags = D3D12_DSV_FLAG_NONE;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	m_pd3dDevice->CreateDepthStencilView(m_pd3dDepthStencilBuffer, &d3dDepthStencilViewDesc, d3dDsvCPUDescriptorHandle);
+	//m_pd3dDevice->CreateDepthStencilView(m_pd3dDepthStencilBuffer, &d3dDepthStencilViewDesc, d3dDsvCPUDescriptorHandle);
+	m_pd3dDevice->CreateDepthStencilView(m_pd3dDepthStencilBuffer, NULL, d3dDsvCPUDescriptorHandle);
 }
 
 void CGameFramework::ChangeSwapChainState()
@@ -455,9 +456,10 @@ void CGameFramework::BuildObjects()
 
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	d3dRtvCPUDescriptorHandle.ptr += (::gnRtvDescriptorIncrementSize * m_nSwapChainBuffers);
 	m_pScene = new SceneManager();
-	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
 
 	HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
 
@@ -686,7 +688,7 @@ void CGameFramework::UpdateShaderVariables()
 
 }
 
-#define _WITH_PLAYER_TOP
+//#define _WITH_PLAYER_TOP
 
 float g_time = 0.0f;
 float g_reverse_time = 0.0f;
@@ -699,6 +701,7 @@ void CGameFramework::FrameAdvance()
 	ProcessInput();
 
 	AnimateObjects();
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
@@ -719,21 +722,22 @@ void CGameFramework::FrameAdvance()
 	float pfClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
 	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle,/* pfClearColor */ Colors::Azure, 0, NULL);
 
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 	if (m_nMode != SCENE2STAGE)
 	{
 		m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
+		m_pScene->OnPreRender(m_pd3dCommandList);
+
 		UpdateShaderVariables();
 	}
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
 
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 #endif
+	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 	if (m_nMode != SCENE2STAGE)
 	{
 		m_pScene->RenderParticle(m_pd3dCommandList, m_pCamera);
@@ -824,6 +828,8 @@ void CGameFramework::FrameAdvance()
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	d3dRtvCPUDescriptorHandle.ptr += (::gnRtvDescriptorIncrementSize * m_nSwapChainBuffers);
 	if (nMode != m_nMode)
 	{
 		ReleaseObjects();
@@ -832,23 +838,24 @@ void CGameFramework::ChangeScene(DWORD nMode)
 		{
 		case SCENE1STAGE:
 		{
+
 			m_nMode = nMode;
 
-			m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-			m_pScene = new Stage1();
-			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
-			HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((Stage1*)m_pScene)->m_pTerrain);
-			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
-			m_pCamera = m_pPlayer->GetCamera();
-			m_pScene->SetCurScene(SCENE1STAGE);
-			break;
+			//m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
+			//m_pScene = new Stage1();
+			//if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
+			//HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((Stage1*)m_pScene)->m_pTerrain);
+			//m_pScene->m_pPlayer = m_pPlayer = pPlayer;
+			//m_pCamera = m_pPlayer->GetCamera();
+			//m_pScene->SetCurScene(SCENE1STAGE);
+			//break;
 		}
 		case SCENE2STAGE:
 		{
 			m_nMode = nMode;
 			gamesound.m_bStopSound = true;
 			m_pScene = new Stage2();
-			if (m_pScene) ((Stage2*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+			if (m_pScene) ((Stage2*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
 			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((Stage2*)m_pScene)->m_pTerrain);
 			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 			m_pCamera = m_pPlayer->GetCamera();

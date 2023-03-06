@@ -12,6 +12,7 @@
 #include "SkyboxShader.h"
 #include "TerrainShader.h"
 #include "MapObjectShaders.h"
+#include "ShadowShader.h"
 #include "Player.h"
 #include "HumanPlayer.h"
 #include "HelicopterPlayer.h"
@@ -19,15 +20,19 @@
 #include "MissileObject.h"
 #include "ParticleObject.h"
 #include "GameSound.h"
-#define MAX_LIGHTS						16 
-#define POINT_LIGHT						1
-#define SPOT_LIGHT						2
-#define DIRECTIONAL_LIGHT				3
 
+//struct MATERIAL
+//{
+//	XMFLOAT4						m_xmf4Ambient;
+//	XMFLOAT4						m_xmf4Diffuse;
+//	XMFLOAT4						m_xmf4Specular; //(r,g,b,a=power)
+//	XMFLOAT4						m_xmf4Emissive;
+//};
 struct MATERIALS
 {
 	EXPLOSIONMATERIAL				m_pReflections[MAX_MATERIALS];
 };
+
 struct LIGHT
 {
 	XMFLOAT4							m_xmf4Ambient;
@@ -64,7 +69,8 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 	virtual void BuildDefaultLightsAndMaterials();
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle, ID3D12Resource* pd3dDepthStencilBuffer);
+
 	virtual void ReleaseObjects();
 	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	ID3D12RootSignature* GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
@@ -74,6 +80,7 @@ public:
 	
 	virtual void ReleaseUploadBuffers();
 
+	void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void OnPostRenderParticle();
@@ -86,6 +93,7 @@ public:
 	int							m_nParticleObjects;
 	ID3D12Resource* m_pd3dcbMaterials = NULL;
 	EXPLOSIONMATERIAL* m_pcbMappedMaterials = NULL;
+
 	MATERIALS* m_pMaterials = NULL;
 public:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
@@ -124,6 +132,11 @@ public:
 	CBulletObject* m_ppBullets[BULLETS];
 	CPlayer* m_pPlayer = NULL;
 
+public:
+	CShadowMapShader* m_pShadowShader = NULL;
+	CDepthRenderShader* m_pDepthRenderShader = NULL;
+	BoundingBox						m_xmBoundingBox;
+public:
 	float								m_fElapsedTime = 0.0f;
 
 	int									m_nGameObjects = 0;
@@ -135,9 +148,10 @@ public:
 	XMFLOAT3							m_xmf3RotatePosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	int									m_nShaders = 0;
-	CStandardObjectsShader** m_ppShaders = NULL;
+	CShader** m_ppShaders = NULL;
 	CBulletEffectShader* m_pBulletEffect = NULL;
 	ValkanEffectShader* m_pValkanEffect = NULL;
+	CUseWaterMoveTerrain* m_pUseWaterMove = NULL;
 	int									m_nMapShaders = 0;
 	int									m_nStageMapShaders = 0;
 	CMapObjectShader** m_ppMapShaders = NULL;
@@ -149,6 +163,7 @@ public:
 	BillboardShader** m_pBillboardShader = NULL;
 	int									m_nLights = 0;
 	LIGHT* m_pLights = NULL;
+	
 	
 	XMFLOAT4							m_xmf4GlobalAmbient;
 

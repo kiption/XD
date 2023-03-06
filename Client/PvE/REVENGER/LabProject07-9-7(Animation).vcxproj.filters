@@ -175,6 +175,12 @@
     <ClInclude Include="TerrainMesh.h">
       <Filter>Client\Mesh\Header</Filter>
     </ClInclude>
+    <ClInclude Include="ShadowShader.h">
+      <Filter>Client\Shader\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="IlluminateMesh.h">
+      <Filter>Client\Mesh\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSound.cpp">
@@ -277,6 +283,12 @@
       <Filter>Client\Mesh\Source</Filter>
     </ClCompile>
     <ClCompile Include="TerrainMesh.cpp">
+      <Filter>Client\Mesh\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowShader.cpp">
+      <Filter>Client\Shader\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="IlluminateMesh.cpp">
       <Filter>Client\Mesh\Source</Filter>
     </ClCompile>
   </ItemGroup>
