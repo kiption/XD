@@ -97,18 +97,15 @@ void processPacket(char* ptr)
 	case SC_LOGIN_INFO:
 	{
 		SC_LOGIN_INFO_PACKET* recv_packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(ptr);
+		// Player 초기정보 설정
 		my_id = recv_packet->id;
-		// Player 초기 위치 설정
 		my_info.m_id = recv_packet->id;
 		my_info.m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-
 		my_info.m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 		my_info.m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 		my_info.m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
 
 		my_info.m_state = OBJ_ST_RUNNING;
-		cout << "Init My Info - id: " << my_info.m_id << ", Pos(x: " << my_info.m_pos.x << ", y : " << my_info.m_pos.y << ", z : " << my_info.m_pos.z << ")." << endl;
-
 		break;
 	}// SC_LOGIN_INFO case end
 	case SC_ADD_OBJECT:
@@ -126,26 +123,7 @@ void processPacket(char* ptr)
 				other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 				other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 				other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-
 				other_players[recv_id].m_state = OBJ_ST_RUNNING;
-
-				cout << "Init New Player's Info - id: " << other_players[recv_id].m_id
-					<< ", Pos(x: " << other_players[recv_id].m_pos.x
-					<< ", y : " << other_players[recv_id].m_pos.y
-					<< ", z : " << other_players[recv_id].m_pos.z << ")." << endl;
-			}
-			else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {	// NPC 추가
-				int npc_id = recv_id - MAX_USER;
-
-				npcs_info[npc_id].m_id = recv_id;
-				npcs_info[npc_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-				npcs_info[npc_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-				npcs_info[npc_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-				npcs_info[npc_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-
-				npcs_info[npc_id].m_state = OBJ_ST_RUNNING;
-				cout << "Init New NPC's Info - id: " << npcs_info[npc_id].m_id
-					<< ", Pos(x: " << npcs_info[npc_id].m_pos.x << ", y : " << npcs_info[npc_id].m_pos.y << ", z : " << npcs_info[npc_id].m_pos.z << ")." << endl;
 			}
 			else {
 				cout << "Exceed Max User." << endl;
@@ -159,12 +137,7 @@ void processPacket(char* ptr)
 			bullets_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 			bullets_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 			bullets_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-
 			bullets_info[recv_id].m_state = OBJ_ST_RUNNING;
-			cout << "Create New Bullet - id: " << bullets_info[recv_id].m_id
-				<< ", Pos(x: " << bullets_info[recv_id].m_pos.x << ", y : " << bullets_info[recv_id].m_pos.y << ", z : " << bullets_info[recv_id].m_pos.z << ")." << endl;
-		
-		
 		}
 		// 3. Add NPC (Helicopter)
 		else if (recv_packet->target == TARGET_NPC) {
@@ -173,10 +146,7 @@ void processPacket(char* ptr)
 			npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 			npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 			npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-
 			npcs_info[recv_id].m_state = OBJ_ST_RUNNING;
-			cout << "Create New Bullet - id: " << npcs_info[recv_id].m_id
-				<< ", Pos(x: " << npcs_info[recv_id].m_pos.x << ", y : " << npcs_info[recv_id].m_pos.y << ", z : " << npcs_info[recv_id].m_pos.z << ")." << endl;
 		}
 		else {
 			cout << "[ADD ERROR] Unknown Target!" << endl;
@@ -191,30 +161,19 @@ void processPacket(char* ptr)
 		// 1. Move Player
 		if (recv_packet->target == TARGET_PLAYER) {
 			if (recv_id == my_info.m_id) {
-				// Player 이동
-				my_info.m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-				cout << "My object moves to (" << my_info.m_pos.x << ", " << my_info.m_pos.y << ", " << my_info.m_pos.z << ")." << endl;
+				my_info.m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };						// Player Object 이동
 			}
 			else if (0 <= recv_id && recv_id < MAX_USER && recv_id != my_info.m_id) {
-				// 상대 Object 이동
-				other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-				cout << "Player[" << recv_id << "]'s object moves to("
-					<< other_players[recv_id].m_pos.x << ", " << other_players[recv_id].m_pos.y << ", " << other_players[recv_id].m_pos.z << ")." << endl;
-			}
-			else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
-				// Npc 이동
-				int npc_id = recv_id - MAX_USER;
-
-				npcs_info[npc_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-				cout << "NPC[" << npc_id << "]'s object moves to("
-					<< npcs_info[npc_id].m_pos.x << ", " << npcs_info[npc_id].m_pos.y << ", " << npcs_info[npc_id].m_pos.z << ")." << endl;
+				other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };		// 상대방Players Object 이동
 			}
 		}
 		// 2. Move Bullet
 		else if (recv_packet->target == TARGET_BULLET) {
 			bullets_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-			cout << "Bullet[" << recv_id << "] object moves to("
-				<< bullets_info[recv_id].m_pos.x << ", " << bullets_info[recv_id].m_pos.y << ", " << bullets_info[recv_id].m_pos.z << ")." << endl;
+		}
+		// 3. Move Npc
+		else if (recv_packet->target == TARGET_NPC) {
+			npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 		}
 		else {
 			cout << "[MOVE ERROR] Unknown Target!" << endl;
@@ -234,26 +193,19 @@ void processPacket(char* ptr)
 				my_info.m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 				my_info.m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 				my_info.m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-				cout << "My object is rotated, LookVec:(" << my_info.m_look_vec.x << ", " << my_info.m_look_vec.y << ", " << my_info.m_look_vec.z << ")." << endl;
 			}
 			else if (0 <= recv_id && recv_id < MAX_USER) {
 				// 상대 Object 회전
 				other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 				other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 				other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-				cout << "Player[" << recv_id << "]'s object is rotated, lookVec:"
-					<< other_players[recv_id].m_look_vec.x << ", " << other_players[recv_id].m_look_vec.y << ", " << other_players[recv_id].m_look_vec.z << ")." << endl;
 			}
-			else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
-				// Npc 회전
-				int npc_id = recv_id - MAX_USER;
-
-				npcs_info[npc_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-				npcs_info[npc_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-				npcs_info[npc_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-				cout << "NPC[" << npc_id << "]'s object is rotated, lookVec:("
-					<< npcs_info[npc_id].m_look_vec.x << ", " << npcs_info[npc_id].m_look_vec.y << ", " << npcs_info[npc_id].m_look_vec.z << ")." << endl;
-			}
+		}
+		// 2. Rotate Npc
+		else if (recv_packet->target == TARGET_NPC) {
+			npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+			npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+			npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
 		}
 		else {
 			cout << "[ROTATE ERROR] Unknown Target!" << endl;
@@ -279,16 +231,6 @@ void processPacket(char* ptr)
 
 				cout << "Player[" << recv_id << "] is log out" << endl;
 			}
-			else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
-				// NPC 없애기
-				int npc_id = recv_id - MAX_USER;
-
-				npcs_info[npc_id].m_id = -1;
-				npcs_info[npc_id].m_pos = { 0.f ,0.f ,0.f };
-				npcs_info[npc_id].m_state = OBJ_ST_LOGOUT;
-
-				cout << "NPC[" << npc_id << "] is removed" << endl;
-			}
 		}
 		// 2. Remove Bullet
 		else if (recv_packet->target == TARGET_BULLET) {
@@ -296,6 +238,12 @@ void processPacket(char* ptr)
 			bullets_info[recv_id].m_state = OBJ_ST_LOGOUT;
 
 			cout << "Bullet[" << recv_id << "] is removed" << endl;
+		}
+		// 3. Remove Npc
+		else if (recv_packet->target == TARGET_NPC) {
+			npcs_info[recv_id].m_id = -1;
+			npcs_info[recv_id].m_pos = { 0.f ,0.f ,0.f };
+			npcs_info[recv_id].m_state = OBJ_ST_LOGOUT;
 		}
 		else {
 			cout << "[REMOVE ERROR] Unknown Target!" << endl;

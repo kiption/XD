@@ -339,6 +339,55 @@ void disconnect(int target_id, int target)
 		wchar_t wchar_buf[10];
 		wsprintfW(wchar_buf, L"%d", target_id);
 		ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L"../x64/Release", SW_SHOW);
+		
+		// 재실행된 서버가 오른쪽 서버라면 Connect요청을 보냅니다. (왼쪽 서버가 오른쪽 서버로 Connect요청을 보내는 구조로 설계했기 때문)
+		if (my_server_id < target_id) {
+			// ConnectEx
+			SOCKET temp_s = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+			GUID guid = WSAID_CONNECTEX;
+			DWORD bytes = 0;
+			LPFN_CONNECTEX connectExFP;
+			::WSAIoctl(temp_s, SIO_GET_EXTENSION_FUNCTION_POINTER, &guid, sizeof(guid), &connectExFP, sizeof(connectExFP), &bytes, nullptr, nullptr);
+			closesocket(temp_s);
+
+			SOCKADDR_IN ha_server_addr;
+			ZeroMemory(&ha_server_addr, sizeof(ha_server_addr));
+			ha_server_addr.sin_family = AF_INET;
+			right_ex_server_sock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);     // 실제 연결할 소켓
+			int ret = ::bind(right_ex_server_sock, reinterpret_cast<LPSOCKADDR>(&ha_server_addr), sizeof(ha_server_addr));
+			if (ret != 0) {
+				cout << "Bind Error - " << ret << endl;
+				cout << WSAGetLastError() << endl;
+				exit(-1);
+			}
+
+			OVER_EXP* con_over = new OVER_EXP;
+			con_over->process_type = OP_CONNECT;
+			int key_num = SERIAL_NUM_EXSERVER + target_id;
+			HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_ss_iocp, key_num, 0);
+			if (NULL == hret) {
+				cout << "CreateIoCompletoinPort Error - " << ret << endl;
+				cout << WSAGetLastError() << endl;
+				exit(-1);
+			}
+
+			ZeroMemory(&ha_server_addr, sizeof(ha_server_addr));
+			ha_server_addr.sin_family = AF_INET;
+			int target_port = HA_PORTNUM_S0 + target_id;
+			ha_server_addr.sin_port = htons(target_port);	// 수평확장된 서버군에서 자기 오른쪽에 있는 서버
+			inet_pton(AF_INET, "127.0.0.1", &ha_server_addr.sin_addr);
+
+			BOOL bret = connectExFP(right_ex_server_sock, reinterpret_cast<sockaddr*>(&ha_server_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over->overlapped);
+			if (FALSE == bret) {
+				int err_no = GetLastError();
+				if (ERROR_IO_PENDING == err_no)
+					cout << "Server Connect 시도 중...\n" << endl;
+				else {
+					cout << "ConnectEX Error - " << err_no << endl;
+					cout << WSAGetLastError() << endl;
+				}
+			}
+		}
 		break;
 	}
 
@@ -516,8 +565,8 @@ void process_packet(int client_id, char* packet)
 					clients[client_id].s_lock.unlock();
 
 					// server message
-					cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
-						<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
+					//cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
+					//	<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
 
 					// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
 					for (int j = 0; j < MAX_USER; j++) {
@@ -545,8 +594,8 @@ void process_packet(int client_id, char* packet)
 					clients[client_id].s_lock.unlock();
 
 					// server message
-					cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] moves to ("
-						<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.z << ")." << endl;
+					//cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] moves to ("
+					//	<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.z << ")." << endl;
 
 					// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
 					for (int j = 0; j < MAX_USER; j++) {
@@ -704,8 +753,8 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].s_lock.unlock();
 
 			// server message
-			cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
-				<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
+			//cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
+			//	<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
 
 			// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
 			for (auto& send_target : clients) {
@@ -1046,7 +1095,7 @@ void timerFunc() {
 							mv_target.do_send(&hpzero_packet);
 						}
 						else {
-							cout << "Player[" << mv_target.id << "] is Damaged by Player[" << other_pl.id << "]!" << endl; //server message
+							//cout << "Player[" << mv_target.id << "] is Damaged by Player[" << other_pl.id << "]!" << endl; //server message
 
 							// 충돌한 플레이어에게 충돌 사실을 알립니다.
 							SC_DAMAGED_PACKET damaged_by_player_packet;
@@ -1082,7 +1131,7 @@ void timerFunc() {
 							other_pl.do_send(&hpzero_packet);
 						}
 						else {
-							cout << "Player[" << other_pl.id << "] is Damaged by Player[" << mv_target.id << "]!" << endl; //server message
+							//cout << "Player[" << other_pl.id << "] is Damaged by Player[" << mv_target.id << "]!" << endl; //server message
 
 							// 충돌한 플레이어에게 충돌 사실을 알립니다.
 							SC_DAMAGED_PACKET damaged_by_player_packet;
@@ -1229,7 +1278,7 @@ void timerFunc() {
 							pl.do_send(&hpzero_packet);
 						}
 						else {
-							cout << "Player[" << pl.id << "] is Damaged by Bullet!" << endl; //server message
+							//cout << "Player[" << pl.id << "] is Damaged by Bullet!" << endl; //server message
 
 							// 충돌한 플레이어에게 충돌 사실을 알립니다.
 							SC_DAMAGED_PACKET damaged_by_bullet_packet;
@@ -1276,7 +1325,7 @@ void sendHeartBeat() {	// 오른쪽 서버에게 Heartbeat를 전달하는 함수
 			if (extended_servers[my_server_id + 1].s_state != ST_ACCEPTED) continue;
 
 			if (chrono::system_clock::now() > extended_servers[my_server_id].heartbeat_send_time + chrono::milliseconds(HB_SEND_CYCLE)) {
-				cout << "자신의 Heartbeat를 Server[" << my_server_id + 1 << "]에게 보냅니다." << endl;
+				//cout << "자신의 Heartbeat를 Server[" << my_server_id + 1 << "]에게 보냅니다." << endl;
 				SS_HEARTBEAT_PACKET hb_packet;
 				hb_packet.size = sizeof(SS_HEARTBEAT_PACKET);
 				hb_packet.type = SS_HEARTBEAT;
@@ -1322,11 +1371,11 @@ void MoveNPC()
 
 			// Move Send
 			SC_MOVE_OBJECT_PACKET npc_move_packet;
-			npc_move_packet.target = TARGET_NPC;
-			npc_move_packet.id = npcs[i].GetID();
 			npc_move_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
 			npc_move_packet.type = SC_MOVE_OBJECT;
 
+			npc_move_packet.target = TARGET_NPC;
+			npc_move_packet.id = npcs[i].GetID();
 			npc_move_packet.x = npcs[i].GetPosition().x;
 			npc_move_packet.y = npcs[i].GetPosition().y;
 			npc_move_packet.z = npcs[i].GetPosition().z;
@@ -1340,10 +1389,11 @@ void MoveNPC()
 
 			// Rotate Send
 			SC_ROTATE_OBJECT_PACKET npc_rotate_packet;
-			npc_rotate_packet.target = TARGET_NPC;
-			npc_rotate_packet.id = npcs[i].GetID();
 			npc_rotate_packet.size = sizeof(SC_ROTATE_OBJECT_PACKET);
 			npc_rotate_packet.type = SC_ROTATE_OBJECT;
+
+			npc_rotate_packet.target = TARGET_NPC;
+			npc_rotate_packet.id = npcs[i].GetID();
 
 			npc_rotate_packet.right_x = npcs[i].GetCurr_coordinate().right.x;
 			npc_rotate_packet.right_y = npcs[i].GetCurr_coordinate().right.y;
@@ -1363,9 +1413,8 @@ void MoveNPC()
 					send_target.do_send(&npc_rotate_packet);
 				}
 			}
-
-			cout << "NPC[" << npcs[i].GetID() << "] moves to POS("
-				<< npcs[i].GetPosition().x << ", " << npcs[i].GetPosition().y << ", " << npcs[i].GetPosition().z << ")" << endl;
+			/*cout << "NPC[" << npcs[i].GetID() << "] moves to POS("
+				<< npcs[i].GetPosition().x << ", " << npcs[i].GetPosition().y << ", " << npcs[i].GetPosition().z << ")" << endl;*/
 		}
 	}
 }
@@ -1521,9 +1570,7 @@ int main(int argc, char* argv[])
 	timer_threads.emplace_back(timerFunc);			// 클라이언트 로직 타이머스레드
 	timer_threads.emplace_back(sendHeartBeat);		// 서버 간 Heartbeat교환 스레드
 	timer_threads.emplace_back(checkHeartbeat);		// 서버 간 다운여부 검사 스레드
-
-	//thread NPC_thread{ MoveNPC };
-	//NPC_thread.join();
+	timer_threads.emplace_back(MoveNPC);			// npc 행동 로직 스레드
 
 	for (auto& th : worker_threads)
 		th.join();
