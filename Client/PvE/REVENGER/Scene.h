@@ -21,16 +21,16 @@
 #include "ParticleObject.h"
 #include "GameSound.h"
 
-//struct MATERIAL
-//{
-//	XMFLOAT4						m_xmf4Ambient;
-//	XMFLOAT4						m_xmf4Diffuse;
-//	XMFLOAT4						m_xmf4Specular; //(r,g,b,a=power)
-//	XMFLOAT4						m_xmf4Emissive;
-//};
+struct MATERIAL
+{
+	XMFLOAT4						m_xmf4Ambient;
+	XMFLOAT4						m_xmf4Diffuse;
+	XMFLOAT4						m_xmf4Specular; //(r,g,b,a=power)
+	XMFLOAT4						m_xmf4Emissive;
+};
 struct MATERIALS
 {
-	EXPLOSIONMATERIAL				m_pReflections[MAX_MATERIALS];
+	MATERIAL				m_pReflections[MAX_MATERIALS];
 };
 
 struct LIGHT
@@ -92,7 +92,7 @@ public:
 	CParticleObject** m_ppParticleObjects = NULL;
 	int							m_nParticleObjects;
 	ID3D12Resource* m_pd3dcbMaterials = NULL;
-	EXPLOSIONMATERIAL* m_pcbMappedMaterials = NULL;
+	MATERIAL* m_pcbMappedMaterials = NULL;
 
 	MATERIALS* m_pMaterials = NULL;
 public:
@@ -135,6 +135,8 @@ public:
 public:
 	CShadowMapShader* m_pShadowShader = NULL;
 	CDepthRenderShader* m_pDepthRenderShader = NULL;
+	CTextureToViewportShader* m_pShadowMapToViewport = NULL;
+	int count= 0;
 	BoundingBox						m_xmBoundingBox;
 public:
 	float								m_fElapsedTime = 0.0f;
@@ -162,13 +164,15 @@ public:
 	int									m_nBillboardShaders = 0;
 	BillboardShader** m_pBillboardShader = NULL;
 	int									m_nLights = 0;
-	LIGHT* m_pLights = NULL;
-	
+	//LIGHT* m_pLights = NULL;
+	LIGHTS* m_pcbMappedLights = NULL;
+	float							m_fLightRotationAngle = 0.0f;
+
+	LIGHTS* m_pLights = NULL;
 	
 	XMFLOAT4							m_xmf4GlobalAmbient;
 
 	ID3D12Resource* m_pd3dcbLights = NULL;
-	LIGHTS* m_pcbMappedLights = NULL;
 
 };
 

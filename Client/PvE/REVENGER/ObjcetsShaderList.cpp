@@ -45,7 +45,6 @@ void CHellicopterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
 
-	
 		for (int i = 0; i < m_nObjects; i++)
 		{
 			
@@ -54,7 +53,8 @@ void CHellicopterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 			
 			m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), Random(20.0f, 100.0f), nColumnSize - int(floor(nColumnSize / 2.0f)), nColumnSpace));
 			m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-			m_ppObjects[i]->OnPrepareAnimate();
+			m_ppObjects[i]->OnPrepareAnimate();	
+		
 		}
 	
 

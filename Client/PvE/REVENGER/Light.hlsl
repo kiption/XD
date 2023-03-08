@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------
-#define MAX_LIGHTS			16 
+#define MAX_LIGHTS			16
 #define MAX_MATERIALS		512
 
 #define POINT_LIGHT			1
@@ -8,8 +8,9 @@
 
 #define _WITH_LOCAL_VIEWER_HIGHLIGHTING
 #define _WITH_THETA_PHI_CONES
-#define _WITH_REFLECT
+//#define _WITH_REFLECT
 #define MAX_DEPTH_TEXTURES		MAX_LIGHTS
+
 struct LIGHT
 {
 	float4					m_cAmbient;
@@ -27,6 +28,10 @@ struct LIGHT
 	float					m_fRange;
 	float					padding;
 };
+cbuffer cbMaterial : register(b10)
+{
+	MATERIAL			gMaterials[MAX_MATERIALS];
+};
 
 cbuffer cbLights : register(b4)
 {
@@ -34,10 +39,42 @@ cbuffer cbLights : register(b4)
 	float4					gcGlobalAmbientLight;
 	int						gnLights;
 };
+#define FRAME_BUFFER_WIDTH		1280
+#define FRAME_BUFFER_HEIGHT		1024
+
+#define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 4)
+#define _DEPTH_BUFFER_HEIGHT	(FRAME_BUFFER_HEIGHT * 4)
+
+#define DELTA_X					(1.0f / _DEPTH_BUFFER_WIDTH)
+#define DELTA_Y					(1.0f / _DEPTH_BUFFER_HEIGHT)
+
+#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
 
 Texture2D<float> gtxtDepthTextures[MAX_DEPTH_TEXTURES] : register(t19);
+
 SamplerComparisonState gssComparisonPCFShadow : register(s2);
 
+float Compute3x3ShadowFactor(float2 uv, float fDepth, uint nIndex)
+{
+	float fPercentLit = gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv, fDepth).r;
+	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, 0.0f), fDepth).r;
+	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, 0.0f), fDepth).r;
+	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, -DELTA_Y), fDepth).r;
+	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, +DELTA_Y), fDepth).r;
+	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, -DELTA_Y), fDepth).r;
+	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, +DELTA_Y), fDepth).r;
+	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, -DELTA_Y), fDepth).r;
+	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, +DELTA_Y), fDepth).r;
+
+	return(fPercentLit / 9.0f);
+}
+
+float Compute5x5ShadowFactor(float2 uv, float fDepth, uint nIndex)
+{
+	float fPercentLit = 0.0f;
+
+	return(fPercentLit / 10.0f);
+}
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
 {

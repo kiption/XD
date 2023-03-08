@@ -1,7 +1,7 @@
 #pragma once
 #include "Shader.h"
 
-class CStandardShader : public CShader
+class CStandardShader : public CIlluminatedShader
 {
 public:
 	CStandardShader();

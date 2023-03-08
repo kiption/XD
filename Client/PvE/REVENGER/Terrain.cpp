@@ -3,7 +3,7 @@
 #include "Scene.h"
 #include "Stage1.h"
 #include "Stage2.h"
-CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale, XMFLOAT3 xmf3Normal) : CGameObject(1)
+CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale, XMFLOAT3 xmf3Normal) : CGameObject(3)
 {
 	m_nWidth = nWidth;
 	m_nLength = nLength;
@@ -24,18 +24,19 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pTerrainDetailTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Cliff_1.dds", RESOURCE_TEXTURE2D, 0);
 
 	CTerrainShader* pTerrainShader = new CTerrainShader();
-	pTerrainShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	pTerrainShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT);
 	pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	SceneManager::CreateShaderResourceViews(pd3dDevice, pTerrainBaseTexture, 0, 13);
 	SceneManager::CreateShaderResourceViews(pd3dDevice, pTerrainDetailTexture, 0, 14);
 
-	CMaterial* pTerrainMaterial = new CMaterial(2);
+	CMaterial* pTerrainMaterial = new CMaterial(3);
 	pTerrainMaterial->SetTexture(pTerrainBaseTexture, 0);
 	pTerrainMaterial->SetTexture(pTerrainDetailTexture, 1);
+	pTerrainMaterial->SetReflection(1);
 	pTerrainMaterial->SetShader(pTerrainShader);
 
-	SetMaterial(0, pTerrainMaterial);
+	SetMaterial(0,pTerrainMaterial);
 }
 
 CHeightMapTerrain::~CHeightMapTerrain(void)

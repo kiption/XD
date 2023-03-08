@@ -145,7 +145,8 @@ void BunkerObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 void CMapObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-
+	CMaterial* pMaterial = new CMaterial(3);
+	pMaterial->SetReflection(3);
 	int GeneratorModels = 3;
 
 	m_nObjects = GeneratorModels;
@@ -159,6 +160,7 @@ void CMapObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 		m_ppObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
 		m_ppObjects[i]->SetScale(10.0, 10.0, 10.0);
+		m_ppObjects[i]->SetMaterial(pMaterial);
 		pGeneratorModel->AddRef();
 	}
 	m_ppObjects[0]->SetPosition(XMFLOAT3(3000.0f, pTerrain->GetHeight(3000.0, 2000.0f)+80.0, 2000.0f));
@@ -192,6 +194,27 @@ D3D12_BLEND_DESC CMapObjectShader::CreateBlendState()
 	return(d3dBlendDesc);
 }
 
+D3D12_DEPTH_STENCIL_DESC CMapObjectShader::CreateDepthStencilState()
+{
+	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
+	d3dDepthStencilDesc.DepthEnable = FALSE;
+	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_NEVER;
+	d3dDepthStencilDesc.StencilEnable = FALSE;
+	d3dDepthStencilDesc.StencilReadMask = 0xff;
+	d3dDepthStencilDesc.StencilWriteMask = 0xff;
+	d3dDepthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_INCR;
+	d3dDepthStencilDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	d3dDepthStencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_DECR;
+	d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+
+	return(d3dDepthStencilDesc);
+}
+
 
 
 void CMapObjectShader::AnimateObjects(float fTimeElapsed)
@@ -210,6 +233,16 @@ void CMapObjectShader::ReleaseObjects()
 void CMapObjectShader::ReleaseUploadBuffers()
 {
 	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
+}
+
+BoundingBox CMapObjectShader::CalculateBoundingBox()
+{
+	for (int i = 0; i < m_nObjects; i++) m_ppObjects[i]->CalculateBoundingBox();
+
+	BoundingBox xmBoundingBox = m_ppObjects[0]->m_xmBoundingBox;
+	for (int i = 1; i < m_nObjects; i++)BoundingBox::CreateMerged(xmBoundingBox, xmBoundingBox, m_ppObjects[i]->m_xmBoundingBox);
+
+	return(xmBoundingBox);
 }
 
 void CMapObjectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)

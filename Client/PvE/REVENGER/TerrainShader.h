@@ -1,7 +1,7 @@
 #pragma once
 #include "Shader.h"
 
-class CTerrainShader : public CShader
+class CTerrainShader : public CIlluminatedShader
 {
 public:
 	CTerrainShader();

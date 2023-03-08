@@ -1,22 +1,9 @@
 #pragma once
 #include "Shader.h"
 #include "IlluminateMesh.h"
-#include "Object.h"
-#include "Camera.h"
+#include "MapObjectShaders.h"
+#include "Terrain.h"
 
-struct LIGHT;
-
-class CIlluminatedShader : public CShader
-{
-public:
-	CIlluminatedShader();
-	virtual ~CIlluminatedShader();
-
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
-
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
-};
 class CObjectsShader : public CIlluminatedShader
 {
 public:
@@ -42,6 +29,7 @@ public:
 struct TOOBJECTSPACEINFO
 {
 	XMFLOAT4X4						m_xmf4x4ToTexture;
+
 	XMFLOAT4						m_xmf4Position;
 };
 
@@ -49,6 +37,7 @@ struct TOLIGHTSPACES
 {
 	TOOBJECTSPACEINFO				m_pToLightSpaces[MAX_LIGHTS];
 };
+
 
 class CDepthRenderShader : public CIlluminatedShader
 {
@@ -72,7 +61,7 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
-protected:
+public:
 	CTexture* m_pDepthTexture = NULL;
 
 	CCamera* m_ppDepthRenderCameras[MAX_DEPTH_TEXTURES];
@@ -94,8 +83,8 @@ public:
 	CObjectsShader* m_pObjectsShader = NULL;
 
 
-protected:
-
+public:
+	SceneManager* m_pScene = NULL;
 	LIGHT* m_pLights = NULL;
 	TOLIGHTSPACES* m_pToLightSpaces;
 
@@ -128,6 +117,27 @@ public:
 
 public:
 	CObjectsShader* m_pObjectsShader = NULL;
+	CTexture* m_pDepthTexture = NULL;
+};
 
+class CTextureToViewportShader : public CShader
+{
+public:
+	CTextureToViewportShader();
+	virtual ~CTextureToViewportShader();
+
+	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
+	virtual void ReleaseObjects();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+
+protected:
 	CTexture* m_pDepthTexture = NULL;
 };

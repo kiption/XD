@@ -17,7 +17,7 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 	if (m_nTextures > 0)
 	{
 		m_ppd3dTextureUploadBuffers = new ID3D12Resource * [m_nTextures];
-		
+
 		m_ppd3dTextures = new ID3D12Resource * [m_nTextures];
 		for (int i = 0; i < m_nTextures; i++) m_ppd3dTextureUploadBuffers[i] = m_ppd3dTextures[i] = NULL;
 		m_ppstrTextureNames = new _TCHAR[m_nTextures][64];
@@ -30,17 +30,18 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootPar
 		m_pdxgiBufferFormats = new DXGI_FORMAT[m_nTextures];
 		for (int i = 0; i < m_nTextures; i++) m_pdxgiBufferFormats[i] = DXGI_FORMAT_UNKNOWN;
 
-		m_pnBufferElements = new int[m_nTextures];		
+		m_pnBufferElements = new int[m_nTextures];
 		for (int i = 0; i < m_nTextures; i++) m_pnBufferElements[i] = 0;
 		m_pnBufferStrides = new int[m_nTextures];
 		for (int i = 0; i < m_nTextures; i++) m_pnBufferStrides[i] = 0;
 	}
 	m_nRootParameters = nRootParameters;
 	if (nRootParameters > 0) m_pnRootParameterIndices = new UINT[nRootParameters];
+	for (int i = 0; i < m_nRootParameters; i++) m_pnRootParameterIndices[i] = -1;
 
 	m_nSamplers = nSamplers;
 	if (m_nSamplers > 0) m_pd3dSamplerGpuDescriptorHandles = new D3D12_GPU_DESCRIPTOR_HANDLE[m_nSamplers];
-	m_xmf4x4Texture = Matrix4x4::Identity();
+
 
 
 }
@@ -111,10 +112,6 @@ void CTexture::ReleaseUploadBuffers()
 	}
 }
 
-//void CTexture::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, wchar_t* pszFileName, UINT nIndex)
-//{
-//	m_ppd3dTextures[nIndex] = ::CreateTextureResourceFromDDSFile(pd3dDevice, pd3dCommandList, pszFileName, &m_ppd3dTextureUploadBuffers[nIndex], D3D12_RESOURCE_STATE_GENERIC_READ);
-//}
 
 void CTexture::LoadTextureFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, wchar_t* pszFileName, UINT nResourceType, UINT nIndex)
 {
@@ -137,7 +134,12 @@ ID3D12Resource* CTexture::CreateTexture(ID3D12Device* pd3dDevice, ID3D12Graphics
 	return(m_ppd3dTextures[nIndex]);
 }
 
-
+ID3D12Resource* CTexture::CreateTexture(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nWidth, UINT nHeight, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue, UINT nResourceType, UINT nIndex)
+{
+	m_pnResourceTypes[nIndex] = nResourceType;
+	m_ppd3dTextures[nIndex] = ::CreateTexture2DResource(pd3dDevice, pd3dCommandList, nWidth, nHeight, 1, 0, dxgiFormat, d3dResourceFlags, d3dResourceStates, pd3dClearValue);
+	return(m_ppd3dTextures[nIndex]);
+}
 
 D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetShaderResourceViewDesc(int nIndex)
 {
@@ -218,7 +220,7 @@ void CTexture::CreateBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 CMaterial::CMaterial(int nTextures)
 {
 	m_nTextures = nTextures;
-
+	//m_pTexture = NULL;
 	m_ppTextures = new CTexture * [m_nTextures];
 	m_ppstrTextureNames = new _TCHAR[m_nTextures][64];
 	for (int i = 0; i < m_nTextures; i++) m_ppTextures[i] = NULL;
@@ -229,6 +231,7 @@ CMaterial::~CMaterial()
 {
 	if (m_pShader) m_pShader->Release();
 
+
 	if (m_nTextures > 0)
 	{
 		for (int i = 0; i < m_nTextures; i++) if (m_ppTextures[i]) m_ppTextures[i]->Release();
@@ -236,6 +239,10 @@ CMaterial::~CMaterial()
 
 		if (m_ppstrTextureNames) delete[] m_ppstrTextureNames;
 	}
+
+
+	//
+	if (m_pTexture) m_pTexture->Release();
 }
 
 void CMaterial::SetShader(CShader* pShader)
@@ -252,12 +259,20 @@ void CMaterial::SetTexture(CTexture* pTexture, UINT nTexture)
 	if (m_ppTextures[nTexture]) m_ppTextures[nTexture]->AddRef();
 }
 
+void CMaterial::SetTexture(CTexture* pTexture)
+{
+	if (m_pTexture) m_pTexture->Release();
+	m_pTexture = pTexture;
+	if (m_pTexture) m_pTexture->AddRef();
+}
+
 void CMaterial::ReleaseUploadBuffers()
 {
 	for (int i = 0; i < m_nTextures; i++)
 	{
 		if (m_ppTextures[i]) m_ppTextures[i]->ReleaseUploadBuffers();
 	}
+	if (m_pTexture) m_pTexture->ReleaseUploadBuffers();
 }
 
 CShader* CMaterial::m_pSkinnedAnimationShader = NULL;
@@ -266,7 +281,7 @@ CShader* CMaterial::m_pStandardShader = NULL;
 void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	m_pStandardShader = new CStandardShader();
-	m_pStandardShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pStandardShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT);
 	m_pStandardShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	m_pSkinnedAnimationShader = new CSkinnedAnimationStandardShader();
@@ -283,16 +298,22 @@ void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nType, 32);
 
-	for(int i=0;i<m_nTextures;i++)
-	if (m_ppTextures[i]) m_ppTextures[i]->UpdateShaderVariables(pd3dCommandList);
+	for (int i = 0; i < m_nTextures; i++)
+		if (m_ppTextures[i]) m_ppTextures[i]->UpdateShaderVariables(pd3dCommandList);
 
+
+	//
+	if (m_pTexture) m_pTexture->UpdateShaderVariables(pd3dCommandList);
 }
 
 void CMaterial::ReleaseShaderVariables()
 {
 	for (int i = 0; i < m_nTextures; i++)
-	if (m_ppTextures[i]) m_ppTextures[i]->ReleaseShaderVariables();
+		if (m_ppTextures[i]) m_ppTextures[i]->ReleaseShaderVariables();
 
+	//
+	if (m_pShader) m_pShader->ReleaseShaderVariables();
+	if (m_pTexture) m_pTexture->ReleaseShaderVariables();
 }
 
 void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR* pwstrTextureName, CTexture** ppTexture, CGameObject* pParent, FILE* pInFile, CShader* pShader)
@@ -742,8 +763,18 @@ CGameObject::CGameObject(int nMaterials) : CGameObject()
 
 CGameObject::~CGameObject()
 {
+	ReleaseShaderVariables();
 	if (m_pMesh) m_pMesh->Release();
 
+	if (m_ppMeshes)
+	{
+		for (int i = 0; i < m_nMeshes; i++)
+		{
+			if (m_ppMeshes[i]) m_ppMeshes[i]->Release();
+			m_ppMeshes[i] = NULL;
+		}
+		delete[] m_ppMeshes;
+	}
 	if (m_nMaterials > 0)
 	{
 		for (int i = 0; i < m_nMaterials; i++)
@@ -752,7 +783,7 @@ CGameObject::~CGameObject()
 		}
 	}
 	if (m_ppMaterials) delete[] m_ppMaterials;
-
+	if (m_pMaterials) m_pMaterials->Release();
 	if (m_pSkinnedAnimationController) delete m_pSkinnedAnimationController;
 }
 
@@ -823,6 +854,14 @@ void CGameObject::SetShader(CShader* pShader)
 void CGameObject::SetShader(int nMaterial, CShader* pShader)
 {
 	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->SetShader(pShader);
+
+	if (!m_pMaterials)
+	{
+		CMaterial* pMaterial = new CMaterial(nMaterial);
+		SetMaterial(pMaterial);
+	}
+	if (m_pMaterials) m_pMaterials->SetShader(pShader);
+
 }
 
 void CGameObject::SetMaterial(int nMaterial, CMaterial* pMaterial)
@@ -919,11 +958,11 @@ void CGameObject::AnimateObject(CCamera* pCamera, float fTimeElapsed)
 
 void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	
+
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
 	OnPrepareRender();
-	
+
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 	if (m_pMesh)
 	{
@@ -935,12 +974,19 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 			{
 				if (m_ppMaterials[i])
 				{
-					if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+					if (m_ppMaterials[i]->m_pShader) {
+						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+						UpdateShaderVariables(pd3dCommandList);
+					}
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+
+					if (m_ppMaterials[i]->m_pTexture) m_ppMaterials[i]->m_pTexture->UpdateShaderVariables(pd3dCommandList);
+					//if (m_pMaterials->m_pTexture) m_pMaterials->m_pTexture->UpdateShaderVariables(pd3dCommandList);
 				}
 
 				m_pMesh->Render(pd3dCommandList, i);
 			}
+
 		}
 		else
 		{
@@ -954,12 +1000,31 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 			{
 				for (int i = 0; i < m_nMeshes; i++)
 				{
-					if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, 0);
+					if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList);
 				}
 			}
 		}
 	}
+	if (m_ppMeshes)
+	{
+		for (int i = 0; i < m_nMeshes; i++)
+		{
+			if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList);
+		}
+	}
+	if (m_pMaterials)
+	{
+		if (m_pMaterials->m_pShader)
+		{
+			m_pMaterials->m_pShader->Render(pd3dCommandList, pCamera);
 
+			UpdateShaderVariables(pd3dCommandList);
+		}
+		if (m_pMaterials->m_pTexture)
+		{
+			m_pMaterials->m_pTexture->UpdateShaderVariables(pd3dCommandList);
+		}
+	}
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 }
@@ -975,9 +1040,14 @@ void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
-	pd3dCommandList->SetGraphicsRootDescriptorTable(19, m_d3dCbvGPUDescriptorHandle);
+	//if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	//pd3dCommandList->SetGraphicsRootDescriptorTable(19, m_d3dCbvGPUDescriptorHandle);
 
+	XMFLOAT4X4 xmf4x4World;
+	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+
+	if (m_pMaterials) pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_pMaterials->m_nReflection, 16);
 }
 
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
@@ -985,10 +1055,24 @@ void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandLis
 	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+
+
+	if (m_pMaterials) pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_pMaterials->m_nReflection, 16);
+
 }
 
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, CMaterial* pMaterial)
 {
+}
+
+void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMMATRIX* pxmf4x4Shadow)
+{
+	XMFLOAT4X4 xmf4x4PlanarShadow;
+	XMStoreFloat4x4(&xmf4x4PlanarShadow, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World) * (*pxmf4x4Shadow)));
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4PlanarShadow, 0);
+
+	for (int i = 0; i < m_nMaterials; i++)if (m_ppMaterials[i]) pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_ppMaterials[i]->m_nReflection, 16);
+
 }
 
 void CGameObject::ReleaseShaderVariables()
@@ -1050,9 +1134,11 @@ void CGameObject::SetScale(float x, float y, float z)
 
 void CGameObject::CalculateBoundingBox()
 {
-	m_xmBoundingBox = m_pMesh->m_xmBoundingBox;
-	/*for (int i = 1; i < m_nMeshes; i++)*/BoundingBox::CreateMerged(m_xmBoundingBox, m_xmBoundingBox, m_pMesh->m_xmBoundingBox);
-
+	for (int i = 1; i < m_nMeshes; i++)
+	{
+		m_xmBoundingBox = m_ppMeshes[i]->m_xmBoundingBox;
+		BoundingBox::CreateMerged(m_xmBoundingBox, m_xmBoundingBox, m_ppMeshes[i]->m_xmBoundingBox);
+	}
 	m_xmBoundingBox.Transform(m_xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
 }
 
@@ -1570,7 +1656,7 @@ void CSuperCobraObject::Animate(float fTimeElapsed)
 //
 CGunshipObject::CGunshipObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
-	SetScale(1.2,1.2,1.2);
+	SetScale(1.2, 1.2, 1.2);
 }
 
 CGunshipObject::~CGunshipObject()
@@ -1603,7 +1689,6 @@ void CGunshipObject::Animate(float fTimeElapsed)
 //
 CMi24Object::CMi24Object(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
-
 }
 
 CMi24Object::~CMi24Object()

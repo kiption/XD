@@ -2,41 +2,9 @@
 #include "ShadowShader.h"
 #include "DDSTextureLoader12.h"
 #include "Scene.h"
+#include "Terrain.h"
 
-CIlluminatedShader::CIlluminatedShader()
-{
-}
 
-CIlluminatedShader::~CIlluminatedShader()
-{
-}
-
-D3D12_INPUT_LAYOUT_DESC CIlluminatedShader::CreateInputLayout()
-{
-	UINT nInputElementDescs = 2;
-	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
-
-	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-
-	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
-	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
-	d3dInputLayoutDesc.NumElements = nInputElementDescs;
-
-	return(d3dInputLayoutDesc);
-}
-
-D3D12_SHADER_BYTECODE CIlluminatedShader::CreateVertexShader()
-{
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSLighting", "vs_5_1", &m_pd3dVertexShaderBlob));
-
-}
-
-D3D12_SHADER_BYTECODE CIlluminatedShader::CreatePixelShader()
-{
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSLighting", "ps_5_1", &m_pd3dPixelShaderBlob));
-
-}
 
 CObjectsShader::CObjectsShader()
 {
@@ -48,37 +16,54 @@ CObjectsShader::~CObjectsShader()
 
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nObjects = 1;
+	m_nObjects = 2;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH, 0.0f, _PLANE_HEIGHT, 0.0f, 0.0f, 0.0f);
+	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH, 0.0f, _PLANE_HEIGHT , 0.0f, 0.0f, 0.0f);
+
 	CMaterial* pPlaneMaterial = new CMaterial(1);
 	pPlaneMaterial->SetReflection(1);
+
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 	m_ppObjects[0] = new CGameObject(1);
 	m_ppObjects[0]->SetMesh(pPlaneMesh);
 	m_ppObjects[0]->SetMaterial(pPlaneMaterial);
-	m_ppObjects[0]->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[0]->SetPosition(XMFLOAT3(3000.0f, pTerrain->GetHeight(3000.0, 2000.0f) + 20.0, 2000.0f));
 
+	CMaterial* pMaterial = new CMaterial(1);
+	pMaterial->SetReflection(1);
+	CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1.bin", NULL);
+	for (int i = 1; i < 2; i++)
+	{
+		m_ppObjects[i] = new CGameObject(1);
+		m_ppObjects[i]->SetChild(pGeneratorModel, false);
+		m_ppObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
+		m_ppObjects[i]->SetScale(10.0, 10.0, 10.0);
+		m_ppObjects[i]->SetMaterial(pMaterial);
+		pGeneratorModel->AddRef();
+	}
+	m_ppObjects[1]->SetPosition(XMFLOAT3(3000.0f, pTerrain->GetHeight(3000.0, 2000.0f) +80.0, 2000.0f));
+
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	
+	//CAirPlaneMeshIlluminated* pAirPlaneMesh = new CAirPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, 40.0f, 40.0f, 4.0f);
+
+	//CMaterial* pMaterial = new CMaterial(1);
+	//pMaterial->SetReflection(2);
+
+	//CMapObjectShader* pRoatingAirPlane = new CMapObjectShader();
+	//pRoatingAirPlane->SetMesh(0pAirPlaneMesh);
+	//pRoatingAirPlane->SetMaterial(pMaterial);
+	//pRoatingAirPlane->SetPosition(100.0f, 50.0f, 120.0f);
+	//pRoatingAirPlane->Rotate(90.0f, 0.0f, 0.0f);
+	//pRoatingAirPlane->SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 1.0f));
+	//pRoatingAirPlane->SetRotationSpeed(0.0f);
+	//m_ppObjects[1] = pRoatingAirPlane->m_ppObjects[1];
 	/*
-	CMaterial* pPlaneMaterial = new CMaterial();
-	pPlaneMaterial->SetReflection(1);
-
-
-	CAirPlaneMeshIlluminated* pAirPlaneMesh = new CAirPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, 40.0f, 40.0f, 4.0f);
-
-	CMaterial* pMaterial = new CMaterial();
-	pMaterial->SetReflection(2);
-
-	CRotatingObject* pRoatingAirPlane = new CRotatingObject(1);
-	pRoatingAirPlane->SetMesh(0, pAirPlaneMesh);
-	pRoatingAirPlane->SetMaterial(pMaterial);
-	pRoatingAirPlane->SetPosition(100.0f, 50.0f, 120.0f);
-	pRoatingAirPlane->Rotate(90.0f, 0.0f, 0.0f);
-	pRoatingAirPlane->SetRotationAxis(XMFLOAT3(0.0f, 0.0f, 1.0f));
-	pRoatingAirPlane->SetRotationSpeed(0.0f);
-	m_ppObjects[1] = pRoatingAirPlane;
-
 	CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 30.0f, 30.0f, 30.0f);
 
 	pMaterial = new CMaterial();
@@ -205,7 +190,7 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 	{
 		if (m_ppObjects[j])
 		{
-			//m_ppObjects[j]->UpdateShaderVariables(pd3dCommandList);
+			m_ppObjects[j]->UpdateShaderVariables(pd3dCommandList);
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}
 	}
@@ -272,7 +257,10 @@ void CShadowMapShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Gra
 
 void CShadowMapShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	//if (m_pDepthTexture) m_pDepthTexture->UpdateShaderVariables(pd3dCommandList);
+	
+	if (m_pDepthTexture) m_pDepthTexture->UpdateShaderVariables(pd3dCommandList);
+
+	
 }
 
 void CShadowMapShader::ReleaseShaderVariables()
@@ -281,18 +269,21 @@ void CShadowMapShader::ReleaseShaderVariables()
 
 void CShadowMapShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_pDepthTexture = (CTexture*)pContext;
+	
+	m_pDepthTexture= (CTexture*)pContext;
 	m_pDepthTexture->AddRef();
-
-	SceneManager::CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, m_pDepthTexture->GetTextures());
-	//SceneManager::CreateShaderResourceViews(pd3dDevice, m_pDepthTexture, 0, 22);
-
+	
+	//SceneManager::CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, m_pDepthTexture->GetTextures());
+	SceneManager::CreateShaderResourceViews(pd3dDevice, m_pDepthTexture, 0, 22);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	
 }
 
 void CShadowMapShader::ReleaseObjects()
 {
+	
 	if (m_pDepthTexture) m_pDepthTexture->Release();
+	
 }
 
 void CShadowMapShader::ReleaseUploadBuffers()
@@ -309,7 +300,7 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 	{
 		if (m_pObjectsShader->m_ppObjects[i])
 		{
-			//m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
+			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
 			m_pObjectsShader->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
 		}
 	}
@@ -352,7 +343,7 @@ D3D12_DEPTH_STENCIL_DESC CDepthRenderShader::CreateDepthStencilState()
 
 	return(d3dDepthStencilDesc);
 }
-
+#define _WITH_RASTERIZER_DEPTH_BIAS
 D3D12_RASTERIZER_DESC CDepthRenderShader::CreateRasterizerState()
 {
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
@@ -384,7 +375,8 @@ void CDepthRenderShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12G
 	UINT ncbDepthElementBytes;
 
 	ncbDepthElementBytes = ((sizeof(TOLIGHTSPACES) + 255) & ~255); //256ÀÇ ¹è¼ö
-	m_pd3dcbToLightSpaces = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbDepthElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbToLightSpaces = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbDepthElementBytes, 
+		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbToLightSpaces->Map(0, NULL, (void**)&m_pcbMappedToLightSpaces);
 }
@@ -409,6 +401,7 @@ void CDepthRenderShader::ReleaseShaderVariables()
 
 void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
+	SceneManager* pScene = NULL;
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
 	::ZeroMemory(&d3dDescriptorHeapDesc, sizeof(D3D12_DESCRIPTOR_HEAP_DESC));
 	d3dDescriptorHeapDesc.NumDescriptors = MAX_DEPTH_TEXTURES;
@@ -419,8 +412,9 @@ void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 	m_pDepthTexture = new CTexture(MAX_DEPTH_TEXTURES, RESOURCE_TEXTURE2D_ARRAY, 0, 1);
 
-	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R32_FLOAT, { 1.0f, 1.0f, 1.0f, 1.0f } };
-	for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++) m_pDepthTexture->CreateTexture(pd3dDevice, pd3dCommandList,i, RESOURCE_TEXTURE2D,_DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, NULL,NULL,DXGI_FORMAT_R32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET,D3D12_RESOURCE_STATE_COMMON,&d3dClearValue);
+	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R32_FLOAT, { 0.1f, 0.44f, 0.1f, 1.0f } };
+	for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++)
+		m_pDepthTexture->CreateTexture(pd3dDevice, pd3dCommandList, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, DXGI_FORMAT_R32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, i);
 
 	D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;
 	d3dRenderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
@@ -509,33 +503,34 @@ void CDepthRenderShader::ReleaseObjects()
 void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	
-	for (int j = 0; j < MAX_LIGHTS; j++)
-	{
-	//	if (m_pLights->m_bEnable)
+	//for (int j = 0; j < MAX_LIGHTS; j++)
+	//{
+
+	//	if (m_pLights[j].m_bEnable)
 	//	{
-	//		XMFLOAT3 xmf3Position = m_pLights->m_xmf3Position;
-	//		XMFLOAT3 xmf3Look = m_pLights->m_xmf3Direction;
+	//		XMFLOAT3 xmf3Position = m_pLights[j].m_xmf3Position;
+	//		XMFLOAT3 xmf3Look = m_pLights[j].m_xmf3Direction;
 	//		XMFLOAT3 xmf3Up = XMFLOAT3(0.0f, +1.0f, 0.0f);
 
 	//		XMMATRIX xmmtxView = XMMatrixLookToLH(XMLoadFloat3(&xmf3Position), XMLoadFloat3(&xmf3Look), XMLoadFloat3(&xmf3Up));
 
-	//		float fNearPlaneDistance = 10.0f, fFarPlaneDistance = m_pLights->m_fRange;
+	//		float fNearPlaneDistance = 10.0f, fFarPlaneDistance = m_pLights[j].m_fRange;
 
 	//		XMMATRIX xmmtxProjection;
-	//		if (m_pLights->m_nType == DIRECTIONAL_LIGHT)
+	//		if (m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
 	//		{
 	//			float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
 	//			xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
 	//			//float fLeft = -(_PLANE_WIDTH * 0.5f), fRight = +(_PLANE_WIDTH * 0.5f), fTop = +(_PLANE_HEIGHT * 0.5f), fBottom = -(_PLANE_HEIGHT * 0.5f);
 	//			//xmmtxProjection = XMMatrixOrthographicOffCenterLH(fLeft * 6.0f, fRight * 6.0f, fBottom * 6.0f, fTop * 6.0f, fBack, fFront);
 	//		}
-	//		else if (m_pLights->m_nType == SPOT_LIGHT)
+	//		else if (m_pLights[j].m_nType == SPOT_LIGHT)
 	//		{
-	//			float fFovAngle = 60.0f; // m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
+	//			/*float fFovAngle = 60.0f; */m_pLights[j].m_fPhi = cos(60.0f);
 	//			float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
-	//			xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fFovAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
+	//			xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(m_pLights[j].m_fPhi), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
 	//		}
-	//		else if (m_pLights->m_nType == POINT_LIGHT)
+	//		else if (m_pLights[j].m_nType == POINT_LIGHT)
 	//		{
 	//			//ShadowMap[6]
 	//		}
@@ -543,30 +538,30 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 	//		m_ppDepthRenderCameras[j]->SetPosition(xmf3Position);
 	//		XMStoreFloat4x4(&m_ppDepthRenderCameras[j]->m_xmf4x4View, xmmtxView);
 	//		XMStoreFloat4x4(&m_ppDepthRenderCameras[j]->m_xmf4x4Projection, xmmtxProjection);
-
+	//		//
 	//		XMMATRIX xmmtxToTexture = XMMatrixTranspose(xmmtxView * xmmtxProjection * m_xmProjectionToTexture);
 	//		XMStoreFloat4x4(&m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4x4ToTexture, xmmtxToTexture);
 
 	//		m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4Position = XMFLOAT4(xmf3Position.x, xmf3Position.y, xmf3Position.z, 1.0f);
 
-	//		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	//		//::SynchronizeResourceTransition(pd3dCommandList, m_pDepthRenderShader->m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	//		FLOAT pfClearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	//		pd3dCommandList->ClearRenderTargetView(m_pd3dRtvCPUDescriptorHandles[j], pfClearColor, 0, NULL);
+	//		//FLOAT pfClearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	//		//pd3dCommandList->ClearRenderTargetView(m_pDepthRenderShader->m_pd3dRtvCPUDescriptorHandles[j], pfClearColor, 0, NULL);
 
-	//		pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, NULL);
+	//		//pd3dCommandList->ClearDepthStencilView(m_pDepthRenderShader->m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, NULL);
 
-	//		pd3dCommandList->OMSetRenderTargets(1, &m_pd3dRtvCPUDescriptorHandles[j], TRUE, &m_d3dDsvDescriptorCPUHandle);
+	//		//pd3dCommandList->OMSetRenderTargets(1, &m_pDepthRenderShader->m_pd3dRtvCPUDescriptorHandles[j], TRUE, &m_pDepthRenderShader->m_d3dDsvDescriptorCPUHandle);
 
-	//		Render(pd3dCommandList, m_ppDepthRenderCameras[j]);
+	//		//Render(pd3dCommandList, m_pDepthRenderShader->m_ppDepthRenderCameras[j]);
 
-	//		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
+	//		//::SynchronizeResourceTransition(pd3dCommandList, m_pDepthRenderShader->m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
 	//	}
 	//	else
 	//	{
-			m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4Position.w = 0.0f;
-		//}
-	}
+	//		m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4Position.w = 0.0f;
+	//	}
+	//}
 }
 
 void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -585,3 +580,64 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 		}
 	}
 }
+
+CTextureToViewportShader::CTextureToViewportShader()
+{
+}
+
+CTextureToViewportShader::~CTextureToViewportShader()
+{
+}
+
+D3D12_DEPTH_STENCIL_DESC CTextureToViewportShader::CreateDepthStencilState()
+{
+	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
+	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
+	d3dDepthStencilDesc.DepthEnable = FALSE;
+	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+	d3dDepthStencilDesc.StencilEnable = FALSE;
+	d3dDepthStencilDesc.StencilReadMask = 0x00;
+	d3dDepthStencilDesc.StencilWriteMask = 0x00;
+	d3dDepthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
+	d3dDepthStencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
+
+	return(d3dDepthStencilDesc);
+}
+
+D3D12_SHADER_BYTECODE CTextureToViewportShader::CreateVertexShader()
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSTextureToViewport", "vs_5_1", &m_pd3dVertexShaderBlob));
+}
+
+D3D12_SHADER_BYTECODE CTextureToViewportShader::CreatePixelShader()
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTextureToViewport", "ps_5_1", &m_pd3dPixelShaderBlob));
+}
+
+void CTextureToViewportShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}
+
+void CTextureToViewportShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+}
+
+void CTextureToViewportShader::ReleaseObjects()
+{
+}
+
+void CTextureToViewportShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CShader::Render(pd3dCommandList, pCamera);
+
+	pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	pd3dCommandList->DrawInstanced(6, 1, 0, 0);
+}
+

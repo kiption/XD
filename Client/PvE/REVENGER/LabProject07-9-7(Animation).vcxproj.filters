@@ -145,9 +145,6 @@
     <ClInclude Include="AnimateInfo.h">
       <Filter>Client\Object\Header</Filter>
     </ClInclude>
-    <ClInclude Include="BillboardObjects.h">
-      <Filter>Client\Object\Header</Filter>
-    </ClInclude>
     <ClInclude Include="MissileObject.h">
       <Filter>Client\Object\Header</Filter>
     </ClInclude>
@@ -180,6 +177,9 @@
     </ClInclude>
     <ClInclude Include="IlluminateMesh.h">
       <Filter>Client\Mesh\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="BillboardObjects.h">
+      <Filter>Client\Object\Header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
