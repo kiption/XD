@@ -260,32 +260,6 @@ void SESSION::send_rotate_packet(int client_id, short rotate_target)
 	do_send(&rotate_pl_packet);
 }
 
-void init_npc()
-{
-	for (int i{}; i < MAX_NPCS; i++) {
-		int npc_id = i;
-		npcs[i].SetID(npc_id);
-		npcs[i].SetNpcType(NPC_Helicopter);
-		npcs[i].SetRotate(0.0f, 0.0f, 0.0f);
-		npcs[i].SetActive(false);
-
-		random_device rd;
-		default_random_engine dre(rd());
-		uniform_real_distribution<float>AirHigh(350, 650);
-		uniform_real_distribution<float>AirPos(2500, 3500);
-
-		npcs[i].SetPosition(AirPos(dre), AirHigh(dre), AirPos(dre));
-		npcs[i].SetOrgPosition(npcs[i].GetPosition());
-
-		uniform_real_distribution<float>rTheta(1.2f, 3.0f);
-		npcs[i].SetTheta(rTheta(dre));
-		npcs[i].SetAcc(npcs[i].GetTheta());
-
-		uniform_int_distribution<int>rRange(15, 30);
-		npcs[i].SetRange(rRange(dre));
-	}
-}
-
 void disconnect(int target_id, int target)
 {
 	switch (target) {
@@ -449,7 +423,8 @@ void process_packet(int client_id, char* packet)
 
 		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is log in" << endl;	// server message
 
-		for (int i = 0; i < MAX_USER; ++i) {		// 현재 접속해 있는 모든 클라이언트에게 새로운 클라이언트(client_id)의 정보를 전송합니다.
+		// 현재 접속해 있는 모든 클라이언트에게 새로운 클라이언트(client_id)의 정보를 전송합니다.
+		for (int i = 0; i < MAX_USER; ++i) {		
 			auto& pl = clients[i];
 
 			if (pl.id == client_id) continue;
@@ -488,7 +463,8 @@ void process_packet(int client_id, char* packet)
 			pl.s_lock.unlock();
 		}
 
-		for (auto& pl : clients) {		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 클라이언트와 NPC들의 정보를 전송합니다.
+		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 클라이언트들의 정보를 전송합니다.
+		for (auto& pl : clients) {		
 			if (pl.id == client_id) continue;
 
 			pl.s_lock.lock();
@@ -497,6 +473,7 @@ void process_packet(int client_id, char* packet)
 				continue;
 			}
 
+			// 자신이 아닌 다른 플레이어
 			SC_ADD_OBJECT_PACKET add_pl_packet;
 			add_pl_packet.target = TARGET_PLAYER;
 			add_pl_packet.id = pl.id;
@@ -524,6 +501,38 @@ void process_packet(int client_id, char* packet)
 			//cout << "[SC_ADD]";
 			clients[client_id].do_send(&add_pl_packet);
 			pl.s_lock.unlock();
+		}
+
+		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 NPC들의 정보를 전송합니다.
+		for (int i = 0; i < MAX_NPCS; i++) {
+			SC_ADD_OBJECT_PACKET add_npc_packet;
+			add_npc_packet.target = TARGET_NPC;
+			strcpy_s(add_npc_packet.name, "NPC");
+			add_npc_packet.size = sizeof(SC_ADD_OBJECT_PACKET);
+			add_npc_packet.type = SC_ADD_OBJECT;
+
+			add_npc_packet.id = i;
+			add_npc_packet.x = npcs[i].GetPosition().x;
+			add_npc_packet.y = npcs[i].GetPosition().y;
+			add_npc_packet.z = npcs[i].GetPosition().z;
+
+			add_npc_packet.right_x = npcs[i].GetCurr_coordinate().right.x;
+			add_npc_packet.right_y = npcs[i].GetCurr_coordinate().right.y;
+			add_npc_packet.right_z = npcs[i].GetCurr_coordinate().right.z;
+
+			add_npc_packet.up_x = npcs[i].GetCurr_coordinate().up.x;
+			add_npc_packet.up_y = npcs[i].GetCurr_coordinate().up.y;
+			add_npc_packet.up_z = npcs[i].GetCurr_coordinate().up.z;
+
+			add_npc_packet.look_x = npcs[i].GetCurr_coordinate().look.x;
+			add_npc_packet.look_y = npcs[i].GetCurr_coordinate().look.y;
+			add_npc_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
+
+			// Send Add Object Packet to All Clients (NPC)
+			for (auto& cl : clients) {
+				if (cl.s_state != ST_INGAME) continue;
+				cl.do_send(&add_npc_packet);
+			}
 		}
 		break;
 	}// CS_LOGIN end
@@ -1363,6 +1372,31 @@ void checkHeartbeat() {	// 인접해있는 서버구성원에게서 Heartbeat를 받았는 지 확�
 	}
 }
 
+
+void init_npc()
+{
+	for (int i{}; i < MAX_NPCS; i++) {
+		npcs[i].SetID(i);
+		npcs[i].SetNpcType(NPC_Helicopter);
+		npcs[i].SetRotate(0.0f, 0.0f, 0.0f);
+		npcs[i].SetActive(false);
+
+		random_device rd;
+		default_random_engine dre(rd());
+		uniform_real_distribution<float>AirHigh(350, 650);
+		uniform_real_distribution<float>AirPos(2500, 3500);
+
+		npcs[i].SetPosition(AirPos(dre), AirHigh(dre), AirPos(dre));
+		npcs[i].SetOrgPosition(npcs[i].GetPosition());
+
+		uniform_real_distribution<float>rTheta(1.2f, 3.0f);
+		npcs[i].SetTheta(rTheta(dre));
+		npcs[i].SetAcc(npcs[i].GetTheta());
+
+		uniform_int_distribution<int>rRange(15, 30);
+		npcs[i].SetRange(rRange(dre));
+	}
+}
 void MoveNPC()
 {
 	while (true) {

@@ -141,12 +141,14 @@ void processPacket(char* ptr)
 		}
 		// 3. Add NPC (Helicopter)
 		else if (recv_packet->target == TARGET_NPC) {
-			npcs_info[recv_id].m_id = recv_id;
-			npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-			npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-			npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-			npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-			npcs_info[recv_id].m_state = OBJ_ST_RUNNING;
+			if (npcs_info[recv_id].m_state == OBJ_ST_EMPTY) {
+				npcs_info[recv_id].m_id = recv_id;
+				npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+				npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+				npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+				npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+				npcs_info[recv_id].m_state = OBJ_ST_RUNNING;
+			}
 		}
 		else {
 			cout << "[ADD ERROR] Unknown Target!" << endl;
@@ -173,7 +175,11 @@ void processPacket(char* ptr)
 		}
 		// 3. Move Npc
 		else if (recv_packet->target == TARGET_NPC) {
-			npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+			if (npcs_info[recv_id].m_state == OBJ_ST_RUNNING) {
+				npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+
+				cout << recv_id << npcs_info[recv_id].m_pos.x << npcs_info[recv_id].m_pos.y << npcs_info[recv_id].m_pos.z << endl;
+			}
 		}
 		else {
 			cout << "[MOVE ERROR] Unknown Target!" << endl;
@@ -203,9 +209,11 @@ void processPacket(char* ptr)
 		}
 		// 2. Rotate Npc
 		else if (recv_packet->target == TARGET_NPC) {
-			npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-			npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-			npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+			if (npcs_info[recv_id].m_state == OBJ_ST_RUNNING) {
+				npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+				npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+				npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+			}
 		}
 		else {
 			cout << "[ROTATE ERROR] Unknown Target!" << endl;
@@ -227,7 +235,7 @@ void processPacket(char* ptr)
 				// 상대 Player 없애기
 				other_players[recv_id].m_id = -1;
 				other_players[recv_id].m_pos = { 0.f ,0.f ,0.f };
-				other_players[recv_id].m_state = OBJ_ST_LOGOUT;
+				other_players[recv_id].m_state = OBJ_ST_EMPTY;
 
 				cout << "Player[" << recv_id << "] is log out" << endl;
 			}
@@ -235,15 +243,17 @@ void processPacket(char* ptr)
 		// 2. Remove Bullet
 		else if (recv_packet->target == TARGET_BULLET) {
 			bullets_info[recv_id].m_pos = { 0.f , -100.f ,0.f };
-			bullets_info[recv_id].m_state = OBJ_ST_LOGOUT;
+			bullets_info[recv_id].m_state = OBJ_ST_EMPTY;
 
 			cout << "Bullet[" << recv_id << "] is removed" << endl;
 		}
 		// 3. Remove Npc
 		else if (recv_packet->target == TARGET_NPC) {
-			npcs_info[recv_id].m_id = -1;
-			npcs_info[recv_id].m_pos = { 0.f ,0.f ,0.f };
-			npcs_info[recv_id].m_state = OBJ_ST_LOGOUT;
+			if (npcs_info[recv_id].m_state == OBJ_ST_RUNNING) {
+				npcs_info[recv_id].m_id = -1;
+				npcs_info[recv_id].m_pos = { 0.f ,0.f ,0.f };
+				npcs_info[recv_id].m_state = OBJ_ST_EMPTY;
+			}
 		}
 		else {
 			cout << "[REMOVE ERROR] Unknown Target!" << endl;
