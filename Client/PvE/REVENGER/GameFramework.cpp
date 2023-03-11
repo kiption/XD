@@ -1067,8 +1067,14 @@ void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3right
 
 void CGameFramework::SetPosition_NPC(int id, XMFLOAT3 pos)
 {
+	m_pScene->m_pp1StageEnemy[id]->SetPosition(pos);
 }
 
-//void CGameFramework::SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
-//{
-//}
+void CGameFramework::SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
+{
+	m_pScene->m_pp1StageEnemy[id]->SetRight(rightVec);
+	m_pScene->m_pp1StageEnemy[id]->SetUp(upVec);
+	m_pScene->m_pp1StageEnemy[id]->SetLook(lookVec);
+	m_pScene->m_pp1StageEnemy[id]->SetScale(15.0f, 15.0f, 15.0f);
+
+}

@@ -248,6 +248,26 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 		pOtherPlayerModel->AddRef();
 	}
 
+	m_n1StageEnemy = 10;
+	m_pp1StageEnemy = new CGameObject * [m_n1StageEnemy];
+	CMaterial* p1Enemy = new CMaterial(5);
+	p1Enemy->SetReflection(5);
+
+	for (int i = 0; i < m_n1StageEnemy; i++)
+	{
+		m_pp1StageEnemy[i] = new CMi24Object(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+		CGameObject* p1StageEnemtModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
+		m_pp1StageEnemy[i]->SetChild(p1StageEnemtModel, false);
+		m_pp1StageEnemy[i]->SetMaterial(p1Enemy);
+		m_pp1StageEnemy[i]->Rotate(0.0f, 90.0f, 0.0f);
+		m_pp1StageEnemy[i]->SetScale(30.0, 30.0, 30.0);
+		m_pp1StageEnemy[i]->OnPrepareAnimate();
+		p1StageEnemtModel->AddRef();
+	}
+
+
+
+
 	m_nMapShaders = 1;
 	m_ppMapShaders = new CMapObjectShader * [m_nMapShaders];
 
@@ -711,8 +731,9 @@ void SceneManager::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++) if (m_ppHierarchicalGameObjects[i]) m_ppHierarchicalGameObjects[i]->Animate(fTimeElapsed);
+	for (int i = 0; i < m_n1StageEnemy; i++) if (m_pp1StageEnemy[i]) m_pp1StageEnemy[i]->Animate(fTimeElapsed);
 	m_pUseWaterMove->Animate(fTimeElapsed);
-
+	
 	/*for (int i = 0; i < m_ppMapShaders[0]->m_ppObjects[0]->m_nMeshes; i++)
 	{
 		m_ppMapShaders[0]->m_ppObjects[0]->m_xoobb = BoundingOrientedBox(
@@ -775,6 +796,13 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 		{
 			m_ppHierarchicalGameObjects[i]->AnimateObject(pCamera, m_fElapsedTime);
 			m_ppHierarchicalGameObjects[i]->Render(pd3dCommandList, pCamera);
+		}
+	}
+
+	for (int i = 0; i < m_n1StageEnemy; i++) {
+		if (m_pp1StageEnemy[i]) {
+			m_pp1StageEnemy[i]->Render(pd3dCommandList, pCamera);
+			
 		}
 	}
 

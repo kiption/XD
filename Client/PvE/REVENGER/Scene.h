@@ -144,6 +144,9 @@ public:
 	int									m_nGameObjects = 0;
 	CGameObject** m_ppGameObjects = NULL;
 
+	int									m_n1StageEnemy = 0;
+	CGameObject** m_pp1StageEnemy = NULL;
+
 	int									m_nHierarchicalGameObjects = 0;
 	CGameObject** m_ppHierarchicalGameObjects = NULL;
 
