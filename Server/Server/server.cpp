@@ -10,7 +10,7 @@
 
 #include "global.h"
 #include "BulletsMgr.h"
-#include "protocol.h"
+#include "../RelayServer/Protocol.h"
 #include "NPC.h"
 #include "Timer.h"
 
@@ -129,7 +129,7 @@ public:
 	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(heli_bbsize_x, heli_bbsize_y, heli_bbsize_z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 };
 
-class EXTENDED_SERVER {
+class HA_SERVER {
 	OVER_EXP recv_over;
 
 public:
@@ -142,7 +142,7 @@ public:
 	chrono::system_clock::time_point heartbeat_send_time;
 
 public:
-	EXTENDED_SERVER() {
+	HA_SERVER() {
 		s_state = ST_FREE;
 		id = -1;
 		socket = 0;
@@ -150,7 +150,7 @@ public:
 		heartbeat_recv_time = chrono::system_clock::now();
 		heartbeat_send_time = chrono::system_clock::now();
 	}
-	~EXTENDED_SERVER() {}
+	~HA_SERVER() {}
 
 	void do_recv() {
 		DWORD recv_flag = 0;
@@ -186,13 +186,19 @@ chrono::system_clock::time_point shoot_time;
 
 HANDLE h_sc_iocp;			// 클라이언트 통신 IOCP 핸들
 SOCKET g_sc_listensock;		// 클라이언트 통신 listen소켓
-HANDLE h_ss_iocp;			// 서버 간 통신 IOCP 핸들
-SOCKET g_ss_listensock;		// 서버 간 통신 listen 소켓
+HANDLE h_ss_iocp;			// 수평확장 서버 간 통신 IOCP 핸들
+SOCKET g_ss_listensock;		// 수평확장 서버 간 통신 listen 소켓
+HANDLE h_relay_iocp;		// 릴레이서버 간 통신 IOCP 핸들
+SOCKET g_relay_sock;		// 릴레이서버 간 통신 listen 소켓
 
-int my_server_id;										// 내 서버 식별번호
-array<EXTENDED_SERVER, MAX_SERVER> extended_servers;	// HA구현을 위해 수평확장된 서버들
 SOCKET left_ex_server_sock;								// 이전 번호의 서버
 SOCKET right_ex_server_sock;							// 다음 번호의 서버
+
+int my_server_id;										// 내 서버 식별번호
+array<HA_SERVER, 1> relay_servers;						// Rel
+array<HA_SERVER, MAX_SERVER> extended_servers;			// HA구현을 위해 수평확장된 서버들
+
+
 
 void SESSION::send_login_info_packet()
 {
@@ -1376,9 +1382,8 @@ int main(int argc, char* argv[])
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 
-	// ========================================
-	//			HA(서버 이중화) 코드
-	// ========================================
+	//======================================================================
+	// [ HA - 서버 ID, 포트번호 지정 ]
 	// 어떤 서버를 가동할 것인지를 명령행 인수로 입력받아서 그 서버에 포트 번호를 부여합니다.
 	my_server_id = 0;		// 서버 구분을 위한 지정번호
 	int sc_portnum = -1;	// 클라이언트 통신용 포트번호
@@ -1407,6 +1412,15 @@ int main(int argc, char* argv[])
 	}
 	cout << "Server[" << my_server_id << "] 가 가동되었습니다. [ S-C PORT: " << sc_portnum << " / S-S PORT: " << ss_portnum << " ]" << endl;
 
+	//======================================================================
+	// [ HA - Relay서버 연결 ]
+	int active_relay_serverid = 0;							// [[[추후에 현재 Active 상태에 있는 릴레이서버의 id와 포트번호로 바꿀 예정임!]]]
+	int active_relay_portnum = PORTNUM_RELAY2LOGIC_0;		//
+	// Connect
+
+
+	//======================================================================
+	// [ HA - 서버 수평확장 ]
 	// HA Listen Socket (서버 간 통신을 위한 Listen소켓)
 	g_ss_listensock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	SOCKADDR_IN ha_server_addr;
@@ -1455,7 +1469,7 @@ int main(int argc, char* argv[])
 
 		OVER_EXP* con_over = new OVER_EXP;
 		con_over->process_type = OP_CONNECT;
-		int key_num = 1000 + right_servernum;
+		int key_num = SERIAL_NUM_EXSERVER + right_servernum;
 		HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_ss_iocp, key_num, 0);
 		if (NULL == hret) {
 			cout << "CreateIoCompletoinPort Error - " << ret << endl;
@@ -1484,11 +1498,14 @@ int main(int argc, char* argv[])
 	}
 	extended_servers[my_server_id].id = my_server_id;
 	extended_servers[my_server_id].s_state = ST_ACCEPTED;
-	// ================[HA END]================
-
+	
+	//======================================================================
+	// [ Main ]
 	init_npc();
 	shoot_time = chrono::system_clock::now();
 
+	//======================================================================
+	// [ Main - 클라이언트 연결 ]
 	// Client Listen Socket (클라이언트-서버 통신을 위한 Listen소켓)
 	g_sc_listensock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	SOCKADDR_IN server_addr;
@@ -1514,8 +1531,7 @@ int main(int argc, char* argv[])
 	vector <thread> worker_threads;
 	for (int i = 0; i < 4; ++i)
 		worker_threads.emplace_back(do_worker);		// 클라이언트-서버 통신용 Worker스레드
-	for (int i = 0; i < 2; ++i)
-		worker_threads.emplace_back(do_ha_worker);	// 서버 간 통신용 Worker스레드
+	worker_threads.emplace_back(do_ha_worker);		// 서버 간 통신용 Worker스레드
 
 	vector<thread> timer_threads;
 	timer_threads.emplace_back(timerFunc);			// 클라이언트 로직 타이머스레드
