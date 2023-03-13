@@ -48,4 +48,11 @@ class CGeometryShadowMesh : public CMesh
 public:
 	CGeometryShadowMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGeometryShadowVertex* pGeometryShadowVertices, UINT nGeometryShadowVertices);
 	virtual ~CGeometryShadowMesh();
+}; 
+
+class CCubeMeshIlluminated : public CMeshIlluminated
+{
+public:
+	CCubeMeshIlluminated(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 2.0f, float fHeight = 2.0f, float fDepth = 2.0f);
+	virtual ~CCubeMeshIlluminated();
 };

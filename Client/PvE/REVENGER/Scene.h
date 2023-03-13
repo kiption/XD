@@ -80,7 +80,7 @@ public:
 	
 	virtual void ReleaseUploadBuffers();
 
-	void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList);
+	void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList,  CCamera* pCamera);
 	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void OnPostRenderParticle();
@@ -122,10 +122,12 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUCbvDescriptorNextHandle() { return(m_d3dCbvGPUDescriptorNextHandle); }
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUSrvDescriptorNextHandle() { return(m_d3dSrvCPUDescriptorNextHandle); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUSrvDescriptorNextHandle() { return(m_d3dSrvGPUDescriptorNextHandle); }
+
 	static void CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
 
 	static D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferViews(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride);
 	static void CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex);
+	static void CreateShaderResourceViews(ID3D12Device* pd3dDevice, int nResources, ID3D12Resource** ppd3dResources, DXGI_FORMAT* pdxgiSrvFormats) {};
 
 	float m_fBulletEffectiveRange = 2000.0f;
 	CBulletObject* pBulletObject = NULL;
@@ -144,9 +146,6 @@ public:
 	int									m_nGameObjects = 0;
 	CGameObject** m_ppGameObjects = NULL;
 
-	int									m_n1StageEnemy = 0;
-	CGameObject** m_pp1StageEnemy = NULL;
-
 	int									m_nHierarchicalGameObjects = 0;
 	CGameObject** m_ppHierarchicalGameObjects = NULL;
 
@@ -154,6 +153,7 @@ public:
 
 	int									m_nShaders = 0;
 	CShader** m_ppShaders = NULL;
+	CShader* m_pShader = NULL;
 	CBulletEffectShader* m_pBulletEffect = NULL;
 	ValkanEffectShader* m_pValkanEffect = NULL;
 	CUseWaterMoveTerrain* m_pUseWaterMove = NULL;

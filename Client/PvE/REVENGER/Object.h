@@ -146,8 +146,8 @@ public:
 
 	void SetShader(CShader *pShader);
 	void SetMaterialType(UINT nType) { m_nType |= nType; }
-	virtual void SetTexture(CTexture *pTexture, UINT nTexture = 0);
-	virtual void SetTexture(CTexture *pTexture);
+	void SetTexture(CTexture *pTexture, UINT nTexture = 0);
+	void SetTexture(CTexture *pTexture);
 	void SetReflection(UINT nReflection) { m_nReflection = nReflection; }
 
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList);
@@ -421,6 +421,7 @@ public:
 	CAnimationController*			m_pSkinnedAnimationController = NULL;
 
 	virtual void SetMesh(CMesh *pMesh);
+	virtual void SetMesh(int nIndex, CMesh* pMesh);
 	void SetShader(CShader *pShader);
 	void SetShader(int nMaterial, CShader *pShader);
 	virtual void SetMaterial(int nMaterial, CMaterial *pMaterial);
@@ -666,3 +667,29 @@ public:
 	virtual ~CEagleObject();
 };
 
+
+
+
+
+
+
+
+
+
+
+class CRotatingObject : public CGameObject
+{
+public:
+	CRotatingObject(int nMeshes = 1);
+	virtual ~CRotatingObject();
+
+private:
+	XMFLOAT3					m_xmf3RotationAxis;
+	float						m_fRotationSpeed;
+
+public:
+	void SetRotationSpeed(float fRotationSpeed) { m_fRotationSpeed = fRotationSpeed; }
+	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
+
+	virtual void Animate(float fTimeElapsed);
+};

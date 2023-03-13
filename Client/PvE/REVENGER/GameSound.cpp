@@ -32,13 +32,13 @@ GameSound::GameSound()
 	result = soundSystem->createSound("sound_boss.mp3", FMOD_DEFAULT, 0, &bossSound);
 	result = bossSound->setMode(FMOD_LOOP_NORMAL);
 
-	result = soundSystem->playSound(walkSound, 0, false, &walkChannel);
+	result = soundSystem->playSound(walkSound, 0, true, &walkChannel);
 	walkChannel->setVolume(0.6f);
 	walkChannel->setPaused(true);
-	result = soundSystem->playSound(runSound, 0, false, &runChannel);
+	result = soundSystem->playSound(runSound, 0, true, &runChannel);
 	runChannel->setVolume(0.6f);
 	runChannel->setPaused(true);
-	result = soundSystem->playSound(bossSound, 0, false, &bossChannel);
+	result = soundSystem->playSound(bossSound, 0, true, &bossChannel);
 	bossChannel->setVolume(0.3f);
 	bossChannel->setPaused(true);
 
@@ -73,7 +73,7 @@ void GameSound::backGroundMusic()
 }
 void GameSound::SpeakMusic()
 {
-	result = soundSystem->playSound(speakSound, 0, m_bStopSound, &speakChannel);
+	result = soundSystem->playSound(speakSound, 0, false, &speakChannel);
 	speakChannel->setVolume(0.06f);
 }
 void GameSound::walkingSound()

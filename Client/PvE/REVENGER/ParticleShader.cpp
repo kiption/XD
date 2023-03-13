@@ -53,16 +53,17 @@ D3D12_SHADER_BYTECODE ParticleShader::CreatePixelShader(ID3DBlob** ppd3dShaderBl
 }
 D3D12_GPU_DESCRIPTOR_HANDLE ParticleShader::CreateConstantBufferViews(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride)
 {
-	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle = SceneManager::m_d3dCbvGPUDescriptorNextHandle;
+	SceneManager* pScene = NULL;
+		D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle = pScene->m_d3dCbvGPUDescriptorNextHandle;
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = pd3dConstantBuffers->GetGPUVirtualAddress();
 	D3D12_CONSTANT_BUFFER_VIEW_DESC d3dCBVDesc;
 	d3dCBVDesc.SizeInBytes = nStride;
 	for (int j = 0; j < nConstantBufferViews; j++)
 	{
 		d3dCBVDesc.BufferLocation = d3dGpuVirtualAddress + (nStride * j);
-		SceneManager::m_d3dCbvCPUDescriptorNextHandle.ptr = SceneManager::m_d3dCbvCPUDescriptorNextHandle.ptr + ::gnCbvSrvDescriptorIncrementSize;
-		pd3dDevice->CreateConstantBufferView(&d3dCBVDesc, SceneManager::m_d3dCbvCPUDescriptorNextHandle);
-		SceneManager::m_d3dCbvGPUDescriptorNextHandle.ptr = SceneManager::m_d3dCbvGPUDescriptorNextHandle.ptr + ::gnCbvSrvDescriptorIncrementSize;
+		pScene->m_d3dCbvCPUDescriptorNextHandle.ptr = pScene->m_d3dCbvCPUDescriptorNextHandle.ptr + ::gnCbvSrvDescriptorIncrementSize;
+		pd3dDevice->CreateConstantBufferView(&d3dCBVDesc, pScene->m_d3dCbvCPUDescriptorNextHandle);
+		pScene->m_d3dCbvGPUDescriptorNextHandle.ptr = pScene->m_d3dCbvGPUDescriptorNextHandle.ptr + ::gnCbvSrvDescriptorIncrementSize;
 	}
 	return(d3dCbvGPUDescriptorHandle);
 }

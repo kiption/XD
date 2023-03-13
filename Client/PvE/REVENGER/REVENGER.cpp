@@ -151,15 +151,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						gGameFramework.m_pScene->m_pLights->m_pLights[3].m_xmf3Direction= XMFLOAT3(bullets_info[i].m_look_vec);
 						gGameFramework.m_pScene->m_pLights->m_pLights[4].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.6f, 0.4f, 1.0f);
 						gGameFramework.m_pScene->m_pLights->m_pLights[4].m_xmf4Emissive = XMFLOAT4(0.9f, 0.6f, 0.4f, 1.0f);
-						gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerPosition = bullets_info[i].m_pos;
-						gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerLook= my_info.m_look_vec;
+					//	gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerPosition = bullets_info[i].m_pos;
+					//	gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerLook= my_info.m_look_vec;
 
 						XMFLOAT3 xmf3bulletPosition = bullets_info[i].m_pos;
 						XMFLOAT3 xmf3bulletLook = my_info.m_look_vec;
 						XMFLOAT3 xmf3Position= Vector3::Add(gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerPosition, Vector3::ScalarProduct(gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerLook, 60.0f, false));
-						gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(bullets_info[i].m_pos);
-						gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetLook(my_info.m_look_vec);
-						gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetLookAt(xmf3Position, XMFLOAT3(0.0f, 0.1, 0.0f));
+					//	gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(bullets_info[i].m_pos);
+					//	gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetLook(my_info.m_look_vec);
+					//	gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetLookAt(xmf3Position, XMFLOAT3(0.0f, 0.1, 0.0f));
 					
 					}
 				}
@@ -181,9 +181,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					gGameFramework.SetPosition_NPC(npcs_info[i].m_id, npcs_info[i].m_pos);
 					gGameFramework.SetVectors_NPC(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
 				}
-
-
-				
 			}
 			//==================================================
 

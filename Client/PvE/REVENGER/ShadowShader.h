@@ -2,7 +2,9 @@
 #include "Shader.h"
 #include "IlluminateMesh.h"
 #include "MapObjectShaders.h"
+#include "MissileObject.h"
 #include "Terrain.h"
+#include "Skybox.h"
 
 class CObjectsShader : public CIlluminatedShader
 {
@@ -22,8 +24,18 @@ public:
 	BoundingBox CalculateBoundingBox();
 
 public:
-	CGameObject** m_ppObjects = 0;
-	int								m_nObjects = 0;
+	CSkyBox* m_pSkyBox = NULL;
+	CHeightMapTerrain* m_pTerrain = NULL;
+	int	m_nHierarchicalGameObjects = 0;
+	CGameObject** m_ppHierarchicalGameObjects = NULL;
+
+	int	m_nNpcObjects = 0;
+	CGameObject** m_ppNpcObjects = NULL;
+
+
+	float m_fBulletEffectiveRange = 2000.0f;
+	CBulletObject* pBulletObject = NULL;
+	CBulletObject* m_ppBullets[BULLETS];
 };
 
 struct TOOBJECTSPACEINFO

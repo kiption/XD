@@ -76,9 +76,6 @@
     <ClInclude Include="WICTextureLoader12.h">
       <Filter>Asset</Filter>
     </ClInclude>
-    <ClInclude Include="GameFramework.h">
-      <Filter>Client\FrameWork</Filter>
-    </ClInclude>
     <ClInclude Include="REVENGER.h">
       <Filter>Client\Main</Filter>
     </ClInclude>
@@ -110,9 +107,6 @@
       <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="Network.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Server\Server\protocol.h">
       <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="BillboardObjectsShader.h">
@@ -157,9 +151,6 @@
     <ClInclude Include="Skybox.h">
       <Filter>Client\Object\Header</Filter>
     </ClInclude>
-    <ClInclude Include="Terrain.h">
-      <Filter>Client\Object\Header</Filter>
-    </ClInclude>
     <ClInclude Include="Mesh.h">
       <Filter>Client\Mesh\Header</Filter>
     </ClInclude>
@@ -180,6 +171,15 @@
     </ClInclude>
     <ClInclude Include="BillboardObjects.h">
       <Filter>Client\Object\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>Client\Object\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="GameFramework.h">
+      <Filter>Client\GameTime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Server\protocol.h">
+      <Filter>Server</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

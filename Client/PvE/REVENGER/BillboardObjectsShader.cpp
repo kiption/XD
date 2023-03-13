@@ -85,6 +85,7 @@ void CrossHairShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	CTexturedRectMesh* pSpriteMesh;
 	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList,40.0, 40.0, 0.0f, 0.0f, 0.0f, 0.0f);
 
+
 	m_nObjects = 1;
 	
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -180,7 +181,7 @@ D3D12_SHADER_BYTECODE RainShader::CreatePixelShader()
 
 void RainShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	/*CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Rain.dds", RESOURCE_TEXTURE2D, 0);
 
 	CMaterial* pSpriteMaterial = new CMaterial(1);
@@ -201,7 +202,7 @@ void RainShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		pRainObject->SetMesh(pSpriteMesh);
 		pRainObject->SetMaterial(0, pSpriteMaterial);
 		m_ppObjects[i] = pRainObject;
-	}
+	}*/
 }
 
 void RainShader::ReleaseObjects()
@@ -286,6 +287,7 @@ D3D12_SHADER_BYTECODE ValkanEffectShader::CreatePixelShader()
 
 void ValkanEffectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
+	SceneManager* m_pScene = NULL;
 	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Overheat.dds", RESOURCE_TEXTURE2D, 0);
 
@@ -297,7 +299,7 @@ void ValkanEffectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 	m_nObjects = 1;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures, 0, 15);
+	m_pScene->CreateShaderResourceViews(pd3dDevice, ppSpriteTextures, 0, 15);
 	m_ppObjects = new CGameObject * [m_nObjects];
 	CRainObject* pRainObject = NULL;
 

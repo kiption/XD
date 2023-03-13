@@ -78,7 +78,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) { }
 	virtual void ReleaseObjects() { }
 	void SetCurScene(int nCurScene) { m_nCurScene = nCurScene; }
-protected:
+public:
 	ID3DBlob							*m_pd3dVertexShaderBlob = NULL;
 	ID3DBlob							*m_pd3dPixelShaderBlob = NULL;
 	ID3DBlob							*m_pd3dGeometryShaderBlob = NULL;

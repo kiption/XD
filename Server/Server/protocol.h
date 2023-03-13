@@ -1,8 +1,17 @@
+constexpr int PORTNUM_RELAY2CLIENT_0 = 10000;	// 릴레이서버-클라이언트 통신 전용 포트
+constexpr int PORTNUM_RELAY2CLIENT_1 = 10001;
+constexpr int PORTNUM_RELAY2LOGIN_0 = 10010;	// 릴레이서버-인증서버 통신 전용 포트
+constexpr int PORTNUM_RELAY2LOGIN_1 = 10011;
+constexpr int PORTNUM_RELAY2LOBBY_0 = 10020;	// 릴레이서버-로비서버 통신 전용 포트
+constexpr int PORTNUM_RELAY2LOBBY_1 = 10021;
+constexpr int PORTNUM_RELAY2LOGIC_0 = 10030;	// 릴레이서버-로직서버 통신 전용 포트
+constexpr int PORTNUM_RELAY2LOGIC_1 = 10031;
+
 constexpr int MAX_SERVER = 2;
-constexpr int PORT_NUM_S0 = 9000;
-constexpr int PORT_NUM_S1 = 9001;
-constexpr int HA_PORTNUM_S0 = 10000;
-constexpr int HA_PORTNUM_S1 = 10001;
+constexpr int PORT_NUM_S0 = 11000;		// 서버
+constexpr int PORT_NUM_S1 = 11001;
+constexpr int HA_PORTNUM_S0 = 11100;		// 서버(HA)
+constexpr int HA_PORTNUM_S1 = 11101;
 
 constexpr int SERIAL_NUM_CLIENT = 0;
 constexpr int SERIAL_NUM_EXSERVER = 1000;
@@ -13,8 +22,8 @@ constexpr int HB_GRACE_PERIOD = 3000;	// Heartbeat가 몇 초 넘어도 오지 않으면 서
 constexpr int BUF_SIZE = 200;
 constexpr int NAME_SIZE = 20;
 
-constexpr int MAX_USER = 3;
-constexpr int MAX_NPCS = 10;
+constexpr int MAX_USER = 5;
+constexpr int MAX_NPCS = 5;
 constexpr int MAX_BULLET = 100;
 
 constexpr int WORLD_X_POS = 2000;

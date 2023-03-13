@@ -162,6 +162,7 @@ D3D12_SHADER_RESOURCE_VIEW_DESC CTexture::GetShaderResourceViewDesc(int nIndex)
 	case RESOURCE_TEXTURE2D: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize == 1)
 	case RESOURCE_TEXTURE2D_ARRAY: //[]
 		d3dShaderResourceViewDesc.Format = d3dResourceDesc.Format;
+		if (d3dResourceDesc.Format == DXGI_FORMAT_D32_FLOAT) d3dShaderResourceViewDesc.Format = DXGI_FORMAT_R32_FLOAT;
 		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		d3dShaderResourceViewDesc.Texture2D.MipLevels = -1;
 		d3dShaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
@@ -281,7 +282,7 @@ CShader* CMaterial::m_pStandardShader = NULL;
 void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	m_pStandardShader = new CStandardShader();
-	m_pStandardShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT);
+	m_pStandardShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1,NULL, DXGI_FORMAT_D24_UNORM_S8_UINT);
 	m_pStandardShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	m_pSkinnedAnimationShader = new CSkinnedAnimationStandardShader();
@@ -302,7 +303,6 @@ void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
 		if (m_ppTextures[i]) m_ppTextures[i]->UpdateShaderVariables(pd3dCommandList);
 
 
-	//
 	if (m_pTexture) m_pTexture->UpdateShaderVariables(pd3dCommandList);
 }
 
@@ -843,6 +843,16 @@ void CGameObject::SetMesh(CMesh* pMesh)
 	if (m_pMesh) m_pMesh->AddRef();
 }
 
+void CGameObject::SetMesh(int nIndex, CMesh* pMesh)
+{
+	if (m_ppMeshes)
+	{
+		if (m_ppMeshes[nIndex]) m_ppMeshes[nIndex]->Release();
+		m_ppMeshes[nIndex] = pMesh;
+		if (pMesh) pMesh->AddRef();
+	}
+}
+
 void CGameObject::SetShader(CShader* pShader)
 {
 	m_nMaterials = 1;
@@ -1025,6 +1035,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 			m_pMaterials->m_pTexture->UpdateShaderVariables(pd3dCommandList);
 		}
 	}
+
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 }
@@ -1071,7 +1082,8 @@ void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandLis
 	XMStoreFloat4x4(&xmf4x4PlanarShadow, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World) * (*pxmf4x4Shadow)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4PlanarShadow, 0);
 
-	for (int i = 0; i < m_nMaterials; i++)if (m_ppMaterials[i]) pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_ppMaterials[i]->m_nReflection, 16);
+
+	if (m_pMaterials) pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_pMaterials->m_nReflection, 16);
 
 }
 
@@ -1302,7 +1314,9 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 					}
 				}
 			}
+			pMaterial->SetReflection(nMaterial);
 			SetMaterial(nMaterial, pMaterial);
+			
 		}
 		else if (!strcmp(pstrToken, "<AlbedoColor>:"))
 		{
@@ -1915,4 +1929,17 @@ CEagleObject::~CEagleObject()
 {
 }
 
+CRotatingObject::CRotatingObject(int nMeshes)
+{
+	m_xmf3RotationAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_fRotationSpeed = 15.0f;
+}
 
+CRotatingObject::~CRotatingObject()
+{
+}
+
+void CRotatingObject::Animate(float fTimeElapsed)
+{
+	CGameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
+}

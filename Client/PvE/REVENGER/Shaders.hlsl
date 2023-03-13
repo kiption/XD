@@ -162,6 +162,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	{
 		normalW = normalize(input.normalW);
 	}
+
 	float4 uvs[MAX_LIGHTS];
 	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
 
@@ -203,7 +204,7 @@ float4 PSBulletStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	}
 
 	float4 uvs[MAX_LIGHTS];
-	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
 
 	return(lerp(cColor, cIllumination, 0.5f));
 }
@@ -319,7 +320,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
 //	float4 cColor = (cBaseTexColor * cDetailTexColor);
 	//cIllumination =Lighting(input.positionW, input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
 
 	
 	cColor = lerp(cColor, cIllumination, 0.5f);
@@ -701,7 +702,7 @@ VS_CIRCULAR_SHADOW_INPUT VSCircularShadow(VS_CIRCULAR_SHADOW_INPUT input)
 }
 
 static float2 pf2UVs[4] = { float2(0.0f,1.0f), float2(0.0f,0.0f), float2(1.0f,1.0f), float2(1.0f,0.0f) };
-Texture2D gtxtCircularShadowTexture : register(t18);
+Texture2D gtxtCircularShadowTexture : register(t34);
 
 [maxvertexcount(4)]
 void GSCircularShadow(point VS_CIRCULAR_SHADOW_INPUT input[1], inout TriangleStream<GS_CIRCULAR_SHADOW_GEOMETRY_OUTPUT> outStream)
@@ -854,6 +855,6 @@ float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
 
 	//	cIllumination = saturate(gtxtDepthTextures[3].SampleLevel(gssProjector, f3uvw.xy, 0).r);
-
+//	cIllumination = float4(0, 0, 0, 1);
 	return(cIllumination);
 }

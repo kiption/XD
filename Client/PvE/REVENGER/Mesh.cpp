@@ -13,7 +13,6 @@ CMesh::CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandLis
 CMesh::~CMesh()
 {
 	if (m_pd3dPositionBuffer) m_pd3dPositionBuffer->Release();
-
 	if (m_nSubMeshes > 0)
 	{
 		for (int i = 0; i < m_nSubMeshes; i++)
@@ -29,6 +28,7 @@ CMesh::~CMesh()
 	}
 
 	if (m_pxmf3Positions) delete[] m_pxmf3Positions;
+
 }
 
 void CMesh::ReleaseUploadBuffers()
@@ -78,6 +78,7 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
 
 void CMesh::CalculateBoundingBox(XMFLOAT3* pxmf3Points, UINT nStride)
 {
+	m_nStride = nStride;
 	BoundingBox::CreateFromPoints(m_xmBoundingBox, m_nVertices, pxmf3Points, nStride);
 
 }
@@ -240,6 +241,8 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
 				m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
 				m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+
+				CalculateBoundingBox((XMFLOAT3*)m_pxmf3Positions, sizeof(XMFLOAT3));
 			}
 		}
 		else if (!strcmp(pstrToken, "<Colors>:"))
@@ -438,6 +441,8 @@ CTexturedRectMesh::CTexturedRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	m_d3dTextureCoord0BufferView.BufferLocation = m_pd3dTextureCoord0Buffer->GetGPUVirtualAddress();
 	m_d3dTextureCoord0BufferView.StrideInBytes = sizeof(XMFLOAT2);
 	m_d3dTextureCoord0BufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
+
+	CalculateBoundingBox((XMFLOAT3*)m_pxmf3Positions, sizeof(XMFLOAT3));
 }
 
 CTexturedRectMesh::~CTexturedRectMesh()

@@ -50,7 +50,7 @@ cbuffer cbLights : register(b4)
 
 #define MAX_DEPTH_TEXTURES		MAX_LIGHTS
 
-Texture2D<float> gtxtDepthTextures[MAX_DEPTH_TEXTURES] : register(t19);
+Texture2D<float> gtxtDepthTextures[MAX_DEPTH_TEXTURES] : register(t18);
 
 SamplerComparisonState gssComparisonPCFShadow : register(s2);
 
@@ -73,7 +73,7 @@ float Compute5x5ShadowFactor(float2 uv, float fDepth, uint nIndex)
 {
 	float fPercentLit = 0.0f;
 
-	return(fPercentLit / 10.0f);
+	return(fPercentLit /25.0f);
 }
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
