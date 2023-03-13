@@ -516,8 +516,8 @@ void process_packet(int client_id, char* packet)
 					clients[client_id].s_lock.unlock();
 
 					// server message
-					cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
-						<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
+					//cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
+					//	<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
 
 					// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
 					for (int j = 0; j < MAX_USER; j++) {
@@ -545,8 +545,8 @@ void process_packet(int client_id, char* packet)
 					clients[client_id].s_lock.unlock();
 
 					// server message
-					cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] moves to ("
-						<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.z << ")." << endl;
+					//cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] moves to ("
+					//	<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.z << ")." << endl;
 
 					// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
 					for (int j = 0; j < MAX_USER; j++) {
@@ -704,8 +704,8 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].s_lock.unlock();
 
 			// server message
-			cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
-				<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
+			//cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
+			//	<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
 
 			// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
 			for (auto& send_target : clients) {
@@ -1034,7 +1034,7 @@ void timerFunc() {
 							mv_target.pl_state = PL_ST_DEAD;
 							mv_target.death_time = chrono::system_clock::now();
 
-							cout << "Player[" << mv_target.id << "] is Killed by Player[" << other_pl.id << "]!" << endl; //server message
+							//cout << "Player[" << mv_target.id << "] is Killed by Player[" << other_pl.id << "]!" << endl; //server message
 
 							// 사망한 플레이어에게 게임오버 사실을 알립니다.
 							SC_PLAYER_STATE_PACKET hpzero_packet;
@@ -1046,7 +1046,7 @@ void timerFunc() {
 							mv_target.do_send(&hpzero_packet);
 						}
 						else {
-							cout << "Player[" << mv_target.id << "] is Damaged by Player[" << other_pl.id << "]!" << endl; //server message
+							//cout << "Player[" << mv_target.id << "] is Damaged by Player[" << other_pl.id << "]!" << endl; //server message
 
 							// 충돌한 플레이어에게 충돌 사실을 알립니다.
 							SC_DAMAGED_PACKET damaged_by_player_packet;
@@ -1070,7 +1070,7 @@ void timerFunc() {
 							other_pl.pl_state = PL_ST_DEAD;
 							other_pl.death_time = chrono::system_clock::now();
 
-							cout << "Player[" << other_pl.id << "] is Killed by Player[" << mv_target.id << "]!" << endl; //server message
+							//cout << "Player[" << other_pl.id << "] is Killed by Player[" << mv_target.id << "]!" << endl; //server message
 
 							// 사망한 플레이어에게 게임오버 사실을 알립니다.
 							SC_PLAYER_STATE_PACKET hpzero_packet;
@@ -1082,7 +1082,7 @@ void timerFunc() {
 							other_pl.do_send(&hpzero_packet);
 						}
 						else {
-							cout << "Player[" << other_pl.id << "] is Damaged by Player[" << mv_target.id << "]!" << endl; //server message
+							//cout << "Player[" << other_pl.id << "] is Damaged by Player[" << mv_target.id << "]!" << endl; //server message
 
 							// 충돌한 플레이어에게 충돌 사실을 알립니다.
 							SC_DAMAGED_PACKET damaged_by_player_packet;
@@ -1116,7 +1116,7 @@ void timerFunc() {
 					mv_target.m_upvec = basic_coordinate.up;
 					mv_target.m_lookvec = basic_coordinate.look;
 					mv_target.setBB();
-					cout << "Player[" << mv_target.id << "] Revived and Move to Respawn Area." << endl;
+					//cout << "Player[" << mv_target.id << "] Revived and Move to Respawn Area." << endl;
 
 					// 부활한 플레이어에게 부활 사실을 알립니다.
 					SC_PLAYER_STATE_PACKET revival_packet;
@@ -1217,7 +1217,7 @@ void timerFunc() {
 							pl.pl_state = PL_ST_DEAD;
 							pl.death_time = chrono::system_clock::now();
 
-							cout << "Player[" << pl.id << "] is Killed by Player[" << bullet.getOwner() << "]'s Bullet!" << endl; //server message
+							//cout << "Player[" << pl.id << "] is Killed by Player[" << bullet.getOwner() << "]'s Bullet!" << endl; //server message
 
 							// 사망한 플레이어에게 게임오버 사실을 알립니다.
 							SC_PLAYER_STATE_PACKET hpzero_packet;
@@ -1229,7 +1229,7 @@ void timerFunc() {
 							pl.do_send(&hpzero_packet);
 						}
 						else {
-							cout << "Player[" << pl.id << "] is Damaged by Bullet!" << endl; //server message
+							//cout << "Player[" << pl.id << "] is Damaged by Bullet!" << endl; //server message
 
 							// 충돌한 플레이어에게 충돌 사실을 알립니다.
 							SC_DAMAGED_PACKET damaged_by_bullet_packet;
@@ -1364,8 +1364,8 @@ void MoveNPC()
 				}
 			}
 
-			cout << "NPC[" << npcs[i].GetID() << "] moves to POS("
-				<< npcs[i].GetPosition().x << ", " << npcs[i].GetPosition().y << ", " << npcs[i].GetPosition().z << ")" << endl;
+			//cout << "NPC[" << npcs[i].GetID() << "] moves to POS("
+			//	<< npcs[i].GetPosition().x << ", " << npcs[i].GetPosition().y << ", " << npcs[i].GetPosition().z << ")" << endl;
 		}
 	}
 }
