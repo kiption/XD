@@ -146,7 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BulletsMgr.h" />
-    <ClInclude Include="global.h" />
+    <ClInclude Include="Constant.h" />
     <ClInclude Include="MyVectors.h" />
     <ClInclude Include="NPC.h" />
     <ClInclude Include="ObjectsMgr.h" />

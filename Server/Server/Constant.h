@@ -2,7 +2,7 @@
 
 #define PI 3.141592654f
 
-#define MOVE_SCALAR_FB 0.006f			// 이동 힘 (앞뒤)
+#define MOVE_SCALAR_FB 0.008f			// 이동 힘 (앞뒤)
 #define MOVE_SCALAR_LR 0.0014f			// 이동 힘 (좌우)
 
 #define PITCH_ROTATE_SCALAR 0.15f	// pitch회전 힘
@@ -20,7 +20,7 @@
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
 
 #define SHOOT_COOLDOWN_BULLET 100		// 총알 발사 쿨타임(ms)
-#define BULLET_MOVE_SCALAR 0.08f		// 총알 이동 힘
+#define BULLET_MOVE_SCALAR 0.8f		// 총알 이동 힘
 #define BULLET_RANGE 500.f				// 총알 사정거리
 #define BULLET_DAMAGE 10				// 총알 피격데미지
 

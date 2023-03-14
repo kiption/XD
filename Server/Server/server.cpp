@@ -8,7 +8,7 @@
 #include <chrono>
 #include <random>
 
-#include "global.h"
+#include "Constant.h"
 #include "BulletsMgr.h"
 #include "../RelayServer/Protocol.h"
 #include "NPC.h"
