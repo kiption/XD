@@ -31,60 +31,56 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[0] = new CGameObject(1);
 	m_ppObjects[0]->SetMesh(pPlaneMesh);
 	m_ppObjects[0]->SetMaterial(pPlaneMaterial);
-	m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, -55.0, 100.0f));
+	m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 0.0, 100.0f));
 
-	CMaterial* pCityMaterial = new CMaterial(1);
-	pCityMaterial->SetReflection(1);
-	CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1.bin", NULL);
+	CMaterial* pCityMaterial = new CMaterial(3);
+	pCityMaterial->SetReflection(3);
 
-	m_ppObjects[1] = new CGameObject(1);
-	m_ppObjects[1]->SetChild(pGeneratorModel, false);
-	m_ppObjects[1]->SetScale(3.0, 3.0, 3.0);
-	m_ppObjects[1]->SetMaterial(pCityMaterial);
-	m_ppObjects[1]->SetPosition(-500.0f, -35.0, 100.0f);
-	pGeneratorModel->AddRef();
-	m_ppObjects[17] = new CGameObject(1);
-	m_ppObjects[17]->SetChild(pGeneratorModel, false);
-	m_ppObjects[17]->SetScale(3.0, 3.0, 3.0);
-	m_ppObjects[17]->SetMaterial(pCityMaterial);
-	m_ppObjects[17]->SetPosition(0.0f, -35.0, -500.0f);
-	pGeneratorModel->AddRef();
+	int Cities = 3;
+	m_ppCityGameObjects = new CGameObject * [Cities];
 
-	m_ppObjects[18] = new CGameObject(1);
-	m_ppObjects[18]->SetChild(pGeneratorModel, false);
-	m_ppObjects[18]->SetScale(3.0, 3.0, 3.0);
-	m_ppObjects[18]->SetMaterial(pCityMaterial);
-	m_ppObjects[18]->SetPosition(250.0f, -35.0, -250.0f);
-	pGeneratorModel->AddRef();
+	for (int i = 0; i < Cities; i++)
+	{
 
+		m_ppCityGameObjects[i] = new CGameObject(3);
+		CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1.bin", NULL);
+		m_ppCityGameObjects[i]->SetChild(pGeneratorModel, false);
+		m_ppCityGameObjects[i]->SetMaterial(pCityMaterial);
+		m_ppCityGameObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
+		m_ppCityGameObjects[i]->SetScale(2.0, 2.0, 2.0);
+		m_ppCityGameObjects[i]->OnPrepareAnimate();
+		pGeneratorModel->AddRef();
+	}
 
-	CPlaneMeshIlluminated* pPlaneMesh2 = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 10.0, 0.0f, _PLANE_HEIGHT + 10.0, 0.0f, 0.0f, 0.0f);
+	m_ppObjects[1] = m_ppCityGameObjects[0];
+	m_ppObjects[17] = m_ppCityGameObjects[1];
+	m_ppObjects[18] = m_ppCityGameObjects[2];
+	m_ppObjects[1]->SetPosition(-500.0, 15.0, 500.0);
+	m_ppObjects[17]->SetPosition(-300.0, 15.0, -500.0);
+	m_ppObjects[18]->SetPosition(500.0, 15.0, 700.0);
+
 	CMaterial* pPlaneMaterial2 = new CMaterial(1);
 	pPlaneMaterial2->SetReflection(1);
-	m_ppObjects[2] = new CGameObject(1);
-	m_ppObjects[2]->SetMesh(pPlaneMesh2);
-	m_ppObjects[2]->SetMaterial(pPlaneMaterial2);
+	XMFLOAT3 xmf3Scale(0.5f, 0.8, 0.5f);
+	XMFLOAT3 xmf3Normal(1.0f, 1.0f, 1.0f);
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf3Normal);
+	m_pTerrain->SetMaterial(pPlaneMaterial2);
+	m_pTerrain->SetPosition(-200.0f, 0.0, -200.0f);
+	m_ppObjects[2] = m_pTerrain;
 
-	m_ppObjects[2]->SetPosition(XMFLOAT3(2000.0f, pTerrain->GetHeight(2000.0, 1500.0f) + 200.0, 1500.0f));
 
 	CMaterial* pMaterial = new CMaterial(3);
 	pMaterial->SetReflection(3);
-
 	m_ppObjects[3] = new CGameObject(1);
 	m_ppObjects[3]->SetMesh(pCubeMesh);
 	m_ppObjects[3]->SetMaterial(pMaterial);
-	m_ppObjects[3]->SetPosition(-500.0f, -20.0, 500.0f);
+	m_ppObjects[3]->SetPosition(-500.0f, 15.0, 500.0f);
 
-	//XMFLOAT3 xmf3Scale(5.0f, 4.0f, 5.0f);
-	//XMFLOAT3 xmf3Normal(1.0f, 1.0f, 1.0f);
-	//m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf3Normal);
-	//m_pTerrain->SetMaterial(pMaterial);
-	//m_pTerrain->SetPosition(-500.0f, -90.0, -500.0f);
-	//m_ppObjects[4] = m_pTerrain;
+	
 	m_ppObjects[4] = new CGameObject(1);
 	m_ppObjects[4]->SetMesh(pCubeMesh);
 	m_ppObjects[4]->SetMaterial(pMaterial);
-	m_ppObjects[4]->SetPosition(-500.0f, -20.0, 500.0f);
+	m_ppObjects[4]->SetPosition(-500.0f, 15.0, 500.0f);
 	m_nHierarchicalGameObjects = 5;
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 	CMaterial* pOtherPlayerMaterial = new CMaterial(5);
@@ -97,8 +93,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 		m_ppHierarchicalGameObjects[i]->SetChild(pOtherPlayerModel, false);
 		m_ppHierarchicalGameObjects[i]->SetMaterial(pOtherPlayerMaterial);
-		m_ppHierarchicalGameObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-		m_ppHierarchicalGameObjects[i]->SetScale(10.0, 10.0, 10.0);
+		m_ppHierarchicalGameObjects[i]->SetScale(5.0, 5.0, 5.0);
 		m_ppHierarchicalGameObjects[i]->OnPrepareAnimate();
 		pOtherPlayerModel->AddRef();
 	}
@@ -223,7 +218,7 @@ D3D12_DEPTH_STENCIL_DESC CShadowMapShader::CreateDepthStencilState()
 	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
 	d3dDepthStencilDesc.DepthEnable = TRUE;
 	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 	d3dDepthStencilDesc.StencilEnable = FALSE;
 	d3dDepthStencilDesc.StencilReadMask = 0x00;
 	d3dDepthStencilDesc.StencilWriteMask = 0x00;
@@ -312,7 +307,7 @@ CDepthRenderShader::CDepthRenderShader(CObjectsShader* pObjectsShader, LIGHT* pL
 	m_pLights = pLights;
 	m_pToLightSpaces = new TOLIGHTSPACES;
 
-	XMFLOAT4X4 xmf4x4ToTexture = { -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, -0.5f, -0.5f, 0.0f, -1.0f };
+	XMFLOAT4X4 xmf4x4ToTexture = { 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.5f, 0.5f, 0.0f, 1.0f };
 	m_xmProjectionToTexture = XMLoadFloat4x4(&xmf4x4ToTexture);
 }
 
@@ -327,7 +322,7 @@ D3D12_DEPTH_STENCIL_DESC CDepthRenderShader::CreateDepthStencilState()
 	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
 	d3dDepthStencilDesc.DepthEnable = TRUE;
 	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS; //D3D12_COMPARISON_FUNC_LESS_EQUAL
+	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL; //D3D12_COMPARISON_FUNC_LESS_EQUAL
 	d3dDepthStencilDesc.StencilEnable = FALSE;
 	d3dDepthStencilDesc.StencilReadMask = 0x00;
 	d3dDepthStencilDesc.StencilWriteMask = 0x00;
@@ -356,7 +351,7 @@ D3D12_RASTERIZER_DESC CDepthRenderShader::CreateRasterizerState()
 	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
 	d3dRasterizerDesc.SlopeScaledDepthBias = 1.0f;
 	d3dRasterizerDesc.DepthClipEnable = TRUE;
-	d3dRasterizerDesc.MultisampleEnable = FALSE;
+	d3dRasterizerDesc.MultisampleEnable = TRUE;
 	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
 	d3dRasterizerDesc.ForcedSampleCount = 0;
 	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_ON;
@@ -595,7 +590,7 @@ D3D12_DEPTH_STENCIL_DESC CTextureToViewportShader::CreateDepthStencilState()
 	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
 	d3dDepthStencilDesc.DepthEnable = FALSE;
 	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 	d3dDepthStencilDesc.StencilEnable = FALSE;
 	d3dDepthStencilDesc.StencilReadMask = 0x00;
 	d3dDepthStencilDesc.StencilWriteMask = 0x00;

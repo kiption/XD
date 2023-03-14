@@ -70,7 +70,7 @@ protected:
 	int								m_nVertices = 0;
 
 	XMFLOAT3						*m_pxmf3Positions = NULL;
-
+//	XMFLOAT3* TextureCoor1= NULL;
 	ID3D12Resource					*m_pd3dPositionBuffer = NULL;
 	ID3D12Resource					*m_pd3dPositionUploadBuffer = NULL;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dPositionBufferView;
@@ -108,9 +108,13 @@ public:
 	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) { }
 	virtual void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) { }
 	virtual void OnPostRender(int nPipelineState) { }
+
 	void CalculateBoundingBox(XMFLOAT3* pxmf3Points, UINT nStride);
 
-
+	void CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices);
+	void CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices);
+	void CalculateTriangleStripVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices);
+	void CalculateVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices, UINT* pnIndices, int nIndices);
 };
 
 class CStandardMesh : public CMesh

@@ -1,4 +1,4 @@
-#define MAX_LIGHTS 16
+#define MAX_LIGHTS 8
 struct MATERIAL
 {
 	float4					m_cAmbient;
@@ -164,9 +164,10 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	}
 
 	float4 uvs[MAX_LIGHTS];
-	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
 
-	return(lerp(cColor, cIllumination, 0.4f));
+	float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
+
+	return(lerp(cColor, cIllumination, 0.5f));
 }
 
 

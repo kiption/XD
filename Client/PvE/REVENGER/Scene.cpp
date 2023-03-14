@@ -91,27 +91,27 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 	m_pLights = new LIGHTS;
 	::ZeroMemory(m_pLights, sizeof(LIGHTS));
 
-	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0);
 
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[0].m_fRange = 3500.0f;
+	m_pLights->m_pLights[0].m_fRange = 4000.0f;
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.93f, 0.93f, 0.93f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-250.0f, 600.0f, -550.0f);
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.43f, 0.43f, 0.43f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(+250, 550.0f, -1000.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(-0.3f, -1.0f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.1f, 0.0001f);
 
 	m_pLights->m_pLights[1].m_bEnable = false;
 	m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 3000.0f;
-	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.8f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.54f, 0.54f, 0.54f, 0.8f);
-	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.53f, 0.53f, 0.53f, 0.8f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-550.0f, 700.0f, -550.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.3f, -1.0f, 0.8f);
-	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.1f, 0.0001f);
-	m_pLights->m_pLights[1].m_fFalloff = 11.0f;
+	m_pLights->m_pLights[1].m_fRange = 10000.0f;
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.2f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.54f, 0.54f, 0.54f, 0.2f);
+	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.23f, 0.23f, 0.23f, 0.2f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-550.0f, 450.0f, -900.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.1f, 0.001f);
+	m_pLights->m_pLights[1].m_fFalloff = 20.0f;
 	m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(60.0f));
 	m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
 
@@ -161,14 +161,14 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 	m_pMaterials->m_pReflections[5] = { XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 30.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
 	m_pMaterials->m_pReflections[6] = { XMFLOAT4(0.5f, 0.5f, 1.0f, 1.0f), XMFLOAT4(0.5f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 35.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
 	m_pMaterials->m_pReflections[7] = { XMFLOAT4(1.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
-	m_pMaterials->m_pReflections[8] = { XMFLOAT4(1.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
-	m_pMaterials->m_pReflections[9] = { XMFLOAT4(1.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
-	m_pMaterials->m_pReflections[10] = { XMFLOAT4(1.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 30.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
-	m_pMaterials->m_pReflections[11] = { XMFLOAT4(0.6f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 20.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
-	m_pMaterials->m_pReflections[12] = { XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f), XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f), XMFLOAT4(1.0f, 1.0f, 1.0f, 10.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
-	m_pMaterials->m_pReflections[13] = { XMFLOAT4(0.7f, 0.5f, 1.0f, 1.0f), XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 15.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
-	m_pMaterials->m_pReflections[14] = { XMFLOAT4(0.28f, 0.28f, 0.28f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 25.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
-	m_pMaterials->m_pReflections[15] = { XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 35.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+//	m_pMaterials->m_pReflections[8] = { XMFLOAT4(1.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	//m_pMaterials->m_pReflections[9] = { XMFLOAT4(1.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	//m_pMaterials->m_pReflections[10] = { XMFLOAT4(1.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 30.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	//m_pMaterials->m_pReflections[11] = { XMFLOAT4(0.6f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 20.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	//m_pMaterials->m_pReflections[12] = { XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f), XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f), XMFLOAT4(1.0f, 1.0f, 1.0f, 10.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	//m_pMaterials->m_pReflections[13] = { XMFLOAT4(0.7f, 0.5f, 1.0f, 1.0f), XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 15.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	//m_pMaterials->m_pReflections[14] = { XMFLOAT4(0.28f, 0.28f, 0.28f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 25.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	//m_pMaterials->m_pReflections[15] = { XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 35.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
 
 }
 
@@ -735,9 +735,9 @@ void SceneManager::AnimateObjects(float fTimeElapsed)
 		m_pLights->m_pLights[4].m_xmf3Direction = m_pPlayer->GetLookVector();
 
 		m_fLightRotationAngle += fTimeElapsed;
-		XMMATRIX xmmtxRotation = XMMatrixRotationY(fTimeElapsed * 0.8f);
+		XMMATRIX xmmtxRotation = XMMatrixRotationY(fTimeElapsed * 0.1f);
 		//XMStoreFloat3(&m_pLights->m_pLights[0].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction), xmmtxRotation));
-		//XMStoreFloat3(&m_pLights->m_pLights[1].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[1].m_xmf3Direction), xmmtxRotation));
+		XMStoreFloat3(&m_pLights->m_pLights[1].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[1].m_xmf3Direction), xmmtxRotation));
 
 	}
 
@@ -810,19 +810,23 @@ void SceneManager::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 
 			XMMATRIX xmmtxView = XMMatrixLookToLH(XMLoadFloat3(&xmf3Position), XMLoadFloat3(&xmf3Look), XMLoadFloat3(&xmf3Up));
 
-			float fNearPlaneDistance = 10.0f, fFarPlaneDistance = m_pLights->m_pLights[j].m_fRange;
+			float fNearPlaneDistance = 30.0f, fFarPlaneDistance = m_pLights->m_pLights[j].m_fRange;
 
 			XMMATRIX xmmtxProjection;
 			if (m_pLights->m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
 			{
-				float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
-				xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
-				float fLeft = -(_PLANE_WIDTH * 0.5f), fRight = +(_PLANE_WIDTH * 0.5f), fTop = +(_PLANE_HEIGHT * 0.5f), fBottom = -(_PLANE_HEIGHT * 0.5f);
-				xmmtxProjection = XMMatrixOrthographicOffCenterLH(fLeft * 6.0f, fRight * 6.0f, fBottom * 6.0f, fTop * 6.0f, fNearPlaneDistance, fFarPlaneDistance);
+			//	float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
+			//	xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
+			//	float fLeft = -(_PLANE_WIDTH * 0.5f), fRight = +(_PLANE_WIDTH * 0.5f), fTop = +(_PLANE_HEIGHT * 0.5f), fBottom = -(_PLANE_HEIGHT * 0.5f);
+			//	xmmtxProjection = XMMatrixOrthographicOffCenterLH(fLeft * 6.0f, fRight * 6.0f, fBottom * 6.0f, fTop * 6.0f, fNearPlaneDistance, fFarPlaneDistance);
+				float fFovAngle = 60.0; //m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
+				float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
+				xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fFovAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
+
 			}
 			else if (m_pLights->m_pLights[j].m_nType == SPOT_LIGHT)
 			{
-				float fFovAngle = 60.0f; //m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
+				float fFovAngle = m_pLights->m_pLights[j].m_fPhi; //m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
 				float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
 				xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fFovAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
 			}

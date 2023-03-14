@@ -28,6 +28,7 @@ public:
 	CHeightMapTerrain* m_pTerrain = NULL;
 	int	m_nHierarchicalGameObjects = 0;
 	CGameObject** m_ppHierarchicalGameObjects = NULL;
+	CGameObject** m_ppCityGameObjects = NULL;
 
 	int	m_nNpcObjects = 0;
 	CGameObject** m_ppNpcObjects = NULL;

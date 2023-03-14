@@ -102,6 +102,90 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 void CMesh::OnPostRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
 {
 }
+void CMesh::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices)
+{
+	int nPrimitives = nVertices / 3;
+	UINT nIndex0, nIndex1, nIndex2;
+	for (int i = 0; i < nPrimitives; i++)
+	{
+		nIndex0 = i * 3 + 0;
+		nIndex1 = i * 3 + 1;
+		nIndex2 = i * 3 + 2;
+		XMFLOAT3 xmf3Edge01 = Vector3::Subtract(pxmf3Positions[nIndex1], pxmf3Positions[nIndex0]);
+		XMFLOAT3 xmf3Edge02 = Vector3::Subtract(pxmf3Positions[nIndex2], pxmf3Positions[nIndex0]);
+		pxmf3Normals[nIndex0] = pxmf3Normals[nIndex1] = pxmf3Normals[nIndex2] = Vector3::CrossProduct(xmf3Edge01, xmf3Edge02, true);
+	}
+}
+
+void CMesh::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices)
+{
+	UINT nPrimitives = (pnIndices) ? (nIndices / 3) : (nVertices / 3);
+	XMFLOAT3 xmf3SumOfNormal, xmf3Edge01, xmf3Edge02, xmf3Normal;
+	UINT nIndex0, nIndex1, nIndex2;
+	for (UINT j = 0; j < nVertices; j++)
+	{
+		xmf3SumOfNormal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		for (UINT i = 0; i < nPrimitives; i++)
+		{
+			nIndex0 = pnIndices[i * 3 + 0];
+			nIndex1 = pnIndices[i * 3 + 1];
+			nIndex2 = pnIndices[i * 3 + 2];
+			if (pnIndices && ((nIndex0 == j) || (nIndex1 == j) || (nIndex2 == j)))
+			{
+				xmf3Edge01 = Vector3::Subtract(pxmf3Positions[nIndex1], pxmf3Positions[nIndex0]);
+				xmf3Edge02 = Vector3::Subtract(pxmf3Positions[nIndex2], pxmf3Positions[nIndex0]);
+				xmf3Normal = Vector3::CrossProduct(xmf3Edge01, xmf3Edge02, false);
+				xmf3SumOfNormal = Vector3::Add(xmf3SumOfNormal, xmf3Normal);
+			}
+		}
+		pxmf3Normals[j] = Vector3::Normalize(xmf3SumOfNormal);
+	}
+}
+
+void CMesh::CalculateTriangleStripVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices)
+{
+	UINT nPrimitives = (pnIndices) ? (nIndices - 2) : (nVertices - 2);
+	XMFLOAT3 xmf3SumOfNormal(0.0f, 0.0f, 0.0f);
+	UINT nIndex0, nIndex1, nIndex2;
+	for (UINT j = 0; j < nVertices; j++)
+	{
+		xmf3SumOfNormal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		for (UINT i = 0; i < nPrimitives; i++)
+		{
+			nIndex0 = ((i % 2) == 0) ? (i + 0) : (i + 1);
+			if (pnIndices)nIndex0 = pnIndices[nIndex0];
+			nIndex1 = ((i % 2) == 0) ? (i + 1) : (i + 0);
+			if (pnIndices)nIndex1 = pnIndices[nIndex1];
+			nIndex2 = (pnIndices) ? pnIndices[i + 2] : (i + 2);
+			if ((nIndex0 == j) || (nIndex1 == j) || (nIndex2 == j))
+			{
+				XMFLOAT3 xmf3Edge01 = Vector3::Subtract(pxmf3Positions[nIndex1], pxmf3Positions[nIndex0]);
+				XMFLOAT3 xmf3Edge02 = Vector3::Subtract(pxmf3Positions[nIndex2], pxmf3Positions[nIndex0]);
+				XMFLOAT3 xmf3Normal = Vector3::CrossProduct(xmf3Edge01, xmf3Edge02, true);
+				xmf3SumOfNormal = Vector3::Add(xmf3SumOfNormal, xmf3Normal);
+			}
+		}
+		pxmf3Normals[j] = Vector3::Normalize(xmf3SumOfNormal);
+	}
+}
+
+void CMesh::CalculateVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices, UINT* pnIndices, int nIndices)
+{
+	switch (m_d3dPrimitiveTopology)
+	{
+	case D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST:
+		if (pnIndices)
+			CalculateTriangleListVertexNormals(pxmf3Normals, pxmf3Positions, nVertices, pnIndices, nIndices);
+		else
+			CalculateTriangleListVertexNormals(pxmf3Normals, pxmf3Positions, nVertices);
+		break;
+	case D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP:
+		CalculateTriangleStripVertexNormals(pxmf3Normals, pxmf3Positions, nVertices, pnIndices, nIndices);
+		break;
+	default:
+		break;
+	}
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
@@ -211,9 +295,9 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 {
 	char pstrToken[64] = { '\0' };
 	int nPositions = 0, nColors = 0, nNormals = 0, nTangents = 0, nBiTangents = 0, nTextureCoords = 0, nIndices = 0, nSubMeshes = 0, nSubIndices = 0;
-
+	UINT* pnIndices = new UINT[nSubMeshes];
 	UINT nReads = (UINT)::fread(&m_nVertices, sizeof(int), 1, pInFile);
-
+	XMFLOAT3* TextureCoor0{}; 	XMFLOAT3* TextureCoor1{};
 	::ReadStringFromFile(pInFile, m_pstrMeshName);
 
 	for (; ; )
@@ -224,7 +308,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			nReads = (UINT)::fread(&m_xmf3AABBCenter, sizeof(XMFLOAT3), 1, pInFile);
 			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
 
-			m_xmeshoobb = BoundingOrientedBox(XMFLOAT3(m_xmf3AABBCenter), XMFLOAT3(m_xmf3AABBExtents),XMFLOAT4(0,0,0,1));
+			m_xmBoundingBox = BoundingBox(XMFLOAT3(m_xmf3AABBCenter), XMFLOAT3(m_xmf3AABBExtents));
 
 		}
 		else if (!strcmp(pstrToken, "<Positions>:"))
@@ -269,6 +353,11 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				m_d3dTextureCoord0BufferView.BufferLocation = m_pd3dTextureCoord0Buffer->GetGPUVirtualAddress();
 				m_d3dTextureCoord0BufferView.StrideInBytes = sizeof(XMFLOAT2);
 				m_d3dTextureCoord0BufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
+				//TextureCoor0->x = m_pxmf2TextureCoords0->x;
+				//TextureCoor0->y = m_pxmf2TextureCoords0->y;
+				//TextureCoor0->z = 0.0;
+				//CalculateBoundingBox((XMFLOAT3*)TextureCoor0, sizeof(XMFLOAT3));
+
 			}
 		}
 		else if (!strcmp(pstrToken, "<TextureCoords1>:"))
@@ -285,7 +374,12 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				m_d3dTextureCoord1BufferView.BufferLocation = m_pd3dTextureCoord1Buffer->GetGPUVirtualAddress();
 				m_d3dTextureCoord1BufferView.StrideInBytes = sizeof(XMFLOAT2);
 				m_d3dTextureCoord1BufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
+				//TextureCoor1->x = m_pxmf2TextureCoords1->x;
+				//TextureCoor1->y = m_pxmf2TextureCoords1->y;
+				////TextureCoor1->z = 0.0;
+				//CalculateBoundingBox((XMFLOAT3*)TextureCoor1, sizeof(XMFLOAT3));
 			}
+
 		}
 		else if (!strcmp(pstrToken, "<Normals>:"))
 		{
@@ -302,6 +396,8 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				m_d3dNormalBufferView.StrideInBytes = sizeof(XMFLOAT3);
 				m_d3dNormalBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 			}
+
+			CalculateBoundingBox((XMFLOAT3*)m_pxmf3Normals, sizeof(XMFLOAT3));
 		}
 		else if (!strcmp(pstrToken, "<Tangents>:"))
 		{
@@ -364,8 +460,10 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 							m_pd3dSubSetIndexBufferViews[i].BufferLocation = m_ppd3dSubSetIndexBuffers[i]->GetGPUVirtualAddress();
 							m_pd3dSubSetIndexBufferViews[i].Format = DXGI_FORMAT_R32_UINT;
 							m_pd3dSubSetIndexBufferViews[i].SizeInBytes = sizeof(UINT) * m_pnSubSetIndices[i];
+
 						}
 					}
+					CalculateVertexNormals(m_pxmf3Normals, m_pxmf3Positions, m_nVertices, m_ppnSubSetIndices[i], m_nSubMeshes);
 				}
 			}
 		}
@@ -373,6 +471,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		{
 			break;
 		}
+
 	}
 }
 

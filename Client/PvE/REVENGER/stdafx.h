@@ -74,8 +74,8 @@ extern HINSTANCE						ghAppInstance;
 #define FRAME_BUFFER_HEIGHT		1024
 #define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 4)
 #define _DEPTH_BUFFER_HEIGHT	(FRAME_BUFFER_HEIGHT * 4)
-#define _PLANE_WIDTH			1024
-#define _PLANE_HEIGHT			1024
+#define _PLANE_WIDTH			FRAME_BUFFER_WIDTH
+#define _PLANE_HEIGHT			FRAME_BUFFER_HEIGHT
 
 #define _WITH_DIRECT2D
 
@@ -128,7 +128,7 @@ inline void Swap(float *pfS, float *pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT
 
 #define ANIMATION_CALLBACK_EPSILON		0.00165f
 
-#define MAX_LIGHTS						16
+#define MAX_LIGHTS						8
 #define MAX_MATERIALS					512
 #define MAX_DEPTH_TEXTURES		MAX_LIGHTS
 #define POINT_LIGHT						1

@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------
-#define MAX_LIGHTS			16
+#define MAX_LIGHTS			8
 #define MAX_MATERIALS		512
 
 #define POINT_LIGHT			1
@@ -8,7 +8,7 @@
 
 #define _WITH_LOCAL_VIEWER_HIGHLIGHTING
 #define _WITH_THETA_PHI_CONES
-//#define _WITH_REFLECT
+#define _WITH_REFLECT
 #define MAX_DEPTH_TEXTURES		MAX_LIGHTS
 
 struct LIGHT
@@ -73,7 +73,7 @@ float Compute5x5ShadowFactor(float2 uv, float fDepth, uint nIndex)
 {
 	float fPercentLit = 0.0f;
 
-	return(fPercentLit /25.0f);
+	return(fPercentLit /50.0f);
 }
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
@@ -250,7 +250,7 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 	float3 vCameraPosition = float3(gvCameraPosition.x, gvCameraPosition.y, gvCameraPosition.z);
 	float3 vToCamera = normalize(vCameraPosition - vPosition);
 
-	float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 cColor = float4(0.3f, 0.3f, 0.3f, 0.3f);
 	[unroll]
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{

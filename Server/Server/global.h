@@ -20,7 +20,7 @@
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
 
 #define SHOOT_COOLDOWN_BULLET 100		// 총알 발사 쿨타임(ms)
-#define BULLET_MOVE_SCALAR 0.08f		// 총알 이동 힘
+#define BULLET_MOVE_SCALAR 0.1f		// 총알 이동 힘
 #define BULLET_RANGE 500.f				// 총알 사정거리
 #define BULLET_DAMAGE 10				// 총알 피격데미지
 
