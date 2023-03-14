@@ -2,14 +2,14 @@
 
 #define PI 3.141592654f
 
-#define MOVE_SCALAR_FB 0.003f			// 이동 힘 (앞뒤)
-#define MOVE_SCALAR_LR 0.0007f			// 이동 힘 (좌우)
+#define MOVE_SCALAR_FB 0.006f			// 이동 힘 (앞뒤)
+#define MOVE_SCALAR_LR 0.0014f			// 이동 힘 (좌우)
 
 #define PITCH_ROTATE_SCALAR 0.15f	// pitch회전 힘
 #define YAW_ROTATE_SCALAR 0.8f		// yaw회전 힘
 #define ROLL_ROTATE_SCALAR 0.2f		// roll회전 힘
 
-#define ENGINE_SCALAR 2.2f			// 헬기 엔진 출력 (상승, 하강 정도조절)
+#define ENGINE_SCALAR 1.6f			// 헬기 엔진 출력 (상승, 하강 정도조절)
 
 #define SENSITIVITY 0.6f			// 마우스 감도
 
