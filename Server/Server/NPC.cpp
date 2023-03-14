@@ -1,5 +1,17 @@
 #include "NPC.h"
 
+XMFLOAT3 NPCNormalize(XMFLOAT3 vec)
+{
+	float dist = sqrtf(powf(vec.x, 2) + powf(vec.y, 2) + powf(vec.z, 2));
+
+	vec.x = vec.x / dist;
+	vec.y = vec.y / dist;
+	vec.z = vec.z / dist;
+
+	return vec;
+}
+
+
 // ===========================================
 // =============      BASE      ==============
 // ===========================================
@@ -160,11 +172,11 @@ void NPC::Move()
 
 void NPC::MovetoRotate()
 {
-	m_yaw += 1.0f * PI * m_theta / 360.0f;
+	m_yaw += 0.01f * m_theta;
 	Coordinate base_coordinate;
-	m_curr_coordinate.right = NPCcalcRotate(base_coordinate.right, m_roll, m_pitch, m_yaw);
-	m_curr_coordinate.up = NPCcalcRotate(base_coordinate.up, m_roll, m_pitch, m_yaw);
-	m_curr_coordinate.look = NPCcalcRotate(base_coordinate.look, m_roll, m_pitch, m_yaw);
+	m_curr_coordinate.right = NPCcalcRotate(base_coordinate.right, m_pitch, m_yaw, m_roll);
+	m_curr_coordinate.up = NPCcalcRotate(base_coordinate.up, m_pitch, m_yaw, m_roll);
+	m_curr_coordinate.look = NPCcalcRotate(base_coordinate.look, m_pitch, m_yaw, m_roll);
 
 	m_Acc += m_theta;
 	m_Pos.x = m_range * cos(m_Acc * PI / 360) + m_saveOrgPos.x;
@@ -173,26 +185,30 @@ void NPC::MovetoRotate()
 }
 
 
-
-XMFLOAT3 NPC::NPCcalcRotate(XMFLOAT3 vec, float roll, float pitch, float yaw)
+XMFLOAT3 NPC::NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll)
 {
+	float curr_pitch = XMConvertToRadians(pitch);
+	float curr_yaw = XMConvertToRadians(yaw);
+	float curr_roll = XMConvertToRadians(roll);
+	
+	
 	float x1, y1;
-	x1 = vec.x * cos(roll) - vec.y * sin(roll);
-	y1 = vec.x * sin(roll) + vec.y * cos(roll);
+	x1 = vec.x * cos(curr_roll) - vec.y * sin(curr_roll);
+	y1 = vec.x * sin(curr_roll) + vec.y * cos(curr_roll);
 
 	// pitch
 	float y2, z1;
-	y2 = y1 * cos(pitch) - vec.z * sin(pitch);
-	z1 = y1 * sin(pitch) + vec.z * cos(pitch);
+	y2 = y1 * cos(curr_pitch) - vec.z * sin(curr_pitch);
+	z1 = y1 * sin(curr_pitch) + vec.z * cos(curr_pitch);
 
 	// yaw
 	float x2, z2;
-	z2 = z1 * cos(yaw) - x1 * sin(yaw);
-	x2 = z1 * sin(yaw) + x1 * cos(yaw);
+	z2 = z1 * cos(curr_yaw) - x1 * sin(curr_yaw);
+	x2 = z1 * sin(curr_yaw) + x1 * cos(curr_yaw);
 
 	// Update
 	vec = { x2, y2, z2 };
 
-	return vec;
+	return NPCNormalize(vec);
 }
 

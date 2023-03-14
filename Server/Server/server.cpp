@@ -1303,11 +1303,11 @@ void init_npc()
 		npcs[i].SetPosition(AirPos(dre), AirHigh(dre), AirPos(dre));
 		npcs[i].SetOrgPosition(npcs[i].GetPosition());
 
-		uniform_real_distribution<float>rTheta(1.2f, 3.0f);
+		uniform_real_distribution<float>rTheta(0.006f, 0.015f);
 		npcs[i].SetTheta(rTheta(dre));
 		npcs[i].SetAcc(npcs[i].GetTheta());
 
-		uniform_int_distribution<int>rRange(15, 30);
+		uniform_int_distribution<int>rRange(550, 750);
 		npcs[i].SetRange(rRange(dre));
 	}
 }

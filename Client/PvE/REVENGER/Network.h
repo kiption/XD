@@ -171,8 +171,9 @@ void processPacket(char* ptr)
 		}
 		// 3. Move Npc
 		else if (recv_packet->target == TARGET_NPC) {
-			int npc_id = recv_id - MAX_USER;
-			npcs_info[npc_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+			//int npc_id = recv_id - MAX_USER;
+			npcs_info[recv_id].m_id = recv_id;
+			npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 		}
 		else {
 			cout << "[MOVE ERROR] Unknown Target!" << endl;
@@ -202,10 +203,11 @@ void processPacket(char* ptr)
 		}
 		// 2. Rotate Npc
 		else if (recv_packet->target == TARGET_NPC) {
-			int npc_id = recv_id - MAX_USER;
-			npcs_info[npc_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-			npcs_info[npc_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-			npcs_info[npc_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+			//int npc_id = recv_id - MAX_USER;
+			npcs_info[recv_id].m_id = recv_id;
+			npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+			npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+			npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
 		}
 		else {
 			cout << "[ROTATE ERROR] Unknown Target!" << endl;

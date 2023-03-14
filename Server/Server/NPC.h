@@ -65,7 +65,7 @@ public:
 	// ===========================================
 	void Move();					// 추후에 A* 알고리즘 추가할 예정 현재는 특정 운동만 수행
 	void MovetoRotate();
-	XMFLOAT3 NPCcalcRotate(XMFLOAT3 vec, float roll, float pitch, float yaw);
+	XMFLOAT3 NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll);
 
 
 };
