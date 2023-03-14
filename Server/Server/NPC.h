@@ -1,6 +1,6 @@
 #pragma once
 #include <math.h>
-#include "global.h"
+#include "Constant.h"
 #include "MyVectors.h"
 
 enum NpcType{NPC_Helicopter, NPC_Bunker, NPC_Terret};
