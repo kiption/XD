@@ -1,3 +1,4 @@
+#pragma once
 constexpr int PORTNUM_RELAY2CLIENT_0 = 10000;	// 릴레이서버-클라이언트 통신 전용 포트
 constexpr int PORTNUM_RELAY2CLIENT_1 = 10001;
 constexpr int PORTNUM_RELAY2LOGIN_0 = 10010;	// 릴레이서버-인증서버 통신 전용 포트
@@ -14,7 +15,8 @@ constexpr int HA_PORTNUM_S0 = 11100;		// 서버(HA)
 constexpr int HA_PORTNUM_S1 = 11101;
 
 constexpr int SERIAL_NUM_CLIENT = 0;
-constexpr int SERIAL_NUM_EXSERVER = 1000;
+constexpr int SERIAL_NUM_RELAYSERVER = 1000;
+constexpr int SERIAL_NUM_EXSERVER = 2000;
 
 constexpr int HB_SEND_CYCLE = 1000;		// Heartbeat를 보내는 주기 (단위: millisec)
 constexpr int HB_GRACE_PERIOD = 3000;	// Heartbeat가 몇 초 넘어도 오지 않으면 서버다운으로 간주함 (단위: millisec)
@@ -39,10 +41,12 @@ constexpr char INPUT_KEY_Q = 0b000010;
 constexpr char INPUT_KEY_E = 0b000001;
 
 // Packet ID
-enum PacketID { CS_LOGIN, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE
+enum PacketID {
+	CS_LOGIN, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT
 	, SC_DAMAGED, SC_PLAYER_STATE, SC_BULLET_COUNT
-	, SS_CONNECT, SS_HEARTBEAT };
+	, SS_CONNECT, SS_HEARTBEAT
+};
 
 // Target Type
 enum TargetType { TARGET_PLAYER, TARGET_BULLET, TARGET_NPC };

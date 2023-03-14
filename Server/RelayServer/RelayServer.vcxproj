@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{5c90a722-c608-4cb9-a80f-e7b81f021484}</ProjectGuid>
-    <RootNamespace>Server</RootNamespace>
+    <ProjectGuid>{f589b084-9b59-4271-8889-2b619629311f}</ProjectGuid>
+    <RootNamespace>RelayServer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -70,18 +70,6 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
-  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -139,18 +127,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BulletsMgr.cpp" />
-    <ClCompile Include="NPC.cpp" />
-    <ClCompile Include="ObjectsMgr.cpp" />
-    <ClCompile Include="server.cpp" />
+    <ClCompile Include="RelayServer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BulletsMgr.h" />
-    <ClInclude Include="global.h" />
-    <ClInclude Include="MyVectors.h" />
-    <ClInclude Include="NPC.h" />
-    <ClInclude Include="ObjectsMgr.h" />
-    <ClInclude Include="Timer.h" />
+    <ClInclude Include="Constant.h" />
+    <ClInclude Include="Protocol.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
