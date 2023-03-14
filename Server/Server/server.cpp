@@ -225,7 +225,6 @@ void SESSION::send_login_info_packet()
 	login_info_packet.hp = hp;
 	login_info_packet.remain_bullet = bullet;
 
-	//cout << "[SC_LOGIN_INFO]";
 	do_send(&login_info_packet);
 }
 void SESSION::send_move_packet(int client_id, short move_target)
@@ -239,7 +238,6 @@ void SESSION::send_move_packet(int client_id, short move_target)
 	move_pl_packet.y = clients[client_id].pos.y;
 	move_pl_packet.z = clients[client_id].pos.z;
 
-	//cout << "[SC_MOVE]";
 	do_send(&move_pl_packet);
 }
 void SESSION::send_rotate_packet(int client_id, short rotate_target)
@@ -262,34 +260,7 @@ void SESSION::send_rotate_packet(int client_id, short rotate_target)
 	rotate_pl_packet.look_y = clients[client_id].m_lookvec.y;
 	rotate_pl_packet.look_z = clients[client_id].m_lookvec.z;
 
-	//cout << "[SC_ROTATE]";
 	do_send(&rotate_pl_packet);
-}
-
-void init_npc()
-{
-	for (int i{}; i < MAX_NPCS; i++) {
-		int npc_id = i;
-		npcs[i].SetID(npc_id);
-		npcs[i].SetNpcType(NPC_Helicopter);
-		npcs[i].SetRotate(0.0f, 0.0f, 0.0f);
-		npcs[i].SetActive(false);
-
-		random_device rd;
-		default_random_engine dre(rd());
-		uniform_real_distribution<float>AirHigh(350, 650);
-		uniform_real_distribution<float>AirPos(2500, 3500);
-
-		npcs[i].SetPosition(AirPos(dre), AirHigh(dre), AirPos(dre));
-		npcs[i].SetOrgPosition(npcs[i].GetPosition());
-
-		uniform_real_distribution<float>rTheta(1.2f, 3.0f);
-		npcs[i].SetTheta(rTheta(dre));
-		npcs[i].SetAcc(npcs[i].GetTheta());
-
-		uniform_int_distribution<int>rRange(15, 30);
-		npcs[i].SetRange(rRange(dre));
-	}
 }
 
 void disconnect(int target_id, int target)
@@ -323,7 +294,7 @@ void disconnect(int target_id, int target)
 			remove_pl_packet.id = target_id;
 			remove_pl_packet.size = sizeof(remove_pl_packet);
 			remove_pl_packet.type = SC_REMOVE_OBJECT;
-			cout << "[SC_REMOVE]";
+
 			pl.do_send(&remove_pl_packet);
 			pl.s_lock.unlock();
 		}
@@ -406,7 +377,8 @@ void process_packet(int client_id, char* packet)
 
 		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is log in" << endl;	// server message
 
-		for (int i = 0; i < MAX_USER; ++i) {		// 현재 접속해 있는 모든 클라이언트에게 새로운 클라이언트(client_id)의 정보를 전송합니다.
+		// 현재 접속해 있는 모든 클라이언트에게 새로운 클라이언트(client_id)의 정보를 전송합니다.
+		for (int i = 0; i < MAX_USER; ++i) {		
 			auto& pl = clients[i];
 
 			if (pl.id == client_id) continue;
@@ -439,13 +411,12 @@ void process_packet(int client_id, char* packet)
 			add_pl_packet.look_y = clients[client_id].m_lookvec.y;
 			add_pl_packet.look_z = clients[client_id].m_lookvec.z;
 
-			cout << "Send new client's info to client[" << pl.id << "]." << endl;
-			//cout << "[SC_ADD]";
 			pl.do_send(&add_pl_packet);
 			pl.s_lock.unlock();
 		}
 
-		for (auto& pl : clients) {		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 클라이언트와 NPC들의 정보를 전송합니다.
+		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 클라이언트의 정보를 전송합니다.
+		for (auto& pl : clients) {
 			if (pl.id == client_id) continue;
 
 			pl.s_lock.lock();
@@ -477,10 +448,39 @@ void process_packet(int client_id, char* packet)
 			add_pl_packet.look_y = pl.m_lookvec.y;
 			add_pl_packet.look_z = pl.m_lookvec.z;
 
-			cout << "Send client[" << pl.id << "]'s info to new client" << endl;
-			//cout << "[SC_ADD]";
 			clients[client_id].do_send(&add_pl_packet);
 			pl.s_lock.unlock();
+		}
+
+		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 NPC의 정보를 전송합니다.
+		for (int i = 0; i < MAX_NPCS; i++) {
+			SC_ADD_OBJECT_PACKET add_npc_packet;
+			add_npc_packet.type = SC_ADD_OBJECT;
+			add_npc_packet.size = sizeof(SC_ADD_OBJECT_PACKET);
+
+			add_npc_packet.id = i;
+			add_npc_packet.target = TARGET_NPC;
+			add_npc_packet.x = npcs[i].GetPosition().x;
+			add_npc_packet.y = npcs[i].GetPosition().y;
+			add_npc_packet.z = npcs[i].GetPosition().z;
+
+			add_npc_packet.right_x = npcs[i].GetCurr_coordinate().right.x;
+			add_npc_packet.right_y = npcs[i].GetCurr_coordinate().right.y;
+			add_npc_packet.right_z = npcs[i].GetCurr_coordinate().right.z;
+
+			add_npc_packet.up_x = npcs[i].GetCurr_coordinate().up.x;
+			add_npc_packet.up_y = npcs[i].GetCurr_coordinate().up.y;
+			add_npc_packet.up_z = npcs[i].GetCurr_coordinate().up.z;
+
+			add_npc_packet.look_x = npcs[i].GetCurr_coordinate().look.x;
+			add_npc_packet.look_y = npcs[i].GetCurr_coordinate().look.y;
+			add_npc_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
+
+			for (int j = 0; j < MAX_USER; j++) {
+				if (clients[j].s_state == ST_INGAME) {
+					clients[j].do_send(&add_npc_packet);
+				}
+			}
 		}
 		break;
 	}// CS_LOGIN end
@@ -521,10 +521,6 @@ void process_packet(int client_id, char* packet)
 					// unlock
 					clients[client_id].s_lock.unlock();
 
-					// server message
-					//cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
-					//	<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
-
 					// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
 					for (int j = 0; j < MAX_USER; j++) {
 						auto& pl = clients[j];
@@ -549,10 +545,6 @@ void process_packet(int client_id, char* packet)
 
 					// unlock
 					clients[client_id].s_lock.unlock();
-
-					// server message
-					//cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] moves to ("
-					//	<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.z << ")." << endl;
 
 					// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
 					for (int j = 0; j < MAX_USER; j++) {
@@ -708,10 +700,6 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].m_lookvec = calcRotate(basic_coordinate.look, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
 
 			clients[client_id].s_lock.unlock();
-
-			// server message
-			//cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is Rotated. "
-			//	<< "Pitch: " << clients[client_id].pitch << ", Yaw: " << clients[client_id].yaw << ", Roll: " << clients[client_id].roll << endl;
 
 			// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
 			for (auto& send_target : clients) {
@@ -1005,8 +993,6 @@ void timerFunc() {
 
 				// 최종 이동
 				if (mv_target.pitch != 0.f || mv_target.roll != 0.f) {
-					//cout << "Player[" << mv_target.id << "] moves to pos(" << mv_target.pos.x << ", " << mv_target.pos.y << ", " << mv_target.pos.z << ").";
-
 					// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
 					for (auto& send_target : clients) {
 						if (send_target.s_state != ST_INGAME) continue;
@@ -1018,19 +1004,16 @@ void timerFunc() {
 
 				// 충돌체크
 				for (auto& other_pl : clients) {
-					// 사망한 플레이어와는 충돌검사 X
-					if (other_pl.pl_state == PL_ST_DEAD) continue;
-					// 접속 중이 아닌 대상을 충돌검사 X
-					if (other_pl.s_state != ST_INGAME) continue;
-					// 이미 검사한 대상끼리, 자기자신과는 충돌검사 X
-					if (mv_target.id <= other_pl.id) continue;
-					// 멀리 떨어진 플레이어는 충돌검사 X
+					if (other_pl.pl_state == PL_ST_DEAD) continue;		// 사망한 플레이어와는 충돌검사 X
+					if (other_pl.s_state != ST_INGAME) continue;		// 접속 중이 아닌 대상을 충돌검사 X
+					if (mv_target.id <= other_pl.id) continue;			// 이미 검사한 대상끼리, 자기자신과는 충돌검사 X
+
 					float dist = 0;
 					float x_difference = pow(other_pl.pos.x - mv_target.pos.x, 2);
 					float y_difference = pow(other_pl.pos.y - mv_target.pos.y, 2);
 					float z_difference = pow(other_pl.pos.z - mv_target.pos.z, 2);
 					dist = sqrtf(x_difference + y_difference + z_difference);
-					if (dist > 500.f)	continue;
+					if (dist > 500.f)	continue;						// 멀리 떨어진 플레이어는 충돌검사 X
 
 					if (mv_target.m_xoobb.Intersects(other_pl.m_xoobb)) {
 						mv_target.s_lock.lock();
@@ -1039,8 +1022,6 @@ void timerFunc() {
 						if (mv_target.hp <= 0) {
 							mv_target.pl_state = PL_ST_DEAD;
 							mv_target.death_time = chrono::system_clock::now();
-
-							//cout << "Player[" << mv_target.id << "] is Killed by Player[" << other_pl.id << "]!" << endl; //server message
 
 							// 사망한 플레이어에게 게임오버 사실을 알립니다.
 							SC_PLAYER_STATE_PACKET hpzero_packet;
@@ -1052,8 +1033,6 @@ void timerFunc() {
 							mv_target.do_send(&hpzero_packet);
 						}
 						else {
-							//cout << "Player[" << mv_target.id << "] is Damaged by Player[" << other_pl.id << "]!" << endl; //server message
-
 							// 충돌한 플레이어에게 충돌 사실을 알립니다.
 							SC_DAMAGED_PACKET damaged_by_player_packet;
 							damaged_by_player_packet.size = sizeof(SC_DAMAGED_PACKET);
@@ -1076,8 +1055,6 @@ void timerFunc() {
 							other_pl.pl_state = PL_ST_DEAD;
 							other_pl.death_time = chrono::system_clock::now();
 
-							//cout << "Player[" << other_pl.id << "] is Killed by Player[" << mv_target.id << "]!" << endl; //server message
-
 							// 사망한 플레이어에게 게임오버 사실을 알립니다.
 							SC_PLAYER_STATE_PACKET hpzero_packet;
 							hpzero_packet.size = sizeof(SC_PLAYER_STATE_PACKET);
@@ -1088,8 +1065,6 @@ void timerFunc() {
 							other_pl.do_send(&hpzero_packet);
 						}
 						else {
-							//cout << "Player[" << other_pl.id << "] is Damaged by Player[" << mv_target.id << "]!" << endl; //server message
-
 							// 충돌한 플레이어에게 충돌 사실을 알립니다.
 							SC_DAMAGED_PACKET damaged_by_player_packet;
 							damaged_by_player_packet.size = sizeof(SC_DAMAGED_PACKET);
@@ -1122,7 +1097,6 @@ void timerFunc() {
 					mv_target.m_upvec = basic_coordinate.up;
 					mv_target.m_lookvec = basic_coordinate.look;
 					mv_target.setBB();
-					//cout << "Player[" << mv_target.id << "] Revived and Move to Respawn Area." << endl;
 
 					// 부활한 플레이어에게 부활 사실을 알립니다.
 					SC_PLAYER_STATE_PACKET revival_packet;
@@ -1188,13 +1162,8 @@ void timerFunc() {
 				bullet.clear();
 			}
 			else {
-				// 총알을 앞으로 이동시킵니다.
-				bullet.moveObj(bullet.getLookvector(), BULLET_MOVE_SCALAR);
-				//cout << "[" << bullet.getId() << "]번 총알이 Pos("
-				//	<< bullet.getPos().x << ", " << bullet.getPos().y << ", " << bullet.getPos().z << ")로 이동하였습니다." << endl;
-
-				// 바운딩박스 업데이트
-				bullet.setBB_ex(XMFLOAT3(vulcan_bullet_bbsize_x, vulcan_bullet_bbsize_y, vulcan_bullet_bbsize_z));
+				bullet.moveObj(bullet.getLookvector(), BULLET_MOVE_SCALAR);		// 총알을 앞으로 이동시킵니다.
+				bullet.setBB_ex(XMFLOAT3(vulcan_bullet_bbsize_x, vulcan_bullet_bbsize_y, vulcan_bullet_bbsize_z));	// 바운딩박스 업데이트
 
 				// 충돌검사
 				for (auto& pl : clients) {
@@ -1223,8 +1192,6 @@ void timerFunc() {
 							pl.pl_state = PL_ST_DEAD;
 							pl.death_time = chrono::system_clock::now();
 
-							//cout << "Player[" << pl.id << "] is Killed by Player[" << bullet.getOwner() << "]'s Bullet!" << endl; //server message
-
 							// 사망한 플레이어에게 게임오버 사실을 알립니다.
 							SC_PLAYER_STATE_PACKET hpzero_packet;
 							hpzero_packet.size = sizeof(SC_PLAYER_STATE_PACKET);
@@ -1235,8 +1202,6 @@ void timerFunc() {
 							pl.do_send(&hpzero_packet);
 						}
 						else {
-							//cout << "Player[" << pl.id << "] is Damaged by Bullet!" << endl; //server message
-
 							// 충돌한 플레이어에게 충돌 사실을 알립니다.
 							SC_DAMAGED_PACKET damaged_by_bullet_packet;
 							damaged_by_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
@@ -1320,6 +1285,32 @@ void checkHeartbeat() {	// 인접해있는 서버구성원에게서 Heartbeat를 받았는 지 확�
 	}
 }
 
+
+void init_npc()
+{
+	for (int i{}; i < MAX_NPCS; i++) {
+		int npc_id = i;
+		npcs[i].SetID(npc_id);
+		npcs[i].SetNpcType(NPC_Helicopter);
+		npcs[i].SetRotate(0.0f, 0.0f, 0.0f);
+		npcs[i].SetActive(false);
+
+		random_device rd;
+		default_random_engine dre(rd());
+		uniform_real_distribution<float>AirHigh(350, 650);
+		uniform_real_distribution<float>AirPos(2500, 3500);
+
+		npcs[i].SetPosition(AirPos(dre), AirHigh(dre), AirPos(dre));
+		npcs[i].SetOrgPosition(npcs[i].GetPosition());
+
+		uniform_real_distribution<float>rTheta(1.2f, 3.0f);
+		npcs[i].SetTheta(rTheta(dre));
+		npcs[i].SetAcc(npcs[i].GetTheta());
+
+		uniform_int_distribution<int>rRange(15, 30);
+		npcs[i].SetRange(rRange(dre));
+	}
+}
 void MoveNPC()
 {
 	while (true) {
@@ -1328,11 +1319,11 @@ void MoveNPC()
 
 			// Move Send
 			SC_MOVE_OBJECT_PACKET npc_move_packet;
-			npc_move_packet.target = TARGET_NPC;
-			npc_move_packet.id = npcs[i].GetID();
 			npc_move_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
 			npc_move_packet.type = SC_MOVE_OBJECT;
 
+			npc_move_packet.target = TARGET_NPC;
+			npc_move_packet.id = npcs[i].GetID();
 			npc_move_packet.x = npcs[i].GetPosition().x;
 			npc_move_packet.y = npcs[i].GetPosition().y;
 			npc_move_packet.z = npcs[i].GetPosition().z;
@@ -1346,11 +1337,11 @@ void MoveNPC()
 
 			// Rotate Send
 			SC_ROTATE_OBJECT_PACKET npc_rotate_packet;
-			npc_rotate_packet.target = TARGET_NPC;
-			npc_rotate_packet.id = npcs[i].GetID();
 			npc_rotate_packet.size = sizeof(SC_ROTATE_OBJECT_PACKET);
 			npc_rotate_packet.type = SC_ROTATE_OBJECT;
 
+			npc_rotate_packet.target = TARGET_NPC;
+			npc_rotate_packet.id = npcs[i].GetID();
 			npc_rotate_packet.right_x = npcs[i].GetCurr_coordinate().right.x;
 			npc_rotate_packet.right_y = npcs[i].GetCurr_coordinate().right.y;
 			npc_rotate_packet.right_z = npcs[i].GetCurr_coordinate().right.z;
@@ -1369,9 +1360,6 @@ void MoveNPC()
 					send_target.do_send(&npc_rotate_packet);
 				}
 			}
-
-			//cout << "NPC[" << npcs[i].GetID() << "] moves to POS("
-			//	<< npcs[i].GetPosition().x << ", " << npcs[i].GetPosition().y << ", " << npcs[i].GetPosition().z << ")" << endl;
 		}
 	}
 }
@@ -1537,9 +1525,7 @@ int main(int argc, char* argv[])
 	timer_threads.emplace_back(timerFunc);			// 클라이언트 로직 타이머스레드
 	timer_threads.emplace_back(sendHeartBeat);		// 서버 간 Heartbeat교환 스레드
 	timer_threads.emplace_back(checkHeartbeat);		// 서버 간 다운여부 검사 스레드
-
-	//thread NPC_thread{ MoveNPC };
-	//NPC_thread.join();
+	timer_threads.emplace_back(MoveNPC);			// NPC 로직 스레드
 
 	for (auto& th : worker_threads)
 		th.join();

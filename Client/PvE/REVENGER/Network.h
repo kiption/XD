@@ -70,10 +70,8 @@ void processData(char* net_buf, size_t io_byte);
 void CALLBACK recvCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flag)
 {
 	if (num_bytes == 0) {
-		cout << "NUM BYTE ZERO" << endl; //test
 		return;
 	}
-	cout << "RECV CALLBACK " << endl; //test
 
 	processData(g_recv_over.send_buf, num_bytes);
 
@@ -81,7 +79,6 @@ void CALLBACK recvCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWO
 }
 void CALLBACK sendCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flag)
 {
-	cout << "SEND CALLBACK" << endl; //test
 	delete over;
 	return;
 }
@@ -90,7 +87,6 @@ void CALLBACK sendCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWO
 int my_id;
 void processPacket(char* ptr)
 {
-	cout << "[Process Packet] Packet Type: " << (int)ptr[1] << endl;//test
 	static bool first_time = true;
 	switch (ptr[1])
 	{
@@ -141,6 +137,8 @@ void processPacket(char* ptr)
 		}
 		// 3. Add NPC (Helicopter)
 		else if (recv_packet->target == TARGET_NPC) {
+			if (npcs_info[recv_id].m_state != OBJ_ST_EMPTY) break;
+
 			npcs_info[recv_id].m_id = recv_id;
 			npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 			npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
@@ -230,16 +228,12 @@ void processPacket(char* ptr)
 				other_players[recv_id].m_id = -1;
 				other_players[recv_id].m_pos = { 0.f ,0.f ,0.f };
 				other_players[recv_id].m_state = OBJ_ST_LOGOUT;
-
-				cout << "Player[" << recv_id << "] is log out" << endl;
 			}
 		}
 		// 2. Remove Bullet
 		else if (recv_packet->target == TARGET_BULLET) {
 			bullets_info[recv_id].m_pos = { 0.f , -100.f ,0.f };
 			bullets_info[recv_id].m_state = OBJ_ST_LOGOUT;
-
-			cout << "Bullet[" << recv_id << "] is removed" << endl;
 		}
 		// 3. Remove Npc
 		else if (recv_packet->target == TARGET_NPC) {
@@ -275,12 +269,10 @@ void processPacket(char* ptr)
 
 		int pl_state = recv_packet->state;
 		if (pl_state == ST_PACK_REVIVAL) {
-			cout << "REVIVAL" << endl;
 			my_info.m_hp = 100;
 		}
 		else if (pl_state == ST_PACK_DEAD) {
 			my_info.m_hp = 0;
-			cout << "DEAD" << endl;
 		}
 
 		break;
@@ -290,7 +282,6 @@ void processPacket(char* ptr)
 		SC_BULLET_COUNT_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COUNT_PACKET*>(ptr);
 		int cnt = recv_packet->bullet_cnt;
 		my_info.m_bullet = cnt;
-		cout << "My Bullet Left: " << my_info.m_bullet << endl;
 
 		break;
 	}//SC_BULLET_COUNT case end
@@ -299,7 +290,6 @@ void processPacket(char* ptr)
 
 void processData(char* net_buf, size_t io_byte)
 {
-	cout << "Process Data" << endl;//test
 	char* ptr = net_buf;
 	static size_t in_packet_size = 0;
 	static size_t saved_packet_size = 0;
