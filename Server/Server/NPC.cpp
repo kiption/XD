@@ -91,6 +91,16 @@ void NPC::SetAcc(float acc)
 	m_Acc = acc;
 }
 
+void NPC::SetDistance(float dis)
+{
+	m_Distance = dis;
+}
+
+void NPC::SetFindRange(float f)
+{
+	m_FindRange = f;
+}
+
 // ===========================================
 // =============       GET      ==============
 // ===========================================
@@ -148,6 +158,16 @@ float NPC::GetRange()
 float NPC::GetAcc()
 {
 	return m_Acc;
+}
+
+float NPC::GetDistance()
+{
+	return m_Distance;
+}
+
+float NPC::GetFindRange()
+{
+	return m_FindRange;
 }
 
 // ===========================================
@@ -212,3 +232,61 @@ XMFLOAT3 NPC::NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll)
 	return NPCNormalize(vec);
 }
 
+void NPC::Get_Distance_Detection(XMFLOAT3 vec)
+{
+	float Distance = sqrtf(pow((vec.x - m_Pos.x), 2) + pow((vec.y - m_Pos.y), 2) + pow((vec.z - m_Pos.z), 2));
+
+	m_Distance = Distance;
+}
+
+void NPC::FindTarget(XMFLOAT3 vec)
+{
+	float Distance = sqrtf(pow((vec.x - m_Pos.x), 2) + pow((vec.y - m_Pos.y), 2) + pow((vec.z - m_Pos.z), 2));
+
+	if (m_FindRange > Distance) {
+		// 상태 변화, 내 탐색 범위보다 플레이어와의 거리가 짧을 때
+	}
+
+}
+
+// 각 객체 별 적 관리
+
+Stage1Enemy::Stage1Enemy()
+{
+
+}
+
+Stage1Enemy::~Stage1Enemy()
+{
+
+}
+
+void Stage1Enemy::Get_Distance_Detection(XMFLOAT3 vec)
+{
+
+}
+
+void Stage1Enemy::ChaseToPlayer()
+{
+
+}
+
+Stage2Enemy::Stage2Enemy()
+{
+
+}
+
+Stage2Enemy::~Stage2Enemy()
+{
+
+}
+
+void Stage2Enemy::Get_Distance_Detection(XMFLOAT3 vec)
+{
+
+}
+
+void Stage2Enemy::ChaseToPlayer()
+{
+
+}
