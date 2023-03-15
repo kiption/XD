@@ -179,7 +179,7 @@ public:
 };
 
 int online_player_cnt = 0;
-array<SESSION, MAX_USER + MAX_NPCS> clients;		// 0 ~ MAX_USER-1: Player,	 MAX_USER ~ MAX_USER+MAX_NPCS: NPC
+array<SESSION, MAX_USER> clients;
 array<NPC, MAX_NPCS> npcs;
 
 array<Bullets, MAX_BULLET> bullets_arr;
@@ -196,7 +196,7 @@ SOCKET left_ex_server_sock;								// 이전 번호의 서버
 SOCKET right_ex_server_sock;							// 다음 번호의 서버
 
 int my_server_id;										// 내 서버 식별번호
-array<HA_SERVER, 1> relay_servers;						// Rel
+bool b_active_server;									// Active 서버인가?
 array<HA_SERVER, MAX_SERVER> extended_servers;			// HA구현을 위해 수평확장된 서버들
 
 
@@ -337,13 +337,75 @@ void disconnect(int target_id, int target)
 		extended_servers[target_id].s_state = ST_FREE;
 		extended_servers[target_id].s_lock.unlock();
 
-		cout << "Server[" << extended_servers[target_id].id << "]이 다운되었습니다. 서버를 재실행합니다." << endl;	// server message
+		cout << "Server[" << extended_servers[target_id].id << "]의 다운이 감지되었습니다." << endl;	// server message
 
 		// 서버 재실행
-		wchar_t wchar_buf[10];
+		/*wchar_t wchar_buf[10];
 		wsprintfW(wchar_buf, L"%d", target_id);
-		ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L"../x64/Release", SW_SHOW);
-		break;
+		ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L"../x64/Release", SW_SHOW);*/
+
+		SC_ACTIVE_DOWN_PACKET active_down_pack;
+		active_down_pack.type = SC_ACTIVE_DOWN;
+		active_down_pack.size = sizeof(SC_ACTIVE_DOWN_PACKET);
+		active_down_pack.serverid = target_id;
+		
+		for (int i = 0; i < MAX_USER; i++) {
+			if (clients[i].s_state == ST_INGAME) {	// 접속 중인 클라이언트 중 가장 먼저 접속한 클라이언트
+				clients[i].do_send(&active_down_pack);
+				break;
+			}
+		}
+
+		// 만약 자신의 오른쪽 서버가 다운되었는데, 그 서버가 서버군의 마지막 서버인 경우 재실행된 서버에게 ConnectEx 요청을 보냅니다.
+		if (target_id == MAX_SERVER - 1) {
+			if (my_server_id < target_id) {
+				// ConnectEx
+				SOCKET temp_s = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+				GUID guid = WSAID_CONNECTEX;
+				DWORD bytes = 0;
+				LPFN_CONNECTEX connectExFP;
+				::WSAIoctl(temp_s, SIO_GET_EXTENSION_FUNCTION_POINTER, &guid, sizeof(guid), &connectExFP, sizeof(connectExFP), &bytes, nullptr, nullptr);
+				closesocket(temp_s);
+
+				SOCKADDR_IN ha_server_addr;
+				ZeroMemory(&ha_server_addr, sizeof(ha_server_addr));
+				ha_server_addr.sin_family = AF_INET;
+				right_ex_server_sock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);     // 실제 연결할 소켓
+				int ret = ::bind(right_ex_server_sock, reinterpret_cast<LPSOCKADDR>(&ha_server_addr), sizeof(ha_server_addr));
+				if (ret != 0) {
+					cout << "Bind Error - " << ret << endl;
+					cout << WSAGetLastError() << endl;
+					exit(-1);
+				}
+
+				OVER_EXP* con_over = new OVER_EXP;
+				con_over->process_type = OP_CONNECT;
+				int key = SERIAL_NUM_EXSERVER + MAX_SERVER - 1;
+				HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_ss_iocp, key, 0);
+				if (NULL == hret) {
+					cout << "CreateIoCompletoinPort Error - " << ret << endl;
+					cout << WSAGetLastError() << endl;
+					exit(-1);
+				}
+
+				int target_portnum = key - SERIAL_NUM_EXSERVER + HA_PORTNUM_S0;
+				ZeroMemory(&ha_server_addr, sizeof(ha_server_addr));
+				ha_server_addr.sin_family = AF_INET;
+				ha_server_addr.sin_port = htons(target_portnum);	// 수평확장된 서버군에서 자기 오른쪽에 있는 서버
+				inet_pton(AF_INET, "127.0.0.1", &ha_server_addr.sin_addr);
+
+				BOOL bret = connectExFP(right_ex_server_sock, reinterpret_cast<sockaddr*>(&ha_server_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over->overlapped);
+				if (FALSE == bret) {
+					int err_no = GetLastError();
+					if (ERROR_IO_PENDING == err_no)
+						cout << "Server Connect 재시도 중...\n" << endl;
+					else {
+						cout << "ConnectEX Error - " << err_no << endl;
+						cout << WSAGetLastError() << endl;
+					}
+				}
+			}
+		}
 	}
 
 }
@@ -385,8 +447,6 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].pos.x = 512 + client_id * 50;
 		clients[client_id].pos.y = 400;
 		clients[client_id].pos.z = 350 - client_id * 50;
-		cout << "A new object is successfully created! - POS:(" << clients[client_id].pos.x
-			<< "," << clients[client_id].pos.y << "," << clients[client_id].pos.z << ")." << endl;
 
 		clients[client_id].pitch = clients[client_id].yaw = clients[client_id].roll = 0.0f;
 		clients[client_id].m_rightvec = basic_coordinate.right;
@@ -402,7 +462,15 @@ void process_packet(int client_id, char* packet)
 
 		clients[client_id].s_lock.unlock();
 
-		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "] is log in" << endl;	// server message
+		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "]이(가) 접속하였습니다." << endl;	// server message
+
+		if (!b_active_server) {
+			cout << "Stand-By서버는 대기 상태를 유지합니다." << endl;
+			break;	// Active서버가 아니라면, 클라이언트가 연결되었음을 사용자에게 알리기만 하고 아무일도 하지 않습니다.
+		}
+
+		cout << "새로운 오브젝트가 생성되었습니다! - POS:(" << clients[client_id].pos.x
+			<< "," << clients[client_id].pos.y << "," << clients[client_id].pos.z << ")." << endl;
 
 		// 현재 접속해 있는 모든 클라이언트에게 새로운 클라이언트(client_id)의 정보를 전송합니다.
 		for (int i = 0; i < MAX_USER; ++i) {		
@@ -512,6 +580,7 @@ void process_packet(int client_id, char* packet)
 		break;
 	}// CS_LOGIN end
 	case CS_INPUT_KEYBOARD: {
+		if (!b_active_server) break;		// Active 서버만 패킷을 처리합니다.
 		CS_INPUT_KEYBOARD_PACKET* inputkey_p = reinterpret_cast<CS_INPUT_KEYBOARD_PACKET*>(packet);
 
 		enum InputKey { KEY_Q, KEY_E, KEY_A, KEY_D, KEY_S, KEY_W, KEY_SPACEBAR };
@@ -695,6 +764,7 @@ void process_packet(int client_id, char* packet)
 		break;
 	}// CS_INPUT_KEYBOARD end
 	case CS_INPUT_MOUSE: {
+		if (!b_active_server) break;		// Active 서버만 패킷을 처리합니다.
 		CS_INPUT_MOUSE_PACKET* rt_p = reinterpret_cast<CS_INPUT_MOUSE_PACKET*>(packet);
 
 		if (clients[client_id].s_state == ST_FREE) {
@@ -749,7 +819,7 @@ void process_packet(int client_id, char* packet)
 		SS_HEARTBEAT_PACKET* heartbeat_pack = reinterpret_cast<SS_HEARTBEAT_PACKET*>(packet);
 		int recv_id = heartbeat_pack->sender_id;
 
-		cout << "Server[" << recv_id << "]로 부터 Heartbeat를 받았습니다." << endl;
+		//cout << "Server[" << recv_id << "]로 부터 Heartbeat를 받았습니다." << endl;
 		extended_servers[recv_id].heartbeat_recv_time = chrono::system_clock::now();
 
 		if (recv_id < my_server_id) {	// A->B->A로 heartbeat의 한 사이클이 끝나도록하기 위함. (즉, 오른쪽 서버로부터 Heartbeat를 받으면 한 사이클의 끝으로 판단)
@@ -761,7 +831,7 @@ void process_packet(int client_id, char* packet)
 			extended_servers[recv_id].do_send(&hb_packet);										// 자신에게 Heartbeat를 보낸 서버에게 전송합니다.
 			extended_servers[my_server_id].heartbeat_send_time = chrono::system_clock::now();	// 전송한 시간을 업데이트
 
-			cout << "Heartbeat를 먼저 보낸 Server[" << recv_id << "]에게 자신의 Heartbeat를 보냅니다." << endl;
+			//cout << "Heartbeat를 먼저 보낸 Server[" << recv_id << "]에게 자신의 Heartbeat를 보냅니다." << endl;
 		}
 		break;
 	}// SS_HEARTBEAT end
@@ -1272,7 +1342,7 @@ void sendHeartBeat() {	// 오른쪽 서버에게 Heartbeat를 전달하는 함수
 			if (extended_servers[my_server_id + 1].s_state != ST_ACCEPTED) continue;
 
 			if (chrono::system_clock::now() > extended_servers[my_server_id].heartbeat_send_time + chrono::milliseconds(HB_SEND_CYCLE)) {
-				cout << "자신의 Heartbeat를 Server[" << my_server_id + 1 << "]에게 보냅니다." << endl;
+				//cout << "자신의 Heartbeat를 Server[" << my_server_id + 1 << "]에게 보냅니다." << endl;
 				SS_HEARTBEAT_PACKET hb_packet;
 				hb_packet.size = sizeof(SS_HEARTBEAT_PACKET);
 				hb_packet.type = SS_HEARTBEAT;
@@ -1322,8 +1392,8 @@ void init_npc()
 
 		random_device rd;
 		default_random_engine dre(rd());
-		uniform_real_distribution<float>AirHigh(350, 750);
-		uniform_real_distribution<float>AirPos(300, 700);
+		uniform_real_distribution<float>AirHigh(450, 550);
+		uniform_real_distribution<float>AirPos(400, 600);
 
 		npcs[i].SetPosition(AirPos(dre), AirHigh(dre), AirPos(dre));
 		npcs[i].SetOrgPosition(npcs[i].GetPosition());
@@ -1332,7 +1402,7 @@ void init_npc()
 		npcs[i].SetTheta(rTheta(dre));
 		npcs[i].SetAcc(npcs[i].GetTheta());
 
-		uniform_int_distribution<int>rRange(550, 750);
+		uniform_int_distribution<int>rRange(100, 300);
 		npcs[i].SetRange(rRange(dre));
 	}
 }
@@ -1401,16 +1471,23 @@ int main(int argc, char* argv[])
 	case 0:	// 0번 서버
 		sc_portnum = PORT_NUM_S0;
 		ss_portnum = HA_PORTNUM_S0;
+
+		b_active_server = true;
 		break;
 	case 1:	// 1번 서버
 		sc_portnum = PORT_NUM_S1;
 		ss_portnum = HA_PORTNUM_S1;
+
+		b_active_server = false;
 		break;
 	default:
 		cout << "잘못된 값이 입력되었습니다. 프로그램을 종료합니다." << endl;
 		return 0;
 	}
-	cout << "Server[" << my_server_id << "] 가 가동되었습니다. [ S-C PORT: " << sc_portnum << " / S-S PORT: " << ss_portnum << " ]" << endl;
+	cout << "Server[" << my_server_id << "] 가 가동되었습니다. [ MODE: ";
+	if (b_active_server) cout << "Acitve";
+	else cout << "Stand-By";
+	cout << " / S - C PORT : " << sc_portnum << " / S - S PORT : " << ss_portnum << " ]" << endl;
 
 	//======================================================================
 	// [ HA - Relay서버 연결 ]
@@ -1511,7 +1588,7 @@ int main(int argc, char* argv[])
 	SOCKADDR_IN server_addr;
 	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(PORT_NUM_S0);
+	server_addr.sin_port = htons(sc_portnum);
 	server_addr.sin_addr.S_un.S_addr = INADDR_ANY;
 	bind(g_sc_listensock, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 	listen(g_sc_listensock, SOMAXCONN);

@@ -178,7 +178,7 @@
     <ClInclude Include="GameFramework.h">
       <Filter>Client\GameTime</Filter>
     </ClInclude>
-    <ClInclude Include="..\Server\protocol.h">
+    <ClInclude Include="..\..\..\Server\RelayServer\Protocol.h">
       <Filter>Server</Filter>
     </ClInclude>
   </ItemGroup>
