@@ -128,7 +128,7 @@ inline void Swap(float *pfS, float *pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT
 
 #define ANIMATION_CALLBACK_EPSILON		0.00165f
 
-#define MAX_LIGHTS						8
+#define MAX_LIGHTS						32
 #define MAX_MATERIALS					512
 #define MAX_DEPTH_TEXTURES		MAX_LIGHTS
 #define POINT_LIGHT						1

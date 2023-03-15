@@ -1,12 +1,12 @@
 //--------------------------------------------------------------------------------------
-#define MAX_LIGHTS			8
+#define MAX_LIGHTS			32
 #define MAX_MATERIALS		512
 
 #define POINT_LIGHT			1
 #define SPOT_LIGHT			2
 #define DIRECTIONAL_LIGHT	3
 
-#define _WITH_LOCAL_VIEWER_HIGHLIGHTING
+//#define _WITH_LOCAL_VIEWER_HIGHLIGHTING
 #define _WITH_THETA_PHI_CONES
 #define _WITH_REFLECT
 #define MAX_DEPTH_TEXTURES		MAX_LIGHTS
@@ -73,7 +73,7 @@ float Compute5x5ShadowFactor(float2 uv, float fDepth, uint nIndex)
 {
 	float fPercentLit = 0.0f;
 
-	return(fPercentLit /50.0f);
+	return(fPercentLit /25.0f);
 }
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
@@ -99,7 +99,9 @@ float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
 		}
 	}
 
-	return((gLights[nIndex].m_cAmbient * gMaterial.m_cAmbient) + (gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse) + (gLights[nIndex].m_cSpecular * fSpecularFactor * gMaterial.m_cSpecular));
+	return((gLights[nIndex].m_cAmbient * gMaterial.m_cAmbient) 
+		+ (gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse) 
+		+ (gLights[nIndex].m_cSpecular * fSpecularFactor * gMaterial.m_cSpecular));
 }
 
 float4 PointLight(int nIndex, float3 vPosition, float3 vNormal, float3 vToCamera)
@@ -250,7 +252,7 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 	float3 vCameraPosition = float3(gvCameraPosition.x, gvCameraPosition.y, gvCameraPosition.z);
 	float3 vToCamera = normalize(vCameraPosition - vPosition);
 
-	float4 cColor = float4(0.3f, 0.3f, 0.3f, 0.3f);
+	float4 cColor = float4(0.3f, 0.3f, 0.3f, 1.0f);
 	[unroll]
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
@@ -274,7 +276,7 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 			else if (gLights[i].m_nType == SPOT_LIGHT)
 			{
 				cColor += SpotLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
-				//				cColor += SpotLight(i, vPosition, vNormal, vToCamera);
+				//cColor += SpotLight(i, vPosition, vNormal, vToCamera);
 			}
 			cColor += gLights[i].m_cAmbient * gMaterial.m_cAmbient;;
 		}

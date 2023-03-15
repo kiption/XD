@@ -1,4 +1,4 @@
-#define MAX_LIGHTS 8
+#define MAX_LIGHTS 32
 struct MATERIAL
 {
 	float4					m_cAmbient;
