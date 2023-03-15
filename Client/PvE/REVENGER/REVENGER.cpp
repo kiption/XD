@@ -177,7 +177,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 				// 6. NPC 움직임 최신화
 				for (int i{}; i < MAX_NPCS; ++i) {
-					npcs_info[i].m_id = i;
+					//npcs_info[i].m_id = i;
 					gGameFramework.SetPosition_NPC(npcs_info[i].m_id, npcs_info[i].m_pos);
 					gGameFramework.SetVectors_NPC(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
 				}

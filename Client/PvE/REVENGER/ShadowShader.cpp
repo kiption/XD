@@ -16,7 +16,7 @@ CObjectsShader::~CObjectsShader()
 
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nObjects = 19;
+	m_nObjects = 17;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 
@@ -53,11 +53,11 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	}
 
 	m_ppObjects[1] = m_ppCityGameObjects[0];
-	m_ppObjects[17] = m_ppCityGameObjects[1];
-	m_ppObjects[18] = m_ppCityGameObjects[2];
+	m_ppObjects[15] = m_ppCityGameObjects[1];
+	m_ppObjects[16] = m_ppCityGameObjects[2];
 	m_ppObjects[1]->SetPosition(-500.0, 15.0, 500.0);
-	m_ppObjects[17]->SetPosition(-300.0, 15.0, -500.0);
-	m_ppObjects[18]->SetPosition(500.0, 15.0, 700.0);
+	m_ppObjects[15]->SetPosition(-300.0, 15.0, -500.0);
+	m_ppObjects[16]->SetPosition(500.0, 15.0, 700.0);
 
 	CMaterial* pPlaneMaterial2 = new CMaterial(1);
 	pPlaneMaterial2->SetReflection(1);
@@ -103,7 +103,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[8] = m_ppHierarchicalGameObjects[3];
 	m_ppObjects[9] = m_ppHierarchicalGameObjects[4];
 
-	m_nNpcObjects = 7;
+	m_nNpcObjects = 5;
 	m_ppNpcObjects = new CGameObject * [m_nNpcObjects];
 	CMaterial* pNpcMaterial = new CMaterial(5);
 	pNpcMaterial->SetReflection(5);
@@ -124,8 +124,6 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[12] = m_ppNpcObjects[2];
 	m_ppObjects[13] = m_ppNpcObjects[3];
 	m_ppObjects[14] = m_ppNpcObjects[4];
-	m_ppObjects[15] = m_ppNpcObjects[5];
-	m_ppObjects[16] = m_ppNpcObjects[6];
 
 	//CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", NULL);
 	//CMaterial* pBulletMaterial = new CMaterial(100);
