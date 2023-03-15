@@ -1,145 +1,6 @@
 #include "stdafx.h"
 #include "MapObjectShaders.h"
 
-WallObjectShaders::WallObjectShaders()
-{
-}
-
-WallObjectShaders::~WallObjectShaders()
-{
-}
-
-void WallObjectShaders::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
-{
-	m_nObjects = 13;
-
-	m_ppObjects = new CGameObject * [m_nObjects];
-
-	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-
-	CLoadedModelInfo* pBuildingModel = pModel;
-	if (!pBuildingModel) pBuildingModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/untitled.blend131321.bin", NULL);
-
-	for (int i = 0; i < m_nObjects; i++)
-	{
-		m_ppObjects[i] = new CEthanObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pBuildingModel, 1);
-
-	}
-
-	m_ppObjects[0]->SetPosition(850.0f, pTerrain->GetHeight(850.0f, 1250.0f), 1250.0f);
-	m_ppObjects[0]->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppObjects[0]->SetScale(16.0f, 6.0f, 14.0f);
-
-	m_ppObjects[1]->SetPosition(875.0f, pTerrain->GetHeight(875.0f, 1150.0f), 1150.0f);
-	m_ppObjects[1]->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppObjects[1]->SetScale(10.0f, 6.0f, 18.0f);
-
-	m_ppObjects[2]->SetPosition(1120.0f, pTerrain->GetHeight(1120.0f, 1325.0f), 1325.0f);
-	m_ppObjects[2]->Rotate(0.0f, 90.0f, 0.0f);
-	m_ppObjects[2]->SetScale(18.0f, 6.0f, 18.0f);
-
-	m_ppObjects[3]->SetPosition(1900.0f, pTerrain->GetHeight(1900.0f, 1400.0f), 1400.0f);
-	m_ppObjects[3]->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppObjects[3]->SetScale(10.0f, 7.0f, 18.0f);
-
-	m_ppObjects[4]->SetPosition(1160.0f, pTerrain->GetHeight(1160.0f, 1605.0f), 1605.0f);
-	m_ppObjects[4]->Rotate(0.0f, 90.0f, 0.0f);
-	m_ppObjects[4]->SetScale(10.0f, 5.0f, 8.0f);
-
-	m_ppObjects[5]->SetPosition(1600.0f, pTerrain->GetHeight(1600.0f, 2500.0f), 2500.0f);
-	m_ppObjects[5]->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppObjects[5]->SetScale(10.0f, 5.0f, 8.0f);
-
-	m_ppObjects[6]->SetPosition(1525.0f, pTerrain->GetHeight(1525.0f, 1650.0f), 1650.0f);
-	m_ppObjects[6]->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppObjects[6]->SetScale(8.0f, 2.0f, 18.0f);
-
-	m_ppObjects[7]->SetPosition(1750.0f, pTerrain->GetHeight(1750.0f, 2800.0f), 2800.0f);
-	m_ppObjects[7]->Rotate(0.0f, 0.0f, 0.0f);
-	m_ppObjects[7]->SetScale(10.0f, 6.0f, 18.0f);
-
-	m_ppObjects[8]->SetPosition(1400.0f, pTerrain->GetHeight(1400.0f, 1500.0f), 1500.0f);
-	m_ppObjects[8]->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppObjects[8]->SetScale(10.0f, 6.0f, 8.0f);
-
-	m_ppObjects[9]->SetPosition(1250.0f, pTerrain->GetHeight(1250.0f, 1795.0f), 1795.0f);
-	m_ppObjects[9]->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppObjects[9]->SetScale(10.0f, 2.0f, 18.0f);
-
-	m_ppObjects[10]->SetPosition(250.0f, pTerrain->GetHeight(250.0f, 795.0f), 795.0f);
-	m_ppObjects[10]->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppObjects[10]->SetScale(10.0f, 2.0f, 18.0f);
-
-	m_ppObjects[11]->SetPosition(1250.0f, pTerrain->GetHeight(1250.0f, 2225.0f), 2225.0f);
-	m_ppObjects[11]->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppObjects[11]->SetScale(10.0f, 2.0f, 18.0f);
-
-	m_ppObjects[12]->SetPosition(1050.0f, pTerrain->GetHeight(1050.0f, 1595.0f), 1595.0f);
-	m_ppObjects[12]->Rotate(0.0f, 180.0f, 0.0f);
-	m_ppObjects[12]->SetScale(10.0f, 2.0f, 18.0f);
-
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	if (!pModel && pBuildingModel) delete pBuildingModel;
-}
-
-void BuildingObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
-{
-	m_nObjects = 5;
-	m_ppObjects = new CGameObject * [m_nObjects];
-
-	CGameObject* pSuperCobraModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/GameObject.bin", this);
-	pSuperCobraModel->SetScale(2.0, 2.0, 2.0);
-
-
-	for (int i = 0; i < m_nObjects; i++)
-	{
-		m_ppObjects[i] = new CSuperCobraObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		m_ppObjects[i]->SetChild(pSuperCobraModel, false);
-		m_ppObjects[i]->SetPosition(1000.0 + (i * 50), 500.0, 1000.0);
-		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-		m_ppObjects[i]->SetScale(5.0f, 5.0f, 5.0f);
-		pSuperCobraModel->AddRef();
-	}
-
-
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-}
-
-void BunkerObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
-{
-	m_nObjects = 3;
-
-	m_ppObjects = new CGameObject * [m_nObjects];
-
-	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-
-	CLoadedModelInfo* pBuildingModel = pModel;
-	if (!pBuildingModel) pBuildingModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/bunker_1_fbx.bin", NULL);
-
-	for (int i = 0; i < m_nObjects; i++)
-	{
-		m_ppObjects[i] = new CEthanObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pBuildingModel, 1);
-		m_ppObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-		m_ppObjects[i]->SetScale(40.0, 35.0f, 40.0f);
-	}
-
-	m_ppObjects[0]->SetPosition(420.0f, pTerrain->GetHeight(420.0f, 1100.0f) - 15.0f, 1100.0f);
-	m_ppObjects[0]->Rotate(55.0, 0.0f, 0.0f);
-
-	m_ppObjects[1]->SetPosition(650.0f, pTerrain->GetHeight(650.0f, 1800.0f) - 15.0f, 1800.0f);
-	m_ppObjects[1]->Rotate(55.0, 0.0f, 0.0f);
-
-	m_ppObjects[2]->SetPosition(1700.0f, pTerrain->GetHeight(1700.0f, 1400.0f) - 15.0f, 1400.0f);
-	m_ppObjects[2]->Rotate(55.0, 0.0f, 0.0f);
-
-
-
-
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	if (!pModel && pBuildingModel) delete pBuildingModel;
-}
 
 /////////////////////////////////////////////
 void CMapObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
@@ -235,11 +96,17 @@ void CMapObjectShader::ReleaseUploadBuffers()
 	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
 }
 
+
+D3D12_SHADER_BYTECODE CMapObjectShader::CreatePixelShader()
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSMapStandard", "ps_5_1", &m_pd3dPixelShaderBlob));
+}
+
 BoundingBox CMapObjectShader::CalculateBoundingBox()
 {
 	for (int i = 0; i < m_nObjects; i++) m_ppObjects[i]->CalculateBoundingBox();
-
-	BoundingBox xmBoundingBox = m_ppObjects[0]->m_xmBoundingBox;
+	BoundingBox xmBoundingBox;
+	for (int i = 1; i < m_ppObjects[0]->m_nMeshes; i++)xmBoundingBox = m_ppObjects[0]->m_ppMeshes[i]->m_xmBoundingBox;
 	for (int i = 1; i < m_nObjects; i++)BoundingBox::CreateMerged(xmBoundingBox, xmBoundingBox, m_ppObjects[i]->m_xmBoundingBox);
 
 	return(xmBoundingBox);

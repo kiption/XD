@@ -33,7 +33,7 @@ public:
 	int	m_nNpcObjects = 0;
 	CGameObject** m_ppNpcObjects = NULL;
 
-
+	CMapObjectShader** m_ppMapShader = NULL;
 	float m_fBulletEffectiveRange = 2000.0f;
 	CBulletObject* pBulletObject = NULL;
 	CBulletObject* m_ppBullets[BULLETS];

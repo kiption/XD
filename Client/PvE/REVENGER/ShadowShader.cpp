@@ -36,28 +36,27 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	CMaterial* pCityMaterial = new CMaterial(3);
 	pCityMaterial->SetReflection(3);
 
-	int Cities = 3;
-	m_ppCityGameObjects = new CGameObject * [Cities];
+	int Cities = 2;
+	m_ppCityGameObjects = new CGameObject * [2];
 
-	for (int i = 0; i < Cities; i++)
+	for (int i = 0; i < 2; i++)
 	{
 
-		m_ppCityGameObjects[i] = new CGameObject(3);
+		m_ppCityGameObjects[i] = new CGameObject(2);
 		CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1.bin", NULL);
 		m_ppCityGameObjects[i]->SetChild(pGeneratorModel, false);
 		m_ppCityGameObjects[i]->SetMaterial(pCityMaterial);
 		m_ppCityGameObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-		m_ppCityGameObjects[i]->SetScale(2.0, 2.0, 2.0);
+		m_ppCityGameObjects[i]->SetScale(3.5, 3.5, 3.5);
 		m_ppCityGameObjects[i]->OnPrepareAnimate();
 		pGeneratorModel->AddRef();
 	}
 
-	m_ppObjects[1] = m_ppCityGameObjects[0];
-	m_ppObjects[15] = m_ppCityGameObjects[1];
-	m_ppObjects[16] = m_ppCityGameObjects[2];
-	m_ppObjects[1]->SetPosition(-500.0, 15.0, 500.0);
-	m_ppObjects[15]->SetPosition(-300.0, 15.0, -500.0);
-	m_ppObjects[16]->SetPosition(500.0, 15.0, 700.0);
+	
+	m_ppObjects[15] = m_ppCityGameObjects[0];
+	m_ppObjects[16] = m_ppCityGameObjects[1];
+	m_ppObjects[15]->SetPosition(-300.0, 18.0, -500.0);
+	m_ppObjects[16]->SetPosition(500.0, 18.0, 700.0);
 
 	CMaterial* pPlaneMaterial2 = new CMaterial(1);
 	pPlaneMaterial2->SetReflection(1);
@@ -68,19 +67,23 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_pTerrain->SetPosition(-200.0f, 0.0, -200.0f);
 	m_ppObjects[2] = m_pTerrain;
 
-
 	CMaterial* pMaterial = new CMaterial(3);
 	pMaterial->SetReflection(3);
+	m_ppObjects[1] = new CGameObject(1);
+	m_ppObjects[1]->SetMesh(pCubeMesh);
+	m_ppObjects[1]->SetMaterial(pMaterial);
+	m_ppObjects[1]->SetPosition(-500.0f, 15.0, 500.0f);
+
 	m_ppObjects[3] = new CGameObject(1);
 	m_ppObjects[3]->SetMesh(pCubeMesh);
 	m_ppObjects[3]->SetMaterial(pMaterial);
 	m_ppObjects[3]->SetPosition(-500.0f, 15.0, 500.0f);
 
-	
 	m_ppObjects[4] = new CGameObject(1);
 	m_ppObjects[4]->SetMesh(pCubeMesh);
 	m_ppObjects[4]->SetMaterial(pMaterial);
 	m_ppObjects[4]->SetPosition(-500.0f, 15.0, 500.0f);
+
 	m_nHierarchicalGameObjects = 5;
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
 	CMaterial* pOtherPlayerMaterial = new CMaterial(5);
@@ -173,7 +176,7 @@ void CObjectsShader::ReleaseUploadBuffers()
 void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	CIlluminatedShader::Render(pd3dCommandList, pCamera);
-
+	//m_pMapShader->Render(pd3dCommandList, pCamera);
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
@@ -194,9 +197,12 @@ BoundingBox CObjectsShader::CalculateBoundingBox()
 	BoundingBox xmBoundingBox;
 	for (int i = 0; i < m_nObjects; i++)
 	{
-		m_ppObjects[i]->CalculateBoundingBox();
-		xmBoundingBox = m_ppObjects[i]->m_xmBoundingBox;
-		for (int i = 1; i < m_nObjects; i++)BoundingBox::CreateMerged(xmBoundingBox, xmBoundingBox, m_ppObjects[i]->m_xmBoundingBox);
+		/*for (int j = 0; j < m_ppObjects[i]->m_nMeshes; j++)
+		{*/
+			m_ppObjects[i]->CalculateBoundingBox();
+			xmBoundingBox = m_ppObjects[i]/*->m_ppMeshes[j]*/->m_xmBoundingBox;
+			for (int i = 1; i < m_nObjects; i++)BoundingBox::CreateMerged(xmBoundingBox, xmBoundingBox, m_ppObjects[i]/*->m_ppMeshes[j]*/->m_xmBoundingBox);
+		//}
 	}
 	return(xmBoundingBox);
 }
@@ -349,10 +355,10 @@ D3D12_RASTERIZER_DESC CDepthRenderShader::CreateRasterizerState()
 	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
 	d3dRasterizerDesc.SlopeScaledDepthBias = 1.0f;
 	d3dRasterizerDesc.DepthClipEnable = TRUE;
-	d3dRasterizerDesc.MultisampleEnable = TRUE;
+	d3dRasterizerDesc.MultisampleEnable = FALSE;
 	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
 	d3dRasterizerDesc.ForcedSampleCount = 0;
-	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_ON;
+	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 
 	return(d3dRasterizerDesc);
 }

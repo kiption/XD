@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------
-#define MAX_LIGHTS			32
+#define MAX_LIGHTS			16
 #define MAX_MATERIALS		512
 
 #define POINT_LIGHT			1
@@ -10,7 +10,7 @@
 #define _WITH_THETA_PHI_CONES
 #define _WITH_REFLECT
 #define MAX_DEPTH_TEXTURES		MAX_LIGHTS
-
+#define _WITH_PCF_FILTERING
 struct LIGHT
 {
 	float4					m_cAmbient;
