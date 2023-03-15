@@ -94,10 +94,10 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[0].m_fRange = 2000.0f;
+	m_pLights->m_pLights[0].m_fRange = 3500.0f;
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.43f, 0.43f, 0.43f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.73f, 0.43f, 0.15f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.7f, 0.4f, 0.15f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(+250, 550.0f, -1500.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(-0.3f, -1.0f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.1f, 0.001f);
@@ -766,13 +766,13 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera);
 
-	D3D12_VIEWPORT d3dViewport = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH * 0.25f, FRAME_BUFFER_HEIGHT * 0.25f, 0.0f, 1.0f };
-	D3D12_RECT d3dScissorRect = { 0, 0, FRAME_BUFFER_WIDTH / 4, FRAME_BUFFER_HEIGHT / 4 };
+	//D3D12_VIEWPORT d3dViewport = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH * 0.25f, FRAME_BUFFER_HEIGHT * 0.25f, 0.0f, 1.0f };
+	//D3D12_RECT d3dScissorRect = { 0, 0, FRAME_BUFFER_WIDTH / 4, FRAME_BUFFER_HEIGHT / 4 };
 
-	pd3dCommandList->RSSetViewports(1, &d3dViewport);
-	pd3dCommandList->RSSetScissorRects(1, &d3dScissorRect);
+	//pd3dCommandList->RSSetViewports(1, &d3dViewport);
+	//pd3dCommandList->RSSetScissorRects(1, &d3dScissorRect);
 
-	if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
+	//if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 	//if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
@@ -815,7 +815,7 @@ void SceneManager::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 			XMMATRIX xmmtxProjection;
 			if (m_pLights->m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
 			{
-				float fFovAngle = 100.0; //m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
+				float fFovAngle = 120.0; //m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
 				float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
 				xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fFovAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
 
@@ -844,7 +844,7 @@ void SceneManager::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 
 			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthRenderShader->m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-			FLOAT pfClearColor[4] = { 0.2f,0.2f,0.2f, 0.5 };
+			FLOAT pfClearColor[4] = { 0.6f,0.2f,0.2f, 0.5 };
 			pd3dCommandList->ClearRenderTargetView(m_pDepthRenderShader->m_pd3dRtvCPUDescriptorHandles[j], pfClearColor, 0, NULL);
 
 			pd3dCommandList->ClearDepthStencilView(m_pDepthRenderShader->m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, NULL);

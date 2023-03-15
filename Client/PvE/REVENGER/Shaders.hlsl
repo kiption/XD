@@ -689,12 +689,13 @@ float4 PSParticleDraw(GS_PARTICLE_DRAW_OUTPUT input) : SV_TARGET
 	return(cColor);
 }
 
-
+Texture2D gtxtCircularShadowTexture : register(t34);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 struct VS_LIGHTING_INPUT
 {
 	float3 position : POSITION;
 	float3 normal : NORMAL;
+	float2 uv : TEXCOORD;
 };
 
 struct VS_LIGHTING_OUTPUT
@@ -702,6 +703,7 @@ struct VS_LIGHTING_OUTPUT
 	float4 position : SV_POSITION;
 	float3 positionW : POSITION;
 	float3 normalW : NORMAL;
+	float2 uv : TEXCOORD;
 };
 
 VS_LIGHTING_OUTPUT VSLighting(VS_LIGHTING_INPUT input)
@@ -711,7 +713,7 @@ VS_LIGHTING_OUTPUT VSLighting(VS_LIGHTING_INPUT input)
 	output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
 	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-
+	output.uv = input.uv;
 	return(output);
 }
 
@@ -719,10 +721,12 @@ float4 PSLighting(VS_LIGHTING_OUTPUT input) : SV_TARGET
 {
 	input.normalW = normalize(input.normalW);
 	float4 uvs[MAX_LIGHTS];
-	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
-
+	float4 cColor = gtxtCircularShadowTexture.Sample(gssWrap, input.uv);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
 	//	return(cIllumination);
-		return(float4(input.normalW * 0.5f + 0.5f, 1.0f));
+	
+	//return(float4(input.normalW * 0.5f + 0.5f, 1.0f));
+	return(lerp(cColor, cIllumination, 0.5));
 }
 
  
@@ -732,7 +736,7 @@ VS_CIRCULAR_SHADOW_INPUT VSCircularShadow(VS_CIRCULAR_SHADOW_INPUT input)
 }
 
 static float2 pf2UVs[4] = { float2(0.0f,1.0f), float2(0.0f,0.0f), float2(1.0f,1.0f), float2(1.0f,0.0f) };
-Texture2D gtxtCircularShadowTexture : register(t34);
+
 
 [maxvertexcount(4)]
 void GSCircularShadow(point VS_CIRCULAR_SHADOW_INPUT input[1], inout TriangleStream<GS_CIRCULAR_SHADOW_GEOMETRY_OUTPUT> outStream)
@@ -860,7 +864,7 @@ struct VS_SHADOW_MAP_OUTPUT
 	float4 position : SV_POSITION;
 	float3 positionW : POSITION;
 	float3 normalW : NORMAL;
-	float4 uvs[MAX_LIGHTS] : TEXCOORD0;
+	float4 uvs[MAX_LIGHTS] : TEXCOORD0aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
 };
 
 VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
@@ -871,6 +875,7 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 	output.positionW = positionW.xyz;
 	output.position = mul(mul(positionW, gmtxView), gmtxProjection);
 	output.normalW = mul(float4(input.normal, 0.0f), gmtxGameObject).xyz;
+	//output.uvs[MAX_LIGHTS].xy = input.uv.xy;
 
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{

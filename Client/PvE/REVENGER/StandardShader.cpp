@@ -76,7 +76,7 @@ void CStandardObjectsShader::ReleaseUploadBuffers()
 
 void CStandardObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	CStandardShader::Render(pd3dCommandList, pCamera);
+	CIlluminatedShader::Render(pd3dCommandList, pCamera);
 
 	for (int j = 0; j < m_nObjects; j++)
 	{

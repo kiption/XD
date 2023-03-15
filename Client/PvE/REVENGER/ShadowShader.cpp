@@ -33,30 +33,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[0]->SetMaterial(pPlaneMaterial);
 	m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 0.0, 100.0f));
 
-	CMaterial* pCityMaterial = new CMaterial(3);
-	pCityMaterial->SetReflection(3);
-
-	int Cities = 2;
-	m_ppCityGameObjects = new CGameObject * [2];
-
-	for (int i = 0; i < 2; i++)
-	{
-
-		m_ppCityGameObjects[i] = new CGameObject(2);
-		CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1.bin", NULL);
-		m_ppCityGameObjects[i]->SetChild(pGeneratorModel, false);
-		m_ppCityGameObjects[i]->SetMaterial(pCityMaterial);
-		m_ppCityGameObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-		m_ppCityGameObjects[i]->SetScale(3.5, 3.5, 3.5);
-		m_ppCityGameObjects[i]->OnPrepareAnimate();
-		pGeneratorModel->AddRef();
-	}
-
 	
-	m_ppObjects[15] = m_ppCityGameObjects[0];
-	m_ppObjects[16] = m_ppCityGameObjects[1];
-	m_ppObjects[15]->SetPosition(-300.0, 18.0, -500.0);
-	m_ppObjects[16]->SetPosition(500.0, 18.0, 700.0);
 
 	CMaterial* pPlaneMaterial2 = new CMaterial(1);
 	pPlaneMaterial2->SetReflection(1);
@@ -143,7 +120,30 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	//	//	pBulletObject->m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 0, pBulletMesh);
 	//	for (int j = 15; j <= ; j++)m_ppObjects[j] = m_ppBullets[i];
 	//}
+	CMaterial* pCityMaterial = new CMaterial(3);
+	pCityMaterial->SetReflection(3);
 
+	int Cities = 2;
+	m_ppCityGameObjects = new CGameObject * [2];
+
+	for (int i = 0; i < 2; i++)
+	{
+
+		m_ppCityGameObjects[i] = new CGameObject(2);
+		CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1.bin", NULL);
+		m_ppCityGameObjects[i]->SetChild(pGeneratorModel, false);
+		m_ppCityGameObjects[i]->SetMaterial(pCityMaterial);
+		m_ppCityGameObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
+		m_ppCityGameObjects[i]->SetScale(3.5, 3.5, 3.5);
+		m_ppCityGameObjects[i]->OnPrepareAnimate();
+		pGeneratorModel->AddRef();
+	}
+
+
+	m_ppObjects[15] = m_ppCityGameObjects[0];
+	m_ppObjects[16] = m_ppCityGameObjects[1];
+	m_ppObjects[15]->SetPosition(-250.0, 21.0, -250.0);
+	m_ppObjects[16]->SetPosition(500.0, 21.0, 700.0);
 }
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
@@ -247,6 +247,22 @@ D3D12_SHADER_BYTECODE CShadowMapShader::CreatePixelShader()
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSShadowMapShadow", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
+
+//D3D12_INPUT_LAYOUT_DESC CShadowMapShader::CreateInputLayout()
+//{
+//	UINT nInputElementDescs = 3;
+//	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+//
+//	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+//	pd3dInputElementDescs[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+//	pd3dInputElementDescs[2] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+//
+//	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+//	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+//	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+//
+//	return(d3dInputLayoutDesc);
+//}
 
 void CShadowMapShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
