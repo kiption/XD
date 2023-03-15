@@ -1472,13 +1472,13 @@ int main(int argc, char* argv[])
 		sc_portnum = PORT_NUM_S0;
 		ss_portnum = HA_PORTNUM_S0;
 
-		b_active_server = true;
+		b_active_server = false;
 		break;
 	case 1:	// 1번 서버
 		sc_portnum = PORT_NUM_S1;
 		ss_portnum = HA_PORTNUM_S1;
 
-		b_active_server = false;
+		b_active_server = true;
 		break;
 	default:
 		cout << "잘못된 값이 입력되었습니다. 프로그램을 종료합니다." << endl;

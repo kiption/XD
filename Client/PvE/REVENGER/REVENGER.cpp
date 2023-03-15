@@ -29,7 +29,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 
-	curr_servernum = 0;
+	curr_servernum = MAX_SERVER - 1;
 
 	CS_LOGIN_PACKET login_pack;
 	login_pack.size = sizeof(CS_LOGIN_PACKET);
@@ -45,8 +45,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);
 	connect(sockets[0], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
 
-	sendPacket(&login_pack, curr_servernum);
-	recvPacket(curr_servernum);
+	sendPacket(&login_pack, 0);
+	recvPacket(0);
 
 	// Standby Server에 연결
 	sockets[1] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
@@ -57,8 +57,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	inet_pton(AF_INET, SERVER_ADDR, &server1_addr.sin_addr);
 	connect(sockets[1], reinterpret_cast<sockaddr*>(&server1_addr), sizeof(server1_addr));
 
-	sendPacket(&login_pack, curr_servernum + 1);
-	recvPacket(curr_servernum + 1);
+	sendPacket(&login_pack, 1);
+	recvPacket(1);
 	//==================================================
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
