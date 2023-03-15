@@ -142,8 +142,8 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	m_ppObjects[15] = m_ppCityGameObjects[0];
 	m_ppObjects[16] = m_ppCityGameObjects[1];
-	m_ppObjects[15]->SetPosition(-250.0, 21.0, -250.0);
-	m_ppObjects[16]->SetPosition(500.0, 21.0, 700.0);
+	m_ppObjects[15]->SetPosition(-250.0, 18.0, -250.0);
+	m_ppObjects[16]->SetPosition(500.0, 18.0, 700.0);
 }
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)

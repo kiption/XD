@@ -94,12 +94,12 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[0].m_fRange = 3500.0f;
+	m_pLights->m_pLights[0].m_fRange = 3000.0f;
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.73f, 0.43f, 0.15f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.7f, 0.4f, 0.15f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.43f, 0.43f, 0.05f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.43f, 0.43f, 0.05f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(+250, 550.0f, -1500.0f);
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(-0.3f, -1.0f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(-0.6f, -1.0f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.1f, 0.001f);
 
 	m_pLights->m_pLights[1].m_bEnable = true;
@@ -108,10 +108,10 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.43f, 0.43f, 0.43f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.23f, 0.23f, 0.23f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(+250, 550.0f, -1000.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(-0.3f, -1.0f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.1f, 0.001f);
-	m_pLights->m_pLights[1].m_fFalloff = 10.0f;
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(+250, 660.0f, -1000.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(-0.1f, -1.0f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.1f, 0.005f);
+	m_pLights->m_pLights[1].m_fFalloff = 11.0f;
 	m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(60.0f));
 	m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
 
@@ -215,6 +215,7 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	m_ppShaders = new CShader * [m_nShaders];
 	CObjectsShader* pObjectShader = new CObjectsShader();
 	pObjectShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT);
+	pObjectShader->SetCurScene(SCENE1STAGE);
 	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 
 	m_xmBoundingBox = pObjectShader->CalculateBoundingBox();
@@ -736,8 +737,8 @@ void SceneManager::AnimateObjects(float fTimeElapsed)
 
 		m_fLightRotationAngle += fTimeElapsed;
 		XMMATRIX xmmtxRotation = XMMatrixRotationY(fTimeElapsed * 0.1f);
-		//XMStoreFloat3(&m_pLights->m_pLights[0].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction), xmmtxRotation));
-		//XMStoreFloat3(&m_pLights->m_pLights[1].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[1].m_xmf3Direction), xmmtxRotation));
+	//	XMStoreFloat3(&m_pLights->m_pLights[0].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction), xmmtxRotation));
+	//	XMStoreFloat3(&m_pLights->m_pLights[1].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[1].m_xmf3Direction), xmmtxRotation));
 
 	}
 
@@ -749,9 +750,6 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 
 
 	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
-
-	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
-	pCamera->UpdateShaderVariables(pd3dCommandList);
 
 	//////if (m_pUseWaterMove) m_pUseWaterMove->Render(pd3dCommandList, pCamera);
 	////for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->Render(pd3dCommandList, pCamera);
@@ -815,10 +813,11 @@ void SceneManager::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 			XMMATRIX xmmtxProjection;
 			if (m_pLights->m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
 			{
-				float fFovAngle = 120.0; //m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
+				float fFovAngle = 80.0; //m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
 				float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
 				xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fFovAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
-
+				//float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
+				//xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
 			}
 			else if (m_pLights->m_pLights[j].m_nType == SPOT_LIGHT)
 			{
@@ -844,7 +843,7 @@ void SceneManager::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 
 			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthRenderShader->m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-			FLOAT pfClearColor[4] = { 0.6f,0.2f,0.2f, 0.5 };
+			FLOAT pfClearColor[4] = { 0.6f,0.6f,0.6f, 1.0 };
 			pd3dCommandList->ClearRenderTargetView(m_pDepthRenderShader->m_pd3dRtvCPUDescriptorHandles[j], pfClearColor, 0, NULL);
 
 			pd3dCommandList->ClearDepthStencilView(m_pDepthRenderShader->m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, NULL);

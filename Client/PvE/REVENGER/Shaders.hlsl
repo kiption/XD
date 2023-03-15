@@ -195,8 +195,13 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	}
 
 	float4 uvs[MAX_LIGHTS];
+	float2 uv = input.uv;
 
-	float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
+	for (int i = 0; i < MAX_LIGHTS; i++)
+	{
+		uvs[i].xy = uv.xy;
+	}
+	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), false, uvs);
 
 	return(lerp(cColor, cIllumination, 0.5f));
 }
@@ -234,7 +239,7 @@ float4 PSBulletStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	}
 
 	float4 uvs[MAX_LIGHTS];
-	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
 
 	return(lerp(cColor, cIllumination, 0.5f));
 }
@@ -350,7 +355,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
 //	float4 cColor = (cBaseTexColor * cDetailTexColor);
 	//cIllumination =Lighting(input.positionW, input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
 
 	
 	cColor = lerp(cColor, cIllumination, 0.5f);
@@ -864,7 +869,7 @@ struct VS_SHADOW_MAP_OUTPUT
 	float4 position : SV_POSITION;
 	float3 positionW : POSITION;
 	float3 normalW : NORMAL;
-	float4 uvs[MAX_LIGHTS] : TEXCOORD0aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa;
+	float4 uvs[MAX_LIGHTS] : TEXCOORD0;
 };
 
 VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
