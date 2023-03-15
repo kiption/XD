@@ -125,6 +125,7 @@ public:
 	void send_login_info_packet();
 	void send_move_packet(int client_id, short move_target);
 	void send_rotate_packet(int client_id, short rotate_target);
+	void send_move_rotate_packet(int client_id, short update_target);
 
 	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(heli_bbsize_x, heli_bbsize_y, heli_bbsize_z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 };
@@ -262,6 +263,32 @@ void SESSION::send_rotate_packet(int client_id, short rotate_target)
 
 	do_send(&rotate_pl_packet);
 }
+void SESSION::send_move_rotate_packet(int client_id, short update_target)
+{
+	SC_MOVE_ROTATE_OBJECT_PACKET update_pl_packet;
+	update_pl_packet.target = update_target;
+	update_pl_packet.id = client_id;
+	update_pl_packet.size = sizeof(SC_MOVE_ROTATE_OBJECT_PACKET);
+	update_pl_packet.type = SC_MOVE_ROTATE_OBJECT;
+
+	update_pl_packet.x = clients[client_id].pos.x;
+	update_pl_packet.y = clients[client_id].pos.y;
+	update_pl_packet.z = clients[client_id].pos.z;
+
+	update_pl_packet.right_x = clients[client_id].m_rightvec.x;
+	update_pl_packet.right_y = clients[client_id].m_rightvec.y;
+	update_pl_packet.right_z = clients[client_id].m_rightvec.z;
+	
+	update_pl_packet.up_x = clients[client_id].m_upvec.x;
+	update_pl_packet.up_y = clients[client_id].m_upvec.y;
+	update_pl_packet.up_z = clients[client_id].m_upvec.z;
+	
+	update_pl_packet.look_x = clients[client_id].m_lookvec.x;
+	update_pl_packet.look_y = clients[client_id].m_lookvec.y;
+	update_pl_packet.look_z = clients[client_id].m_lookvec.z;
+
+	do_send(&update_pl_packet);
+}
 
 void disconnect(int target_id, int target)
 {
@@ -355,9 +382,9 @@ void process_packet(int client_id, char* packet)
 
 		// 새로 접속한 플레이어의 초기 정보를 설정합니다.
 		clients[client_id].pl_state = PL_ST_ALIVE;
-		clients[client_id].pos.x = 1500 + client_id * 50;
-		clients[client_id].pos.y = 400 + client_id * 20;
-		clients[client_id].pos.z = 1265 - client_id * 50;
+		clients[client_id].pos.x = 512 + client_id * 50;
+		clients[client_id].pos.y = 400;
+		clients[client_id].pos.z = 350 - client_id * 50;
 		cout << "A new object is successfully created! - POS:(" << clients[client_id].pos.x
 			<< "," << clients[client_id].pos.y << "," << clients[client_id].pos.z << ")." << endl;
 
@@ -1089,9 +1116,9 @@ void timerFunc() {
 					mv_target.pl_state = PL_ST_ALIVE;
 					mv_target.hp = 100;
 					mv_target.bullet = 100;
-					mv_target.pos.x = 1500 + mv_target.id * 50;
-					mv_target.pos.y = 400 + mv_target.id * 20;
-					mv_target.pos.z = 1265 - mv_target.id * 50;
+					mv_target.pos.x = 512 + mv_target.id * 50;
+					mv_target.pos.y = 400;
+					mv_target.pos.z = 350 - mv_target.id * 50;
 					mv_target.pitch = mv_target.yaw = mv_target.roll = 0.0f;
 					mv_target.m_rightvec = basic_coordinate.right;
 					mv_target.m_upvec = basic_coordinate.up;
@@ -1110,8 +1137,7 @@ void timerFunc() {
 					// 부활구역으로 이동한 결과를 모든 클라이언트들에게 알립니다.
 					for (auto& cl : clients) {
 						if (cl.s_state == ST_INGAME) {
-							cl.send_move_packet(mv_target.id, TARGET_PLAYER);
-							cl.send_rotate_packet(mv_target.id, TARGET_PLAYER);
+							cl.send_move_rotate_packet(mv_target.id, TARGET_PLAYER);
 						}
 					}
 
@@ -1131,8 +1157,7 @@ void timerFunc() {
 
 						for (auto& cl : clients) {
 							if (cl.s_state == ST_INGAME) {
-								cl.send_move_packet(mv_target.id, TARGET_PLAYER);
-								cl.send_rotate_packet(mv_target.id, TARGET_PLAYER);
+								cl.send_move_rotate_packet(mv_target.id, TARGET_PLAYER);
 							}
 						}
 					}
@@ -1297,8 +1322,8 @@ void init_npc()
 
 		random_device rd;
 		default_random_engine dre(rd());
-		uniform_real_distribution<float>AirHigh(350, 650);
-		uniform_real_distribution<float>AirPos(2500, 3500);
+		uniform_real_distribution<float>AirHigh(350, 750);
+		uniform_real_distribution<float>AirPos(300, 700);
 
 		npcs[i].SetPosition(AirPos(dre), AirHigh(dre), AirPos(dre));
 		npcs[i].SetOrgPosition(npcs[i].GetPosition());
@@ -1317,47 +1342,34 @@ void MoveNPC()
 		for (int i = 0; i < MAX_NPCS; i++) {
 			npcs[i].MovetoRotate();
 
-			// Move Send
-			SC_MOVE_OBJECT_PACKET npc_move_packet;
-			npc_move_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
-			npc_move_packet.type = SC_MOVE_OBJECT;
+			// Send Move&Rotate Packet
+			SC_MOVE_ROTATE_OBJECT_PACKET npc_update_packet;
+			npc_update_packet.size = sizeof(SC_MOVE_ROTATE_OBJECT_PACKET);
+			npc_update_packet.type = SC_MOVE_OBJECT;
 
-			npc_move_packet.target = TARGET_NPC;
-			npc_move_packet.id = npcs[i].GetID();
-			npc_move_packet.x = npcs[i].GetPosition().x;
-			npc_move_packet.y = npcs[i].GetPosition().y;
-			npc_move_packet.z = npcs[i].GetPosition().z;
+			npc_update_packet.target = TARGET_NPC;
+			npc_update_packet.id = npcs[i].GetID();
 
-			for (auto& send_target : clients) {
-				lock_guard<mutex> lg{ send_target.s_lock };
-				if (send_target.s_state == ST_INGAME) {
-					send_target.do_send(&npc_move_packet);
-				}
-			}
+			npc_update_packet.x = npcs[i].GetPosition().x;
+			npc_update_packet.y = npcs[i].GetPosition().y;
+			npc_update_packet.z = npcs[i].GetPosition().z;
 
-			// Rotate Send
-			SC_ROTATE_OBJECT_PACKET npc_rotate_packet;
-			npc_rotate_packet.size = sizeof(SC_ROTATE_OBJECT_PACKET);
-			npc_rotate_packet.type = SC_ROTATE_OBJECT;
-
-			npc_rotate_packet.target = TARGET_NPC;
-			npc_rotate_packet.id = npcs[i].GetID();
-			npc_rotate_packet.right_x = npcs[i].GetCurr_coordinate().right.x;
-			npc_rotate_packet.right_y = npcs[i].GetCurr_coordinate().right.y;
-			npc_rotate_packet.right_z = npcs[i].GetCurr_coordinate().right.z;
-
-			npc_rotate_packet.up_x = npcs[i].GetCurr_coordinate().up.x;
-			npc_rotate_packet.up_y = npcs[i].GetCurr_coordinate().up.y;
-			npc_rotate_packet.up_z = npcs[i].GetCurr_coordinate().up.z;
-
-			npc_rotate_packet.look_x = npcs[i].GetCurr_coordinate().look.x;
-			npc_rotate_packet.look_y = npcs[i].GetCurr_coordinate().look.y;
-			npc_rotate_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
+			npc_update_packet.right_x = npcs[i].GetCurr_coordinate().right.x;
+			npc_update_packet.right_y = npcs[i].GetCurr_coordinate().right.y;
+			npc_update_packet.right_z = npcs[i].GetCurr_coordinate().right.z;
+			
+			npc_update_packet.up_x = npcs[i].GetCurr_coordinate().up.x;
+			npc_update_packet.up_y = npcs[i].GetCurr_coordinate().up.y;
+			npc_update_packet.up_z = npcs[i].GetCurr_coordinate().up.z;
+			
+			npc_update_packet.look_x = npcs[i].GetCurr_coordinate().look.x;
+			npc_update_packet.look_y = npcs[i].GetCurr_coordinate().look.y;
+			npc_update_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
 
 			for (auto& send_target : clients) {
 				lock_guard<mutex> lg{ send_target.s_lock };
 				if (send_target.s_state == ST_INGAME) {
-					send_target.do_send(&npc_rotate_packet);
+					send_target.do_send(&npc_update_packet);
 				}
 			}
 		}

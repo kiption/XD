@@ -43,7 +43,7 @@ constexpr char INPUT_KEY_E = 0b000001;
 // Packet ID
 enum PacketID {
 	CS_LOGIN, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE
-	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT
+	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
 	, SC_DAMAGED, SC_PLAYER_STATE, SC_BULLET_COUNT
 	, SS_CONNECT, SS_HEARTBEAT
 };
@@ -124,6 +124,17 @@ struct SC_ROTATE_OBJECT_PACKET {
 	char type;
 	short target;
 	short id;
+	float right_x, right_y, right_z;
+	float up_x, up_y, up_z;
+	float look_x, look_y, look_z;
+};
+
+struct SC_MOVE_ROTATE_OBJECT_PACKET {
+	unsigned char size;
+	char type;
+	short target;
+	short id;
+	float x, y, z;
 	float right_x, right_y, right_z;
 	float up_x, up_y, up_z;
 	float look_x, look_y, look_z;
