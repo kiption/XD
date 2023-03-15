@@ -111,28 +111,26 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 				// 2. 다른 Player 객체 최신화
 				for (int i = 0; i < MAX_USER; i++) {
-					if (i == my_info.m_id || other_players[i].m_state == OBJ_ST_EMPTY) continue;
+					if (i == my_info.m_id) continue;
 
 					if (other_players[i].m_state == OBJ_ST_RUNNING) {
 						gGameFramework.SetPosition_OtherPlayerObj(i, other_players[i].m_pos);
 						gGameFramework.SetVectors_OtherPlayerObj(i, other_players[i].m_right_vec, other_players[i].m_up_vec, other_players[i].m_look_vec);
-						
 					}
 					else if (other_players[i].m_state == OBJ_ST_LOGOUT) {
 						other_players[i].m_state = OBJ_ST_EMPTY;
 						gGameFramework.Remove_OtherPlayerObj(i);
 					}
-				if (gGameFramework.m_nMode==SCENE2STAGE)
-				{
-					other_players[i].m_state == OBJ_ST_LOGOUT;
-					gGameFramework.Remove_OtherPlayerObj(i);
-				}
+
+					if (gGameFramework.m_nMode == SCENE2STAGE)
+					{
+						other_players[i].m_state == OBJ_ST_LOGOUT;
+						gGameFramework.Remove_OtherPlayerObj(i);
+					}
 				}
 				// 3. Bullet 객체 최신화
 				for (int i = 0; i < MAX_BULLET; i++) {
-					if (bullets_info[i].m_state == OBJ_ST_EMPTY) {
-						continue;
-					}
+					if (bullets_info[i].m_state == OBJ_ST_EMPTY) continue;
 
 					if (bullets_info[i].m_state == OBJ_ST_LOGOUT) {	// Clear
 						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
@@ -176,8 +174,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				gGameFramework.m_currHp = my_info.m_hp;
 
 				// 6. NPC 움직임 최신화
-				for (int i{}; i < MAX_NPCS; ++i) {
-					//npcs_info[i].m_id = i;
+				for (int i{}; i < MAX_NPCS; i++) {
 					gGameFramework.SetPosition_NPC(npcs_info[i].m_id, npcs_info[i].m_pos);
 					gGameFramework.SetVectors_NPC(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
 				}
