@@ -445,7 +445,7 @@ void process_packet(int client_id, char* packet)
 		// 새로 접속한 플레이어의 초기 정보를 설정합니다.
 		clients[client_id].pl_state = PL_ST_ALIVE;
 		clients[client_id].pos.x = 512 + client_id * 50;
-		clients[client_id].pos.y = 400;
+		clients[client_id].pos.y = 300;
 		clients[client_id].pos.z = 350 - client_id * 50;
 
 		clients[client_id].pitch = clients[client_id].yaw = clients[client_id].roll = 0.0f;
@@ -1392,17 +1392,17 @@ void init_npc()
 
 		random_device rd;
 		default_random_engine dre(rd());
-		uniform_real_distribution<float>AirHigh(450, 550);
-		uniform_real_distribution<float>AirPos(400, 600);
+		uniform_real_distribution<float>AirHigh(150, 250);
+		uniform_real_distribution<float>AirPos(-50, 350);
 
 		npcs[i].SetPosition(AirPos(dre), AirHigh(dre), AirPos(dre));
 		npcs[i].SetOrgPosition(npcs[i].GetPosition());
 
-		uniform_real_distribution<float>rTheta(0.006f, 0.015f);
+		uniform_real_distribution<float>rTheta(0.006f, 0.01f);
 		npcs[i].SetTheta(rTheta(dre));
 		npcs[i].SetAcc(npcs[i].GetTheta());
 
-		uniform_int_distribution<int>rRange(100, 300);
+		uniform_int_distribution<int>rRange(100, 200);
 		npcs[i].SetRange(rRange(dre));
 	}
 }
