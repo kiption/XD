@@ -73,7 +73,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 		m_ppHierarchicalGameObjects[i]->SetChild(pOtherPlayerModel, false);
 		m_ppHierarchicalGameObjects[i]->SetMaterial(pOtherPlayerMaterial);
-		m_ppHierarchicalGameObjects[i]->SetScale(5.0, 5.0, 5.0);
+		m_ppHierarchicalGameObjects[i]->SetScale(0.0, 0.0, 0.0);
 		m_ppHierarchicalGameObjects[i]->OnPrepareAnimate();
 		pOtherPlayerModel->AddRef();
 	}

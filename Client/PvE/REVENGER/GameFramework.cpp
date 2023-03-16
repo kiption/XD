@@ -1075,7 +1075,7 @@ void CGameFramework::SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, X
 	m_pScene->m_ppShaders[0]->m_ppObjects[10 + id]->SetRight(rightVec);
 	m_pScene->m_ppShaders[0]->m_ppObjects[10 + id]->SetUp(upVec);
 	m_pScene->m_ppShaders[0]->m_ppObjects[10 + id]->SetLook(lookVec);
-	m_pScene->m_ppShaders[0]->m_ppObjects[10 + id]->SetScale(15.0f, 15.0f, 15.0f);
+	m_pScene->m_ppShaders[0]->m_ppObjects[10 + id]->SetScale(1.0f,1.0f, 1.0f);
 }
 
 
