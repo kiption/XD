@@ -1,18 +1,31 @@
 #pragma once
-constexpr int PORTNUM_RELAY2CLIENT_0 = 10000;	// 릴레이서버-클라이언트 통신 전용 포트
+// 릴레이서버-클라이언트 통신
+constexpr int MAX_RELAY_SERVER = 2;
+constexpr int PORTNUM_RELAY2CLIENT_0 = 10000;
 constexpr int PORTNUM_RELAY2CLIENT_1 = 10001;
-constexpr int PORTNUM_RELAY2LOGIN_0 = 10010;	// 릴레이서버-인증서버 통신 전용 포트
+
+// 릴레이서버-인증서버 통신
+constexpr int MAX_LOGIN_SERVER = 2;
+constexpr int PORTNUM_RELAY2LOGIN_0 = 10010;
 constexpr int PORTNUM_RELAY2LOGIN_1 = 10011;
-constexpr int PORTNUM_RELAY2LOBBY_0 = 10020;	// 릴레이서버-로비서버 통신 전용 포트
+
+// 릴레이서버-로비서버 통신
+constexpr int MAX_LOBBY_SERVER = 2;
+constexpr int PORTNUM_RELAY2LOBBY_0 = 10020;
 constexpr int PORTNUM_RELAY2LOBBY_1 = 10021;
-constexpr int PORTNUM_RELAY2LOGIC_0 = 10030;	// 릴레이서버-로직서버 통신 전용 포트
+
+// 릴레이서버-로직서버 통신
+constexpr int MAX_LOGIC_SERVER = 2;
+constexpr int PORTNUM_RELAY2LOGIC_0 = 10030;
 constexpr int PORTNUM_RELAY2LOGIC_1 = 10031;
 
+// 서버
 constexpr int MAX_SERVER = 2;
-constexpr int PORT_NUM_S0 = 11000;		// 서버
-constexpr int PORT_NUM_S1 = 11001;
-constexpr int HA_PORTNUM_S0 = 11100;		// 서버(HA)
-constexpr int HA_PORTNUM_S1 = 11101;
+constexpr int PORT_NUM_S0 = 9000;
+constexpr int PORT_NUM_S1 = 9001;
+// 서버(HA)
+constexpr int HA_PORTNUM_S0 = 9100;
+constexpr int HA_PORTNUM_S1 = 9101;
 
 constexpr int SERIAL_NUM_CLIENT = 0;
 constexpr int SERIAL_NUM_RELAYSERVER = 1000;
@@ -44,7 +57,7 @@ constexpr char INPUT_KEY_E = 0b000001;
 enum PacketID {
 	CS_LOGIN, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
-	, SC_DAMAGED, SC_PLAYER_STATE, SC_BULLET_COUNT
+	, SC_DAMAGED, SC_PLAYER_STATE, SC_BULLET_COUNT, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT
 };
 
@@ -162,6 +175,12 @@ struct SC_BULLET_COUNT_PACKET {
 	char type;
 	short id;
 	int bullet_cnt;
+};
+
+struct SC_ACTIVE_DOWN_PACKET {	// 현재는 클라-서버 -> 추후에 클라-릴레이서버 로 바꿀 예정.
+	unsigned char size;
+	char type;
+	short serverid;
 };
 
 // ================================

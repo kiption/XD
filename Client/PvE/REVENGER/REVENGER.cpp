@@ -27,22 +27,38 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 //==================================================
 	wcout.imbue(locale("korean"));
 	WSADATA WSAData;
-	WSAStartup(MAKEWORD(2, 0), &WSAData);
+	WSAStartup(MAKEWORD(2, 2), &WSAData);
 
-	s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	SOCKADDR_IN server_addr;
-	ZeroMemory(&server_addr, sizeof(server_addr));
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(PORT_NUM_S0);
-	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
-	connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
-	CS_LOGIN_PACKET p;
-	p.size = sizeof(CS_LOGIN_PACKET);
-	p.type = CS_LOGIN;
-	strcpy_s(p.name, "COPTER");
+	curr_servernum = MAX_SERVER - 1;
 
-	sendPacket(&p);
-	recvPacket();
+	CS_LOGIN_PACKET login_pack;
+	login_pack.size = sizeof(CS_LOGIN_PACKET);
+	login_pack.type = CS_LOGIN;
+	strcpy_s(login_pack.name, "COPTER");
+
+	// Active Server에 연결
+	sockets[0] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	SOCKADDR_IN server0_addr;
+	ZeroMemory(&server0_addr, sizeof(server0_addr));
+	server0_addr.sin_family = AF_INET;
+	server0_addr.sin_port = htons(PORT_NUM_S0);
+	inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);
+	connect(sockets[0], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
+
+	sendPacket(&login_pack, 0);
+	recvPacket(0);
+
+	// Standby Server에 연결
+	sockets[1] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	SOCKADDR_IN server1_addr;
+	ZeroMemory(&server1_addr, sizeof(server1_addr));
+	server1_addr.sin_family = AF_INET;
+	server1_addr.sin_port = htons(PORT_NUM_S1);
+	inet_pton(AF_INET, SERVER_ADDR, &server1_addr.sin_addr);
+	connect(sockets[1], reinterpret_cast<sockaddr*>(&server1_addr), sizeof(server1_addr));
+
+	sendPacket(&login_pack, 1);
+	recvPacket(1);
 	//==================================================
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
@@ -85,7 +101,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					keyinput_pack.direction = keyValue;
 
 					cout << "[Keyboard] Send KeyValue - " << keyinput_pack.direction << endl;//test
-					sendPacket(&keyinput_pack);
+					sendPacket(&keyinput_pack, curr_servernum);
 				}
 
 				if (!gGameFramework.CheckNewInputExist_Mouse()) {
@@ -98,7 +114,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					mouseinput_pack.delta_y = mouseValue.delY;
 
 					cout << "[Mouse] Send KeyValue - " << mouseinput_pack.key_val << endl;//test
-					sendPacket(&mouseinput_pack);
+					sendPacket(&mouseinput_pack, curr_servernum);
 				}
 				//==================================================
 

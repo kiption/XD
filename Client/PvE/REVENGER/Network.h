@@ -12,6 +12,8 @@ GameSound gamesound;
 
 const char* SERVER_ADDR = "127.0.0.1";
 SOCKET s_socket;
+short curr_servernum = 0;
+array<SOCKET, MAX_SERVER> sockets;
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
@@ -43,7 +45,7 @@ public:
 void CALLBACK recvCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED lp_over, DWORD s_flag);
 void CALLBACK sendCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED lp_over, DWORD s_flag);
 OVER_EX g_recv_over;
-void recvPacket()
+void recvPacket(short servernum)
 {
 	cout << "Do RECV" << endl;
 	DWORD recv_flag = 0;
@@ -51,16 +53,16 @@ void recvPacket()
 	memset(&g_recv_over.overlapped, 0, sizeof(g_recv_over.overlapped));
 	g_recv_over.wsabuf.len = BUF_SIZE;
 	g_recv_over.wsabuf.buf = g_recv_over.send_buf;
-	if (WSARecv(s_socket, &g_recv_over.wsabuf, 1, 0, &recv_flag, &g_recv_over.overlapped, recvCallback) == SOCKET_ERROR) {
+	if (WSARecv(sockets[servernum], &g_recv_over.wsabuf, 1, 0, &recv_flag, &g_recv_over.overlapped, recvCallback) == SOCKET_ERROR) {
 		if (GetLastError() != WSA_IO_PENDING)
 			cout << "[WSARecv Error] code: " << GetLastError() << "\n" << endl;
 	}
 }
-void sendPacket(void* packet)
+void sendPacket(void* packet, short servernum)
 {
 	cout << "Do SEND" << endl;
 	OVER_EX* s_data = new OVER_EX{ reinterpret_cast<char*>(packet) };
-	if (WSASend(s_socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback) == SOCKET_ERROR) {
+	if (WSASend(sockets[servernum], &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback) == SOCKET_ERROR) {
 		cout << "[WSASend Error] code: " << GetLastError() << "\n" << endl;
 	}
 }
@@ -75,7 +77,7 @@ void CALLBACK recvCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWO
 
 	processData(g_recv_over.send_buf, num_bytes);
 
-	recvPacket();
+	recvPacket(curr_servernum);
 }
 void CALLBACK sendCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flag)
 {
@@ -171,8 +173,6 @@ void processPacket(char* ptr)
 		}
 		// 3. Move Npc
 		else if (recv_packet->target == TARGET_NPC) {
-			//int npc_id = recv_id - MAX_USER;
-			npcs_info[recv_id].m_id = recv_id;
 			npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 		}
 		else {
@@ -203,8 +203,6 @@ void processPacket(char* ptr)
 		}
 		// 2. Rotate Npc
 		else if (recv_packet->target == TARGET_NPC) {
-			//int npc_id = recv_id - MAX_USER;
-			npcs_info[recv_id].m_id = recv_id;
 			npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 			npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 			npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
@@ -215,6 +213,44 @@ void processPacket(char* ptr)
 
 		break;
 	}// SC_ROTATE_PLAYER case end
+	case SC_MOVE_ROTATE_OBJECT:
+	{
+		SC_MOVE_ROTATE_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_MOVE_ROTATE_OBJECT_PACKET*>(ptr);
+		int recv_id = recv_packet->id;
+
+		// 1. Rotate Player
+		if (recv_packet->target == TARGET_PLAYER) {
+			if (recv_id == my_info.m_id) {
+				// Player 이동
+				my_info.m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+				// Player 회전
+				my_info.m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+				my_info.m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+				my_info.m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+			}
+			else if (0 <= recv_id && recv_id < MAX_USER) {
+				// 상대 Object 이동
+				other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+				// 상대 Object 회전
+				other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+				other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+				other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+			}
+		}
+		// 2. Rotate Npc
+		else if (recv_packet->target == TARGET_NPC) {
+			npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+
+			npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+			npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+			npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+		}
+		else {
+			cout << "[MOVE&ROTATE ERROR] Unknown Target!" << endl;
+		}
+
+		break;
+	}// SC_MOVE_ROTATE_PLAYER case end
 	case SC_REMOVE_OBJECT:
 	{
 		SC_REMOVE_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_REMOVE_OBJECT_PACKET*>(ptr);
@@ -285,6 +321,14 @@ void processPacket(char* ptr)
 		int cnt = recv_packet->bullet_cnt;
 		my_info.m_bullet = cnt;
 
+		break;
+	}//SC_BULLET_COUNT case end
+	case SC_ACTIVE_DOWN:
+	{
+		SC_ACTIVE_DOWN_PACKET* recv_packet = reinterpret_cast<SC_ACTIVE_DOWN_PACKET*>(ptr);
+		wchar_t wchar_buf[10];
+		wsprintfW(wchar_buf, L"%d", recv_packet->serverid);
+		ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L"../../../Server/x64/Release", SW_SHOW);
 		break;
 	}//SC_BULLET_COUNT case end
 	}
