@@ -1064,6 +1064,7 @@ void do_ha_worker() {
 
 void timerFunc() {
 	while (true) {
+		auto start_t = system_clock::now();
 		// Helicopter
 		for (auto& mv_target : clients) {
 			if (mv_target.s_state != ST_INGAME) continue;
@@ -1332,6 +1333,10 @@ void timerFunc() {
 				}
 			}
 		}
+		auto curr_t = system_clock::now();
+		if (curr_t - start_t < 33ms) {
+			this_thread::sleep_for(33ms - (curr_t - start_t));
+		}
 	}
 }
 
@@ -1340,8 +1345,8 @@ void sendHeartBeat() {	// 오른쪽 서버에게 Heartbeat를 전달하는 함수
 		if (my_server_id != MAX_SERVER - 1) {	// 왼쪽 서버가 오른쪽 서버로 전송하기 때문에 가장 마지막 서버는 전송하지 않습니다.
 			if (extended_servers[my_server_id].s_state != ST_ACCEPTED)	continue;
 			if (extended_servers[my_server_id + 1].s_state != ST_ACCEPTED) continue;
-
-			if (chrono::system_clock::now() > extended_servers[my_server_id].heartbeat_send_time + chrono::milliseconds(HB_SEND_CYCLE)) {
+			this_thread::sleep_for(chrono::milliseconds(HB_SEND_CYCLE));
+			//if (chrono::system_clock::now() > extended_servers[my_server_id].heartbeat_send_time + chrono::milliseconds(HB_SEND_CYCLE)) {
 				//cout << "자신의 Heartbeat를 Server[" << my_server_id + 1 << "]에게 보냅니다." << endl;
 				SS_HEARTBEAT_PACKET hb_packet;
 				hb_packet.size = sizeof(SS_HEARTBEAT_PACKET);
@@ -1350,7 +1355,7 @@ void sendHeartBeat() {	// 오른쪽 서버에게 Heartbeat를 전달하는 함수
 				extended_servers[my_server_id + 1].do_send(&hb_packet);	// 오른쪽 서버에 전송합니다.
 
 				extended_servers[my_server_id].heartbeat_send_time = chrono::system_clock::now();	// 전송한 시간을 업데이트
-			}
+			//}
 		}
 	}
 }
@@ -1408,7 +1413,12 @@ void init_npc()
 }
 void MoveNPC()
 {
+	auto start_t = system_clock::now();
 	while (true) {
+		auto curr_t = system_clock::now();
+		if (curr_t - start_t < 500ms)
+			this_thread::sleep_for(500ms - (curr_t - start_t));
+		start_t = curr_t;
 		for (int i = 0; i < MAX_NPCS; i++) {
 			npcs[i].MovetoRotate();
 
