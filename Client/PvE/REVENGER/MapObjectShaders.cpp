@@ -27,10 +27,6 @@ void CMapObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	m_ppObjects[0]->SetPosition(XMFLOAT3(3000.0f, pTerrain->GetHeight(3000.0, 2000.0f)+80.0, 2000.0f));
 	m_ppObjects[1]->SetPosition(XMFLOAT3(1500.0f, pTerrain->GetHeight(1500.0f, 1500.0f)+ 80.0, 1500.0f));
 	m_ppObjects[2]->SetPosition(XMFLOAT3(2000.0f, pTerrain->GetHeight(2000.0f, 3500.0f)+80.0, 3500.0f));
-	/*m_ppObjects[3]->SetPosition(XMFLOAT3(750.0f, pTerrain->GetHeight(750.0f, 2400.0f), 2400.0f));
-	m_ppObjects[3]->SetPosition(XMFLOAT3(3750.0f, pTerrain->GetHeight(3750.0f, 2400.0f), 2400.0f));*/
-
-	//
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

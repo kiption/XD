@@ -142,8 +142,8 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	m_ppObjects[15] = m_ppCityGameObjects[0];
 	m_ppObjects[16] = m_ppCityGameObjects[1];
-	m_ppObjects[15]->SetPosition(-250.0, 18.0, -250.0);
-	m_ppObjects[16]->SetPosition(500.0, 18.0, 700.0);
+	m_ppObjects[15]->SetPosition(-250.0, 20.0, -250.0);
+	m_ppObjects[16]->SetPosition(500.0, 20.0, 700.0);
 }
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
@@ -197,12 +197,12 @@ BoundingBox CObjectsShader::CalculateBoundingBox()
 	BoundingBox xmBoundingBox;
 	for (int i = 0; i < m_nObjects; i++)
 	{
-		/*for (int j = 0; j < m_ppObjects[i]->m_nMeshes; j++)
-		{*/
+		for (int j = 0; j < m_ppObjects[i]->m_nMeshes; j++)
+		{
 			m_ppObjects[i]->CalculateBoundingBox();
-			xmBoundingBox = m_ppObjects[i]/*->m_ppMeshes[j]*/->m_xmBoundingBox;
-			for (int i = 1; i < m_nObjects; i++)BoundingBox::CreateMerged(xmBoundingBox, xmBoundingBox, m_ppObjects[i]/*->m_ppMeshes[j]*/->m_xmBoundingBox);
-		//}
+			xmBoundingBox = m_ppObjects[i]->m_ppMeshes[j]->m_xmBoundingBox;
+			for (int i = 1; i < m_nObjects; i++)BoundingBox::CreateMerged(xmBoundingBox, xmBoundingBox, m_ppObjects[i]->m_ppMeshes[j]->m_xmBoundingBox);
+		}
 	}
 	return(xmBoundingBox);
 }

@@ -726,12 +726,12 @@ float4 PSLighting(VS_LIGHTING_OUTPUT input) : SV_TARGET
 {
 	input.normalW = normalize(input.normalW);
 	float4 uvs[MAX_LIGHTS];
-	float4 cColor = gtxtCircularShadowTexture.Sample(gssWrap, input.uv);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
+	float4 cColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
 	//	return(cIllumination);
 	
 	//return(float4(input.normalW * 0.5f + 0.5f, 1.0f));
-	return(lerp(cColor, cIllumination, 0.5));
+	return(lerp(cColor, cIllumination, 0.8));
 }
 
  

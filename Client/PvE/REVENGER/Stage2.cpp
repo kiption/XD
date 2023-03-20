@@ -538,16 +538,15 @@ void Stage2::AnimateObjects(float fTimeElapsed)
 	XMFLOAT3 PlayerLook = ((CHumanPlayer*)m_pPlayer)->GetLookVector();
 	XMFLOAT3 PlayerUp = ((CHumanPlayer*)m_pPlayer)->GetUpVector();
 	XMFLOAT3 PlayerRight = ((CHumanPlayer*)m_pPlayer)->GetRightVector();
-	//for (int j = 0; j < 8; j++)
-	//{
-	//	if (m_ppStageMapShaders[0]->m_ppObjects[0]->m_xoobb.Intersects(((CHumanPlayer*)m_pPlayer)->m_xoobb))
-	//	{
-	//		PlayerLook.x *= (-1.0); PlayerLook.y *= (-1.0); PlayerLook.z *= (-1.0);
-	//		PlayerUp.x *= (-1.0); PlayerUp.y *= (-1.0); PlayerUp.z *= (-1.0);
-	//		PlayerRight.x *= (-1.0); PlayerRight.y *= (-1.0); PlayerRight.z *= (-1.0);
 
-	//	}
-	//}
+		if (m_ppStageMapShaders[0]->m_ppObjects[0]->m_xoobb.Intersects(((CHumanPlayer*)m_pPlayer)->m_xoobb))
+		{
+			PlayerLook.x *= (-1.0); PlayerLook.y *= (-1.0); PlayerLook.z *= (-1.0);
+			PlayerUp.x *= (-1.0); PlayerUp.y *= (-1.0); PlayerUp.z *= (-1.0);
+			PlayerRight.x *= (-1.0); PlayerRight.y *= (-1.0); PlayerRight.z *= (-1.0);
+		
+		}
+	
 	XMFLOAT3 lookA = ((CHumanPlayer*)m_pPlayer)->GetLookVector();
 	XMFLOAT3 posA = ((CHumanPlayer*)m_pPlayer)->GetPosition();
 	XMFLOAT3 upA = ((CHumanPlayer*)m_pPlayer)->GetUpVector();
@@ -603,7 +602,7 @@ void Stage2::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 bool Stage2::CheckCollision( DirectX::BoundingOrientedBox& box1,  DirectX::BoundingOrientedBox& box2, DirectX::XMFLOAT3& posA, DirectX::XMFLOAT3& lookA, DirectX::XMFLOAT3& upA, DirectX::XMFLOAT3& rightA)
 {
 	// BoundingOrientedBox 간 충돌 검사 수행
-	bool isIntersecting = box1.Intersects(box2);
+	bool isIntersecting = IsIntersecting(box1, box2);
 
 	//XMFLOAT3 BoxOrient = boxIntersection.Orientation();
 	if (isIntersecting)
