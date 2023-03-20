@@ -17,7 +17,7 @@ GameSound::GameSound()
 	result = speakSound->setMode(FMOD_LOOP_BIDI);
 
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("Sound/RainingSound.mp3", FMOD_3D, 0, &bgmSound);
+	result = soundSystem->createSound("Sound/Speaking.mp3", FMOD_3D, 0, &bgmSound);
 	result = bgmSound->setMode(FMOD_LOOP_NORMAL);
 
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);

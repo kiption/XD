@@ -181,6 +181,9 @@
     <ClInclude Include="..\..\..\Server\RelayServer\Protocol.h">
       <Filter>Server</Filter>
     </ClInclude>
+    <ClInclude Include="mfplay.h">
+      <Filter>Asset</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSound.cpp">

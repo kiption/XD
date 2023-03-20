@@ -320,3 +320,128 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	return((INT_PTR)FALSE);
 }
+
+
+HRESULT PlayMediaFile(HWND hwnd, const WCHAR* sURL);
+void OnMediaItemSet(MFP_MEDIAITEM_SET_EVENT* pEvent);
+// Constants 
+const WCHAR CLASS_NAME[] = L"MFPlay Window Class";
+const WCHAR WINDOW_NAME[] = L"MFPlay Sample Application";
+// Global variables
+BOOL                    g_bHasVideo = FALSE;
+
+#include <mfplay.h>
+#include <Shlwapi.h>
+
+
+
+class MediaPlayerCallback : public IMFPMediaPlayerCallback
+{
+	long m_cRef; // Reference count
+
+public:
+
+	MediaPlayerCallback() : m_cRef(1)
+	{
+	}
+
+	STDMETHODIMP QueryInterface(REFIID riid, void** ppv)
+	{
+		static const QITAB qit[] =
+		{
+			QITABENT(MediaPlayerCallback, IMFPMediaPlayerCallback),
+			{ 0 },
+		};
+		return QISearch(this, qit, riid, ppv);
+	}
+	STDMETHODIMP_(ULONG) AddRef()
+	{
+		return InterlockedIncrement(&m_cRef);
+	}
+	STDMETHODIMP_(ULONG) Release()
+	{
+		ULONG count = InterlockedDecrement(&m_cRef);
+		if (count == 0)
+		{
+			delete this;
+			return 0;
+		}
+		return count;
+	}
+
+	// IMFPMediaPlayerCallback methods
+	void STDMETHODCALLTYPE OnMediaPlayerEvent(MFP_EVENT_HEADER* pEventHeader);
+};
+
+void MediaPlayerCallback::OnMediaPlayerEvent(MFP_EVENT_HEADER* pEventHeader)
+{
+	if (FAILED(pEventHeader->hrEvent))
+	{
+		//ShowErrorMessage(L"Playback error", pEventHeader->hrEvent);
+		return;
+	}
+
+	switch (pEventHeader->eEventType)
+	{
+	case MFP_EVENT_TYPE_MEDIAITEM_CREATED:
+		//OnMediaItemCreated(MFP_GET_MEDIAITEM_CREATED_EVENT(pEventHeader));
+		break;
+
+	case MFP_EVENT_TYPE_MEDIAITEM_SET:
+		//OnMediaItemSet(MFP_GET_MEDIAITEM_SET_EVENT(pEventHeader));
+		break;
+	}
+}
+IMFPMediaPlayer* g_pPlayer = NULL;      // The MFPlay player object.
+MediaPlayerCallback* g_pPlayerCB = NULL;    // Application callback object.
+void OnMediaItemSet(MFP_MEDIAITEM_SET_EVENT* /*pEvent*/)
+{
+	HRESULT hr = S_OK;
+
+	hr = g_pPlayer->Play();
+
+	//if (FAILED(hr))
+	//{
+	//	ShowErrorMessage(L"IMFPMediaPlayer::Play failed.", hr);
+	//}
+}
+#include <winapifamily.h>
+//const WCHAR* sURL = L"C:\\Users\\Public\\Videos\\example.wmv";
+HRESULT PlayMediaFile(HWND hwnd, const WCHAR* sURL)
+{
+	HRESULT hr = S_OK;
+
+	// Create the MFPlayer object.
+	if (g_pPlayer == NULL)
+	{
+		g_pPlayerCB = new (std::nothrow) MediaPlayerCallback();
+
+		if (g_pPlayerCB == NULL)
+		{
+			hr = E_OUTOFMEMORY;
+			goto done;
+		}
+
+		hr = MFPCreateMediaPlayer(
+			NULL,
+			FALSE,          // Start playback automatically?
+			0,              // Flags
+			g_pPlayerCB,    // Callback pointer
+			hwnd,           // Video window
+			&g_pPlayer
+		);
+
+		if (FAILED(hr)) { goto done; }
+	}
+
+	// Create a new media item for this URL.
+	hr = g_pPlayer->CreateMediaItemFromURL(sURL, FALSE, 0, NULL);
+
+	// The CreateMediaItemFromURL method completes asynchronously. 
+	// The application will receive an MFP_EVENT_TYPE_MEDIAITEM_CREATED 
+	// event. See MediaPlayerCallback::OnMediaPlayerEvent().
+
+
+done:
+	return hr;
+}

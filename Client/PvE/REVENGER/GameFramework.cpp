@@ -20,7 +20,10 @@ CGameFramework::CGameFramework()
 
 	m_pd3dRtvDescriptorHeap = NULL;
 	m_pd3dDsvDescriptorHeap = NULL;
+
+	gnRtvDescriptorIncrementSize = 0;
 	gnDsvDescriptorIncrementSize = 0;
+
 	m_hFenceEvent = NULL;
 	m_pd3dFence = NULL;
 	for (int i = 0; i < m_nSwapChainBuffers; i++) m_nFenceValues[i] = 0;
@@ -56,12 +59,13 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	CreateCommandQueueAndList();
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateSwapChain();
-	CreateDepthStencilView();
 
 	CoInitialize(NULL);
+
 #ifdef _WITH_DIRECT2D
 	CreateDirect2DDevice();
 #endif
+	CreateDepthStencilView();
 	BuildObjects();
 
 	return(true);
@@ -117,8 +121,13 @@ void CGameFramework::CreateSwapChain()
 
 	HRESULT hResult = m_pdxgiFactory->CreateSwapChain(m_pd3dCommandQueue, &dxgiSwapChainDesc, (IDXGISwapChain**)&m_pdxgiSwapChain);
 #endif
+	if (!m_pdxgiSwapChain)
+	{
+		MessageBox(NULL, L"Swap Chain Cannot be Created.", L"Error", MB_OK);
+		::PostQuitMessage(0);
+		return;
+	}
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
-
 	hResult = m_pdxgiFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
 
 #ifndef _WITH_SWAPCHAIN_FULLSCREEN_STATE
@@ -475,7 +484,7 @@ void CGameFramework::BuildObjects()
 	CreateShaderVariables();
 
 	WaitForGpuComplete();
-	//gamesound.backGroundMusic();
+	gamesound.backGroundMusic();
 	if (m_pScene) m_pScene->ReleaseUploadBuffers();
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 	m_GameTimer.Reset();

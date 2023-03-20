@@ -35,6 +35,7 @@ using namespace std;
 
 #include <Mmsystem.h>
 
+
 #ifdef _DEBUG
 #include <dxgidebug.h>
 #endif
@@ -44,6 +45,15 @@ using namespace std;
 #include <dwrite_1.h>
 #include <d3d11on12.h>
 #include <d2d1_1helper.h>
+#include <new>
+#include <windowsx.h>
+#include <mfplay.h>
+#include <mfidl.h>
+#include "mfplay.h"
+#include <mferror.h>
+#include <shobjidl.h>   // defines IFileOpenDialog
+#include <strsafe.h>
+#include <evr.h>
 
 #include <d2d1effects.h>
 #include <wincodec.h>
@@ -56,9 +66,25 @@ using namespace std;
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "windowscodecs.lib")
 #pragma comment(lib, "Winmm.lib")
+#pragma comment(lib, "mfplay.lib")
 #ifdef _DEBUG
 #include <dxgidebug.h>
 #endif
+#pragma comment(linker, \
+    "\"/manifestdependency:type='Win32' "\
+    "name='Microsoft.Windows.Common-Controls' "\
+    "version='6.0.0.0' "\
+    "processorArchitecture='*' "\
+    "publicKeyToken='6595b64144ccf1df' "\
+    "language='*'\"")
+
+#pragma comment(lib, "comsuppw.lib")
+#pragma comment(lib, "shlwapi.lib")
+#pragma comment(lib, "propsys.lib")
+#pragma comment(lib, "Mf.lib")
+#pragma comment(lib, "Mfplat.lib")
+#pragma comment(lib, "mfuuid.lib")
+#pragma comment(lib, "mfreadwrite.lib")
 
 using namespace std;
 using namespace DirectX;
@@ -70,8 +96,8 @@ extern HINSTANCE						ghAppInstance;
 
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 
-#define FRAME_BUFFER_WIDTH		1024
-#define FRAME_BUFFER_HEIGHT		968
+#define FRAME_BUFFER_WIDTH		1280
+#define FRAME_BUFFER_HEIGHT		1024
 #define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 4)
 #define _DEPTH_BUFFER_HEIGHT	(FRAME_BUFFER_HEIGHT * 4)
 #define _PLANE_WIDTH			FRAME_BUFFER_WIDTH
