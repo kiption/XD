@@ -107,9 +107,9 @@ protected:
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
-	ID2D1Effect* m_pd2dfxBitmapSource = NULL;
-	ID2D1Effect* m_pd2dfxGaussianBlur = NULL;
-	ID2D1Effect* m_pd2dfxEdgeDetection = NULL;
+	ID2D1Effect* m_pd2dfxBitmapSource[2]{};
+	ID2D1Effect* m_pd2dfxGaussianBlur[2]{};
+	ID2D1Effect* m_pd2dfxEdgeDetection[2]{};
 	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState = NULL;
 	IWICFormatConverter* m_pwicFormatConverter = NULL;
 	int							m_nDrawEffectImage = 0;
