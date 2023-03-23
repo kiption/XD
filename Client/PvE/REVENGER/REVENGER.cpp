@@ -11,20 +11,99 @@
 HINSTANCE						ghAppInstance;
 TCHAR							szTitle[MAX_LOADSTRING];
 TCHAR							szWindowClass[MAX_LOADSTRING];
-
+const WCHAR CLASS_NAME[] = L"MFPlay Window Class";
+const WCHAR WINDOW_NAME[] = L"MFPlay Sample Application";
 CGameFramework					gGameFramework;
-
-
+void    OnClose(HWND hwnd);
+void    OnFileOpen(HWND hwnd);
+HRESULT PlayMediaFile(HWND hwnd, const WCHAR* sURL);
 ATOM MyRegisterClass(HINSTANCE hInstance);
-BOOL InitInstance(HINSTANCE, int);
+BOOL InitInstance(HINSTANCE, HWND*, int);
+BOOL    InitializeWindow(HINSTANCE, HWND* pHwnd);
+void OnMediaItemCreated(MFP_MEDIAITEM_CREATED_EVENT* pEvent);
+void OnMediaItemSet(MFP_MEDIAITEM_SET_EVENT* pEvent);
+void OnMediaItemEND(MFP_PLAYBACK_ENDED_EVENT* /*pEvent*/);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
+#include <mfplay.h>
+#include <Shlwapi.h>
+BOOL                    g_bHasVideo = FALSE;
+bool					g_TurnOpening = false;
+
+class MediaPlayerCallback : public IMFPMediaPlayerCallback
+{
+	long m_cRef; // Reference count
+
+public:
+
+	MediaPlayerCallback() : m_cRef(1)
+	{
+	}
+
+	STDMETHODIMP QueryInterface(REFIID riid, void** ppv)
+	{
+		static const QITAB qit[] =
+		{
+			QITABENT(MediaPlayerCallback, IMFPMediaPlayerCallback),
+			{ 0 },
+		};
+		return QISearch(this, qit, riid, ppv);
+	}
+	STDMETHODIMP_(ULONG) AddRef()
+	{
+		return InterlockedIncrement(&m_cRef);
+	}
+	STDMETHODIMP_(ULONG) Release()
+	{
+		ULONG count = InterlockedDecrement(&m_cRef);
+		if (count == 0)
+		{
+			delete this;
+			return 0;
+		}
+		return count;
+	}
+
+	// IMFPMediaPlayerCallback methods
+	void STDMETHODCALLTYPE OnMediaPlayerEvent(MFP_EVENT_HEADER* pEventHeader);
+};
+
+
+void MediaPlayerCallback::OnMediaPlayerEvent(MFP_EVENT_HEADER* pEventHeader)
+{
+	if (FAILED(pEventHeader->hrEvent))
+	{
+		//ShowErrorMessage(L"Playback error", pEventHeader->hrEvent);
+		return;
+	}
+
+	switch (pEventHeader->eEventType)
+	{
+	case MFP_EVENT_TYPE_MEDIAITEM_CREATED:
+		OnMediaItemCreated(MFP_GET_MEDIAITEM_CREATED_EVENT(pEventHeader));
+		break;
+
+	case MFP_EVENT_TYPE_MEDIAITEM_SET:
+		OnMediaItemSet(MFP_GET_MEDIAITEM_SET_EVENT(pEventHeader));
+		break;
+	case MFP_EVENT_TYPE_PLAYBACK_ENDED:
+		OnMediaItemEND(MFP_GET_PLAYBACK_ENDED_EVENT(pEventHeader));
+		break;
+	}
+}
+
+IMFPMediaPlayer* g_pPlayer = NULL;      // The MFPlay player object.
+MediaPlayerCallback* g_pPlayerCB = NULL;    // Application callback object.
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-//==================================================
-//					Server Code
-//==================================================
+	MSG msg{};
+	HWND hwnd{};
+	HACCEL hAccelTable;
+
+	//==================================================
+	//					Server Code
+	//==================================================
 	wcout.imbue(locale("korean"));
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
@@ -59,23 +138,58 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 	sendPacket(&login_pack, 1);
 	recvPacket(1);
+
+
 	//==================================================
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
-
-	MSG msg;
-	HACCEL hAccelTable;
-
+	(void)HeapSetInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
 	::LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	::LoadString(hInstance, IDC_LABPROJECT0797ANIMATION, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
-
-	if (!InitInstance(hInstance, nCmdShow)) return(FALSE);
-
+	if (!InitInstance(hInstance, &hwnd, nCmdShow))return(FALSE);
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LABPROJECT0797ANIMATION));
 
+	/*if (FAILED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)))
+	{
+		return 0;
+	}*/
+	//if (g_TurnOpening == false) {
+	//	PlayMediaFile(hwnd, L"C:/Users/재성/Desktop/Direct12-예제 프로젝트/LabProject02-1/Opening/TEST.avi");
+	//	while (GetMessage(&msg, NULL, 0, 0))
+	//	{
+	//		TranslateMessage(&msg);
+	//		DispatchMessage(&msg);
+	//		if (g_TurnOpening == true)
+	//		{
+	//			DestroyWindow(hwnd);
+	//			CoUninitialize();
+	//			break;
+	//		}
+	//	}*/
+
+	//}
+	//else
+	//{
+	//}
+
+	//if (g_TurnOpening == false)
+	//{
+	//	PlayMediaFile(hwnd, L"C:/Users/재성/Desktop/Direct12-예제 프로젝트/LabProject02-1/Opening/TEST.avi");
+	//	while (GetMessage(&msg, NULL, 0, 0))
+	//	{
+	//		TranslateMessage(&msg);
+	//		DispatchMessage(&msg);
+	//		if (g_TurnOpening == true)break;
+	//	}
+
+	//}
+	//else
+	//{
 	while (1)
 	{
+
+
 		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT) break;
@@ -87,6 +201,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		}
 		else
 		{
+
 			if (gGameFramework.m_nMode != SCENE2STAGE)
 			{
 
@@ -160,21 +275,21 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
 
 						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(4.0, 4.0, 18.0);
-						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(100.0,0.0,0.0);
+						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(100.0, 0.0, 0.0);
 						gGameFramework.m_pScene->m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(bullets_info[i].m_pos);
-						gGameFramework.m_pScene->m_pLights->m_pLights[3].m_xmf3Direction= XMFLOAT3(bullets_info[i].m_look_vec);
+						gGameFramework.m_pScene->m_pLights->m_pLights[3].m_xmf3Direction = XMFLOAT3(bullets_info[i].m_look_vec);
 						gGameFramework.m_pScene->m_pLights->m_pLights[4].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.6f, 0.4f, 1.0f);
 						gGameFramework.m_pScene->m_pLights->m_pLights[4].m_xmf4Emissive = XMFLOAT4(0.9f, 0.6f, 0.4f, 1.0f);
-					//	gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerPosition = bullets_info[i].m_pos;
-					//	gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerLook= my_info.m_look_vec;
+						//	gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerPosition = bullets_info[i].m_pos;
+						//	gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerLook= my_info.m_look_vec;
 
 						XMFLOAT3 xmf3bulletPosition = bullets_info[i].m_pos;
 						XMFLOAT3 xmf3bulletLook = my_info.m_look_vec;
-					//	XMFLOAT3 xmf3Position= Vector3::Add(gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerPosition, Vector3::ScalarProduct(gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerLook, 60.0f, false));
-					//	gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(bullets_info[i].m_pos);
-					//	gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetLook(my_info.m_look_vec);
-					//	gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetLookAt(xmf3Position, XMFLOAT3(0.0f, 0.1, 0.0f));
-					
+						//	XMFLOAT3 xmf3Position= Vector3::Add(gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerPosition, Vector3::ScalarProduct(gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerLook, 60.0f, false));
+						//	gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(bullets_info[i].m_pos);
+						//	gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetLook(my_info.m_look_vec);
+						//	gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetLookAt(xmf3Position, XMFLOAT3(0.0f, 0.1, 0.0f));
+
 					}
 				}
 
@@ -196,8 +311,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				}
 			}
 			//==================================================
-
-			//==================================================
 			//				충돌 이펙트 구현 코드
 			//==================================================
 			if (!coll_info.empty()) {
@@ -211,10 +324,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 			gGameFramework.FrameAdvance();
 		}
-	}
-	gGameFramework.OnDestroy();
 
+	}
+
+	gGameFramework.OnDestroy();
 	return((int)msg.wParam);
+
+
+
 }
 
 ATOM MyRegisterClass(HINSTANCE hInstance)
@@ -231,30 +348,139 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hIcon = ::LoadIcon(hInstance, MAKEINTRESOURCE(IDI_LABPROJECT0797ANIMATION));
 	wcex.hCursor = ::LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = NULL;
+	wcex.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = ::LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 
 	return ::RegisterClassEx(&wcex);
 }
 
-BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+BOOL InitInstance(HINSTANCE hInstance, HWND* MainWnd, int nCmdShow)
 {
-	ghAppInstance = hInstance;
 
 	RECT rc = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 	DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
-	AdjustWindowRect(&rc, dwStyle, FALSE);
-	HWND hMainWnd = CreateWindow(szWindowClass, szTitle, dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
 
-	if (!hMainWnd) return(FALSE);
+	HWND hwnd = CreateWindow(
+		szWindowClass,
+		szTitle,
+		dwStyle,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		rc.right - rc.left,
+		rc.bottom - rc.top,
+		NULL,
+		NULL,
+		GetModuleHandle(NULL),
+		NULL);
 
-	gGameFramework.OnCreate(hInstance, hMainWnd);
+	//if (g_TurnOpening == false)
+	//{
 
-	::ShowWindow(hMainWnd, nCmdShow);
-	::UpdateWindow(hMainWnd);
+	//	WNDCLASS wc = { 0 };
 
-	return(TRUE);
+	//	wc.lpfnWndProc = WndProc;
+	//	wc.hInstance = GetModuleHandle(NULL);
+	//	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	//	wc.lpszClassName = CLASS_NAME;
+	//	wc.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);
+	//	if (!RegisterClass(&wc))
+	//	{
+	//		return FALSE;
+	//	}
+	//	*MainWnd = hwnd;
+	//	ShowWindow(hwnd, SW_SHOWDEFAULT);
+	//	UpdateWindow(hwnd);
+
+	//}
+	//else
+	//{
+	//}
+	if (!hwnd)
+	{
+		return FALSE;
+	}
+
+	gGameFramework.OnCreate(hInstance, hwnd);
+	*MainWnd = hwnd;
+	ShowWindow(hwnd, nCmdShow);
+	UpdateWindow(hwnd);
+
+	return TRUE;
+}
+
+BOOL InitializeWindow(HINSTANCE hInstance, HWND* pHwnd)
+{
+	RECT rc = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
+	DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
+
+	HWND hwnd = CreateWindow(
+		szWindowClass,
+		szTitle,
+		dwStyle,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		rc.right - rc.left,
+		rc.bottom - rc.top,
+		NULL,
+		NULL,
+		GetModuleHandle(NULL),
+		NULL);
+
+	if (g_TurnOpening == false)
+	{
+
+		WNDCLASS wc = { 0 };
+
+		wc.lpfnWndProc = WndProc;
+		wc.hInstance = GetModuleHandle(NULL);
+		wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+		wc.lpszClassName = CLASS_NAME;
+		wc.lpszMenuName = MAKEINTRESOURCE(IDR_MENU1);
+		if (!RegisterClass(&wc))
+		{
+			return FALSE;
+		}
+		*pHwnd = hwnd;
+		ShowWindow(hwnd, SW_SHOWDEFAULT);
+		UpdateWindow(hwnd);
+
+	}
+	if (g_TurnOpening == true)
+	{
+
+		ghAppInstance = hInstance;
+		RECT rc = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
+		DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
+		AdjustWindowRect(&rc, dwStyle, FALSE);
+		HWND hwnd = CreateWindow(
+			szWindowClass,
+			szTitle,
+			dwStyle,
+			CW_USEDEFAULT,
+			CW_USEDEFAULT,
+			rc.right - rc.left,
+			rc.bottom - rc.top,
+			NULL,
+			NULL,
+			GetModuleHandle(NULL),
+			NULL
+		);
+		if (!hwnd)
+		{
+			return FALSE;
+		}
+
+		gGameFramework.OnCreate(hInstance, hwnd);
+		*pHwnd = hwnd;
+		ShowWindow(hwnd, SW_SHOWDEFAULT);
+		UpdateWindow(hwnd);
+		//#ifdef _WITH_SWAPCHAIN_FULLSCREEN_STATE
+		//		gGameFramework.ChangeSwapChainState();
+		//#endif
+
+	}
+	return TRUE;
 }
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -297,6 +523,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		::PostQuitMessage(0);
 		break;
+	case WM_ERASEBKGND:
+		return 1;
 	default:
 		return(::DefWindowProc(hWnd, message, wParam, lParam));
 	}
@@ -322,84 +550,133 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 
-HRESULT PlayMediaFile(HWND hwnd, const WCHAR* sURL);
-void OnMediaItemSet(MFP_MEDIAITEM_SET_EVENT* pEvent);
-// Constants 
-const WCHAR CLASS_NAME[] = L"MFPlay Window Class";
-const WCHAR WINDOW_NAME[] = L"MFPlay Sample Application";
+
+
+// Menu handlers
+
+//// Constants 
+//const WCHAR CLASS_NAME[] = L"MFPlay Window Class";
+//const WCHAR WINDOW_NAME[] = L"MFPlay Sample Application";
 // Global variables
-BOOL                    g_bHasVideo = FALSE;
 
-#include <mfplay.h>
-#include <Shlwapi.h>
-
-
-
-class MediaPlayerCallback : public IMFPMediaPlayerCallback
+void OnMediaItemCreated(MFP_MEDIAITEM_CREATED_EVENT* pEvent)
 {
-	long m_cRef; // Reference count
+	HRESULT hr = S_OK;
 
-public:
+	// The media item was created successfully.
 
-	MediaPlayerCallback() : m_cRef(1)
+	if (g_pPlayer)
 	{
+		BOOL bHasVideo = FALSE, bIsSelected = FALSE;
+
+		// Check if the media item contains video.
+		hr = pEvent->pMediaItem->HasVideo(&bHasVideo, &bIsSelected);
+
+		if (FAILED(hr)) { goto done; }
+
+		g_bHasVideo = bHasVideo && bIsSelected;
+
+		// Set the media item on the player. This method completes asynchronously.
+		hr = g_pPlayer->SetMediaItem(pEvent->pMediaItem);
 	}
 
-	STDMETHODIMP QueryInterface(REFIID riid, void** ppv)
+done:
+	if (FAILED(hr))
 	{
-		static const QITAB qit[] =
-		{
-			QITABENT(MediaPlayerCallback, IMFPMediaPlayerCallback),
-			{ 0 },
-		};
-		return QISearch(this, qit, riid, ppv);
-	}
-	STDMETHODIMP_(ULONG) AddRef()
-	{
-		return InterlockedIncrement(&m_cRef);
-	}
-	STDMETHODIMP_(ULONG) Release()
-	{
-		ULONG count = InterlockedDecrement(&m_cRef);
-		if (count == 0)
-		{
-			delete this;
-			return 0;
-		}
-		return count;
-	}
-
-	// IMFPMediaPlayerCallback methods
-	void STDMETHODCALLTYPE OnMediaPlayerEvent(MFP_EVENT_HEADER* pEventHeader);
-};
-
-void MediaPlayerCallback::OnMediaPlayerEvent(MFP_EVENT_HEADER* pEventHeader)
-{
-	if (FAILED(pEventHeader->hrEvent))
-	{
-		//ShowErrorMessage(L"Playback error", pEventHeader->hrEvent);
-		return;
-	}
-
-	switch (pEventHeader->eEventType)
-	{
-	case MFP_EVENT_TYPE_MEDIAITEM_CREATED:
-		//OnMediaItemCreated(MFP_GET_MEDIAITEM_CREATED_EVENT(pEventHeader));
-		break;
-
-	case MFP_EVENT_TYPE_MEDIAITEM_SET:
-		//OnMediaItemSet(MFP_GET_MEDIAITEM_SET_EVENT(pEventHeader));
-		break;
+		//ShowErrorMessage(L"Error playing this file.", hr);
 	}
 }
-IMFPMediaPlayer* g_pPlayer = NULL;      // The MFPlay player object.
-MediaPlayerCallback* g_pPlayerCB = NULL;    // Application callback object.
+
+
+
+
+void OnFileOpen(HWND hwnd)
+{
+	HRESULT hr = S_OK;
+
+	IFileOpenDialog* pFileOpen = NULL;
+	IShellItem* pItem = NULL;
+
+	PWSTR pwszFilePath = NULL;
+
+	// Create the FileOpenDialog object.
+	hr = CoCreateInstance(
+		__uuidof(FileOpenDialog),
+		NULL,
+		CLSCTX_INPROC_SERVER,
+		IID_PPV_ARGS(&pFileOpen)
+	);
+
+	if (FAILED(hr)) { goto done; }
+
+
+	hr = pFileOpen->SetTitle(L"Select a File to Play");
+
+	if (FAILED(hr)) { goto done; }
+
+
+	// Show the file-open dialog.
+	hr = pFileOpen->Show(hwnd);
+
+	if (hr == HRESULT_FROM_WIN32(ERROR_CANCELLED))
+	{
+		// User cancelled.
+		hr = S_OK;
+		goto done;
+	}
+	if (FAILED(hr)) { goto done; }
+
+
+	// Get the file name from the dialog.
+	hr = pFileOpen->GetResult(&pItem);
+
+	if (FAILED(hr)) { goto done; }
+
+
+	hr = pItem->GetDisplayName(SIGDN_URL, &pwszFilePath);
+
+	if (FAILED(hr)) { goto done; }
+
+
+	// Open the media file.
+	hr = PlayMediaFile(hwnd, pwszFilePath);
+
+	if (FAILED(hr)) { goto done; }
+
+done:
+	if (FAILED(hr))
+	{
+		//ShowErrorMessage(L"Could not open file.", hr);
+	}
+
+	CoTaskMemFree(pwszFilePath);
+
+	if (pItem)
+	{
+		pItem->Release();
+	}
+	if (pFileOpen)
+	{
+		pFileOpen->Release();
+	}
+}
 void OnMediaItemSet(MFP_MEDIAITEM_SET_EVENT* /*pEvent*/)
 {
 	HRESULT hr = S_OK;
 
 	hr = g_pPlayer->Play();
 
+	//if (FAILED(hr))
+	//{
+	//	ShowErrorMessage(L"IMFPMediaPlayer::Play failed.", hr);
+	//}
+}
+void OnMediaItemEND(MFP_PLAYBACK_ENDED_EVENT* /*pEvent*/)
+{
+	HRESULT hr = S_OK;
+
+	hr = g_pPlayer->Stop();
+	g_TurnOpening = true;
 	//if (FAILED(hr))
 	//{
 	//	ShowErrorMessage(L"IMFPMediaPlayer::Play failed.", hr);
@@ -444,4 +721,21 @@ HRESULT PlayMediaFile(HWND hwnd, const WCHAR* sURL)
 
 done:
 	return hr;
+}
+void OnClose(HWND /*hwnd*/)
+{
+	if (g_pPlayer)
+	{
+		g_pPlayer->Shutdown();
+		g_pPlayer->Release();
+		g_pPlayer = NULL;
+	}
+
+	if (g_pPlayerCB)
+	{
+		g_pPlayerCB->Release();
+		g_pPlayerCB = NULL;
+	}
+
+	PostQuitMessage(0);
 }

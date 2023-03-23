@@ -78,6 +78,7 @@ using namespace std;
     "publicKeyToken='6595b64144ccf1df' "\
     "language='*'\"")
 
+//#pragma comment(lib, "d3d11on12.lib")
 #pragma comment(lib, "comsuppw.lib")
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib, "propsys.lib")

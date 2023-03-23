@@ -40,7 +40,7 @@ public:
 	 
 	// Use PipelineStates
 
-	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState);
+	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState);
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState(int nPipelineState);
 	virtual D3D12_STREAM_OUTPUT_DESC CreateStreamOuputState(int nPipelineState);

@@ -55,14 +55,15 @@ struct CB_TOOBJECTSPACE
 	float4		f4Position;
 };
 
-cbuffer cbProjectorSpace : register(b12)
-{
-	CB_TOOBJECTSPACE gcbToProjectorSpaces[MAX_LIGHTS];
-};
-//
-cbuffer cbToLightSpace : register(b13)
+//cbuffer cbProjectorSpace : register(b12)
+//{
+//	CB_TOOBJECTSPACE gcbToProjectorSpaces[MAX_LIGHTS];
+//};
+////
+cbuffer cbToLightSpace : register(b12)
 {
 	CB_TOOBJECTSPACE gcbToLightSpaces[MAX_LIGHTS];
+	CB_TOOBJECTSPACE gcbToProjectorSpaces[MAX_LIGHTS];
 };
 
 struct VS_CIRCULAR_SHADOW_INPUT
@@ -408,10 +409,31 @@ struct VS_TEXTURED_OUTPUT
 	float4 position : SV_POSITION;
 	float2 uv : TEXCOORD;
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
+VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
+{
+	VS_TEXTURED_OUTPUT output;
+
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	output.uv = input.uv;
+
+	return(output);
+}
+
+float4 PSTextured(VS_TEXTURED_OUTPUT input, uint primitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float4 cColor = gtxtParticleTexture.Sample(gssWrap, input.uv);
+
+	return(cColor);
+}
+
 VS_TEXTURED_OUTPUT VSBillBoardTextured(VS_TEXTURED_INPUT input)
 {
 	VS_TEXTURED_OUTPUT output;
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 	return (output);
 
@@ -624,7 +646,7 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
 	VS_PARTICLE_INPUT particle = input[0];
 
 	if (particle.type == PARTICLE_TYPE_EMITTER) EmmitParticles(particle, output);
-	else if (particle.type == PARTICLE_TYPE_SHELL) ShellParticles(particle, output);			// Shell 타입은 파티클의 수명이 다 할떄, FLAR 파티클을 만든다.
+	else if (particle.type == PARTICLE_TYPE_SHELL) ShellParticles(particle, output);// Shell 타입은 파티클의 수명이 다 할떄, FLAR 파티클을 만든다.
 	else if ((particle.type == PARTICLE_TYPE_FLARE01) || (particle.type == PARTICLE_TYPE_FLARE03)) OutputEmberParticles(particle, output);
 	else if (particle.type == PARTICLE_TYPE_FLARE02) GenerateEmberParticles(particle, output);
 }

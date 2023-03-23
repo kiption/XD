@@ -400,7 +400,7 @@ void CDepthRenderShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCo
 	::memcpy(m_pcbMappedToLightSpaces, m_pToLightSpaces, sizeof(TOLIGHTSPACES));
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbToLightGpuVirtualAddress = m_pd3dcbToLightSpaces->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(24, d3dcbToLightGpuVirtualAddress); //ToLight
+	pd3dCommandList->SetGraphicsRootConstantBufferView(23, d3dcbToLightGpuVirtualAddress); //ToLight
 }
 
 void CDepthRenderShader::ReleaseShaderVariables()

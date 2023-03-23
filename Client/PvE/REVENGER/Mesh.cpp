@@ -54,7 +54,10 @@ void CMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pConte
 
 void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
 {
+	//Stage2
 	UpdateShaderVariables(pd3dCommandList);
+	//
+
 
 	OnPreRender(pd3dCommandList, NULL);
 

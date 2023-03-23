@@ -35,11 +35,6 @@ struct EXPLOSIONMATERIAL
 struct CB_STREAMGAMEOBJECT_INFO
 {
 	XMFLOAT4X4						m_xmf4x4World;
-	EXPLOSIONMATERIAL				m_material;
-
-	XMFLOAT4X4						m_xmf4x4Texture;
-	XMINT2							m_xmi2TextureTiling;
-	XMFLOAT2						m_xmf2TextureOffset;
 };
 class CShader;
 class CStandardShader;
@@ -146,8 +141,8 @@ public:
 
 	void SetShader(CShader *pShader);
 	void SetMaterialType(UINT nType) { m_nType |= nType; }
-	void SetTexture(CTexture *pTexture, UINT nTexture = 0);
-	void SetTexture(CTexture *pTexture);
+	virtual void SetTexture(CTexture *pTexture, UINT nTexture = 0);
+	virtual void SetTexture(CTexture *pTexture);
 	void SetReflection(UINT nReflection) { m_nReflection = nReflection; }
 
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList);
@@ -376,6 +371,7 @@ public:
 public:
 	CGameObject();
 	CGameObject(int nMaterials);
+	CGameObject(int nMeshes, int nMaterials);
     virtual ~CGameObject();
 
 public:
@@ -395,11 +391,10 @@ public:
 	CGameObject 					*m_pParent = NULL;
 	CGameObject 					*m_pChild = NULL;
 	CGameObject 					*m_pSibling = NULL;
-	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
+
 
 
 	BoundingBox						m_xmBoundingBox;
-
 protected:
 	ID3D12Resource* m_pd3dcbGameObject = NULL;
 	CB_STREAMGAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
@@ -442,9 +437,9 @@ public:
 	virtual void OnLateUpdate() { }
 
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMFLOAT4X4 *pxmf4x4World);
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, CMaterial *pMaterial);
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMMATRIX* pxmf4x4Shadow);
@@ -502,6 +497,8 @@ public:
 	static CGameObject* LoadGeometryHierachyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName, CShader* pShader);
 
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
+
+	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
 	void SetCbvGPUDescriptorHandle(D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle) { m_d3dCbvGPUDescriptorHandle = d3dCbvGPUDescriptorHandle; }
 	void SetCbvGPUDescriptorHandlePtr(UINT64 nCbvGPUDescriptorHandlePtr) { m_d3dCbvGPUDescriptorHandle.ptr = nCbvGPUDescriptorHandlePtr; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetCbvGPUDescriptorHandle() { return(m_d3dCbvGPUDescriptorHandle); }

@@ -177,7 +177,7 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_d3dIndexBufferView.Format = DXGI_FORMAT_R32_UINT;
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 
-	CalculateVertexNormals(m_pxmf3Normals,m_pxmf3Positions, m_nVertices, pnIndices, m_nIndices);
+	//CalculateVertexNormals(m_pxmf3Normals,m_pxmf3Positions, m_nVertices, pnIndices, m_nIndices);
 
 	delete[] pnIndices;
 }

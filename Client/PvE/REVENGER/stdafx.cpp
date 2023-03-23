@@ -10,8 +10,8 @@
 UINT gnCbvSrvDescriptorIncrementSize = 0;
 UINT gnRtvDescriptorIncrementSize = 0;
 UINT gnDsvDescriptorIncrementSize = 0;
-
 int gnCurrentParticles = 0;
+
 void OutputString(_TCHAR* pString, float fValue)
 {
 	TCHAR pstrDebug[256] = { 0 };

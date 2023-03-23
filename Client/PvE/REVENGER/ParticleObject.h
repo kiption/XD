@@ -3,6 +3,7 @@
 
 #include "ParticleMesh.h"
 
+class SceneManager;
 //////////CParticleObject/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class CParticleObject : public CGameObject
 {
@@ -12,9 +13,12 @@ public:
 
 	CTexture* m_pRandowmValueTexture = NULL;
 	CTexture* m_pRandowmValueOnSphereTexture = NULL;
+	//virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseUploadBuffers();
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
 
-	void ReleaseUploadBuffers();
-
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	virtual void OnPostRender();

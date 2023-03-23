@@ -231,6 +231,7 @@ CMaterial::CMaterial(int nTextures)
 CMaterial::~CMaterial()
 {
 	if (m_pShader) m_pShader->Release();
+	if (m_pTexture) m_pTexture->Release();
 
 
 	if (m_nTextures > 0)
@@ -243,7 +244,6 @@ CMaterial::~CMaterial()
 
 
 	//
-	if (m_pTexture) m_pTexture->Release();
 }
 
 void CMaterial::SetShader(CShader* pShader)
@@ -749,11 +749,26 @@ CGameObject::CGameObject()
 CGameObject::CGameObject(int nMaterials) : CGameObject()
 {
 	m_nMaterials = nMaterials;
+	if (m_nMaterials > 0)
+	{
+		m_ppMaterials = new CMaterial * [m_nMaterials];
+		for (int i = 0; i < m_nMaterials; i++) m_ppMaterials[i] = NULL;
+	}
+}
+
+CGameObject::CGameObject(int nMeshes, int nMaterials)
+{
+
+	m_nMeshes = nMeshes;
+	m_pMesh = NULL;
 	if (m_nMeshes > 0)
 	{
 		m_ppMeshes = new CMesh * [m_nMeshes];
 		for (int i = 0; i < m_nMeshes; i++)	m_ppMeshes[i] = NULL;
 	}
+
+	m_nMaterials = nMaterials;
+	m_ppMaterials = NULL;
 	if (m_nMaterials > 0)
 	{
 		m_ppMaterials = new CMaterial * [m_nMaterials];
@@ -1042,10 +1057,10 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 
 void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255); //256의 배수
-	m_pd3dcbGameObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
-		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
-	m_pd3dcbGameObject->Map(0, NULL, (void**)&m_pcbMappedGameObject);
+	//UINT ncbElementBytes = ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255); //256의 배수
+	//m_pd3dcbGameObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
+	//	D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+	//m_pd3dcbGameObject->Map(0, NULL, (void**)&m_pcbMappedGameObject);
 
 }
 
