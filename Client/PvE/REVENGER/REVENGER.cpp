@@ -293,6 +293,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 				}
 
+				myTime++;
+				if (myTime % 60 == 0) {
+					gGameFramework.m_time++;
+					if (gGameFramework.m_time == 10) {
+						gGameFramework.m_time = 0;
+					}
+				}
+
 				// 4. 자신의 총알 개수 최신화 (UI)
 				wchar_t MyBullet[20];
 				_itow_s(my_info.m_bullet, MyBullet, sizeof(MyBullet), 10);

@@ -78,7 +78,7 @@ public:
 	void ChangeScene(DWORD nMode);
 	DWORD						m_nMode = SCENE1STAGE;
 	GameSound gamesound;
-
+	int m_NumOfUI = 5;
 protected:
 	ID3D12Resource* m_pd3dcbFrameworkInfo = NULL;
 	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;
@@ -107,9 +107,9 @@ protected:
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
-	ID2D1Effect* m_pd2dfxBitmapSource[2]{};
-	ID2D1Effect* m_pd2dfxGaussianBlur[2]{};
-	ID2D1Effect* m_pd2dfxEdgeDetection[2]{};
+	ID2D1Effect* m_pd2dfxBitmapSource[5];
+	ID2D1Effect* m_pd2dfxGaussianBlur[5];
+	ID2D1Effect* m_pd2dfxEdgeDetection[5];
 	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState = NULL;
 	IWICFormatConverter* m_pwicFormatConverter = NULL;
 	int							m_nDrawEffectImage = 0;
@@ -180,6 +180,7 @@ public:
 	WCHAR m_myhp[20];
 
 	int m_currHp;
+	int m_time;
 	//==================================================
 
 	//==================================================
