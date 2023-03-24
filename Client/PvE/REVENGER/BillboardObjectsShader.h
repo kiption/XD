@@ -27,11 +27,11 @@ public:
 #endif
 };
 
-class RainShader : public BillboardShader
+class BillboardParticleShader : public BillboardShader
 {
 public:
-	RainShader() {};
-	virtual ~RainShader() {};
+	BillboardParticleShader() {};
+	virtual ~BillboardParticleShader() {};
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
 	virtual D3D12_BLEND_DESC CreateBlendState();

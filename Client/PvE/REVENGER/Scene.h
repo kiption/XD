@@ -49,10 +49,10 @@ struct LIGHT
 	int									m_nType;
 	float								m_fRange;
 	float								padding;
-};										
-										
-struct LIGHTS							
-{										
+};
+
+struct LIGHTS
+{
 	LIGHT								m_pLights[MAX_LIGHTS];
 	XMFLOAT4							m_xmf4GlobalAmbient;
 	int									m_nLights;
@@ -78,10 +78,10 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void AnimateObjects(CCamera* pCamera, float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
-	
+
 	virtual void ReleaseUploadBuffers();
 
-	void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList,  CCamera* pCamera);
+	void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void OnPostRenderParticle();
@@ -139,7 +139,7 @@ public:
 	CShadowMapShader* m_pShadowShader = NULL;
 	CDepthRenderShader* m_pDepthRenderShader = NULL;
 	CTextureToViewportShader* m_pShadowMapToViewport = NULL;
-	int count= 0;
+	int count = 0;
 	BoundingBox						m_xmBoundingBox;
 public:
 	float								m_fElapsedTime = 0.0f;
@@ -162,18 +162,18 @@ public:
 	int									m_nStageMapShaders = 0;
 	CMapObjectShader** m_ppMapShaders = NULL;
 	CStage2MapObjectShader** m_ppStageMapShaders = NULL;
-	
+
 	CSkyBox* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;
 	int									m_nBillboardShaders = 0;
-	BillboardShader** m_pBillboardShader = NULL;
+	CShader** m_pBillboardShader = NULL;
 	int									m_nLights = 0;
 	//LIGHT* m_pLights = NULL;
 	LIGHTS* m_pcbMappedLights = NULL;
 	float							m_fLightRotationAngle = 0.0f;
 
 	LIGHTS* m_pLights = NULL;
-	
+
 	XMFLOAT4							m_xmf4GlobalAmbient;
 
 	ID3D12Resource* m_pd3dcbLights = NULL;

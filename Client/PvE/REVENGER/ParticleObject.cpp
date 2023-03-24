@@ -33,7 +33,7 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	SceneManager* pScene = NULL;
-	pScene->CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbGameObject, ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255));
+	pScene->CreateConstantBufferViews(pd3dDevice, 0, m_pd3dcbGameObject, ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255));
 	pScene->CreateShaderResourceViews(pd3dDevice, pParticleTexture, 0, 16);
 	pScene->CreateShaderResourceViews(pd3dDevice, m_pRandowmValueTexture, 0, 17);
 	pScene->CreateShaderResourceViews(pd3dDevice, m_pRandowmValueOnSphereTexture, 0, 18);
@@ -89,10 +89,10 @@ void CParticleObject::ReleaseShaderVariables()
 
 void CParticleObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
-	pd3dCommandList->SetGraphicsRootDescriptorTable(19, m_d3dCbvGPUDescriptorHandle);
+	//if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	//pd3dCommandList->SetGraphicsRootDescriptorTable(19, m_d3dCbvGPUDescriptorHandle);
 
-	CGameObject::UpdateShaderVariables(pd3dCommandList);
+ 	CGameObject::UpdateShaderVariables(pd3dCommandList);
 }
 
 void CParticleObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)

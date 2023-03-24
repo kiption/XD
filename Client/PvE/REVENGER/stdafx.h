@@ -32,7 +32,7 @@ using namespace std;
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
-
+#include <DirectXMath.h>
 #include <Mmsystem.h>
 
 
@@ -54,7 +54,7 @@ using namespace std;
 #include <shobjidl.h>   // defines IFileOpenDialog
 #include <strsafe.h>
 #include <evr.h>
-
+#include <cmath>
 #include <d2d1effects.h>
 #include <wincodec.h>
 #pragma comment(lib, "d3dcompiler.lib")

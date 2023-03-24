@@ -15,11 +15,11 @@ public:
 	float m_fTime = 0.0f;
 };
 
-class CRainObject : public CGameObject
+class CBillboardParticleObject : public CGameObject
 {
 public:
-	CRainObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
-	virtual ~CRainObject();
+	CBillboardParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CBillboardParticleObject();
 
 	virtual void Animate(float fTimeElapsed);
 
