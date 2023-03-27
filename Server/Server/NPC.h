@@ -2,11 +2,11 @@
 #include <math.h>
 #include "Constant.h"
 #include "MyVectors.h"
-
+//#include <random>
 enum NpcType{NPC_Helicopter, NPC_Bunker, NPC_Terret};
 
-std::random_device rd;
-std::default_random_engine dre(rd());
+//std::random_device rd;
+//std::default_random_engine dre(rd());
 
 class NPC{
 private:

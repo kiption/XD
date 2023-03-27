@@ -333,8 +333,8 @@ void NPC::FindTarget(XMFLOAT3 vec)
 	}
 
 	if (cnt != 0) {
-		std::uniform_int_distribution<int>uid(chaseID, chaseID + cnt);
-		chaseID = uid(dre);
+		/*std::uniform_int_distribution<int>uid(chaseID, chaseID + cnt);
+		chaseID = uid(dre);*/
 		cnt = 0;
 	}
 
