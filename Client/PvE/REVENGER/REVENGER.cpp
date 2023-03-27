@@ -116,31 +116,19 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	strcpy_s(login_pack.name, "COPTER");
 
 	// Active Server에 연결
-	sockets[0] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	sockets[curr_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 	SOCKADDR_IN server0_addr;
 	ZeroMemory(&server0_addr, sizeof(server0_addr));
 	server0_addr.sin_family = AF_INET;
-	server0_addr.sin_port = htons(PORT_NUM_S0);
+	int new_portnum = PORT_NUM_S0 + curr_servernum;
+	server0_addr.sin_port = htons(new_portnum);
 	inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);
-	connect(sockets[0], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
+	connect(sockets[curr_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
 
-	sendPacket(&login_pack, 0);
-	recvPacket(0);
-
-	// Standby Server에 연결
-	sockets[1] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	SOCKADDR_IN server1_addr;
-	ZeroMemory(&server1_addr, sizeof(server1_addr));
-	server1_addr.sin_family = AF_INET;
-	server1_addr.sin_port = htons(PORT_NUM_S1);
-	inet_pton(AF_INET, SERVER_ADDR, &server1_addr.sin_addr);
-	connect(sockets[1], reinterpret_cast<sockaddr*>(&server1_addr), sizeof(server1_addr));
-
-	sendPacket(&login_pack, 1);
-	recvPacket(1);
-
-
+	sendPacket(&login_pack, curr_servernum);
+	recvPacket(curr_servernum);
 	//==================================================
+
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	(void)HeapSetInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);

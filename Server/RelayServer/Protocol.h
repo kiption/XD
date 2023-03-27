@@ -180,7 +180,8 @@ struct SC_BULLET_COUNT_PACKET {
 struct SC_ACTIVE_DOWN_PACKET {	// 현재는 클라-서버 -> 추후에 클라-릴레이서버 로 바꿀 예정.
 	unsigned char size;
 	char type;
-	short serverid;
+	short prev_s_id;
+	short my_s_id;
 };
 
 // ================================
