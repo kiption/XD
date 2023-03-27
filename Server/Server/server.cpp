@@ -805,6 +805,11 @@ void process_packet(int client_id, char* packet)
 
 		break;
 	}// CS_INPUT_MOUSE end
+	case CS_RELOGIN:
+	{
+		CS_RELOGIN_PACKET* re_login_pack = reinterpret_cast<CS_RELOGIN_PACKET*>(packet);
+
+	}// CS_RELOGIN end
 	case SS_HEARTBEAT:
 	{
 		SS_HEARTBEAT_PACKET* heartbeat_pack = reinterpret_cast<SS_HEARTBEAT_PACKET*>(packet);

@@ -95,6 +95,7 @@ struct CS_INPUT_MOUSE_PACKET {
 struct CS_RELOGIN_PACKET {
 	unsigned char size;
 	char type;
+	short id;
 };
 
 // ================================

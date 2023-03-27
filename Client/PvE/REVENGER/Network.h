@@ -92,6 +92,12 @@ void sendPacket(void* packet, short servernum)
 			strcpy_s(login_pack.name, "COPTER");
 			sendPacket(&login_pack, curr_servernum);
 			recvPacket(curr_servernum);
+
+			//CS_RELOGIN_PACKET re_login_pack;
+			//re_login_pack.size = sizeof(CS_RELOGIN_PACKET);
+			//re_login_pack.type = CS_RELOGIN;
+			//sendPacket(&re_login_pack, curr_servernum);
+			//recvPacket(curr_servernum);
 		}
 		cout << "[WSASend Error] code: " << err_no << "\n" << endl;
 	}
