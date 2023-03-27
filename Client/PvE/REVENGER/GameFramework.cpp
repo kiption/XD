@@ -576,8 +576,42 @@ void CGameFramework::ProcessInput()
 
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
 			inputKeyValue += INPUT_SPACEBAR;//S
-
 		}
+
+		// 마우스 조작이 익숙하지 않은 유저를 위한 방향키를 통한 이동조작
+		if (pKeysBuffer[VK_UP] & 0xF0) {
+			MouseInputVal inputMouseValueU;
+			inputMouseValueU.button = L_BUTTON;
+			inputMouseValueU.delX = 0.0f;
+			inputMouseValueU.delY = -3.0f;
+
+			q_mouseInput.push(inputMouseValueU);
+		}
+		if (pKeysBuffer[VK_DOWN] & 0xF0) {
+			MouseInputVal inputMouseValueD;
+			inputMouseValueD.button = L_BUTTON;
+			inputMouseValueD.delX = 0.0f;
+			inputMouseValueD.delY = 3.0f;
+
+			q_mouseInput.push(inputMouseValueD);
+		}
+		if (pKeysBuffer[VK_LEFT] & 0xF0) {
+			MouseInputVal inputMouseValueL;
+			inputMouseValueL.button = L_BUTTON;
+			inputMouseValueL.delX = -3.0f;
+			inputMouseValueL.delY = 0.0f;
+
+			q_mouseInput.push(inputMouseValueL);
+		}
+		if (pKeysBuffer[VK_RIGHT] & 0xF0) {
+			MouseInputVal inputMouseValueR;
+			inputMouseValueR.button = L_BUTTON;
+			inputMouseValueR.delX = 3.0f;
+			inputMouseValueR.delY = 0.0f;
+
+			q_mouseInput.push(inputMouseValueR);
+		}
+		//
 
 		// Server
 		if (inputKeyValue != 0) {

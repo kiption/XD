@@ -9,7 +9,7 @@
 #define YAW_ROTATE_SCALAR 0.8f		// yaw회전 힘
 #define ROLL_ROTATE_SCALAR 0.2f		// roll회전 힘
 
-#define ENGINE_SCALAR 1.6f			// 헬기 엔진 출력 (상승, 하강 정도조절)
+#define ENGINE_SCALAR 1.0f			// 헬기 엔진 출력 (상승, 하강 정도조절)
 
 #define SENSITIVITY 0.7f			// 마우스 감도
 

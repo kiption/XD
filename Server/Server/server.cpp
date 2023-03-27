@@ -802,7 +802,6 @@ void process_packet(int client_id, char* packet)
 		}
 		else if (rt_p->key_val == RT_RBUTTON) {		// 마우스 우클릭 드래그: 기능 미정.
 			//clients[client_id].s_lock.lock();
-			cout << "마우스 우클릭 입력됨." << endl;// 임시코드
 			//clients[client_id].s_lock.unlock();
 		}
 
@@ -1636,7 +1635,7 @@ int main(int argc, char* argv[])
 	timer_threads.emplace_back(timerFunc);			// 클라이언트 로직 타이머스레드
 	timer_threads.emplace_back(sendHeartBeat);		// 서버 간 Heartbeat교환 스레드
 	timer_threads.emplace_back(checkHeartbeat);		// 서버 간 다운여부 검사 스레드
-	//timer_threads.emplace_back(MoveNPC);			// NPC 로직 스레드
+	timer_threads.emplace_back(MoveNPC);			// NPC 로직 스레드
 
 	for (auto& th : worker_threads)
 		th.join();
