@@ -34,6 +34,8 @@ constexpr int SERIAL_NUM_EXSERVER = 2000;
 constexpr int HB_SEND_CYCLE = 1000;		// Heartbeat를 보내는 주기 (단위: millisec)
 constexpr int HB_GRACE_PERIOD = 3000;	// Heartbeat가 몇 초 넘어도 오지 않으면 서버다운으로 간주함 (단위: millisec)
 
+constexpr int HA_REPLICA_CYCLE = 10000;	// 서버간 데이터복제 주기 (단위: millisec)
+//
 constexpr int BUF_SIZE = 200;
 constexpr int NAME_SIZE = 20;
 
@@ -58,7 +60,7 @@ enum PacketID {
 	CS_LOGIN, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_RELOGIN
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
 	, SC_DAMAGED, SC_PLAYER_STATE, SC_BULLET_COUNT, SC_ACTIVE_DOWN
-	, SS_CONNECT, SS_HEARTBEAT
+	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
 };
 
 // Target Type
@@ -203,5 +205,20 @@ struct SS_HEARTBEAT_PACKET {
 	unsigned char size;
 	char type;
 	short sender_id;
+};
+
+struct SS_DATA_REPLICA_PACKET {
+	unsigned char size;
+	char type;
+	short target;
+	short id;
+	char name[NAME_SIZE];
+	float x, y, z;
+	float roll, yaw, pitch;
+	float right_x, right_y, right_z;
+	float up_x, up_y, up_z;
+	float look_x, look_y, look_z;
+	short hp;
+	short bullet_cnt;
 };
 #pragma pack (pop)

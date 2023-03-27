@@ -177,7 +177,7 @@ public:
 	}
 };
 
-int online_player_cnt = 0;
+int user_count = 0;
 array<SESSION, MAX_USER> clients;
 array<NPC, MAX_NPCS> npcs;
 
@@ -197,7 +197,6 @@ SOCKET right_ex_server_sock;							// 다음 번호의 서버
 int my_server_id;										// 내 서버 식별번호
 bool b_active_server;									// Active 서버인가?
 array<HA_SERVER, MAX_SERVER> extended_servers;			// HA구현을 위해 수평확장된 서버들
-
 
 
 void SESSION::send_login_info_packet()
@@ -302,7 +301,7 @@ void disconnect(int target_id, int target)
 		clients[target_id].s_state = ST_FREE;
 		clients[target_id].s_lock.unlock();
 
-		online_player_cnt--;
+		user_count--;
 		cout << "Player[ID: " << clients[target_id].id << ", name: " << clients[target_id].name << " is log out\n" << endl;	// server message
 
 		for (int i = 0; i < MAX_USER; i++) {
@@ -410,7 +409,7 @@ int get_new_client_id()
 		if (clients[i].s_state == ST_FREE) {
 			clients[i].s_state = ST_ACCEPTED;
 			clients[i].s_lock.unlock();
-			online_player_cnt++;
+			user_count++;
 			return i;
 		}
 		clients[i].s_lock.unlock();
@@ -811,9 +810,7 @@ void process_packet(int client_id, char* packet)
 		SS_HEARTBEAT_PACKET* heartbeat_pack = reinterpret_cast<SS_HEARTBEAT_PACKET*>(packet);
 		int recv_id = heartbeat_pack->sender_id;
 
-		//cout << "Server[" << recv_id << "]로 부터 Heartbeat를 받았습니다." << endl;
 		extended_servers[recv_id].heartbeat_recv_time = chrono::system_clock::now();
-
 		if (recv_id < my_server_id) {	// A->B->A로 heartbeat의 한 사이클이 끝나도록하기 위함. (즉, 오른쪽 서버로부터 Heartbeat를 받으면 한 사이클의 끝으로 판단)
 			// Heartbeat를 먼저 보낸 서버에게 자신의 Heartbeat를 전송합니다.
 			SS_HEARTBEAT_PACKET hb_packet;
@@ -822,11 +819,32 @@ void process_packet(int client_id, char* packet)
 			hb_packet.sender_id = my_server_id;
 			extended_servers[recv_id].do_send(&hb_packet);										// 자신에게 Heartbeat를 보낸 서버에게 전송합니다.
 			extended_servers[my_server_id].heartbeat_send_time = chrono::system_clock::now();	// 전송한 시간을 업데이트
-
-			//cout << "Heartbeat를 먼저 보낸 Server[" << recv_id << "]에게 자신의 Heartbeat를 보냅니다." << endl;
 		}
 		break;
 	}// SS_HEARTBEAT end
+	case SS_DATA_REPLICA:
+	{
+		SS_DATA_REPLICA_PACKET* replica_pack = reinterpret_cast<SS_DATA_REPLICA_PACKET*>(packet);
+		
+		int replica_id = replica_pack->id;
+		clients[replica_id].s_lock.lock();
+		clients[replica_id].id = replica_id;
+		clients[replica_id].hp = replica_pack->hp;
+		clients[replica_id].bullet = replica_pack->bullet_cnt;
+
+		clients[replica_id].pos = { replica_pack->x, replica_pack->y, replica_pack->z };
+
+		clients[replica_id].pitch = replica_pack->pitch;
+		clients[replica_id].yaw = replica_pack->yaw;
+		clients[replica_id].roll = replica_pack->roll;
+
+		clients[replica_id].m_rightvec = { replica_pack->right_x, replica_pack->right_y, replica_pack->right_z };
+		clients[replica_id].m_upvec = { replica_pack->up_x, replica_pack->up_y, replica_pack->up_z };
+		clients[replica_id].m_lookvec = { replica_pack->look_x, replica_pack->look_y, replica_pack->look_z };
+		clients[replica_id].s_lock.unlock();
+
+		cout << "Client[" << replica_id << "]의 데이터가 복제되었습니다.\n" << endl;
+	}// SS_DATA_REPLICA end
 	}
 }
 
@@ -1332,29 +1350,26 @@ void timerFunc() {
 	}
 }
 
-void sendHeartBeat() {	// 오른쪽 서버에게 Heartbeat를 전달하는 함수
+void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 	while (true) {
-		if (my_server_id != MAX_SERVER - 1) {	// 왼쪽 서버가 오른쪽 서버로 전송하기 때문에 가장 마지막 서버는 전송하지 않습니다.
+		auto start_t = system_clock::now();
+		// 오른쪽 서버로 Heartbeat를 보냅니다. (왼쪽 서버가 오른쪽 서버로 전송하기 때문에 가장 마지막 서버는 보내지 않습니다.)
+		if (my_server_id != MAX_SERVER - 1) {
 			if (extended_servers[my_server_id].s_state != ST_ACCEPTED)	continue;
 			if (extended_servers[my_server_id + 1].s_state != ST_ACCEPTED) continue;
-			this_thread::sleep_for(chrono::milliseconds(HB_SEND_CYCLE));
-			//if (chrono::system_clock::now() > extended_servers[my_server_id].heartbeat_send_time + chrono::milliseconds(HB_SEND_CYCLE)) {
-				//cout << "자신의 Heartbeat를 Server[" << my_server_id + 1 << "]에게 보냅니다." << endl;
-				SS_HEARTBEAT_PACKET hb_packet;
-				hb_packet.size = sizeof(SS_HEARTBEAT_PACKET);
-				hb_packet.type = SS_HEARTBEAT;
-				hb_packet.sender_id = my_server_id;
-				extended_servers[my_server_id + 1].do_send(&hb_packet);	// 오른쪽 서버에 전송합니다.
 
-				extended_servers[my_server_id].heartbeat_send_time = chrono::system_clock::now();	// 전송한 시간을 업데이트
-			//}
+			SS_HEARTBEAT_PACKET hb_packet;
+			hb_packet.size = sizeof(SS_HEARTBEAT_PACKET);
+			hb_packet.type = SS_HEARTBEAT;
+			hb_packet.sender_id = my_server_id;
+			extended_servers[my_server_id + 1].do_send(&hb_packet);	// 오른쪽 서버에 전송합니다.
+
+			extended_servers[my_server_id].heartbeat_send_time = chrono::system_clock::now();	// 전송한 시간을 업데이트
 		}
-	}
-}
-void checkHeartbeat() {	// 인접해있는 서버구성원에게서 Heartbeat를 받았는 지 확인하는 함수
-	while (true) {
-		if (my_server_id != 0) {	// 가장 왼쪽에 있는 서버 구성원만 제외
-			// 오른쪽의 서버 검사
+
+		// 오랫동안 Heartbeat를 받지 못한 서버구성원이 있는지 확인합니다.
+		// 1. 오른쪽 서버 검사	(가장 왼쪽에 있는 서버 구성원은 검사하지 않습니다.)
+		if (my_server_id != 0) {
 			if (extended_servers[my_server_id - 1].s_state == ST_ACCEPTED) {
 				if (chrono::system_clock::now() > extended_servers[my_server_id - 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
 					cout << "Server[" << my_server_id - 1 << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
@@ -1362,9 +1377,8 @@ void checkHeartbeat() {	// 인접해있는 서버구성원에게서 Heartbeat를 받았는 지 확�
 				}
 			}
 		}
-
-		if (my_server_id != MAX_SERVER - 1) {	// 가장 오른쪽에 있는 서버 구성원만 제외
-			// 왼쪽의 서버 검사
+		// 2. 왼쪽 서버 검사 (가장 오른쪽에 있는 서버 구성원은 검사하지 않습니다.)
+		if (my_server_id != MAX_SERVER - 1) {
 			if (extended_servers[my_server_id + 1].s_state == ST_ACCEPTED) {
 				if (chrono::system_clock::now() > extended_servers[my_server_id + 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
 					cout << "Server[" << my_server_id + 1 << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
@@ -1373,7 +1387,64 @@ void checkHeartbeat() {	// 인접해있는 서버구성원에게서 Heartbeat를 받았는 지 확�
 			}
 		}
 
-		Sleep(1000);
+		// 스레드 대기
+		auto curr_t = system_clock::now();
+		if (curr_t - start_t < static_cast<milliseconds>(HB_SEND_CYCLE)) {
+			this_thread::sleep_for(static_cast<milliseconds>(HB_SEND_CYCLE) - (curr_t - start_t));
+		}
+	}
+}
+void replicaSessions() {	// 서버간 세션데이터를 복제하는 함수
+	while (true) {
+		auto start_t = system_clock::now();
+
+		int standby_id = -1;
+		if (my_server_id == 0)		standby_id = 1;
+		else if (my_server_id == 1) standby_id = 0;
+
+		if (extended_servers[standby_id].s_state == ST_ACCEPTED) {
+			cout << "REPLICA!" << endl;
+			for (auto& cl : clients) {
+				if (cl.s_state != ST_INGAME) continue;
+
+				SS_DATA_REPLICA_PACKET replica_pack;
+				replica_pack.type = SS_DATA_REPLICA;
+				replica_pack.size = sizeof(SS_DATA_REPLICA_PACKET);
+
+				replica_pack.target = TARGET_PLAYER;
+				replica_pack.id = cl.id;
+				strcpy_s(replica_pack.name, cl.name);
+				replica_pack.hp = cl.hp;
+				replica_pack.bullet_cnt = cl.bullet;
+
+				replica_pack.x = cl.pos.x;
+				replica_pack.y = cl.pos.y;
+				replica_pack.z = cl.pos.z;
+
+				replica_pack.roll = cl.roll;
+				replica_pack.yaw = cl.yaw;
+				replica_pack.pitch = cl.pitch;
+
+				replica_pack.right_x = cl.m_rightvec.x;
+				replica_pack.right_y = cl.m_rightvec.y;
+				replica_pack.right_z = cl.m_rightvec.z;
+
+				replica_pack.up_x = cl.m_upvec.x;
+				replica_pack.up_y = cl.m_upvec.y;
+				replica_pack.up_z = cl.m_upvec.z;
+
+				replica_pack.look_x = cl.m_lookvec.x;
+				replica_pack.look_y = cl.m_lookvec.y;
+				replica_pack.look_z = cl.m_lookvec.z;
+
+				extended_servers[standby_id].do_send(&replica_pack);
+			}
+		}
+
+		auto curr_t = system_clock::now();
+		if (curr_t - start_t < static_cast<milliseconds>(HA_REPLICA_CYCLE)) {
+			this_thread::sleep_for(static_cast<milliseconds>(HA_REPLICA_CYCLE) - (curr_t - start_t));
+		}
 	}
 }
 
@@ -1513,7 +1584,7 @@ int main(int argc, char* argv[])
 	// [ HA - Relay서버 연결 ]
 	int active_relay_serverid = 0;							// [[[추후에 현재 Active 상태에 있는 릴레이서버의 id와 포트번호로 바꿀 예정임!]]]
 	int active_relay_portnum = PORTNUM_RELAY2LOGIC_0;		//
-	// Connect
+	// HA Connect
 
 
 	//======================================================================
@@ -1627,14 +1698,16 @@ int main(int argc, char* argv[])
 
 	vector <thread> worker_threads;
 	for (int i = 0; i < 4; ++i)
-		worker_threads.emplace_back(do_worker);		// 클라이언트-서버 통신용 Worker스레드
-	worker_threads.emplace_back(do_ha_worker);		// 서버 간 통신용 Worker스레드
+		worker_threads.emplace_back(do_worker);			// 클라이언트-서버 통신용 Worker스레드
+	worker_threads.emplace_back(do_ha_worker);			// 서버 간 통신용 Worker스레드
 
 	vector<thread> timer_threads;
-	timer_threads.emplace_back(timerFunc);			// 클라이언트 로직 타이머스레드
-	timer_threads.emplace_back(sendHeartBeat);		// 서버 간 Heartbeat교환 스레드
-	timer_threads.emplace_back(checkHeartbeat);		// 서버 간 다운여부 검사 스레드
-	timer_threads.emplace_back(MoveNPC);			// NPC 로직 스레드
+	timer_threads.emplace_back(timerFunc);				// 클라이언트 로직 타이머스레드
+	timer_threads.emplace_back(heartBeatFunc);			// 서버 간 Heartbeat교환 스레드
+	timer_threads.emplace_back(MoveNPC);				// NPC 로직 스레드
+	if (b_active_server) {
+		timer_threads.emplace_back(replicaSessions);	// 서버 간 세션데이터 복제 스레드
+	}
 
 	for (auto& th : worker_threads)
 		th.join();
