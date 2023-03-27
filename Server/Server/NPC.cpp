@@ -93,7 +93,7 @@ void NPC::SetAcc(float acc)
 
 void NPC::SetDistance(float dis)
 {
-	m_Distance = dis;
+	*m_Distance = dis;
 }
 
 void NPC::SetFindRange(float f)
@@ -162,7 +162,7 @@ float NPC::GetAcc()
 
 float NPC::GetDistance()
 {
-	return m_Distance;
+	return *m_Distance;
 }
 
 float NPC::GetFindRange()
@@ -173,6 +173,83 @@ float NPC::GetFindRange()
 // ===========================================
 // =============     NORMAL     ==============
 // ===========================================
+
+//void CSuperCobraObject::Ai(float fTimeElapsed)
+//{
+//	if (CheckPlayer())
+//	{
+//		XMFLOAT3 xmf3Dir = Vector3::Normalize(Vector3::Subtract(m_PlayerPosition, GetPosition()));
+//		bool checkR = RotateXZPlayer(GetLook(), xmf3Dir);
+//		bool checkM = MoveYPlayer(m_PlayerPosition);
+//		if (checkR && checkM)
+//		{
+//			if (m_fShotDelay == 0.f)
+//				m_bShotMissile = true;
+//		}
+//		m_fShotDelay += fTimeElapsed * 5.0f;
+//		if (m_fShotDelay >= 10.f)
+//		{
+//			m_fShotDelay = 0.f;
+//		}
+//	}
+//	else
+//	{
+//		switch (m_behavior)
+//		{
+//		case ENEMY_PLAY::ENEMY_MOVECHECK:
+//		{
+//			m_iRoteDest = RandRotate();
+//			Rotate(0.f, m_iRoteDest, 0.f);
+//			MoveForward(100.f);
+//			XMFLOAT3 pos = GetPosition();
+//			if (pos.x > 4400.f || pos.x < 200.f || pos.z > 4400.f || pos.z < 200.f);
+//			else
+//				m_behavior = ENEMY_PLAY::ENEMY_ROTATE;
+//			Rotate(0.f, 180.f, 0.f);
+//			MoveForward(100.f);
+//			Rotate(0.f, 180.f, 0.f);
+//			Rotate(0.f, -m_iRoteDest, 0.f);
+//		}
+//		break;
+//		case ENEMY_PLAY::ENEMY_ROTATE:
+//			if (m_iRoteDest < 0)
+//			{
+//				Rotate(0.f, -1.f, 0.f);
+//				--m_iRotateCnt;
+//				if (m_iRotateCnt <= m_iRoteDest)
+//				{
+//					m_behavior = ENEMY_PLAY::ENEMY_MOVE;
+//					m_iRotateCnt = 0;
+//				}
+//			}
+//			else
+//			{
+//				Rotate(0.f, 1.f, 0.f);
+//				++m_iRotateCnt;
+//				if (m_iRotateCnt >= m_iRoteDest)
+//				{
+//					m_behavior = ENEMY_PLAY::ENEMY_MOVE;
+//					m_iRotateCnt = 0;
+//				}
+//			}
+//			break;
+//		case ENEMY_PLAY::ENEMY_MOVE:
+//			MoveForward(0.5f);
+//			++m_iMoveCnt;
+//			if (m_iMoveCnt >= 100)
+//			{
+//				m_behavior = ENEMY_PLAY::ENEMY_MOVECHECK;
+//				m_iMoveCnt = 0;
+//			}
+//
+//			break;
+//		default:
+//			break;
+//		}
+//	}
+//}
+//
+
 
 void NPC::Move()
 {
@@ -210,8 +287,8 @@ XMFLOAT3 NPC::NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll)
 	float curr_pitch = XMConvertToRadians(pitch);
 	float curr_yaw = XMConvertToRadians(yaw);
 	float curr_roll = XMConvertToRadians(roll);
-	
-	
+
+
 	float x1, y1;
 	x1 = vec.x * cos(curr_roll) - vec.y * sin(curr_roll);
 	y1 = vec.x * sin(curr_roll) + vec.y * cos(curr_roll);
@@ -232,21 +309,58 @@ XMFLOAT3 NPC::NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll)
 	return NPCNormalize(vec);
 }
 
-void NPC::Get_Distance_Detection(XMFLOAT3 vec)
+void NPC::Caculation_Distance(XMFLOAT3 vec, int id)
 {
-	float Distance = sqrtf(pow((vec.x - m_Pos.x), 2) + pow((vec.y - m_Pos.y), 2) + pow((vec.z - m_Pos.z), 2));
-
-	m_Distance = Distance;
+	m_Distance[id] = sqrtf(pow((vec.x - m_Pos.x), 2) + pow((vec.y - m_Pos.y), 2) + pow((vec.z - m_Pos.z), 2));
 }
 
 void NPC::FindTarget(XMFLOAT3 vec)
 {
-	float Distance = sqrtf(pow((vec.x - m_Pos.x), 2) + pow((vec.y - m_Pos.y), 2) + pow((vec.z - m_Pos.z), 2));
-
-	if (m_FindRange > Distance) {
-		// 상태 변화, 내 탐색 범위보다 플레이어와의 거리가 짧을 때
+	float Dis = 20000;
+	int chaseID = -1;
+	int SubID[3] = { -1 };
+	int cnt{};
+	for (int i{}; i < 3; ++i) {
+		if (m_Distance[i] <  Dis) {
+			Dis = m_Distance[i];
+			chaseID = i;
+			*SubID = { -1 };
+		}
+		if (m_Distance[i] == Dis) {
+			SubID[i] = i;
+			cnt++;
+		}
 	}
 
+	if (cnt != 0) {
+		std::uniform_int_distribution<int>uid(chaseID, chaseID + cnt);
+		chaseID = uid(dre);
+		cnt = 0;
+	}
+
+	if (Dis < 500.0f) {
+		m_Active = true;
+		FlyOnNpc(vec, chaseID);
+	}
+	else {
+		m_Active = false;
+	}
+
+}
+
+void NPC::FlyOnNpc(XMFLOAT3 vec, int id)
+{
+	if (m_Active) {
+		if (m_Pos.y < vec.y) {
+			m_Pos.y += 12.0f;
+		}
+		if (m_Pos.y > vec.y) {
+			m_Pos.y -= 6.0f;
+		}	
+	}
+	else {
+
+	}
 }
 
 // 각 객체 별 적 관리
@@ -261,7 +375,7 @@ Stage1Enemy::~Stage1Enemy()
 
 }
 
-void Stage1Enemy::Get_Distance_Detection(XMFLOAT3 vec)
+void Stage1Enemy::Caculation_Distance(XMFLOAT3 vec)
 {
 
 }
@@ -281,7 +395,7 @@ Stage2Enemy::~Stage2Enemy()
 
 }
 
-void Stage2Enemy::Get_Distance_Detection(XMFLOAT3 vec)
+void Stage2Enemy::Caculation_Distance(XMFLOAT3 vec)
 {
 
 }

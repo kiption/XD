@@ -6,7 +6,6 @@
 #include <array>
 #include <vector>
 #include <chrono>
-#include <random>
 
 #include "Constant.h"
 #include "BulletsMgr.h"

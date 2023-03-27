@@ -5,6 +5,9 @@
 
 enum NpcType{NPC_Helicopter, NPC_Bunker, NPC_Terret};
 
+std::random_device rd;
+std::default_random_engine dre(rd());
+
 class NPC{
 private:
 	int m_ID;									// ID는 7001~부터 시작
@@ -20,7 +23,7 @@ private:
 	float m_range;					// 임시 변수 재 제작시 사라질 운명
 	float m_Acc;
 
-	float m_Distance;
+	float m_Distance[3] = { 10000 };
 	float m_FindRange;
 
 public:
@@ -74,8 +77,10 @@ public:
 	void Move();					// 추후에 A* 알고리즘 추가할 예정 현재는 특정 운동만 수행
 	void MovetoRotate();
 	XMFLOAT3 NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll);
-	virtual void Get_Distance_Detection(XMFLOAT3 vec);
+	virtual void Caculation_Distance(XMFLOAT3 vec, int id); // 범위 내 플레이어 탐색
 	virtual void FindTarget(XMFLOAT3 vec);
+	void FlyOnNpc(XMFLOAT3 vec, int id);
+
 
 };
 
@@ -91,7 +96,7 @@ public:
 	Stage1Enemy();
 	~Stage1Enemy();
 
-	virtual void Get_Distance_Detection(XMFLOAT3 vec);
+	virtual void Caculation_Distance(XMFLOAT3 vec);
 
 	void ChaseToPlayer();
 };
@@ -108,7 +113,7 @@ public:
 	Stage2Enemy();
 	~Stage2Enemy();
 
-	virtual void Get_Distance_Detection(XMFLOAT3 vec);
+	virtual void Caculation_Distance(XMFLOAT3 vec);
 
 	void ChaseToPlayer();
 };
