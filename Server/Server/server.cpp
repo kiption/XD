@@ -26,14 +26,14 @@ enum SESSION_TYPE { SESSION_CLIENT, SESSION_EXTENDED_SERVER };
 
 Coordinate basic_coordinate;	// 기본(초기) 좌표계
 
-class OVER_EXP {
+class OVER_EX {
 public:
 	WSAOVERLAPPED overlapped;
 	WSABUF wsabuf;
 	char send_buf[BUF_SIZE];
 	PACKET_PROCESS_TYPE process_type;
 
-	OVER_EXP()
+	OVER_EX()
 	{
 		wsabuf.len = BUF_SIZE;
 		wsabuf.buf = send_buf;
@@ -41,7 +41,7 @@ public:
 		ZeroMemory(&overlapped, sizeof(overlapped));
 	}
 
-	OVER_EXP(char* packet)
+	OVER_EX(char* packet)
 	{
 		wsabuf.len = packet[0];
 		wsabuf.buf = send_buf;
@@ -52,7 +52,7 @@ public:
 };
 
 class SESSION {
-	OVER_EXP recv_over;
+	OVER_EX recv_over;
 
 public:
 	mutex s_lock;
@@ -111,7 +111,7 @@ public:
 
 	void do_send(void* packet)
 	{
-		OVER_EXP* s_data = new OVER_EXP{ reinterpret_cast<char*>(packet) };
+		OVER_EX* s_data = new OVER_EX{ reinterpret_cast<char*>(packet) };
 		ZeroMemory(&s_data->overlapped, sizeof(s_data->overlapped));
 
 		//cout << "[do_send] Target ID: " << id << "\n" << endl;
@@ -131,7 +131,7 @@ public:
 };
 
 class HA_SERVER {
-	OVER_EXP recv_over;
+	OVER_EX recv_over;
 
 public:
 	mutex s_lock;
@@ -166,7 +166,7 @@ public:
 		}
 	}
 	void do_send(void* packet) {
-		OVER_EXP* s_data = new OVER_EXP{ reinterpret_cast<char*>(packet) };
+		OVER_EX* s_data = new OVER_EX{ reinterpret_cast<char*>(packet) };
 		ZeroMemory(&s_data->overlapped, sizeof(s_data->overlapped));
 
 		//cout << "[do_send] Target ID: " << id << "\n" << endl;
@@ -304,7 +304,7 @@ void disconnect(int target_id, int target)
 		clients[target_id].s_lock.unlock();
 
 		online_player_cnt--;
-		cout << "Player[ID: " << clients[target_id].id << ", name: " << clients[target_id].name << " is log out" << endl;	// server message
+		cout << "Player[ID: " << clients[target_id].id << ", name: " << clients[target_id].name << " is log out\n" << endl;	// server message
 
 		for (int i = 0; i < MAX_USER; i++) {
 			auto& pl = clients[i];
@@ -340,20 +340,14 @@ void disconnect(int target_id, int target)
 		cout << "Server[" << extended_servers[target_id].id << "]의 다운이 감지되었습니다." << endl;	// server message
 
 		// 서버 재실행
-		/*wchar_t wchar_buf[10];
-		wsprintfW(wchar_buf, L"%d", target_id);
-		ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L"../x64/Release", SW_SHOW);*/
+		wchar_t wchar_buf[10];
+		wsprintfW(wchar_buf, L"%d", 10 + target_id);	// 십의자리: Actvie여부(S: 1, A: 0), 일의자리: 서버ID
+		ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L"../x64/Release", SW_SHOW);
 
-		SC_ACTIVE_DOWN_PACKET active_down_pack;
-		active_down_pack.type = SC_ACTIVE_DOWN;
-		active_down_pack.size = sizeof(SC_ACTIVE_DOWN_PACKET);
-		active_down_pack.serverid = target_id;
-		
-		for (int i = 0; i < MAX_USER; i++) {
-			if (clients[i].s_state == ST_INGAME) {	// 접속 중인 클라이언트 중 가장 먼저 접속한 클라이언트
-				clients[i].do_send(&active_down_pack);
-				break;
-			}
+		// 클라이언트에게 Active서버가 다운되었다고 알려줌.
+		if (!b_active_server) {	// 내가 Active가 아니면 상대가 Active임. (서버가 2개밖에 없기 때문)
+			b_active_server = true;
+			cout << "현재 Server[" << my_server_id << "] 가 Active 서버로 승격되었습니다. [ MODE: Stand-by -> Active ]\n" << endl;
 		}
 
 		// 만약 자신의 오른쪽 서버가 다운되었는데, 그 서버가 서버군의 마지막 서버인 경우 재실행된 서버에게 ConnectEx 요청을 보냅니다.
@@ -378,7 +372,7 @@ void disconnect(int target_id, int target)
 					exit(-1);
 				}
 
-				OVER_EXP* con_over = new OVER_EXP;
+				OVER_EX* con_over = new OVER_EX;
 				con_over->process_type = OP_CONNECT;
 				int key = SERIAL_NUM_EXSERVER + MAX_SERVER - 1;
 				HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_ss_iocp, key, 0);
@@ -808,7 +802,6 @@ void process_packet(int client_id, char* packet)
 		}
 		else if (rt_p->key_val == RT_RBUTTON) {		// 마우스 우클릭 드래그: 기능 미정.
 			//clients[client_id].s_lock.lock();
-			cout << "마우스 우클릭 입력됨." << endl;// 임시코드
 			//clients[client_id].s_lock.unlock();
 		}
 
@@ -845,7 +838,7 @@ void do_worker()
 		ULONG_PTR key;
 		WSAOVERLAPPED* over = nullptr;
 		BOOL ret = GetQueuedCompletionStatus(h_sc_iocp, &num_bytes, &key, &over, INFINITE);
-		OVER_EXP* ex_over = reinterpret_cast<OVER_EXP*>(over);
+		OVER_EX* ex_over = reinterpret_cast<OVER_EX*>(over);
 		if (FALSE == ret) {
 			if (ex_over->process_type == OP_ACCEPT) cout << "Accept Error";
 			else {
@@ -930,7 +923,7 @@ void do_ha_worker() {
 		ULONG_PTR key;
 		WSAOVERLAPPED* over = nullptr;
 		BOOL ret = GetQueuedCompletionStatus(h_ss_iocp, &num_bytes, &key, &over, INFINITE);
-		OVER_EXP* ex_over = reinterpret_cast<OVER_EXP*>(over);
+		OVER_EX* ex_over = reinterpret_cast<OVER_EX*>(over);
 		if (FALSE == ret) {
 			if (ex_over->process_type == OP_ACCEPT)
 				cout << "Accept Error";
@@ -956,7 +949,7 @@ void do_ha_worker() {
 					exit(-1);
 				}
 
-				OVER_EXP* con_over = new OVER_EXP;
+				OVER_EX* con_over = new OVER_EX;
 				con_over->process_type = OP_CONNECT;
 				HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_ss_iocp, key, 0);
 				if (NULL == hret) {
@@ -1468,12 +1461,34 @@ int main(int argc, char* argv[])
 	my_server_id = 0;		// 서버 구분을 위한 지정번호
 	int sc_portnum = -1;	// 클라이언트 통신용 포트번호
 	int ss_portnum = -1;	// 서버 간 통신용 포트번호
-	if (argc > 1) {			// 입력된 명령행 인수가 있다면...
-		my_server_id = atoi(argv[1]);
+	if (argc > 1) {			// 입력된 명령행 인수가 있을 때 (주로 서버다운으로 인한 서버 재실행때 사용됨)
+		// Active 여부 결정
+		int isActiveStart = atoi(argv[1]) / 10;
+		if (isActiveStart == 0) {
+			b_active_server = true;
+		}
+		else {
+			b_active_server = false;
+		}
+		// Serve ID지정
+		my_server_id = atoi(argv[1]) % 10;
 	}
-	else {				// 만약 입력된 명령행 인수가 없다면 디폴트값(포트번호 9000)으로 실행됩니다.
+	else {				// 만약 입력된 명령행 인수가 없다면 입력을 받습니다.
 		cout << "실행할 서버: ";
 		cin >> my_server_id;
+
+		// Active 여부 결정
+		switch (my_server_id) {
+		case 0:	// 0번 서버
+			b_active_server = false;
+			break;
+		case 1:	// 1번 서버
+			b_active_server = true;
+			break;
+		default:
+			cout << "잘못된 값이 입력되었습니다. 프로그램을 종료합니다." << endl;
+			return 0;
+		}
 	}
 
 	// 서버번호에 따라 포트번호를 지정해줍니다.
@@ -1481,14 +1496,10 @@ int main(int argc, char* argv[])
 	case 0:	// 0번 서버
 		sc_portnum = PORT_NUM_S0;
 		ss_portnum = HA_PORTNUM_S0;
-
-		b_active_server = false;
 		break;
 	case 1:	// 1번 서버
 		sc_portnum = PORT_NUM_S1;
 		ss_portnum = HA_PORTNUM_S1;
-
-		b_active_server = true;
 		break;
 	default:
 		cout << "잘못된 값이 입력되었습니다. 프로그램을 종료합니다." << endl;
@@ -1524,7 +1535,7 @@ int main(int argc, char* argv[])
 	h_ss_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_ss_listensock), h_ss_iocp, 1999, 0);
 	right_ex_server_sock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-	OVER_EXP ha_over;
+	OVER_EX ha_over;
 	ha_over.process_type = OP_ACCEPT;
 	ha_over.wsabuf.buf = reinterpret_cast<CHAR*>(right_ex_server_sock);
 	AcceptEx(g_ss_listensock, right_ex_server_sock, ha_over.send_buf, 0, ha_addr_size + 16, ha_addr_size + 16, 0, &ha_over.overlapped);
@@ -1554,7 +1565,7 @@ int main(int argc, char* argv[])
 			exit(-1);
 		}
 
-		OVER_EXP* con_over = new OVER_EXP;
+		OVER_EX* con_over = new OVER_EX;
 		con_over->process_type = OP_CONNECT;
 		int key_num = SERIAL_NUM_EXSERVER + right_servernum;
 		HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_ss_iocp, key_num, 0);
@@ -1610,7 +1621,7 @@ int main(int argc, char* argv[])
 	h_sc_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_sc_listensock), h_sc_iocp, 999, 0);
 	SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-	OVER_EXP a_over;
+	OVER_EX a_over;
 	a_over.process_type = OP_ACCEPT;
 	a_over.wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
 	AcceptEx(g_sc_listensock, c_socket, a_over.send_buf, 0, addr_size + 16, addr_size + 16, 0, &a_over.overlapped);

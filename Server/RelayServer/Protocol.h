@@ -55,7 +55,7 @@ constexpr char INPUT_KEY_E = 0b000001;
 
 // Packet ID
 enum PacketID {
-	CS_LOGIN, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE
+	CS_LOGIN, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_RELOGIN
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
 	, SC_DAMAGED, SC_PLAYER_STATE, SC_BULLET_COUNT, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT
@@ -88,6 +88,11 @@ struct CS_INPUT_MOUSE_PACKET {
 	char key_val;
 	float delta_x, delta_y;
 	//float roll, pitch, yaw;
+};
+
+struct CS_RELOGIN_PACKET {
+	unsigned char size;
+	char type;
 };
 
 // ================================
@@ -180,7 +185,8 @@ struct SC_BULLET_COUNT_PACKET {
 struct SC_ACTIVE_DOWN_PACKET {	// 현재는 클라-서버 -> 추후에 클라-릴레이서버 로 바꿀 예정.
 	unsigned char size;
 	char type;
-	short serverid;
+	short prev_s_id;
+	short my_s_id;
 };
 
 // ================================
