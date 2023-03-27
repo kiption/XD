@@ -182,13 +182,13 @@ D3D12_SHADER_BYTECODE BillboardParticleShader::CreatePixelShader()
 void BillboardParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Smoke.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/smoke2.dds", RESOURCE_TEXTURE2D, 0);
 
 	CMaterial* pSpriteMaterial = new CMaterial(1);
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 60.0f,50.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 60.0f,60.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	m_nObjects = 1000;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -233,24 +233,25 @@ void BillboardParticleShader::AnimateObjects(float fTimeElapsed)
 {
 	random_device rd;
 	default_random_engine dre(rd());
-	uniform_real_distribution<float>uid(-0.5,0.5);
+	uniform_real_distribution<float>uidx(-0.5,0.5);
+	uniform_real_distribution<float>uidy(-0.0,0.1);
+	uniform_real_distribution<float>uidz(-0.5,0.5);
 	float randomX{};
 	float randomY{};
 	float randomZ{};
 
-	float scale = 2.0f;
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		randomX =uid(dre);
-		randomY =uid(dre);
-		randomZ =uid(dre);
+		randomX = uidx(dre);
+		randomY = uidy(dre);
+		randomZ = uidz(dre);
 		XMFLOAT3 xf_Velocity = XMFLOAT3(0.001, 0.0, 0.0f);
 		XMFLOAT3 xf_GravityAccel = XMFLOAT3(0.0, 1.8f, 0.0);
 		float f_EmmitTime = {};
-		float a_LifeTime = {};
+		float a_LifeTime = 2.0;
 		float f_ResetTime = {};
 		float NewY{};
-		fTimeElapsed += 0.003f;
+		fTimeElapsed += 0.03f;
 		XMFLOAT3 newPosition = XMFLOAT3(0, 0, 0);
 		float Time = fTimeElapsed- f_EmmitTime;
 		if (Time < 0.0)
@@ -259,10 +260,10 @@ void BillboardParticleShader::AnimateObjects(float fTimeElapsed)
 		}
 		else
 		{
-			//NewY = a_LifeTime * XMScalarModAngle(Time / a_LifeTime);
-			m_ppObjects[j]->m_xmf4x4ToParent._41 = m_ppObjects[j]->m_xmf4x4ToParent._41 + xf_Velocity.x * Time + 0.5 * xf_GravityAccel.x * Time * Time+ randomX;
-			m_ppObjects[j]->m_xmf4x4ToParent._42 = m_ppObjects[j]->m_xmf4x4ToParent._42 + xf_Velocity.y * Time + 0.5 * xf_GravityAccel.y * Time * Time+ randomY;
-			m_ppObjects[j]->m_xmf4x4ToParent._43 = m_ppObjects[j]->m_xmf4x4ToParent._43 + xf_Velocity.z * Time + 0.5 * xf_GravityAccel.z * Time * Time+ randomZ;
+			Time = a_LifeTime * XMScalarModAngle(Time / a_LifeTime);
+			m_ppObjects[j]->m_xmf4x4ToParent._41 = m_ppObjects[j]->m_xmf4x4ToParent._41 + xf_Velocity.x * Time + 0.5 * xf_GravityAccel.x * Time * Time	+ randomX;
+			m_ppObjects[j]->m_xmf4x4ToParent._42 = m_ppObjects[j]->m_xmf4x4ToParent._42 + xf_Velocity.y * Time + 0.5 * xf_GravityAccel.y * Time * Time	+ randomY;
+			m_ppObjects[j]->m_xmf4x4ToParent._43 = m_ppObjects[j]->m_xmf4x4ToParent._43 + xf_Velocity.z * Time + 0.5 * xf_GravityAccel.z * Time * Time	+ randomZ;
 		}
 
 	}
