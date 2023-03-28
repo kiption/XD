@@ -57,12 +57,10 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
 	//Stage2
 	UpdateShaderVariables(pd3dCommandList);
 	//
-
-
 	OnPreRender(pd3dCommandList, NULL);
 
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
-
+	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 	if (m_pd3dIndexBuffer)
 	{
 		pd3dCommandList->IASetIndexBuffer(&m_d3dIndexBufferView);
@@ -329,7 +327,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
 				m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 			}
-				CalculateBoundingBox((XMFLOAT3*)m_pxmf3Positions, sizeof(XMFLOAT3));
+	
 		}
 		else if (!strcmp(pstrToken, "<Colors>:"))
 		{
@@ -399,7 +397,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				m_d3dNormalBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 			}
 
-			CalculateBoundingBox((XMFLOAT3*)m_pxmf3Normals, sizeof(XMFLOAT3));
+		
 		}
 		else if (!strcmp(pstrToken, "<Tangents>:"))
 		{

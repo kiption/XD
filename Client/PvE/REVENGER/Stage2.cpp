@@ -126,7 +126,7 @@ void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_ppStageMapShaders = new CStage2MapObjectShader * [m_nStageMapShaders];
 
 	CStage2MapObjectShader* pMapObjectShader = new CStage2MapObjectShader();
-	pMapObjectShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pMapObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pMapObjectShader->SetCurScene(SCENE2STAGE);
 	pMapObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 	m_ppStageMapShaders[0] = pMapObjectShader;
@@ -135,7 +135,7 @@ void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_ppShaders = new CSkinnedAnimationObjectsShader * [m_nShaders];
 
 	CHumanObjectsShader* pOtherPlayerShader = new CHumanObjectsShader();
-	pOtherPlayerShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pOtherPlayerShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pOtherPlayerShader->SetCurScene(SCENE2STAGE);
 	pOtherPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, m_pTerrain);
 	m_ppShaders[0] = pOtherPlayerShader;
@@ -579,12 +579,12 @@ void Stage2::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < m_nStageMapShaders; i++) if (m_ppStageMapShaders[i]) m_ppStageMapShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nStageMapShaders; i++) if (m_ppStageMapShaders[i]) m_ppStageMapShaders[i]->Render(pd3dCommandList, pCamera,0);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera,0);
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 
-	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera,0);
 
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
 	{

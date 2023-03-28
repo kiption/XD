@@ -31,7 +31,7 @@ void CMapObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
-D3D12_BLEND_DESC CMapObjectShader::CreateBlendState()
+D3D12_BLEND_DESC CMapObjectShader::CreateBlendState(int nPipelineState)
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
 	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
@@ -51,7 +51,7 @@ D3D12_BLEND_DESC CMapObjectShader::CreateBlendState()
 	return(d3dBlendDesc);
 }
 
-D3D12_DEPTH_STENCIL_DESC CMapObjectShader::CreateDepthStencilState()
+D3D12_DEPTH_STENCIL_DESC CMapObjectShader::CreateDepthStencilState(int nPipelineState)
 {
 	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
 	d3dDepthStencilDesc.DepthEnable = FALSE;
@@ -93,9 +93,9 @@ void CMapObjectShader::ReleaseUploadBuffers()
 }
 
 
-D3D12_SHADER_BYTECODE CMapObjectShader::CreatePixelShader()
+D3D12_SHADER_BYTECODE CMapObjectShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSMapStandard", "ps_5_1", &m_pd3dPixelShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSMapStandard", "ps_5_1", ppd3dShaderBlob));
 }
 
 BoundingBox CMapObjectShader::CalculateBoundingBox()
@@ -108,9 +108,9 @@ BoundingBox CMapObjectShader::CalculateBoundingBox()
 	return(xmBoundingBox);
 }
 
-void CMapObjectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CMapObjectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CShader::Render(pd3dCommandList, pCamera);
+	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
@@ -153,7 +153,7 @@ void CStage2MapObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphi
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
-D3D12_BLEND_DESC CStage2MapObjectShader::CreateBlendState()
+D3D12_BLEND_DESC CStage2MapObjectShader::CreateBlendState(int nPipelineState)
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
 	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
@@ -192,9 +192,9 @@ void CStage2MapObjectShader::ReleaseUploadBuffers()
 	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
 }
 
-void CStage2MapObjectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CStage2MapObjectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CShader::Render(pd3dCommandList, pCamera);
+	CShader::Render(pd3dCommandList, pCamera,0);
 
 	for (int j = 0; j < m_nObjects; j++)
 	{

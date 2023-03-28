@@ -21,10 +21,10 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pTerrainBaseTexture[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Cliff_2.dds", RESOURCE_TEXTURE2D, 0);
 	pTerrainBaseTexture[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTerrainBaseTexture[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Cliff_1.dds", RESOURCE_TEXTURE2D, 0);
-
+	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	
 	CTerrainShader* pTerrainShader = new CTerrainShader();
-	pTerrainShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_B8G8R8A8_TYPELESS);
+	pTerrainShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	m_pScene->CreateShaderResourceViews(pd3dDevice, pTerrainBaseTexture[0], 0, 13);
@@ -65,7 +65,7 @@ CUseWaterMoveTerrain::CUseWaterMoveTerrain(ID3D12Device* pd3dDevice, ID3D12Graph
 	pTerrainDetailTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/water2.dds", RESOURCE_TEXTURE2D, 0);
 
 	CWaterShader* pTerrainShader = new CWaterShader();
-	pTerrainShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	pTerrainShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	SceneManager::CreateShaderResourceViews(pd3dDevice, pTerrainBaseTexture, 0, 13);

@@ -260,7 +260,7 @@ void CMaterial::SetTexture(CTexture* pTexture, UINT nTexture)
 	if (m_ppTextures[nTexture]) m_ppTextures[nTexture]->AddRef();
 }
 
-void CMaterial::SetTexture(CTexture* pTexture)
+void CMaterial::SetTextures(CTexture* pTexture)
 {
 	if (m_pTexture) m_pTexture->Release();
 	m_pTexture = pTexture;
@@ -281,12 +281,13 @@ CShader* CMaterial::m_pStandardShader = NULL;
 
 void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
+	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	m_pStandardShader = new CStandardShader();
-	m_pStandardShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1,NULL, DXGI_FORMAT_D24_UNORM_S8_UINT);
+	m_pStandardShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT,0);
 	m_pStandardShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	m_pSkinnedAnimationShader = new CSkinnedAnimationStandardShader();
-	m_pSkinnedAnimationShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pSkinnedAnimationShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	m_pSkinnedAnimationShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -790,13 +791,13 @@ CGameObject::~CGameObject()
 		}
 		delete[] m_ppMeshes;
 	}
-	if (m_nMaterials > 0)
-	{
-		for (int i = 0; i < m_nMaterials; i++)
-		{
-			if (m_ppMaterials[i]) m_ppMaterials[i]->Release();
-		}
-	}
+	//if (m_nMaterials > 0)
+	//{
+	//	for (int i = 0; i < m_nMaterials; i++)
+	//	{
+	//		if (m_ppMaterials[i]) m_ppMaterials[i]->Release();
+	//	}
+	//}
 	if (m_ppMaterials) delete[] m_ppMaterials;
 	if (m_pMaterials) m_pMaterials->Release();
 	if (m_pSkinnedAnimationController) delete m_pSkinnedAnimationController;
@@ -1000,7 +1001,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 				if (m_ppMaterials[i])
 				{
 					if (m_ppMaterials[i]->m_pShader) {
-						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0);
 						UpdateShaderVariables(pd3dCommandList);
 					}
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
@@ -1017,7 +1018,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		{
 			if ((m_nMaterials == 1) && (m_ppMaterials[0]))
 			{
-				if (m_ppMaterials[0]->m_pShader) m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera);
+				if (m_ppMaterials[0]->m_pShader) m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera,0);
 				m_ppMaterials[0]->UpdateShaderVariable(pd3dCommandList);
 			}
 
@@ -1041,7 +1042,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	{
 		if (m_pMaterials->m_pShader)
 		{
-			m_pMaterials->m_pShader->Render(pd3dCommandList, pCamera);
+			m_pMaterials->m_pShader->Render(pd3dCommandList, pCamera,0);
 
 			UpdateShaderVariables(pd3dCommandList);
 		}
@@ -1057,23 +1058,26 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 
 void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	//UINT ncbElementBytes = ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255); //256의 배수
-	//m_pd3dcbGameObject = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
-	//	D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
-	//m_pd3dcbGameObject->Map(0, NULL, (void**)&m_pcbMappedGameObject);
+	UINT ncbElementBytes = ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255); //256의 배수
+	m_pd3dcbGameObject = ::CreateBufResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+	m_pd3dcbGameObject->Map(0, NULL, (void**)&m_pcbMappedGameObject);
+
 
 }
 
 void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+
+
 	//if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
 	//pd3dCommandList->SetGraphicsRootDescriptorTable(19, m_d3dCbvGPUDescriptorHandle);
-
-	XMFLOAT4X4 xmf4x4World;
-	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	//XMFLOAT4X4 xmf4x4World;
+	//
+	/*XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 
-	if (m_pMaterials) pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_pMaterials->m_nReflection, 16);
+	if (m_pMaterials) pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_pMaterials->m_nReflection, 16);*/
 }
 
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)

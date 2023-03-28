@@ -64,12 +64,12 @@ GameSound::~GameSound()
 void GameSound::shootingSound()
 {
 	result = soundSystem->playSound(shootSound, 0, false, &shootChannel);
-	shootChannel->setVolume(0.2f);
+	shootChannel->setVolume(0.02f);
 }
 void GameSound::backGroundMusic()
 {
 	result = soundSystem->playSound(bgmSound, 0, false, &bgmChannel);
-	bgmChannel->setVolume(0.35f);
+	bgmChannel->setVolume(0.05f);
 }
 void GameSound::SpeakMusic()
 {
@@ -84,7 +84,7 @@ void GameSound::walkingSound()
 void GameSound::collisionSound()
 {
 	result = soundSystem->playSound(ColliSound, 0, false, &ColliChannel);
-	ColliChannel->setVolume(0.22f);
+	ColliChannel->setVolume(0.02f);
 }
 
 void GameSound::pauseWalking()

@@ -526,7 +526,7 @@ void CGameFramework::ProcessInput()
 			if (m_nMode != SCENE2STAGE)
 			{
 				inputKeyValue += INPUT_KEY_W;//S
-				m_pCamera->SetTimeLag(0.02);
+
 			}
 		}
 		if (pKeysBuffer[KEY_S] & 0xF0) {
@@ -537,7 +537,7 @@ void CGameFramework::ProcessInput()
 			if (m_nMode != SCENE2STAGE)
 			{
 				inputKeyValue += INPUT_KEY_S;//S
-				m_pCamera->SetTimeLag(0.02);
+
 			}
 		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
@@ -549,7 +549,7 @@ void CGameFramework::ProcessInput()
 			if (m_nMode != SCENE2STAGE)
 			{
 				inputKeyValue += INPUT_KEY_D;//S
-				m_pCamera->SetTimeLag(0.05);
+
 			}
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
@@ -559,7 +559,7 @@ void CGameFramework::ProcessInput()
 			dwDirection |= DIR_LEFT;
 
 			inputKeyValue += INPUT_KEY_A;//S
-			m_pCamera->SetTimeLag(0.05);
+
 
 		}
 
@@ -637,15 +637,18 @@ void CGameFramework::ProcessInput()
 				// Server
 				MouseInputVal inputMouseValue;
 
-				if (pKeysBuffer[VK_LBUTTON] & 0xF0)
-					inputMouseValue.button = L_BUTTON;
-				else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					inputMouseValue.button = R_BUTTON;
+				if (WM_LBUTTONUP)
+				{
 
-				inputMouseValue.delX = cxDelta;
-				inputMouseValue.delY = cyDelta;
+					if (pKeysBuffer[VK_LBUTTON] & 0xF0)
+						inputMouseValue.button = L_BUTTON;
+					else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+						inputMouseValue.button = R_BUTTON;
+					inputMouseValue.delX = cxDelta;
+					inputMouseValue.delY = cyDelta;
 
-				q_mouseInput.push(inputMouseValue);
+					q_mouseInput.push(inputMouseValue);
+				}
 				//====
 				if (m_nMode == SCENE2STAGE)
 				{

@@ -96,9 +96,9 @@ void CSkinnedAnimationObjectsShader::ReleaseUploadBuffers()
 	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
 }
 
-void CSkinnedAnimationObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CSkinnedAnimationObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CSkinnedAnimationStandardShader::Render(pd3dCommandList, pCamera);
+	CSkinnedAnimationStandardShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
@@ -251,7 +251,7 @@ CBulletEffectShader::~CBulletEffectShader()
 }
 
 
-D3D12_INPUT_LAYOUT_DESC CBulletEffectShader::CreateInputLayout()
+D3D12_INPUT_LAYOUT_DESC CBulletEffectShader::CreateInputLayout(int nPipelineState)
 {
 	UINT nInputElementDescs = 5;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
@@ -269,17 +269,17 @@ D3D12_INPUT_LAYOUT_DESC CBulletEffectShader::CreateInputLayout()
 	return(d3dInputLayoutDesc);
 }
 
-D3D12_SHADER_BYTECODE CBulletEffectShader::CreateVertexShader()
+D3D12_SHADER_BYTECODE CBulletEffectShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSStandard", "vs_5_1", &m_pd3dVertexShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSStandard", "vs_5_1", ppd3dShaderBlob));
 }
 
-D3D12_SHADER_BYTECODE CBulletEffectShader::CreatePixelShader()
+D3D12_SHADER_BYTECODE CBulletEffectShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBulletStandard", "ps_5_1", &m_pd3dPixelShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBulletStandard", "ps_5_1", ppd3dShaderBlob));
 }
 
-void CBulletEffectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CBulletEffectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CStandardObjectsShader::Render(pd3dCommandList,pCamera);
+	CStandardObjectsShader::Render(pd3dCommandList,pCamera, nPipelineState);
 }

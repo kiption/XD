@@ -44,10 +44,10 @@ class CBulletEffectShader : public CStandardObjectsShader
 public:
 	CBulletEffectShader();
 	virtual ~CBulletEffectShader();
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 };
 

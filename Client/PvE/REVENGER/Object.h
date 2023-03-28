@@ -141,8 +141,8 @@ public:
 
 	void SetShader(CShader *pShader);
 	void SetMaterialType(UINT nType) { m_nType |= nType; }
+	virtual void SetTextures(CTexture *pTexture);
 	virtual void SetTexture(CTexture *pTexture, UINT nTexture = 0);
-	virtual void SetTexture(CTexture *pTexture);
 	void SetReflection(UINT nReflection) { m_nReflection = nReflection; }
 
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList);
@@ -395,7 +395,7 @@ public:
 
 
 	BoundingBox						m_xmBoundingBox;
-protected:
+public:
 	ID3D12Resource* m_pd3dcbGameObject = NULL;
 	CB_STREAMGAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
 public:
