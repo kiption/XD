@@ -809,6 +809,19 @@ void process_packet(int client_id, char* packet)
 	{
 		CS_RELOGIN_PACKET* re_login_pack = reinterpret_cast<CS_RELOGIN_PACKET*>(packet);
 
+		int re_login_id = re_login_pack->id;
+		clients[re_login_id].s_lock.lock();
+		clients[re_login_id].s_state = ST_INGAME;
+		clients[re_login_id].setBB();
+		clients[re_login_id].s_lock.unlock();
+		//cout << "TEST: clients[" << re_login_id << "] is log-in again." << endl;
+		//cout << "===================================" << endl;
+		//cout << "Pos: " << clients[re_login_id].pos.x << ", " << clients[re_login_id].pos.y << ", " << clients[re_login_id].pos.z << endl;
+		//cout << "LookVec: " << clients[re_login_id].m_lookvec.x << ", " << clients[re_login_id].m_lookvec.y << ", " << clients[re_login_id].m_lookvec.z << endl;
+		//cout << "Pitch: " << clients[re_login_id].pitch << "/ Yaw: " << clients[re_login_id].yaw << "/ Roll: " << clients[re_login_id].roll << endl;
+		//cout << "===================================" << endl;
+
+		break;
 	}// CS_RELOGIN end
 	case SS_HEARTBEAT:
 	{
@@ -837,6 +850,8 @@ void process_packet(int client_id, char* packet)
 		clients[replica_id].hp = replica_pack->hp;
 		clients[replica_id].bullet = replica_pack->bullet_cnt;
 
+		strcpy_s(clients[replica_id].name, replica_pack->name);
+
 		clients[replica_id].pos = { replica_pack->x, replica_pack->y, replica_pack->z };
 
 		clients[replica_id].pitch = replica_pack->pitch;
@@ -848,7 +863,14 @@ void process_packet(int client_id, char* packet)
 		clients[replica_id].m_lookvec = { replica_pack->look_x, replica_pack->look_y, replica_pack->look_z };
 		clients[replica_id].s_lock.unlock();
 
-		cout << "Client[" << replica_id << "]의 데이터가 복제되었습니다.\n" << endl;
+		//cout << "Client[" << replica_id << "]의 데이터가 복제되었습니다." << endl;
+		//cout << "===================================" << endl;
+		//cout << "Name: " << clients[replica_id].name << endl;
+		//cout << "Pos: " << clients[replica_id].pos.x << ", " << clients[replica_id].pos.y << ", " << clients[replica_id].pos.z << endl;
+		//cout << "LookVec: " << clients[replica_id].m_lookvec.x << ", " << clients[replica_id].m_lookvec.y << ", " << clients[replica_id].m_lookvec.z << endl;
+		//cout << "Pitch: " << clients[replica_id].pitch << "/ Yaw: " << clients[replica_id].yaw << "/ Roll: " << clients[replica_id].roll << endl;
+		//cout << "===================================\n" << endl;
+
 	}// SS_DATA_REPLICA end
 	}
 }
@@ -876,9 +898,9 @@ void do_worker()
 			SOCKET c_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
 			int client_id = get_new_client_id();
 			if (client_id != -1) {
-				clients[client_id].pos = { 0.0f, 0.0f, 0.0f };
+				//clients[client_id].pos = { 0.0f, 0.0f, 0.0f };
 				clients[client_id].id = client_id;
-				clients[client_id].name[0] = 0;
+				//clients[client_id].name[0] = 0;
 				clients[client_id].remain_size = 0;
 				clients[client_id].socket = c_socket;
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), h_sc_iocp, client_id, 0);
@@ -1408,7 +1430,7 @@ void replicaSessions() {	// 서버간 세션데이터를 복제하는 함수
 		else if (my_server_id == 1) standby_id = 0;
 
 		if (extended_servers[standby_id].s_state == ST_ACCEPTED) {
-			cout << "REPLICA!" << endl;
+			//cout << "REPLICA!" << endl;
 			for (auto& cl : clients) {
 				if (cl.s_state != ST_INGAME) continue;
 

@@ -6,7 +6,6 @@
 #include "GameSound.h"
 GameSound gamesound;
 
-
 #pragma comment (lib, "WS2_32.LIB")
 #pragma comment(lib, "MSWSock.lib")
 
@@ -14,6 +13,7 @@ const char* SERVER_ADDR = "127.0.0.1";
 SOCKET s_socket;
 short curr_servernum = 1;
 array<SOCKET, MAX_SERVER> sockets;
+int my_id;
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
@@ -86,18 +86,19 @@ void sendPacket(void* packet, short servernum)
 			connect(sockets[curr_servernum], reinterpret_cast<sockaddr*>(&newserver_addr), sizeof(newserver_addr));
 
 			// 임시코드: 나중에 RELOGIN 패킷을 새로 만들어서 그거를 보내도록 해야함.
-			CS_LOGIN_PACKET login_pack;
-			login_pack.size = sizeof(CS_LOGIN_PACKET);
-			login_pack.type = CS_LOGIN;
-			strcpy_s(login_pack.name, "COPTER");
-			sendPacket(&login_pack, curr_servernum);
-			recvPacket(curr_servernum);
-
-			//CS_RELOGIN_PACKET re_login_pack;
-			//re_login_pack.size = sizeof(CS_RELOGIN_PACKET);
-			//re_login_pack.type = CS_RELOGIN;
-			//sendPacket(&re_login_pack, curr_servernum);
+			//CS_LOGIN_PACKET login_pack;
+			//login_pack.size = sizeof(CS_LOGIN_PACKET);
+			//login_pack.type = CS_LOGIN;
+			//strcpy_s(login_pack.name, "COPTER");
+			//sendPacket(&login_pack, curr_servernum);
 			//recvPacket(curr_servernum);
+
+			CS_RELOGIN_PACKET re_login_pack;
+			re_login_pack.size = sizeof(CS_RELOGIN_PACKET);
+			re_login_pack.type = CS_RELOGIN;
+			re_login_pack.id = my_id;
+			sendPacket(&re_login_pack, curr_servernum);
+			recvPacket(curr_servernum);
 		}
 		cout << "[WSASend Error] code: " << err_no << "\n" << endl;
 	}
@@ -122,7 +123,6 @@ void CALLBACK sendCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWO
 }
 
 
-int my_id;
 void processPacket(char* ptr)
 {
 	static bool first_time = true;
