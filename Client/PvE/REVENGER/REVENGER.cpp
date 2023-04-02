@@ -108,7 +108,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 
-	curr_servernum = MAX_SERVER - 1;
+	active_servernum = MAX_SERVER - 1;
 
 	CS_LOGIN_PACKET login_pack;
 	login_pack.size = sizeof(CS_LOGIN_PACKET);
@@ -116,17 +116,17 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	strcpy_s(login_pack.name, "COPTER");
 
 	// Active Server에 연결
-	sockets[curr_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	sockets[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 	SOCKADDR_IN server0_addr;
 	ZeroMemory(&server0_addr, sizeof(server0_addr));
 	server0_addr.sin_family = AF_INET;
-	int new_portnum = PORT_NUM_S0 + curr_servernum;
+	int new_portnum = PORT_NUM_S0 + active_servernum;
 	server0_addr.sin_port = htons(new_portnum);
 	inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);
-	connect(sockets[curr_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
+	connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
 
-	sendPacket(&login_pack, curr_servernum);
-	recvPacket(curr_servernum);
+	sendPacket(&login_pack, active_servernum);
+	recvPacket(active_servernum);
 	//==================================================
 
 	UNREFERENCED_PARAMETER(hPrevInstance);
@@ -204,7 +204,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					keyinput_pack.direction = keyValue;
 
 					cout << "[Keyboard] Send KeyValue - " << keyinput_pack.direction << endl;//test
-					sendPacket(&keyinput_pack, curr_servernum);
+					sendPacket(&keyinput_pack, active_servernum);
 				}
 
 				if (!gGameFramework.CheckNewInputExist_Mouse()) {
@@ -217,7 +217,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					mouseinput_pack.delta_y = mouseValue.delY;
 
 					cout << "[Mouse] Send KeyValue - " << mouseinput_pack.key_val << endl;//test
-					sendPacket(&mouseinput_pack, curr_servernum);
+					sendPacket(&mouseinput_pack, active_servernum);
 				}
 				//==================================================
 

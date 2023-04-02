@@ -1423,6 +1423,8 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 }
 void replicaSessions() {	// 서버간 세션데이터를 복제하는 함수
 	while (true) {
+		if (!b_active_server) continue;
+
 		auto start_t = system_clock::now();
 
 		int standby_id = -1;
@@ -1430,7 +1432,6 @@ void replicaSessions() {	// 서버간 세션데이터를 복제하는 함수
 		else if (my_server_id == 1) standby_id = 0;
 
 		if (extended_servers[standby_id].s_state == ST_ACCEPTED) {
-			//cout << "REPLICA!" << endl;
 			for (auto& cl : clients) {
 				if (cl.s_state != ST_INGAME) continue;
 
@@ -1465,6 +1466,8 @@ void replicaSessions() {	// 서버간 세션데이터를 복제하는 함수
 				replica_pack.look_z = cl.m_lookvec.z;
 
 				extended_servers[standby_id].do_send(&replica_pack);
+
+				//cout << "TEST: Client[" << cl.id << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다." << endl;
 			}
 		}
 
@@ -1732,9 +1735,7 @@ int main(int argc, char* argv[])
 	timer_threads.emplace_back(timerFunc);				// 클라이언트 로직 타이머스레드
 	timer_threads.emplace_back(heartBeatFunc);			// 서버 간 Heartbeat교환 스레드
 	timer_threads.emplace_back(MoveNPC);				// NPC 로직 스레드
-	if (b_active_server) {
-		timer_threads.emplace_back(replicaSessions);	// 서버 간 세션데이터 복제 스레드
-	}
+	timer_threads.emplace_back(replicaSessions);	// 서버 간 세션데이터 복제 스레드
 
 	for (auto& th : worker_threads)
 		th.join();
