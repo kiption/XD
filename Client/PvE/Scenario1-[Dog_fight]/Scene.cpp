@@ -94,6 +94,7 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	{
 		pBulletObject = new CBulletObject(NULL);
 		pBulletObject->SetChild(pGameObject, false);
+		pBulletObject->SetCurScene(SCENE1STAGE);
 		m_ppBullets[i] = pBulletObject;
 	}
 
@@ -364,8 +365,8 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	for (int i = 0; i < 3; i++) if (m_ppNPCShaders[i])m_ppNPCShaders[i]->Render(pd3dCommandList, pCamera, 0);
 	if (m_pUseWaterMove) m_pUseWaterMove->Render(pd3dCommandList, pCamera);
 
-	if (m_pShader)m_pShader->Render(pd3dCommandList, pCamera, 0);
-	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) m_ppBullets[i]->Render(pd3dCommandList, pCamera);
+	//if (m_pShader)m_pShader->Render(pd3dCommandList, pCamera, 0);
+	//for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) m_ppBullets[i]->Render(pd3dCommandList, pCamera);
 	if (m_bOutlineMode)
 	{
 		for (int i = 0; i < m_ppNPCShaders[0]->m_nObjects; i++)

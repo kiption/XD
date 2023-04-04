@@ -1204,6 +1204,8 @@ void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3right
 	((CMainPlayer*)m_pPlayer)->m_ppBullets[id]->SetRight(xmf3right);
 	((CMainPlayer*)m_pPlayer)->m_ppBullets[id]->SetUp(xmf3up);
 	((CMainPlayer*)m_pPlayer)->m_ppBullets[id]->SetLook(xmf3look);
+
+
 }
 
 void CGameFramework::SetPosition_NPC(int id, XMFLOAT3 pos)

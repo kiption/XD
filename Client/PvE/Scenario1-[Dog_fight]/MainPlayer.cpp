@@ -8,7 +8,7 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	m_pShader = new CPlayerShader();
 	m_pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
-	m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 4 + 1 + 1);
+	m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 6);
 
 	
 	CGameObject* pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", m_pShader);
@@ -24,17 +24,6 @@ CMainPlayer::CMainPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 		pBulletObject->SetActive(false);
 		pBulletObject->m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 0, pBulletMesh);
 		m_ppBullets[i] = pBulletObject;
-	}
-
-	CLoadedModelInfo* pBulletMesh2 = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", m_pShader);
-	for (int i = 0; i < BULLETS2; i++)
-	{
-		pBulletObject2 = new CBulletObject(m_fBulletEffectiveRange);
-		pBulletObject2->SetChild(pBulletMesh2->m_pModelRootObject, true);
-		pBulletObject2->SetMovingSpeed(7000.0f);
-		pBulletObject2->SetActive(false);
-		pBulletObject2->m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 0, pBulletMesh2);
-		m_ppBullets2[i] = pBulletObject2;
 	}
 
 	PrepareAnimate();
@@ -60,16 +49,9 @@ void CMainPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	for (int i = 0; i < BULLETS; i++)
 	{
 		if (m_ppBullets[i]->m_bActive) {
-
-
 			m_ppBullets[i]->Animate(fTimeElapsed);
 		}
 
-		if (m_ppBullets2[i]->m_bActive) {
-
-
-			m_ppBullets2[i]->Animate(fTimeElapsed);
-		}
 	}
 	if (m_pMainRotorFrame)
 	{
@@ -114,7 +96,6 @@ void CMainPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	CPlayer::Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < BULLETS; i++) {
 		 m_ppBullets[i]->Render(pd3dCommandList, pCamera); 
-
 	}
 }
 void CMainPlayer::FireBullet(CGameObject* pLockedObject)
@@ -128,7 +109,7 @@ void CMainPlayer::FireBullet(CGameObject* pLockedObject)
 
 
 	CBulletObject* pBulletObject = NULL;
-	CBulletObject* pBulletObject2 = NULL;
+
 	for (int i = 0; i < BULLETS; i++)
 	{
 		if (!m_ppBullets[i]->m_bActive)
@@ -138,16 +119,6 @@ void CMainPlayer::FireBullet(CGameObject* pLockedObject)
 			break;
 		}
 
-	}
-
-	for (int i = 0; i < BULLETS2; i++)
-	{
-		if (!m_ppBullets2[i]->m_bActive)
-		{
-			pBulletObject2 = m_ppBullets2[i];
-			pBulletObject2->Reset();
-			break;
-		}
 	}
 	XMFLOAT3 PlayerLook = this->GetLookVector();
 	XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
@@ -167,22 +138,6 @@ void CMainPlayer::FireBullet(CGameObject* pLockedObject)
 		pBulletObject->SetScale(125.0, 125.0, 140.5);
 		pBulletObject->Rotate(90.0, 0.0, 0.0);
 		pBulletObject->SetActive(true);
-	}
-
-	if (pBulletObject2)
-	{
-
-		XMFLOAT3 xmf3Position = this->GetPosition();
-		xmf3Position.x += 3.0f;
-		XMFLOAT3 xmf3Direction = PlayerLook;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 20.0f, false));
-
-		pBulletObject2->m_xmf4x4Transform = m_xmf4x4World;
-		pBulletObject2->SetMovingDirection(xmf3Direction);
-		pBulletObject2->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + .0, xmf3FirePosition.z));
-		pBulletObject2->SetScale(125.0, 125.0, 140.5);
-		pBulletObject2->Rotate(90.0, 0.0, 0.0);
-		pBulletObject2->SetActive(true);
 	}
 }
 
