@@ -2,7 +2,7 @@
 #include "HumanPlayer.h"
 
 
-CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext )
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
@@ -10,15 +10,27 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
 	m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 4 + 1 + 1);
 
-	CLoadedModelInfo* pGameObject = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", m_pShader);
-	SetChild(pGameObject->m_pModelRootObject,true);
-	pGameObject->m_pModelRootObject->SetScale(7.0,7.0,7.0);
-	pGameObject->m_pModelRootObject->m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 2, pGameObject);
-	pGameObject->m_pModelRootObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	pGameObject->m_pModelRootObject->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
-	pGameObject->m_pModelRootObject->m_pSkinnedAnimationController->SetTrackEnable(1, true);
-	pGameObject->m_pModelRootObject->m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
-	pGameObject->m_pModelRootObject->m_pSkinnedAnimationController->SetCallbackKeys(2, 1);
+	pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", m_pShader);
+	SetChild(pAngrybotModel->m_pModelRootObject,true);
+	pAngrybotModel->m_pModelRootObject->SetScale(14.0, 14.0, 14.0);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 3, pAngrybotModel);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
+
+	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
+	m_pSkinnedAnimationController->SetCallbackKeys(2, 1);
+#ifdef _WITH_SOUND_RESOURCE
+	m_pSkinnedAnimationController->SetCallbackKey(0, 0.1f, _T("Footstep01"));
+	m_pSkinnedAnimationController->SetCallbackKey(1, 0.5f, _T("Footstep02"));
+	m_pSkinnedAnimationController->SetCallbackKey(2, 0.9f, _T("Footstep03"));
+#else
+	m_pSkinnedAnimationController->SetCallbackKey(1, 0, 0.8f, _T("Sound/Footstep01.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(1, 1, 1.2f, _T("Sound/Footstep02.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(2, 0, 0.8f, _T("Sound/Footstep02.wav"));
+#endif
+	CAnimationCallbackHandler* pAnimationCallbackHandler = new CSoundCallbackHandler();
+	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
 
 	CLoadedModelInfo* pBulletMesh = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", m_pShader);
 	for (int i = 0; i < BULLETS; i++)
@@ -48,7 +60,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	if (pBulletMesh) delete pBulletMesh;
 	if (pBulletMesh2) delete pBulletMesh2;
-	if (pGameObject) delete pGameObject;
+	if (pAngrybotModel) delete pAngrybotModel;
 }
 
 CHumanPlayer::~CHumanPlayer()
@@ -77,17 +89,6 @@ void CHumanPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 
 			m_ppBullets2[i]->Animate(fTimeElapsed);
 		}
-	}
-	if (m_pMainRotorFrame)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 4.0) * fTimeElapsed);
-		m_pMainRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4Transform);
-	}
-
-	if (m_pTailRotorFrame)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0) * fTimeElapsed);
-		m_pTailRotorFrame->m_xmf4x4Transform = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4Transform);
 	}
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
 }
@@ -214,7 +215,7 @@ void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 		pBulletObject2->m_xmf4x4Transform = m_xmf4x4World;
 		pBulletObject2->SetMovingDirection(xmf3Direction);
 		pBulletObject2->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + .0, xmf3FirePosition.z));
-		pBulletObject2->SetScale(25.0, 25.0, 40.5);
+		pBulletObject2->SetScale(125.0, 125.0, 140.5);
 		pBulletObject2->Rotate(90.0, 0.0, 0.0);
 		pBulletObject2->SetActive(true);
 	}

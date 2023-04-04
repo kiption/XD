@@ -64,7 +64,7 @@ GameSound::~GameSound()
 void GameSound::shootingSound()
 {
 	result = soundSystem->playSound(shootSound, 0, false, &shootChannel);
-	shootChannel->setVolume(0.2f);
+	shootChannel->setVolume(0.02f);
 }
 void GameSound::backGroundMusic()
 {

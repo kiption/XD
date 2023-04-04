@@ -132,7 +132,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(0.3f, 0.0f, 0.0f, 0.5f), &m_pd2dbrBackground);
 	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF(0x9ACD32, 1.0f)), &m_pd2dbrBorder);
 
-	hResult = m_pdWriteFactory->CreateTextFormat(L"텍스트 레이아웃", NULL, DWRITE_FONT_WEIGHT_DEMI_BOLD, DWRITE_FONT_STYLE_OBLIQUE, DWRITE_FONT_STRETCH_NORMAL, 24.0f, L"en-US", &m_pdwFont);
+	hResult = m_pdWriteFactory->CreateTextFormat(L"텍스트 레이아웃", NULL, DWRITE_FONT_WEIGHT_DEMI_BOLD, DWRITE_FONT_STYLE_OBLIQUE, DWRITE_FONT_STRETCH_NORMAL, 24.0f, L"ko-kr", &m_pdwFont);
 	hResult = m_pdwFont->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	hResult = m_pdwFont->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::DarkBlue, 0.8f), &m_pd2dbrText);
@@ -156,28 +156,134 @@ void CGameFramework::CreateDirect2DDevice()
 	hResult = ::CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, __uuidof(IWICImagingFactory), (void**)&m_pwicImagingFactory);
 
 	hResult = m_pd2dFactory->CreateDrawingStateBlock(&m_pd2dsbDrawingState);
-	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1BitmapSource, &m_pd2dfxBitmapSource);
-	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1GaussianBlur, &m_pd2dfxGaussianBlur);
-	hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1EdgeDetection, &m_pd2dfxEdgeDetection);
+
+	for (int i{}; i < m_NumOfUI; ++i) {
+		hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1BitmapSource, &m_pd2dfxBitmapSource[i]);
+		hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1GaussianBlur, &m_pd2dfxGaussianBlur[i]);
+		hResult = m_pd2dDeviceContext->CreateEffect(CLSID_D2D1EdgeDetection, &m_pd2dfxEdgeDetection[i]);
+	}
 
 	IWICBitmapDecoder* pwicBitmapDecoder;
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"Image/MiniMap.jpg", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/green_button05.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	IWICBitmapFrameDecode* pwicFrameDecode;
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
-	m_pd2dfxBitmapSource->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"Image/EDGE.jpg", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	m_pd2dfxBitmapSource[0]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 
-	m_pd2dfxGaussianBlur->SetInputEffect(0, m_pd2dfxBitmapSource);
-	m_pd2dfxGaussianBlur->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+	m_pd2dfxGaussianBlur[0]->SetInputEffect(0, m_pd2dfxBitmapSource[0]);
+	m_pd2dfxGaussianBlur[0]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
 
-	m_pd2dfxEdgeDetection->SetInputEffect(0, m_pd2dfxBitmapSource);
-	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
-	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
-	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
-	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
-	m_pd2dfxEdgeDetection->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+	m_pd2dfxEdgeDetection[0]->SetInputEffect(0, m_pd2dfxBitmapSource[0]);
+	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/yellow_button05.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[1]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[1]->SetInputEffect(0, m_pd2dfxBitmapSource[1]);
+	m_pd2dfxGaussianBlur[1]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[1]->SetInputEffect(0, m_pd2dfxBitmapSource[1]);
+	m_pd2dfxEdgeDetection[1]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[1]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[1]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[1]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[1]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/Time.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[2]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[2]->SetInputEffect(0, m_pd2dfxBitmapSource[2]);
+	m_pd2dfxGaussianBlur[2]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[2]->SetInputEffect(0, m_pd2dfxBitmapSource[2]);
+	m_pd2dfxEdgeDetection[2]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[2]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[2]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[2]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[2]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	m_pd2dfxBitmapSource[3]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	m_pd2dfxGaussianBlur[3]->SetInputEffect(0, m_pd2dfxBitmapSource[3]);
+	m_pd2dfxGaussianBlur[3]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[3]->SetInputEffect(0, m_pd2dfxBitmapSource[3]);
+	m_pd2dfxEdgeDetection[3]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[3]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[3]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[3]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[3]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	m_pd2dfxBitmapSource[5]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	m_pd2dfxGaussianBlur[5]->SetInputEffect(0, m_pd2dfxBitmapSource[5]);
+	m_pd2dfxGaussianBlur[5]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[5]->SetInputEffect(0, m_pd2dfxBitmapSource[5]);
+	m_pd2dfxEdgeDetection[5]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[5]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[5]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[5]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[5]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	m_pd2dfxBitmapSource[6]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	m_pd2dfxGaussianBlur[6]->SetInputEffect(0, m_pd2dfxBitmapSource[6]);
+	m_pd2dfxGaussianBlur[6]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[6]->SetInputEffect(0, m_pd2dfxBitmapSource[6]);
+	m_pd2dfxEdgeDetection[6]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[6]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[6]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[6]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[6]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/Clock.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[4]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[4]->SetInputEffect(0, m_pd2dfxBitmapSource[4]);
+	m_pd2dfxGaussianBlur[4]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[4]->SetInputEffect(0, m_pd2dfxBitmapSource[4]);
+	m_pd2dfxEdgeDetection[4]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[4]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[4]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[4]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[4]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/BulletIcon.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[7]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[7]->SetInputEffect(0, m_pd2dfxBitmapSource[7]);
+	m_pd2dfxGaussianBlur[7]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[7]->SetInputEffect(0, m_pd2dfxBitmapSource[7]);
+	m_pd2dfxEdgeDetection[7]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[7]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[7]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[7]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[7]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
 
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
@@ -341,6 +447,7 @@ void CGameFramework::CreateRtvAndDsvDescriptorHeaps()
 	d3dDescriptorHeapDesc.NodeMask = 0;
 	HRESULT hResult = m_pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dRtvDescriptorHeap);
 	::gnRtvDescriptorIncrementSize = m_pd3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+
 	d3dDescriptorHeapDesc.NumDescriptors = 1;
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	hResult = m_pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dDsvDescriptorHeap);
@@ -432,8 +539,8 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	if (m_pScene) m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 	switch (nMessageID)
 	{
-	case WM_LBUTTONDOWN:
 	case WM_RBUTTONDOWN:
+	case WM_LBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
 		break;
@@ -547,7 +654,6 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			CMainPlayer* pMainPlayer = new CMainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
 			m_pScene->m_pPlayer = m_pPlayer = pMainPlayer;
 			m_pCamera = m_pPlayer->GetCamera();
-			m_pPlayer->SetTerrain(m_pScene->m_pTerrain);
 			m_pScene->m_pPlayer = m_pPlayer;
 			m_pScene->SetCurScene(SCENE1STAGE);
 			break;
@@ -557,13 +663,12 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_nMode = nMode;
 			m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 			m_pScene = new CStage2();
-			if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
-			CHumanPlayer* pMainPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
+			if (m_pScene)  (m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+			CHumanPlayer* pMainPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, (m_pScene)->GetGraphicsRootSignature());
 			m_pScene->m_pPlayer = m_pPlayer = pMainPlayer;
 			m_pCamera = m_pPlayer->GetCamera();
-			m_pPlayer->SetTerrain(m_pScene->m_pTerrain);
+
 			m_pScene->m_pPlayer = m_pPlayer;
-			m_pScene->m_pPlayer->SetPosition(XMFLOAT3(1000.0,700.0,1000.0));
 			m_pScene->SetCurScene(SCENE2STAGE);
 			break;
 		}
@@ -601,63 +706,19 @@ void CGameFramework::OnDestroy()
 
 void CGameFramework::BuildObjects()
 {
-	//m_pUILayer = new UILayer(m_nSwapChainBuffers, 2, m_pd3dDevice, m_pd3dCommandQueue, m_ppd3dSwapChainBackBuffers, m_nWndClientWidth, m_nWndClientHeight);
-
-	//// ==========현재 총알 개수 출력=======
-	//ID2D1SolidColorBrush* pd2dBrush = m_pUILayer->CreateBrush(D2D1::ColorF(D2D1::ColorF::Black, 1.0f));
-	//WCHAR TextForm[20];
-	//wcscpy_s(TextForm, L"돋움체");
-
-	//IDWriteTextFormat* pdwTextFormat = m_pUILayer->CreateTextFormat(TextForm, m_nWndClientHeight / 10.0f);
-	//D2D1_RECT_F d2dRect = D2D1::RectF(400.0f, 300.0f, (float)m_nWndClientWidth, (float)m_nWndClientHeight);
-
-	//m_pUILayer->UpdateTextOutputs(0, NULL, &d2dRect, pdwTextFormat, pd2dBrush);
-	// ==========================================
-
-	//// ===============현재 체력 출력=============
-	//pd2dBrush = m_pUILayer->CreateBrush(D2D1::ColorF(D2D1::ColorF::BlanchedAlmond, 1.0f));
-	//pdwTextFormat = m_pUILayer->CreateTextFormat((wchar_t*)"Verdana", m_nWndClientHeight / 25.0f);
-	//d2dRect = D2D1::RectF(700.0f, 600.0f, (float)m_nWndClientWidth, (float)m_nWndClientHeight);
-
-	//m_pUILayer->UpdateTextOutputs(1, NULL, &d2dRect, pdwTextFormat, pd2dBrush);
-	//// ==========================================
-
-	//// ==============User Lap 숫자 출력==========
-	//pd2dBrush = m_pUILayer->CreateBrush(D2D1::ColorF(D2D1::ColorF::BlanchedAlmond, 1.0f));
-	//pdwTextFormat = m_pUILayer->CreateTextFormat(L"Verdana", m_nWndClientHeight / 25.0f);
-	//d2dRect = D2D1::RectF(700.0f, 0.0f, (float)m_nWndClientWidth, (float)m_nWndClientHeight);
-
-	//m_pUILayer->UpdateTextOutputs(2, NULL, &d2dRect, pdwTextFormat, pd2dBrush);
-	//// ==========================================
-
-	//// ==============User Lap 글자 출력==========
-	//pd2dBrush = m_pUILayer->CreateBrush(D2D1::ColorF(D2D1::ColorF::BlanchedAlmond, 1.0f));
-	//pdwTextFormat = m_pUILayer->CreateTextFormat(L"Verdana", m_nWndClientHeight / 25.0f);
-	//d2dRect = D2D1::RectF(850.0f, 0.0f, (float)m_nWndClientWidth, (float)m_nWndClientHeight);
-
-	//m_pUILayer->UpdateTextOutputs(3, NULL, &d2dRect, pdwTextFormat, pd2dBrush);
-	//// ==========================================
-
-	//// ============도착 시 최종 시간 출력=======
-	//pd2dBrush = m_pUILayer->CreateBrush(D2D1::ColorF(D2D1::ColorF::OrangeRed, 1.0f));
-	//pdwTextFormat = m_pUILayer->CreateTextFormat((wchar_t *)"Verdana", m_nWndClientHeight / 15.0f);
-	//d2dRect = D2D1::RectF(0.0f, 300.0f, (float)m_nWndClientWidth, (float)m_nWndClientHeight);
-
-	//m_pUILayer->UpdateTextOutputs(4, NULL, &d2dRect, pdwTextFormat, pd2dBrush);
-	//// ==========================================
 
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-	m_pScene = new CScene();
+	m_pScene = new SceneManager();
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
-
 	CMainPlayer* pMainPlayer = new CMainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
+
+	CreateShaderVariables();
 	m_pScene->m_pPlayer = m_pPlayer = pMainPlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 	m_pPlayer->SetTerrain(m_pScene->m_pTerrain);
 	m_pScene->m_pPlayer = m_pPlayer;
 
-	CreateShaderVariables();
 
 	::ExecuteCommandList(m_pd3dCommandList, m_pd3dCommandQueue, m_pd3dFence, ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
 
@@ -697,52 +758,48 @@ void CGameFramework::ProcessInput()
 		DWORD dwDirection = 0;
 
 		if (pKeysBuffer[KEY_W] & 0xF0) {
+			dwDirection |= DIR_FORWARD;
 			if (m_nMode == SCENE2STAGE)
 			{
-				dwDirection |= DIR_FORWARD;
 			}
 			if (m_nMode != SCENE2STAGE)
 			{
 				inputKeyValue += INPUT_KEY_W;//S
-				dwDirection |= DIR_FORWARD;
-				m_pCamera->SetTimeLag(0.02);
+
 			}
 		}
 		if (pKeysBuffer[KEY_S] & 0xF0) {
+			dwDirection |= DIR_BACKWARD;
 			if (m_nMode == SCENE2STAGE)
 			{
-				dwDirection |= DIR_BACKWARD;
 			}
 			if (m_nMode != SCENE2STAGE)
 			{
 				inputKeyValue += INPUT_KEY_S;//S
-				dwDirection |= DIR_BACKWARD;
-				m_pCamera->SetTimeLag(0.02);
+
 			}
 		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
+
 			if (m_nMode == SCENE2STAGE)
 			{
-				dwDirection |= DIR_RIGHT;
 			}
+			dwDirection |= DIR_RIGHT;
 			if (m_nMode != SCENE2STAGE)
 			{
 				inputKeyValue += INPUT_KEY_D;//S
-				dwDirection |= DIR_RIGHT;
-				m_pCamera->SetTimeLag(0.05);
+
 			}
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
 			if (m_nMode == SCENE2STAGE)
 			{
-				dwDirection |= DIR_LEFT;
 			}
-			if (m_nMode != SCENE2STAGE)
-			{
-				inputKeyValue += INPUT_KEY_A;//S
-				dwDirection |= DIR_LEFT;
-				m_pCamera->SetTimeLag(0.05);
-			}
+			dwDirection |= DIR_LEFT;
+
+			inputKeyValue += INPUT_KEY_A;//S
+
+
 		}
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
@@ -758,8 +815,42 @@ void CGameFramework::ProcessInput()
 
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
 			inputKeyValue += INPUT_SPACEBAR;//S
-
 		}
+
+		// 마우스 조작이 익숙하지 않은 유저를 위한 방향키를 통한 이동조작
+		if (pKeysBuffer[VK_UP] & 0xF0) {
+			MouseInputVal inputMouseValueU;
+			inputMouseValueU.button = L_BUTTON;
+			inputMouseValueU.delX = 0.0f;
+			inputMouseValueU.delY = -3.0f;
+
+			q_mouseInput.push(inputMouseValueU);
+		}
+		if (pKeysBuffer[VK_DOWN] & 0xF0) {
+			MouseInputVal inputMouseValueD;
+			inputMouseValueD.button = L_BUTTON;
+			inputMouseValueD.delX = 0.0f;
+			inputMouseValueD.delY = 3.0f;
+
+			q_mouseInput.push(inputMouseValueD);
+		}
+		if (pKeysBuffer[VK_LEFT] & 0xF0) {
+			MouseInputVal inputMouseValueL;
+			inputMouseValueL.button = L_BUTTON;
+			inputMouseValueL.delX = -3.0f;
+			inputMouseValueL.delY = 0.0f;
+
+			q_mouseInput.push(inputMouseValueL);
+		}
+		if (pKeysBuffer[VK_RIGHT] & 0xF0) {
+			MouseInputVal inputMouseValueR;
+			inputMouseValueR.button = L_BUTTON;
+			inputMouseValueR.delX = 3.0f;
+			inputMouseValueR.delY = 0.0f;
+
+			q_mouseInput.push(inputMouseValueR);
+		}
+		//
 
 		// Server
 		if (inputKeyValue != 0) {
@@ -777,17 +868,7 @@ void CGameFramework::ProcessInput()
 			czDelta = ((float)(ptCursorPos.y - m_ptOldCursorPos.y) + (float)(ptCursorPos.x - m_ptOldCursorPos.x)) / 3.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
-		
-		if (SCENE2STAGE)
-		{
 
-			if (pKeysBuffer[KEY_W] & 0xF0) dwDirection |= DIR_FORWARD;
-			if (pKeysBuffer[KEY_S] & 0xF0) dwDirection |= DIR_BACKWARD;
-			if (pKeysBuffer[KEY_A] & 0xF0) dwDirection |= DIR_LEFT;
-			if (pKeysBuffer[KEY_D] & 0xF0) dwDirection |= DIR_RIGHT;
-			if (pKeysBuffer[KEY_Q] & 0xF0) dwDirection |= DIR_UP;
-			if (pKeysBuffer[KEY_E] & 0xF0) dwDirection |= DIR_DOWN;
-		}
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
 			if (cxDelta || cyDelta)
@@ -795,24 +876,35 @@ void CGameFramework::ProcessInput()
 				// Server
 				MouseInputVal inputMouseValue;
 
-				if (pKeysBuffer[VK_LBUTTON] & 0xF0)
-					inputMouseValue.button = L_BUTTON;
-				else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					inputMouseValue.button = R_BUTTON;
+				if (WM_LBUTTONUP)
+				{
 
-				inputMouseValue.delX = cxDelta;
-				inputMouseValue.delY = cyDelta;
+					if (pKeysBuffer[VK_LBUTTON] & 0xF0)
+						inputMouseValue.button = L_BUTTON;
+					else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+						inputMouseValue.button = R_BUTTON;
+					inputMouseValue.delX = cxDelta;
+					inputMouseValue.delY = cyDelta;
 
-				q_mouseInput.push(inputMouseValue);
+					q_mouseInput.push(inputMouseValue);
+				}
 				//====
+				if (m_nMode == SCENE2STAGE)
+				{
+					if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+						m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+					else
+						m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+				}
 			}
-			if (SCENE2STAGE)
-				if (dwDirection) m_pPlayer->Move(dwDirection, 12.25f, true);
+			if (m_nMode == SCENE2STAGE)
+				if (dwDirection) m_pPlayer->Move(dwDirection, 9.25f, true);
 
 		}
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
+
 
 void CGameFramework::AnimateObjects()
 {
@@ -823,34 +915,41 @@ void CGameFramework::AnimateObjects()
 
 void CGameFramework::ReleaseShaderVariables()
 {
-	//if (m_pd3dcbFrameworkInfo)
-	//{
-	//	m_pd3dcbFrameworkInfo->Unmap(0, NULL);
-	//	m_pd3dcbFrameworkInfo->Release();
-	//}
+	if (m_nMode != SCENE2STAGE)
+	{
+		if (m_pd3dcbFrameworkInfo)
+		{
+			m_pd3dcbFrameworkInfo->Unmap(0, NULL);
+			m_pd3dcbFrameworkInfo->Release();
+		}
+	}
 }
 
 void CGameFramework::CreateShaderVariables()
 {
-	//UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256의 배수
-	//m_pd3dcbFrameworkInfo = ::CreateBufferResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes,
-	//	D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
-	//m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
+	UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256의 배수
+	m_pd3dcbFrameworkInfo = ::CreateBufferResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes,
+		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+	m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
 }
 
 
 
 void CGameFramework::UpdateShaderVariables()
 {
-	//m_pcbMappedFrameworkInfo->m_fCurrentTime = m_GameTimer.GetTotalTime();
-	//m_pcbMappedFrameworkInfo->m_fElapsedTime = m_GameTimer.GetTimeElapsed();
-	//m_pcbMappedFrameworkInfo->m_fSecondsPerFirework = 0.5f;
-	//m_pcbMappedFrameworkInfo->m_nFlareParticlesToEmit = 100;
-	//m_pcbMappedFrameworkInfo->m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
-	//m_pcbMappedFrameworkInfo->m_nMaxFlareType2Particles = 15 * 1.5f;
+	if (m_nMode != SCENE2STAGE)
+	{
 
-	//D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
-	//m_pd3dCommandList->SetGraphicsRootConstantBufferView(14, d3dGpuVirtualAddress);
+		m_pcbMappedFrameworkInfo->m_fCurrentTime = m_GameTimer.GetTotalTime();
+		m_pcbMappedFrameworkInfo->m_fElapsedTime = m_GameTimer.GetTimeElapsed();
+		m_pcbMappedFrameworkInfo->m_fSecondsPerFirework = 0.5f;
+		m_pcbMappedFrameworkInfo->m_nFlareParticlesToEmit = 100;
+		m_pcbMappedFrameworkInfo->m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
+		m_pcbMappedFrameworkInfo->m_nMaxFlareType2Particles = 15 * 1.5f;
+
+		D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
+		m_pd3dCommandList->SetGraphicsRootConstantBufferView(14, d3dGpuVirtualAddress);
+	}
 }
 
 void CGameFramework::WaitForGpuComplete()
@@ -887,17 +986,28 @@ float g_reverse_time = 0.0f;
 void CGameFramework::FrameAdvance()
 {
 	SleepEx(1, TRUE);//Server
-	m_GameTimer.Tick(144.0f);
+	if (m_nMode == SCENE2STAGE)m_GameTimer.Tick(30.0f);
+	if (m_nMode != SCENE2STAGE) m_GameTimer.Tick(60.0f);
 
 	ProcessInput();
 
 	AnimateObjects();
-	//UpdateUI();
 
 	//m_pScene->OnPreRender(m_pd3dDevice, m_pd3dCommandQueue, m_pd3dFence, m_hFenceEvent);
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-	::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	//::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+
+	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
+	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
+	d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	d3dResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	d3dResourceBarrier.Transition.pResource = m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex];
+	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * gnRtvDescriptorIncrementSize);
@@ -909,20 +1019,37 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 
+	if (m_nMode != SCENE2STAGE)
+	{
+		m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
+		UpdateShaderVariables();
+	}
 
-	m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
-	UpdateShaderVariables();
+
 	m_pScene->Render(m_pd3dCommandList, m_pCamera);
 
 #ifdef _WITH_PLAYER_TOP
 	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
-	//m_pScene->RenderParticle(m_pd3dCommandList, m_pCamera);
-	::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	::ExecuteCommandList(m_pd3dCommandList, m_pd3dCommandQueue, m_pd3dFence, ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
-	//m_pScene->OnPostRenderParticle();
+	if (m_nMode != SCENE2STAGE)
+	{
+		m_pScene->RenderParticle(m_pd3dCommandList, m_pCamera);
+		::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+		::ExecuteCommandList(m_pd3dCommandList, m_pd3dCommandQueue, m_pd3dFence, ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
+		m_pScene->OnPostRenderParticle();
+	}
+	// Stage2
+	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
+	hResult = m_pd3dCommandList->Close();
+	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
+	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+	// Stage2
 
+	WaitForGpuComplete();
 #ifdef _WITH_DIRECT2D
 	//Direct2D Drawing
 	m_pd2dDeviceContext->SetTarget(m_ppd2dRenderTargets[m_nSwapChainBufferIndex]);
@@ -933,23 +1060,58 @@ void CGameFramework::FrameAdvance()
 
 	m_pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
-	D2D_POINT_2F d2dPoint = { 0.0f, 0.0f };
-	D2D_RECT_F d2dRect = { 100.0f, 100.0f, 250.0f, 250.0f };
-	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur : m_pd2dfxGaussianBlur, &d2dPoint, &d2dRect);
+	D2D_POINT_2F d2dPoint = { 60.0f, 650.0f };
+	D2D_RECT_F d2dRect = { 0.0f, 0.0f, 190.0f, 45.0f };
+	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[0] : m_pd2dfxGaussianBlur[0], &d2dPoint, &d2dRect);
+
+	D2D_POINT_2F d2BHPPoint = { 60.0f, 700.0f };
+	D2D_RECT_F d2BHPRect = { 0.0f , 0.0f, 190.0f, 45.0f };
+	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2BHPPoint, &d2BHPRect);
+
+	D2D_POINT_2F d2T_M2Point = { 560.0f, 50.0f };
+	D2D_RECT_F d2T_M2Rect = { m_time * 40.0f , 0.0f, 40.0f + m_time * 40.0f, 50.0f };
+	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[2] : m_pd2dfxGaussianBlur[2], &d2T_M2Point, &d2T_M2Rect);
+
+	D2D_POINT_2F d2T_M1Point = { 590.0f, 50.0f };
+	D2D_RECT_F d2T_M1Rect = { m_time * 40.0f , 0.0f, 40.0f + m_time * 40.0f, 50.0f };
+	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[3] : m_pd2dfxGaussianBlur[3], &d2T_M1Point, &d2T_M1Rect);
+
+	D2D_POINT_2F d2T_SectionPoint = { 620.0f, 50.0f };
+	D2D_RECT_F d2T_SectionRect = { 282.0f , 420.0f, 300.0f, 475.0f };
+	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[4] : m_pd2dfxGaussianBlur[4], &d2T_SectionPoint, &d2T_SectionRect);
+
+	D2D_POINT_2F d2T_S2Point = { 650.0f, 50.0f };
+	D2D_RECT_F d2T_S2Rect = { m_time * 40.0f , 0.0f, 40.0f + m_time * 40.0f, 50.0f };
+	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[5] : m_pd2dfxGaussianBlur[5], &d2T_S2Point, &d2T_S2Rect);
+
+	D2D_POINT_2F d2T_S1Point = { 680.0f, 50.0f };
+	D2D_RECT_F d2T_S1Rect = { m_time * 40.0f , 0.0f, 40.0f + m_time * 40.0f, 50.0f };
+	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[6] : m_pd2dfxGaussianBlur[6], &d2T_S1Point, &d2T_S1Rect);
+
+	D2D_POINT_2F d2d_BulletPoint = { 1000.0f, 680.0f };
+	D2D_RECT_F d2d_BulletRect = { 0.0f , 0.0f, 32.0f, 32.0f };
+	m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[7] : m_pd2dfxGaussianBlur[7], &d2d_BulletPoint, &d2d_BulletRect);
+
+
 #endif
 	D2D1_SIZE_F szRenderTarget = m_ppd2dRenderTargets[m_nSwapChainBufferIndex]->GetSize();
 	D2D1_RECT_F rcUpperText = D2D1::RectF(0, 0, szRenderTarget.width, szRenderTarget.height * 0.25f);
-	m_pd2dDeviceContext->DrawTextW(L"Locking...", (UINT32)wcslen(L"Locking..."), m_pdwFont, &rcUpperText, m_pd2dbrText);
+	m_pd2dDeviceContext->DrawTextW(L"", (UINT32)wcslen(L""), m_pdwFont, &rcUpperText, m_pd2dbrText);
 
 	D2D1_RECT_F rcLowerText = D2D1::RectF(0, szRenderTarget.height * 0.8f, szRenderTarget.width, szRenderTarget.height);
 	m_pd2dDeviceContext->DrawTextW(L" ", (UINT32)wcslen(L" "), m_pdwFont, &rcLowerText, m_pd2dbrText);
 
-	D2D1_RECT_F rcBulletText = D2D1::RectF(750, 650, szRenderTarget.width, szRenderTarget.height * 0.5f);
+	D2D1_RECT_F rcBulletText = D2D1::RectF(850, 950, szRenderTarget.width, szRenderTarget.height * 0.5f);
 	m_pd2dDeviceContext->DrawTextW(m_myBullet, (UINT32)wcslen(m_myBullet), m_pdwFont, &rcBulletText, m_pd2dbrText);
 
-	D2D1_RECT_F rcMaxBulletText = D2D1::RectF(850, 650, szRenderTarget.width, szRenderTarget.height * 0.5f);
-	m_pd2dDeviceContext->DrawTextW(L"/100" , (UINT32)wcslen(L"/100"), m_pdwFont, &rcMaxBulletText, m_pd2dbrText);
+	D2D1_RECT_F rcMaxBulletText = D2D1::RectF(950, 950, szRenderTarget.width, szRenderTarget.height * 0.5f);
+	m_pd2dDeviceContext->DrawTextW(L"/100", (UINT32)wcslen(L"/100"), m_pdwFont, &rcMaxBulletText, m_pd2dbrText);
 
+	D2D1_RECT_F rcCurrHpText = D2D1::RectF(-1025, 920, szRenderTarget.width, szRenderTarget.height * 0.5f);
+	m_pd2dDeviceContext->DrawTextW(m_myhp, (UINT32)wcslen(m_myhp), m_pdwFont, &rcCurrHpText, m_pd2dbrText);
+
+	D2D1_RECT_F rcMaxHpText = D2D1::RectF(-925, 920, szRenderTarget.width, szRenderTarget.height * 0.5f);
+	m_pd2dDeviceContext->DrawTextW(L"/100", (UINT32)wcslen(L"/100"), m_pdwFont, &rcMaxHpText, m_pd2dbrText);
 
 	m_pd2dDeviceContext->EndDraw();
 
@@ -968,17 +1130,11 @@ void CGameFramework::FrameAdvance()
 #ifdef _WITH_SYNCH_SWAPCHAIN
 	m_pdxgiSwapChain->Present(1, 0);
 #else
-	m_pdxgiSwapChain->Present(1, 0);
+	m_pdxgiSwapChain->Present(0, 0);
 #endif
 #endif
 
 	MoveToNextFrame();
-
-	// Npc
-	m_pScene->m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._41 = 1500;
-	m_pScene->m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._42 = 1500;
-	m_pScene->m_ppShaders[0]->m_ppObjects[0]->m_xmf4x4Transform._43 = 1500;
-
 
 	m_GameTimer.GetFrameRate(m_pszCaption + 14, 37);
 	size_t nLength = _tcslen(m_pszCaption);
@@ -988,12 +1144,6 @@ void CGameFramework::FrameAdvance()
 
 void CGameFramework::UpdateUI()
 {
-	m_pUILayer->UpdateTextOutputs(0, m_myBullet, NULL, NULL, NULL);
-	//m_pUILayer->UpdateTextOutputs(1, m_InputName, NULL, NULL, NULL);
-	/*m_pUILayer->UpdateTextOutputs(2, m_mylapnum, NULL, NULL, NULL);
-	m_pUILayer->UpdateTextOutputs(3, m_lapmark, NULL, NULL, NULL);
-	m_pUILayer->UpdateTextOutputs(4, m_endTime, NULL, NULL, NULL);*/
-
 }
 
 
@@ -1038,80 +1188,22 @@ void CGameFramework::SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOA
 	m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetLook(lookVec);
 }
 void CGameFramework::Remove_OtherPlayerObj(int id) {
-	if (m_pScene->m_ppShaders[0]->m_ppObjects[id]) {
+	if (m_pScene->m_ppShaders[0]->m_ppObjects[id]) 
+	{
 		m_pScene->m_ppShaders[0]->m_ppObjects[id]->SetScale(0.0, 0.0, 0.0);
 	}
 }
 
 void CGameFramework::Create_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look)
 {
-	((CMainPlayer*)m_pPlayer)->FireBullet(NULL);
-	m_GameSound.shootingSound();
-	((CMainPlayer*)m_pPlayer)->m_ppBullets[id]->m_xmf3FirePosition = pos;
-
-	CBulletObject* pBulletObjectL = NULL;
-	CBulletObject* pBulletObjectR = NULL;
-	XMFLOAT3 PlayerPos = ((CMainPlayer*)m_pPlayer)->GetLookVector() = xmf3look;
-
-	if (pBulletObjectL)
-	{
-
-		XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
-		//xmf3Position.x -= 10.0f;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
-		pBulletObjectL->m_xmf4x4Transform = pBulletObjectL->m_xmf4x4World;
-		pBulletObjectL->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-		pBulletObjectL->SetMovingDirection(PlayerPos);
-		pBulletObjectL->Rotate(90.0f, 0.0, 0.0);
-		pBulletObjectL->SetScale(700.0, 200.0, 700.0);
-	}
-
-	if (pBulletObjectR)
-	{
-
-		XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
-		//xmf3Position.x += 10.0f;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
-		pBulletObjectR->m_xmf4x4Transform = pBulletObjectR->m_xmf4x4World;
-		pBulletObjectR->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-		pBulletObjectR->SetMovingDirection(PlayerPos);
-		pBulletObjectR->Rotate(90.0f, 0.0, 0.0);
-		pBulletObjectR->SetScale(700.0, 200.0, 700.0);
-	}
 }
 
-void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look)
+void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3right, XMFLOAT3 xmf3up, XMFLOAT3 xmf3look)
 {
-
-	//CBulletObject* pBulletObjectL = NULL;
-	//CBulletObject* pBulletObjectR = NULL;
-	//XMFLOAT3 PlayerPos = ((CMainPlayer*)m_pPlayer)->GetLookVector() = xmf3look;
-
-	//if (pBulletObjectL)
-	//{
-
-	//	XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
-	//	//xmf3Position.x -= 10.0f;
-	//	XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
-	//	pBulletObjectL->m_xmf4x4Transform = pBulletObjectL->m_xmf4x4World;
-	//	pBulletObjectL->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-	//	pBulletObjectL->SetMovingDirection(PlayerPos);
-	//	pBulletObjectL->Rotate(90.0f, 0.0, 0.0);
-	//	pBulletObjectL->SetScale(700.0, 200.0, 700.0);
-	//}
-
-	//if (pBulletObjectR)
-	//{
-
-	//	XMFLOAT3 xmf3Position = ((CMainPlayer*)m_pPlayer)->GetPosition() = pos;
-	//	//xmf3Position.x += 10.0f;
-	//	XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(PlayerPos, 60.0f, true));
-	//	pBulletObjectR->m_xmf4x4Transform = pBulletObjectR->m_xmf4x4World;
-	//	pBulletObjectR->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-	//	pBulletObjectR->SetMovingDirection(PlayerPos);
-	//	pBulletObjectR->Rotate(90.0f, 0.0, 0.0);
-	//	pBulletObjectR->SetScale(700.0, 200.0, 700.0);
-	//}
+	((CMainPlayer*)m_pPlayer)->m_ppBullets[id]->SetPosition(pos);
+	((CMainPlayer*)m_pPlayer)->m_ppBullets[id]->SetRight(xmf3right);
+	((CMainPlayer*)m_pPlayer)->m_ppBullets[id]->SetUp(xmf3up);
+	((CMainPlayer*)m_pPlayer)->m_ppBullets[id]->SetLook(xmf3look);
 }
 
 void CGameFramework::SetPosition_NPC(int id, XMFLOAT3 pos)

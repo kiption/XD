@@ -112,7 +112,7 @@ void CDynamicCubeMappingShader::ReleaseUploadBuffers()
 	CBaseObjectShader::ReleaseUploadBuffers();
 }
 
-void CDynamicCubeMappingShader::OnPreRender(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue, ID3D12Fence* pd3dFence, HANDLE hFenceEvent, CScene* pScene)
+void CDynamicCubeMappingShader::OnPreRender(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue, ID3D12Fence* pd3dFence, HANDLE hFenceEvent, SceneManager* pScene)
 {
 	for (int i = 0; i < m_nObjects; i++)
 	{

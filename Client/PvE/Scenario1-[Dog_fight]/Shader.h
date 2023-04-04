@@ -74,7 +74,7 @@ public:
 protected:
 	ID3D12PipelineState** m_ppd3dPipelineStates = NULL;
 	int	m_nPipelineStates = 0;
-
+	float								m_fElapsedTime = 0.0f;
 	ID3D12DescriptorHeap* m_pd3dCbvSrvDescriptorHeap = NULL;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE			m_d3dCbvCPUDescriptorStartHandle;

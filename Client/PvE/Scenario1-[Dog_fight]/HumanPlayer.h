@@ -10,9 +10,9 @@
 class CHumanPlayer : public CPlayer
 {
 public:
-	CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual ~CHumanPlayer();
-
+	CLoadedModelInfo* pAngrybotModel = NULL;
 	float						m_fBulletEffectiveRange = 2000.0f;
 	CBulletObject* pBulletObject = NULL;
 	CBulletObject* pBulletObject2 = NULL;

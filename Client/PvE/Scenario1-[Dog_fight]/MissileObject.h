@@ -1,12 +1,12 @@
 #pragma once
 #include "Object.h"
-
+#include "Shader.h"
 class CBulletObject : public CGameObject
 {
 public:
-	CBulletObject(float fEffectiveRange);
+	CBulletObject( float fEffectiveRange);
 	virtual ~CBulletObject();
-
+	CShader* m_pShader = NULL;
 public:
 	virtual void Animate(float fElapsedTime);
 	virtual void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);

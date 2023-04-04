@@ -3,11 +3,17 @@
 #include <WS2tcpip.h>
 #include <MSWSock.h>
 #include "ObjectsInfo.h"
+#include "GameSound.h"
+GameSound gamesound;
+
 #pragma comment (lib, "WS2_32.LIB")
 #pragma comment(lib, "MSWSock.lib")
 
 const char* SERVER_ADDR = "127.0.0.1";
 SOCKET s_socket;
+short active_servernum = 1;
+array<SOCKET, MAX_SERVER> sockets;
+int my_id;
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
@@ -39,7 +45,7 @@ public:
 void CALLBACK recvCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED lp_over, DWORD s_flag);
 void CALLBACK sendCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED lp_over, DWORD s_flag);
 OVER_EX g_recv_over;
-void recvPacket()
+void recvPacket(short servernum)
 {
 	cout << "Do RECV" << endl;
 	DWORD recv_flag = 0;
@@ -47,17 +53,56 @@ void recvPacket()
 	memset(&g_recv_over.overlapped, 0, sizeof(g_recv_over.overlapped));
 	g_recv_over.wsabuf.len = BUF_SIZE;
 	g_recv_over.wsabuf.buf = g_recv_over.send_buf;
-	if (WSARecv(s_socket, &g_recv_over.wsabuf, 1, 0, &recv_flag, &g_recv_over.overlapped, recvCallback) == SOCKET_ERROR) {
+	if (WSARecv(sockets[servernum], &g_recv_over.wsabuf, 1, 0, &recv_flag, &g_recv_over.overlapped, recvCallback) == SOCKET_ERROR) {
 		if (GetLastError() != WSA_IO_PENDING)
 			cout << "[WSARecv Error] code: " << GetLastError() << "\n" << endl;
 	}
 }
-void sendPacket(void* packet)
+void sendPacket(void* packet, short servernum)
 {
 	cout << "Do SEND" << endl;
 	OVER_EX* s_data = new OVER_EX{ reinterpret_cast<char*>(packet) };
-	if (WSASend(s_socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback) == SOCKET_ERROR) {
-		cout << "[WSASend Error] code: " << GetLastError() << "\n" << endl;
+	if (WSASend(sockets[servernum], &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback) == SOCKET_ERROR) {
+		int err_no = GetLastError();
+		if (err_no == WSAECONNRESET) {	// 서버가 끊어진 상황
+			closesocket(sockets[active_servernum]);
+
+			int new_portnum = 0;
+			switch (servernum) {
+			case 0:	// Active: 0 -> 1
+				active_servernum = 1;
+				new_portnum = PORT_NUM_S1;
+				break;
+			case 1:	// Active: 1 -> 0
+				active_servernum = 0;
+				new_portnum = PORT_NUM_S0;
+				break;
+			}
+
+			sockets[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+			SOCKADDR_IN newserver_addr;
+			ZeroMemory(&newserver_addr, sizeof(newserver_addr));
+			newserver_addr.sin_family = AF_INET;
+			newserver_addr.sin_port = htons(new_portnum);
+			inet_pton(AF_INET, SERVER_ADDR, &newserver_addr.sin_addr);
+			connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&newserver_addr), sizeof(newserver_addr));
+
+			// 임시코드: 나중에 RELOGIN 패킷을 새로 만들어서 그거를 보내도록 해야함.
+			//CS_LOGIN_PACKET login_pack;
+			//login_pack.size = sizeof(CS_LOGIN_PACKET);
+			//login_pack.type = CS_LOGIN;
+			//strcpy_s(login_pack.name, "COPTER");
+			//sendPacket(&login_pack, active_servernum);
+			//recvPacket(active_servernum);
+
+			CS_RELOGIN_PACKET re_login_pack;
+			re_login_pack.size = sizeof(CS_RELOGIN_PACKET);
+			re_login_pack.type = CS_RELOGIN;
+			re_login_pack.id = my_id;
+			sendPacket(&re_login_pack, active_servernum);
+			recvPacket(active_servernum);
+		}
+		cout << "[WSASend Error] code: " << err_no << "\n" << endl;
 	}
 }
 
@@ -66,45 +111,37 @@ void processData(char* net_buf, size_t io_byte);
 void CALLBACK recvCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flag)
 {
 	if (num_bytes == 0) {
-		cout << "NUM BYTE ZERO" << endl; //test
 		return;
 	}
-	cout << "RECV CALLBACK " << endl; //test
 
 	processData(g_recv_over.send_buf, num_bytes);
 
-	recvPacket();
+	recvPacket(active_servernum);
 }
 void CALLBACK sendCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flag)
 {
-	cout << "SEND CALLBACK" << endl; //test
 	delete over;
 	return;
 }
 
 
-int my_id;
 void processPacket(char* ptr)
 {
-	cout << "[Process Packet] Packet Type: " << (int)ptr[1] << endl;//test
 	static bool first_time = true;
 	switch (ptr[1])
 	{
 	case SC_LOGIN_INFO:
 	{
 		SC_LOGIN_INFO_PACKET* recv_packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(ptr);
+		// Player 초기정보 설정
 		my_id = recv_packet->id;
-		// Player 초기 위치 설정
 		my_info.m_id = recv_packet->id;
 		my_info.m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-
 		my_info.m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 		my_info.m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 		my_info.m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
 
 		my_info.m_state = OBJ_ST_RUNNING;
-		cout << "Init My Info - id: " << my_info.m_id << ", Pos(x: " << my_info.m_pos.x << ", y : " << my_info.m_pos.y << ", z : " << my_info.m_pos.z << ")." << endl;
-
 		break;
 	}// SC_LOGIN_INFO case end
 	case SC_ADD_OBJECT:
@@ -122,26 +159,7 @@ void processPacket(char* ptr)
 				other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 				other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 				other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-
 				other_players[recv_id].m_state = OBJ_ST_RUNNING;
-
-				cout << "Init New Player's Info - id: " << other_players[recv_id].m_id
-					<< ", Pos(x: " << other_players[recv_id].m_pos.x
-					<< ", y : " << other_players[recv_id].m_pos.y
-					<< ", z : " << other_players[recv_id].m_pos.z << ")." << endl;
-			}
-			else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {	// NPC 추가
-				int npc_id = recv_id - MAX_USER;
-
-				npcs_info[npc_id].m_id = recv_id;
-				npcs_info[npc_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-				npcs_info[npc_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-				npcs_info[npc_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-				npcs_info[npc_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-
-				npcs_info[npc_id].m_state = OBJ_ST_RUNNING;
-				cout << "Init New NPC's Info - id: " << npcs_info[npc_id].m_id
-					<< ", Pos(x: " << npcs_info[npc_id].m_pos.x << ", y : " << npcs_info[npc_id].m_pos.y << ", z : " << npcs_info[npc_id].m_pos.z << ")." << endl;
 			}
 			else {
 				cout << "Exceed Max User." << endl;
@@ -149,27 +167,24 @@ void processPacket(char* ptr)
 		}
 		// 2. Add Bullet
 		else if (recv_packet->target == TARGET_BULLET) {
+			gamesound.shootingSound();
 			bullets_info[recv_id].m_id = recv_id;
 			bullets_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 			bullets_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 			bullets_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 			bullets_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-
-			bullets_info[recv_id].m_state = OBJ_ST_STANDBY;                       
-			cout << "Create New Bullet - id: " << bullets_info[recv_id].m_id
-				<< ", Pos(x: " << bullets_info[recv_id].m_pos.x << ", y : " << bullets_info[recv_id].m_pos.y << ", z : " << bullets_info[recv_id].m_pos.z << ")." << endl;
+			bullets_info[recv_id].m_state = OBJ_ST_RUNNING;
 		}
 		// 3. Add NPC (Helicopter)
 		else if (recv_packet->target == TARGET_NPC) {
+			if (npcs_info[recv_id].m_state != OBJ_ST_EMPTY) break;
+
 			npcs_info[recv_id].m_id = recv_id;
 			npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 			npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 			npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 			npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-
 			npcs_info[recv_id].m_state = OBJ_ST_RUNNING;
-			cout << "Create New Bullet - id: " << npcs_info[recv_id].m_id
-				<< ", Pos(x: " << npcs_info[recv_id].m_pos.x << ", y : " << npcs_info[recv_id].m_pos.y << ", z : " << npcs_info[recv_id].m_pos.z << ")." << endl;
 		}
 		else {
 			cout << "[ADD ERROR] Unknown Target!" << endl;
@@ -184,32 +199,19 @@ void processPacket(char* ptr)
 		// 1. Move Player
 		if (recv_packet->target == TARGET_PLAYER) {
 			if (recv_id == my_info.m_id) {
-				// Player 이동
-				my_info.m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-				cout << "My object moves to (" << my_info.m_pos.x << ", " << my_info.m_pos.y << ", " << my_info.m_pos.z << ")." << endl;
+				my_info.m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };						// Player Object 이동
 			}
 			else if (0 <= recv_id && recv_id < MAX_USER && recv_id != my_info.m_id) {
-				// 상대 Object 이동
-				other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-				cout << "Player[" << recv_id << "]'s object moves to("
-					<< other_players[recv_id].m_pos.x << ", " << other_players[recv_id].m_pos.y << ", " << other_players[recv_id].m_pos.z << ")." << endl;
-
-				cout << "[TEST] R_PACK POS: " << recv_packet->x << ", " << recv_packet->y << ", " << recv_packet->z << endl;
-			}
-			else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
-				// Npc 이동
-				int npc_id = recv_id - MAX_USER;
-
-				npcs_info[npc_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-				cout << "NPC[" << npc_id << "]'s object moves to("
-					<< npcs_info[npc_id].m_pos.x << ", " << npcs_info[npc_id].m_pos.y << ", " << npcs_info[npc_id].m_pos.z << ")." << endl;
+				other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };		// 상대방Players Object 이동
 			}
 		}
 		// 2. Move Bullet
 		else if (recv_packet->target == TARGET_BULLET) {
 			bullets_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-			cout << "Bullet[" << recv_id << "] object moves to("
-				<< bullets_info[recv_id].m_pos.x << ", " << bullets_info[recv_id].m_pos.y << ", " << bullets_info[recv_id].m_pos.z << ")." << endl;
+		}
+		// 3. Move Npc
+		else if (recv_packet->target == TARGET_NPC) {
+			npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 		}
 		else {
 			cout << "[MOVE ERROR] Unknown Target!" << endl;
@@ -229,26 +231,19 @@ void processPacket(char* ptr)
 				my_info.m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 				my_info.m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 				my_info.m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-				cout << "My object is rotated, LookVec:(" << my_info.m_look_vec.x << ", " << my_info.m_look_vec.y << ", " << my_info.m_look_vec.z << ")." << endl;
 			}
 			else if (0 <= recv_id && recv_id < MAX_USER) {
 				// 상대 Object 회전
 				other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 				other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 				other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-				cout << "Player[" << recv_id << "]'s object is rotated, lookVec:"
-					<< other_players[recv_id].m_look_vec.x << ", " << other_players[recv_id].m_look_vec.y << ", " << other_players[recv_id].m_look_vec.z << ")." << endl;
 			}
-			else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
-				// Npc 회전
-				int npc_id = recv_id - MAX_USER;
-
-				npcs_info[npc_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-				npcs_info[npc_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-				npcs_info[npc_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-				cout << "NPC[" << npc_id << "]'s object is rotated, lookVec:("
-					<< npcs_info[npc_id].m_look_vec.x << ", " << npcs_info[npc_id].m_look_vec.y << ", " << npcs_info[npc_id].m_look_vec.z << ")." << endl;
-			}
+		}
+		// 2. Rotate Npc
+		else if (recv_packet->target == TARGET_NPC) {
+			npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+			npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+			npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
 		}
 		else {
 			cout << "[ROTATE ERROR] Unknown Target!" << endl;
@@ -256,6 +251,44 @@ void processPacket(char* ptr)
 
 		break;
 	}// SC_ROTATE_PLAYER case end
+	case SC_MOVE_ROTATE_OBJECT:
+	{
+		SC_MOVE_ROTATE_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_MOVE_ROTATE_OBJECT_PACKET*>(ptr);
+		int recv_id = recv_packet->id;
+
+		// 1. Rotate Player
+		if (recv_packet->target == TARGET_PLAYER) {
+			if (recv_id == my_info.m_id) {
+				// Player 이동
+				my_info.m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+				// Player 회전
+				my_info.m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+				my_info.m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+				my_info.m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+			}
+			else if (0 <= recv_id && recv_id < MAX_USER) {
+				// 상대 Object 이동
+				other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+				// 상대 Object 회전
+				other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+				other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+				other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+			}
+		}
+		// 2. Rotate Npc
+		else if (recv_packet->target == TARGET_NPC) {
+			npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+
+			npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+			npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+			npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+		}
+		else {
+			cout << "[MOVE&ROTATE ERROR] Unknown Target!" << endl;
+		}
+
+		break;
+	}// SC_MOVE_ROTATE_PLAYER case end
 	case SC_REMOVE_OBJECT:
 	{
 		SC_REMOVE_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_REMOVE_OBJECT_PACKET*>(ptr);
@@ -271,27 +304,19 @@ void processPacket(char* ptr)
 				other_players[recv_id].m_id = -1;
 				other_players[recv_id].m_pos = { 0.f ,0.f ,0.f };
 				other_players[recv_id].m_state = OBJ_ST_LOGOUT;
-
-				cout << "Player[" << recv_id << "] is log out" << endl;
-			}
-			else if (MAX_USER <= recv_id && recv_id < MAX_USER + MAX_NPCS) {
-				// NPC 없애기
-				int npc_id = recv_id - MAX_USER;
-
-				npcs_info[npc_id].m_id = -1;
-				npcs_info[npc_id].m_pos = { 0.f ,0.f ,0.f };
-				npcs_info[npc_id].m_state = OBJ_ST_LOGOUT;
-
-				cout << "NPC[" << npc_id << "] is removed" << endl;
 			}
 		}
 		// 2. Remove Bullet
 		else if (recv_packet->target == TARGET_BULLET) {
-			bullets_info[recv_id].m_id = -1;
-			bullets_info[recv_id].m_pos = { 0.f ,0.f ,0.f };
+			bullets_info[recv_id].m_pos = { 0.f , -100.f ,0.f };
 			bullets_info[recv_id].m_state = OBJ_ST_LOGOUT;
-
-			cout << "Bullet[" << recv_id << "] is removed" << endl;
+		}
+		// 3. Remove Npc
+		else if (recv_packet->target == TARGET_NPC) {
+			int npc_id = recv_id - MAX_USER;
+			npcs_info[npc_id].m_id = -1;
+			npcs_info[npc_id].m_pos = { 0.f ,0.f ,0.f };
+			npcs_info[npc_id].m_state = OBJ_ST_LOGOUT;
 		}
 		else {
 			cout << "[REMOVE ERROR] Unknown Target!" << endl;
@@ -299,30 +324,50 @@ void processPacket(char* ptr)
 
 		break;
 	}//SC_REMOVE_PLAYER case end
-	case SC_HP_COUNT:
+	case SC_DAMAGED:
 	{
-		SC_HP_COUNT_PACKET* recv_packet = reinterpret_cast<SC_HP_COUNT_PACKET*>(ptr);
-		my_info.m_hp = recv_packet->hp;
+		SC_DAMAGED_PACKET* recv_packet = reinterpret_cast<SC_DAMAGED_PACKET*>(ptr);
 
-		int cause = recv_packet->change_cause;
-		if (cause == CAUSE_DAMAGED_BY_BULLET) {
-			cout << "Damaged by Bullet!" << endl;
-		}
-		else if (cause == CAUSE_DAMAGED_BY_PLAYER) {
-			cout << "Damaged by Player!" << endl;
-		}
-		else if (cause == CAUSE_HEAL) {
-			cout << "Heal" << endl;
+		if (recv_packet->target == TARGET_PLAYER && recv_packet->id == my_id) {
+			my_info.m_hp = my_info.m_hp - recv_packet->dec_hp;
+
+			XMFLOAT3 coll_pos = { recv_packet->col_pos_x, recv_packet->col_pos_y, recv_packet->col_pos_z };
+			coll_info.push(coll_pos);
+
+			gamesound.collisionSound();
 		}
 
 		break;
 	}//SC_HP_COUNT case end
+	case SC_PLAYER_STATE:
+	{
+		SC_PLAYER_STATE_PACKET* recv_packet = reinterpret_cast<SC_PLAYER_STATE_PACKET*>(ptr);
+
+		int pl_state = recv_packet->state;
+		if (pl_state == ST_PACK_REVIVAL) {
+			my_info.m_hp = 100;
+		}
+		else if (pl_state == ST_PACK_DEAD) {
+			my_info.m_hp = 0;
+		}
+
+		break;
+	}//SC_PLAYER_STATE case end
 	case SC_BULLET_COUNT:
 	{
 		SC_BULLET_COUNT_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COUNT_PACKET*>(ptr);
-		my_info.m_bullet = recv_packet->bullet_cnt;
-		cout << "My Bullet Left: " << my_info.m_bullet << endl;
+		int cnt = recv_packet->bullet_cnt;
+		my_info.m_bullet = cnt;
 
+		break;
+	}//SC_BULLET_COUNT case end
+	case SC_ACTIVE_DOWN:
+	{
+		SC_ACTIVE_DOWN_PACKET* recv_packet = reinterpret_cast<SC_ACTIVE_DOWN_PACKET*>(ptr);
+
+		if (recv_packet->prev_s_id == active_servernum) {
+			active_servernum = recv_packet->my_s_id;
+		}
 		break;
 	}//SC_BULLET_COUNT case end
 	}
@@ -330,7 +375,6 @@ void processPacket(char* ptr)
 
 void processData(char* net_buf, size_t io_byte)
 {
-	cout << "Process Data" << endl;//test
 	char* ptr = net_buf;
 	static size_t in_packet_size = 0;
 	static size_t saved_packet_size = 0;

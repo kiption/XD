@@ -134,13 +134,13 @@ void HeliPlayer::OnPrepareAnimate()
 }
 void HeliPlayer::Animate(float fTimeElapsed)
 {
-	for (int i = 0; i < BULLETS; i++)
+	/*for (int i = 0; i < BULLETS; i++)
 	{
 		if (m_ppBullets[i]->m_bActive) {
 
 			m_ppBullets[i]->Animate(fTimeElapsed);
 		}
-	}
+	}*/
 	CPlayer::Animate(fTimeElapsed);
 }
 

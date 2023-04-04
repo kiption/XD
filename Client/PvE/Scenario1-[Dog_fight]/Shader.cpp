@@ -3,6 +3,7 @@
 //-----------------------------------------------------------------------------
 
 #include "stdafx.h"
+#include "Object.h"
 #include "Shader.h"
 #include "Player.h"
 #include "Scene.h"

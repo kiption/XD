@@ -20,7 +20,7 @@ public:
 	virtual void ReleaseUploadBuffers();
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
-	virtual void OnPreRender(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue, ID3D12Fence* pd3dFence, HANDLE hFenceEvent, CScene* pScene);
+	virtual void OnPreRender(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue, ID3D12Fence* pd3dFence, HANDLE hFenceEvent, SceneManager* pScene);
 	float SavePointx[6] = { 0,0,0,0,0,0 };
 	float SavePointz[6] = { 0,0,0,0,0,0 };
 

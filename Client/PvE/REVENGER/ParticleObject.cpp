@@ -29,12 +29,12 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	ParticleShader* pShader = new ParticleShader();
-	pShader->CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, 0, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	SceneManager* pScene = NULL;
 	
-	pScene->CreateConstantBufferViews(pd3dDevice, 0, m_pd3dcbGameObject, ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255));
+	pScene->CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbGameObject, ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255));
 	pScene->CreateShaderResourceViews(pd3dDevice, pParticleTexture, 0, 16);
 	pScene->CreateShaderResourceViews(pd3dDevice, m_pRandowmValueTexture, 0, 17);
 	pScene->CreateShaderResourceViews(pd3dDevice, m_pRandowmValueOnSphereTexture, 0, 18);

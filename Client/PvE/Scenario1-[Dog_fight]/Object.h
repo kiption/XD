@@ -27,8 +27,11 @@
 #define RESOURCE_BUFFER				0x06
 #define RESOURCE_STRUCTURED_BUFFER	0x07
 
-class CShader;
-class CScene;
+#define ANIMATION_TYPE_ONCE			0
+#define ANIMATION_TYPE_LOOP			1
+#define ANIMATION_TYPE_PINGPONG		2
+
+class SceneManager;
 class CPlayer;
 
 struct MATERIAL
@@ -84,8 +87,9 @@ struct CB_SPRITEBILLBOARD_INFO
 	XMFLOAT2						m_xmf2TextureOffset;
 };
 
-class CGameObject;
+class CShader;
 class CStandardShader;
+
 
 class CTexture
 {
@@ -192,7 +196,6 @@ struct MATERIALLOADINFO
 	UINT							m_nType = 0x00;
 
 };
-
 struct MATERIALSLOADINFO
 {
 	int								m_nMaterials = 0;
@@ -217,9 +220,6 @@ public:
 	XMFLOAT4						m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f); //(r,g,b,a=power)
 	XMFLOAT4						m_xmf4Emissive = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 };
-
-class CGameObject;
-class CShader;
 
 class CMaterial
 {
@@ -255,6 +255,8 @@ public:
 	virtual void ReleaseUploadBuffers();
 
 	static CShader* m_pIlluminatedShader;
+	static CShader* m_pStandardShader;
+	static CShader* m_pSkinnedAnimationShader;
 public:
 	CMaterialColors* m_pMaterialColors = NULL;
 
@@ -266,16 +268,23 @@ public:
 	float							m_fSpecularHighlight = 0.0f;
 	float							m_fMetallic = 0.0f;
 	float							m_fGlossyReflection = 0.0f;
+
+public:
+
+
+	static void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+	void SetStandardShader() { CMaterial::SetShader(m_pStandardShader); }
+	void SetSkinnedAnimationShader() { CMaterial::SetShader(m_pSkinnedAnimationShader); }
 };
+
 struct CALLBACKKEY
 {
 	float  							m_fTime = 0.0f;
 	void* m_pCallbackData = NULL;
 };
 #define _WITH_ANIMATION_INTERPOLATION
-#define ANIMATION_TYPE_ONCE			0
-#define ANIMATION_TYPE_LOOP			1
-#define ANIMATION_TYPE_PINGPONG		2
+
 class CAnimationCallbackHandler
 {
 public:
@@ -314,28 +323,16 @@ public:
 	XMFLOAT3** m_ppxmf3KeyFrameTranslations = NULL;
 #endif
 
-	float 							m_fPosition = 0.0f;
-	int 							m_nType = ANIMATION_TYPE_LOOP; //Once, Loop, PingPong
-
-	int 							m_nCallbackKeys = 0;
-	CALLBACKKEY* m_pCallbackKeys = NULL;
-
-	CAnimationCallbackHandler* m_pAnimationCallbackHandler = NULL;
-
 public:
-	void SetPosition(float fTrackPosition);
-
-	XMFLOAT4X4 GetSRT(int nBone);
-
-	void SetCallbackKeys(int nCallbackKeys);
-	void SetCallbackKey(int nKeyIndex, float fTime, void* pData);
-	void SetAnimationCallbackHandler(CAnimationCallbackHandler* pCallbackHandler);
-
-	void HandleCallback();
+	XMFLOAT4X4 GetSRT(int nBone, float fPosition);
 };
 
 class CAnimationSets
 {
+public:
+	CAnimationSets(int nAnimationSets);
+	~CAnimationSets();
+
 private:
 	int								m_nReferences = 0;
 
@@ -344,35 +341,33 @@ public:
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
 public:
-	CAnimationSets(int nAnimationSets);
-	~CAnimationSets();
-
-public:
 	int								m_nAnimationSets = 0;
 	CAnimationSet** m_pAnimationSets = NULL;
 
 	int								m_nAnimatedBoneFrames = 0;
 	CGameObject** m_ppAnimatedBoneFrameCaches = NULL; //[m_nAnimatedBoneFrames]
-
-public:
-	void SetCallbackKeys(int nAnimationSet, int nCallbackKeys);
-	void SetCallbackKey(int nAnimationSet, int nKeyIndex, float fTime, void* pData);
-	void SetAnimationCallbackHandler(int nAnimationSet, CAnimationCallbackHandler* pCallbackHandler);
 };
 
 class CAnimationTrack
 {
 public:
 	CAnimationTrack() { }
-	~CAnimationTrack() { }
+	~CAnimationTrack();
 
 public:
 	BOOL 							m_bEnable = true;
 	float 							m_fSpeed = 1.0f;
-	float 							m_fPosition = 0.0f;
+	float 							m_fPosition = -ANIMATION_CALLBACK_EPSILON;
 	float 							m_fWeight = 1.0f;
 
 	int 							m_nAnimationSet = 0;
+
+	int 							m_nType = ANIMATION_TYPE_LOOP; //Once, Loop, PingPong
+
+	int 							m_nCallbackKeys = 0;
+	CALLBACKKEY* m_pCallbackKeys = NULL;
+
+	CAnimationCallbackHandler* m_pAnimationCallbackHandler = NULL;
 
 public:
 	void SetAnimationSet(int nAnimationSet) { m_nAnimationSet = nAnimationSet; }
@@ -380,7 +375,15 @@ public:
 	void SetEnable(bool bEnable) { m_bEnable = bEnable; }
 	void SetSpeed(float fSpeed) { m_fSpeed = fSpeed; }
 	void SetWeight(float fWeight) { m_fWeight = fWeight; }
+
 	void SetPosition(float fPosition) { m_fPosition = fPosition; }
+	float UpdatePosition(float fTrackPosition, float fTrackElapsedTime, float fAnimationLength);
+
+	void SetCallbackKeys(int nCallbackKeys);
+	void SetCallbackKey(int nKeyIndex, float fTime, void* pData);
+	void SetAnimationCallbackHandler(CAnimationCallbackHandler* pCallbackHandler);
+
+	void HandleCallback();
 };
 
 class CLoadedModelInfo
@@ -431,14 +434,24 @@ public:
 	void SetTrackSpeed(int nAnimationTrack, float fSpeed);
 	void SetTrackWeight(int nAnimationTrack, float fWeight);
 
-	void SetCallbackKeys(int nAnimationSet, int nCallbackKeys);
-	void SetCallbackKey(int nAnimationSet, int nKeyIndex, float fTime, void* pData);
-	void SetAnimationCallbackHandler(int nAnimationSet, CAnimationCallbackHandler* pCallbackHandler);
+	void SetCallbackKeys(int nAnimationTrack, int nCallbackKeys);
+	void SetCallbackKey(int nAnimationTrack, int nKeyIndex, float fTime, void* pData);
+	void SetAnimationCallbackHandler(int nAnimationTrack, CAnimationCallbackHandler* pCallbackHandler);
 
 	void AdvanceTime(float fElapsedTime, CGameObject* pRootGameObject);
 
-};
+public:
+	bool							m_bRootMotion = false;
+	CGameObject* m_pModelRootObject = NULL;
 
+	CGameObject* m_pRootMotionObject = NULL;
+	XMFLOAT3						m_xmf3FirstRootMotionPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+	void SetRootMotion(bool bRootMotion) { m_bRootMotion = bRootMotion; }
+
+	virtual void OnRootMotion(CGameObject* pRootGameObject) { }
+	virtual void OnAnimationIK(CGameObject* pRootGameObject) { }
+};
 
 class CGameObject
 {
@@ -515,7 +528,7 @@ public:
 	//virtual void Animate(float fTimeElapsed);
 	virtual void AnimateObject(CCamera* pCamera, float fDeltaTime);
 
-	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CScene* pScene) { } ///D
+	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, SceneManager* pScene) { } ///D
 	virtual void OnPrepareRender() { }
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 

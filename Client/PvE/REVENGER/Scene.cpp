@@ -171,7 +171,7 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 1 + 2 + 2 + 2 + 20 + 20 + 20 * 3 + 1+50+50+50+50);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 3, 1 + 2 + 2 + 2 + 20 + 20 + 20 * 3 + 1+50+50+50+50+50);
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	BuildDefaultLightsAndMaterials();
@@ -216,12 +216,12 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
 	m_pBulletEffect = pBCBulletEffectShader;
 
-	CLoadedModelInfo* pBulletMesh = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", m_pBulletEffect);
+
+	CGameObject* pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", m_pBulletEffect);
 	for (int i = 0; i < 100; i++)
 	{
 		pBulletObject = new CBulletObject(NULL);
-		pBulletObject->SetChild(pBulletMesh->m_pModelRootObject, true);
-		pBulletObject->m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 0, pBulletMesh);
+		pBulletObject->SetChild(pGameObject, false);
 		m_ppBullets[i] = pBulletObject;
 	}
 
@@ -704,10 +704,6 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	UpdateShaderVariables(pd3dCommandList);
 	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
 
-	//////if (m_pUseWaterMove) m_pUseWaterMove->Render(pd3dCommandList, pCamera);
-	////for (int i = 0; i < m_nMapShaders; i++) if (m_ppMapShaders[i]) m_ppMapShaders[i]->Render(pd3dCommandList, pCamera);
-	////for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
-
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
@@ -717,16 +713,9 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera,0);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera,0);
 
-	//D3D12_VIEWPORT d3dViewport = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH * 0.25f, FRAME_BUFFER_HEIGHT * 0.25f, 0.0f, 1.0f };
-	//D3D12_RECT d3dScissorRect = { 0, 0, FRAME_BUFFER_WIDTH / 4, FRAME_BUFFER_HEIGHT / 4 };
-
-	//pd3dCommandList->RSSetViewports(1, &d3dViewport);
-	//pd3dCommandList->RSSetScissorRects(1, &d3dScissorRect);
-
-	//if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
-	//if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
+
 
 }
 

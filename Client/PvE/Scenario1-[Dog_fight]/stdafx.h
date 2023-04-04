@@ -71,8 +71,8 @@ using namespace DirectX::PackedVector;
 using Microsoft::WRL::ComPtr;
 
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
-#define FRAME_BUFFER_WIDTH		1024
-#define FRAME_BUFFER_HEIGHT		960
+#define FRAME_BUFFER_WIDTH		1280
+#define FRAME_BUFFER_HEIGHT		1024
 
 #define SCENE1STAGE				0x00
 #define SCENE2STAGE				0x01

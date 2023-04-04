@@ -1069,15 +1069,9 @@ void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graphics
 void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
-
-	//if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
-	//pd3dCommandList->SetGraphicsRootDescriptorTable(19, m_d3dCbvGPUDescriptorHandle);
-	//XMFLOAT4X4 xmf4x4World;
-	//
-	/*XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
-
-	if (m_pMaterials) pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_pMaterials->m_nReflection, 16);*/
+	SceneManager* pScene = NULL;
+	if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	pd3dCommandList->SetGraphicsRootDescriptorTable(19, pScene->m_d3dCbvGPUDescriptorStartHandle);
 }
 
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
@@ -1113,6 +1107,7 @@ void CGameObject::ReleaseShaderVariables()
 		m_pd3dcbGameObject->Unmap(0, NULL);
 		m_pd3dcbGameObject->Release();
 	}
+
 	for (int i = 0; i < m_nMaterials; i++)
 	{
 		if (m_ppMaterials[i]) m_ppMaterials[i]->ReleaseShaderVariables();

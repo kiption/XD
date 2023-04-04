@@ -3,6 +3,7 @@
 #include "Timer.h"
 #include "Player.h"
 #include "Scene.h"
+#include "Stage2.h"
 #include "GameSound.h"
 #include "MainPlayer.h"
 #include "HumanPlayer.h"
@@ -54,6 +55,7 @@ public:
 //			  서버 통신을 위한 것들...
 //==================================================
 public:
+	SceneManager* m_pScene = NULL;
 	// 서버로 보낼 키보드 입력값
 	queue<short> q_keyboardInput;
 
@@ -61,7 +63,11 @@ public:
 	queue<MouseInputVal> q_mouseInput;
 
 	// 서버에서 받은 총알 개수
-	WCHAR						m_myBullet[20];
+	WCHAR m_myBullet[20];
+	WCHAR m_myhp[20];
+
+	int m_currHp;
+	int m_time;
 //==================================================
 
 //==================================================
@@ -85,7 +91,8 @@ public:
 	void Remove_OtherPlayerObj(int id);
 
 	void Create_Bullet(int id, XMFLOAT3 pos,XMFLOAT3 xmf3look);
-	void SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look);
+
+	void SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3right, XMFLOAT3 xmf3up, XMFLOAT3 xmf3look);
 
 	void SetPosition_NPC(int id, XMFLOAT3 pos);
 	void SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
@@ -121,7 +128,9 @@ public:
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 	virtual void ChangeScene(DWORD nMode);
+	int m_NumOfUI = 8;
 	DWORD						m_nMode = SCENE1STAGE;
+	CPlayer* m_pPlayer = NULL;
 private:
 	HINSTANCE					m_hInstance;
 	HWND						m_hWnd; 
@@ -178,9 +187,9 @@ private:
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
-	ID2D1Effect* m_pd2dfxBitmapSource = NULL;
-	ID2D1Effect* m_pd2dfxGaussianBlur = NULL;
-	ID2D1Effect* m_pd2dfxEdgeDetection = NULL;
+	ID2D1Effect* m_pd2dfxBitmapSource[8];
+	ID2D1Effect* m_pd2dfxGaussianBlur[8];
+	ID2D1Effect* m_pd2dfxEdgeDetection[8];
 	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState = NULL;
 	IWICFormatConverter* m_pwicFormatConverter = NULL;
 	int							m_nDrawEffectImage = 0;
@@ -193,8 +202,8 @@ private:
 
 	CGameTimer					m_GameTimer;
 
-	CScene						*m_pScene = NULL;
-	CPlayer						*m_pPlayer = NULL;
+
+
 	CCamera						*m_pCamera = NULL;
 	POINT						m_ptOldCursorPos;
 

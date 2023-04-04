@@ -153,7 +153,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Server\RelayServer\Protocol.h" />
-    <ClInclude Include="AnimateInfo.h" />
     <ClInclude Include="BillboardObjects.h" />
     <ClInclude Include="BillboardObjectsShader.h" />
     <ClInclude Include="Camera.h" />
@@ -194,7 +193,6 @@
     <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AnimateInfo.cpp" />
     <ClCompile Include="BillboardObjects.cpp" />
     <ClCompile Include="BillboardObjectsShader.cpp" />
     <ClCompile Include="Camera.cpp" />

@@ -136,9 +136,6 @@
     <ClInclude Include="Shader.h">
       <Filter>Client\Shader\Header</Filter>
     </ClInclude>
-    <ClInclude Include="AnimateInfo.h">
-      <Filter>Client\Object\Header</Filter>
-    </ClInclude>
     <ClInclude Include="MissileObject.h">
       <Filter>Client\Object\Header</Filter>
     </ClInclude>
@@ -256,9 +253,6 @@
       <Filter>Client\Shader\Source</Filter>
     </ClCompile>
     <ClCompile Include="MissileObject.cpp">
-      <Filter>Client\Object\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="AnimateInfo.cpp">
       <Filter>Client\Object\Source</Filter>
     </ClCompile>
     <ClCompile Include="BillboardObjects.cpp">

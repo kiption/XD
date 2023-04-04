@@ -29,20 +29,30 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 0), &WSAData);
 
-	s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	SOCKADDR_IN server_addr;
-	ZeroMemory(&server_addr, sizeof(server_addr));
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(PORT_NUM);
-	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
-	connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+
+	active_servernum = MAX_SERVER - 1;
+
 	CS_LOGIN_PACKET p;
 	p.size = sizeof(CS_LOGIN_PACKET);
 	p.type = CS_LOGIN;
+	CS_LOGIN_PACKET login_pack;
+	login_pack.size = sizeof(CS_LOGIN_PACKET);
+	login_pack.type = CS_LOGIN;
 	strcpy_s(p.name, "COPTER");
 
-	sendPacket(&p);
-	recvPacket();
+
+	// Active Server에 연결
+	sockets[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	SOCKADDR_IN server0_addr;
+	ZeroMemory(&server0_addr, sizeof(server0_addr));
+	server0_addr.sin_family = AF_INET;
+	int new_portnum = PORT_NUM_S0 + active_servernum;
+	server0_addr.sin_port = htons(new_portnum);
+	inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);
+	connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
+
+	sendPacket(&login_pack, active_servernum);
+	recvPacket(active_servernum);
 	//==================================================
 
 	UNREFERENCED_PARAMETER(hPrevInstance);
@@ -77,7 +87,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 				//==================================================
 				//		새로운 키 입력을 서버에게 전달합니다.
-				//==================================================
+				////==================================================
 				if (!gGameFramework.CheckNewInputExist_Keyboard()) {
 					short keyValue = gGameFramework.PopInputVal_Keyboard();
 					CS_INPUT_KEYBOARD_PACKET keyinput_pack;
@@ -86,7 +96,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					keyinput_pack.direction = keyValue;
 
 					cout << "[Keyboard] Send KeyValue - " << keyinput_pack.direction << endl;//test
-					sendPacket(&keyinput_pack);
+					sendPacket(&keyinput_pack, active_servernum);
 				}
 
 				if (!gGameFramework.CheckNewInputExist_Mouse()) {
@@ -99,7 +109,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					mouseinput_pack.delta_y = mouseValue.delY;
 
 					cout << "[Mouse] Send KeyValue - " << mouseinput_pack.key_val << endl;//test
-					sendPacket(&mouseinput_pack);
+					sendPacket(&mouseinput_pack, active_servernum);
 				}
 				//==================================================
 
@@ -112,7 +122,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 				// 2. 다른 Player 객체 최신화
 				for (int i = 0; i < MAX_USER; i++) {
-					if (i == my_info.m_id || other_players[i].m_state == OBJ_ST_EMPTY) continue;
+					if (i == my_info.m_id) continue;
 
 					if (other_players[i].m_state == OBJ_ST_RUNNING) {
 						gGameFramework.SetPosition_OtherPlayerObj(i, other_players[i].m_pos);
@@ -122,48 +132,57 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						other_players[i].m_state = OBJ_ST_EMPTY;
 						gGameFramework.Remove_OtherPlayerObj(i);
 					}
+
+					if (gGameFramework.m_nMode == SCENE2STAGE)
+					{
+						other_players[i].m_state == OBJ_ST_LOGOUT;
+						gGameFramework.Remove_OtherPlayerObj(i);
+					}
 				}
 
 				// 3. Bullet 객체 최신화
 				for (int i = 0; i < MAX_BULLET; i++) {
-					if (bullets_info[i].m_state == OBJ_ST_EMPTY) {
-						continue;
-					}
+					if (bullets_info[i].m_state == OBJ_ST_EMPTY) continue;
 
-					if (bullets_info[i].m_state == OBJ_ST_STANDBY) {	// Create
-						gGameFramework.Create_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_look_vec);
-						bullets_info[i].m_state = OBJ_ST_RUNNING;
-					}
-					else if (bullets_info[i].m_state == OBJ_ST_LOGOUT) {	// Clear
-						bullets_info[i].m_id = -1;
-						bullets_info[i].m_pos = { 0.0f, 0.0f, 0.0f };
-						bullets_info[i].m_right_vec = { 1.0f, 0.0f, 0.0f };
-						bullets_info[i].m_up_vec = { 0.0f, 1.0f, 0.0f };
-						bullets_info[i].m_look_vec = { 0.0f, 0.0f, 1.0f };
-						bullets_info[i].m_state = OBJ_ST_EMPTY;
+					if (bullets_info[i].m_state == OBJ_ST_LOGOUT) {	// Clear
+						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
+						((CMainPlayer*)gGameFramework.m_pPlayer)->m_ppBullets[i]->SetScale(0.01f, 0.01f, 0.01f);
+						((CMainPlayer*)gGameFramework.m_pPlayer)->m_ppBullets[i]->Rotate(45.0, 0.0, 0.0);
+						bullets_info[i].returnToInitialState();
 					}
 					else if (bullets_info[i].m_state == OBJ_ST_RUNNING) {	// Update
-						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_look_vec);
+						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
+
+						((CMainPlayer*)gGameFramework.m_pPlayer)->m_ppBullets[i]->SetScale(4.0, 4.0, 10.0);
+						((CMainPlayer*)gGameFramework.m_pPlayer)->m_ppBullets[i]->Rotate(100.0, 0.0, 0.0);
+
+
+					}
+				}
+				myTime++;
+				if (myTime % 60 == 0) {
+					gGameFramework.m_time++;
+					if (gGameFramework.m_time == 10) {
+						gGameFramework.m_time = 0;
 					}
 				}
 
-				// 4. NPC 객체 최신화
-				for (int i{}; i < MAX_NPCS; i++) {
-					if (npcs_info[i].m_state == OBJ_ST_RUNNING) {
-						gGameFramework.SetPosition_NPC(i, npcs_info[i].m_pos);
-						gGameFramework.SetVectors_NPC(i, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
-					}
-
-				}
-
-				// 5. 자신의 총알 개수 최신화
+				// 4. 자신의 총알 개수 최신화
 				wchar_t MyBullet[20];
 				_itow_s(my_info.m_bullet, MyBullet, sizeof(MyBullet), 10);
 				wcscpy_s(gGameFramework.m_myBullet, MyBullet);
 
-				// 6. HP 최신화
+				// 5. HP 최신화
+				wchar_t MyHp[20];
+				_itow_s(my_info.m_hp, MyHp, sizeof(MyHp), 10);
+				wcscpy_s(gGameFramework.m_myhp, MyHp);
+				gGameFramework.m_currHp = my_info.m_hp;
 
-
+				//// 6. NPC 움직임 최신화
+				//for (int i{}; i < MAX_NPCS; i++) {
+				//	gGameFramework.SetPosition_NPC(npcs_info[i].m_id, npcs_info[i].m_pos);
+				//	gGameFramework.SetVectors_NPC(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
+				//}
 			}
 
 			//==================================================

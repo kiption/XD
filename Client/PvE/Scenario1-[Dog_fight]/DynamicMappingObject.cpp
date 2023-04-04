@@ -73,7 +73,7 @@ CDynamicCubeMappingObject::~CDynamicCubeMappingObject()
 }
 
 // 인자 원본 수정
-void CDynamicCubeMappingObject::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CScene* pScene, CCamera* pCamera)
+void CDynamicCubeMappingObject::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, SceneManager* pScene, CCamera* pCamera)
 {
 	pScene->OnPrepareRender(pd3dCommandList, NULL);
 
