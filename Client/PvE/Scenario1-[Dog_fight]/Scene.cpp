@@ -66,9 +66,9 @@ void SceneManager::BuildDefaultLightsAndMaterials()
 }
 
 
-void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle, ID3D12Resource* pd3dDepthStencilBuffer)
 {
-	m_pd3dGraphicsRootSignature = ::GraphicsRootSignature(pd3dDevice);
+	m_pd3dGraphicsRootSignature = ::GraphicsRootSignatureSt1(pd3dDevice);
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
@@ -83,9 +83,9 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 	m_nShaders = 4;
 	m_ppShaders = new CObjectsShader * [m_nShaders];
-
+	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	CPlayerShader* pPlayerShader = new CPlayerShader();
-	pPlayerShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pPlayerShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pPlayerShader->SetCurScene(SCENE1STAGE);
 	pPlayerShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 
@@ -93,32 +93,34 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	for (int i = 0; i < 100; i++)
 	{
 		pBulletObject = new CBulletObject(NULL);
-		pBulletObject->SetChild(pGameObject, false);
 		pBulletObject->SetCurScene(SCENE1STAGE);
+		pBulletObject->SetChild(pGameObject, false);
 		m_ppBullets[i] = pBulletObject;
+	
 	}
 
 
 	CObjectsShader* pObjectsShader = new CObjectsShader();
-	pObjectsShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pObjectsShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pObjectsShader->SetCurScene(SCENE1STAGE);
 	pObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppShaders[0] = pObjectsShader;
 
 	CBillboardObjectShader* pBillboardObjectShader = new CBillboardObjectShader();
-	pBillboardObjectShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pBillboardObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pBillboardObjectShader->SetCurScene(SCENE1STAGE);
 	pBillboardObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 	m_ppShaders[1] = pBillboardObjectShader;
 
 	CSnowObjectShader* pCSnowObjectShader = new CSnowObjectShader();
-	pCSnowObjectShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pCSnowObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pCSnowObjectShader->SetCurScene(SCENE1STAGE);
 	pCSnowObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppShaders[2] = pCSnowObjectShader;
 
 	CCrossHairShader* pCrossHeadShader = new CCrossHairShader();
-	pCrossHeadShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pCrossHeadShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pCrossHeadShader->SetCurScene(SCENE1STAGE);
 	pCrossHeadShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pPlayer);
 	m_ppShaders[3] = pCrossHeadShader;
@@ -126,19 +128,22 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	int m_nNPCShaders = 3;
 	m_ppNPCShaders = new CNPCShader * [m_nNPCShaders];
 	CNPCShader* pCNPCShader = new CNPCShader();
-	pCNPCShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pCNPCShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pCNPCShader->SetCurScene(SCENE1STAGE);
 	pCNPCShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppNPCShaders[0] = pCNPCShader;
 
 	CBulletMotionShader* pCBulletMotionShader = new CBulletMotionShader();
-	pCBulletMotionShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pCBulletMotionShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pCBulletMotionShader->SetCurScene(SCENE1STAGE);
 	pCBulletMotionShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppNPCShaders[1] = pCBulletMotionShader;
 
 	CBulletMotionShader* pCExplosionShader1 = new CBulletMotionShader();
-	pCExplosionShader1->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pCExplosionShader1->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pCExplosionShader1->SetCurScene(SCENE1STAGE);
 	pCExplosionShader1->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pCExplosionShader1->SetActive(false);
@@ -172,7 +177,8 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	m_pOutlineShader = new COutlineShader();
-	m_pOutlineShader->CreateGraphicsPipelineState(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	m_pOutlineShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	m_pOutlineShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }
@@ -202,18 +208,6 @@ void SceneManager::ReleaseObjects()
 		}
 		delete[] m_ppNPCShaders;
 	}
-
-	//if (m_ppSpriteShaders)
-	//{
-	//	for (int i = 0; i < 1; i++)
-	//	{
-	//		m_ppSpriteShaders[i]->ReleaseShaderVariables();
-	//		m_ppSpriteShaders[i]->ReleaseObjects();
-	//		m_ppSpriteShaders[i]->Release();
-	//	}
-	//	delete[] m_ppSpriteShaders;
-	//}
-
 	if (m_pOutlineShader)
 	{
 		m_pOutlineShader->ReleaseShaderVariables();
@@ -330,12 +324,9 @@ bool SceneManager::ProcessInput(UCHAR* pKeysBuffer)
 void SceneManager::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 {
 	m_pUseWaterMove->Animate(fTimeElapsed);
-	/*for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed, NULL);
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->UpdateTransform(NULL);*/
 	//for (int i = 0; i < m_nEnvironmentMappingShaders; i++) m_ppEnvironmentMappingShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nParticleObjects; i++) m_ppParticleObjects[i]->AnimateObject(pCamera, fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
-	//for (int i = 0; i < 1; i++) if (m_ppSpriteShaders[i]) m_ppSpriteShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < 3; i++) if (m_ppNPCShaders[i]) m_ppNPCShaders[i]->AnimateObjects(fTimeElapsed);
 
 
@@ -362,11 +353,8 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i])m_ppShaders[i]->Render(pd3dCommandList, pCamera, 0);
-	for (int i = 0; i < 3; i++) if (m_ppNPCShaders[i])m_ppNPCShaders[i]->Render(pd3dCommandList, pCamera, 0);
+	//for (int i = 0; i < 3; i++) if (m_ppNPCShaders[i])m_ppNPCShaders[i]->Render(pd3dCommandList, pCamera, 0);
 	if (m_pUseWaterMove) m_pUseWaterMove->Render(pd3dCommandList, pCamera);
-
-	//if (m_pShader)m_pShader->Render(pd3dCommandList, pCamera, 0);
-	//for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) m_ppBullets[i]->Render(pd3dCommandList, pCamera);
 	if (m_bOutlineMode)
 	{
 		for (int i = 0; i < m_ppNPCShaders[0]->m_nObjects; i++)

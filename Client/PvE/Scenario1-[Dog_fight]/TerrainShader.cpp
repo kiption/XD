@@ -48,12 +48,16 @@ D3D12_BLEND_DESC CTerrainShader::CreateBlendState(int nPipelineState)
 	return(d3dBlendDesc);
 }
 
-void CTerrainShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
+void CTerrainShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets,
+	DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
+	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, nPipelineState);
 }
 
 
@@ -107,9 +111,13 @@ D3D12_SHADER_BYTECODE CWaterMoveShader::CreatePixelShader(ID3DBlob** ppd3dShader
 
 
 
-void CWaterMoveShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
+void CWaterMoveShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets,
+	DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
+	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, nPipelineState);
 }

@@ -36,7 +36,7 @@ protected:
 	LPVOID						m_pPlayerUpdatedContext;
 	LPVOID						m_pCameraUpdatedContext;
 
-	CPlayerShader* m_pShader = NULL;
+	CStandardObjectsShader* m_pShader = NULL;
 	GameSound m_GameSound;
 public:
 	XMFLOAT3					m_xmf3Right;

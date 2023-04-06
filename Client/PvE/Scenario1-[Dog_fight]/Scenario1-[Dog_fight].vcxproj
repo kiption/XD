@@ -143,7 +143,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Server\Server\protocol.h" />
     <ClInclude Include="BillboardObject.h" />
     <ClInclude Include="BillboardShader.h" />
     <ClInclude Include="Camera.h" />
@@ -169,9 +168,11 @@
     <ClInclude Include="ParticleObejct.h" />
     <ClInclude Include="ParticleShader.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Protocol.h" />
     <ClInclude Include="Scenario1-[Dog_fight].h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="ShadowShader.h" />
     <ClInclude Include="SkyboxMesh.h" />
     <ClInclude Include="SkyboxObject.h" />
     <ClInclude Include="Stage2.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="Scenario1-[Dog_fight].cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="ShadowShader.cpp" />
     <ClCompile Include="SkyboxMesh.cpp" />
     <ClCompile Include="SkyboxObject.cpp" />
     <ClCompile Include="Stage2.cpp" />

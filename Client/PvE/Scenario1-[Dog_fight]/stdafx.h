@@ -96,9 +96,9 @@ using Microsoft::WRL::ComPtr;
 #define _WITH_DIRECT2D_IMAGE_EFFECT
 #endif
 
-#define MAX_LIGHTS				8 
-#define MAX_MATERIALS			8 
-
+#define MAX_LIGHTS				16 
+#define MAX_MATERIALS			512 
+#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
 #define ANIMATION_CALLBACK_EPSILON		0.0165f
 
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
@@ -135,7 +135,8 @@ static std::random_device rd;
 static std::default_random_engine dre(rd());
 
 
-extern ID3D12RootSignature* GraphicsRootSignature(ID3D12Device* pd3dDevice);
+extern ID3D12RootSignature* GraphicsRootSignatureSt1(ID3D12Device* pd3dDevice);
+extern ID3D12RootSignature* GraphicsRootSignatureSt2(ID3D12Device* pd3dDevice);
 extern int ReadIntegerFromFile(FILE* pInFile);
 extern BYTE ReadStringFromFile(FILE* pInFile, char* pstrToken);
 extern float ReadFloatFromFile(FILE* pInFile);

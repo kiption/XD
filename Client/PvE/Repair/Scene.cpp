@@ -696,18 +696,6 @@ void CScene::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 
 	}
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////
-	for (int i = 0; i < 10; i++) { if (CollisionCheck == i) CollisionEND = 1; }
-	if (CollisionEND == 1)m_ppShaders[0]->m_ppObjects[CollisionCheck]->m_xmf4x4Transform._43 -= 0.5f;
-	if (m_bWarMode == true) WarMode();
-	for (int i = 0; i < 10; i++)
-	{
-		float fHeight = m_pTerrain->GetHeight(m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._41, m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._43) + 4.0f;
-		if (m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 < fHeight)
-		{
-			m_ppShaders[0]->m_ppObjects[i]->m_xmf4x4Transform._42 = fHeight + 2.0f;
-		}
-	}
 
 	if (m_pLights)
 	{
@@ -733,7 +721,6 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < m_nEnvironmentMappingShaders; i++)m_ppEnvironmentMappingShaders[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i])m_ppShaders[i]->Render(pd3dCommandList, pCamera, 0);
 	if (m_pUseWaterMove) m_pUseWaterMove->Render(pd3dCommandList, pCamera);
 	if (m_bOutlineMode)

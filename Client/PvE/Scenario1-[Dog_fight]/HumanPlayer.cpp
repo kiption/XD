@@ -5,9 +5,10 @@
 CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext )
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
-
-	m_pShader = new CPlayerShader();
-	m_pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
+	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
+	m_pShader = new CStandardObjectsShader();
+	m_pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	m_pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 4 + 1 + 1);
 
 	pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", m_pShader);
@@ -175,15 +176,6 @@ void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 
 	}
 
-	for (int i = 0; i < BULLETS2; i++)
-	{
-		if (!m_ppBullets2[i]->m_bActive)
-		{
-			pBulletObject2 = m_ppBullets2[i];
-			pBulletObject2->Reset();
-			break;
-		}
-	}
 	XMFLOAT3 PlayerLook = this->GetLookVector();
 	XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
 	XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));

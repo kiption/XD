@@ -26,9 +26,10 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pRandowmValueOnSphereTexture->CreateBuffer(pd3dDevice, pd3dCommandList, pxmf4RandomValues, 256, sizeof(XMFLOAT4), DXGI_FORMAT_R32G32B32A32_FLOAT, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, 0);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
+	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	CParticleShader* pShader = new CParticleShader();
-	pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
+	pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pShader->SetCurScene(SCENE1STAGE);
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 3);

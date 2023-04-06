@@ -21,6 +21,8 @@ public:
 	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState);
 
-	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState);
+	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+		ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets,
+		DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState);
 };
 

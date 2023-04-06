@@ -22,24 +22,20 @@ INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
+
 	//==================================================
 	//					Server Code
 	//==================================================
 	wcout.imbue(locale("korean"));
 	WSADATA WSAData;
-	WSAStartup(MAKEWORD(2, 0), &WSAData);
-
+	WSAStartup(MAKEWORD(2, 2), &WSAData);
 
 	active_servernum = MAX_SERVER - 1;
 
-	CS_LOGIN_PACKET p;
-	p.size = sizeof(CS_LOGIN_PACKET);
-	p.type = CS_LOGIN;
 	CS_LOGIN_PACKET login_pack;
 	login_pack.size = sizeof(CS_LOGIN_PACKET);
 	login_pack.type = CS_LOGIN;
-	strcpy_s(p.name, "COPTER");
-
+	strcpy_s(login_pack.name, "COPTER");
 
 	// Active Server에 연결
 	sockets[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
@@ -71,6 +67,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 	while (1)
 	{
+
+
 		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			if (msg.message == WM_QUIT) break;
@@ -82,12 +80,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		}
 		else
 		{
+
 			if (gGameFramework.m_nMode != SCENE2STAGE)
 			{
 
 				//==================================================
 				//		새로운 키 입력을 서버에게 전달합니다.
-				////==================================================
+				//==================================================
 				if (!gGameFramework.CheckNewInputExist_Keyboard()) {
 					short keyValue = gGameFramework.PopInputVal_Keyboard();
 					CS_INPUT_KEYBOARD_PACKET keyinput_pack;
@@ -153,12 +152,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					else if (bullets_info[i].m_state == OBJ_ST_RUNNING) {	// Update
 						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
 
-						((CMainPlayer*)gGameFramework.m_pPlayer)->m_ppBullets[i]->SetScale(4.0, 4.0, 10.0);
+						((CMainPlayer*)gGameFramework.m_pPlayer)->m_ppBullets[i]->SetScale(4.0, 4.0, 18.0);
 						((CMainPlayer*)gGameFramework.m_pPlayer)->m_ppBullets[i]->Rotate(100.0, 0.0, 0.0);
-
+						XMFLOAT3 xmf3bulletPosition = bullets_info[i].m_pos;
+						XMFLOAT3 xmf3bulletLook = my_info.m_look_vec;
 
 					}
 				}
+
 				myTime++;
 				if (myTime % 60 == 0) {
 					gGameFramework.m_time++;
@@ -167,12 +168,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 				}
 
-				// 4. 자신의 총알 개수 최신화
-				wchar_t MyBullet[100];
+				// 4. 자신의 총알 개수 최신화 (UI)
+				wchar_t MyBullet[20];
 				_itow_s(my_info.m_bullet, MyBullet, sizeof(MyBullet), 10);
 				wcscpy_s(gGameFramework.m_myBullet, MyBullet);
 
-				// 5. HP 최신화
+				// 5. HP 최신화	(UI)
 				wchar_t MyHp[20];
 				_itow_s(my_info.m_hp, MyHp, sizeof(MyHp), 10);
 				wcscpy_s(gGameFramework.m_myhp, MyHp);
@@ -185,6 +186,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//}
 			}
 
+			//==================================================
+//				충돌 이펙트 구현 코드
+			//==================================================
+			if (!coll_info.empty()) {
+				XMFLOAT3 collision_effect_pos = coll_info.front();
+				coll_info.pop();
+
+				std::cout << collision_effect_pos.x << ", " << collision_effect_pos.y << ", " << collision_effect_pos.z << endl;
+			}
 			//==================================================
 
 

@@ -57,7 +57,9 @@ D3D12_DEPTH_STENCIL_DESC COutlineShader::CreateDepthStencilState(int nPipelineSt
 	return(d3dDepthStencilDesc);
 }
 #define _WITH_PROJECTION_SPACE
-void COutlineShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
+void COutlineShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets,
+	DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
 {
 	m_nPipelineStates = 2;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];

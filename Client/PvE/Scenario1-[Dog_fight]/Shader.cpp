@@ -100,7 +100,9 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(const wchar_t* pszFileName,
 	return(d3dShaderByteCode);
 }
 
-void CShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
+void CShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets,
+	DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
 {
 	ID3DBlob* pd3dVertexShaderBlob = NULL, * pd3dPixelShaderBlob = NULL, * pd3dGeometryShaderBlob = NULL;
 
@@ -118,7 +120,19 @@ void CShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSi
 	d3dPipelineStateDesc.SampleMask = UINT_MAX;
 	d3dPipelineStateDesc.PrimitiveTopologyType = GetPrimitiveTopologyType(nPipelineState);
 	d3dPipelineStateDesc.NumRenderTargets = GetNumRenderTargets(nPipelineState);
-	d3dPipelineStateDesc.RTVFormats[0] = GetRTVFormat(nPipelineState, 0);
+
+	for (UINT i = 0; i < nRenderTargets; i++)
+	{
+		if (i == 0)
+		{
+			d3dPipelineStateDesc.RTVFormats[i] = GetRTVFormat(nPipelineState, 0);
+		}
+		else
+		{
+			d3dPipelineStateDesc.RTVFormats[i] = (pdxgiRtvFormats) ? pdxgiRtvFormats[i] : DXGI_FORMAT_R8G8B8A8_UNORM;
+		}
+	}
+
 	d3dPipelineStateDesc.DSVFormat = GetDSVFormat(nPipelineState);
 	d3dPipelineStateDesc.SampleDesc.Count = 1;
 	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
@@ -304,7 +318,7 @@ void CShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, int nP
 void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
 	OnPrepareRender(pd3dCommandList, nPipelineState);
-	
+
 }
 
 
@@ -362,14 +376,16 @@ D3D12_SHADER_BYTECODE CSkyBoxShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlo
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSkyBox", "ps_5_1", ppd3dShaderBlob));
 }
 
-void CSkyBoxShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice,ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
+void CSkyBoxShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets,
+	DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
-
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
+	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, nPipelineState);
 }
-
 
 CTexturedShader::CTexturedShader()
 {
@@ -404,12 +420,16 @@ D3D12_SHADER_BYTECODE CTexturedShader::CreatePixelShader(ID3DBlob** ppd3dShaderB
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTextured", "ps_5_1", ppd3dShaderBlob));
 }
 
-void CTexturedShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
+void CTexturedShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
+	ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets,
+	DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature,0);
+	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, nPipelineState);
 }
 
 

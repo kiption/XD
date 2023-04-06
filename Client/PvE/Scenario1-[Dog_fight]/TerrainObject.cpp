@@ -32,7 +32,7 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			SetMesh(x + (z * cxBlocks), pHeightMapGridMesh);
 		}
 	}
-
+	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 
 	CTexture* pTerrainTexture = new CTexture(5, RESOURCE_TEXTURE2D, 0, 1);
 
@@ -43,7 +43,9 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Dead_Grass_1_Normal.dds", RESOURCE_TEXTURE2D, 4);
 
 	CTerrainShader* pTerrainShader = new CTerrainShader();
-	pTerrainShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
+	pTerrainShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+
 	pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 5);
 	pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	pTerrainShader->CreateShaderResourceViews(pd3dDevice, pTerrainTexture, 0, 11);
@@ -92,14 +94,16 @@ CUseWaterMoveTerrain::CUseWaterMoveTerrain(ID3D12Device* pd3dDevice, ID3D12Graph
 	}
 
 
-
+	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	CTexture* pTerrainTexture = new CTexture(2, RESOURCE_TEXTURE2D, 0, 1);
 
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/DetailWater.dds", RESOURCE_TEXTURE2D, 0);
 	pTerrainTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Water.dds", RESOURCE_TEXTURE2D, 1);
 
 	CWaterMoveShader* pTerrainShader = new CWaterMoveShader();
-	pTerrainShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
+	pTerrainShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	
 	pTerrainShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 2);
 	pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	pTerrainShader->CreateShaderResourceViews(pd3dDevice, pTerrainTexture, 0, 11);

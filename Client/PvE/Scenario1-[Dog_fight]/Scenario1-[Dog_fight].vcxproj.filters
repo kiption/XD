@@ -93,6 +93,9 @@
     <Filter Include="Client\UI">
       <UniqueIdentifier>{a091a4e2-7e24-4dae-a168-0cefab3c2655}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Client\Shader\Shadow">
+      <UniqueIdentifier>{3ab44794-99c2-481b-b6df-2af25dc98cc7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -102,9 +105,6 @@
       <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="ObjectsInfo.h">
-      <Filter>Server</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Server\Server\protocol.h">
       <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
@@ -209,6 +209,12 @@
     <ClInclude Include="Stage2.h">
       <Filter>Client\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Protocol.h">
+      <Filter>Server</Filter>
+    </ClInclude>
+    <ClInclude Include="ShadowShader.h">
+      <Filter>Client\Shader\Shadow</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -309,6 +315,9 @@
     </ClCompile>
     <ClCompile Include="Stage2.cpp">
       <Filter>Client\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowShader.cpp">
+      <Filter>Client\Shader\Shadow</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
