@@ -461,6 +461,7 @@ void CGameFramework::CreateRenderTargetViews()
 	{
 		m_pdxgiSwapChain->GetBuffer(i, __uuidof(ID3D12Resource), (void**)&m_ppd3dSwapChainBackBuffers[i]);
 		m_pd3dDevice->CreateRenderTargetView(m_ppd3dSwapChainBackBuffers[i], NULL, d3dRtvCPUDescriptorHandle);
+		m_pd3dSwapChainBackBufferRTVCPUHandles[i] = d3dRtvCPUDescriptorHandle;
 		d3dRtvCPUDescriptorHandle.ptr += gnRtvDescriptorIncrementSize;
 	}
 }
@@ -1013,15 +1014,15 @@ void CGameFramework::FrameAdvance()
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * gnRtvDescriptorIncrementSize);
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
 	float pfClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	m_pd3dCommandList->ClearRenderTargetView(d3dRtvCPUDescriptorHandle, pfClearColor, 0, NULL);
-
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], pfClearColor, 0, NULL);
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
+	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], TRUE, &d3dDsvCPUDescriptorHandle);
 
 	m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
+	m_pScene->OnShadowPreRender(m_pd3dCommandList, m_pCamera);
 	if (m_nMode != SCENE2STAGE)
 	{
 		UpdateShaderVariables();

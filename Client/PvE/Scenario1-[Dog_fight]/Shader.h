@@ -6,6 +6,7 @@
 #include "Object.h"
 #include "Camera.h"
 
+struct LIGHT;
 
 class CShader
 {
@@ -97,6 +98,12 @@ public:
 	bool								m_bIntolakeCheck = false;
 	bool								GetActive() { return(m_bActive); }
 	void								SetActive(bool bActive) { m_bActive = bActive; }
+
+
+public:
+
+	CGameObject** m_ppObjects = 0;
+	int									m_nObjects = 0;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

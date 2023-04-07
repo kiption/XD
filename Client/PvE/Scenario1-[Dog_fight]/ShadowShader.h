@@ -2,10 +2,10 @@
 
 #include "Shader.h"
 
-//#include "IlluminateMesh.h"
+#include "IlluminatedMesh.h"
 #include "TerrainObject.h"
 #include "SkyboxObject.h"
-#include "Scene.h"
+
 
 
 struct TOOBJECTSPACEINFO
@@ -66,7 +66,7 @@ public:
 class CDepthRenderShader : public CIlluminatedShader
 {
 public:
-	CDepthRenderShader(CShadowInObjectsShader* pObjectsShader, LIGHT* pLights) {};
+	CDepthRenderShader(CShadowInObjectsShader* pObjectsShader, LIGHT* pLights);
 	virtual ~CDepthRenderShader();
 
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState);

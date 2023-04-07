@@ -5,7 +5,7 @@
 #include "TerrainObject.h"
 
 #define BULLETS					150
-#define BULLETS2				150
+
 class CMainPlayer : public CPlayer
 {
 public:
@@ -27,7 +27,7 @@ private:
 public:
 
 	CBulletObject* m_ppBullets[BULLETS];
-	CBulletObject* m_ppBullets2[BULLETS2];
+
 	void FireBullet(CGameObject* pLockedObject);
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPrepareRender();

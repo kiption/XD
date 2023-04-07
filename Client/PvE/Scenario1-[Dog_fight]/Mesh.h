@@ -93,6 +93,10 @@ public:
 	virtual void OnPostRender(int nPipelineState) { }
 public:
 	BoundingOrientedBox			m_xmOOBB = BoundingOrientedBox();
+
+public:
+	void CalculateBoundingBox(XMFLOAT3* pxmf3Points, UINT nStride);
+	BoundingBox						m_xmBoundingBox;
 	
 };
 

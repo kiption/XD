@@ -89,7 +89,12 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
 	}
 }
 
+void CMesh::CalculateBoundingBox(XMFLOAT3* pxmf3Points, UINT nStride)
+{
+	m_nStride = nStride;
+	BoundingBox::CreateFromPoints(m_xmBoundingBox, m_nVertices, pxmf3Points, nStride);
 
+}
 
 CTexturedRectMesh::CTexturedRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth, float fxPosition, float fyPosition, float fzPosition) : CMesh(pd3dDevice, pd3dCommandList)
 {

@@ -215,6 +215,9 @@
     <ClInclude Include="ShadowShader.h">
       <Filter>Client\Shader\Shadow</Filter>
     </ClInclude>
+    <ClInclude Include="IlluminatedMesh.h">
+      <Filter>Client\Mesh\BaseMesh</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp">
@@ -318,6 +321,9 @@
     </ClCompile>
     <ClCompile Include="ShadowShader.cpp">
       <Filter>Client\Shader\Shadow</Filter>
+    </ClCompile>
+    <ClCompile Include="IlluminatedMesh.cpp">
+      <Filter>Client\Mesh\BaseMesh</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

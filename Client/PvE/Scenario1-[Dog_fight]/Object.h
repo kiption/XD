@@ -276,6 +276,10 @@ public:
 
 	void SetStandardShader() { CMaterial::SetShader(m_pStandardShader); }
 	void SetSkinnedAnimationShader() { CMaterial::SetShader(m_pSkinnedAnimationShader); }
+
+public:
+	void SetReflection(UINT nReflection) { m_nReflection = nReflection; }
+
 };
 
 struct CALLBACKKEY
@@ -479,7 +483,7 @@ public:
 	CShader** m_ppShader = NULL;
 	XMFLOAT4X4						m_xmf4x4Transform;
 	XMFLOAT4X4						m_xmf4x4World;
-
+	BoundingBox						m_xmBoundingBox;
 	CGameObject 					*m_pParent = NULL;
 	CGameObject 					*m_pChild = NULL;
 	CGameObject 					*m_pSibling = NULL;
@@ -505,7 +509,7 @@ public:
 	
 	XMFLOAT3 m_xmf3RotationAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	XMFLOAT3 m_xmf3MovingDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	
+	void CalculateBoundingBox();
 	void SetMovingDirection(const XMFLOAT3& xmf3MovingDirection);
 	void SetRotationSpeed(float fSpeed) { m_fRotationSpeed = fSpeed; }
 	void SetMovingSpeed(float fSpeed) { m_fMovingSpeed = fSpeed; }

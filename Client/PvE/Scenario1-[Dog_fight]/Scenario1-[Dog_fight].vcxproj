@@ -156,6 +156,7 @@
     <ClInclude Include="HelicopterObejct.h" />
     <ClInclude Include="HelicopterObjectShader.h" />
     <ClInclude Include="HumanPlayer.h" />
+    <ClInclude Include="IlluminatedMesh.h" />
     <ClInclude Include="MainPlayer.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MissileObject.h" />
@@ -196,6 +197,7 @@
     <ClCompile Include="HelicopterObejct.cpp" />
     <ClCompile Include="HelicopterObjectShader.cpp" />
     <ClCompile Include="HumanPlayer.cpp" />
+    <ClCompile Include="IlluminatedMesh.cpp" />
     <ClCompile Include="MainPlayer.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MissileObject.cpp" />
@@ -243,6 +245,18 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VSStandard</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">VSStandard</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VSStandard</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VSStandard</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.1</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -360,7 +360,7 @@ ID3D12RootSignature* GraphicsRootSignatureSt1(ID3D12Device* pd3dDevice)
 
 	pd3dDescriptorRanges[20].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[20].NumDescriptors = MAX_DEPTH_TEXTURES;
-	pd3dDescriptorRanges[20].BaseShaderRegister = 28; //t18~34 (18+MAX LIGHT): Depth Buffer
+	pd3dDescriptorRanges[20].BaseShaderRegister = 28; //t28~ (18+MAX LIGHT): Depth Buffer
 	pd3dDescriptorRanges[20].RegisterSpace = 0;
 	pd3dDescriptorRanges[20].OffsetInDescriptorsFromTableStart = 0;
 

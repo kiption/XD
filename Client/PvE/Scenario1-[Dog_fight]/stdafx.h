@@ -73,6 +73,14 @@ using Microsoft::WRL::ComPtr;
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 #define FRAME_BUFFER_WIDTH		1280
 #define FRAME_BUFFER_HEIGHT		1024
+#define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 4)
+#define _DEPTH_BUFFER_HEIGHT	(FRAME_BUFFER_HEIGHT * 4)
+#define _PLANE_WIDTH			FRAME_BUFFER_WIDTH
+#define _PLANE_HEIGHT			FRAME_BUFFER_HEIGHT
+#define MAX_LIGHTS				16 
+#define MAX_MATERIALS			512 
+#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
+#define ANIMATION_CALLBACK_EPSILON		0.0165f
 
 #define SCENE1STAGE				0x00
 #define SCENE2STAGE				0x01
@@ -96,10 +104,7 @@ using Microsoft::WRL::ComPtr;
 #define _WITH_DIRECT2D_IMAGE_EFFECT
 #endif
 
-#define MAX_LIGHTS				16 
-#define MAX_MATERIALS			512 
-#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
-#define ANIMATION_CALLBACK_EPSILON		0.0165f
+
 
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 extern int gnCurrentParticles;

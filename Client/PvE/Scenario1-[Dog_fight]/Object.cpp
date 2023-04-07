@@ -359,6 +359,8 @@ void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	
 }
 
+
+
 void CMaterial::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &m_xmf4AmbientColor, 16);
@@ -525,6 +527,16 @@ void CGameObject::SetMaterial(CMaterial* pMaterial)
 	if (m_pMaterial) m_pMaterial->Release();
 	m_pMaterial = pMaterial;
 	if (m_pMaterial) m_pMaterial->AddRef();
+}
+
+void CGameObject::CalculateBoundingBox()
+{
+	for (int i = 1; i < m_nMeshes; i++)
+	{
+		m_xmBoundingBox = m_ppMeshes[i]->m_xmBoundingBox;
+		BoundingBox::CreateMerged(m_xmBoundingBox, m_xmBoundingBox, m_ppMeshes[i]->m_xmBoundingBox);
+	}
+	m_xmBoundingBox.Transform(m_xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
 }
 
 void CGameObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)

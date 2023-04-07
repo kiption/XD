@@ -94,6 +94,7 @@ void CMainPlayer::OnPrepareRender()
 void CMainPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	CPlayer::Render(pd3dCommandList, pCamera);
+
 	for (int i = 0; i < BULLETS; i++) {
 		 m_ppBullets[i]->Render(pd3dCommandList, pCamera); 
 	}

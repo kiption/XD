@@ -12,43 +12,42 @@ CStage2::~CStage2()
 
 void CStage2::BuildDefaultLightsAndMaterials()
 {
-	m_nLights = 3;
-	m_pLights = new LIGHT[m_nLights];
-	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
+	m_pLights = new LIGHTS;
+	::ZeroMemory(m_pLights, sizeof(LIGHTS));
 
 	m_xmf4GlobalAmbient = XMFLOAT4(0.15f, 0.15f, 0.15f, 1.0f);
 
-	m_pLights[0].m_bEnable = true;
-	m_pLights[0].m_nType = POINT_LIGHT;
-	m_pLights[0].m_fRange = 1000.0f;
-	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f);
-	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
-	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
-	m_pLights[0].m_xmf3Position = XMFLOAT3(30.0f, 30.0f, 30.0f);
-	m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+	 m_pLights->m_pLights[0].m_bEnable = true;
+	 m_pLights->m_pLights[0].m_nType = POINT_LIGHT;
+	 m_pLights->m_pLights[0].m_fRange = 1000.0f;
+	 m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.0f, 0.0f, 1.0f);
+	 m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.0f, 0.0f, 1.0f);
+	 m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
+	 m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(30.0f, 30.0f, 30.0f);
+	 m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	 m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 
-	m_pLights[1].m_nType = SPOT_LIGHT;
-	m_pLights[1].m_fRange = 1200.0f;
-	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.8f);
-	m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2f, 0.3f, 0.0f);
-	m_pLights[1].m_xmf3Position = XMFLOAT3(0.0f, 10.0f, 2.0f);
-	m_pLights[1].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights[1].m_fFalloff = 5.5f;
-	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(60.0f));
-	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(40.0f));
-	m_pLights[1].m_bEnable = true;
+	 m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
+	 m_pLights->m_pLights[1].m_fRange = 1200.0f;
+	 m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	 m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.8f);
+	 m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2f, 0.3f, 0.0f);
+	 m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(0.0f, 10.0f, 2.0f);
+	 m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	 m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	 m_pLights->m_pLights[1].m_fFalloff = 5.5f;
+	 m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(60.0f));
+	 m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(40.0f));
+	 m_pLights->m_pLights[1].m_bEnable = true;
 
-	m_pLights[2].m_bEnable = true;
-	m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights[2].m_fRange = 3000.0f;
-	m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	m_pLights[2].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
-	m_pLights[2].m_xmf3Position = XMFLOAT3(50.0f, 30.0f, 30.0f);
-	m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, 1.0f, 1.0f);
+	 m_pLights->m_pLights[2].m_bEnable = true;
+	 m_pLights->m_pLights[2].m_nType = DIRECTIONAL_LIGHT;
+	 m_pLights->m_pLights[2].m_fRange = 3000.0f;
+	 m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	 m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	 m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+	 m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(50.0f, 30.0f, 30.0f);
+	 m_pLights->m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, 1.0f, 1.0f);
 
 
 	m_pMaterials = new MATERIALS;
@@ -228,9 +227,7 @@ void CStage2::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 }
 void CStage2::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	::memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(LIGHTS) * m_nLights);
-	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
-	::memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
+	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
 
 	if (m_pcbMappedMaterials) ::memcpy(m_pcbMappedMaterials, m_pMaterials, sizeof(MATERIALS));
 }

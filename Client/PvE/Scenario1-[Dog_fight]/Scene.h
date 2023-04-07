@@ -10,6 +10,7 @@
 #include "OutlineShader.h"
 #include "ObjectShader.h"
 #include "DynamicMappingShader.h"
+#include "ShadowShader.h"
 
 #include "ParticleObejct.h"
 #include "SkyboxObject.h"
@@ -83,6 +84,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 	void OnPreRender(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue, ID3D12Fence* pd3dFence, HANDLE hFenceEvent);
+	void OnShadowPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void ReleaseUploadBuffers();
 
@@ -124,10 +126,10 @@ public:
 	COutlineShader* m_pOutlineShader = NULL;
 	XMFLOAT4							m_xmf4GlobalAmbient;
 	int									m_nLights = 0;
-	LIGHT								*m_pLights = NULL;
+//	LIGHT								*m_pLights = NULL;
 	ID3D12Resource						*m_pd3dcbLights = NULL;
 	LIGHTS								*m_pcbMappedLights = NULL;
-
+	LIGHTS* m_pLights = NULL;
 	ID3D12Resource* m_pd3dcbMaterials = NULL;
 	MATERIAL* m_pcbMappedMaterials = NULL;
 	MATERIALS* m_pMaterials = NULL;
@@ -142,5 +144,11 @@ public:
 
 	bool m_bWarMode = false;
 	bool m_bOutlineMode = false;
+
+public:
+	CShadowMapShader* m_pShadowShader = NULL;
+	CDepthRenderShader* m_pDepthRenderShader = NULL;
+	BoundingBox						m_xmBoundingBox;
+	float m_fLightRotationAngle = 0.0f;
 };
 
