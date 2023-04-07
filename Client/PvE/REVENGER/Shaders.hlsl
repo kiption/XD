@@ -386,6 +386,7 @@ VS_SKYBOX_CUBEMAP_OUTPUT VSSkyBox(VS_SKYBOX_CUBEMAP_INPUT input)
 
 TextureCube gtxtSkyCubeTexture : register(t13);
 SamplerState gssClamp : register(s1);
+Texture2D gtxtBillboardTexture : register(t14);
 Texture2D<float4> gtxtParticleTexture : register(t15);
 Buffer<float4> gRandomBuffer : register(t16);
 Buffer<float4> gRandomSphereBuffer : register(t17);
@@ -397,7 +398,6 @@ float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 	return(cColor);
 }
 
-Texture2D gtxtBillboardTexture : register(t14);
 struct VS_TEXTURED_INPUT
 {
 	float3 position : POSITION;
@@ -417,7 +417,7 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 {
 	VS_TEXTURED_OUTPUT output;
 
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 
 	return(output);
@@ -425,7 +425,7 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 
 float4 PSTextured(VS_TEXTURED_OUTPUT input, uint primitiveID : SV_PrimitiveID) : SV_TARGET
 {
-	float4 cColor = gtxtParticleTexture.Sample(gssWrap, input.uv);
+	float4 cColor = gtxtBillboardTexture.Sample(gssWrap, input.uv);
 
 	return(cColor);
 }
@@ -441,7 +441,7 @@ VS_TEXTURED_OUTPUT VSBillBoardTextured(VS_TEXTURED_INPUT input)
 VS_TEXTURED_OUTPUT VSParticleBillBoardTextured(VS_TEXTURED_INPUT input)
 {
 	VS_TEXTURED_OUTPUT output;
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 	return (output);
 
@@ -533,13 +533,13 @@ void GetPositions(float3 position, float2 f2Size, out float3 pf3Positions[8])
 	pf3Positions[7] = position + float3(0.0f, 0.0f, -f2Size.y);
 }
 //
-//// 랜덤 값들
+// 랜덤 값들
 float4 RandomDirection(float fOffset)
 {
 	int u = uint(gfCurrentTime + fOffset + frac(gfCurrentTime) * 1000.0f) % 1024;
 	return(normalize(gRandomBuffer.Load(u)));
 }
-//
+
 float4 RandomDirectionOnSphere(float fOffset)
 {
 	int u = uint(gfCurrentTime + fOffset + frac(gfCurrentTime) * 1000.0f) % 256;
@@ -579,7 +579,6 @@ void EmmitParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT
 	output.Append(input);
 }
 
-
 void ShellParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
 {
 	if (input.lifetime <= 0.0f)
@@ -616,7 +615,7 @@ void ShellParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT
 	}
 }
 
-//
+
 void OutputEmberParticles(VS_PARTICLE_INPUT input, inout PointStream<VS_PARTICLE_INPUT> output)
 {
 	if (input.lifetime > 0.0f)
@@ -654,7 +653,7 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
 	VS_PARTICLE_INPUT particle = input[0];
 
 	if (particle.type == PARTICLE_TYPE_EMITTER) EmmitParticles(particle, output);
-	else if (particle.type == PARTICLE_TYPE_SHELL) ShellParticles(particle, output);// Shell 타입은 파티클의 수명이 다 할떄, FLAR 파티클을 만든다.
+	else if (particle.type == PARTICLE_TYPE_SHELL) ShellParticles(particle, output);			// Shell 타입은 파티클의 수명이 다 할떄, FLAR 파티클을 만든다.
 	else if ((particle.type == PARTICLE_TYPE_FLARE01) || (particle.type == PARTICLE_TYPE_FLARE03)) OutputEmberParticles(particle, output);
 	else if (particle.type == PARTICLE_TYPE_FLARE02) GenerateEmberParticles(particle, output);
 }

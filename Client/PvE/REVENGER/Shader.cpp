@@ -312,9 +312,9 @@ void CShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12Graphi
 //}
 void CShader::OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList, int nPipelineState)
 {
-	//SceneManager* m_pScene = NULL;
+	SceneManager* m_pScene = NULL;
 	//if (m_pd3dPipelineState) pd3dCommandList->SetPipelineState(m_pd3dPipelineState);
-	//if (m_pScene->m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pScene->m_pd3dCbvSrvDescriptorHeap);
+	if (m_pScene->m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pScene->m_pd3dCbvSrvDescriptorHeap);////
 	if (m_ppd3dPipelineStates && m_ppd3dPipelineStates[nPipelineState]) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
 	UpdateShaderVariables(pd3dCommandList);
 

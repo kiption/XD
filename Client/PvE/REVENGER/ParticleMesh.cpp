@@ -100,8 +100,8 @@ void CParticleMesh::PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nP
 		m_d3dStreamOutputBufferView.SizeInBytes = m_nStride * m_nMaxParticles;
 		m_d3dStreamOutputBufferView.BufferFilledSizeLocation = m_pd3dDefaultBufferFilledSize->GetGPUVirtualAddress();
 
-		*m_pnUploadBufferFilledSize = m_nStride * m_nVertices;
-		//*m_pnUploadBufferFilledSize = 0;
+		//*m_pnUploadBufferFilledSize = m_nStride * m_nVertices;
+		*m_pnUploadBufferFilledSize = 0;
 
 		::SynchronizeResourceTransition(pd3dCommandList, m_pd3dDefaultBufferFilledSize, D3D12_RESOURCE_STATE_STREAM_OUT, D3D12_RESOURCE_STATE_COPY_DEST);
 		pd3dCommandList->CopyResource(m_pd3dDefaultBufferFilledSize, m_pd3dUploadBufferFilledSize);
@@ -136,7 +136,7 @@ void CParticleMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipe
 
 		pd3dCommandList->ResolveQueryData(m_pd3dSOQueryHeap, D3D12_QUERY_TYPE_SO_STATISTICS_STREAM0, 0, 1, m_pd3dSOQueryBuffer, 0);
 #else
-		CMesh::Render(pd3dCommandList); //Stream Output to m_pd3dStreamOutputBuffer
+		CMesh::Render(pd3dCommandList,0); //Stream Output to m_pd3dStreamOutputBuffer
 		::SynchronizeResourceTransition(pd3dCommandList, m_pd3dDefaultBufferFilledSize, D3D12_RESOURCE_STATE_STREAM_OUT, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		pd3dCommandList->CopyResource(m_pd3dReadBackBufferFilledSize, m_pd3dDefaultBufferFilledSize);
 		::SynchronizeResourceTransition(pd3dCommandList, m_pd3dDefaultBufferFilledSize, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_STREAM_OUT);
@@ -145,7 +145,7 @@ void CParticleMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipe
 	else if (nPipelineState == 1)
 	{
 		pd3dCommandList->SOSetTargets(0, 1, NULL);
-		CMesh::Render(pd3dCommandList); //Render m_pd3dDrawBuffer 
+		CMesh::Render(pd3dCommandList,0); //Render m_pd3dDrawBuffer 
 	}
 }
 

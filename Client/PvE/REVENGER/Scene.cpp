@@ -82,15 +82,16 @@ void SceneManager::ReleaseShaderVariables()
 
 void SceneManager::BuildDefaultLightsAndMaterials()
 {
-	m_pLights = new LIGHTS;
-	::ZeroMemory(m_pLights, sizeof(LIGHTS));
+	m_nLights = 5;
+	m_pLights = new LIGHTS[m_nLights];
+	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
 
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[0].m_fRange = 3000.0f;
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.43f, 0.43f, 0.05f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.43f, 0.43f, 0.45f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.43f, 0.43f, 0.05f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(+250, 550.0f, -1500.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(-0.6f, -1.0f, 1.0f);
@@ -696,6 +697,8 @@ void SceneManager::AnimateObjects(float fTimeElapsed)
 
 void SceneManager::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
 {
+	m_fElapsedTime = fTimeElapsed;
+	for (int i = 0; i < m_nParticleObjects; i++) m_ppParticleObjects[i]->AnimateObject(m_pPlayer->GetCamera(), fTimeElapsed);
 }
 
 void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -755,7 +758,7 @@ void SceneManager::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 			XMMATRIX xmmtxProjection{};
 			if (m_pLights->m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
 			{
-				float fFovAngle = 80.0; //m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
+				float fFovAngle = 80.0; m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
 				float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
 				xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fFovAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
 				//float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;

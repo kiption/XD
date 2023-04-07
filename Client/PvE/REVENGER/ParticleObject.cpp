@@ -29,7 +29,8 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	ParticleShader* pShader = new ParticleShader();
-	pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, 0, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	SceneManager* pScene = NULL;
@@ -70,7 +71,7 @@ void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 {
 	OnPrepareRender();
 
-	/*if (m_ppMaterials)
+	if (m_ppMaterials)
 	{
 		for (int i = 0; i < m_nMaterials; i++)
 		{
@@ -81,14 +82,15 @@ void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 			if (m_pRandowmValueTexture) m_pRandowmValueTexture->UpdateShaderVariables(pd3dCommandList);
 			if (m_pRandowmValueOnSphereTexture) m_pRandowmValueOnSphereTexture->UpdateShaderVariables(pd3dCommandList);
 		}
-	}*/
-	if (m_pMaterials)
-	{
-		if (m_pMaterials->m_pShader) m_pMaterials->m_pShader->OnPrepareRender(pd3dCommandList, 0);
-		if (m_pMaterials->m_pTexture) m_pMaterials->m_pTexture->UpdateShaderVariables(pd3dCommandList);
-		if (m_pRandowmValueTexture) m_pRandowmValueTexture->UpdateShaderVariables(pd3dCommandList);
-		if (m_pRandowmValueOnSphereTexture) m_pRandowmValueOnSphereTexture->UpdateShaderVariables(pd3dCommandList);
 	}
+	//if (m_pMaterials)
+	//{
+	//	if (m_pMaterials->m_pShader) m_pMaterials->m_pShader->OnPrepareRender(pd3dCommandList, 0);
+	//	if (m_pMaterials->m_pTexture) m_pMaterials->m_pTexture->UpdateShaderVariables(pd3dCommandList);
+	//	
+	//	if (m_pRandowmValueTexture) m_pRandowmValueTexture->UpdateShaderVariables(pd3dCommandList);
+	//	if (m_pRandowmValueOnSphereTexture) m_pRandowmValueOnSphereTexture->UpdateShaderVariables(pd3dCommandList);
+	//}
 
 	UpdateShaderVariables(pd3dCommandList);
 
@@ -96,9 +98,9 @@ void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	if (m_pMesh) m_pMesh->PreRender(pd3dCommandList, 0); //Stream Output
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList, 0); //Stream Output
 	if (m_pMesh) m_pMesh->PostRender(pd3dCommandList, 0); //Stream Output
-   /*for (int i = 0; i < m_nMaterials; i++)
-	   if (m_ppMaterials[i] && m_ppMaterials[i]->m_pShader)m_ppMaterials[i]->m_pShader->OnPrepareRender(pd3dCommandList, 1);*/
-	if (m_pMaterials && m_pMaterials->m_pShader) m_pMaterials->m_pShader->OnPrepareRender(pd3dCommandList, 1);
+   for (int i = 0; i < m_nMaterials; i++)
+	   if (m_ppMaterials[i] && m_ppMaterials[i]->m_pShader)m_ppMaterials[i]->m_pShader->OnPrepareRender(pd3dCommandList, 1);
+	//if (m_pMaterials && m_pMaterials->m_pShader) m_pMaterials->m_pShader->OnPrepareRender(pd3dCommandList, 1);
 	if (m_pMesh)m_pMesh->PreRender(pd3dCommandList, 1); //Draw
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList, 1); //Draw
 }
