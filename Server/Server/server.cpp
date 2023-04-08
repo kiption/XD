@@ -180,7 +180,7 @@ public:
 
 int user_count = 0;
 array<SESSION, MAX_USER> clients;
-array<NPC, MAX_NPCS> npcs;
+array<ST1_NPC, MAX_NPCS> npcs;
 
 array<Bullets, MAX_BULLET> bullets_arr;
 chrono::system_clock::time_point shoot_time;
@@ -277,11 +277,11 @@ void SESSION::send_move_rotate_packet(int client_id, short update_target)
 	update_pl_packet.right_x = clients[client_id].m_rightvec.x;
 	update_pl_packet.right_y = clients[client_id].m_rightvec.y;
 	update_pl_packet.right_z = clients[client_id].m_rightvec.z;
-	
+
 	update_pl_packet.up_x = clients[client_id].m_upvec.x;
 	update_pl_packet.up_y = clients[client_id].m_upvec.y;
 	update_pl_packet.up_z = clients[client_id].m_upvec.z;
-	
+
 	update_pl_packet.look_x = clients[client_id].m_lookvec.x;
 	update_pl_packet.look_y = clients[client_id].m_lookvec.y;
 	update_pl_packet.look_z = clients[client_id].m_lookvec.z;
@@ -466,7 +466,7 @@ void process_packet(int client_id, char* packet)
 			<< "," << clients[client_id].pos.y << "," << clients[client_id].pos.z << ")." << endl;
 
 		// 현재 접속해 있는 모든 클라이언트에게 새로운 클라이언트(client_id)의 정보를 전송합니다.
-		for (int i = 0; i < MAX_USER; ++i) {		
+		for (int i = 0; i < MAX_USER; ++i) {
 			auto& pl = clients[i];
 
 			if (pl.id == client_id) continue;
@@ -844,7 +844,7 @@ void process_packet(int client_id, char* packet)
 	case SS_DATA_REPLICA:
 	{
 		SS_DATA_REPLICA_PACKET* replica_pack = reinterpret_cast<SS_DATA_REPLICA_PACKET*>(packet);
-		
+
 		int replica_id = replica_pack->id;
 		clients[replica_id].s_lock.lock();
 		clients[replica_id].id = replica_id;
@@ -1487,17 +1487,17 @@ void init_npc()
 		npcs[i].SetID(npc_id);
 		npcs[i].SetNpcType(NPC_Helicopter);
 		npcs[i].SetRotate(0.0f, 0.0f, 0.0f);
-		npcs[i].SetActive(false);
+		//npcs[i].SetActive(false);
 
 		random_device rd;
 		default_random_engine dre(rd());
-		uniform_real_distribution<float>AirHigh(150, 250);
-		uniform_real_distribution<float>AirPos(-50, 350);
+		uniform_real_distribution<float>AirHigh(200, 300);
+		uniform_real_distribution<float>AirPos(100, 550);
 
 		npcs[i].SetPosition(AirPos(dre), AirHigh(dre), AirPos(dre));
 		npcs[i].SetOrgPosition(npcs[i].GetPosition());
 
-		uniform_real_distribution<float>rTheta(0.006f, 0.01f);
+		uniform_real_distribution<float>rTheta(0.6f, 1.0f);
 		npcs[i].SetTheta(rTheta(dre));
 		npcs[i].SetAcc(npcs[i].GetTheta());
 
@@ -1505,6 +1505,7 @@ void init_npc()
 		npcs[i].SetRange(rRange(dre));
 	}
 }
+
 void MoveNPC()
 {
 	auto start_t = system_clock::now();
@@ -1513,8 +1514,25 @@ void MoveNPC()
 		if (curr_t - start_t < 500ms)
 			this_thread::sleep_for(500ms - (curr_t - start_t));
 		start_t = curr_t;
-		for (int i = 0; i < MAX_NPCS; i++) {
-			npcs[i].MovetoRotate();
+		for (int i = 0; i < MAX_NPCS; ++i) {
+			// 클라이언트들과 NPC 사이의 거리 계산
+			for (auto& cl : clients) {
+				npcs[i].Caculation_Distance(cl.pos, cl.id);
+				//cout << i << "번째 NPC와 플레이어" << cl.id << "의 거리 - " << npcs[i].GetDistance(cl.id) << endl;
+			}
+
+			//cout << i << "번째 Status - " << npcs[i].GetState() << endl;
+
+			// NPC가 추적하려는 아이디가 있는지부터 확인, 있으면 추적 대상 플레이어 좌표를 임시 저장
+			if (npcs[i].GetChaseID() != -1) {
+				npcs[i].SetUser_Pos(clients[npcs[i].GetChaseID()].pos, npcs[i].GetChaseID());
+			}
+
+			// 상태마다 다른 움직임을 하는 매니지먼트
+			npcs[i].ST1_State_Manegement(npcs[i].GetState());
+			//npcs[i].MovetoRotate();
+			cout << i << "번째 Pos:" << npcs[i].GetPosition().x << ',' << npcs[i].GetPosition().y << ',' << npcs[i].GetPosition().z << endl;
+			//cout << i << "번째 Pos:" << npcs[i].GetPosition().x << ',' << npcs[i].GetPosition().y << ',' << npcs[i].GetRotate() << endl;
 
 			// Send Move&Rotate Packet
 			SC_MOVE_ROTATE_OBJECT_PACKET npc_update_packet;
@@ -1531,11 +1549,11 @@ void MoveNPC()
 			npc_update_packet.right_x = npcs[i].GetCurr_coordinate().right.x;
 			npc_update_packet.right_y = npcs[i].GetCurr_coordinate().right.y;
 			npc_update_packet.right_z = npcs[i].GetCurr_coordinate().right.z;
-			
+
 			npc_update_packet.up_x = npcs[i].GetCurr_coordinate().up.x;
 			npc_update_packet.up_y = npcs[i].GetCurr_coordinate().up.y;
 			npc_update_packet.up_z = npcs[i].GetCurr_coordinate().up.z;
-			
+
 			npc_update_packet.look_x = npcs[i].GetCurr_coordinate().look.x;
 			npc_update_packet.look_y = npcs[i].GetCurr_coordinate().look.y;
 			npc_update_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
@@ -1697,7 +1715,7 @@ int main(int argc, char* argv[])
 	}
 	extended_servers[my_server_id].id = my_server_id;
 	extended_servers[my_server_id].s_state = ST_ACCEPTED;
-	
+
 	//======================================================================
 	// [ Main ]
 	init_npc();

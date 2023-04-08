@@ -4,13 +4,14 @@
 #include "MyVectors.h"
 //#include <random>
 enum NpcType{NPC_Helicopter, NPC_Bunker, NPC_Terret};
-
+enum St1_NPCState{NPC_IDLE, NPC_FLY, NPC_CHASE, NPC_ATTACK, NPC_DEATH};
+enum Hit_target{g_none, g_body, g_profeller};
 //std::random_device rd;
 //std::default_random_engine dre(rd());
 
-class NPC{
+class ST1_NPC{
 private:
-	int m_ID;									// ID는 7001~부터 시작
+	int m_ID;
 	int m_NpcType;
 	float m_pitch, m_yaw, m_roll;					// Rotated Degree
 	
@@ -18,102 +19,95 @@ private:
 	XMFLOAT3 m_saveOrgPos;
 	Coordinate m_curr_coordinate;				// 현재 Look, Right, Up Vectors
 
-	bool m_Active;
+	XMFLOAT3 m_User_Pos[5];
+	int m_state;
+	
+	int m_Hit;
+	int m_ProfellerHP;
+	int m_BodyHP;
+	int m_attack;
+	int m_defence;
+	int m_chaseID;
+
+	float m_Speed;
 	float m_theta;
 	float m_range;					// 임시 변수 재 제작시 사라질 운명
 	float m_Acc;
 
-	float m_Distance[3] = { 10000 };
-	float m_FindRange;
+	float m_Distance[3];
 
 public:
 	// ===========================================
 	// =============      BASE      ==============
 	// ===========================================
-	NPC();
-	~NPC();
-
+	ST1_NPC();
+	~ST1_NPC();
 
 	// ===========================================
 	// =============       SET      ==============
 	// ===========================================
 	void SetID(int id);
 	void SetNpcType(int type);
+	void SetChaseID(int id);
 	void SetRotate(float y, float p, float r);
 	void SetPosition(float x, float y, float z);
 	void SetPosition(XMFLOAT3 pos);
 	void SetOrgPosition(XMFLOAT3 pos);
 	void SetCurr_coordinate(Coordinate cor);
+	void SetUser_Pos(XMFLOAT3 pos, int id);
 
-	void SetActive(bool act);
 	void SetTheta(float t);
 	void SetRange(float r);
 	void SetAcc(float acc);
 	void SetDistance(float dis);
-	void SetFindRange(float f);
 
 	// ===========================================
 	// =============       GET      ==============
 	// ===========================================
 	int GetID();
+	int GetChaseID();
 	int GetType();
-	float GetRotate();
-	float MyGetPosition();
+	int GetState();
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetOrgPosition();
 	Coordinate GetCurr_coordinate();
 
-	bool GetActive();
+	float MyGetPosition();
+	float GetRotate();
 	float GetTheta();
 	float GetRange();
 	float GetAcc();
-	float GetDistance();
-	float GetFindRange();
+	float GetDistance(int id);
 
 public:
+	
 	// ===========================================
 	// =============     NORMAL     ==============
 	// ===========================================
-	void Move();					// 추후에 A* 알고리즘 추가할 예정 현재는 특정 운동만 수행
+	
+	// State
+	void ST1_State_Manegement(int state); // 상태 관리
+	
+	void Caculation_Distance(XMFLOAT3 vec, int id); // 범위 내 플레이어 탐색
+	void ST1_Death_motion(); // HP 0
+
+	// Damege
+	void ST1_Damege_Calc(int id);
+	
+	// Idle
 	void MovetoRotate();
-	XMFLOAT3 NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll);
-	virtual void Caculation_Distance(XMFLOAT3 vec, int id); // 범위 내 플레이어 탐색
-	virtual void FindTarget(XMFLOAT3 vec);
+	
+	// Fly
 	void FlyOnNpc(XMFLOAT3 vec, int id);
+	
+	// Chase
+	void PlayerChasing();
+
+	// Rotate
+	XMFLOAT3 NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll);
+	
+	
 
 
-};
 
-class Stage1Enemy : public NPC
-{
-private:
-
-
-public:
-	int m_n1STEnemy = 60;
-
-public:
-	Stage1Enemy();
-	~Stage1Enemy();
-
-	virtual void Caculation_Distance(XMFLOAT3 vec);
-
-	void ChaseToPlayer();
-};
-
-class Stage2Enemy : public NPC
-{
-private:
-
-public:
-	int m_n2STEnemy = 40;
-
-public:
-
-	Stage2Enemy();
-	~Stage2Enemy();
-
-	virtual void Caculation_Distance(XMFLOAT3 vec);
-
-	void ChaseToPlayer();
 };

@@ -11,21 +11,32 @@ XMFLOAT3 NPCNormalize(XMFLOAT3 vec)
 	return vec;
 }
 
-
 // ===========================================
 // =============      BASE      ==============
 // ===========================================
 
-NPC::NPC()
+ST1_NPC::ST1_NPC()
 {
 	m_curr_coordinate.right = { 1.0f, 0.0f, 0.0f };
 	m_curr_coordinate.up = { 0.0f, 1.0f, 0.0f };
 	m_curr_coordinate.look = { 0.0f, 0.0f, 1.0f };
 
+	for (int i{}; i < 3; ++i) {
+		m_Distance[i] = { 10000 };
+	}
 
+	m_state = NPC_IDLE;
+	m_Hit = g_none;
+	m_ProfellerHP = 50;
+	m_BodyHP = 50;
+
+	m_attack = 25;
+	m_defence = 100;
+	m_Speed = 15.0f;
+	m_chaseID = -1;
 }
 
-NPC::~NPC()
+ST1_NPC::~ST1_NPC()
 {
 
 }
@@ -34,242 +45,272 @@ NPC::~NPC()
 // =============       SET      ==============
 // ===========================================
 
-void NPC::SetID(int id)
+void ST1_NPC::SetID(int id)
 {
 	m_ID = id;
 }
 
-void NPC::SetNpcType(int type)
+void ST1_NPC::SetNpcType(int type)
 {
 	m_NpcType = type;
 }
 
-void NPC::SetRotate(float y, float p, float r)
+void ST1_NPC::SetChaseID(int id)
+{
+	m_chaseID = id;
+}
+
+void ST1_NPC::SetRotate(float y, float p, float r)
 {
 	m_yaw = y;
 	m_pitch = p;
 	m_roll = r;
 }
 
-void NPC::SetPosition(float x, float y, float z)
+void ST1_NPC::SetPosition(float x, float y, float z)
 {
 	m_Pos = { x,y,z };
 }
 
-void NPC::SetPosition(XMFLOAT3 pos)
+void ST1_NPC::SetPosition(XMFLOAT3 pos)
 {
 	m_Pos = pos;
 }
 
-void NPC::SetOrgPosition(XMFLOAT3 pos)
+void ST1_NPC::SetOrgPosition(XMFLOAT3 pos)
 {
 	m_saveOrgPos = pos;
 }
 
-void NPC::SetCurr_coordinate(Coordinate cor)
+void ST1_NPC::SetCurr_coordinate(Coordinate cor)
 {
 	m_curr_coordinate = cor;
 }
 
-void NPC::SetActive(bool act)
+void ST1_NPC::SetUser_Pos(XMFLOAT3 pos, int id)
 {
-	m_Active = act;
+	m_User_Pos[id] = pos;
 }
 
-void NPC::SetTheta(float t)
+void ST1_NPC::SetTheta(float t)
 {
 	m_theta = t;
 }
 
-void NPC::SetRange(float r)
+void ST1_NPC::SetRange(float r)
 {
 	m_range = r;
 }
 
-void NPC::SetAcc(float acc)
+void ST1_NPC::SetAcc(float acc)
 {
 	m_Acc = acc;
 }
 
-void NPC::SetDistance(float dis)
+void ST1_NPC::SetDistance(float dis)
 {
 	*m_Distance = dis;
-}
-
-void NPC::SetFindRange(float f)
-{
-	m_FindRange = f;
 }
 
 // ===========================================
 // =============       GET      ==============
 // ===========================================
 
-int NPC::GetID()
+int ST1_NPC::GetID()
 {
 	return m_ID;
 }
 
-int NPC::GetType()
+int ST1_NPC::GetChaseID()
+{
+	return m_chaseID;
+}
+
+int ST1_NPC::GetType()
 {
 	return m_NpcType;
 }
 
-float NPC::GetRotate()
+int ST1_NPC::GetState()
+{
+	return m_state;
+}
+
+float ST1_NPC::GetRotate()
 {
 	return m_yaw, m_pitch, m_roll;
 }
 
-float NPC::MyGetPosition()
+float ST1_NPC::MyGetPosition()
 {
 	return m_Pos.x, m_Pos.y, m_Pos.z;
 }
 
-XMFLOAT3 NPC::GetPosition()
+XMFLOAT3 ST1_NPC::GetPosition()
 {
 	return m_Pos;
 }
 
-XMFLOAT3 NPC::GetOrgPosition()
+XMFLOAT3 ST1_NPC::GetOrgPosition()
 {
 	return m_saveOrgPos;
 }
 
-Coordinate NPC::GetCurr_coordinate()
+Coordinate ST1_NPC::GetCurr_coordinate()
 {
 	return m_curr_coordinate;
 }
 
-bool NPC::GetActive()
-{
-	return m_Active;
-}
-
-float NPC::GetTheta()
+float ST1_NPC::GetTheta()
 {
 	return m_theta;
 }
 
-float NPC::GetRange()
+float ST1_NPC::GetRange()
 {
 	return m_range;
 }
 
-float NPC::GetAcc()
+float ST1_NPC::GetAcc()
 {
 	return m_Acc;
 }
 
-float NPC::GetDistance()
+float ST1_NPC::GetDistance(int id)
 {
-	return *m_Distance;
-}
-
-float NPC::GetFindRange()
-{
-	return m_FindRange;
+	return m_Distance[id];
 }
 
 // ===========================================
 // =============     NORMAL     ==============
 // ===========================================
-
-//void CSuperCobraObject::Ai(float fTimeElapsed)
-//{
-//	if (CheckPlayer())
-//	{
-//		XMFLOAT3 xmf3Dir = Vector3::Normalize(Vector3::Subtract(m_PlayerPosition, GetPosition()));
-//		bool checkR = RotateXZPlayer(GetLook(), xmf3Dir);
-//		bool checkM = MoveYPlayer(m_PlayerPosition);
-//		if (checkR && checkM)
-//		{
-//			if (m_fShotDelay == 0.f)
-//				m_bShotMissile = true;
-//		}
-//		m_fShotDelay += fTimeElapsed * 5.0f;
-//		if (m_fShotDelay >= 10.f)
-//		{
-//			m_fShotDelay = 0.f;
-//		}
-//	}
-//	else
-//	{
-//		switch (m_behavior)
-//		{
-//		case ENEMY_PLAY::ENEMY_MOVECHECK:
-//		{
-//			m_iRoteDest = RandRotate();
-//			Rotate(0.f, m_iRoteDest, 0.f);
-//			MoveForward(100.f);
-//			XMFLOAT3 pos = GetPosition();
-//			if (pos.x > 4400.f || pos.x < 200.f || pos.z > 4400.f || pos.z < 200.f);
-//			else
-//				m_behavior = ENEMY_PLAY::ENEMY_ROTATE;
-//			Rotate(0.f, 180.f, 0.f);
-//			MoveForward(100.f);
-//			Rotate(0.f, 180.f, 0.f);
-//			Rotate(0.f, -m_iRoteDest, 0.f);
-//		}
-//		break;
-//		case ENEMY_PLAY::ENEMY_ROTATE:
-//			if (m_iRoteDest < 0)
-//			{
-//				Rotate(0.f, -1.f, 0.f);
-//				--m_iRotateCnt;
-//				if (m_iRotateCnt <= m_iRoteDest)
-//				{
-//					m_behavior = ENEMY_PLAY::ENEMY_MOVE;
-//					m_iRotateCnt = 0;
-//				}
-//			}
-//			else
-//			{
-//				Rotate(0.f, 1.f, 0.f);
-//				++m_iRotateCnt;
-//				if (m_iRotateCnt >= m_iRoteDest)
-//				{
-//					m_behavior = ENEMY_PLAY::ENEMY_MOVE;
-//					m_iRotateCnt = 0;
-//				}
-//			}
-//			break;
-//		case ENEMY_PLAY::ENEMY_MOVE:
-//			MoveForward(0.5f);
-//			++m_iMoveCnt;
-//			if (m_iMoveCnt >= 100)
-//			{
-//				m_behavior = ENEMY_PLAY::ENEMY_MOVECHECK;
-//				m_iMoveCnt = 0;
-//			}
-//
-//			break;
-//		default:
-//			break;
-//		}
-//	}
-//}
-//
-
-
-void NPC::Move()
+void ST1_NPC::ST1_State_Manegement(int state)
 {
-	int sign = 1.0f;
-	XMFLOAT3 vec1 = m_Pos;
-	XMFLOAT3 move_dir{ 0,0,0 };
-	move_dir.x = m_curr_coordinate.look.x * sign;
-	move_dir.y = m_curr_coordinate.look.y * sign;
-	move_dir.z = m_curr_coordinate.look.z * sign;
+	switch (m_state)
+	{
+	case NPC_IDLE: // 매복 혹은 특정 운동을 하는 중.
+	{
+		//this->MovetoRotate(); // 원운동 중
+		MovetoRotate();
+		for (int i{}; i < 3; ++i) {
+			if (m_Distance[i] < 400) {
+				if (m_chaseID != -1) {
+					if (m_Distance[i] < m_Distance[m_chaseID]) {
+						m_chaseID = i;
+						//m_state = NPC_FLY; // 수시로 탐색 후 날기 상태로 돌입
+					}
+					else {
+						break;
+					}
+				}
+				else {
+					//m_state = NPC_FLY; // 수시로 탐색 후 날기 상태로 돌입
+					m_chaseID = i;
 
-	float Fixed_Acc = 0.3f;
+				}
+			}
+		}
+		//std::cout << m_ID << "번째 NPC Status - " << m_state << std::endl;
+	}
+	break;
+	case NPC_FLY:
+	{
+		// Fly 지속 or Fly -> chase or Fly -> Idle
+		FlyOnNpc(m_User_Pos[m_chaseID], m_chaseID); // 대상 플레이어와의 y 좌표를 비슷하게 맞춤.
+		bool State_check = false;
 
-	vec1.x = vec1.x + move_dir.x * Fixed_Acc;
-	vec1.y = vec1.y + move_dir.y * Fixed_Acc;
-	vec1.z = vec1.z + move_dir.z * Fixed_Acc;
+		for (int i{}; i < 3; ++i) {
+			if (m_Distance[i] < 200) {  // 추적상태로 변환
+				State_check = true;
+				if (m_Distance[i] < m_Distance[m_chaseID]) {
+					m_chaseID = i;
+					m_state = NPC_CHASE; // 날기 후 추적 상태로 돌입
+				}
+				m_chaseID = i;
+			}
+			else if (i == 2 && !State_check) { // 자신의 상태 유지
+				m_state = NPC_FLY;
+			}
+		}
+
+		int Idle_Change = 0;
+		if (m_state == NPC_FLY) {
+			for (int i{}; i < 3; ++i) {
+				if (m_Distance[i] > 700) {
+					Idle_Change++;
+				}
+			}
+		}
+		if (Idle_Change == 3) {
+			m_state = NPC_IDLE;
+			m_chaseID = -1;
+		}
+	}
+	break;
+	case NPC_CHASE:
+	{
+		// chase -> chase or chase -> attack or chase -> fly	
+		PlayerChasing();
+
+		bool State_check = false;
+
+		for (int i{}; i < 3; ++i) {
+			if (m_Distance[i] < 200) {  // 공격상태로 변환
+				State_check = true;
+				if (m_Distance[i] < m_Distance[m_chaseID]) {
+					m_chaseID = i;
+					m_state = NPC_ATTACK; // 날기 후 공격 상태로 돌입
+				}
+				m_chaseID = i;
+			}
+			else if (i == 2 && !State_check) { // 자신의 상태 유지
+				m_state = NPC_CHASE;
+			}
+		}
+
+		int Fly_Change = 0;
+		if (m_state == NPC_CHASE) {
+			for (int i{}; i < 3; ++i) {
+				if (m_Distance[i] > 700) {
+					Fly_Change++;
+				}
+			}
+		}
+		if (Fly_Change == 3) {
+			m_state = NPC_FLY;
+			m_chaseID = -1;
+		}
+
+	}
+	break;
+	case NPC_ATTACK:
+	{
+		// bullet 관리
+
+
+
+	}
+	break;
+	case NPC_DEATH:
+	{
+		if (m_Pos.y >= 0) {
+			ST1_Death_motion();
+		}
+	}
+	break;
+	default:
+		break;
+	}
 }
 
-void NPC::MovetoRotate()
+void ST1_NPC::ST1_Death_motion()
 {
-	m_yaw += 0.01f * m_theta;
+	m_Pos.y -= 6.0f;
+}
+
+void ST1_NPC::MovetoRotate()
+{
+	m_yaw += 1.0f * m_theta;
 	Coordinate base_coordinate;
 	m_curr_coordinate.right = NPCcalcRotate(base_coordinate.right, m_pitch, m_yaw, m_roll);
 	m_curr_coordinate.up = NPCcalcRotate(base_coordinate.up, m_pitch, m_yaw, m_roll);
@@ -277,12 +318,13 @@ void NPC::MovetoRotate()
 
 	m_Acc += m_theta;
 	m_Pos.x = m_range * cos(m_Acc * PI / 360) + m_saveOrgPos.x;
+
 	//m_Pos.y = m_Pos.y;
 	m_Pos.z = m_range * sin(m_Acc * PI / 360) + m_saveOrgPos.z;
 }
 
 
-XMFLOAT3 NPC::NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll)
+XMFLOAT3 ST1_NPC::NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll)
 {
 	float curr_pitch = XMConvertToRadians(pitch);
 	float curr_yaw = XMConvertToRadians(yaw);
@@ -309,98 +351,70 @@ XMFLOAT3 NPC::NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll)
 	return NPCNormalize(vec);
 }
 
-void NPC::Caculation_Distance(XMFLOAT3 vec, int id)
+void ST1_NPC::Caculation_Distance(XMFLOAT3 vec, int id) // 서버에서 따로 부를 것.
 {
 	m_Distance[id] = sqrtf(pow((vec.x - m_Pos.x), 2) + pow((vec.y - m_Pos.y), 2) + pow((vec.z - m_Pos.z), 2));
+
 }
 
-void NPC::FindTarget(XMFLOAT3 vec)
+void ST1_NPC::ST1_Damege_Calc(int id)
 {
-	float Dis = 20000;
-	int chaseID = -1;
-	int SubID[3] = { -1 };
-	int cnt{};
-	for (int i{}; i < 3; ++i) {
-		if (m_Distance[i] <  Dis) {
-			Dis = m_Distance[i];
-			chaseID = i;
-			*SubID = { -1 };
+	if (m_Hit == g_body) {
+
+		int distance_damege = 0;
+		if (((int)(m_Distance[id])) > 2000) {
+			distance_damege = (2000 / 100) * 5;
 		}
-		if (m_Distance[i] == Dis) {
-			SubID[i] = i;
-			cnt++;
+		else {
+			distance_damege = ((((int)(m_Distance[id])) / 100) * 5);
 		}
+		int damege = (20 * distance_damege) / m_defence;
+		m_BodyHP -= damege;
+		m_Hit = g_none;
+	}
+	else if (m_Hit == g_profeller) {
+		int damege = (20 * ((((int)(m_Distance[id])) / 100) * 5)) / m_defence;
+		m_ProfellerHP -= damege;
+		m_Hit = g_none;
 	}
 
-	if (cnt != 0) {
-		/*std::uniform_int_distribution<int>uid(chaseID, chaseID + cnt);
-		chaseID = uid(dre);*/
-		cnt = 0;
-	}
-
-	if (Dis < 500.0f) {
-		m_Active = true;
-		FlyOnNpc(vec, chaseID);
-	}
-	else {
-		m_Active = false;
-	}
-
-}
-
-void NPC::FlyOnNpc(XMFLOAT3 vec, int id)
-{
-	if (m_Active) {
-		if (m_Pos.y < vec.y) {
-			m_Pos.y += 12.0f;
-		}
-		if (m_Pos.y > vec.y) {
-			m_Pos.y -= 6.0f;
-		}	
-	}
-	else {
-
+	if ((m_BodyHP <= 0) || (m_ProfellerHP <= 0)) {
+		m_state = NPC_DEATH;
 	}
 }
 
-// 각 객체 별 적 관리
-
-Stage1Enemy::Stage1Enemy()
+void ST1_NPC::FlyOnNpc(XMFLOAT3 vec, int id) // 추적대상 플레이어와 높이 맞추기
 {
-
+	if (m_Pos.y < vec.y) {
+		m_Pos.y += 12.0f;
+	}
+	if (m_Pos.y > vec.y) {
+		m_Pos.y -= 6.0f;
+	}
 }
 
-Stage1Enemy::~Stage1Enemy()
+void ST1_NPC::PlayerChasing()
 {
+	// Look 방향 변환
+	XMFLOAT3 temp;
+	temp.x = m_User_Pos[m_chaseID].x - m_Pos.x;
+	temp.y = m_User_Pos[m_chaseID].y - m_Pos.y;
+	temp.z = m_User_Pos[m_chaseID].z - m_Pos.z;
 
-}
+	m_curr_coordinate.look = NPCNormalize(temp);
 
-void Stage1Enemy::Caculation_Distance(XMFLOAT3 vec)
-{
+	// Right 방향 변환
+	Coordinate base_coordinate;
+	base_coordinate.up = { 1,0,0 };
 
-}
+	XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), XMLoadFloat3(&m_curr_coordinate.look)));
+	XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+	
+	// Up 방향 변환
+	XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&m_curr_coordinate.look), XMLoadFloat3(&m_curr_coordinate.right)));
+	XMStoreFloat3(&m_curr_coordinate.up, uptemp);
 
-void Stage1Enemy::ChaseToPlayer()
-{
-
-}
-
-Stage2Enemy::Stage2Enemy()
-{
-
-}
-
-Stage2Enemy::~Stage2Enemy()
-{
-
-}
-
-void Stage2Enemy::Caculation_Distance(XMFLOAT3 vec)
-{
-
-}
-
-void Stage2Enemy::ChaseToPlayer()
-{
-
+	// 위치 변환
+	m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+	m_Pos.z += m_Speed * m_curr_coordinate.look.z;
 }
