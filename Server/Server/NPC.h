@@ -105,9 +105,4 @@ public:
 
 	// Rotate
 	XMFLOAT3 NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll);
-	
-	
-
-
-
 };

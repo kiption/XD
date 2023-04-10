@@ -1492,7 +1492,7 @@ void init_npc()
 		random_device rd;
 		default_random_engine dre(rd());
 		uniform_real_distribution<float>AirHigh(200, 300);
-		uniform_real_distribution<float>AirPos(100, 550);
+		uniform_real_distribution<float>AirPos(600, 800);
 
 		npcs[i].SetPosition(AirPos(dre), AirHigh(dre), AirPos(dre));
 		npcs[i].SetOrgPosition(npcs[i].GetPosition());
@@ -1518,9 +1518,7 @@ void MoveNPC()
 			// 클라이언트들과 NPC 사이의 거리 계산
 			for (auto& cl : clients) {
 				npcs[i].Caculation_Distance(cl.pos, cl.id);
-				//cout << i << "번째 NPC와 플레이어" << cl.id << "의 거리 - " << npcs[i].GetDistance(cl.id) << endl;
 			}
-
 			//cout << i << "번째 Status - " << npcs[i].GetState() << endl;
 
 			// NPC가 추적하려는 아이디가 있는지부터 확인, 있으면 추적 대상 플레이어 좌표를 임시 저장
@@ -1530,10 +1528,7 @@ void MoveNPC()
 
 			// 상태마다 다른 움직임을 하는 매니지먼트
 			npcs[i].ST1_State_Manegement(npcs[i].GetState());
-			//npcs[i].MovetoRotate();
-			cout << i << "번째 Pos:" << npcs[i].GetPosition().x << ',' << npcs[i].GetPosition().y << ',' << npcs[i].GetPosition().z << endl;
-			//cout << i << "번째 Pos:" << npcs[i].GetPosition().x << ',' << npcs[i].GetPosition().y << ',' << npcs[i].GetRotate() << endl;
-
+			
 			// Send Move&Rotate Packet
 			SC_MOVE_ROTATE_OBJECT_PACKET npc_update_packet;
 			npc_update_packet.size = sizeof(SC_MOVE_ROTATE_OBJECT_PACKET);

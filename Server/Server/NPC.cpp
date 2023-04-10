@@ -197,14 +197,14 @@ void ST1_NPC::ST1_State_Manegement(int state)
 				if (m_chaseID != -1) {
 					if (m_Distance[i] < m_Distance[m_chaseID]) {
 						m_chaseID = i;
-						//m_state = NPC_FLY; // 수시로 탐색 후 날기 상태로 돌입
+						m_state = NPC_FLY; // 수시로 탐색 후 날기 상태로 돌입
 					}
 					else {
 						break;
 					}
 				}
 				else {
-					//m_state = NPC_FLY; // 수시로 탐색 후 날기 상태로 돌입
+					m_state = NPC_FLY; // 수시로 탐색 후 날기 상태로 돌입
 					m_chaseID = i;
 
 				}
@@ -224,8 +224,8 @@ void ST1_NPC::ST1_State_Manegement(int state)
 				State_check = true;
 				if (m_Distance[i] < m_Distance[m_chaseID]) {
 					m_chaseID = i;
-					m_state = NPC_CHASE; // 날기 후 추적 상태로 돌입
 				}
+				m_state = NPC_CHASE; // 날기 후 추적 상태로 돌입
 				m_chaseID = i;
 			}
 			else if (i == 2 && !State_check) { // 자신의 상태 유지
@@ -255,12 +255,12 @@ void ST1_NPC::ST1_State_Manegement(int state)
 		bool State_check = false;
 
 		for (int i{}; i < 3; ++i) {
-			if (m_Distance[i] < 200) {  // 공격상태로 변환
+			if (m_Distance[i] < 150) {  // 공격상태로 변환
 				State_check = true;
 				if (m_Distance[i] < m_Distance[m_chaseID]) {
 					m_chaseID = i;
-					m_state = NPC_ATTACK; // 날기 후 공격 상태로 돌입
 				}
+				//m_state = NPC_ATTACK; // 날기 후 공격 상태로 돌입
 				m_chaseID = i;
 			}
 			else if (i == 2 && !State_check) { // 자신의 상태 유지
@@ -271,7 +271,7 @@ void ST1_NPC::ST1_State_Manegement(int state)
 		int Fly_Change = 0;
 		if (m_state == NPC_CHASE) {
 			for (int i{}; i < 3; ++i) {
-				if (m_Distance[i] > 700) {
+				if (m_Distance[i] > 400) {
 					Fly_Change++;
 				}
 			}
@@ -386,32 +386,28 @@ void ST1_NPC::ST1_Damege_Calc(int id)
 void ST1_NPC::FlyOnNpc(XMFLOAT3 vec, int id) // 추적대상 플레이어와 높이 맞추기
 {
 	if (m_Pos.y < vec.y) {
-		m_Pos.y += 12.0f;
+		m_Pos.y += 1.0f;
 	}
 	if (m_Pos.y > vec.y) {
-		m_Pos.y -= 6.0f;
+		m_Pos.y -= 1.5f;
 	}
 }
 
 void ST1_NPC::PlayerChasing()
 {
 	// Look 방향 변환
-	XMFLOAT3 temp;
-	temp.x = m_User_Pos[m_chaseID].x - m_Pos.x;
-	temp.y = m_User_Pos[m_chaseID].y - m_Pos.y;
-	temp.z = m_User_Pos[m_chaseID].z - m_Pos.z;
-
-	m_curr_coordinate.look = NPCNormalize(temp);
-
+	XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&m_User_Pos[m_chaseID]), XMLoadFloat3(&m_Pos)));
+	XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+	
 	// Right 방향 변환
 	Coordinate base_coordinate;
-	base_coordinate.up = { 1,0,0 };
+	base_coordinate.up = { 0,1,0 };
 
-	XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), XMLoadFloat3(&m_curr_coordinate.look)));
+	XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
 	XMStoreFloat3(&m_curr_coordinate.right, righttemp);
-	
+
 	// Up 방향 변환
-	XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&m_curr_coordinate.look), XMLoadFloat3(&m_curr_coordinate.right)));
+	XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
 	XMStoreFloat3(&m_curr_coordinate.up, uptemp);
 
 	// 위치 변환
