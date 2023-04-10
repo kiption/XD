@@ -86,7 +86,8 @@ ID3D12Resource* CreateBufferResource(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	if (d3dHeapType == D3D12_HEAP_TYPE_UPLOAD) d3dResourceInitialStates = D3D12_RESOURCE_STATE_GENERIC_READ;
 	else if (d3dHeapType == D3D12_HEAP_TYPE_READBACK) d3dResourceInitialStates = D3D12_RESOURCE_STATE_COPY_DEST;
 
-	HRESULT hResult = pd3dDevice->CreateCommittedResource(&d3dHeapPropertiesDesc, D3D12_HEAP_FLAG_NONE, &d3dResourceDesc, d3dResourceInitialStates, NULL, __uuidof(ID3D12Resource), (void**)&pd3dBuffer);
+	HRESULT hResult = pd3dDevice->CreateCommittedResource(&d3dHeapPropertiesDesc, D3D12_HEAP_FLAG_NONE,
+		&d3dResourceDesc, d3dResourceInitialStates, NULL, __uuidof(ID3D12Resource), (void**)&pd3dBuffer);
 
 	if (pData)
 	{
@@ -360,7 +361,7 @@ ID3D12RootSignature* GraphicsRootSignatureSt1(ID3D12Device* pd3dDevice)
 
 	pd3dDescriptorRanges[20].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[20].NumDescriptors = MAX_DEPTH_TEXTURES;
-	pd3dDescriptorRanges[20].BaseShaderRegister = 28; //t28~ (18+MAX LIGHT): Depth Buffer
+	pd3dDescriptorRanges[20].BaseShaderRegister = 28; //t28~ (28+MAX LIGHT): Depth Buffer
 	pd3dDescriptorRanges[20].RegisterSpace = 0;
 	pd3dDescriptorRanges[20].OffsetInDescriptorsFromTableStart = 0;
 
@@ -491,7 +492,7 @@ ID3D12RootSignature* GraphicsRootSignatureSt1(ID3D12Device* pd3dDevice)
 	pd3dRootParameters[24].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[24].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[24].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[20]; //Depth Buffer
-	pd3dRootParameters[24].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dRootParameters[24].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	pd3dRootParameters[25].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[25].Descriptor.ShaderRegister = 10; //toshadow
@@ -560,9 +561,9 @@ ID3D12RootSignature* GraphicsRootSignatureSt1(ID3D12Device* pd3dDevice)
 	pd3dSamplerDescs[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dSamplerDescs[1].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-	pd3dSamplerDescs[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	pd3dSamplerDescs[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-	pd3dSamplerDescs[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	pd3dSamplerDescs[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	pd3dSamplerDescs[1].MipLODBias = 0;
 	pd3dSamplerDescs[1].MaxAnisotropy = 1;
 	pd3dSamplerDescs[1].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
@@ -579,8 +580,8 @@ ID3D12RootSignature* GraphicsRootSignatureSt1(ID3D12Device* pd3dDevice)
 	pd3dSamplerDescs[2].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	pd3dSamplerDescs[2].MipLODBias = 0.0f;
 	pd3dSamplerDescs[2].MaxAnisotropy = 1;
-	pd3dSamplerDescs[2].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS;// D3D12_COMPARISON_FUNC_LESS;
-	pd3dSamplerDescs[2].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;//  D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+	pd3dSamplerDescs[2].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;// D3D12_COMPARISON_FUNC_LESS;
+	pd3dSamplerDescs[2].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;//  D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
 	pd3dSamplerDescs[2].MinLOD = 0;
 	pd3dSamplerDescs[2].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[2].ShaderRegister = 2;
@@ -866,7 +867,6 @@ ID3D12RootSignature* GraphicsRootSignatureSt2(ID3D12Device* pd3dDevice)
 #endif
 
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[4];
-
 	pd3dSamplerDescs[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pd3dSamplerDescs[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -874,6 +874,7 @@ ID3D12RootSignature* GraphicsRootSignatureSt2(ID3D12Device* pd3dDevice)
 	pd3dSamplerDescs[0].MipLODBias = 0;
 	pd3dSamplerDescs[0].MaxAnisotropy = 1;
 	pd3dSamplerDescs[0].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	pd3dSamplerDescs[0].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
 	pd3dSamplerDescs[0].MinLOD = 0;
 	pd3dSamplerDescs[0].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[0].ShaderRegister = 0;
@@ -887,39 +888,45 @@ ID3D12RootSignature* GraphicsRootSignatureSt2(ID3D12Device* pd3dDevice)
 	pd3dSamplerDescs[1].MipLODBias = 0;
 	pd3dSamplerDescs[1].MaxAnisotropy = 1;
 	pd3dSamplerDescs[1].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	pd3dSamplerDescs[1].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
 	pd3dSamplerDescs[1].MinLOD = 0;
 	pd3dSamplerDescs[1].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[1].ShaderRegister = 1;
 	pd3dSamplerDescs[1].RegisterSpace = 0;
 	pd3dSamplerDescs[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dSamplerDescs[2].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-	pd3dSamplerDescs[2].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	pd3dSamplerDescs[2].AddressV = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
-	pd3dSamplerDescs[2].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	pd3dSamplerDescs[2].MipLODBias = 0;
+
+	pd3dSamplerDescs[2].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	pd3dSamplerDescs[2].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[2].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[2].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[2].MipLODBias = 0.0f;
 	pd3dSamplerDescs[2].MaxAnisotropy = 1;
-	pd3dSamplerDescs[2].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	pd3dSamplerDescs[2].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS;// D3D12_COMPARISON_FUNC_LESS;
+	pd3dSamplerDescs[2].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;//  D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
 	pd3dSamplerDescs[2].MinLOD = 0;
 	pd3dSamplerDescs[2].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[2].ShaderRegister = 2;
 	pd3dSamplerDescs[2].RegisterSpace = 0;
 	pd3dSamplerDescs[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dSamplerDescs[3].Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
-	pd3dSamplerDescs[3].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	pd3dSamplerDescs[3].AddressV = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
-	pd3dSamplerDescs[3].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	pd3dSamplerDescs[3].MipLODBias = 0;
+	pd3dSamplerDescs[3].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	pd3dSamplerDescs[3].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[3].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[3].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[3].MipLODBias = 0.0f;
 	pd3dSamplerDescs[3].MaxAnisotropy = 1;
 	pd3dSamplerDescs[3].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	pd3dSamplerDescs[3].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
 	pd3dSamplerDescs[3].MinLOD = 0;
 	pd3dSamplerDescs[3].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[3].ShaderRegister = 3;
 	pd3dSamplerDescs[3].RegisterSpace = 0;
 	pd3dSamplerDescs[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_ALLOW_STREAM_OUTPUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;
+	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | 
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_STREAM_OUTPUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+		D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
 	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
 	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);

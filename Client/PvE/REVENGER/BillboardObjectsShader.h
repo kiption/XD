@@ -3,6 +3,7 @@
 #include "BillboardObjects.h"
 #include "MissileObject.h"
 
+class SceneManager;
 class CrossHairShader : public BillboardShader
 {
 public:
@@ -46,14 +47,18 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void ReleaseUploadBuffers();
+
+	float m_fWidth = 0.0f;
+	float m_fHeight = 0.0f;
 };
 
 
-class ValkanEffectShader : public BillboardShader
+
+class OpeningBillboardBanner : public BillboardShader
 {
 public:
-	ValkanEffectShader() {};
-	virtual ~ValkanEffectShader() {};
+	OpeningBillboardBanner() {};
+	virtual ~OpeningBillboardBanner() {};
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);
@@ -67,4 +72,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void ReleaseUploadBuffers();
+
+	float m_fWidth = 0.0f;
+	float m_fHeight = 0.0f;
 };

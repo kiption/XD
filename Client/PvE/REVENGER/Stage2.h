@@ -73,7 +73,7 @@ public:
 	int									m_nBillboardShaders = 0;
 	CShader** m_pBillboardShader = NULL;
 
-	CSkyBox2* m_pSkyBox = NULL;
+	CSkyBox* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;
 
 	int									m_nLights = 0;

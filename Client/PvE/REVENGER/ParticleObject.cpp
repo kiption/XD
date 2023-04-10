@@ -35,7 +35,7 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	SceneManager* pScene = NULL;
 	
-	pScene->CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbGameObject, ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255));
+	pScene->CreateConstantBufferViews(pd3dDevice, 0, m_pd3dcbGameObject, ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255));
 	pScene->CreateShaderResourceViews(pd3dDevice, pParticleTexture, 0, 16);
 	pScene->CreateShaderResourceViews(pd3dDevice, m_pRandowmValueTexture, 0, 17);
 	pScene->CreateShaderResourceViews(pd3dDevice, m_pRandowmValueOnSphereTexture, 0, 18);
@@ -83,14 +83,6 @@ void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 			if (m_pRandowmValueOnSphereTexture) m_pRandowmValueOnSphereTexture->UpdateShaderVariables(pd3dCommandList);
 		}
 	}
-	//if (m_pMaterials)
-	//{
-	//	if (m_pMaterials->m_pShader) m_pMaterials->m_pShader->OnPrepareRender(pd3dCommandList, 0);
-	//	if (m_pMaterials->m_pTexture) m_pMaterials->m_pTexture->UpdateShaderVariables(pd3dCommandList);
-	//	
-	//	if (m_pRandowmValueTexture) m_pRandowmValueTexture->UpdateShaderVariables(pd3dCommandList);
-	//	if (m_pRandowmValueOnSphereTexture) m_pRandowmValueOnSphereTexture->UpdateShaderVariables(pd3dCommandList);
-	//}
 
 	UpdateShaderVariables(pd3dCommandList);
 

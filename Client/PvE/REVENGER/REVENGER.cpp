@@ -5,7 +5,7 @@
 #include "REVENGER.h"
 #include "GameFramework.h"
 #include "Network.h"
-
+#include "BillboardObjectsShader.h"
 #define MAX_LOADSTRING 100
 
 HINSTANCE						ghAppInstance;
@@ -190,7 +190,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		else
 		{
 
-			if (gGameFramework.m_nMode != SCENE2STAGE)
+			if (gGameFramework.m_nMode != SCENE2STAGE && gGameFramework.m_nMode == SCENE1STAGE)
 			{
 
 				//==================================================
@@ -304,7 +304,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				for (int i{}; i < MAX_NPCS; i++) {
 					gGameFramework.SetPosition_NPC(npcs_info[i].m_id, npcs_info[i].m_pos);
 					gGameFramework.SetVectors_NPC(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
+					gGameFramework.m_pScene->SmokePosition = npcs_info[i].m_pos;
 				}
+
 			}
 			//==================================================
 			//				충돌 이펙트 구현 코드

@@ -16,7 +16,7 @@ CObjectsShader::~CObjectsShader()
 
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nObjects = 17;
+	m_nObjects = 18;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 
@@ -37,11 +37,11 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	CMaterial* pPlaneMaterial2 = new CMaterial(1);
 	pPlaneMaterial2->SetReflection(1);
-	XMFLOAT3 xmf3Scale(0.5f, 0.8, 0.5f);
-	XMFLOAT3 xmf3Normal(1.0f, 1.0f, 1.0f);
+	XMFLOAT3 xmf3Scale(0.5f, 3.8, 0.5f);
+	XMFLOAT3 xmf3Normal(0.0f, 0.0f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf3Normal);
 	m_pTerrain->SetMaterial(pPlaneMaterial2);
-	m_pTerrain->SetPosition(-200.0f, 0.0, -200.0f);
+	m_pTerrain->SetPosition(-1000.0f, -80.0, -3000.0f);
 	m_ppObjects[2] = m_pTerrain;
 
 	CMaterial* pMaterial = new CMaterial(3);
@@ -105,36 +105,21 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[13] = m_ppNpcObjects[3];
 	m_ppObjects[14] = m_ppNpcObjects[4];
 
-	//CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", NULL);
-	//CMaterial* pBulletMaterial = new CMaterial(100);
-	//pBulletMaterial->SetReflection(100);
-	//for (int i = 0; i < 3; i++)
-	//{
-	//	m_ppBullets[i] = new CBulletObject(NULL);
-	//	m_ppBullets[i]->SetChild(pBulletMesh, false);
-	//	m_ppBullets[i]->SetMaterial(pNpcMaterial);
-	//	m_ppBullets[i]->SetScale(10.0, 10.0, 10.0);
-	//	m_ppBullets[i]->OnPrepareAnimate();
-	//	pBulletMesh->AddRef();
-	//	/*	pBulletObject->SetChild(pBulletMesh->m_pModelRootObject, true);*/
-	//	//	pBulletObject->m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 0, pBulletMesh);
-	//	for (int j = 15; j <= ; j++)m_ppObjects[j] = m_ppBullets[i];
-	//}
 	CMaterial* pCityMaterial = new CMaterial(3);
 	pCityMaterial->SetReflection(3);
 
-	int Cities = 2;
-	m_ppCityGameObjects = new CGameObject * [2];
+	int Cities = 3;
+	m_ppCityGameObjects = new CGameObject * [Cities];
 
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < Cities; i++)
 	{
 
-		m_ppCityGameObjects[i] = new CGameObject(2);
+		m_ppCityGameObjects[i] = new CGameObject(3);
 		CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1.bin", NULL);
 		m_ppCityGameObjects[i]->SetChild(pGeneratorModel, false);
 		m_ppCityGameObjects[i]->SetMaterial(pCityMaterial);
 		m_ppCityGameObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-		m_ppCityGameObjects[i]->SetScale(3.5, 3.5, 3.5);
+		m_ppCityGameObjects[i]->SetScale(2.5, 2.5, 2.5);
 		m_ppCityGameObjects[i]->OnPrepareAnimate();
 		pGeneratorModel->AddRef();
 	}
@@ -142,8 +127,11 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	m_ppObjects[15] = m_ppCityGameObjects[0];
 	m_ppObjects[16] = m_ppCityGameObjects[1];
-	m_ppObjects[15]->SetPosition(-250.0, 20.0, -250.0);
-	m_ppObjects[16]->SetPosition(500.0, 20.0, 700.0);
+	m_ppObjects[17] = m_ppCityGameObjects[2];
+
+	m_ppObjects[15]->SetPosition(-150.0, 20.0, -550.0);
+	m_ppObjects[16]->SetPosition(550.0, 20.0, -400.0);
+	m_ppObjects[17]->SetPosition(250.0, 20.0, -200.0);
 }
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)

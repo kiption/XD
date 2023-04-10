@@ -7,8 +7,8 @@
 #include "Scene.h"
 CShader::CShader()
 {
-	m_d3dSrvCPUDescriptorStartHandle.ptr = NULL;
-	m_d3dSrvGPUDescriptorStartHandle.ptr = NULL;
+	//m_d3dSrvCPUDescriptorStartHandle.ptr = NULL;
+	//m_d3dSrvGPUDescriptorStartHandle.ptr = NULL;
 }
 CShader::~CShader()
 {
@@ -314,7 +314,7 @@ void CShader::OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList, int nP
 {
 	SceneManager* m_pScene = NULL;
 	//if (m_pd3dPipelineState) pd3dCommandList->SetPipelineState(m_pd3dPipelineState);
-	if (m_pScene->m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pScene->m_pd3dCbvSrvDescriptorHeap);////
+	//if (m_pScene->m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pScene->m_pd3dCbvSrvDescriptorHeap);////
 	if (m_ppd3dPipelineStates && m_ppd3dPipelineStates[nPipelineState]) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
 	UpdateShaderVariables(pd3dCommandList);
 
@@ -324,19 +324,6 @@ void CShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 	OnPrepareRender(pd3dCommandList, nPipelinestates);
 }
 
-void CShader::CreateConstantBufferViews(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride)
-{
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = pd3dConstantBuffers->GetGPUVirtualAddress();
-	D3D12_CONSTANT_BUFFER_VIEW_DESC d3dCBVDesc;
-	d3dCBVDesc.SizeInBytes = nStride;
-	for (int j = 0; j < nConstantBufferViews; j++)
-	{
-		d3dCBVDesc.BufferLocation = d3dGpuVirtualAddress + (nStride * j);
-		D3D12_CPU_DESCRIPTOR_HANDLE d3dCbvCPUDescriptorHandle;
-		d3dCbvCPUDescriptorHandle.ptr = m_d3dCbvCPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * j);
-		pd3dDevice->CreateConstantBufferView(&d3dCBVDesc, d3dCbvCPUDescriptorHandle);
-	}
-}
 
 CIlluminatedShader::CIlluminatedShader()
 {

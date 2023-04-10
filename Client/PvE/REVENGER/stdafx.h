@@ -110,8 +110,9 @@ extern HINSTANCE						ghAppInstance;
 #define _WITH_DIRECT2D_IMAGE_EFFECT
 #endif
 
-#define SCENE1STAGE 0x00
-#define SCENE2STAGE 0x01
+#define OPENINGSCENE 0x00
+#define SCENE1STAGE 0x01
+#define SCENE2STAGE 0x02
 #define BULLETS					150
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 

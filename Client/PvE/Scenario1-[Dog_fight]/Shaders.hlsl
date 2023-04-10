@@ -308,7 +308,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	float4 cColor = (cBaseTexColor * cDetailTexColors[0]);
 	cColor += lerp(cDetailTexColors[1] * 0.55f, (cDetailTexColors[2]) * 0.5f, cDetailTexColors[3] * 0.5);
 
-	cColor += lerp(cColor, cIllumination, 0.2f);
+	cColor += lerp(cColor, cIllumination, 0.8f);
 
 	return(cColor);
 }
@@ -725,6 +725,7 @@ VS_LIGHTING_OUTPUT VSLighting(VS_LIGHTING_INPUT input)
 	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	float3 normalW = mul(input.normal, (float3x3)gmtxGameObject);
+
 #ifdef _WITH_VERTEX_LIGHTING
 	output.color = Lighting(output.positionW, normalize(normalW));
 #else
@@ -749,8 +750,8 @@ float4 PSLighting(VS_LIGHTING_OUTPUT input) : SV_TARGET
 //#define _WITH_NORMAL_DISPLACEMENT
 #define _WITH_PROJECTION_SPACE
 
-#define FRAME_BUFFER_WIDTH		1480
-#define FRAME_BUFFER_HEIGHT		960
+#define FRAME_BUFFER_WIDTH		1248
+#define FRAME_BUFFER_HEIGHT		1024
 
 VS_LIGHTING_OUTPUT VSOutline(VS_LIGHTING_INPUT input)
 {
@@ -793,18 +794,6 @@ float4 PSOutline(VS_LIGHTING_OUTPUT input) : SV_TARGET
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 struct CB_TOOBJECTSPACE
 {
 	matrix		mtxToTexture;
@@ -821,15 +810,13 @@ struct VS_SDWLIGHTING_INPUT
 {
 	float3	position    : POSITION;
 	float3	normal		: NORMAL;
-	float2  uv			: TEXCOORD;
-};
 
+};
 struct VS_SDWLIGHTING_OUTPUT
 {
 	float4	position    : SV_POSITION;
 	float3	positionW   : POSITION;
 	float3	normalW		: NORMAL;
-	float2  uv			: TEXCOORD;
 };
 VS_SDWLIGHTING_OUTPUT VSShadowLighting(VS_SDWLIGHTING_INPUT input)
 {
@@ -838,20 +825,69 @@ VS_SDWLIGHTING_OUTPUT VSShadowLighting(VS_SDWLIGHTING_INPUT input)
 	output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
 	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-	output.uv = input.uv;
 	return(output);
 }
-
 float4 PSShadowLighting(VS_SDWLIGHTING_OUTPUT input) : SV_TARGET
 {
 	input.normalW = normalize(input.normalW);
 	float4 uvs[MAX_LIGHTS];
-	float4 cColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
-	//	return(cIllumination);
 
-	//return(float4(input.normalW * 0.5f + 0.5f, 1.0f));
-	return(lerp(cColor, cIllumination, 0.5));
+	//	return(cIllumination);
+	return(float4(input.normalW * 0.5f - 0.5f, 1.0f));
+}
+struct VS_CIRCULAR_SHADOW_INPUT
+{
+	float3 center : POSITION;
+	float2 size : TEXCOORD;
+};
+
+VS_CIRCULAR_SHADOW_INPUT VSCircularShadow(VS_CIRCULAR_SHADOW_INPUT input)
+{
+	return(input);
+}
+
+struct GS_CIRCULAR_SHADOW_GEOMETRY_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float2 uv : TEXCOORD;
+};
+
+static float2 pf2UVs[4] = { float2(0.0f,1.0f), float2(0.0f,0.0f), float2(1.0f,1.0f), float2(1.0f,0.0f) };
+
+[maxvertexcount(4)]
+void GSCircularShadow(point VS_CIRCULAR_SHADOW_INPUT input[1], inout TriangleStream<GS_CIRCULAR_SHADOW_GEOMETRY_OUTPUT> outStream)
+{
+	float fHalfWidth = input[0].size.x * 0.5f;
+	float fHalfDepth = input[0].size.y * 0.5f;
+
+	float3 f3Right = float3(1.0f, 0.0f, 0.0f);
+	float3 f3Look = float3(0.0f, 0.0f, 1.0f);
+
+	float4 pf4Vertices[4];
+	pf4Vertices[0] = float4(input[0].center.xyz - (fHalfWidth * f3Right) - (fHalfDepth * f3Look), 1.0f);
+	pf4Vertices[1] = float4(input[0].center.xyz - (fHalfWidth * f3Right) + (fHalfDepth * f3Look), 1.0f);
+	pf4Vertices[2] = float4(input[0].center.xyz + (fHalfWidth * f3Right) - (fHalfDepth * f3Look), 1.0f);
+	pf4Vertices[3] = float4(input[0].center.xyz + (fHalfWidth * f3Right) + (fHalfDepth * f3Look), 1.0f);
+
+	GS_CIRCULAR_SHADOW_GEOMETRY_OUTPUT output;
+	for (int i = 0; i < 4; i++)
+	{
+		output.position = mul(mul(pf4Vertices[i], gmtxView), gmtxProjection);
+		output.uv = pf2UVs[i];
+
+		outStream.Append(output);
+	}
+}
+
+
+Texture2D gtxtCircularShadowTexture : register(t28);
+
+float4 PSCircularShadow(GS_CIRCULAR_SHADOW_GEOMETRY_OUTPUT input) : SV_TARGET
+{
+	float4 cColor = gtxtCircularShadowTexture.Sample(gssWrap, input.uv);
+
+	return(cColor);
 }
 
 ////////////////////////////////////////////////////////////////
@@ -860,6 +896,7 @@ struct VS_SHADOW_MAP_OUTPUT
 	float4 position : SV_POSITION;
 	float3 positionW : POSITION;
 	float3 normalW : NORMAL;
+
 	float4 uvs[MAX_LIGHTS] : TEXCOORD0;
 };
 
@@ -885,7 +922,7 @@ float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 {
 	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
 
-	//	cIllumination = saturate(gtxtDepthTextures[3].SampleLevel(gssProjector, f3uvw.xy, 0).r);
+//		cIllumination = saturate(gtxtDepthTextures[3].SampleLevel(gssProjector, f3uvw.xy, 0).r);
 //	cIllumination = float4(0, 0, 0, 1);
 	return(cIllumination);
 }

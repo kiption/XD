@@ -200,10 +200,8 @@ void HeliPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 void HeliPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	CPlayer::Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < BULLETS; i++) {
-		if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
-	}
+	if(m_nCurScene!=OPENINGSCENE) CPlayer::Render(pd3dCommandList, pCamera);
+
 }
 
 void HeliPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)

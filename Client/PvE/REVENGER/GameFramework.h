@@ -76,7 +76,7 @@ public:
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void ChangeScene(DWORD nMode);
-	DWORD						m_nMode = SCENE1STAGE;
+	DWORD						m_nMode = OPENINGSCENE;
 	GameSound gamesound;
 	int m_NumOfUI = 8;
 protected:

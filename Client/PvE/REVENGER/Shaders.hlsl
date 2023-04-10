@@ -356,7 +356,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
 //	float4 cColor = (cBaseTexColor * cDetailTexColor);
 	//cIllumination =Lighting(input.positionW, input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
 
 	
 	cColor = lerp(cColor, cIllumination, 0.5f);
@@ -755,12 +755,12 @@ float4 PSLighting(VS_LIGHTING_OUTPUT input) : SV_TARGET
 {
 	input.normalW = normalize(input.normalW);
 	float4 uvs[MAX_LIGHTS];
-	float4 cColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
-	//	return(cIllumination);
+	//float4 cColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
+	return(cIllumination);
 	
 	//return(float4(input.normalW * 0.5f + 0.5f, 1.0f));
-	return(lerp(cColor, cIllumination, 0.8));
+	//return(lerp(cColor, cIllumination, 0.8));
 }
 
  
@@ -846,7 +846,7 @@ float4 PSTextureToViewport(VS_TEXTURED_OUTPUT input) : SV_Target
 {
 	float4 cColor = gtxtDepthTextures[1].SampleLevel(gssBorder, input.uv, 0).r * 1.0f;
 
-		//cColor = GetColorFromDepth(cColor.r);
+	//cColor = GetColorFromDepth(cColor.r);
 
 	return(cColor);
 }

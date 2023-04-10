@@ -1,6 +1,7 @@
 #pragma once
 #include "Shader.h"
 
+
 class CStandardShader : public CShader
 {
 public:
@@ -55,7 +56,9 @@ public:
 	virtual void ReleaseUploadBuffers();
 	virtual void ReleaseObjects();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
-
+	XMFLOAT3 newPosition = XMFLOAT3(0, 0, 0);
+	XMFLOAT3 NextPosition = XMFLOAT3(0, 0, 0);
+	
 	int								m_nObjects = 0;
 	CGameObject** m_ppObjects = 0;
 

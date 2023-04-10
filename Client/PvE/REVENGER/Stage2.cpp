@@ -96,31 +96,13 @@ void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	BuildDefaultLightsAndMaterials();
-	m_pSkyBox = new CSkyBox2(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pSkyBox->SetCurScene(SCENE2STAGE);
 
 	XMFLOAT3 xmf3Scale(15.0f, 4.0f, 15.0);
 	XMFLOAT3 xmf3Normal(0.0f, 0.3f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf3Normal);
 	m_pTerrain->SetCurScene(SCENE2STAGE);
-
-
-	m_nHierarchicalGameObjects = 0;
-	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
-
-	m_nBillboardShaders = 0;
-	m_pBillboardShader = new CShader * [m_nBillboardShaders];
-	/*CrossHairShader* pCrossHairShader = new CrossHairShader();
-	pCrossHairShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	pCrossHairShader->SetCurScene(SCENE2STAGE);
-	pCrossHairShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_pBillboardShader[0] = pCrossHairShader;*/
-
-	//RainShader* pRainShader = new RainShader();
-	//pRainShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	//pRainShader->SetCurScene(SCENE1STAGE);
-	//pRainShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	//m_pBillboardShader[0] = pRainShader;
 
 	m_nStageMapShaders = 1;
 	m_ppStageMapShaders = new CStage2MapObjectShader * [m_nStageMapShaders];
@@ -163,16 +145,16 @@ void Stage2::ReleaseObjects()
 		}
 		delete[] m_ppStageMapShaders;
 	}
-	if (m_pBillboardShader)
-	{
-		for (int i = 0; i < m_nBillboardShaders; i++)
-		{
-			m_pBillboardShader[i]->ReleaseShaderVariables();
-			m_pBillboardShader[i]->ReleaseObjects();
-			m_pBillboardShader[i]->Release();
-		}
-		delete[] m_pBillboardShader;
-	}
+	//if (m_pBillboardShader)
+	//{
+	//	for (int i = 0; i < m_nBillboardShaders; i++)
+	//	{
+	//		m_pBillboardShader[i]->ReleaseShaderVariables();
+	//		m_pBillboardShader[i]->ReleaseObjects();
+	//		m_pBillboardShader[i]->Release();
+	//	}
+	//	delete[] m_pBillboardShader;
+	//}
 	if (m_ppShaders)
 	{
 		for (int i = 0; i < m_nShaders; i++)
@@ -186,11 +168,11 @@ void Stage2::ReleaseObjects()
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
 
-	if (m_ppHierarchicalGameObjects)
+	/*if (m_ppHierarchicalGameObjects)
 	{
 		for (int i = 0; i < m_nHierarchicalGameObjects; i++) if (m_ppHierarchicalGameObjects[i]) m_ppHierarchicalGameObjects[i]->Release();
 		delete[] m_ppHierarchicalGameObjects;
-	}
+	}*/
 
 	ReleaseShaderVariables();
 	if (m_pLights) delete[] m_pLights;
@@ -412,9 +394,7 @@ void Stage2::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 void Stage2::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	
-	::memcpy(m_pcbMappedLights->m_pLights, m_pLights, sizeof(LIGHT) * m_nLights);
-	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
-	::memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
+	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
 
 	::memcpy(m_pcbMappedMaterials, &m_pMaterials, sizeof(MATERIALS));
 }

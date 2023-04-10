@@ -5,7 +5,7 @@
 #include "IlluminatedMesh.h"
 #include "TerrainObject.h"
 #include "SkyboxObject.h"
-
+#include "ObjectShader.h"
 
 
 struct TOOBJECTSPACEINFO
@@ -59,6 +59,9 @@ public:
 
 	int	m_nNpcObjects = 0;
 	CGameObject** m_ppNpcObjects = NULL;
+	int	m_nMapObjects = 0;
+	CGameObject** m_ppMapObjects = NULL;
+
 };
 
 
@@ -83,7 +86,7 @@ public:
 
 	void PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList);
 
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 
 	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState);

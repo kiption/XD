@@ -81,13 +81,14 @@ public:
 
 	virtual void ReleaseUploadBuffers();
 
-	void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void OnPostRenderParticle();
 	int GetCurScene() { return m_nCurScene; }
 	void SetCurScene(int nCurScene) { m_nCurScene = nCurScene; }
-
+	void ParticleAnimation();
+	XMFLOAT3 SmokePosition;
 	GameSound gamesound;
 
 	CParticleObject** m_ppParticleObjects = NULL;
@@ -99,7 +100,7 @@ public:
 public:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 
-	int	m_nCurScene = SCENE1STAGE;
+	int	m_nCurScene = OPENINGSCENE;
 
 public:
 	static ID3D12DescriptorHeap* m_pd3dCbvSrvDescriptorHeap;
@@ -156,17 +157,16 @@ public:
 	CShader** m_ppShaders = NULL;
 	CShader* m_pShader = NULL;
 	CBulletEffectShader* m_pBulletEffect = NULL;
-	ValkanEffectShader* m_pValkanEffect = NULL;
 	CUseWaterMoveTerrain* m_pUseWaterMove = NULL;
 	int									m_nMapShaders = 0;
 	int									m_nStageMapShaders = 0;
 	CMapObjectShader** m_ppMapShaders = NULL;
 	CStage2MapObjectShader** m_ppStageMapShaders = NULL;
 
-	CSkyBox* m_pSkyBox = NULL;
+	COpeningBackScene* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;
 	int									m_nBillboardShaders = 0;
-	CShader** m_pBillboardShader = NULL;
+	BillboardShader** m_pBillboardShader = NULL;
 	int									m_nLights = 0;
 	//LIGHT* m_pLights = NULL;
 	LIGHTS* m_pcbMappedLights = NULL;

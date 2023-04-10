@@ -84,7 +84,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 	void OnPreRender(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue, ID3D12Fence* pd3dFence, HANDLE hFenceEvent);
-	void OnShadowPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	void OnShadowPreRender(ID3D12GraphicsCommandList* pd3dCommandList);
 	void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void ReleaseUploadBuffers();
 
@@ -150,5 +150,8 @@ public:
 	CDepthRenderShader* m_pDepthRenderShader = NULL;
 	BoundingBox						m_xmBoundingBox;
 	float m_fLightRotationAngle = 0.0f;
+
+	CShader** m_ppShadowShaders = NULL;
+	int								m_nShadowShaders = 0;
 };
 

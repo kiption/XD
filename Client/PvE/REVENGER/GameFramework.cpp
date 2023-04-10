@@ -54,7 +54,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 {
 	m_hInstance = hInstance;
 	m_hWnd = hMainWnd;
-	m_nMode = SCENE1STAGE;
+	m_nMode = OPENINGSCENE;
 	CreateDirect3DDevice();
 	CreateCommandQueueAndList();
 	CreateRtvAndDsvDescriptorHeaps();
@@ -472,18 +472,20 @@ void CGameFramework::BuildObjects()
 	m_pScene = new SceneManager();
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
 
+
 	HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
 
 	CreateShaderVariables();
 	m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 	m_pCamera = m_pPlayer->GetCamera();
+	m_pCamera->SetMode(FIRST_PERSON_CAMERA);
 	m_pScene->m_pPlayer->SetPosition(XMFLOAT3(500.0, 200.0, 500.0));
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 
 	WaitForGpuComplete();
-	gamesound.backGroundMusic();
+	
 	if (m_pScene) m_pScene->ReleaseUploadBuffers();
 	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 	m_GameTimer.Reset();
@@ -496,7 +498,7 @@ void CGameFramework::ReleaseObjects()
 	if (m_pPlayer) m_pPlayer->Release();
 
 	if (m_pScene) m_pScene->ReleaseObjects();
-	if (m_pScene) delete m_pScene;
+	//if (m_pScene) delete m_pScene;
 }
 
 // key value
@@ -520,7 +522,7 @@ void CGameFramework::ProcessInput()
 
 		if (pKeysBuffer[KEY_W] & 0xF0) {
 			dwDirection |= DIR_FORWARD;
-			if (m_nMode == SCENE2STAGE)
+			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
 			{
 			}
 			if (m_nMode != SCENE2STAGE)
@@ -531,7 +533,7 @@ void CGameFramework::ProcessInput()
 		}
 		if (pKeysBuffer[KEY_S] & 0xF0) {
 			dwDirection |= DIR_BACKWARD;
-			if (m_nMode == SCENE2STAGE)
+			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
 			{
 			}
 			if (m_nMode != SCENE2STAGE)
@@ -542,7 +544,7 @@ void CGameFramework::ProcessInput()
 		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
 
-			if (m_nMode == SCENE2STAGE)
+			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
 			{
 			}
 			dwDirection |= DIR_RIGHT;
@@ -553,7 +555,7 @@ void CGameFramework::ProcessInput()
 			}
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
-			if (m_nMode == SCENE2STAGE)
+			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
 			{
 			}
 			dwDirection |= DIR_LEFT;
@@ -650,7 +652,7 @@ void CGameFramework::ProcessInput()
 					q_mouseInput.push(inputMouseValue);
 				}
 				//====
-				if (m_nMode == SCENE2STAGE)
+				if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
 				{
 					if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 						m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
@@ -658,7 +660,7 @@ void CGameFramework::ProcessInput()
 						m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 				}
 			}
-			if (m_nMode == SCENE2STAGE)
+			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
 				if (dwDirection) m_pPlayer->Move(dwDirection, 9.25f, true);
 
 		}
@@ -703,28 +705,28 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::CreateShaderVariables()
 {
-	UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256의 배수
-	m_pd3dcbFrameworkInfo = ::CreateBufResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes,
-		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
-	m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
+	//UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256의 배수
+	//m_pd3dcbFrameworkInfo = ::CreateBufResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes,
+	//	D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+	//m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
 
 }
 
 void CGameFramework::ReleaseShaderVariables()
 {
-	if (m_nMode != SCENE2STAGE)
+	/*if (m_nMode != SCENE2STAGE)
 	{
 		if (m_pd3dcbFrameworkInfo)
 		{
 			m_pd3dcbFrameworkInfo->Unmap(0, NULL);
 			m_pd3dcbFrameworkInfo->Release();
 		}
-	}
+	}*/
 }
 
 void CGameFramework::UpdateShaderVariables()
 {
-	m_pcbMappedFrameworkInfo->m_fCurrentTime = m_GameTimer.GetTotalTime();
+	/*m_pcbMappedFrameworkInfo->m_fCurrentTime = m_GameTimer.GetTotalTime();
 	m_pcbMappedFrameworkInfo->m_fElapsedTime = m_GameTimer.GetTimeElapsed();
 	m_pcbMappedFrameworkInfo->m_fSecondsPerFirework = 0.5f;
 	m_pcbMappedFrameworkInfo->m_nFlareParticlesToEmit = 100;
@@ -732,7 +734,7 @@ void CGameFramework::UpdateShaderVariables()
 	m_pcbMappedFrameworkInfo->m_nMaxFlareType2Particles = 15 * 1.5f;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
-	m_pd3dCommandList->SetGraphicsRootConstantBufferView(21, d3dGpuVirtualAddress);
+	m_pd3dCommandList->SetGraphicsRootConstantBufferView(21, d3dGpuVirtualAddress);*/
 
 }
 
@@ -744,15 +746,11 @@ void CGameFramework::FrameAdvance()
 {
 	SleepEx(1, TRUE);//Server
 	if (m_nMode == SCENE2STAGE)m_GameTimer.Tick(30.0f);
-	if (m_nMode != SCENE2STAGE) m_GameTimer.Tick(60.0f);
+	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick(60.0f);
 
 	ProcessInput();
 
 	AnimateObjects();
-
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * ::gnRtvDescriptorIncrementSize);
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
@@ -774,26 +772,30 @@ void CGameFramework::FrameAdvance()
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
 
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * ::gnRtvDescriptorIncrementSize);
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+
 
 
 	float pfClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], pfClearColor/*Colors::Azure*/, 0, NULL);
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], TRUE, &d3dDsvCPUDescriptorHandle);
-	if (m_nMode != SCENE2STAGE) UpdateShaderVariables();
+	//if (m_nMode != SCENE2STAGE) UpdateShaderVariables();
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
 
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
 	if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
-	if (m_nMode != SCENE2STAGE)
-	{
-		m_pScene->RenderParticle(m_pd3dCommandList, m_pCamera);
-		::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-		::ExecuteCommandList(m_pd3dCommandList, m_pd3dCommandQueue, m_pd3dFence, ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
-		m_pScene->OnPostRenderParticle();
-	}
+	//if (m_nMode != SCENE2STAGE)
+	//{
+	//	m_pScene->RenderParticle(m_pd3dCommandList, m_pCamera);
+	//	::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	//	::ExecuteCommandList(m_pd3dCommandList, m_pd3dCommandQueue, m_pd3dFence, ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
+	//	m_pScene->OnPostRenderParticle();
+	//}
 
 	// Stage2
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -912,17 +914,14 @@ void CGameFramework::ChangeScene(DWORD nMode)
 		{
 		case SCENE1STAGE:
 		{
-
 			m_nMode = nMode;
-
-			//m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-			//m_pScene = new Stage1();
-			//if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
-			//HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((Stage1*)m_pScene)->m_pTerrain);
-			//m_pScene->m_pPlayer = m_pPlayer = pPlayer;
-			//m_pCamera = m_pPlayer->GetCamera();
-			//m_pScene->SetCurScene(SCENE1STAGE);
-			//break;
+			m_pScene = new Stage1();
+			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
+			HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((Stage1*)m_pScene)->m_pTerrain);
+			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
+			m_pCamera = m_pPlayer->GetCamera();
+			m_pScene->SetCurScene(SCENE1STAGE);
+			break;
 		}
 		case SCENE2STAGE:
 		{
@@ -1189,9 +1188,9 @@ void CGameFramework::SetVectors_PlayerObj(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMF
 
 void CGameFramework::SetPosition_OtherPlayerObj(int id, XMFLOAT3 pos) {
 
-	m_pScene->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._41 = pos.x;
-	m_pScene->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._42 = pos.y;
-	m_pScene->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._43 = pos.z;
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._41 = pos.x;
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._42 = pos.y;
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._43 = pos.z;
 
 	/*if (m_nMode == SCENE2STAGE)
 	{
@@ -1201,10 +1200,10 @@ void CGameFramework::SetPosition_OtherPlayerObj(int id, XMFLOAT3 pos) {
 	}*/
 }
 void CGameFramework::SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec) {
-	m_pScene->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
-	m_pScene->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
-	m_pScene->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
-	m_pScene->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(1.0, 1.0, 1.0);
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(1.0, 1.0, 1.0);
 	//if (m_nMode == SCENE2STAGE)
 	//{
 	//	((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->SetUp(upVec);
@@ -1213,8 +1212,8 @@ void CGameFramework::SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOA
 	//}
 }
 void CGameFramework::Remove_OtherPlayerObj(int id) {
-	if (m_pScene->m_ppShaders[0]->m_ppObjects[5 + id]) {
-		m_pScene->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
+	if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
 	}
 }
 
@@ -1227,24 +1226,24 @@ void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3right
 {
 
 
-	m_pScene->m_ppBullets[id]->SetPosition(pos);
-	m_pScene->m_ppBullets[id]->SetRight(xmf3right);
-	m_pScene->m_ppBullets[id]->SetUp(xmf3up);
-	m_pScene->m_ppBullets[id]->SetLook(xmf3look);
+	((Stage1*)m_pScene)->m_ppBullets[id]->SetPosition(pos);
+	((Stage1*)m_pScene)->m_ppBullets[id]->SetRight(xmf3right);
+	((Stage1*)m_pScene)->m_ppBullets[id]->SetUp(xmf3up);
+	((Stage1*)m_pScene)->m_ppBullets[id]->SetLook(xmf3look);
 
 }
 
 void CGameFramework::SetPosition_NPC(int id, XMFLOAT3 pos)
 {
-	m_pScene->m_ppShaders[0]->m_ppObjects[10 + id]->SetPosition(pos);
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetPosition(pos);
 }
 
 void CGameFramework::SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
-	m_pScene->m_ppShaders[0]->m_ppObjects[10 + id]->SetRight(rightVec);
-	m_pScene->m_ppShaders[0]->m_ppObjects[10 + id]->SetUp(upVec);
-	m_pScene->m_ppShaders[0]->m_ppObjects[10 + id]->SetLook(lookVec);
-	m_pScene->m_ppShaders[0]->m_ppObjects[10 + id]->SetScale(1.0f, 1.0f, 1.0f);
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetRight(rightVec);
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetUp(upVec);
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetLook(lookVec);
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetScale(1.0f, 1.0f, 1.0f);
 }
 
 
