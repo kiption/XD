@@ -32,7 +32,7 @@ ST1_NPC::ST1_NPC()
 
 	m_attack = 25;
 	m_defence = 100;
-	m_Speed = 15.0f;
+	m_Speed = 3.0f;
 	m_chaseID = -1;
 }
 
@@ -395,20 +395,21 @@ void ST1_NPC::FlyOnNpc(XMFLOAT3 vec, int id) // 추적대상 플레이어와 높이 맞추기
 
 void ST1_NPC::PlayerChasing()
 {
-	// Look 방향 변환
-	XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&m_User_Pos[m_chaseID]), XMLoadFloat3(&m_Pos)));
-	XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
-	
-	// Right 방향 변환
-	Coordinate base_coordinate;
-	base_coordinate.up = { 0,1,0 };
+	// Look 방향 변환 --> 조금씩 회전
 
-	XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-	XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+	//XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&m_User_Pos[m_chaseID]), XMLoadFloat3(&m_Pos)));
+	//XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+	//
+	//// Right 방향 변환
+	//Coordinate base_coordinate;
+	//base_coordinate.up = { 0,1,0 };
 
-	// Up 방향 변환
-	XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-	XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+	//XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+	//XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+	//// Up 방향 변환
+	//XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+	//XMStoreFloat3(&m_curr_coordinate.up, uptemp);
 
 	// 위치 변환
 	m_Pos.x += m_Speed * m_curr_coordinate.look.x;

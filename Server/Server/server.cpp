@@ -1532,7 +1532,7 @@ void MoveNPC()
 			// Send Move&Rotate Packet
 			SC_MOVE_ROTATE_OBJECT_PACKET npc_update_packet;
 			npc_update_packet.size = sizeof(SC_MOVE_ROTATE_OBJECT_PACKET);
-			npc_update_packet.type = SC_MOVE_OBJECT;
+			npc_update_packet.type = SC_MOVE_ROTATE_OBJECT;
 
 			npc_update_packet.target = TARGET_NPC;
 			npc_update_packet.id = npcs[i].GetID();
