@@ -72,7 +72,8 @@ public:
 	int									m_nShaders = 0;
 	CShader** m_ppShaders = NULL;
 	int									m_nBillboardShaders = 0;
-	BillboardShader** m_pBillboardShader = NULL;
+	BillboardParticleShader** m_pBillboardShader = NULL;
+	bool Start = false;
 
 	CSkyBox* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;

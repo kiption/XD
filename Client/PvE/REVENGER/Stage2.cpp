@@ -106,7 +106,6 @@ void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	m_nStageMapShaders = 1;
 	m_ppStageMapShaders = new CStage2MapObjectShader * [m_nStageMapShaders];
-
 	CStage2MapObjectShader* pMapObjectShader = new CStage2MapObjectShader();
 	pMapObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pMapObjectShader->SetCurScene(SCENE2STAGE);

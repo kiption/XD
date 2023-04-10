@@ -45,18 +45,18 @@ void CHellicopterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
 
-		for (int i = 0; i < m_nObjects; i++)
-		{
-			
-			m_ppObjects[i] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			m_ppObjects[i]->SetChild(pGunshipModel->m_pModelRootObject, true);
-			
-			m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), Random(20.0f, 100.0f), nColumnSize - int(floor(nColumnSize / 2.0f)), nColumnSpace));
-			m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-			m_ppObjects[i]->OnPrepareAnimate();	
-		
-		}
-	
+	for (int i = 0; i < m_nObjects; i++)
+	{
+
+		m_ppObjects[i] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppObjects[i]->SetChild(pGunshipModel->m_pModelRootObject, true);
+
+		m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), Random(20.0f, 100.0f), nColumnSize - int(floor(nColumnSize / 2.0f)), nColumnSpace));
+		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
+		m_ppObjects[i]->OnPrepareAnimate();
+
+	}
+
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -225,16 +225,16 @@ void CHumanObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 	for (int x = 0; x <= m_nObjects; x++)
 	{
-		
-			m_ppObjects[x] = new CEthanObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pEthanModel, 1);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(0,0);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.25f);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackPosition(0, 0);
-			XMFLOAT3 xmf3Position = XMFLOAT3(1610.0, 146.0f, 2250.0f);
-			xmf3Position.y = pTerrain->GetHeight(xmf3Position.x, xmf3Position.z);
-			m_ppObjects[x]->SetScale(7.0,7.0,7.0);
-			m_ppObjects[x]->SetPosition(xmf3Position);
-		
+
+		m_ppObjects[x] = new CEthanObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pEthanModel, 1);
+		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.25f);
+		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackPosition(0, 0);
+		XMFLOAT3 xmf3Position = XMFLOAT3(1610.0, 146.0f, 2250.0f);
+		xmf3Position.y = pTerrain->GetHeight(xmf3Position.x, xmf3Position.z);
+		m_ppObjects[x]->SetScale(7.0, 7.0, 7.0);
+		m_ppObjects[x]->SetPosition(xmf3Position);
+
 	}
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -281,5 +281,80 @@ D3D12_SHADER_BYTECODE CBulletEffectShader::CreatePixelShader(ID3DBlob** ppd3dSha
 
 void CBulletEffectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CStandardObjectsShader::Render(pd3dCommandList,pCamera, nPipelineState);
+	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState);
+}
+
+void CFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+
+
+	m_nObjects = 50;
+	m_ppObjects = new CGameObject * [m_nObjects];
+	CGameObject* pFragmentModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Sphere.bin", NULL);
+	for (int i = 0; i < m_nObjects; i++)
+	{
+		m_ppObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppObjects[i]->SetChild(pFragmentModel, false);
+		m_ppObjects[i]->SetScale(500.0, 500.0, 500.0);
+		m_ppObjects[i]->SetPosition(450.0, 200.0, 400.0);
+		pFragmentModel->AddRef();
+	}
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CFragmentsShader::ReleaseObjects()
+{
+	if (m_ppObjects)
+	{
+		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->Release();
+		delete[] m_ppObjects;
+	}
+}
+
+void CFragmentsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+{
+	CShader::Render(pd3dCommandList, pCamera, 0);
+
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			m_ppObjects[j]->Animate(0.16f);
+			m_ppObjects[j]->UpdateTransform(NULL);
+			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+		}
+	}
+}
+
+void CFragmentsShader::AnimateObjects(float fTimeElapsed)
+{
+	
+	float g = 9.8f;
+	float t = fTimeElapsed;
+	//random_device rd;
+	//default_random_engine dre(rd());
+	//uniform_real_distribution<float>uidx(-15.5, 15.5);
+	//uniform_real_distribution<float>uidy(-0.0, 0.3);
+	//uniform_real_distribution<float>uidz(-0.5, 0.5);
+
+	//float randomX{};
+	//float randomY{};
+	//float randomZ{};
+	float vx= t * 80.0f;
+
+	
+	float theta = XMConvertToRadians(60.0f);
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		t += 0.1f;
+		m_ppObjects[j]->m_xmf4x4ToParent._41 += (vx * cos(theta) * (-1.0)) * t;
+		m_ppObjects[j]->m_xmf4x4ToParent._42 += -0.5 * g * t * t + (vx * sin(theta) * t);
+		m_ppObjects[j]->m_xmf4x4ToParent._43 += (vx * cos(theta)*(-1.0)) * t;
+	}
+}
+
+void CFragmentsShader::ReleaseUploadBuffers()
+{
+	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
 }

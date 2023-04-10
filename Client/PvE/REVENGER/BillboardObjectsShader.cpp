@@ -264,18 +264,18 @@ void BillboardParticleShader::Render(ID3D12GraphicsCommandList* pd3dCommandList,
 
 void BillboardParticleShader::AnimateObjects(float fTimeElapsed)
 {
+
 	random_device rd;
 	default_random_engine dre(rd());
 	uniform_real_distribution<float>uidx(-0.5, 0.5);
 	uniform_real_distribution<float>uidy(-0.0, 0.3);
 	uniform_real_distribution<float>uidz(-0.5, 0.5);
-	uniform_real_distribution<float>uidw(15.0, 30.0);
-	uniform_real_distribution<float>uidh(15.0, 30.0);
 
 	float randomX{};
 	float randomY{};
 	float randomZ{};
-
+	uniform_real_distribution<float>uidw(15.0, 30.0);
+	uniform_real_distribution<float>uidh(15.0, 30.0);
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		m_fWidth = uidw(dre);
@@ -405,8 +405,6 @@ void OpeningBillboardBanner::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphi
 		pThirdObject->SetMaterial(0, pTerrainMaterial);
 		m_ppObjects[i] = pThirdObject;
 	}
-
-
 }
 
 void OpeningBillboardBanner::ReleaseObjects()

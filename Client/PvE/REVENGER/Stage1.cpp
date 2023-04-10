@@ -117,6 +117,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	BuildDefaultLightsAndMaterials();
+
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pSkyBox->SetCurScene(SCENE1STAGE);
@@ -127,13 +128,20 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pTerrain->SetCurScene(SCENE1STAGE);
 
 	m_nBillboardShaders = 1;
-	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
+	m_pBillboardShader = new BillboardParticleShader * [m_nBillboardShaders];
 	BillboardParticleShader* pBillboardParticleShader = new BillboardParticleShader();
 	pBillboardParticleShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pBillboardParticleShader->SetCurScene(SCENE1STAGE);
-
 	pBillboardParticleShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[0] = pBillboardParticleShader;
+
+	m_nFragShaders = 1;
+	m_ppFragShaders = new CFragmentsShader * [m_nFragShaders];
+	CFragmentsShader* pFragmentsShader = new CFragmentsShader();
+	pFragmentsShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	pFragmentsShader->SetCurScene(SCENE1STAGE);
+	pFragmentsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppFragShaders[0] = pFragmentsShader;
 
 	CBulletEffectShader* pBCBulletEffectShader = new CBulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
@@ -147,26 +155,30 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 		pBulletObject->SetChild(pGameObject, false);
 		m_ppBullets[i] = pBulletObject;
 	}
+	{
+		m_nShaders = 1;
+		m_ppShaders = new CShader * [m_nShaders];
+		CObjectsShader* pObjectShader = new CObjectsShader();
+		pObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+		pObjectShader->SetCurScene(OPENINGSCENE);
+		pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
+		m_xmBoundingBox = pObjectShader->CalculateBoundingBox();
+		m_ppShaders[0] = pObjectShader;
 
-	m_nShaders = 1;
-	m_ppShaders = new CShader * [m_nShaders];
-	CObjectsShader* pObjectShader = new CObjectsShader();
-	pObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
-	pObjectShader->SetCurScene(OPENINGSCENE);
-	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
-	m_xmBoundingBox = pObjectShader->CalculateBoundingBox();
-	m_ppShaders[0] = pObjectShader;
+		m_pDepthRenderShader = new CDepthRenderShader(pObjectShader, m_pcbMappedLights->m_pLights);
+		DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
+		m_pDepthRenderShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
+		m_pDepthRenderShader->SetCurScene(SCENE1STAGE);
+		m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 
-	m_pDepthRenderShader = new CDepthRenderShader(pObjectShader, m_pcbMappedLights->m_pLights);
-	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
-	m_pDepthRenderShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvFormats, DXGI_FORMAT_D32_FLOAT, 0);
-	m_pDepthRenderShader->SetCurScene(SCENE1STAGE);
-	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
+		m_pShadowShader = new CShadowMapShader(pObjectShader);
+		m_pShadowShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+		m_pShadowShader->SetCurScene(SCENE1STAGE);
+		m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
-	m_pShadowShader = new CShadowMapShader(pObjectShader);
-	m_pShadowShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
-	m_pShadowShader->SetCurScene(SCENE1STAGE);
-	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
+	}
+
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }
@@ -195,6 +207,16 @@ void Stage1::ReleaseObjects()
 			m_ppShaders[i]->Release();
 		}
 		delete[] m_ppShaders;
+	}
+	if (m_ppFragShaders)
+	{
+		for (int i = 0; i < m_nFragShaders; i++)
+		{
+			m_ppFragShaders[i]->ReleaseShaderVariables();
+			m_ppFragShaders[i]->ReleaseObjects();
+			m_ppFragShaders[i]->Release();
+		}
+		delete[] m_ppFragShaders;
 	}
 	if (m_pDepthRenderShader)
 	{
@@ -569,6 +591,7 @@ void Stage1::ReleaseUploadBuffers()
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->ReleaseUploadBuffers();
 
 }
 
@@ -653,7 +676,13 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
+
+	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->AnimateObjects(fTimeElapsed);
+	
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
+
+
+	ParticleAnimation();
 }
 
 void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -666,7 +695,7 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pBulletEffect) m_pBulletEffect->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) m_ppBullets[i]->Render(pd3dCommandList, pCamera);
-
+	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->Render(pd3dCommandList, pCamera, 0);
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
 
@@ -763,10 +792,11 @@ void Stage1::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 
 void Stage1::ParticleAnimation()
 {
-	//	SmokePosition = XMFLOAT3(((CObjectsShader*)m_ppShaders[0])->m_ppObjects[10]->m_xmf4x4ToParent._41, ((CObjectsShader*)m_ppShaders[0])->m_ppObjects[10]->m_xmf4x4ToParent._42, ((CObjectsShader*)m_ppShaders[0])->m_ppObjects[10]->m_xmf4x4ToParent._43);
 	m_pBillboardShader[0]->NextPosition.x = SmokePosition.x;
 	m_pBillboardShader[0]->NextPosition.y = SmokePosition.y + 10.0f;
 	m_pBillboardShader[0]->NextPosition.z = SmokePosition.z;
+
+
 }
 
 bool Stage1::CheckCollision(DirectX::BoundingOrientedBox& box1, DirectX::BoundingOrientedBox& box2, DirectX::XMFLOAT3& posA, DirectX::XMFLOAT3& lookA, DirectX::XMFLOAT3& upA, DirectX::XMFLOAT3& rightA)

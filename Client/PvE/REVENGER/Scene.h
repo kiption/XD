@@ -160,8 +160,10 @@ public:
 	CUseWaterMoveTerrain* m_pUseWaterMove = NULL;
 	int									m_nMapShaders = 0;
 	int									m_nStageMapShaders = 0;
+	int									m_nFragShaders = 0;
 	CMapObjectShader** m_ppMapShaders = NULL;
 	CStage2MapObjectShader** m_ppStageMapShaders = NULL;
+	CFragmentsShader** m_ppFragShaders = NULL;
 
 	COpeningBackScene* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;

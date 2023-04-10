@@ -4,6 +4,7 @@
 #include "MissileObject.h"
 
 class SceneManager;
+
 class CrossHairShader : public BillboardShader
 {
 public:
