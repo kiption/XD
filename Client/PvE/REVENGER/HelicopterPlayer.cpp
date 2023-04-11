@@ -39,6 +39,7 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 HeliPlayer::~HeliPlayer()
 {
+	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
 }
 
 void HeliPlayer::Firevalkan(CGameObject* pLockedObject)

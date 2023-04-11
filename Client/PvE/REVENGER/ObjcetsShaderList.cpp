@@ -284,21 +284,32 @@ void CBulletEffectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState);
 }
 
+D3D12_SHADER_BYTECODE CFragmentsShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSParticleStandard", "ps_5_1", ppd3dShaderBlob));
+}
+
 void CFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
 
-	m_nObjects = 30;
+	m_nObjects = 80;
 	m_ppObjects = new CGameObject * [m_nObjects];
-	CGameObject* pFragmentModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Sphere.bin", NULL);
-	for (int i = 0; i < m_nObjects; i++)
+	CGameObject* pFragmentModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Sphere.bin", this);
+	m_ppObjects[0] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_ppObjects[0]->SetScale(300.0, 300.0, 300.0);
+	m_ppObjects[0]->SetChild(pFragmentModel, false);
+	m_ppObjects[0]->SetPosition(18.0, 55.0, -45.0);
+	pFragmentModel->AddRef();
+	for (int i = 1; i < m_nObjects; i++)
 	{
 		m_ppObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pFragmentModel, false);
-		m_ppObjects[i]->SetScale(100.0, 100.0, 100.0);
+		m_ppObjects[i]->SetScale(50.0, 50.0, 50.0);
 		pFragmentModel->AddRef();
 	}
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -323,14 +334,33 @@ void CFragmentsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}
 	}
+
+}
+
+D3D12_INPUT_LAYOUT_DESC CFragmentsShader::CreateInputLayout(int nPipelineState)
+{
+	UINT nInputElementDescs = 5;
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[3] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 3, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[4] = { "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 4, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+
+	return(d3dInputLayoutDesc);
 }
 
 void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 {
 	random_device rd;
 	default_random_engine dre(rd());
-	uniform_real_distribution<float>uidr(-80.0, 80.0);
-	uniform_real_distribution<float>uidy(100.0, 130.0);
+	uniform_real_distribution<float>uidr(50.0, 60.0);
+	uniform_real_distribution<float>uidy(80.0, 90.0);
 	uniform_real_distribution<float>uidz(-0.5, 0.5);
 
 	float gravity = 9.8f;
@@ -346,21 +376,22 @@ void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 	//theta->Random°ª (-180 ~ 180) 
 	//vx ->Random°ª t * RANDOM;
 
+
 	if (m_bActive == true)
 	{
 
-		for (int j = 0; j < m_nObjects; j++)
+		for (int j = 1; j < m_nObjects; j++)
 		{
 			radian = uidr(dre);
 			dirtheta = XMConvertToRadians(radian);
-			time += 0.1f;
-			m_ppObjects[j]->m_xmf4x4ToParent._41 += (velocity * cos(radian)) * time;
-			m_ppObjects[j]->m_xmf4x4ToParent._42 += -0.5 * gravity * time * time + (velocity * sin(radian) * time);
-			m_ppObjects[j]->m_xmf4x4ToParent._43 += (velocity * cos(radian)) * time;
+			time += 0.01f;
+			m_ppObjects[j]->m_xmf4x4ToParent._41 += (velocity * cos(dirtheta)) * time;
+			m_ppObjects[j]->m_xmf4x4ToParent._42 += -0.5 * gravity * time * time + (velocity * sin(dirtheta) * time);
+			m_ppObjects[j]->m_xmf4x4ToParent._43 += (velocity * cos(dirtheta)) * time;
 
 			if (m_ppObjects[j]->m_xmf4x4ToParent._42 < 0.0f)
 			{
-				m_ppObjects[j]->SetPosition(300.0, 300.0, 300.0);
+				m_ppObjects[j]->SetPosition(65.0, 155.0, 18.0);
 			}
 		}
 	}

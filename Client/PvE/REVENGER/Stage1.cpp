@@ -23,7 +23,7 @@ Stage1::~Stage1()
 
 void Stage1::BuildDefaultLightsAndMaterials()
 {
-	m_nLights = 5;
+	m_nLights = 10;
 	m_pLights = new LIGHTS[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
@@ -85,7 +85,78 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[4].m_fFalloff = 8.0f;
 	m_pLights->m_pLights[4].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights->m_pLights[4].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	
+		m_pLights->m_pLights[5].m_bEnable = true;
+		m_pLights->m_pLights[5].m_nType = SPOT_LIGHT;
+		m_pLights->m_pLights[5].m_fRange = 50.0f;
+		m_pLights->m_pLights[5].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[5].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[5].m_xmf4Specular = XMFLOAT4(0.8f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[5].m_xmf4Emissive = XMFLOAT4(0.9f, 0.2f, 0.2f, 1.0f);
+		m_pLights->m_pLights[5].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		m_pLights->m_pLights[5].m_xmf3Direction = XMFLOAT3(0.5f, -1.0f, 0.5f);
+		m_pLights->m_pLights[5].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+		m_pLights->m_pLights[5].m_fFalloff = 1.0f;
+		m_pLights->m_pLights[5].m_fPhi = (float)cos(XMConvertToRadians(359.0f));
+		m_pLights->m_pLights[5].m_fTheta = (float)cos(XMConvertToRadians(15.0));
 
+		m_pLights->m_pLights[6].m_bEnable = true;
+		m_pLights->m_pLights[6].m_nType = SPOT_LIGHT;
+		m_pLights->m_pLights[6].m_fRange = 60.0f;
+		m_pLights->m_pLights[6].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[6].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[6].m_xmf4Specular = XMFLOAT4(0.8f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[6].m_xmf4Emissive = XMFLOAT4(0.9f, 0.2f, 0.2f, 1.0f);
+		m_pLights->m_pLights[6].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		m_pLights->m_pLights[6].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.5f);
+		m_pLights->m_pLights[6].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+		m_pLights->m_pLights[6].m_fFalloff = 1.0f;
+		m_pLights->m_pLights[6].m_fPhi = (float)cos(XMConvertToRadians(359.0f));
+		m_pLights->m_pLights[6].m_fTheta = (float)cos(XMConvertToRadians(15.0));
+
+		m_pLights->m_pLights[7].m_bEnable = true;
+		m_pLights->m_pLights[7].m_nType = SPOT_LIGHT;
+		m_pLights->m_pLights[7].m_fRange = 90.0f;
+		m_pLights->m_pLights[7].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[7].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[7].m_xmf4Specular = XMFLOAT4(0.8f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[7].m_xmf4Emissive = XMFLOAT4(0.9f, 0.2f, 0.2f, 1.0f);
+		m_pLights->m_pLights[7].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		m_pLights->m_pLights[7].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.5f);
+		m_pLights->m_pLights[7].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+		m_pLights->m_pLights[7].m_fFalloff = 1.0f;
+		m_pLights->m_pLights[7].m_fPhi = (float)cos(XMConvertToRadians(359.0f));
+		m_pLights->m_pLights[7].m_fTheta = (float)cos(XMConvertToRadians(15.0));
+
+
+		m_pLights->m_pLights[8].m_bEnable = true;
+		m_pLights->m_pLights[8].m_nType = SPOT_LIGHT;
+		m_pLights->m_pLights[8].m_fRange = 90.0f;
+		m_pLights->m_pLights[8].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[8].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[8].m_xmf4Specular = XMFLOAT4(0.8f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[8].m_xmf4Emissive = XMFLOAT4(0.9f, 0.2f, 0.2f, 1.0f);
+		m_pLights->m_pLights[8].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		m_pLights->m_pLights[8].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.5f);
+		m_pLights->m_pLights[8].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+		m_pLights->m_pLights[8].m_fFalloff = 1.0f;
+		m_pLights->m_pLights[8].m_fPhi = (float)cos(XMConvertToRadians(359.0f));
+		m_pLights->m_pLights[8].m_fTheta = (float)cos(XMConvertToRadians(15.0));
+
+
+		m_pLights->m_pLights[9].m_bEnable = true;
+		m_pLights->m_pLights[9].m_nType = SPOT_LIGHT;
+		m_pLights->m_pLights[9].m_fRange = 90.0f;
+		m_pLights->m_pLights[9].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[9].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[9].m_xmf4Specular = XMFLOAT4(0.8f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[9].m_xmf4Emissive = XMFLOAT4(0.9f, 0.2f, 0.2f, 1.0f);
+		m_pLights->m_pLights[9].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		m_pLights->m_pLights[9].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 0.5f);
+		m_pLights->m_pLights[9].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+		m_pLights->m_pLights[9].m_fFalloff = 1.0f;
+		m_pLights->m_pLights[9].m_fPhi = (float)cos(XMConvertToRadians(359.0f));
+		m_pLights->m_pLights[9].m_fTheta = (float)cos(XMConvertToRadians(15.0));
 	m_pMaterials = new MATERIALS;
 	::ZeroMemory(m_pMaterials, sizeof(MATERIALS));
 
@@ -224,6 +295,7 @@ void Stage1::ReleaseObjects()
 		m_pDepthRenderShader->ReleaseObjects();
 		m_pDepthRenderShader->Release();
 	}
+	for (int i = 0; i < 100; i++)if (m_ppBullets[i]) delete m_ppBullets[i];
 	if (m_pShadowShader)delete m_pShadowShader;
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
@@ -676,12 +748,20 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
-
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->AnimateObjects(fTimeElapsed);
-	
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 
-
+	if (m_pLights)
+	{
+		for (int i = 0; i < 5; i++)
+		{
+			m_pLights->m_pLights[5].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[0]->GetPosition();
+			m_pLights->m_pLights[6].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[2]->GetPosition();
+			m_pLights->m_pLights[7].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[4]->GetPosition();
+			m_pLights->m_pLights[8].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[6]->GetPosition();
+			m_pLights->m_pLights[9].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[8]->GetPosition();
+		}
+	}
 	ParticleAnimation();
 }
 

@@ -4,6 +4,7 @@
 #include <MSWSock.h>
 #include "ObjectsInfo.h"
 #include "GameSound.h"
+
 GameSound gamesound;
 
 #pragma comment (lib, "WS2_32.LIB")
@@ -326,6 +327,7 @@ void processPacket(char* ptr)
 	}//SC_REMOVE_PLAYER case end
 	case SC_DAMAGED:
 	{
+		
 		SC_DAMAGED_PACKET* recv_packet = reinterpret_cast<SC_DAMAGED_PACKET*>(ptr);
 
 		if (recv_packet->target == TARGET_PLAYER && recv_packet->id == my_id) {

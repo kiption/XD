@@ -67,6 +67,7 @@ void Stage2::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(90.0f));
 	m_pLights->m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
 	m_pLights->m_pLights[4].m_bEnable = true;
+
 	m_pLights->m_pLights[4].m_nType = POINT_LIGHT;
 	m_pLights->m_pLights[4].m_fRange = 200.0f;
 	m_pLights->m_pLights[4].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
@@ -74,6 +75,7 @@ void Stage2::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[4].m_xmf4Specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
 	m_pLights->m_pLights[4].m_xmf3Position = XMFLOAT3(600.0f, 250.0f, 700.0f);
 	m_pLights->m_pLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
+
 	m_pLights->m_pLights[5].m_nType = SPOT_LIGHT;
 	m_pLights->m_pLights[5].m_fRange = 1500.0f;
 	m_pLights->m_pLights[5].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
