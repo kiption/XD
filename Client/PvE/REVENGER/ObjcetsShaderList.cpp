@@ -289,15 +289,14 @@ void CFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
 
-	m_nObjects = 50;
+	m_nObjects = 30;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	CGameObject* pFragmentModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Sphere.bin", NULL);
 	for (int i = 0; i < m_nObjects; i++)
 	{
 		m_ppObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pFragmentModel, false);
-		m_ppObjects[i]->SetScale(500.0, 500.0, 500.0);
-		m_ppObjects[i]->SetPosition(450.0, 200.0, 400.0);
+		m_ppObjects[i]->SetScale(100.0, 100.0, 100.0);
 		pFragmentModel->AddRef();
 	}
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -320,7 +319,6 @@ void CFragmentsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 	{
 		if (m_ppObjects[j])
 		{
-			m_ppObjects[j]->Animate(0.16f);
 			m_ppObjects[j]->UpdateTransform(NULL);
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}
@@ -329,28 +327,42 @@ void CFragmentsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 
 void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 {
-	
-	float g = 9.8f;
-	float t = fTimeElapsed;
-	//random_device rd;
-	//default_random_engine dre(rd());
-	//uniform_real_distribution<float>uidx(-15.5, 15.5);
-	//uniform_real_distribution<float>uidy(-0.0, 0.3);
-	//uniform_real_distribution<float>uidz(-0.5, 0.5);
+	random_device rd;
+	default_random_engine dre(rd());
+	uniform_real_distribution<float>uidr(-80.0, 80.0);
+	uniform_real_distribution<float>uidy(100.0, 130.0);
+	uniform_real_distribution<float>uidz(-0.5, 0.5);
+
+	float gravity = 9.8f;
+	float time = fTimeElapsed;
+	float velocity = time * uidy(dre);
+	float radian = uidr(dre);
+	float dirtheta = XMConvertToRadians(radian);
 
 	//float randomX{};
 	//float randomY{};
 	//float randomZ{};
-	float vx= t * 80.0f;
 
-	
-	float theta = XMConvertToRadians(60.0f);
-	for (int j = 0; j < m_nObjects; j++)
+	//theta->Random°ª (-180 ~ 180) 
+	//vx ->Random°ª t * RANDOM;
+
+	if (m_bActive == true)
 	{
-		t += 0.1f;
-		m_ppObjects[j]->m_xmf4x4ToParent._41 += (vx * cos(theta) * (-1.0)) * t;
-		m_ppObjects[j]->m_xmf4x4ToParent._42 += -0.5 * g * t * t + (vx * sin(theta) * t);
-		m_ppObjects[j]->m_xmf4x4ToParent._43 += (vx * cos(theta)*(-1.0)) * t;
+
+		for (int j = 0; j < m_nObjects; j++)
+		{
+			radian = uidr(dre);
+			dirtheta = XMConvertToRadians(radian);
+			time += 0.1f;
+			m_ppObjects[j]->m_xmf4x4ToParent._41 += (velocity * cos(radian)) * time;
+			m_ppObjects[j]->m_xmf4x4ToParent._42 += -0.5 * gravity * time * time + (velocity * sin(radian) * time);
+			m_ppObjects[j]->m_xmf4x4ToParent._43 += (velocity * cos(radian)) * time;
+
+			if (m_ppObjects[j]->m_xmf4x4ToParent._42 < 0.0f)
+			{
+				m_ppObjects[j]->SetPosition(300.0, 300.0, 300.0);
+			}
+		}
 	}
 }
 

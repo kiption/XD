@@ -62,4 +62,6 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void ReleaseUploadBuffers();
 
+	bool m_bActive = false;
+
 };

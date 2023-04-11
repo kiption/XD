@@ -384,9 +384,8 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
-		case VK_SPACE:
-
-			//if (m_nMode == SCENE1STAGE)((CAirplanePlayer*)m_pPlayer)->Firevalkan(NULL);
+		case VK_CONTROL:
+			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
 			break;
 		default:
 			break;
