@@ -2,7 +2,7 @@
 #include <WS2tcpip.h>
 #include <MSWSock.h>
 #include <thread>
-#include <mutex>
+//#include <mutex>
 #include <array>
 #include <vector>
 #include <chrono>
@@ -658,77 +658,77 @@ void process_packet(int client_id, char* packet)
 					// empty space check
 					int new_bullet_id = -1;
 					int arr_cnt = -1;
-					if (clients[client_id].bullet > 0) {		// 남은 총알이 있을 때에만
-						while (arr_cnt < MAX_BULLET / MAX_USER) {
-							if (bullets_arr[arr_cnt].getId() == -1) {
-								new_bullet_id = arr_cnt + 10 * client_id;	// 0번 클라: 0-99, 1번 클라: 100-199, 2번 클라: 200-299
+					if (clients[client_id].bullet > 0) {		// 남은 총알이 있다면,
+						// Bullet Array에 비어있는 인덱스 확인
+						for (int i = 0; i < MAX_BULLET; ++i) {	
+							if (bullets_arr[i].getId() == -1) {
+								new_bullet_id = i;
+
+								// 새로운 Bullet 생성
+								bullets_arr[new_bullet_id].m_objlock.lock();
+
+								bullets_arr[new_bullet_id].setId(new_bullet_id);
+								bullets_arr[new_bullet_id].setPos(clients[client_id].pos);
+								bullets_arr[new_bullet_id].setPitch(clients[client_id].pitch);
+								bullets_arr[new_bullet_id].setYaw(clients[client_id].yaw);
+								bullets_arr[new_bullet_id].setRoll(clients[client_id].roll - 20);
+								bullets_arr[new_bullet_id].setRightvector(clients[client_id].m_rightvec);
+								bullets_arr[new_bullet_id].setUpvector(clients[client_id].m_upvec);
+								bullets_arr[new_bullet_id].setLookvector(calcRotate(clients[client_id].m_lookvec, bullets_arr[new_bullet_id].getPitch(), 0.f, 0.f));
+								bullets_arr[new_bullet_id].setOwner(client_id);
+								bullets_arr[new_bullet_id].setInitialPos(bullets_arr[new_bullet_id].getPos());
+								bullets_arr[new_bullet_id].setBB_ex(XMFLOAT3{ vulcan_bullet_bbsize_x, vulcan_bullet_bbsize_y, vulcan_bullet_bbsize_z });
+
+								bullets_arr[new_bullet_id].m_objlock.unlock();
+
+								cout << "Create New Bullet. [Owner:" << client_id << " , b_id: " << new_bullet_id << " ]" << endl;//test
+
+								// shoot time update
+								shoot_time = chrono::system_clock::now();
+
+								// 총알 하나 사용
+								clients[client_id].s_lock.lock();
+								clients[client_id].bullet -= 1;
+
+								// 발사한 사용자에게 총알 사용했음을 알려줍니다.
+								SC_BULLET_COUNT_PACKET bullet_packet;
+								bullet_packet.size = sizeof(bullet_packet);
+								bullet_packet.type = SC_BULLET_COUNT;
+								bullet_packet.id = client_id;
+								bullet_packet.bullet_cnt = clients[client_id].bullet;
+								clients[client_id].do_send(&bullet_packet);
+
+								clients[client_id].s_lock.unlock();
+
+								// 접속해있는 모든 클라이언트에게 새로운 Bullet정보를 보냅니다.
+								SC_ADD_OBJECT_PACKET add_bullet_packet;
+								add_bullet_packet.target = TARGET_BULLET;
+								add_bullet_packet.id = new_bullet_id;
+								strcpy_s(add_bullet_packet.name, "bullet");
+								add_bullet_packet.size = sizeof(add_bullet_packet);
+								add_bullet_packet.type = SC_ADD_OBJECT;
+
+								add_bullet_packet.x = bullets_arr[new_bullet_id].getPos().x;
+								add_bullet_packet.y = bullets_arr[new_bullet_id].getPos().y;
+								add_bullet_packet.z = bullets_arr[new_bullet_id].getPos().z;
+
+								add_bullet_packet.right_x = bullets_arr[new_bullet_id].getRightvector().x;
+								add_bullet_packet.right_y = bullets_arr[new_bullet_id].getRightvector().y;
+								add_bullet_packet.right_z = bullets_arr[new_bullet_id].getRightvector().z;
+
+								add_bullet_packet.up_x = bullets_arr[new_bullet_id].getUpvector().x;
+								add_bullet_packet.up_y = bullets_arr[new_bullet_id].getUpvector().y;
+								add_bullet_packet.up_z = bullets_arr[new_bullet_id].getUpvector().z;
+
+								add_bullet_packet.look_x = bullets_arr[new_bullet_id].getLookvector().x;
+								add_bullet_packet.look_y = bullets_arr[new_bullet_id].getLookvector().y;
+								add_bullet_packet.look_z = bullets_arr[new_bullet_id].getLookvector().z;
+
+								for (auto& pl : clients) {
+									if (pl.s_state == ST_INGAME)
+										pl.do_send(&add_bullet_packet);
+								}
 								break;
-							}
-							else {
-								arr_cnt++;
-							}
-						}
-
-						// 벡터에 남아있는 공간이 있을 때에만 발사합니다.
-						if (new_bullet_id != -1) {
-							// shoot time update
-							shoot_time = chrono::system_clock::now();
-
-							// 총알 하나 사용
-							clients[client_id].s_lock.lock();
-							clients[client_id].bullet -= 1;
-
-							// 발사한 사용자에게 총알 사용했음을 알려줍니다.
-							SC_BULLET_COUNT_PACKET bullet_packet;
-							bullet_packet.size = sizeof(bullet_packet);
-							bullet_packet.type = SC_BULLET_COUNT;
-							bullet_packet.id = client_id;
-							bullet_packet.bullet_cnt = clients[client_id].bullet;
-							clients[client_id].do_send(&bullet_packet);
-
-							clients[client_id].s_lock.unlock();
-
-							// Bullet 생성
-							bullets_arr[new_bullet_id].setId(new_bullet_id);
-							bullets_arr[new_bullet_id].setPos(clients[client_id].pos);
-							bullets_arr[new_bullet_id].setPitch(clients[client_id].pitch);
-							bullets_arr[new_bullet_id].setYaw(clients[client_id].yaw);
-							bullets_arr[new_bullet_id].setRoll(clients[client_id].roll - 20);
-							bullets_arr[new_bullet_id].setRightvector(clients[client_id].m_rightvec);
-							bullets_arr[new_bullet_id].setUpvector(clients[client_id].m_upvec);
-							bullets_arr[new_bullet_id].setLookvector(calcRotate(clients[client_id].m_lookvec
-								, bullets_arr[new_bullet_id].getPitch(), 0.f, 0.f));
-							bullets_arr[new_bullet_id].setOwner(client_id);
-							bullets_arr[new_bullet_id].setInitialPos(bullets_arr[new_bullet_id].getPos());
-							bullets_arr[new_bullet_id].setBB_ex(XMFLOAT3{ vulcan_bullet_bbsize_x, vulcan_bullet_bbsize_y, vulcan_bullet_bbsize_z });
-
-							// 접속해있는 모든 클라이언트에게 새로운 Bullet정보를 보냅니다.
-							SC_ADD_OBJECT_PACKET add_bullet_packet;
-							add_bullet_packet.target = TARGET_BULLET;
-							add_bullet_packet.id = new_bullet_id;
-							strcpy_s(add_bullet_packet.name, "bullet");
-							add_bullet_packet.size = sizeof(add_bullet_packet);
-							add_bullet_packet.type = SC_ADD_OBJECT;
-
-							add_bullet_packet.x = bullets_arr[new_bullet_id].getPos().x;
-							add_bullet_packet.y = bullets_arr[new_bullet_id].getPos().y;
-							add_bullet_packet.z = bullets_arr[new_bullet_id].getPos().z;
-
-							add_bullet_packet.right_x = bullets_arr[new_bullet_id].getRightvector().x;
-							add_bullet_packet.right_y = bullets_arr[new_bullet_id].getRightvector().y;
-							add_bullet_packet.right_z = bullets_arr[new_bullet_id].getRightvector().z;
-
-							add_bullet_packet.up_x = bullets_arr[new_bullet_id].getUpvector().x;
-							add_bullet_packet.up_y = bullets_arr[new_bullet_id].getUpvector().y;
-							add_bullet_packet.up_z = bullets_arr[new_bullet_id].getUpvector().z;
-
-							add_bullet_packet.look_x = bullets_arr[new_bullet_id].getLookvector().x;
-							add_bullet_packet.look_y = bullets_arr[new_bullet_id].getLookvector().y;
-							add_bullet_packet.look_z = bullets_arr[new_bullet_id].getLookvector().z;
-
-							for (auto& pl : clients) {
-								if (pl.s_state == ST_INGAME)
-									pl.do_send(&add_bullet_packet);
 							}
 						}
 					}
