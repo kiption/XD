@@ -1,4 +1,5 @@
 #pragma once
+#include <mutex>
 #include <math.h>
 #include "MyVectors.h"
 
@@ -23,6 +24,9 @@ private:
 	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;	// ÇöÀç Look, Right, Up Vectors
 
 	BoundingOrientedBox m_xoobb;				// Bounding Box
+
+public:
+	mutex m_objlock;	// mutex
 
 public:
 	Objects() {
@@ -53,23 +57,23 @@ public:
 public:
 	// Accessor Function
 	//  1. Set
-	void setId(int id) { m_id = id; }
-	void setPos(XMFLOAT3 pos) { m_pos = pos; }
+	void setId(int id)		   { m_id = id; }
+	void setPos(XMFLOAT3 pos)  { m_pos = pos; }
 	void setPitch(float pitch) { m_pitch = pitch; }
-	void setYaw(float yaw) { m_yaw = yaw; }
-	void setRoll(float roll) { m_roll = roll; }
+	void setYaw(float yaw)	   { m_yaw = yaw; }
+	void setRoll(float roll)   { m_roll = roll; }
 	void setRightvector(XMFLOAT3 right) { m_rightvec = right; }
-	void setUpvector(XMFLOAT3 up) { m_upvec = up; }
-	void setLookvector(XMFLOAT3 look) { m_lookvec = look; }
+	void setUpvector(XMFLOAT3 up)		{ m_upvec = up; }
+	void setLookvector(XMFLOAT3 look)	{ m_lookvec = look; }
 	//  2. Get
-	int			getId() { return m_id; }
-	XMFLOAT3	getPos() { return m_pos; }
-	float		getPitch() { return m_pitch; }
-	float		getYaw() { return m_yaw; }
-	float		getRoll() { return m_roll; }
+	int			getId()			 { return m_id; }
+	XMFLOAT3	getPos()		 { return m_pos; }
+	float		getPitch()		 { return m_pitch; }
+	float		getYaw()		 { return m_yaw; }
+	float		getRoll()		 { return m_roll; }
 	XMFLOAT3	getRightvector() { return m_rightvec; }
-	XMFLOAT3	getUpvector() { return m_upvec; }
-	XMFLOAT3	getLookvector() { return m_lookvec; }
+	XMFLOAT3	getUpvector()	 { return m_upvec; }
+	XMFLOAT3	getLookvector()  { return m_lookvec; }
 
 public:
 	void clear();
