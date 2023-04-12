@@ -16,7 +16,7 @@ CObjectsShader::~CObjectsShader()
 
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nObjects = 18;
+	m_nObjects = 21;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CShadowMapShader* pShadowMapShader = new CShadowMapShader(this);
@@ -38,11 +38,11 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	CMaterial* pPlaneMaterial2 = new CMaterial(1);
 	pPlaneMaterial2->SetReflection(1);
-	XMFLOAT3 xmf3Scale(0.5f, 3.8, 0.5f);
+	XMFLOAT3 xmf3Scale(1.0f, 1.1, 1.0f);
 	XMFLOAT3 xmf3Normal(0.0f, 0.0f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf3Normal);
 	m_pTerrain->SetMaterial(pPlaneMaterial2);
-	m_pTerrain->SetPosition(-1000.0f, -80.0, -3000.0f);
+	m_pTerrain->SetPosition(300.0, 5.0, 300.0);
 	m_ppObjects[2] = m_pTerrain;
 
 	CMaterial* pMaterial = new CMaterial(3);
@@ -96,7 +96,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppNpcObjects[i]->SetChild(pNpcModel, false);
 		m_ppNpcObjects[i]->SetMaterial(pNpcMaterial);
 		m_ppNpcObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-		m_ppNpcObjects[i]->SetScale(10.0, 10.0, 10.0);
+		m_ppNpcObjects[i]->SetScale(0.0, 0.0, 0.0);
 		m_ppNpcObjects[i]->OnPrepareAnimate();
 		pNpcModel->AddRef();
 	}
@@ -109,7 +109,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	CMaterial* pCityMaterial = new CMaterial(3);
 	pCityMaterial->SetReflection(3);
 
-	int Cities = 3;
+	int Cities = 6;
 	m_ppCityGameObjects = new CGameObject * [Cities];
 
 	for (int i = 0; i < Cities; i++)
@@ -129,10 +129,16 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[15] = m_ppCityGameObjects[0];
 	m_ppObjects[16] = m_ppCityGameObjects[1];
 	m_ppObjects[17] = m_ppCityGameObjects[2];
+	m_ppObjects[18] = m_ppCityGameObjects[3];
+	m_ppObjects[19] = m_ppCityGameObjects[4];
+	m_ppObjects[20] = m_ppCityGameObjects[5];
 
 	m_ppObjects[15]->SetPosition(-150.0, 20.0, -550.0);
 	m_ppObjects[16]->SetPosition(550.0, 20.0, -400.0);
 	m_ppObjects[17]->SetPosition(250.0, 20.0, -200.0);
+	m_ppObjects[18]->SetPosition(950.0, 20.0, 670.0);
+	m_ppObjects[19]->SetPosition(-150.0, 20.0,980.0);
+	m_ppObjects[20]->SetPosition(1200.0, 20.0, 300.0);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	
@@ -208,23 +214,7 @@ CShadowMapShader::~CShadowMapShader()
 {
 }
 
-//D3D12_INPUT_LAYOUT_DESC CShadowMapShader::CreateInputLayout(int nPipelineState)
-//{
-//	UINT nInputElementDescs = 4;
-//	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
-//
-//	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-//	pd3dInputElementDescs[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-//	pd3dInputElementDescs[2] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-//
-//	
-//
-//	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
-//	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
-//	d3dInputLayoutDesc.NumElements = nInputElementDescs;
-//
-//	return(d3dInputLayoutDesc);
-//}
+
 
 D3D12_DEPTH_STENCIL_DESC CShadowMapShader::CreateDepthStencilState(int nPipelineState)
 {
@@ -246,6 +236,24 @@ D3D12_DEPTH_STENCIL_DESC CShadowMapShader::CreateDepthStencilState(int nPipeline
 	d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
 
 	return(d3dDepthStencilDesc);
+}
+
+D3D12_RASTERIZER_DESC CShadowMapShader::CreateRasterizerState(int nPipelineState)
+{
+	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
+	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
+	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
+	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
+	d3dRasterizerDesc.SlopeScaledDepthBias = 1.0f;
+	d3dRasterizerDesc.DepthClipEnable = TRUE;
+	d3dRasterizerDesc.MultisampleEnable = FALSE;
+	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
+	d3dRasterizerDesc.ForcedSampleCount = 0;
+	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+
+	return(d3dRasterizerDesc);
 }
 
 D3D12_SHADER_BYTECODE CShadowMapShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)

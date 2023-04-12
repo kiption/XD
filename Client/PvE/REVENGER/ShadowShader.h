@@ -111,9 +111,9 @@ class CShadowMapShader : public CIlluminatedShader
 public:
 	CShadowMapShader(CObjectsShader* pObjectsShader);
 	virtual ~CShadowMapShader();
-//	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
+	/*virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);*/
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState);
-
+	virtual D3D12_RASTERIZER_DESC CreateRasterizerState(int nPipelineState);
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 	//virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();

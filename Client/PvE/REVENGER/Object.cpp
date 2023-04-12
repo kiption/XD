@@ -992,8 +992,6 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 	if (m_pMesh)
 	{
-		//UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-
 		if (m_nMaterials > 0)
 		{
 			for (int i = 0; i < m_nMaterials; i++)
@@ -1007,7 +1005,6 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 
 					if (m_ppMaterials[i]->m_pTexture) m_ppMaterials[i]->m_pTexture->UpdateShaderVariables(pd3dCommandList);
-					//if (m_pMaterials->m_pTexture) m_pMaterials->m_pTexture->UpdateShaderVariables(pd3dCommandList);
 				}
 
 				m_pMesh->Render(pd3dCommandList, i);
@@ -1031,7 +1028,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 			}
 		}
 	}
-	if (m_ppMeshes)
+	/*if (m_ppMeshes)
 	{
 		for (int i = 0; i < m_nMeshes; i++)
 		{
@@ -1050,7 +1047,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		{
 			m_pMaterials->m_pTexture->UpdateShaderVariables(pd3dCommandList);
 		}
-	}
+	}*/
 
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);

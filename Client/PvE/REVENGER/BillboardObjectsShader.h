@@ -48,9 +48,14 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void ReleaseUploadBuffers();
-
+	float randomLiftHeight{};
+	float randomLiftHeighiest{};
 	float m_fWidth = 0.0f;
 	float m_fHeight = 0.0f;
+	CMaterial* pSpriteMaterial = NULL;
+		CMaterial* pSpriteMaterial2 = NULL;
+		CMaterial* pSpriteMaterial3 = NULL;
+
 };
 
 

@@ -135,7 +135,7 @@ VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 }
 
 float4 PSMapStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
-{ 
+{
 
 	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	if (gnTexturesMask & MATERIAL_ALBEDO_MAP) cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
@@ -329,7 +329,7 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 	float4x4 mtxVertexToBoneWorld = (float4x4)0.0f;
 	for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
 	{
-//		mtxVertexToBoneWorld += input.weights[i] * gpmtxBoneTransforms[input.indices[i]];
+		//		mtxVertexToBoneWorld += input.weights[i] * gpmtxBoneTransforms[input.indices[i]];
 		mtxVertexToBoneWorld += input.weights[i] * mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
 	}
 	output.positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
@@ -337,7 +337,7 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 	output.tangentW = mul(input.tangent, (float3x3)mtxVertexToBoneWorld).xyz;
 	output.bitangentW = mul(input.bitangent, (float3x3)mtxVertexToBoneWorld).xyz;
 
-//	output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
+	//	output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
 
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
@@ -393,13 +393,13 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	float4 cBaseTexColor = gtxtTerrainBaseTexture.Sample(gssWrap, input.uv0);
 	float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gssWrap, input.uv1);
 	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
-//	float4 cColor = (cBaseTexColor * cDetailTexColor);
-	//cIllumination =Lighting(input.positionW, input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
+	//	float4 cColor = (cBaseTexColor * cDetailTexColor);
+		//cIllumination =Lighting(input.positionW, input.normalW);
+		float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
 
-	
-	cColor = lerp(cColor, cIllumination, 0.5f);
-	return(cColor);
+
+		cColor = lerp(cColor, cIllumination, 0.5f);
+		return(cColor);
 }
 
 struct VS_SKYBOX_CUBEMAP_INPUT
@@ -497,7 +497,7 @@ float4 PSSmokeBillBoardTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
 
 	float4 cColor = gtxtBillboardTexture.Sample(gssWrap, input.uv);
-	
+
 	return (cColor);
 }
 
@@ -803,12 +803,12 @@ float4 PSLighting(VS_LIGHTING_OUTPUT input) : SV_TARGET
 	//float4 cColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
 	float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
 	return(cIllumination);
-	
+
 	//return(float4(input.normalW * 0.5f + 0.5f, 1.0f));
 	//return(lerp(cColor, cIllumination, 0.8));
 }
 
- 
+
 VS_CIRCULAR_SHADOW_INPUT VSCircularShadow(VS_CIRCULAR_SHADOW_INPUT input)
 {
 	return(input);
@@ -924,6 +924,7 @@ struct PS_DEPTH_OUTPUT
 {
 	float fzPosition : SV_Target;
 	float fDepth : SV_Depth;
+
 };
 
 PS_DEPTH_OUTPUT PSDepthWriteShader(VS_LIGHTING_OUTPUT input)
@@ -944,9 +945,13 @@ struct VS_SHADOW_MAP_OUTPUT
 	float3 positionW : POSITION;
 	float3 normalW : NORMAL;
 	float2 uv : TEXCOORD0;
-	float4 uvs[MAX_LIGHTS] : TEXCOORD1; 
+	float4 uvs[MAX_LIGHTS] : TEXCOORD1;
 };
 
+static matrix gmxTexture = { 0.5,0.0,0.0,0.0,
+							0.0,-0.5,0.0,0.0,
+							0.0,0.0,1.0,0.0,
+							0.5,0.5,0.0,1.0 };
 VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 {
 	VS_SHADOW_MAP_OUTPUT output = (VS_SHADOW_MAP_OUTPUT)0;
@@ -955,10 +960,11 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 	output.positionW = positionW.xyz;
 	output.position = mul(mul(positionW, gmtxView), gmtxProjection);
 	output.normalW = mul(float4(input.normal, 0.0f), gmtxGameObject).xyz;
-	output.uv = input.uv;
-
+	output.uv = mul(output.positionW, mul(mul(gmtxView, gmtxProjection), gmxTexture));
+	output.uv += input.uv;
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
+	
 		if (gcbToLightSpaces[i].f4Position.w != 0.0f) output.uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
 	}
 
@@ -967,18 +973,26 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 
 float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 {
+	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 cBaseTexColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 cDetailTexColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float2 uv = input.uv;
+
 	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
-	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	if (gnTexturesMask & MATERIAL_ALBEDO_MAP) cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
-	else
-		cAlbedoColor = gMaterial.m_cDiffuse;
-	if (gnTexturesMask & MATERIAL_SPECULAR_MAP) cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
-	else
-		cSpecularColor = gMaterial.m_cSpecular;
-	//	cIllumination = saturate(gtxtDepthTextures[3].SampleLevel(gssProjector, f3uvw.xy, 0).r);
-	float4 cColor = cAlbedoColor+cSpecularColor;
-	return(lerp(cColor,cIllumination,0.4));
+	//if (gnTexturesMask & MATERIAL_ALBEDO_MAP) cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, uv);
+	//else
+	//	cAlbedoColor = gMaterial.m_cDiffuse;
+
+
+	//float4 cColor = gtxtDepthTextures[1].SampleLevel(gssBorder, uv, 0).r * 1.0f;
+	//cIllumination = saturate(gtxtDepthTextures[3].Sample(gssWrap, input.uvs[5].xy/ input.uvs[5].ww)* cIllumination);
+	//float4 cColor = cAlbedoColor;
+	//return(lerp(cColor,cIllumination,0.9));
+	/*for (int i = 0; i < MAX_LIGHTS; i++)
+	{
+	}*/
+	return(gtxtAlbedoTexture.Sample(gssWrap, input.uvs[5].xy / input.uvs[5].ww) * cIllumination);
 }
 
 
