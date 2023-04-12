@@ -194,10 +194,9 @@ void ST1_NPC::ST1_State_Manegement(int state)
 	{
 	case NPC_IDLE: // 매복 혹은 특정 운동을 하는 중.
 	{
-		//this->MovetoRotate(); // 원운동 중
 		MovetoRotate();
 		for (int i{}; i < 3; ++i) {
-			if (m_Distance[i] < 400) {
+			if (m_Distance[i] <= 400) {
 				if (m_chaseID != -1) {
 					if (m_Distance[i] < m_Distance[m_chaseID]) {
 						m_chaseID = i;
@@ -214,7 +213,6 @@ void ST1_NPC::ST1_State_Manegement(int state)
 				}
 			}
 		}
-		//std::cout << m_ID << "번째 NPC Status - " << m_state << std::endl;
 	}
 	break;
 	case NPC_FLY:
@@ -224,7 +222,7 @@ void ST1_NPC::ST1_State_Manegement(int state)
 		bool State_check = false;
 
 		for (int i{}; i < 3; ++i) {
-			if (m_Distance[i] < 200) {  // 추적상태로 변환
+			if (m_Distance[i] <= 200) {  // 추적상태로 변환
 				State_check = true;
 				if (m_Distance[i] < m_Distance[m_chaseID]) {
 					m_chaseID = i;
@@ -240,7 +238,7 @@ void ST1_NPC::ST1_State_Manegement(int state)
 		int Idle_Change = 0;
 		if (m_state == NPC_FLY) {
 			for (int i{}; i < 3; ++i) {
-				if (m_Distance[i] > 700) {
+				if (m_Distance[i] > 400) {
 					Idle_Change++;
 				}
 			}
@@ -248,6 +246,10 @@ void ST1_NPC::ST1_State_Manegement(int state)
 		if (Idle_Change == 3) {
 			m_state = NPC_IDLE;
 			m_chaseID = -1;
+			// Idle로 돌아가니까, NPC 객체 하나당 갖고있던 플레이어들의 거리 배열을 초기화
+			for (int i{}; i < 3; ++i) {
+				m_Distance[i] = 10000;
+			}
 		}
 	}
 	break;
@@ -259,7 +261,7 @@ void ST1_NPC::ST1_State_Manegement(int state)
 		bool State_check = false;
 
 		for (int i{}; i < 3; ++i) {
-			if (m_Distance[i] < 150) {  // 공격상태로 변환
+			if (m_Distance[i] <= 150) {  // 공격상태로 변환
 				State_check = true;
 				if (m_Distance[i] < m_Distance[m_chaseID]) {
 					m_chaseID = i;
@@ -275,7 +277,7 @@ void ST1_NPC::ST1_State_Manegement(int state)
 		int Fly_Change = 0;
 		if (m_state == NPC_CHASE) {
 			for (int i{}; i < 3; ++i) {
-				if (m_Distance[i] > 400) {
+				if (m_Distance[i] > 200) {
 					Fly_Change++;
 				}
 			}
@@ -297,7 +299,7 @@ void ST1_NPC::ST1_State_Manegement(int state)
 	break;
 	case NPC_DEATH:
 	{
-		if (m_Pos.y >= 0) {
+		if (m_Pos.y > 0.0f) {
 			ST1_Death_motion();
 		}
 	}
@@ -305,11 +307,20 @@ void ST1_NPC::ST1_State_Manegement(int state)
 	default:
 		break;
 	}
+	setBB();
 }
 
 void ST1_NPC::ST1_Death_motion()
 {
 	m_Pos.y -= 6.0f;
+
+	// 빙글빙글 돌며 추락
+	m_yaw += 3.0f;
+
+	Coordinate base_coordinate;
+	m_curr_coordinate.right = NPCcalcRotate(base_coordinate.right, m_pitch, m_yaw, m_roll);
+	m_curr_coordinate.up = NPCcalcRotate(base_coordinate.up, m_pitch, m_yaw, m_roll);
+	m_curr_coordinate.look = NPCcalcRotate(base_coordinate.look, m_pitch, m_yaw, m_roll);
 }
 
 void ST1_NPC::MovetoRotate()
@@ -322,8 +333,6 @@ void ST1_NPC::MovetoRotate()
 
 	m_Acc += m_theta;
 	m_Pos.x = m_range * cos(m_Acc * PI / 360) + m_saveOrgPos.x;
-
-	//m_Pos.y = m_Pos.y;
 	m_Pos.z = m_range * sin(m_Acc * PI / 360) + m_saveOrgPos.z;
 }
 
@@ -358,13 +367,11 @@ XMFLOAT3 ST1_NPC::NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll
 void ST1_NPC::Caculation_Distance(XMFLOAT3 vec, int id) // 서버에서 따로 부를 것.
 {
 	m_Distance[id] = sqrtf(pow((vec.x - m_Pos.x), 2) + pow((vec.y - m_Pos.y), 2) + pow((vec.z - m_Pos.z), 2));
-
 }
 
 void ST1_NPC::ST1_Damege_Calc(int id)
 {
 	if (m_Hit == g_body) {
-
 		int distance_damege = 0;
 		if (((int)(m_Distance[id])) > 2000) {
 			distance_damege = (2000 / 100) * 5;
@@ -377,7 +384,14 @@ void ST1_NPC::ST1_Damege_Calc(int id)
 		m_Hit = g_none;
 	}
 	else if (m_Hit == g_profeller) {
-		int damege = (20 * ((((int)(m_Distance[id])) / 100) * 5)) / m_defence;
+		int distance_damege = 0;
+		if (((int)(m_Distance[id])) > 2000) {
+			distance_damege = (2000 / 100) * 5;
+		}
+		else {
+			distance_damege = ((((int)(m_Distance[id])) / 100) * 5);
+		}
+		int damege = (20 * distance_damege) / m_defence;
 		m_ProfellerHP -= damege;
 		m_Hit = g_none;
 	}
