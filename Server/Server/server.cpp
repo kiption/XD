@@ -12,7 +12,7 @@
 #include "../RelayServer/Protocol.h"
 #include "NPC.h"
 #include "Timer.h"
-
+#include "CP_KEYS.h"
 
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
@@ -22,7 +22,7 @@ using namespace std;
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_CONNECT };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_RUNNING_SERVER, ST_DOWN_SERVER };
 enum PLAYER_STATE { PL_ST_ALIVE, PL_ST_DEAD };
-enum SESSION_TYPE { SESSION_CLIENT, SESSION_EXTENDED_SERVER };
+enum SESSION_TYPE { SESSION_CLIENT, SESSION_EXTENDED_SERVER, SESSION_RELAY };
 
 Coordinate basic_coordinate;	// 기본(초기) 좌표계
 
@@ -198,6 +198,7 @@ SOCKET right_ex_server_sock;							// 다음 번호의 서버
 int my_server_id;										// 내 서버 식별번호
 bool b_active_server;									// Active 서버인가?
 array<HA_SERVER, MAX_SERVER> extended_servers;			// HA구현을 위해 수평확장된 서버들
+HA_SERVER relayserver;	// 릴레이서버
 
 
 void SESSION::send_login_info_packet()
@@ -399,6 +400,20 @@ void disconnect(int target_id, int target)
 				}
 			}
 		}
+		break;
+		
+	case SESSION_RELAY:
+		relayserver.s_lock.lock();
+		if (relayserver.s_state == ST_FREE) {
+			relayserver.s_lock.unlock();
+			return;
+		}
+		closesocket(relayserver.socket);
+		relayserver.s_state = ST_FREE;
+		relayserver.s_lock.unlock();
+
+		cout << "릴레이서버[" << relayserver.id << "]와의 연결이 끊겼습니다." << endl;	// server message
+		break;
 	}
 
 }
@@ -1688,7 +1703,50 @@ int main(int argc, char* argv[])
 
 	// Relay Connect
 	// Relay서버가 Logic서버를 실행시켜주기 때문에, 비동기Connect를 할 필요가 없음.
-	
+	// ConnectEx test
+	SOCKET temp_relays = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	GUID guid_relay = WSAID_CONNECTEX;
+	DWORD bytes_relay = 0;
+	LPFN_CONNECTEX connectExFP_relay;
+	::WSAIoctl(temp_relays, SIO_GET_EXTENSION_FUNCTION_POINTER, &guid_relay, sizeof(guid_relay), &connectExFP_relay, sizeof(connectExFP_relay), &bytes_relay, nullptr, nullptr);
+	closesocket(temp_relays);
+
+	SOCKADDR_IN relaysvr_addr;
+	ZeroMemory(&relaysvr_addr, sizeof(relaysvr_addr));
+	relaysvr_addr.sin_family = AF_INET;
+	g_relay_sock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);     // 실제 연결할 소켓
+	int ret = ::bind(g_relay_sock, reinterpret_cast<LPSOCKADDR>(&relaysvr_addr), sizeof(relaysvr_addr));
+	if (ret != 0) {
+		cout << "Bind Error - " << ret << endl;
+		cout << WSAGetLastError() << endl;
+		exit(-1);
+	}
+
+	OVER_EX* con_over_relay = new OVER_EX;
+	con_over_relay->process_type = OP_CONNECT;
+	HANDLE hret_relay = CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_relay_sock), h_relay_iocp, CP_KEY_LOGIC2RELAY, 0);
+	if (NULL == hret_relay) {
+		cout << "CreateIoCompletoinPort Error - " << ret << endl;
+		cout << WSAGetLastError() << endl;
+		exit(-1);
+	}
+
+	ZeroMemory(&relaysvr_addr, sizeof(relaysvr_addr));
+	relaysvr_addr.sin_family = AF_INET;
+	relaysvr_addr.sin_port = htons(PORTNUM_RELAY2LOGIC_0);
+	inet_pton(AF_INET, "127.0.0.1", &relaysvr_addr.sin_addr);
+
+	BOOL bret_relay = connectExFP_relay(g_relay_sock, reinterpret_cast<sockaddr*>(&relaysvr_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over_relay->overlapped);
+	if (FALSE == bret_relay) {
+		int err_no = GetLastError();
+		if (ERROR_IO_PENDING == err_no)
+			cout << "Server Connect 시도 중...\n" << endl;
+		else {
+			cout << "ConnectEX Error - " << err_no << endl;
+			cout << WSAGetLastError() << endl;
+		}
+	}
+	//test end
 
 
 	//======================================================================

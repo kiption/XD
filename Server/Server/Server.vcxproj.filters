@@ -53,5 +53,8 @@
     <ClInclude Include="BulletsMgr.h">
       <Filter>소스 파일\Objects\Bullets</Filter>
     </ClInclude>
+    <ClInclude Include="CP_KEYS.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

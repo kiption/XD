@@ -17,7 +17,7 @@ using namespace std;
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_CONNECT };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_RUNNING_SERVER, ST_DOWN_SERVER };
-enum SESSION_TYPE { SESSION_CLIENT, SESSION_EXTENDED_SERVER };
+enum SESSION_TYPE { SESSION_CLIENT, SESSION_LOGIN, SESSION_LOBBY, SESSION_LOGIC };
 
 int online_user_cnt = 0;				// 접속중인 유저 수
 HANDLE h_iocp_relay2client;				// 클라이언트-릴레이서버 통신 IOCP 핸들
@@ -100,7 +100,10 @@ public:
 		}
 	}
 };
-array<SESSION, MAX_USER> clients;		// 0 ~ MAX_USER-1: Player,	 MAX_USER ~ MAX_USER+MAX_NPCS: NPC
+array<SESSION, MAX_USER> clients;
+array<SESSION, MAX_LOGIN_SERVER> login_servers;
+array<SESSION, MAX_LOBBY_SERVER> lobby_servers;
+array<SESSION, MAX_LOGIC_SERVER> logic_servers;
 
 
 void disconnect(int target_id, int target)
@@ -138,6 +141,25 @@ void disconnect(int target_id, int target)
 			pl.do_send(&remove_pl_packet);
 			pl.s_lock.unlock();
 		}
+		break;
+
+	case SESSION_LOGIN:
+		break;
+
+	case SESSION_LOBBY:
+		break;
+
+	case SESSION_LOGIC:
+		logic_servers[target_id].s_lock.lock();
+		if (logic_servers[target_id].s_state == ST_FREE) {
+			logic_servers[target_id].s_lock.unlock();
+			return;
+		}
+		closesocket(logic_servers[target_id].socket);
+		logic_servers[target_id].s_state = ST_FREE;
+		logic_servers[target_id].s_lock.unlock();
+
+		cout << "LogicServer[ID: " << logic_servers[target_id].id << "] is disconnected." << endl;	// server message
 		break;
 	}
 
@@ -253,50 +275,132 @@ void do_worker()
 
 		switch (ex_over->process_type) {
 		case OP_ACCEPT: {
-			SOCKET c_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
-			int client_id = get_new_client_id();
-			if (client_id != -1) {
-				clients[client_id].id = client_id;
-				clients[client_id].name[0] = 0;
-				clients[client_id].remain_size = 0;
-				clients[client_id].socket = c_socket;
-				CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), h_iocp_relay2client, client_id, 0);
-				clients[client_id].do_recv();
-				c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-			}
-			else {
-				cout << "Sever is Full" << endl;
-			}
+			if (key == CP_KEY_RELAY2CLIENT) {	// 클라이언트의 연결 요청
+				SOCKET c_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
+				int client_id = get_new_client_id();
+				if (client_id != -1) {
+					clients[client_id].id = client_id;
+					clients[client_id].name[0] = 0;
+					clients[client_id].remain_size = 0;
+					clients[client_id].socket = c_socket;
+					CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), h_iocp_relay2client, client_id, 0);
+					clients[client_id].do_recv();
+					c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+					cout << "클라이언트[" << client_id << "]의 연결요청을 받았습니다.\n" << endl;//server message
+				}
+				else {
+					cout << "[Client Accept] Sever is Full" << endl;
+				}
 
-			ZeroMemory(&ex_over->overlapped, sizeof(ex_over->overlapped));
-			ex_over->wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
-			int addr_size = sizeof(SOCKADDR_IN);
-			AcceptEx(g_listensock_relay2client, c_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
+				ZeroMemory(&ex_over->overlapped, sizeof(ex_over->overlapped));
+				ex_over->wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
+				int addr_size = sizeof(SOCKADDR_IN);
+				AcceptEx(g_listensock_relay2client, c_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
+			}
+			else if (key == CP_KEY_RELAY2LOGIN) {	// 인증서버의 연결 요청
+				
+			}
+			else if (key == CP_KEY_RELAY2LOBBY) {	// 로비서버의 연결 요청
+
+			}
+			else if (key == CP_KEY_RELAY2LOGIC) {	// 로직서버의 연결 요청
+				SOCKET lgc_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
+				int new_lgcsvr_num = -1;
+				for (int i = 0; i < MAX_LOGIC_SERVER; ++i) {
+					logic_servers[i].s_lock.lock();
+					if (logic_servers[i].s_state == ST_FREE) {
+						logic_servers[i].s_state = ST_ACCEPTED;
+						new_lgcsvr_num = i;
+						logic_servers[i].s_lock.unlock();
+						break;
+					}
+					logic_servers[i].s_lock.unlock();
+				}
+
+				if (new_lgcsvr_num != -1) {
+					logic_servers[new_lgcsvr_num].id = new_lgcsvr_num;
+					logic_servers[new_lgcsvr_num].name[0] = 0;
+					logic_servers[new_lgcsvr_num].remain_size = 0;
+					logic_servers[new_lgcsvr_num].socket = lgc_socket;
+					CreateIoCompletionPort(reinterpret_cast<HANDLE>(lgc_socket), h_iocp_relay2logic, new_lgcsvr_num, 0);
+					logic_servers[new_lgcsvr_num].do_recv();
+					lgc_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+					cout << "로직서버[" << new_lgcsvr_num << "]의 연결요청을 받았습니다.\n" << endl;//server message
+				}
+				else {
+					cout << "[LogicServer Accept] Sever is Full" << endl;
+				}
+
+				ZeroMemory(&ex_over->overlapped, sizeof(ex_over->overlapped));
+				ex_over->wsabuf.buf = reinterpret_cast<CHAR*>(lgc_socket);
+				int addr_size = sizeof(SOCKADDR_IN);
+				AcceptEx(g_listensock_relay2logic, lgc_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
+			}
 			break;
 		}
 		case OP_RECV: {
-			if (0 == num_bytes) disconnect(key, SESSION_CLIENT);
+			if (key == CP_KEY_RELAY2CLIENT) {		// 클라이언트 RECV
+				if (0 == num_bytes) disconnect(key, SESSION_CLIENT);
 
-			int remain_data = num_bytes + clients[key].remain_size;
-			char* p = ex_over->send_buf;
-			while (remain_data > 0) {
-				int packet_size = p[0];
-				if (packet_size <= remain_data) {
-					process_packet(static_cast<int>(key), p);
-					p = p + packet_size;
-					remain_data = remain_data - packet_size;
+				int remain_data = num_bytes + clients[key].remain_size;
+				char* p = ex_over->send_buf;
+				while (remain_data > 0) {
+					int packet_size = p[0];
+					if (packet_size <= remain_data) {
+						process_packet(static_cast<int>(key), p);
+						p = p + packet_size;
+						remain_data = remain_data - packet_size;
+					}
+					else break;
 				}
-				else break;
+				clients[key].remain_size = remain_data;
+				if (remain_data > 0) {
+					memcpy(ex_over->send_buf, p, remain_data);
+				}
+				clients[key].do_recv();
 			}
-			clients[key].remain_size = remain_data;
-			if (remain_data > 0) {
-				memcpy(ex_over->send_buf, p, remain_data);
+			else if (key == CP_KEY_RELAY2LOGIN) {	// 인증서버의 RECV
+
 			}
-			clients[key].do_recv();
+			else if (key == CP_KEY_RELAY2LOBBY) {	// 로비서버의 RECV
+
+			}
+			else if (key == CP_KEY_RELAY2LOGIC) {	// 로직서버의 RECV
+				if (0 == num_bytes) disconnect(key, SESSION_LOGIC);
+
+				int remain_data = num_bytes + logic_servers[key].remain_size;
+				char* p = ex_over->send_buf;
+				while (remain_data > 0) {
+					int packet_size = p[0];
+					if (packet_size <= remain_data) {
+						process_packet(static_cast<int>(key), p);
+						p = p + packet_size;
+						remain_data = remain_data - packet_size;
+					}
+					else break;
+				}
+				logic_servers[key].remain_size = remain_data;
+				if (remain_data > 0) {
+					memcpy(ex_over->send_buf, p, remain_data);
+				}
+				logic_servers[key].do_recv();
+			}
+
 			break;
 		}
 		case OP_SEND: {
-			if (0 == num_bytes) disconnect(key, SESSION_CLIENT);
+			if (key == CP_KEY_RELAY2CLIENT) {		// 클라이언트 SEND
+				if (0 == num_bytes) disconnect(key, SESSION_CLIENT);
+			}
+			else if (key == CP_KEY_RELAY2LOGIN) {	// 인증서버의 SEND
+
+			}
+			else if (key == CP_KEY_RELAY2LOBBY) {	// 로비서버의 SEND
+
+			}
+			else if (key == CP_KEY_RELAY2LOGIC) {	// 로직서버의 SEND
+				if (0 == num_bytes) disconnect(key, SESSION_LOGIC);
+			}
 			delete ex_over;
 			break;
 		}
