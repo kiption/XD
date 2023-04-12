@@ -330,7 +330,7 @@ int main(int argc, char* argv[])
 	}
 
 	// [ 하위 Server 연결 ]
-	// Client Listen Socket (클라이언트-서버 통신을 위한 Listen소켓)
+	// LogicServer Listen Socket (릴레이-로직서버 통신을 위한 Listen소켓)
 	g_listensock_relay2logic = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	SOCKADDR_IN logic_sockaddr;
 	memset(&logic_sockaddr, 0, sizeof(logic_sockaddr));
@@ -341,9 +341,9 @@ int main(int argc, char* argv[])
 	listen(g_listensock_relay2logic, SOMAXCONN);
 	int logic_addrsize = sizeof(logic_sockaddr);
 
-	// Client Accept
+	// LogicServer Accept
 	h_iocp_relay2logic = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
-	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_listensock_relay2logic), h_iocp_relay2logic, 998, 0);
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_listensock_relay2logic), h_iocp_relay2logic, CP_KEY_RELAY2LOGIC, 0);
 	SOCKET logic_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	OVER_EXP logic_over;
 	logic_over.process_type = OP_ACCEPT;
@@ -352,7 +352,7 @@ int main(int argc, char* argv[])
 
 	//======================================================================
 	// [ Client 연결 ]
-	// Client Listen Socket (클라이언트-서버 통신을 위한 Listen소켓)
+	// Client Listen Socket (클라이언트-릴레이서버 통신을 위한 Listen소켓)
 	g_listensock_relay2client = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	SOCKADDR_IN server_addr;
 	memset(&server_addr, 0, sizeof(server_addr));
@@ -366,7 +366,7 @@ int main(int argc, char* argv[])
 
 	// CLient Accept
 	h_iocp_relay2client = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
-	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_listensock_relay2client), h_iocp_relay2client, 999, 0);
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_listensock_relay2client), h_iocp_relay2client, CP_KEY_RELAY2CLIENT, 0);
 	SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	OVER_EXP a_over;
 	a_over.process_type = OP_ACCEPT;

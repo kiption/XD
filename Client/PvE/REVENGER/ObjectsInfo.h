@@ -46,6 +46,3 @@ std::array<ObjectsInfo, MAX_BULLET> bullets_info;
 
 // test Time
 int myTime;
-
-// Collision Info
-std::queue<XMFLOAT3> coll_info;

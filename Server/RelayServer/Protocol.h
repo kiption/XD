@@ -167,7 +167,6 @@ struct SC_DAMAGED_PACKET {
 	short target;
 	short id;
 	int dec_hp;
-	float col_pos_x, col_pos_y, col_pos_z;
 };
 
 enum player_state { ST_PACK_REVIVAL, ST_PACK_DEAD };

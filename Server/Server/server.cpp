@@ -681,8 +681,6 @@ void process_packet(int client_id, char* packet)
 
 								bullets_arr[new_bullet_id].m_objlock.unlock();
 
-								cout << "Create New Bullet. [Owner:" << client_id << " , b_id: " << new_bullet_id << " ]" << endl;//test
-
 								// shoot time update
 								shoot_time = chrono::system_clock::now();
 
@@ -1141,6 +1139,7 @@ void timerFunc() {
 				}
 
 				// 충돌체크
+				// 1. Player-Player
 				for (auto& other_pl : clients) {
 					if (other_pl.pl_state == PL_ST_DEAD) continue;		// 사망한 플레이어와는 충돌검사 X
 					if (other_pl.s_state != ST_INGAME) continue;		// 접속 중이 아닌 대상을 충돌검사 X
@@ -1178,9 +1177,6 @@ void timerFunc() {
 							damaged_by_player_packet.id = mv_target.id;
 							damaged_by_player_packet.type = SC_DAMAGED;
 							damaged_by_player_packet.dec_hp = COLLIDE_PLAYER_DAMAGE;
-							damaged_by_player_packet.col_pos_x = mv_target.pos.x;
-							damaged_by_player_packet.col_pos_y = mv_target.pos.y;
-							damaged_by_player_packet.col_pos_z = mv_target.pos.z;
 
 							mv_target.do_send(&damaged_by_player_packet);
 						}
@@ -1210,9 +1206,6 @@ void timerFunc() {
 							damaged_by_player_packet.id = other_pl.id;
 							damaged_by_player_packet.type = SC_DAMAGED;
 							damaged_by_player_packet.dec_hp = COLLIDE_PLAYER_DAMAGE;
-							damaged_by_player_packet.col_pos_x = other_pl.pos.x;
-							damaged_by_player_packet.col_pos_y = other_pl.pos.y;
-							damaged_by_player_packet.col_pos_z = other_pl.pos.z;
 
 							other_pl.do_send(&damaged_by_player_packet);
 						}
@@ -1291,8 +1284,8 @@ void timerFunc() {
 				remove_bullet_packet.type = SC_REMOVE_OBJECT;
 
 				for (auto& cl : clients) {
-					if (cl.s_state == ST_INGAME)
-						cl.do_send(&remove_bullet_packet);
+					if (cl.s_state != ST_INGAME) continue;
+					cl.do_send(&remove_bullet_packet);
 				}
 
 				bullet.clear();
@@ -1302,6 +1295,8 @@ void timerFunc() {
 				bullet.setBB_ex(XMFLOAT3(vulcan_bullet_bbsize_x, vulcan_bullet_bbsize_y, vulcan_bullet_bbsize_z));	// 바운딩박스 업데이트
 
 				// 충돌검사
+				bool bullet_alive = true;	// 총알이 충돌하지 않고 잘 살아있는지
+				// 1. Bullet-Player
 				for (auto& pl : clients) {
 					if (bullet.getOwner() == pl.id) continue;							// 총을 쏜 사람은 충돌체크 X
 					if (bullet.calcDistance(pl.pos) > BULLET_RANGE)	continue;			// 총알 사거리보다 멀리 떨어진 플레이어는 충돌체크 X
@@ -1313,7 +1308,6 @@ void timerFunc() {
 						remove_bullet_packet.size = sizeof(SC_REMOVE_OBJECT_PACKET);
 						remove_bullet_packet.id = bullet.getId();
 						remove_bullet_packet.type = SC_REMOVE_OBJECT;
-
 						for (auto& cl : clients) {
 							if (cl.s_state == ST_INGAME)
 								cl.do_send(&remove_bullet_packet);
@@ -1345,34 +1339,95 @@ void timerFunc() {
 							damaged_by_bullet_packet.id = pl.id;
 							damaged_by_bullet_packet.type = SC_DAMAGED;
 							damaged_by_bullet_packet.dec_hp = BULLET_DAMAGE;
-							damaged_by_bullet_packet.col_pos_x = pl.pos.x;
-							damaged_by_bullet_packet.col_pos_y = pl.pos.y;
-							damaged_by_bullet_packet.col_pos_z = pl.pos.z;
 
 							pl.do_send(&damaged_by_bullet_packet);
 						}
 
 						// 마지막으로 총알의 정보를 초기화합니다.
+						bullet.m_objlock.lock();
 						bullet.clear();
+						bullet_alive = false;
+						bullet.m_objlock.unlock();
+					}//bullet.intersectsCheck end
+				}//for(auto& pl:clients) end
+
+				// 2. Bullet-NPC
+				for (auto& npc_obj : npcs) {
+					// 총알 사거리보다 멀리 떨어진 플레이어는 충돌체크 X
+					if (bullet.calcDistance(npc_obj.GetPosition()) > BULLET_RANGE)	continue;	
+
+					// 충돌검사.
+					if (bullet.intersectsCheck(npc_obj.m_xoobb)) {
+						cout << "Bullet is Collide with NPC[" << npc_obj.GetID() << "]!" << endl;//test
+						// 우선 총알 객체를 없애고
+						SC_REMOVE_OBJECT_PACKET remove_bullet_packet;
+						remove_bullet_packet.target = TARGET_BULLET;
+						remove_bullet_packet.size = sizeof(SC_REMOVE_OBJECT_PACKET);
+						remove_bullet_packet.id = bullet.getId();
+						remove_bullet_packet.type = SC_REMOVE_OBJECT;
+						for (auto& cl : clients) {
+							if (cl.s_state != ST_INGAME) continue;
+							cl.do_send(&remove_bullet_packet);
+						}
+
+						// 충돌한 플레이어의 HP를 감소시킵니다.
+						npc_obj.ST1_Damege_Calc(bullet.getOwner());
+
+						// NPC가 사망하면 객체(npc)제거패킷을 접속중인 모든 클라이언트에게 보냅니다.
+						if (npc_obj.GetState() == NPC_DEATH) {
+							SC_REMOVE_OBJECT_PACKET rm_npc_packet;
+							rm_npc_packet.size = sizeof(SC_REMOVE_OBJECT_PACKET);
+							rm_npc_packet.type = SC_REMOVE_OBJECT;
+							rm_npc_packet.target = TARGET_NPC;
+							rm_npc_packet.id = npc_obj.GetID();
+							for (auto& cl : clients) {
+								if (cl.pl_state != ST_INGAME) continue;
+								cl.do_send(&rm_npc_packet);
+							}
+						}
+						else {
+							// 접속중인 모든 플레이어에게 npc의 HP감소 사실을 알립니다.
+							SC_DAMAGED_PACKET npc_damaged_by_bullet_packet;
+							npc_damaged_by_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
+							npc_damaged_by_bullet_packet.target = TARGET_PLAYER;
+							npc_damaged_by_bullet_packet.id = npc_obj.GetID();
+							npc_damaged_by_bullet_packet.type = SC_DAMAGED;
+							npc_damaged_by_bullet_packet.dec_hp = BULLET_DAMAGE;
+
+							for (auto& cl : clients) {
+								if (cl.pl_state != ST_INGAME) continue;
+								cl.do_send(&npc_damaged_by_bullet_packet);
+							}
+						}
+
+						// 마지막으로 총알의 정보를 초기화합니다.
+						bullet.m_objlock.lock();
+						bullet.clear();
+						bullet_alive = false;
+						bullet.m_objlock.unlock();
+
+					}//bullet.intersectsCheck end
+				}//for(auto& npc:npcs) end
+
+				// 총알이 어디에도 충돌하지 않았다면 총알의 이동패킷을 보냅니다.
+				if (bullet_alive) {
+					SC_MOVE_OBJECT_PACKET move_bullet_packet;
+					move_bullet_packet.target = TARGET_BULLET;
+					move_bullet_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
+					move_bullet_packet.id = bullet.getId();
+					move_bullet_packet.type = SC_MOVE_OBJECT;
+					move_bullet_packet.x = bullet.getPos().x;
+					move_bullet_packet.y = bullet.getPos().y;
+					move_bullet_packet.z = bullet.getPos().z;
+
+					for (auto& cl : clients) {
+						if (cl.s_state == ST_INGAME)
+							cl.do_send(&move_bullet_packet);
 					}
 				}
-
-				// 이동된 총알의 위치를 모든 클라이언트에게 전달합니다.
-				SC_MOVE_OBJECT_PACKET move_bullet_packet;
-				move_bullet_packet.target = TARGET_BULLET;
-				move_bullet_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
-				move_bullet_packet.id = bullet.getId();
-				move_bullet_packet.type = SC_MOVE_OBJECT;
-				move_bullet_packet.x = bullet.getPos().x;
-				move_bullet_packet.y = bullet.getPos().y;
-				move_bullet_packet.z = bullet.getPos().z;
-
-				for (auto& cl : clients) {
-					if (cl.s_state == ST_INGAME)
-						cl.do_send(&move_bullet_packet);
-				}
 			}
-		}
+		}//for (auto& bullet : bullets_arr) end
+
 		auto curr_t = system_clock::now();
 		if (curr_t - start_t < 33ms) {
 			this_thread::sleep_for(33ms - (curr_t - start_t));
@@ -1630,7 +1685,10 @@ int main(int argc, char* argv[])
 	// [ HA - Relay서버 연결 ]
 	int active_relay_serverid = 0;							// [[[추후에 현재 Active 상태에 있는 릴레이서버의 id와 포트번호로 바꿀 예정임!]]]
 	int active_relay_portnum = PORTNUM_RELAY2LOGIC_0;		//
-	// HA Connect
+
+	// Relay Connect
+	// Relay서버가 Logic서버를 실행시켜주기 때문에, 비동기Connect를 할 필요가 없음.
+	
 
 
 	//======================================================================
@@ -1733,7 +1791,7 @@ int main(int argc, char* argv[])
 	int addr_size = sizeof(cl_addr);
 	int client_id = 0;
 
-	// CLient Accept
+	// Client Accept
 	h_sc_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
 	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_sc_listensock), h_sc_iocp, 999, 0);
 	SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);

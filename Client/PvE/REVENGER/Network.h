@@ -330,13 +330,17 @@ void processPacket(char* ptr)
 		
 		SC_DAMAGED_PACKET* recv_packet = reinterpret_cast<SC_DAMAGED_PACKET*>(ptr);
 
-		if (recv_packet->target == TARGET_PLAYER && recv_packet->id == my_id) {
-			my_info.m_hp = my_info.m_hp - recv_packet->dec_hp;
-
-			XMFLOAT3 coll_pos = { recv_packet->col_pos_x, recv_packet->col_pos_y, recv_packet->col_pos_z };
-			coll_info.push(coll_pos);
-
-			gamesound.collisionSound();
+		// Player Damaged
+		if (recv_packet->target == TARGET_PLAYER) {
+			if (recv_packet->id == my_id) {
+				my_info.m_hp -= recv_packet->dec_hp;
+				gamesound.collisionSound();
+			}
+		}
+		// NPC Damaged
+		else if (recv_packet->target == TARGET_NPC) {
+			npcs_info[recv_packet->id].m_hp -= recv_packet->dec_hp;
+			cout << npcs_info[recv_packet->id].m_hp << endl;//test
 		}
 
 		break;
