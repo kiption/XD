@@ -37,6 +37,7 @@ private:
 
 	float m_Distance[3];
 
+public:
 	BoundingOrientedBox m_xoobb;
 
 public:
