@@ -185,11 +185,9 @@ array<ST1_NPC, MAX_NPCS> npcs;
 array<Bullets, MAX_BULLET> bullets_arr;
 chrono::system_clock::time_point shoot_time;
 
-HANDLE h_sc_iocp;			// 클라이언트 통신 IOCP 핸들
+HANDLE h_iocp;				// IOCP 핸들
 SOCKET g_sc_listensock;		// 클라이언트 통신 listen소켓
-HANDLE h_ss_iocp;			// 수평확장 서버 간 통신 IOCP 핸들
 SOCKET g_ss_listensock;		// 수평확장 서버 간 통신 listen 소켓
-HANDLE h_relay_iocp;		// 릴레이서버 간 통신 IOCP 핸들
 SOCKET g_relay_sock;		// 릴레이서버 간 통신 listen 소켓
 
 SOCKET left_ex_server_sock;								// 이전 번호의 서버
@@ -374,15 +372,15 @@ void disconnect(int target_id, int target)
 
 				OVER_EX* con_over = new OVER_EX;
 				con_over->process_type = OP_CONNECT;
-				int key = SERIAL_NUM_EXSERVER + MAX_SERVER - 1;
-				HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_ss_iocp, key, 0);
+				int key = CP_KEY_LOGIC2EXLOGIC + MAX_SERVER - 1;
+				HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_iocp, key, 0);
 				if (NULL == hret) {
 					cout << "CreateIoCompletoinPort Error - " << ret << endl;
 					cout << WSAGetLastError() << endl;
 					exit(-1);
 				}
 
-				int target_portnum = key - SERIAL_NUM_EXSERVER + HA_PORTNUM_S0;
+				int target_portnum = key - CP_KEY_LOGIC2EXLOGIC + HA_PORTNUM_S0;
 				ZeroMemory(&ha_server_addr, sizeof(ha_server_addr));
 				ha_server_addr.sin_family = AF_INET;
 				ha_server_addr.sin_port = htons(target_portnum);	// 수평확장된 서버군에서 자기 오른쪽에 있는 서버
@@ -416,21 +414,6 @@ void disconnect(int target_id, int target)
 		break;
 	}
 
-}
-
-int get_new_client_id()
-{
-	for (int i = 0; i < MAX_USER; ++i) {
-		clients[i].s_lock.lock();
-		if (clients[i].s_state == ST_FREE) {
-			clients[i].s_state = ST_ACCEPTED;
-			clients[i].s_lock.unlock();
-			user_count++;
-			return i;
-		}
-		clients[i].s_lock.unlock();
-	}
-	return -1;
 }
 
 void process_packet(int client_id, char* packet)
@@ -891,79 +874,22 @@ void process_packet(int client_id, char* packet)
 	}
 }
 
-void do_worker()
+
+int get_new_client_id()	// clients의 비어있는 칸을 찾아서 새로운 client의 아이디를 할당해주는 함수
 {
-	while (true) {
-		DWORD num_bytes;
-		ULONG_PTR key;
-		WSAOVERLAPPED* over = nullptr;
-		BOOL ret = GetQueuedCompletionStatus(h_sc_iocp, &num_bytes, &key, &over, INFINITE);
-		OVER_EX* ex_over = reinterpret_cast<OVER_EX*>(over);
-		if (FALSE == ret) {
-			if (ex_over->process_type == OP_ACCEPT) cout << "Accept Error";
-			else {
-				//cout << "GQCS Error ( client[" << key << "] )" << endl;
-				disconnect(static_cast<int>(key), SESSION_CLIENT);
-				if (ex_over->process_type == OP_SEND) delete ex_over;
-				continue;
-			}
+	for (int i = 0; i < MAX_USER; ++i) {
+		clients[i].s_lock.lock();
+		if (clients[i].s_state == ST_FREE) {
+			clients[i].s_state = ST_ACCEPTED;
+			clients[i].s_lock.unlock();
+			user_count++;
+			return i;
 		}
-
-		switch (ex_over->process_type) {
-		case OP_ACCEPT: {
-			SOCKET c_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
-			int client_id = get_new_client_id();
-			if (client_id != -1) {
-				//clients[client_id].pos = { 0.0f, 0.0f, 0.0f };
-				clients[client_id].id = client_id;
-				//clients[client_id].name[0] = 0;
-				clients[client_id].remain_size = 0;
-				clients[client_id].socket = c_socket;
-				CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), h_sc_iocp, client_id, 0);
-				clients[client_id].do_recv();
-				c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-			}
-			else {
-				cout << "Sever is Full" << endl;
-			}
-
-			ZeroMemory(&ex_over->overlapped, sizeof(ex_over->overlapped));
-			ex_over->wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
-			int addr_size = sizeof(SOCKADDR_IN);
-			AcceptEx(g_sc_listensock, c_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
-			break;
-		}
-		case OP_RECV: {
-			if (0 == num_bytes) disconnect(key, SESSION_CLIENT);
-
-			int remain_data = num_bytes + clients[key].remain_size;
-			char* p = ex_over->send_buf;
-			while (remain_data > 0) {
-				int packet_size = p[0];
-				if (packet_size <= remain_data) {
-					process_packet(static_cast<int>(key), p);
-					p = p + packet_size;
-					remain_data = remain_data - packet_size;
-				}
-				else break;
-			}
-			clients[key].remain_size = remain_data;
-			if (remain_data > 0) {
-				memcpy(ex_over->send_buf, p, remain_data);
-			}
-			clients[key].do_recv();
-			break;
-		}
-		case OP_SEND: {
-			if (0 == num_bytes) disconnect(key, SESSION_CLIENT);
-			delete ex_over;
-			break;
-		}
-		}
+		clients[i].s_lock.unlock();
 	}
+	return -1;
 }
-
-int find_empty_extended_server() {
+int find_empty_extended_server() {	// ex_servers의 비어있는 칸을 찾아서 새로운 Server_ex의 아이디를 할당해주는 함수
 	for (int i = 0; i < MAX_USER; ++i) {
 		extended_servers[i].s_lock.lock();
 		if (extended_servers[i].s_state == ST_FREE) {
@@ -977,20 +903,22 @@ int find_empty_extended_server() {
 	}
 	return -1;
 }
-void do_ha_worker() {
+void do_worker()
+{
 	while (true) {
 		DWORD num_bytes;
 		ULONG_PTR key;
 		WSAOVERLAPPED* over = nullptr;
-		BOOL ret = GetQueuedCompletionStatus(h_ss_iocp, &num_bytes, &key, &over, INFINITE);
+		BOOL ret = GetQueuedCompletionStatus(h_iocp, &num_bytes, &key, &over, INFINITE);
 		OVER_EX* ex_over = reinterpret_cast<OVER_EX*>(over);
 		if (FALSE == ret) {
-			if (ex_over->process_type == OP_ACCEPT)
+			if (ex_over->process_type == OP_ACCEPT) {
 				cout << "Accept Error";
-			if (ex_over->process_type == OP_CONNECT) {
+			}
+			else if (ex_over->process_type == OP_CONNECT) {
 				cout << "Connect Error" << endl;
 
-				// ConnectEx
+				// 비동기Conn를 다시 시도합니다.
 				SOCKET temp_s = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 				GUID guid = WSAID_CONNECTEX;
 				DWORD bytes = 0;
@@ -1011,17 +939,17 @@ void do_ha_worker() {
 
 				OVER_EX* con_over = new OVER_EX;
 				con_over->process_type = OP_CONNECT;
-				HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_ss_iocp, key, 0);
+				HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_iocp, key, 0);
 				if (NULL == hret) {
 					cout << "CreateIoCompletoinPort Error - " << ret << endl;
 					cout << WSAGetLastError() << endl;
 					exit(-1);
 				}
 
-				int target_portnum = key - SERIAL_NUM_EXSERVER + HA_PORTNUM_S0;
+				int target_portnum = key - CP_KEY_LOGIC2EXLOGIC + HA_PORTNUM_S0;
 				ZeroMemory(&ha_server_addr, sizeof(ha_server_addr));
 				ha_server_addr.sin_family = AF_INET;
-				ha_server_addr.sin_port = htons(target_portnum);	// 수평확장된 서버군에서 자기 오른쪽에 있는 서버
+				ha_server_addr.sin_port = htons(target_portnum);
 				inet_pton(AF_INET, "127.0.0.1", &ha_server_addr.sin_addr);
 
 				BOOL bret = connectExFP(right_ex_server_sock, reinterpret_cast<sockaddr*>(&ha_server_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over->overlapped);
@@ -1036,84 +964,173 @@ void do_ha_worker() {
 				}
 			}
 			else {
-				//cout << "GQCS Error ( client[" << key << "] )" << endl;
-				cout << WSAGetLastError() << endl;
-				int server_id = key - SERIAL_NUM_EXSERVER;
-				disconnect(static_cast<int>(server_id), SESSION_EXTENDED_SERVER);
-				if (ex_over->process_type == OP_SEND) delete ex_over;
-				continue;
+				// 1. Client Error
+				if (key >= CP_KEY_LOGIC2CLIENT && key <= CP_KEY_LISTEN_CLIENT) {
+					//cout << "GQCS Error ( client[" << key << "] )" << endl;
+					disconnect(static_cast<int>(key - CP_KEY_LOGIC2CLIENT), SESSION_CLIENT);
+					if (ex_over->process_type == OP_SEND) delete ex_over;
+					continue;
+				}
+				// 2. RelayServer Error
+				else if (key >= CP_KEY_LOGIC2RELAY && key < CP_KEY_LOGIC2EXLOGIC) {
+
+				}
+				// 3. Ex_Server Error
+				else if (key >= CP_KEY_LOGIC2EXLOGIC && key <= CP_KEY_LISTEN_EXLOGIC) {
+					//cout << WSAGetLastError() << endl;
+					disconnect(static_cast<int>(key - CP_KEY_LOGIC2EXLOGIC), SESSION_EXTENDED_SERVER);
+					if (ex_over->process_type == OP_SEND) delete ex_over;
+					continue;
+				}
 			}
 		}
 
 		switch (ex_over->process_type) {
 		case OP_ACCEPT: {
-			SOCKET extended_server_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
-			left_ex_server_sock = extended_server_socket;
-			int new_id = find_empty_extended_server();
-			if (new_id != -1) {
-				cout << "Sever[" << new_id << "]의 연결요청을 받았습니다.\n" << endl;
-				extended_servers[new_id].id = new_id;
-				extended_servers[new_id].remain_size = 0;
-				extended_servers[new_id].socket = extended_server_socket;
-				int new_key = new_id + SERIAL_NUM_EXSERVER;
-				CreateIoCompletionPort(reinterpret_cast<HANDLE>(extended_server_socket), h_ss_iocp, new_key, 0);
-				extended_servers[new_id].do_recv();
-				extended_server_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-			}
-			else {
-				cout << "다른 Sever의 연결요청을 받았으나, 현재 서버가 꽉 찼습니다.\n" << endl;
-			}
-
-			ZeroMemory(&ex_over->overlapped, sizeof(ex_over->overlapped));
-			ex_over->wsabuf.buf = reinterpret_cast<CHAR*>(extended_server_socket);
-			int addr_size = sizeof(SOCKADDR_IN);
-			AcceptEx(g_ss_listensock, extended_server_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
-			break;
-		}
-		case OP_RECV: {
-			if (0 == num_bytes) disconnect(key, SESSION_EXTENDED_SERVER);
-			int server_id = key - SERIAL_NUM_EXSERVER;
-
-			int remain_data = num_bytes + extended_servers[server_id].remain_size;
-			char* p = ex_over->send_buf;
-			while (remain_data > 0) {
-				int packet_size = p[0];
-				if (packet_size <= remain_data) {
-					process_packet(static_cast<int>(server_id), p);
-					p = p + packet_size;
-					remain_data = remain_data - packet_size;
+			// 1. Client Accept
+			if (key == CP_KEY_LISTEN_CLIENT) {
+				SOCKET c_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
+				int client_id = get_new_client_id();
+				if (client_id != -1) {
+					//clients[client_id].pos = { 0.0f, 0.0f, 0.0f };
+					clients[client_id].id = client_id;
+					//clients[client_id].name[0] = 0;
+					clients[client_id].remain_size = 0;
+					clients[client_id].socket = c_socket;
+					int new_key = client_id + CP_KEY_LOGIC2CLIENT;
+					//CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), h_iocp, client_id, 0);
+					CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), h_iocp, new_key, 0);
+					clients[client_id].do_recv();
+					c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 				}
-				else break;
+				else {
+					cout << "Sever is Full" << endl;
+				}
+
+				ZeroMemory(&ex_over->overlapped, sizeof(ex_over->overlapped));
+				ex_over->wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
+				int addr_size = sizeof(SOCKADDR_IN);
+				AcceptEx(g_sc_listensock, c_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
 			}
-			extended_servers[server_id].remain_size = remain_data;
-			if (remain_data > 0) {
-				memcpy(ex_over->send_buf, p, remain_data);
+			// 2. Ex_Server Accept
+			else if (key == CP_KEY_LISTEN_EXLOGIC) {
+				SOCKET extended_server_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
+				left_ex_server_sock = extended_server_socket;
+				int new_id = find_empty_extended_server();
+				if (new_id != -1) {
+					cout << "Sever[" << new_id << "]의 연결요청을 받았습니다.\n" << endl;
+					extended_servers[new_id].id = new_id;
+					extended_servers[new_id].remain_size = 0;
+					extended_servers[new_id].socket = extended_server_socket;
+					int new_key = new_id + CP_KEY_LOGIC2EXLOGIC;
+					CreateIoCompletionPort(reinterpret_cast<HANDLE>(extended_server_socket), h_iocp, new_key, 0);
+					extended_servers[new_id].do_recv();
+					extended_server_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+				}
+				else {
+					cout << "다른 Sever의 연결요청을 받았으나, 현재 서버가 꽉 찼습니다.\n" << endl;
+				}
+
+				ZeroMemory(&ex_over->overlapped, sizeof(ex_over->overlapped));
+				ex_over->wsabuf.buf = reinterpret_cast<CHAR*>(extended_server_socket);
+				int addr_size = sizeof(SOCKADDR_IN);
+				AcceptEx(g_ss_listensock, extended_server_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
 			}
-			extended_servers[server_id].do_recv();
+
 			break;
-		}
-		case OP_SEND: {
-			int server_id = key - SERIAL_NUM_EXSERVER;
-			if (0 == num_bytes) disconnect(server_id, SESSION_EXTENDED_SERVER);
-			delete ex_over;
-			break;
-		}
-		case OP_CONNECT: {
-			if (FALSE != ret) {
-				int server_id = key - SERIAL_NUM_EXSERVER;
-				std::cout << "성공적으로 Server[" << server_id << "]에 연결되었습니다.\n" << endl;
-				extended_servers[server_id].id = server_id;
-				extended_servers[server_id].remain_size = 0;
-				extended_servers[server_id].socket = right_ex_server_sock;
-				extended_servers[server_id].s_state = ST_ACCEPTED;
-				CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_ss_iocp, NULL, 0);
-				delete ex_over;
+		}//OP_ACPT end
+		case OP_RECV: {
+			// 1. Client Recv
+			if (key >= CP_KEY_LOGIC2CLIENT && key <= CP_KEY_LISTEN_CLIENT) {
+				int recved_id = key - CP_KEY_LOGIC2CLIENT;
+				if (0 == num_bytes) disconnect(recved_id, SESSION_CLIENT);
+
+				int remain_data = num_bytes + clients[recved_id].remain_size;
+				char* p = ex_over->send_buf;
+				while (remain_data > 0) {
+					int packet_size = p[0];
+					if (packet_size <= remain_data) {
+						process_packet(static_cast<int>(recved_id), p);
+						p = p + packet_size;
+						remain_data = remain_data - packet_size;
+					}
+					else break;
+				}
+				clients[recved_id].remain_size = remain_data;
+				if (remain_data > 0) {
+					memcpy(ex_over->send_buf, p, remain_data);
+				}
+				clients[recved_id].do_recv();
+			}
+			// 2. RelayServer Recv
+			else if (key >= CP_KEY_LOGIC2RELAY && key < CP_KEY_LOGIC2EXLOGIC) {
+
+			}
+			// 3. Ex_Server Recv
+			else if (key >= CP_KEY_LOGIC2EXLOGIC && key <= CP_KEY_LISTEN_EXLOGIC) {
+				if (0 == num_bytes) disconnect(key, SESSION_EXTENDED_SERVER);
+				int server_id = key - CP_KEY_LOGIC2EXLOGIC;
+
+				int remain_data = num_bytes + extended_servers[server_id].remain_size;
+				char* p = ex_over->send_buf;
+				while (remain_data > 0) {
+					int packet_size = p[0];
+					if (packet_size <= remain_data) {
+						process_packet(static_cast<int>(server_id), p);
+						p = p + packet_size;
+						remain_data = remain_data - packet_size;
+					}
+					else break;
+				}
+				extended_servers[server_id].remain_size = remain_data;
+				if (remain_data > 0) {
+					memcpy(ex_over->send_buf, p, remain_data);
+				}
 				extended_servers[server_id].do_recv();
+				break;
 			}
-		}
+
+			break;
+		}//OP_RECV end
+		case OP_SEND: {
+			// 1. Client Send
+			if (key >= CP_KEY_LOGIC2CLIENT && key <= CP_KEY_LISTEN_CLIENT) {
+				if (0 == num_bytes) disconnect(key - CP_KEY_LOGIC2CLIENT, SESSION_CLIENT);
+				delete ex_over;
+			}
+			// 2. RelayServer Send
+			else if (key >= CP_KEY_LOGIC2RELAY && key < CP_KEY_LOGIC2EXLOGIC) {
+
+			}
+			// 3. Ex_Server Send
+			else if (key >= CP_KEY_LOGIC2EXLOGIC && key <= CP_KEY_LISTEN_EXLOGIC) {
+				int server_id = key - CP_KEY_LOGIC2EXLOGIC;
+				if (0 == num_bytes) disconnect(server_id, SESSION_EXTENDED_SERVER);
+				delete ex_over;
+			}
+
+			break;
+		}//OP_SEND end
+		case OP_CONNECT: {
+			// 1. Ex_Server Conn_Ex
+			if (key >= CP_KEY_LOGIC2EXLOGIC && key <= CP_KEY_LISTEN_EXLOGIC) {
+				if (FALSE != ret) {
+					int server_id = key - CP_KEY_LOGIC2EXLOGIC;
+					std::cout << "성공적으로 Server[" << server_id << "]에 연결되었습니다.\n" << endl;
+					extended_servers[server_id].id = server_id;
+					extended_servers[server_id].remain_size = 0;
+					extended_servers[server_id].socket = right_ex_server_sock;
+					extended_servers[server_id].s_state = ST_ACCEPTED;
+					CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_iocp, NULL, 0);
+					delete ex_over;
+					extended_servers[server_id].do_recv();
+				}
+			}
+		}//OP_CONN end
 		}
 	}
 }
+
 
 void timerFunc() {
 	while (true) {
@@ -1640,6 +1657,7 @@ int main(int argc, char* argv[])
 {
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
+	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
 
 	//======================================================================
 	// [ HA - 서버 ID, 포트번호 지정 ]
@@ -1724,7 +1742,7 @@ int main(int argc, char* argv[])
 
 	OVER_EX* con_over_relay = new OVER_EX;
 	con_over_relay->process_type = OP_CONNECT;
-	HANDLE hret_relay = CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_relay_sock), h_relay_iocp, CP_KEY_LOGIC2RELAY, 0);
+	HANDLE hret_relay = CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_relay_sock), h_iocp, CP_KEY_LOGIC2RELAY, 0);
 	if (NULL == hret_relay) {
 		cout << "CreateIoCompletoinPort Error - " << ret << endl;
 		cout << WSAGetLastError() << endl;
@@ -1764,8 +1782,7 @@ int main(int argc, char* argv[])
 	int ha_addr_size = sizeof(ha_addr);
 
 	// HA Accept
-	h_ss_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
-	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_ss_listensock), h_ss_iocp, 1999, 0);
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_ss_listensock), h_iocp, CP_KEY_LISTEN_EXLOGIC, 0);
 	right_ex_server_sock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	OVER_EX ha_over;
 	ha_over.process_type = OP_ACCEPT;
@@ -1799,8 +1816,8 @@ int main(int argc, char* argv[])
 
 		OVER_EX* con_over = new OVER_EX;
 		con_over->process_type = OP_CONNECT;
-		int key_num = SERIAL_NUM_EXSERVER + right_servernum;
-		HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_ss_iocp, key_num, 0);
+		int key_num = CP_KEY_LOGIC2EXLOGIC + right_servernum;
+		HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_iocp, key_num, 0);
 		if (NULL == hret) {
 			cout << "CreateIoCompletoinPort Error - " << ret << endl;
 			cout << WSAGetLastError() << endl;
@@ -1850,8 +1867,7 @@ int main(int argc, char* argv[])
 	int client_id = 0;
 
 	// Client Accept
-	h_sc_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
-	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_sc_listensock), h_sc_iocp, 999, 0);
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_sc_listensock), h_iocp, CP_KEY_LISTEN_CLIENT, 0);
 	SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	OVER_EX a_over;
 	a_over.process_type = OP_ACCEPT;
@@ -1861,7 +1877,6 @@ int main(int argc, char* argv[])
 	vector <thread> worker_threads;
 	for (int i = 0; i < 4; ++i)
 		worker_threads.emplace_back(do_worker);			// 클라이언트-서버 통신용 Worker스레드
-	worker_threads.emplace_back(do_ha_worker);			// 서버 간 통신용 Worker스레드
 
 	vector<thread> timer_threads;
 	timer_threads.emplace_back(timerFunc);				// 클라이언트 로직 타이머스레드

@@ -17,12 +17,11 @@ using namespace std;
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_CONNECT };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_RUNNING_SERVER, ST_DOWN_SERVER };
-enum SESSION_TYPE { SESSION_CLIENT, SESSION_LOGIN, SESSION_LOBBY, SESSION_LOGIC };
+enum SESSION_TYPE { SESSION_CLIENT, SESSION_LOGIN, SESSION_LOGIC };
 
 int online_user_cnt = 0;				// 접속중인 유저 수
-HANDLE h_iocp_relay2client;				// 클라이언트-릴레이서버 통신 IOCP 핸들
+HANDLE h_iocp;							// IOCP 핸들
 SOCKET g_listensock_relay2client;		// 클라이언트-릴레이서버 통신 listen소켓
-HANDLE h_iocp_relay2logic;				// 릴레이서버-로직서버 통신 IOCP 핸들
 SOCKET g_listensock_relay2logic;		// 릴레이서버-로직서버 통신 listen소켓
 
 class OVER_EXP {
@@ -102,7 +101,6 @@ public:
 };
 array<SESSION, MAX_USER> clients;
 array<SESSION, MAX_LOGIN_SERVER> login_servers;
-array<SESSION, MAX_LOBBY_SERVER> lobby_servers;
 array<SESSION, MAX_LOGIC_SERVER> logic_servers;
 
 
@@ -117,36 +115,13 @@ void disconnect(int target_id, int target)
 		}
 		closesocket(clients[target_id].socket);
 		clients[target_id].s_state = ST_FREE;
+		online_user_cnt--;
 		clients[target_id].s_lock.unlock();
 
-		online_user_cnt--;
 		cout << "Player[ID: " << clients[target_id].id << ", name: " << clients[target_id].name << "] is log out" << endl;	// server message
-
-		for (int i = 0; i < MAX_USER; i++) {
-			auto& pl = clients[i];
-
-			if (pl.id == target_id) continue;
-
-			pl.s_lock.lock();
-			if (pl.s_state != ST_INGAME) {
-				pl.s_lock.unlock();
-				continue;
-			}
-			SC_REMOVE_OBJECT_PACKET remove_pl_packet;
-			remove_pl_packet.target = TARGET_PLAYER;
-			remove_pl_packet.id = target_id;
-			remove_pl_packet.size = sizeof(remove_pl_packet);
-			remove_pl_packet.type = SC_REMOVE_OBJECT;
-			cout << "[SC_REMOVE]";
-			pl.do_send(&remove_pl_packet);
-			pl.s_lock.unlock();
-		}
 		break;
 
 	case SESSION_LOGIN:
-		break;
-
-	case SESSION_LOBBY:
 		break;
 
 	case SESSION_LOGIC:
@@ -261,7 +236,7 @@ void do_worker()
 		DWORD num_bytes;
 		ULONG_PTR key;
 		WSAOVERLAPPED* over = nullptr;
-		BOOL ret = GetQueuedCompletionStatus(h_iocp_relay2client, &num_bytes, &key, &over, INFINITE);
+		BOOL ret = GetQueuedCompletionStatus(h_iocp, &num_bytes, &key, &over, INFINITE);
 		OVER_EXP* ex_over = reinterpret_cast<OVER_EXP*>(over);
 		if (FALSE == ret) {
 			if (ex_over->process_type == OP_ACCEPT) cout << "Accept Error";
@@ -283,7 +258,8 @@ void do_worker()
 					clients[client_id].name[0] = 0;
 					clients[client_id].remain_size = 0;
 					clients[client_id].socket = c_socket;
-					CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), h_iocp_relay2client, client_id, 0);
+					int new_key = client_id + CP_KEY_RELAY2CLIENT;
+					CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), h_iocp, new_key, 0);
 					clients[client_id].do_recv();
 					c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 					cout << "클라이언트[" << client_id << "]의 연결요청을 받았습니다.\n" << endl;//server message
@@ -299,9 +275,6 @@ void do_worker()
 			}
 			else if (key == CP_KEY_RELAY2LOGIN) {	// 인증서버의 연결 요청
 				
-			}
-			else if (key == CP_KEY_RELAY2LOBBY) {	// 로비서버의 연결 요청
-
 			}
 			else if (key == CP_KEY_RELAY2LOGIC) {	// 로직서버의 연결 요청
 				SOCKET lgc_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
@@ -322,7 +295,7 @@ void do_worker()
 					logic_servers[new_lgcsvr_num].name[0] = 0;
 					logic_servers[new_lgcsvr_num].remain_size = 0;
 					logic_servers[new_lgcsvr_num].socket = lgc_socket;
-					CreateIoCompletionPort(reinterpret_cast<HANDLE>(lgc_socket), h_iocp_relay2logic, new_lgcsvr_num, 0);
+					CreateIoCompletionPort(reinterpret_cast<HANDLE>(lgc_socket), h_iocp, new_lgcsvr_num, 0);
 					logic_servers[new_lgcsvr_num].do_recv();
 					lgc_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 					cout << "로직서버[" << new_lgcsvr_num << "]의 연결요청을 받았습니다.\n" << endl;//server message
@@ -340,29 +313,27 @@ void do_worker()
 		}
 		case OP_RECV: {
 			if (key == CP_KEY_RELAY2CLIENT) {		// 클라이언트 RECV
-				if (0 == num_bytes) disconnect(key, SESSION_CLIENT);
+				int cl_id = key - CP_KEY_RELAY2CLIENT;
+				if (0 == num_bytes) disconnect(cl_id, SESSION_CLIENT);
 
-				int remain_data = num_bytes + clients[key].remain_size;
+				int remain_data = num_bytes + clients[cl_id].remain_size;
 				char* p = ex_over->send_buf;
 				while (remain_data > 0) {
 					int packet_size = p[0];
 					if (packet_size <= remain_data) {
-						process_packet(static_cast<int>(key), p);
+						process_packet(static_cast<int>(cl_id), p);
 						p = p + packet_size;
 						remain_data = remain_data - packet_size;
 					}
 					else break;
 				}
-				clients[key].remain_size = remain_data;
+				clients[cl_id].remain_size = remain_data;
 				if (remain_data > 0) {
 					memcpy(ex_over->send_buf, p, remain_data);
 				}
-				clients[key].do_recv();
+				clients[cl_id].do_recv();
 			}
 			else if (key == CP_KEY_RELAY2LOGIN) {	// 인증서버의 RECV
-
-			}
-			else if (key == CP_KEY_RELAY2LOBBY) {	// 로비서버의 RECV
 
 			}
 			else if (key == CP_KEY_RELAY2LOGIC) {	// 로직서버의 RECV
@@ -390,12 +361,9 @@ void do_worker()
 		}
 		case OP_SEND: {
 			if (key == CP_KEY_RELAY2CLIENT) {		// 클라이언트 SEND
-				if (0 == num_bytes) disconnect(key, SESSION_CLIENT);
+				if (0 == num_bytes) disconnect(key - CP_KEY_RELAY2CLIENT, SESSION_CLIENT);
 			}
 			else if (key == CP_KEY_RELAY2LOGIN) {	// 인증서버의 SEND
-
-			}
-			else if (key == CP_KEY_RELAY2LOBBY) {	// 로비서버의 SEND
 
 			}
 			else if (key == CP_KEY_RELAY2LOGIC) {	// 로직서버의 SEND
@@ -410,7 +378,7 @@ void do_worker()
 
 void timerFunc() {
 	while (true) {
-		cout << "TIMER" << endl;
+		cout << "TIMER TEST" << endl;
 		Sleep(1000);
 	}
 }
@@ -419,6 +387,7 @@ int main(int argc, char* argv[])
 {
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
+	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
 
 	//======================================================================
 	// [ 하위 Server 실행 ]
@@ -446,8 +415,7 @@ int main(int argc, char* argv[])
 	int logic_addrsize = sizeof(logic_sockaddr);
 
 	// LogicServer Accept
-	h_iocp_relay2logic = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
-	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_listensock_relay2logic), h_iocp_relay2logic, CP_KEY_RELAY2LOGIC, 0);
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_listensock_relay2logic), h_iocp, CP_KEY_RELAY2LOGIC, 0);
 	SOCKET logic_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	OVER_EXP logic_over;
 	logic_over.process_type = OP_ACCEPT;
@@ -469,8 +437,7 @@ int main(int argc, char* argv[])
 	int client_id = 0;
 
 	// CLient Accept
-	h_iocp_relay2client = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
-	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_listensock_relay2client), h_iocp_relay2client, CP_KEY_RELAY2CLIENT, 0);
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_listensock_relay2client), h_iocp, CP_KEY_RELAY2CLIENT, 0);
 	SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	OVER_EXP a_over;
 	a_over.process_type = OP_ACCEPT;
