@@ -395,7 +395,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
 //	float4 cColor = (cBaseTexColor * cDetailTexColor);
 	//cIllumination =Lighting(input.positionW, input.normalW);
-	float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
 
 	
 	cColor = lerp(cColor, cIllumination, 0.5f);
@@ -943,7 +943,8 @@ struct VS_SHADOW_MAP_OUTPUT
 	float4 position : SV_POSITION;
 	float3 positionW : POSITION;
 	float3 normalW : NORMAL;
-	float4 uvs[MAX_LIGHTS] : TEXCOORD0;
+	float2 uv : TEXCOORD0;
+	float4 uvs[MAX_LIGHTS] : TEXCOORD1; 
 };
 
 VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
@@ -954,7 +955,7 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 	output.positionW = positionW.xyz;
 	output.position = mul(mul(positionW, gmtxView), gmtxProjection);
 	output.normalW = mul(float4(input.normal, 0.0f), gmtxGameObject).xyz;
-	//output.uvs[MAX_LIGHTS].xy = input.uv.xy;
+	output.uv = input.uv;
 
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
@@ -967,8 +968,30 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 {
 	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
-
+	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (gnTexturesMask & MATERIAL_ALBEDO_MAP) cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
+	else
+		cAlbedoColor = gMaterial.m_cDiffuse;
+	if (gnTexturesMask & MATERIAL_SPECULAR_MAP) cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
+	else
+		cSpecularColor = gMaterial.m_cSpecular;
 	//	cIllumination = saturate(gtxtDepthTextures[3].SampleLevel(gssProjector, f3uvw.xy, 0).r);
-//	cIllumination = float4(0, 0, 0, 1);
-	return(cIllumination);
+	float4 cColor = cAlbedoColor+cSpecularColor;
+	return(lerp(cColor,cIllumination,0.4));
 }
+
+
+
+//float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+//if (gnTexturesMask & MATERIAL_ALBEDO_MAP) cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
+/*float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+if (gnTexturesMask & MATERIAL_SPECULAR_MAP) cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
+float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+if (gnTexturesMask & MATERIAL_NORMAL_MAP) cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
+float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
+float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);*/
+//float4 cColor = cAlbedoColor /*+ cSpecularColor + cEmissionColor*/;
+//	cIllumination = saturate(gtxtDepthTextures[3].SampleLevel(gssProjector, f3uvw.xy, 0).r);

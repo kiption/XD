@@ -19,8 +19,9 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_nObjects = 18;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
+	CShadowMapShader* pShadowMapShader = new CShadowMapShader(this);
 
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
 	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 1000.0, 0.0f, _PLANE_HEIGHT + 1000.0, 0.0f, 0.0f, 0.0f);
 	CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 100.0f, 100.0f, 100.0f);
 
@@ -115,7 +116,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	{
 
 		m_ppCityGameObjects[i] = new CGameObject(3);
-		CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1.bin", NULL);
+		CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1.bin", pShadowMapShader);
 		m_ppCityGameObjects[i]->SetChild(pGeneratorModel, false);
 		m_ppCityGameObjects[i]->SetMaterial(pCityMaterial);
 		m_ppCityGameObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
@@ -132,6 +133,9 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[15]->SetPosition(-150.0, 20.0, -550.0);
 	m_ppObjects[16]->SetPosition(550.0, 20.0, -400.0);
 	m_ppObjects[17]->SetPosition(250.0, 20.0, -200.0);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	
 }
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
@@ -203,6 +207,24 @@ CShadowMapShader::CShadowMapShader(CObjectsShader* pObjectsShader)
 CShadowMapShader::~CShadowMapShader()
 {
 }
+
+//D3D12_INPUT_LAYOUT_DESC CShadowMapShader::CreateInputLayout(int nPipelineState)
+//{
+//	UINT nInputElementDescs = 4;
+//	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+//
+//	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+//	pd3dInputElementDescs[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+//	pd3dInputElementDescs[2] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+//
+//	
+//
+//	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+//	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+//	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+//
+//	return(d3dInputLayoutDesc);
+//}
 
 D3D12_DEPTH_STENCIL_DESC CShadowMapShader::CreateDepthStencilState(int nPipelineState)
 {

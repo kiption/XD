@@ -540,8 +540,7 @@ void Stage2::AnimateObjects(float fTimeElapsed)
 	{
 		m_pLights->m_pLights[1].m_xmf3Position = xmfPosition;
 		m_pLights->m_pLights[1].m_xmf3Direction = m_pPlayer->GetLook();
-		m_pLights->m_pLights[5].m_xmf3Position = XMFLOAT3(420.0f, m_pTerrain->GetHeight(420.0f, 1100.0f), 1100.0f);
-		m_pLights->m_pLights[5].m_xmf3Direction.x += 0.5;
+
 	}
 
 }
