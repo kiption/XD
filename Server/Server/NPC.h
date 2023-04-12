@@ -29,12 +29,15 @@ private:
 	int m_defence;
 	int m_chaseID;
 
+	float m_turnSpeed;
 	float m_Speed;
 	float m_theta;
 	float m_range;					// 임시 변수 재 제작시 사라질 운명
 	float m_Acc;
 
 	float m_Distance[3];
+
+	BoundingOrientedBox m_xoobb;
 
 public:
 	// ===========================================
