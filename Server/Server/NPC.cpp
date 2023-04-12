@@ -4,9 +4,11 @@ XMFLOAT3 NPCNormalize(XMFLOAT3 vec)
 {
 	float dist = sqrtf(powf(vec.x, 2) + powf(vec.y, 2) + powf(vec.z, 2));
 
-	vec.x = vec.x / dist;
-	vec.y = vec.y / dist;
-	vec.z = vec.z / dist;
+	if (dist != 0.0f) {
+		vec.x = vec.x / dist;
+		vec.y = vec.y / dist;
+		vec.z = vec.z / dist;
+	}
 
 	return vec;
 }
@@ -34,6 +36,8 @@ ST1_NPC::ST1_NPC()
 	m_defence = 100;
 	m_Speed = 3.0f;
 	m_chaseID = -1;
+
+	m_xoobb = BoundingOrientedBox(XMFLOAT3(m_Pos.x, m_Pos.y, m_Pos.z), XMFLOAT3(heli_bbsize_x, heli_bbsize_y, heli_bbsize_z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 ST1_NPC::~ST1_NPC()
@@ -330,7 +334,7 @@ XMFLOAT3 ST1_NPC::NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll
 	float curr_yaw = XMConvertToRadians(yaw);
 	float curr_roll = XMConvertToRadians(roll);
 
-
+	// roll
 	float x1, y1;
 	x1 = vec.x * cos(curr_roll) - vec.y * sin(curr_roll);
 	y1 = vec.x * sin(curr_roll) + vec.y * cos(curr_roll);
@@ -395,23 +399,35 @@ void ST1_NPC::FlyOnNpc(XMFLOAT3 vec, int id) // 추적대상 플레이어와 높이 맞추기
 
 void ST1_NPC::PlayerChasing()
 {
-	// Look 방향 변환 --> 조금씩 회전
+	// Look
+	XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&m_User_Pos[m_chaseID]), XMLoadFloat3(&m_Pos)));
+	XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
 
-	//XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&m_User_Pos[m_chaseID]), XMLoadFloat3(&m_Pos)));
-	//XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
-	//
-	//// Right 방향 변환
-	//Coordinate base_coordinate;
-	//base_coordinate.up = { 0,1,0 };
+	// Right
+	Coordinate base_coordinate;
+	base_coordinate.up = { 0,1,0 };
 
-	//XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-	//XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+	XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+	XMStoreFloat3(&m_curr_coordinate.right, righttemp);
 
-	//// Up 방향 변환
-	//XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-	//XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+	// up
+	XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+	XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+	if (m_Distance[m_chaseID] < 30) {
+		m_Speed = 0;
+	}
+	else {
+		m_Speed = 1.5f;
+	}
 
 	// 위치 변환
 	m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+	m_Pos.y += m_Speed * m_curr_coordinate.look.y;
 	m_Pos.z += m_Speed * m_curr_coordinate.look.z;
 }
+
+
+
+
+
