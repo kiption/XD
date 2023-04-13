@@ -992,13 +992,10 @@ void do_worker()
 				SOCKET c_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
 				int client_id = get_new_client_id();
 				if (client_id != -1) {
-					//clients[client_id].pos = { 0.0f, 0.0f, 0.0f };
 					clients[client_id].id = client_id;
-					//clients[client_id].name[0] = 0;
 					clients[client_id].remain_size = 0;
 					clients[client_id].socket = c_socket;
 					int new_key = client_id + CP_KEY_LOGIC2CLIENT;
-					//CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), h_iocp, client_id, 0);
 					CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), h_iocp, new_key, 0);
 					clients[client_id].do_recv();
 					c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -1018,7 +1015,7 @@ void do_worker()
 				left_ex_server_sock = extended_server_socket;
 				int new_id = find_empty_extended_server();
 				if (new_id != -1) {
-					cout << "Sever[" << new_id << "]의 연결요청을 받았습니다.\n" << endl;
+					//cout << "Sever[" << new_id << "]의 연결요청을 받았습니다.\n" << endl;
 					extended_servers[new_id].id = new_id;
 					extended_servers[new_id].remain_size = 0;
 					extended_servers[new_id].socket = extended_server_socket;
