@@ -1663,16 +1663,16 @@ int main(int argc, char* argv[])
 	int sc_portnum = -1;	// 클라이언트 통신용 포트번호
 	int ss_portnum = -1;	// 서버 간 통신용 포트번호
 	if (argc > 1) {			// 입력된 명령행 인수가 있을 때 (주로 서버다운으로 인한 서버 재실행때 사용됨)
+		// Serve ID지정
+		my_server_id = atoi(argv[1]) % 10;
+
 		// Active 여부 결정
-		int isActiveStart = atoi(argv[1]) / 10;
-		if (isActiveStart == 0) {
+		if (my_server_id == MAX_SERVER - 1) {
 			b_active_server = true;
 		}
 		else {
 			b_active_server = false;
 		}
-		// Serve ID지정
-		my_server_id = atoi(argv[1]) % 10;
 	}
 	else {				// 만약 입력된 명령행 인수가 없다면 입력을 받습니다.
 		cout << "실행할 서버: ";
@@ -1755,7 +1755,7 @@ int main(int argc, char* argv[])
 	if (FALSE == bret_relay) {
 		int err_no = GetLastError();
 		if (ERROR_IO_PENDING == err_no)
-			cout << "Server Connect 시도 중...\n" << endl;
+			cout << "Connect 시도 중...\n" << endl;
 		else {
 			cout << "ConnectEX Error - " << err_no << endl;
 			cout << WSAGetLastError() << endl;
