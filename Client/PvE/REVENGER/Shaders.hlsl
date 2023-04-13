@@ -989,10 +989,10 @@ float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 	//cIllumination = saturate(gtxtDepthTextures[3].Sample(gssWrap, input.uvs[5].xy/ input.uvs[5].ww)* cIllumination);
 	//float4 cColor = cAlbedoColor;
 	//return(lerp(cColor,cIllumination,0.9));
-	/*for (int i = 0; i < MAX_LIGHTS; i++)
+	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
-	}*/
-	return(gtxtAlbedoTexture.Sample(gssWrap, input.uvs[5].xy / input.uvs[5].ww) * cIllumination);
+	return(gtxtAlbedoTexture.Sample(gssBorder, input.uvs[i].xy / input.uvs[i].ww) * cIllumination);
+	}
 }
 
 

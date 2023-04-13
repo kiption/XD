@@ -300,7 +300,6 @@ void BillboardParticleShader::AnimateObjects(float fTimeElapsed)
 	float randomY{};
 	float randomZ{};
 	uniform_real_distribution<float>uidw(15.0, 30.0);
-
 	uniform_real_distribution<float>uidh(15.0, 30.0);
 
 

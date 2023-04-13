@@ -255,7 +255,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	}
 
-
+	gamesound.backGroundMusic();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }

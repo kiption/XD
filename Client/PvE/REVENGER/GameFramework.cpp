@@ -745,7 +745,7 @@ void CGameFramework::FrameAdvance()
 {
 	SleepEx(1, TRUE);//Server
 	if (m_nMode == SCENE2STAGE)m_GameTimer.Tick(30.0f);
-	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick(60.0f);
+	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick();
 
 	ProcessInput();
 
@@ -754,7 +754,7 @@ void CGameFramework::FrameAdvance()
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-	if (m_nMode != SCENE2STAGE)
+	if (m_nMode == SCENE1STAGE)
 	{
 		m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
 		m_pScene->OnPreRender(m_pd3dCommandList, m_pCamera);
