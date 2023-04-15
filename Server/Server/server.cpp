@@ -622,16 +622,34 @@ void process_packet(int client_id, char* packet)
 					[[fallthrough]]
 				case KEY_W:
 					clients[client_id].s_lock.lock();
-
 					// 이동 계산 & 결과 업데이트
 					XMFLOAT3 move_result = calcMove(clients[client_id].pos, clients[client_id].m_upvec, ENGINE_SCALAR * sign);
 					clients[client_id].pos = move_result;
-
 					// 바운딩 박스 업데이트
 					clients[client_id].setBB();
-
-					// unlock
 					clients[client_id].s_lock.unlock();
+
+					// 비행고도가 최저높이 아래로 내려가면 사망
+					if (clients[client_id].pos.y < FLY_MIN_HEIGHT) {
+						// HP가 0이 됩니다.
+						clients[client_id].s_lock.lock();
+						clients[client_id].hp = 0;
+						clients[client_id].pos.y = 100.f;
+						if (clients[client_id].hp <= 0) {
+							clients[client_id].pl_state = PL_ST_DEAD;
+							clients[client_id].death_time = chrono::system_clock::now();
+						}
+						clients[client_id].s_lock.unlock();
+
+						// 플레이어에게 데미지를 알려줍니다.
+						SC_DAMAGED_PACKET pl_damage_packet;
+						pl_damage_packet.size = sizeof(SC_DAMAGED_PACKET);
+						pl_damage_packet.type = SC_DAMAGED;
+						pl_damage_packet.target = TARGET_PLAYER;
+						pl_damage_packet.id = clients[client_id].id;
+						pl_damage_packet.dec_hp = HELI_MAXHP;
+						clients[client_id].do_send(&pl_damage_packet);
+					}
 
 					// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
 					for (int j = 0; j < MAX_USER; j++) {
@@ -1229,6 +1247,7 @@ void timerFunc() {
 						// HP가 0이 됩니다.
 						mv_target.s_lock.lock();
 						mv_target.hp = 0;
+						mv_target.pos.y = 100.f;
 						if (mv_target.hp <= 0) {
 							mv_target.pl_state = PL_ST_DEAD;
 							mv_target.death_time = chrono::system_clock::now();
@@ -1241,7 +1260,7 @@ void timerFunc() {
 						pl_damage_packet.type = SC_DAMAGED;
 						pl_damage_packet.target = TARGET_PLAYER;
 						pl_damage_packet.id = mv_target.id;
-						pl_damage_packet.dec_hp = 0;
+						pl_damage_packet.dec_hp = HELI_MAXHP;
 						mv_target.do_send(&pl_damage_packet);
 					}
 
