@@ -88,14 +88,6 @@ void sendPacket(void* packet, short servernum)
 			inet_pton(AF_INET, SERVER_ADDR, &newserver_addr.sin_addr);
 			connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&newserver_addr), sizeof(newserver_addr));
 
-			// 임시코드: 나중에 RELOGIN 패킷을 새로 만들어서 그거를 보내도록 해야함.
-			//CS_LOGIN_PACKET login_pack;
-			//login_pack.size = sizeof(CS_LOGIN_PACKET);
-			//login_pack.type = CS_LOGIN;
-			//strcpy_s(login_pack.name, "COPTER");
-			//sendPacket(&login_pack, active_servernum);
-			//recvPacket(active_servernum);
-
 			CS_RELOGIN_PACKET re_login_pack;
 			re_login_pack.size = sizeof(CS_RELOGIN_PACKET);
 			re_login_pack.type = CS_RELOGIN;
@@ -334,31 +326,17 @@ void processPacket(char* ptr)
 		if (recv_packet->target == TARGET_PLAYER) {
 			if (recv_packet->id == my_id) {
 				my_info.m_hp -= recv_packet->dec_hp;
+				if (my_info.m_hp < 0) my_info.m_hp = 0;
 				gamesound.collisionSound();
 			}
 		}
 		// NPC Damaged
 		else if (recv_packet->target == TARGET_NPC) {
 			npcs_info[recv_packet->id].m_hp -= recv_packet->dec_hp;
-			cout << npcs_info[recv_packet->id].m_hp << endl;//test
 		}
 
 		break;
 	}//SC_HP_COUNT case end
-	case SC_PLAYER_STATE:
-	{
-		SC_PLAYER_STATE_PACKET* recv_packet = reinterpret_cast<SC_PLAYER_STATE_PACKET*>(ptr);
-
-		int pl_state = recv_packet->state;
-		if (pl_state == ST_PACK_REVIVAL) {
-			my_info.m_hp = 100;
-		}
-		else if (pl_state == ST_PACK_DEAD) {
-			my_info.m_hp = 0;
-		}
-
-		break;
-	}//SC_PLAYER_STATE case end
 	case SC_BULLET_COUNT:
 	{
 		SC_BULLET_COUNT_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COUNT_PACKET*>(ptr);

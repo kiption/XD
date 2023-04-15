@@ -110,5 +110,5 @@ public:
 	// Rotate
 	XMFLOAT3 NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll);
 
-	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(m_Pos.x, m_Pos.y, m_Pos.z), XMFLOAT3(heli_bbsize_x, heli_bbsize_y, heli_bbsize_z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
+	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(m_Pos.x, m_Pos.y, m_Pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 };

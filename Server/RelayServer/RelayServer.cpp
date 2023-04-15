@@ -179,6 +179,7 @@ void process_packet(int client_id, char* packet)
 		// 로직서버로 패킷 전달 (나중에는 여기서 보내는게 아니라, 매칭을 돌리고 매칭이 잡혔을때 로직서버로 전달하도록 수정해야함)
 		logic_servers[1].do_send(login_packet);
 
+
 		break;
 	}// CS_LOGIN end
 	case CS_INPUT_KEYBOARD: {
@@ -270,6 +271,7 @@ void do_worker()
 				SOCKET c_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
 				int client_id = get_new_client_id();
 				if (client_id != -1) {
+					clients[client_id].s_lock.lock();
 					clients[client_id].id = client_id;
 					clients[client_id].name[0] = 0;
 					clients[client_id].remain_size = 0;
@@ -277,6 +279,7 @@ void do_worker()
 					int new_key = client_id + CP_KEY_RELAY2CLIENT;
 					CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), h_iocp, new_key, 0);
 					clients[client_id].do_recv();
+					clients[client_id].s_lock.unlock();
 					c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 				}
 				else {
