@@ -7,7 +7,9 @@
 #include <vector>
 #include <chrono>
 #include <random>
+
 #include "Constant.h"
+#include "MathFuncs.h"
 #include "BulletsMgr.h"
 #include "../RelayServer/Protocol.h"
 #include "NPC.h"
@@ -65,10 +67,11 @@ public:
 	PLAYER_STATE pl_state;
 	int hp;
 	int bullet;
-	XMFLOAT3 pos;								// Position (x, y, z)
-	float pitch, yaw, roll;						// Rotated Degree
-	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;	// 현재 Look, Right, Up Vectors
+	XMFLOAT3 pos;									// Position (x, y, z)
+	float pitch, yaw, roll;							// Rotated Degree
+	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;		// 현재 Look, Right, Up Vectors
 	chrono::system_clock::time_point death_time;
+	chrono::system_clock::time_point last_move_rotate_keyinput_time;	// 마지막으로 키 입력이 된 시간
 
 	BoundingOrientedBox m_xoobb;	// Bounding Box
 
@@ -596,7 +599,6 @@ void process_packet(int client_id, char* packet)
 					clients[client_id].s_lock.lock();
 					// yaw 설정
 					clients[client_id].yaw += sign * YAW_ROTATE_SCALAR;
-
 					// right, up, look 벡터 업데이트
 					clients[client_id].m_rightvec = calcRotate(basic_coordinate.right
 						, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
@@ -604,8 +606,9 @@ void process_packet(int client_id, char* packet)
 						, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
 					clients[client_id].m_lookvec = calcRotate(basic_coordinate.look
 						, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
+					// 키입력 시간 업데이트
+					clients[client_id].last_move_rotate_keyinput_time = chrono::system_clock::now();
 
-					// unlock
 					clients[client_id].s_lock.unlock();
 
 					// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
@@ -627,6 +630,8 @@ void process_packet(int client_id, char* packet)
 					clients[client_id].pos = move_result;
 					// 바운딩 박스 업데이트
 					clients[client_id].setBB();
+					// 키입력 시간 업데이트
+					clients[client_id].last_move_rotate_keyinput_time = chrono::system_clock::now();
 					clients[client_id].s_lock.unlock();
 
 					// 비행고도가 최저높이 아래로 내려가면 사망
@@ -804,7 +809,16 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].m_rightvec = calcRotate(basic_coordinate.right, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
 			clients[client_id].m_upvec = calcRotate(basic_coordinate.up, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
 			clients[client_id].m_lookvec = calcRotate(basic_coordinate.look, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
+			//test
+			//cout << "[Mouse Input] Client[" << client_id << "]의 pitch가 " << clients[client_id].pitch <<
+			//	"로, roll이 " << clients[client_id].roll << "로 변경되었습니다." << endl;
+			//cout << "Right: " << clients[client_id].m_rightvec.x << ", " << clients[client_id].m_rightvec.y << ", " << clients[client_id].m_rightvec.z << endl;
+			//cout << "Up: "    << clients[client_id].m_upvec.x    << ", " << clients[client_id].m_upvec.y    << ", " << clients[client_id].m_upvec.z    << endl;
+			//cout << "Look: "  << clients[client_id].m_lookvec.x  << ", " << clients[client_id].m_lookvec.y  << ", " << clients[client_id].m_lookvec.z  << endl;
+			//cout << endl;
 
+			// 키입력 시간 업데이트
+			clients[client_id].last_move_rotate_keyinput_time = chrono::system_clock::now();
 			clients[client_id].s_lock.unlock();
 
 			// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
@@ -1156,36 +1170,98 @@ void timerFunc() {
 
 			// 1. Player가 살아있는 동안의 움직임
 			if (mv_target.pl_state == PL_ST_ALIVE) {
-				float proj_x = 0.f, proj_z = 0.f;		// proj_x는 UP벡터를 x축에 정사영시킨 정사영벡터, proj_z는 up벡터를 z축에 정사영시킨 정사영벡터입니다.
+				// 1) 마지막 이동or회전 키입력 이후, '자동수평비행모드 전환 시간'이 아직 지나지 않은 경우
+				//    => 기체의 수평 정도에 따른 이동을 합니다.
+				if (chrono::system_clock::now() < mv_target.last_move_rotate_keyinput_time + milliseconds(AUTO_LEVELOFF_TIME)) {
+					float proj_x = 0.f, proj_z = 0.f;		// proj_x는 UP벡터를 x축에 정사영시킨 정사영벡터, proj_z는 up벡터를 z축에 정사영시킨 정사영벡터입니다.
 
-				// pitch가 0이 아니면(= 앞or뒤로 기울어져 있다면) 헬기를 앞 또는 뒤로 이동시킵니다.
-				if (mv_target.pitch != 0.f) {
-					// pitch 각도에 따른 이동: proj_z = √(y^2 + z^2) cos(90˚ - pitch)
-					proj_z = sqrtf(powf(mv_target.m_upvec.y, 2) + powf(mv_target.m_upvec.z, 2)) * cos(XMConvertToRadians(90 - mv_target.pitch));
-					mv_target.pos = calcMove(mv_target.pos, mv_target.m_lookvec, proj_z * MOVE_SCALAR_FB);
-				}
+					// pitch가 0이 아니면(= 앞or뒤로 기울어져 있다면) 헬기를 앞 또는 뒤로 이동시킵니다.
+					if (mv_target.pitch != 0.f) {
+						// pitch 각도에 따른 이동: proj_z = √(y^2 + z^2) cos(90˚ - pitch)
+						proj_z = sqrtf(powf(mv_target.m_upvec.y, 2) + powf(mv_target.m_upvec.z, 2)) * cos(XMConvertToRadians(90 - mv_target.pitch));
+						mv_target.pos = calcMove(mv_target.pos, mv_target.m_lookvec, proj_z * MOVE_SCALAR_FB);
+					}
+					// roll이 0이 아니면(= 좌or우로 기울어져 있다면) 헬기를 좌 또는 우로 이동시킵니다.
+					if (mv_target.roll != 0.f) {
+						// roll 각도에 따른 이동: proj_x = √(x^2 + y^2) cos(90˚ - roll)
+						proj_x = sqrtf(powf(mv_target.m_upvec.x, 2) + powf(mv_target.m_upvec.y, 2)) * cos(XMConvertToRadians(90 - mv_target.roll));
+						mv_target.pos = calcMove(mv_target.pos, mv_target.m_rightvec, -1.f * proj_x * MOVE_SCALAR_LR);
+					}
+					// 바운딩 박스 업데이트
+					mv_target.setBB();
 
-				// roll이 0이 아니면(= 좌or우로 기울어져 있다면) 헬기를 좌 또는 우로 이동시킵니다.
-				if (mv_target.roll != 0.f) {
-					// roll 각도에 따른 이동: proj_x = √(x^2 + y^2) cos(90˚ - roll)
-					proj_x = sqrtf(powf(mv_target.m_upvec.x, 2) + powf(mv_target.m_upvec.y, 2)) * cos(XMConvertToRadians(90 - mv_target.roll));
-					mv_target.pos = calcMove(mv_target.pos, mv_target.m_rightvec, -1.f * proj_x * MOVE_SCALAR_LR);
-				}
+					// 최종 이동
+					if (mv_target.pitch != 0.f || mv_target.roll != 0.f) {
+						// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
+						for (auto& send_target : clients) {
+							if (send_target.s_state != ST_INGAME) continue;
 
-				// 바운딩 박스 업데이트
-				mv_target.setBB();
-
-				// 최종 이동
-				if (mv_target.pitch != 0.f || mv_target.roll != 0.f) {
-					// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
-					for (auto& send_target : clients) {
-						if (send_target.s_state != ST_INGAME) continue;
-
-						lock_guard<mutex> lg{ send_target.s_lock };
-						send_target.send_move_packet(mv_target.id, TARGET_PLAYER);
+							lock_guard<mutex> lg{ send_target.s_lock };
+							send_target.send_move_packet(mv_target.id, TARGET_PLAYER);
+						}
 					}
 				}
+				// 2) 마지막 이동or회전 키입력 이후, '자동수평비행모드 전환 시간'이 지난 경우
+				//    => 서서히 기체를 수평 상태로 바꿉니다.
+				else {
+					bool b_auto_leveloff = false;
+					// pitch값을 0으로 서서히 바꿉니다.
+					if (mv_target.pitch != 0.f) {
+						//cout << "[Auto Before] pitch: " << mv_target.pitch << endl;
+						b_auto_leveloff = true;
 
+						mv_target.s_lock.lock();
+						mv_target.pitch = mv_target.pitch - mv_target.pitch / 100.f;
+						round_digit(mv_target.pitch, 5);	// 소수점 다섯째자리에서 반올림
+
+						if (-1.f < mv_target.pitch && mv_target.pitch < 1.f) mv_target.pitch = 0.f;
+						
+						// 객체를 회전시킵니다.
+						mv_target.m_rightvec = calcRotate(basic_coordinate.right, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.m_upvec = calcRotate(basic_coordinate.up, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.m_lookvec = calcRotate(basic_coordinate.look, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.s_lock.unlock();
+
+						//cout << "[자동 수평복구 시스템] Client[" << mv_target.id << "]의 pitch가 " << mv_target.pitch << "로 변경되었습니다." << endl;
+						//cout << "Right: " << mv_target.m_rightvec.x << ", " << mv_target.m_rightvec.y << ", " << mv_target.m_rightvec.z << endl;
+						//cout << "Up: " << mv_target.m_upvec.x << ", " << mv_target.m_upvec.y << ", " << mv_target.m_upvec.z << endl;
+						//cout << "Look: " << mv_target.m_lookvec.x << ", " << mv_target.m_lookvec.y << ", " << mv_target.m_lookvec.z << endl;
+					}
+					// roll값을 0으로 서서히 바꿉니다.
+					if (mv_target.roll != 0.f) {
+						//cout << "[Auto Before] roll: " << mv_target.roll << endl;
+						b_auto_leveloff = true;
+
+						mv_target.s_lock.lock();
+						mv_target.roll = mv_target.roll - mv_target.roll / 100.f;
+						round_digit(mv_target.roll, 5);	// 소수점 다섯째자리에서 반올림
+
+						if (-1.f < mv_target.roll && mv_target.roll < 1.f) mv_target.roll = 0.f;
+						
+						// 객체를 회전시킵니다.
+						mv_target.m_rightvec = calcRotate(basic_coordinate.right, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.m_upvec = calcRotate(basic_coordinate.up, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.m_lookvec = calcRotate(basic_coordinate.look, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.s_lock.unlock();
+
+						//cout << "[자동 수평복구 시스템] Client[" << mv_target.id << "]의 roll가 " << mv_target.roll << "로 변경되었습니다." << endl;
+						//cout << "Right: " << mv_target.m_rightvec.x << ", " << mv_target.m_rightvec.y << ", " << mv_target.m_rightvec.z << endl;
+						//cout << "Up: " << mv_target.m_upvec.x << ", " << mv_target.m_upvec.y << ", " << mv_target.m_upvec.z << endl;
+						//cout << "Look: " << mv_target.m_lookvec.x << ", " << mv_target.m_lookvec.y << ", " << mv_target.m_lookvec.z << endl;
+						//cout << endl;
+					}
+
+					// 만약 자동 수평복구가 이뤄졌다면, 결과를 모든 클라이언트(자신포함)에게 보냅니다.
+					if (b_auto_leveloff) {
+						for (auto& cl : clients) {
+							if (cl.s_state == ST_INGAME) {
+								cl.send_rotate_packet(mv_target.id, TARGET_PLAYER);
+							}
+						}
+						b_auto_leveloff = false;
+					}
+				}
+				
 				// 충돌체크
 				// 1. Player-Player
 				for (auto& other_pl : clients) {

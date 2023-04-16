@@ -148,6 +148,7 @@
     <ClInclude Include="BulletsMgr.h" />
     <ClInclude Include="Constant.h" />
     <ClInclude Include="CP_KEYS.h" />
+    <ClInclude Include="MathFuncs.h" />
     <ClInclude Include="MyVectors.h" />
     <ClInclude Include="NPC.h" />
     <ClInclude Include="ObjectsMgr.h" />
