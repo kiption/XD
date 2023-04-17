@@ -5,6 +5,18 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 
+// key value (for Server)
+constexpr short INPUT_KEY_2 = 256;
+constexpr short INPUT_KEY_1 = 128;
+constexpr short INPUT_SPACEBAR = 0b1000000;
+constexpr short INPUT_KEY_W = 0b0100000;
+constexpr short INPUT_KEY_S = 0b0010000;
+constexpr short INPUT_KEY_D = 0b0001000;
+constexpr short INPUT_KEY_A = 0b0000100;
+constexpr short INPUT_KEY_E = 0b0000010;
+constexpr short INPUT_KEY_Q = 0b0000001;
+//====
+
 CGameFramework::CGameFramework()
 {
 	m_pdxgiFactory = NULL;
@@ -369,11 +381,19 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			ChangeSwapChainState();
 			break;
 		case '1':
+		{
+			short key1 = INPUT_KEY_1;//S
+			q_keyboardInput.push(key1);//S
 			ChangeScene(SCENE1STAGE);
 			break;
+		}
 		case '2':
+		{
+			short key2 = INPUT_KEY_2;//S
+			q_keyboardInput.push(key2);//S
 			ChangeScene(SCENE2STAGE);
 			break;
+		}
 		case VK_SPACE:
 
 			break;
@@ -499,15 +519,6 @@ void CGameFramework::ReleaseObjects()
 	if (m_pScene) m_pScene->ReleaseObjects();
 	//if (m_pScene) delete m_pScene;
 }
-
-// key value
-constexpr char INPUT_SPACEBAR = 0b1000000;
-constexpr char INPUT_KEY_W = 0b0100000;
-constexpr char INPUT_KEY_S = 0b0010000;
-constexpr char INPUT_KEY_D = 0b0001000;
-constexpr char INPUT_KEY_A = 0b0000100;
-constexpr char INPUT_KEY_E = 0b0000010;
-constexpr char INPUT_KEY_Q = 0b0000001;
 
 void CGameFramework::ProcessInput()
 {

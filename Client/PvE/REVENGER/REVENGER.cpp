@@ -204,7 +204,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					keyinput_pack.type = CS_INPUT_KEYBOARD;
 					keyinput_pack.direction = keyValue;
 
-					cout << "[Keyboard] Send KeyValue - " << keyinput_pack.direction << endl;//test
 					sendPacket(&keyinput_pack, active_servernum);
 				}
 
@@ -217,7 +216,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					mouseinput_pack.delta_x = mouseValue.delX;
 					mouseinput_pack.delta_y = mouseValue.delY;
 
-					cout << "[Mouse] Send KeyValue - " << mouseinput_pack.key_val << endl;//test
 					sendPacket(&mouseinput_pack, active_servernum);
 				}
 				//==================================================
@@ -307,11 +305,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				gGameFramework.m_currHp = my_info.m_hp;
 
 				// 6. NPC 움직임 최신화
-				for (int i{}; i < MAX_NPCS; i++) {
-					gGameFramework.SetPosition_NPC(npcs_info[i].m_id, npcs_info[i].m_pos);
-					gGameFramework.SetVectors_NPC(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
-					gGameFramework.m_pScene->SmokePosition = npcs_info[i].m_pos;
-				}
+				//for (int i{}; i < MAX_NPCS; i++) {
+				//	if (gGameFramework.m_nMode == SCENE1STAGE) {	// 임시
+				//		gGameFramework.SetPosition_NPC(npcs_info[i].m_id, npcs_info[i].m_pos);
+				//		gGameFramework.SetVectors_NPC(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
+				//		gGameFramework.m_pScene->SmokePosition = npcs_info[i].m_pos;
+				//	}
+				//}
 
 			}
 

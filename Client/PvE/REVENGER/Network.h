@@ -16,6 +16,9 @@ short active_servernum = 1;
 array<SOCKET, MAX_SERVER> sockets;
 int my_id;
 
+int servertime_ms;
+int servertime_sec;
+
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
 class OVER_EX {
@@ -345,6 +348,13 @@ void processPacket(char* ptr)
 
 		break;
 	}//SC_BULLET_COUNT case end
+	case SC_TIME_TICKING:
+	{
+		SC_TIME_TICKING_PACKET* recv_packet = reinterpret_cast<SC_TIME_TICKING_PACKET*>(ptr);
+
+		servertime_ms = recv_packet->servertime_ms;
+		servertime_sec = servertime_ms * 1000;
+	}//SC_TIME_TICKING case end
 	case SC_ACTIVE_DOWN:
 	{
 		SC_ACTIVE_DOWN_PACKET* recv_packet = reinterpret_cast<SC_ACTIVE_DOWN_PACKET*>(ptr);

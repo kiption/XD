@@ -53,7 +53,7 @@ constexpr char INPUT_KEY_E = 0b000001;
 enum PacketID {
 	CS_LOGIN, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_RELOGIN
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
-	, SC_DAMAGED, SC_BULLET_COUNT, SC_ACTIVE_DOWN
+	, SC_DAMAGED, SC_BULLET_COUNT, SC_TIME_TICKING, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
 };
 
@@ -74,7 +74,7 @@ struct CS_LOGIN_PACKET {
 struct CS_INPUT_KEYBOARD_PACKET {
 	unsigned char size;
 	char type;
-	char direction;
+	short direction;
 };
 
 enum rotate_type { RT_LBUTTON, RT_RBUTTON, RT_BOTH };
@@ -168,6 +168,12 @@ struct SC_BULLET_COUNT_PACKET {
 	char type;
 	short id;
 	int bullet_cnt;
+};
+
+struct SC_TIME_TICKING_PACKET {
+	unsigned char size;
+	char type;
+	int servertime_ms;	// 단위: ms
 };
 
 struct SC_ACTIVE_DOWN_PACKET {	// 현재는 클라-서버 -> 추후에 클라-릴레이서버 로 바꿀 예정.

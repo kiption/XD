@@ -2,7 +2,6 @@
 #include <WS2tcpip.h>
 #include <MSWSock.h>
 #include <thread>
-//#include <mutex>
 #include <array>
 #include <vector>
 #include <chrono>
@@ -27,6 +26,11 @@ enum PLAYER_STATE { PL_ST_ALIVE, PL_ST_DEAD };
 enum SESSION_TYPE { SESSION_CLIENT, SESSION_EXTENDED_SERVER, SESSION_RELAY };
 
 Coordinate basic_coordinate;	// 기본(초기) 좌표계
+
+chrono::system_clock::time_point g_s_start_time;	// 서버 시작시간  (단위: ms)
+milliseconds g_curr_servertime;
+bool b_isfirstplayer;	// 첫 player입장인지. (첫 클라 접속부터 서버시간이 흐르도록 하기 위함)
+mutex servertime_lock;	// 서버시간 lock
 
 class OVER_EX {
 public:
@@ -73,6 +77,8 @@ public:
 	chrono::system_clock::time_point death_time;
 	chrono::system_clock::time_point last_move_rotate_keyinput_time;	// 마지막으로 키 입력이 된 시간
 
+	short curr_stage;
+
 	BoundingOrientedBox m_xoobb;	// Bounding Box
 
 public:
@@ -92,6 +98,7 @@ public:
 		m_rightvec = { 1.0f, 0.0f, 0.0f };
 		m_upvec = { 0.0f, 1.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 1.0f };
+		curr_stage = 1;
 
 		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	}
@@ -438,9 +445,11 @@ void process_packet(int client_id, char* packet)
 
 		// 새로 접속한 플레이어의 초기 정보를 설정합니다.
 		clients[client_id].pl_state = PL_ST_ALIVE;
-		clients[client_id].pos.x = 512 + client_id * 50;
-		clients[client_id].pos.y = 100;
-		clients[client_id].pos.z = 350 - client_id * 50;
+		clients[client_id].curr_stage = 1;
+
+		clients[client_id].pos.x = RESPAWN_POS_X + client_id * 50;
+		clients[client_id].pos.y = RESPAWN_POS_Y;
+		clients[client_id].pos.z = RESPAWN_POS_Z - client_id * 50;
 
 		clients[client_id].pitch = clients[client_id].yaw = clients[client_id].roll = 0.0f;
 		clients[client_id].m_rightvec = basic_coordinate.right;
@@ -577,8 +586,22 @@ void process_packet(int client_id, char* packet)
 		if (!b_active_server) break;		// Active 서버만 패킷을 처리합니다.
 		CS_INPUT_KEYBOARD_PACKET* inputkey_p = reinterpret_cast<CS_INPUT_KEYBOARD_PACKET*>(packet);
 
-		enum InputKey { KEY_Q, KEY_E, KEY_A, KEY_D, KEY_S, KEY_W, KEY_SPACEBAR };
+		if (inputkey_p->direction == 128) {
+			clients[client_id].s_lock.lock();
+			clients[client_id].curr_stage = 1;
+			clients[client_id].s_lock.unlock();
+			cout << "Client[" << client_id << "]가 Stage1로 전환함." << endl;//test
+			break;
+		}
+		else if (inputkey_p->direction == 256) {
+			clients[client_id].s_lock.lock();
+			clients[client_id].curr_stage = 2;
+			clients[client_id].s_lock.unlock();
+			cout << "Client[" << client_id << "]가 Stage2로 전환함." << endl;//test
+			break;
+		}
 
+		enum InputKey { KEY_Q, KEY_E, KEY_A, KEY_D, KEY_S, KEY_W, KEY_SPACEBAR };
 		for (int i = 0; i <= 6; i++) {
 			if ((inputkey_p->direction >> i) & 1) {
 				float sign = 1.0f;					// right/up/look벡터 방향으로 움직이는지, 반대 방향으로 움직이는지
@@ -596,180 +619,203 @@ void process_packet(int client_id, char* packet)
 					sign = -1.0f;	// A는 right벡터 반대 방향으로 움직이기 때문에 -1을 곱해줍니다.
 					[[fallthrough]]
 				case KEY_D:
-					clients[client_id].s_lock.lock();
-					// yaw 설정
-					clients[client_id].yaw += sign * YAW_ROTATE_SCALAR;
-					// right, up, look 벡터 업데이트
-					clients[client_id].m_rightvec = calcRotate(basic_coordinate.right
-						, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
-					clients[client_id].m_upvec = calcRotate(basic_coordinate.up
-						, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
-					clients[client_id].m_lookvec = calcRotate(basic_coordinate.look
-						, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
-					// 키입력 시간 업데이트
-					clients[client_id].last_move_rotate_keyinput_time = chrono::system_clock::now();
+					// 1스테이지 로직
+					if (clients[client_id].curr_stage == 1) {
+						clients[client_id].s_lock.lock();
+						// yaw 설정
+						clients[client_id].yaw += sign * YAW_ROTATE_SCALAR;
+						// right, up, look 벡터 업데이트
+						clients[client_id].m_rightvec = calcRotate(basic_coordinate.right
+							, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
+						clients[client_id].m_upvec = calcRotate(basic_coordinate.up
+							, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
+						clients[client_id].m_lookvec = calcRotate(basic_coordinate.look
+							, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
+						// 키입력 시간 업데이트
+						clients[client_id].last_move_rotate_keyinput_time = chrono::system_clock::now();
 
-					clients[client_id].s_lock.unlock();
+						clients[client_id].s_lock.unlock();
 
-					// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
-					for (int j = 0; j < MAX_USER; j++) {
-						auto& pl = clients[j];
-						lock_guard<mutex> lg{ pl.s_lock };
-						if (pl.s_state == ST_INGAME)
-							pl.send_rotate_packet(client_id, TARGET_PLAYER);
+						// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
+						for (int j = 0; j < MAX_USER; j++) {
+							auto& pl = clients[j];
+							lock_guard<mutex> lg{ pl.s_lock };
+							if (pl.s_state == ST_INGAME)
+								pl.send_rotate_packet(client_id, TARGET_PLAYER);
+						}
 					}
+					// 2스테이지 로직
+					else if (clients[client_id].curr_stage == 2) {
+						// 미구현.
+					}
+
 					break;
 
 				case KEY_S:			// W, S는 엔진출력 조절 키입니다. 기체를 상승 또는 하강시킵니다.
 					sign = -1.0f;	// S는 up벡터 반대 방향으로 움직이기 때문에 -1을 곱해줍니다.
 					[[fallthrough]]
 				case KEY_W:
-					clients[client_id].s_lock.lock();
-					// 이동 계산 & 결과 업데이트
-					XMFLOAT3 move_result = calcMove(clients[client_id].pos, clients[client_id].m_upvec, ENGINE_SCALAR * sign);
-					clients[client_id].pos = move_result;
-					// 바운딩 박스 업데이트
-					clients[client_id].setBB();
-					// 키입력 시간 업데이트
-					clients[client_id].last_move_rotate_keyinput_time = chrono::system_clock::now();
-					clients[client_id].s_lock.unlock();
-
-					// 비행고도가 최저높이 아래로 내려가면 사망
-					if (clients[client_id].pos.y < FLY_MIN_HEIGHT) {
-						// HP가 0이 됩니다.
+					// 1스테이지 로직
+					if (clients[client_id].curr_stage == 1) {
 						clients[client_id].s_lock.lock();
-						clients[client_id].hp = 0;
-						clients[client_id].pos.y = 100.f;
-						if (clients[client_id].hp <= 0) {
-							clients[client_id].pl_state = PL_ST_DEAD;
-							clients[client_id].death_time = chrono::system_clock::now();
-						}
+						// 이동 계산 & 결과 업데이트
+						XMFLOAT3 move_result = calcMove(clients[client_id].pos, clients[client_id].m_upvec, ENGINE_SCALAR * sign);
+						clients[client_id].pos = move_result;
+						// 바운딩 박스 업데이트
+						clients[client_id].setBB();
+						// 키입력 시간 업데이트
+						clients[client_id].last_move_rotate_keyinput_time = chrono::system_clock::now();
 						clients[client_id].s_lock.unlock();
 
-						// 플레이어에게 데미지를 알려줍니다.
-						SC_DAMAGED_PACKET pl_damage_packet;
-						pl_damage_packet.size = sizeof(SC_DAMAGED_PACKET);
-						pl_damage_packet.type = SC_DAMAGED;
-						pl_damage_packet.target = TARGET_PLAYER;
-						pl_damage_packet.id = clients[client_id].id;
-						pl_damage_packet.dec_hp = HELI_MAXHP;
-						clients[client_id].do_send(&pl_damage_packet);
-					}
+						// 비행고도가 최저높이 아래로 내려가면 사망
+						if (clients[client_id].pos.y < FLY_MIN_HEIGHT) {
+							// HP가 0이 됩니다.
+							clients[client_id].s_lock.lock();
+							clients[client_id].hp = 0;
+							clients[client_id].pos.y = 100.f;
+							if (clients[client_id].hp <= 0) {
+								clients[client_id].pl_state = PL_ST_DEAD;
+								clients[client_id].death_time = chrono::system_clock::now();
+							}
+							clients[client_id].s_lock.unlock();
 
-					// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
-					for (int j = 0; j < MAX_USER; j++) {
-						auto& pl = clients[j];
-						lock_guard<mutex> lg{ pl.s_lock };
-						if (pl.s_state == ST_INGAME)
-							pl.send_move_packet(client_id, TARGET_PLAYER);
+							// 플레이어에게 데미지를 알려줍니다.
+							SC_DAMAGED_PACKET pl_damage_packet;
+							pl_damage_packet.size = sizeof(SC_DAMAGED_PACKET);
+							pl_damage_packet.type = SC_DAMAGED;
+							pl_damage_packet.target = TARGET_PLAYER;
+							pl_damage_packet.id = clients[client_id].id;
+							pl_damage_packet.dec_hp = HELI_MAXHP;
+							clients[client_id].do_send(&pl_damage_packet);
+						}
+						// 비행고도가 최고높이 위로는 못올라가도록 제한
+						else if (clients[client_id].pos.y > FLY_MAX_HEIGHT) {
+							clients[client_id].pos.y = FLY_MAX_HEIGHT;
+						}
+
+						// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
+						for (int j = 0; j < MAX_USER; j++) {
+							auto& pl = clients[j];
+							lock_guard<mutex> lg{ pl.s_lock };
+							if (pl.s_state == ST_INGAME)
+								pl.send_move_packet(client_id, TARGET_PLAYER);
+						}
+					}
+					// 2스테이지 로직
+					else if (clients[client_id].curr_stage == 2) {
+						// 미구현
 					}
 
 					break;
 
 				case KEY_SPACEBAR:	// 스페이스바는 공격 키입니다. 바라보는 방향으로 총을 쏩니다.
-					// bullet lock (구현 예정)
+					// 1스테이지 로직
+					if (clients[client_id].curr_stage == 1) {
+						// Bullet Cooldown Check
+						milliseconds shoot_term = duration_cast<milliseconds>(chrono::system_clock::now() - shoot_time);
+						if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) {	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
+							milliseconds left_cooldown = duration_cast<milliseconds>(milliseconds(SHOOT_COOLDOWN_BULLET) - shoot_term);
+							break;
+						}
 
-					// Bullet Cooldown Check
-					milliseconds shoot_term = duration_cast<milliseconds>(chrono::system_clock::now() - shoot_time);
-					if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) {	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
-						milliseconds left_cooldown = duration_cast<milliseconds>(milliseconds(SHOOT_COOLDOWN_BULLET) - shoot_term);
-						break;
-					}
+						// empty space check
+						int new_bullet_id = -1;
+						int arr_cnt = -1;
+						if (clients[client_id].bullet > 0) {		// 남은 총알이 있다면,
+							// Bullet Array에 비어있는 인덱스 확인
+							for (int i = 0; i < MAX_BULLET; ++i) {
+								if (bullets_arr[i].getId() == -1) {
+									new_bullet_id = i;
 
-					// empty space check
-					int new_bullet_id = -1;
-					int arr_cnt = -1;
-					if (clients[client_id].bullet > 0) {		// 남은 총알이 있다면,
-						// Bullet Array에 비어있는 인덱스 확인
-						for (int i = 0; i < MAX_BULLET; ++i) {	
-							if (bullets_arr[i].getId() == -1) {
-								new_bullet_id = i;
+									// 새로운 Bullet 생성
+									bullets_arr[new_bullet_id].m_objlock.lock();
 
-								// 새로운 Bullet 생성
-								bullets_arr[new_bullet_id].m_objlock.lock();
+									bullets_arr[new_bullet_id].setId(new_bullet_id);
+									bullets_arr[new_bullet_id].setPos(clients[client_id].pos);
+									bullets_arr[new_bullet_id].setPitch(clients[client_id].pitch);
+									bullets_arr[new_bullet_id].setYaw(clients[client_id].yaw);
+									bullets_arr[new_bullet_id].setRoll(clients[client_id].roll - 20);
+									bullets_arr[new_bullet_id].setRightvector(clients[client_id].m_rightvec);
+									bullets_arr[new_bullet_id].setUpvector(clients[client_id].m_upvec);
+									bullets_arr[new_bullet_id].setLookvector(calcRotate(clients[client_id].m_lookvec, bullets_arr[new_bullet_id].getPitch(), 0.f, 0.f));
+									bullets_arr[new_bullet_id].setOwner(client_id);
+									bullets_arr[new_bullet_id].setInitialPos(bullets_arr[new_bullet_id].getPos());
+									bullets_arr[new_bullet_id].setBB_ex(XMFLOAT3{ VULCAN_BULLET_BBSIZE_X, VULCAN_BULLET_BBSIZE_Y, VULCAN_BULLET_BBSIZE_Z });
 
-								bullets_arr[new_bullet_id].setId(new_bullet_id);
-								bullets_arr[new_bullet_id].setPos(clients[client_id].pos);
-								bullets_arr[new_bullet_id].setPitch(clients[client_id].pitch);
-								bullets_arr[new_bullet_id].setYaw(clients[client_id].yaw);
-								bullets_arr[new_bullet_id].setRoll(clients[client_id].roll - 20);
-								bullets_arr[new_bullet_id].setRightvector(clients[client_id].m_rightvec);
-								bullets_arr[new_bullet_id].setUpvector(clients[client_id].m_upvec);
-								bullets_arr[new_bullet_id].setLookvector(calcRotate(clients[client_id].m_lookvec, bullets_arr[new_bullet_id].getPitch(), 0.f, 0.f));
-								bullets_arr[new_bullet_id].setOwner(client_id);
-								bullets_arr[new_bullet_id].setInitialPos(bullets_arr[new_bullet_id].getPos());
-								bullets_arr[new_bullet_id].setBB_ex(XMFLOAT3{ VULCAN_BULLET_BBSIZE_X, VULCAN_BULLET_BBSIZE_Y, VULCAN_BULLET_BBSIZE_Z });
+									bullets_arr[new_bullet_id].m_objlock.unlock();
 
-								bullets_arr[new_bullet_id].m_objlock.unlock();
+									// shoot time update
+									shoot_time = chrono::system_clock::now();
 
-								// shoot time update
-								shoot_time = chrono::system_clock::now();
+									// 총알 하나 사용
+									clients[client_id].s_lock.lock();
+									clients[client_id].bullet -= 1;
 
-								// 총알 하나 사용
-								clients[client_id].s_lock.lock();
-								clients[client_id].bullet -= 1;
+									// 발사한 사용자에게 총알 사용했음을 알려줍니다.
+									SC_BULLET_COUNT_PACKET bullet_packet;
+									bullet_packet.size = sizeof(bullet_packet);
+									bullet_packet.type = SC_BULLET_COUNT;
+									bullet_packet.id = client_id;
+									bullet_packet.bullet_cnt = clients[client_id].bullet;
+									clients[client_id].do_send(&bullet_packet);
 
-								// 발사한 사용자에게 총알 사용했음을 알려줍니다.
-								SC_BULLET_COUNT_PACKET bullet_packet;
-								bullet_packet.size = sizeof(bullet_packet);
-								bullet_packet.type = SC_BULLET_COUNT;
-								bullet_packet.id = client_id;
-								bullet_packet.bullet_cnt = clients[client_id].bullet;
-								clients[client_id].do_send(&bullet_packet);
+									clients[client_id].s_lock.unlock();
 
-								clients[client_id].s_lock.unlock();
+									// 접속해있는 모든 클라이언트에게 새로운 Bullet정보를 보냅니다.
+									SC_ADD_OBJECT_PACKET add_bullet_packet;
+									add_bullet_packet.target = TARGET_BULLET;
+									add_bullet_packet.id = new_bullet_id;
+									strcpy_s(add_bullet_packet.name, "bullet");
+									add_bullet_packet.size = sizeof(add_bullet_packet);
+									add_bullet_packet.type = SC_ADD_OBJECT;
 
-								// 접속해있는 모든 클라이언트에게 새로운 Bullet정보를 보냅니다.
-								SC_ADD_OBJECT_PACKET add_bullet_packet;
-								add_bullet_packet.target = TARGET_BULLET;
-								add_bullet_packet.id = new_bullet_id;
-								strcpy_s(add_bullet_packet.name, "bullet");
-								add_bullet_packet.size = sizeof(add_bullet_packet);
-								add_bullet_packet.type = SC_ADD_OBJECT;
+									add_bullet_packet.x = bullets_arr[new_bullet_id].getPos().x;
+									add_bullet_packet.y = bullets_arr[new_bullet_id].getPos().y;
+									add_bullet_packet.z = bullets_arr[new_bullet_id].getPos().z;
 
-								add_bullet_packet.x = bullets_arr[new_bullet_id].getPos().x;
-								add_bullet_packet.y = bullets_arr[new_bullet_id].getPos().y;
-								add_bullet_packet.z = bullets_arr[new_bullet_id].getPos().z;
+									add_bullet_packet.right_x = bullets_arr[new_bullet_id].getRightvector().x;
+									add_bullet_packet.right_y = bullets_arr[new_bullet_id].getRightvector().y;
+									add_bullet_packet.right_z = bullets_arr[new_bullet_id].getRightvector().z;
 
-								add_bullet_packet.right_x = bullets_arr[new_bullet_id].getRightvector().x;
-								add_bullet_packet.right_y = bullets_arr[new_bullet_id].getRightvector().y;
-								add_bullet_packet.right_z = bullets_arr[new_bullet_id].getRightvector().z;
+									add_bullet_packet.up_x = bullets_arr[new_bullet_id].getUpvector().x;
+									add_bullet_packet.up_y = bullets_arr[new_bullet_id].getUpvector().y;
+									add_bullet_packet.up_z = bullets_arr[new_bullet_id].getUpvector().z;
 
-								add_bullet_packet.up_x = bullets_arr[new_bullet_id].getUpvector().x;
-								add_bullet_packet.up_y = bullets_arr[new_bullet_id].getUpvector().y;
-								add_bullet_packet.up_z = bullets_arr[new_bullet_id].getUpvector().z;
+									add_bullet_packet.look_x = bullets_arr[new_bullet_id].getLookvector().x;
+									add_bullet_packet.look_y = bullets_arr[new_bullet_id].getLookvector().y;
+									add_bullet_packet.look_z = bullets_arr[new_bullet_id].getLookvector().z;
 
-								add_bullet_packet.look_x = bullets_arr[new_bullet_id].getLookvector().x;
-								add_bullet_packet.look_y = bullets_arr[new_bullet_id].getLookvector().y;
-								add_bullet_packet.look_z = bullets_arr[new_bullet_id].getLookvector().z;
+									for (auto& pl : clients) {
+										if (pl.s_state == ST_INGAME)
+											pl.do_send(&add_bullet_packet);
+									}
+									break;
 
-								for (auto& pl : clients) {
-									if (pl.s_state == ST_INGAME)
-										pl.do_send(&add_bullet_packet);
+
 								}
-								break;
-
-								
 							}
 						}
+						else {	// 남은 탄환이 0이라면 reload
+							clients[client_id].s_lock.lock();
+
+							clients[client_id].bullet = 100;
+
+							// 발사한 사용자에게 총알 장전했음을 알려줍니다.
+							SC_BULLET_COUNT_PACKET bullet_packet;
+							bullet_packet.size = sizeof(bullet_packet);
+							bullet_packet.type = SC_BULLET_COUNT;
+							bullet_packet.id = client_id;
+							bullet_packet.bullet_cnt = clients[client_id].bullet;
+							clients[client_id].do_send(&bullet_packet);
+
+							clients[client_id].s_lock.unlock();
+						}
 					}
-					else {	// 남은 탄환이 0이라면 reload
-						clients[client_id].s_lock.lock();
-
-						clients[client_id].bullet = 100;
-
-						// 발사한 사용자에게 총알 장전했음을 알려줍니다.
-						SC_BULLET_COUNT_PACKET bullet_packet;
-						bullet_packet.size = sizeof(bullet_packet);
-						bullet_packet.type = SC_BULLET_COUNT;
-						bullet_packet.id = client_id;
-						bullet_packet.bullet_cnt = clients[client_id].bullet;
-						clients[client_id].do_send(&bullet_packet);
-
-						clients[client_id].s_lock.unlock();
+					// 2스테이지 로직
+					else if (clients[client_id].curr_stage == 2) {
+						// 미구현
 					}
 
-					// bullet unlock (구현 예정)
 					break;
 				}
 			}
@@ -787,51 +833,65 @@ void process_packet(int client_id, char* packet)
 			break;
 		}
 
-		if (rt_p->key_val == RT_LBUTTON) {			// 마우스 좌클릭 드래그
-			float rotate_scalar = 0.0f;
+		if (rt_p->key_val == RT_LBUTTON) {			// 마우스 좌클릭
+			// 1스테이지 로직
+			if (clients[client_id].curr_stage == 1) {
+				float rotate_scalar = 0.0f;
 
-			clients[client_id].s_lock.lock();
+				clients[client_id].s_lock.lock();
 
-			if (fabs(rt_p->delta_x) < fabs(rt_p->delta_y)) {	// 마우스 상,하 드래그: 기수를 조절합니다. 기체를 x축 기준 회전시킵니다.
-				rotate_scalar = -1.f * rt_p->delta_y * PITCH_ROTATE_SCALAR * SENSITIVITY;
-				if (fabs(clients[client_id].pitch + rotate_scalar) < PITCH_LIMIT) {		// 비정상적인 회전 방지
-					clients[client_id].pitch += rotate_scalar;							// pitch 설정
+				if (fabs(rt_p->delta_x) < fabs(rt_p->delta_y)) {	// 마우스 상,하 드래그: 기수를 조절합니다. 기체를 x축 기준 회전시킵니다.
+					rotate_scalar = -1.f * rt_p->delta_y * PITCH_ROTATE_SCALAR * SENSITIVITY;
+					if (fabs(clients[client_id].pitch + rotate_scalar) < PITCH_LIMIT) {		// 비정상적인 회전 방지
+						clients[client_id].pitch += rotate_scalar;							// pitch 설정
+					}
+				}
+				else {												// 마우스 좌,우 드래그: 기수의 수평을 조절합니다. 기체를 z축 기준으로 회전시킵니다.
+					rotate_scalar = -1.f * rt_p->delta_x * ROLL_ROTATE_SCALAR * SENSITIVITY;
+					if (fabs(clients[client_id].roll + rotate_scalar) < ROLL_LIMIT) {		// 비정상적인 회전 방지
+						clients[client_id].roll += rotate_scalar;							// roll 설정
+					}
+				}
+
+				// right, up, look 벡터 회전 & 업데이트
+				clients[client_id].m_rightvec = calcRotate(basic_coordinate.right, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
+				clients[client_id].m_upvec = calcRotate(basic_coordinate.up, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
+				clients[client_id].m_lookvec = calcRotate(basic_coordinate.look, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
+				//test
+				//cout << "[Mouse Input] Client[" << client_id << "]의 pitch가 " << clients[client_id].pitch <<
+				//	"로, roll이 " << clients[client_id].roll << "로 변경되었습니다." << endl;
+				//cout << "Right: " << clients[client_id].m_rightvec.x << ", " << clients[client_id].m_rightvec.y << ", " << clients[client_id].m_rightvec.z << endl;
+				//cout << "Up: "    << clients[client_id].m_upvec.x    << ", " << clients[client_id].m_upvec.y    << ", " << clients[client_id].m_upvec.z    << endl;
+				//cout << "Look: "  << clients[client_id].m_lookvec.x  << ", " << clients[client_id].m_lookvec.y  << ", " << clients[client_id].m_lookvec.z  << endl;
+				//cout << endl;
+
+				// 키입력 시간 업데이트
+				clients[client_id].last_move_rotate_keyinput_time = chrono::system_clock::now();
+				clients[client_id].s_lock.unlock();
+
+				// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
+				for (auto& send_target : clients) {
+					lock_guard<mutex> lg{ send_target.s_lock };
+					if (send_target.s_state == ST_INGAME) {
+						send_target.send_rotate_packet(client_id, TARGET_PLAYER);
+					}
 				}
 			}
-			else {												// 마우스 좌,우 드래그: 기수의 수평을 조절합니다. 기체를 z축 기준으로 회전시킵니다.
-				rotate_scalar = -1.f * rt_p->delta_x * ROLL_ROTATE_SCALAR * SENSITIVITY;
-				if (fabs(clients[client_id].roll + rotate_scalar) < ROLL_LIMIT) {		// 비정상적인 회전 방지
-					clients[client_id].roll += rotate_scalar;							// roll 설정
-				}
+			// 2스테이지 로직
+			else if (clients[client_id].curr_stage == 2) {
+				// 미구현
 			}
 
-			// right, up, look 벡터 회전 & 업데이트
-			clients[client_id].m_rightvec = calcRotate(basic_coordinate.right, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
-			clients[client_id].m_upvec = calcRotate(basic_coordinate.up, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
-			clients[client_id].m_lookvec = calcRotate(basic_coordinate.look, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
-			//test
-			//cout << "[Mouse Input] Client[" << client_id << "]의 pitch가 " << clients[client_id].pitch <<
-			//	"로, roll이 " << clients[client_id].roll << "로 변경되었습니다." << endl;
-			//cout << "Right: " << clients[client_id].m_rightvec.x << ", " << clients[client_id].m_rightvec.y << ", " << clients[client_id].m_rightvec.z << endl;
-			//cout << "Up: "    << clients[client_id].m_upvec.x    << ", " << clients[client_id].m_upvec.y    << ", " << clients[client_id].m_upvec.z    << endl;
-			//cout << "Look: "  << clients[client_id].m_lookvec.x  << ", " << clients[client_id].m_lookvec.y  << ", " << clients[client_id].m_lookvec.z  << endl;
-			//cout << endl;
-
-			// 키입력 시간 업데이트
-			clients[client_id].last_move_rotate_keyinput_time = chrono::system_clock::now();
-			clients[client_id].s_lock.unlock();
-
-			// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
-			for (auto& send_target : clients) {
-				lock_guard<mutex> lg{ send_target.s_lock };
-				if (send_target.s_state == ST_INGAME) {
-					send_target.send_rotate_packet(client_id, TARGET_PLAYER);
-				}
-			}
 		}
 		else if (rt_p->key_val == RT_RBUTTON) {		// 마우스 우클릭 드래그: 기능 미정.
-			//clients[client_id].s_lock.lock();
-			//clients[client_id].s_lock.unlock();
+			// 1스테이지 로직
+			if (clients[client_id].curr_stage == 1) {
+
+			}
+			// 2스테이지 로직
+			else if (clients[client_id].curr_stage == 2) {
+
+			}
 		}
 
 		break;
@@ -1024,9 +1084,18 @@ void do_worker()
 				SOCKET c_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
 				int client_id = get_new_client_id();
 				if (client_id != -1) {
+					// 서버구동 이후 첫번째 클라이언트의 접속
+					if (b_isfirstplayer) {
+						cout << "서버 시간이 흐르기 시작합니다.\n" << endl;
+						g_s_start_time = system_clock::now();
+						b_isfirstplayer = false;
+					}
+					// 클라이언트 id, 소켓
+					clients[client_id].s_lock.lock();
 					clients[client_id].id = client_id;
 					clients[client_id].remain_size = 0;
 					clients[client_id].socket = c_socket;
+					clients[client_id].s_lock.unlock();
 					int new_key = client_id + CP_KEY_LOGIC2CLIENT;
 					CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), h_iocp, new_key, 0);
 					clients[client_id].do_recv();
@@ -1164,6 +1233,22 @@ void do_worker()
 void timerFunc() {
 	while (true) {
 		auto start_t = system_clock::now();
+
+		// 서버 시간 업데이트
+		if (b_active_server && !b_isfirstplayer) {
+			servertime_lock.lock();
+			g_curr_servertime = duration_cast<milliseconds>(start_t - g_s_start_time);
+			servertime_lock.unlock();
+			for (auto& cl : clients) {
+				if (cl.s_state != ST_INGAME) continue;
+				SC_TIME_TICKING_PACKET ticking_packet;
+				ticking_packet.size = sizeof(SC_TIME_TICKING_PACKET);
+				ticking_packet.type = SC_TIME_TICKING;
+				ticking_packet.servertime_ms = static_cast<int>(g_curr_servertime.count());
+				cl.do_send(&ticking_packet);
+			}
+		}
+
 		// Helicopter
 		for (auto& mv_target : clients) {
 			if (mv_target.s_state != ST_INGAME) continue;
@@ -1373,9 +1458,9 @@ void timerFunc() {
 					mv_target.pl_state = PL_ST_ALIVE;
 					mv_target.hp = 100;
 					mv_target.bullet = 100;
-					mv_target.pos.x = 512 + mv_target.id * 50;
-					mv_target.pos.y = 400;
-					mv_target.pos.z = 350 - mv_target.id * 50;
+					mv_target.pos.x = RESPAWN_POS_X + mv_target.id * 50;
+					mv_target.pos.y = RESPAWN_POS_Y;
+					mv_target.pos.z = RESPAWN_POS_Z - mv_target.id * 50;
 					mv_target.pitch = mv_target.yaw = mv_target.roll = 0.0f;
 					mv_target.m_rightvec = basic_coordinate.right;
 					mv_target.m_upvec = basic_coordinate.up;
@@ -1683,6 +1768,7 @@ void MoveNPC()
 		if (curr_t - start_t < 500ms)
 			this_thread::sleep_for(500ms - (curr_t - start_t));
 		start_t = curr_t;
+
 		for (int i = 0; i < MAX_NPCS; ++i) {
 			// 클라이언트들과 NPC 사이의 거리 계산
 			for (auto& cl : clients) {
@@ -1724,9 +1810,10 @@ void MoveNPC()
 
 			for (auto& send_target : clients) {
 				lock_guard<mutex> lg{ send_target.s_lock };
-				if (send_target.s_state == ST_INGAME) {
-					send_target.do_send(&npc_update_packet);
-				}
+				if (send_target.s_state != ST_INGAME) continue;
+				if (send_target.curr_stage != 1) continue;		// 임시코드.
+
+				send_target.do_send(&npc_update_packet);
 			}
 		}
 	}
@@ -1735,6 +1822,8 @@ void MoveNPC()
 
 int main(int argc, char* argv[])
 {
+	b_isfirstplayer = true;
+
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);

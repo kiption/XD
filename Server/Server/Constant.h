@@ -11,8 +11,8 @@
 #define MOVE_SCALAR_FB 4.0f			// 이동 힘 (앞뒤)
 #define MOVE_SCALAR_LR 1.4f			// 이동 힘 (좌우)
 
-#define FLY_MIN_HEIGHT 100.f		// 비행가능한 최저높이
-#define FLY_MAX_HEIGHT 2000.f		// 비행가능한 최고높이
+#define FLY_MIN_HEIGHT 20.f		// 비행가능한 최저높이
+#define FLY_MAX_HEIGHT 330.f		// 비행가능한 최고높이
 
 #define ENGINE_SCALAR 0.5f			// 헬기 엔진 출력 (상승, 하강 정도조절)
 
@@ -66,4 +66,8 @@
 
 #define AUTO_LEVELOFF_TIME 3000			// 몇 초(ms)동안 키입력이 없어야 자동 수평비행 전환이 되는가
 #define RESPAWN_TIME 5000				// 리스폰 시간 (ms)
+
+#define RESPAWN_POS_X 512				// clientID * 50 씩 더해주면됨.
+#define RESPAWN_POS_Y 100
+#define RESPAWN_POS_Z 350				// clientID * 50 씩 빼주면됨.
 

@@ -9,7 +9,8 @@
 #include "Stage1.h"
 #include "Stage2.h"
 
-#include <queue> //S
+//==== S
+#include <queue>
 enum MButton { L_BUTTON, R_BUTTON };
 #include "GameSound.h"
 
@@ -17,7 +18,7 @@ struct MouseInputVal {
 	char button;
 	float delX, delY;
 };
-//S
+//==== S
 #define KEY_A         0x41
 #define KEY_D         0x44
 #define KEY_S         0x53
