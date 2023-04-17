@@ -100,7 +100,7 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 1.0f, +1.5f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f,2.6f, 0.5f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -120,7 +120,7 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	default:
 		break;
 	}
-	m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
+	m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z), m_pCamera->GetOffset()));
 	Update(fTimeElapsed);
 
 	return(m_pCamera);
@@ -190,10 +190,13 @@ void HeliPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 	{
 		xmf3CameraPosition.y = fHeight;
 		m_pCamera->SetPosition(xmf3CameraPosition);
-		if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA)
+		if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA || m_pCamera->GetMode() == SPACESHIP_CAMERA)
 		{
 			CThirdPersonCamera* p3rdPersonCamera = (CThirdPersonCamera*)m_pCamera;
 			p3rdPersonCamera->SetLookAt(GetPosition());
+
+			CSpaceShipCamera* p2rdPersonCamera = (CSpaceShipCamera*)m_pCamera;
+			p2rdPersonCamera->SetLookAt(GetPosition());
 		}
 	}
 }
@@ -207,12 +210,6 @@ void HeliPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 
 void HeliPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
-	//if (dwDirection)
-	//{
-	//	m_pSkinnedAnimationController->SetTrackEnable(0, true);
-	//	//m_pSkinnedAnimationController->SetTrackEnable(1, true);
-	//}
-
 	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
 }
 
@@ -221,14 +218,4 @@ void HeliPlayer::Update(float fTimeElapsed)
 {
 	CPlayer::Update(fTimeElapsed);
 
-	//if (m_pSkinnedAnimationController)
-	//{
-	//	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-	//	if (::IsZero(fLength))
-	//	{
-	//		m_pSkinnedAnimationController->SetTrackEnable(0, true);
-	//		//m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	//		m_pSkinnedAnimationController->SetTrackPosition(0, 0.0f);
-	//	}
-	//}
 }

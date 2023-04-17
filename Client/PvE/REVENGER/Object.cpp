@@ -1404,7 +1404,7 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 	int nFrame = 0, nTextures = 0;
 
 	CGameObject* pGameObject = new CGameObject();
-
+	CObjectsShader* pObjectShader = new CObjectsShader();
 	for (; ; )
 	{
 		::ReadStringFromFile(pInFile, pstrToken);
@@ -1430,9 +1430,12 @@ CGameObject* CGameObject::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, I
 		}
 		else if (!strcmp(pstrToken, "<Mesh>:"))
 		{
+		
 			CStandardMesh* pMesh = new CStandardMesh(pd3dDevice, pd3dCommandList);
 			pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
 			pGameObject->SetMesh(pMesh);
+			
+		
 		}
 		else if (!strcmp(pstrToken, "<SkinningInfo>:"))
 		{

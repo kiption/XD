@@ -16,14 +16,12 @@ CObjectsShader::~CObjectsShader()
 
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nObjects = 21;
+	m_nObjects = 19;
 	m_ppObjects = new CGameObject * [m_nObjects];
-
-	CShadowMapShader* pShadowMapShader = new CShadowMapShader(this);
-
 
 	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 1000.0, 0.0f, _PLANE_HEIGHT + 1000.0, 0.0f, 0.0f, 0.0f);
 	CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 100.0f, 100.0f, 100.0f);
+
 
 	CMaterial* pPlaneMaterial = new CMaterial(3);
 	pPlaneMaterial->SetReflection(3);
@@ -33,8 +31,6 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[0]->SetMesh(pPlaneMesh);
 	m_ppObjects[0]->SetMaterial(pPlaneMaterial);
 	m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 0.0, 100.0f));
-
-	
 
 	CMaterial* pPlaneMaterial2 = new CMaterial(1);
 	pPlaneMaterial2->SetReflection(1);
@@ -106,42 +102,37 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[13] = m_ppNpcObjects[3];
 	m_ppObjects[14] = m_ppNpcObjects[4];
 
-	CMaterial* pCityMaterial = new CMaterial(3);
-	pCityMaterial->SetReflection(3);
+	CMaterial* pCityMaterial = new CMaterial(6);
+	pCityMaterial->SetReflection(6);
 
-	int Cities = 6;
+	int Cities = 4;
 	m_ppCityGameObjects = new CGameObject * [Cities];
 
 	for (int i = 0; i < Cities; i++)
 	{
-
-		m_ppCityGameObjects[i] = new CGameObject(3);
-		CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1.bin", pShadowMapShader);
+		m_ppCityGameObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1.bin", NULL);
 		m_ppCityGameObjects[i]->SetChild(pGeneratorModel, false);
 		m_ppCityGameObjects[i]->SetMaterial(pCityMaterial);
 		m_ppCityGameObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-		m_ppCityGameObjects[i]->SetScale(2.5, 2.5, 2.5);
+		m_ppCityGameObjects[i]->SetScale(4.5, 4.5, 4.5);
 		m_ppCityGameObjects[i]->OnPrepareAnimate();
 		pGeneratorModel->AddRef();
 	}
-
 
 	m_ppObjects[15] = m_ppCityGameObjects[0];
 	m_ppObjects[16] = m_ppCityGameObjects[1];
 	m_ppObjects[17] = m_ppCityGameObjects[2];
 	m_ppObjects[18] = m_ppCityGameObjects[3];
-	m_ppObjects[19] = m_ppCityGameObjects[4];
-	m_ppObjects[20] = m_ppCityGameObjects[5];
 
-	m_ppObjects[15]->SetPosition(-150.0, 20.0, -550.0);
-	m_ppObjects[16]->SetPosition(550.0, 20.0, -400.0);
-	m_ppObjects[17]->SetPosition(250.0, 20.0, -200.0);
-	m_ppObjects[18]->SetPosition(950.0, 20.0, 670.0);
-	m_ppObjects[19]->SetPosition(-150.0, 20.0,980.0);
-	m_ppObjects[20]->SetPosition(1200.0, 20.0, 300.0);
+
+	m_ppObjects[15]->SetPosition(550.0, 22.0, -550.0);
+	m_ppObjects[16]->SetPosition(-550.0, 22.0, 550.0);
+	m_ppObjects[17]->SetPosition(250.0, 22.0, -200.0);
+	m_ppObjects[18]->SetPosition(950.0, 22.0, 670.0);
+
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	
 }
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
@@ -174,7 +165,7 @@ void CObjectsShader::ReleaseUploadBuffers()
 void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
 	CIlluminatedShader::Render(pd3dCommandList, pCamera, nPipelineState);
-	//m_pMapShader->Render(pd3dCommandList, pCamera);
+
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
@@ -212,6 +203,22 @@ CShadowMapShader::CShadowMapShader(CObjectsShader* pObjectsShader)
 
 CShadowMapShader::~CShadowMapShader()
 {
+}
+
+D3D12_INPUT_LAYOUT_DESC CShadowMapShader::CreateInputLayout(int nPipelineState)
+{
+	UINT nInputElementDescs = 3;
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[2] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+
+	return(d3dInputLayoutDesc);
 }
 
 
@@ -287,10 +294,10 @@ void CShadowMapShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	m_pDepthTexture = (CTexture*)pContext;
 	m_pDepthTexture->AddRef();
-	SceneManager* m_pScene = NULL;
-	//SceneManager::CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, m_pDepthTexture->GetTextures());
+	SceneManager* m_pScene =NULL;
+	//m_pScene->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, m_pDepthTexture->GetTextures());
+	//SceneManager::CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100);
 	SceneManager::CreateShaderResourceViews(pd3dDevice, m_pDepthTexture, 0, 22);
-
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }

@@ -256,7 +256,7 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 	float3 vCameraPosition = float3(gvCameraPosition.x, gvCameraPosition.y, gvCameraPosition.z);
 	float3 vToCamera = normalize(vCameraPosition - vPosition);
 
-	float4 cColor = float4(0.3f, 0.3f, 0.3f, 1.0f);
+	float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	[unroll]
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{

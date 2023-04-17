@@ -436,7 +436,7 @@ void process_packet(int client_id, char* packet)
 		// 새로 접속한 플레이어의 초기 정보를 설정합니다.
 		clients[client_id].pl_state = PL_ST_ALIVE;
 		clients[client_id].pos.x = 512 + client_id * 50;
-		clients[client_id].pos.y = 300;
+		clients[client_id].pos.y = 100;
 		clients[client_id].pos.z = 350 - client_id * 50;
 
 		clients[client_id].pitch = clients[client_id].yaw = clients[client_id].roll = 0.0f;
