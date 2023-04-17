@@ -846,11 +846,11 @@ void CGameFramework::FrameAdvance()
 		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2BHPPoint, &d2BHPRect);
 
 		D2D_POINT_2F d2T_M2Point = { 560.0f, 50.0f };
-		D2D_RECT_F d2T_M2Rect = { m_time * 40.0f , 0.0f, 40.0f + m_time * 40.0f, 50.0f };
+		D2D_RECT_F d2T_M2Rect = { m_10MinOfTime * 40.0f , 0.0f, 40.0f + m_10MinOfTime * 40.0f, 50.0f };
 		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[2] : m_pd2dfxGaussianBlur[2], &d2T_M2Point, &d2T_M2Rect);
 
 		D2D_POINT_2F d2T_M1Point = { 590.0f, 50.0f };
-		D2D_RECT_F d2T_M1Rect = { m_time * 40.0f , 0.0f, 40.0f + m_time * 40.0f, 50.0f };
+		D2D_RECT_F d2T_M1Rect = { m_1MinOfTime * 40.0f , 0.0f, 40.0f + m_1MinOfTime * 40.0f, 50.0f };
 		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[3] : m_pd2dfxGaussianBlur[3], &d2T_M1Point, &d2T_M1Rect);
 
 		D2D_POINT_2F d2T_SectionPoint = { 620.0f, 50.0f };
@@ -858,11 +858,11 @@ void CGameFramework::FrameAdvance()
 		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[4] : m_pd2dfxGaussianBlur[4], &d2T_SectionPoint, &d2T_SectionRect);
 
 		D2D_POINT_2F d2T_S2Point = { 650.0f, 50.0f };
-		D2D_RECT_F d2T_S2Rect = { m_time * 40.0f , 0.0f, 40.0f + m_time * 40.0f, 50.0f };
+		D2D_RECT_F d2T_S2Rect = { m_10SecOftime * 40.0f , 0.0f, 40.0f + m_10SecOftime * 40.0f, 50.0f };
 		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[5] : m_pd2dfxGaussianBlur[5], &d2T_S2Point, &d2T_S2Rect);
 
 		D2D_POINT_2F d2T_S1Point = { 680.0f, 50.0f };
-		D2D_RECT_F d2T_S1Rect = { m_time * 40.0f , 0.0f, 40.0f + m_time * 40.0f, 50.0f };
+		D2D_RECT_F d2T_S1Rect = { m_1SecOfTime * 40.0f , 0.0f, 40.0f + m_1SecOfTime * 40.0f, 50.0f };
 		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[6] : m_pd2dfxGaussianBlur[6], &d2T_S1Point, &d2T_S1Rect);
 
 		D2D_POINT_2F d2d_BulletPoint = { 1000.0f, 680.0f };

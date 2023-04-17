@@ -181,7 +181,10 @@ public:
 	WCHAR m_myhp[20];
 
 	int m_currHp;
-	int m_time;
+	int m_10MinOfTime;
+	int m_1MinOfTime;
+	int m_10SecOftime;
+	int m_1SecOfTime;
 	//==================================================
 
 	//==================================================

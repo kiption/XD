@@ -353,7 +353,7 @@ void processPacket(char* ptr)
 		SC_TIME_TICKING_PACKET* recv_packet = reinterpret_cast<SC_TIME_TICKING_PACKET*>(ptr);
 
 		servertime_ms = recv_packet->servertime_ms;
-		servertime_sec = servertime_ms * 1000;
+		servertime_sec = servertime_ms / 1000;
 	}//SC_TIME_TICKING case end
 	case SC_ACTIVE_DOWN:
 	{
