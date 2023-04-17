@@ -1,8 +1,9 @@
 #pragma once
 #include "Scene.h"
-
+#include "SpriteAnimationBillboard.h"
 class Player;
 class CHumanPlayer;
+
 class Stage1 : public SceneManager
 {
 public:
@@ -72,9 +73,11 @@ public:
 	int									m_nShaders = 0;
 	CShader** m_ppShaders = NULL;
 	int									m_nBillboardShaders = 0;
-	BillboardParticleShader** m_pBillboardShader = NULL;
+	BillboardShader** m_pBillboardShader = NULL;
 	bool Start = false;
 
+	int m_nSpriteBillboards = 0;
+	SpriteAnimationBillboard** m_ppSpriteBillboard = NULL;
 	CSkyBox* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;
 

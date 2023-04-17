@@ -27,7 +27,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights = new LIGHTS[m_nLights];
 	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
 
-
+	m_xmf4GlobalAmbient = XMFLOAT4(0.15,0.15,0.15,0.5);
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[0].m_fRange = 3000.0f;
@@ -186,7 +186,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 76); //SuperCobra(17), Gunship(2), Player:Mi24(1), Angrybot()
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 76); //SuperCobra(17), Gunship(2), Player:Mi24(1), Angrybot()
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
@@ -204,13 +204,29 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	//m_pTerrain->m_xmf4x4World._42 = -50.0f;
 	//m_pTerrain->m_xmf4x4World._43 = -3500.0f;
 
-	m_nBillboardShaders = 1;
-	m_pBillboardShader = new BillboardParticleShader * [m_nBillboardShaders];
+	m_nBillboardShaders = 2;
+	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
 	BillboardParticleShader* pBillboardParticleShader = new BillboardParticleShader();
 	pBillboardParticleShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pBillboardParticleShader->SetCurScene(SCENE1STAGE);
 	pBillboardParticleShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[0] = pBillboardParticleShader;
+
+	SpriteAnimationBillboard* pSpriteAnimationBillboard = new SpriteAnimationBillboard();
+	pSpriteAnimationBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	pSpriteAnimationBillboard->SetCurScene(SCENE1STAGE);
+	pSpriteAnimationBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	pSpriteAnimationBillboard->SetActive(false);
+	m_pBillboardShader[1] = pSpriteAnimationBillboard;
+
+	m_nSpriteBillboards = 1;
+	m_ppSpriteBillboard = new SpriteAnimationBillboard * [m_nSpriteBillboards];
+	SpriteAnimationBillboard* pSpriteAnimationBillboard2 = new SpriteAnimationBillboard();
+	pSpriteAnimationBillboard2->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	pSpriteAnimationBillboard2->SetCurScene(SCENE1STAGE);
+	pSpriteAnimationBillboard2->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+
+	m_ppSpriteBillboard[0] = pSpriteAnimationBillboard2;
 
 	m_nFragShaders = 1;
 	m_ppFragShaders = new CFragmentsShader * [m_nFragShaders];
@@ -275,6 +291,16 @@ void Stage1::ReleaseObjects()
 			m_pBillboardShader[i]->Release();
 		}
 		delete[] m_pBillboardShader;
+	}
+	if (m_ppSpriteBillboard)
+	{
+		for (int i = 0; i < m_nSpriteBillboards; i++)
+		{
+			m_ppSpriteBillboard[i]->ReleaseShaderVariables();
+			m_ppSpriteBillboard[i]->ReleaseObjects();
+			m_ppSpriteBillboard[i]->Release();
+		}
+		delete[] m_ppSpriteBillboard;
 	}
 	if (m_ppShaders)
 	{
@@ -638,6 +664,8 @@ void Stage1::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256ÀÇ ¹è¼ö
 	m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbMaterialBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbMaterials->Map(0, NULL, (void**)&m_pcbMappedMaterials);
+
+
 }
 
 void Stage1::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -670,6 +698,7 @@ void Stage1::ReleaseUploadBuffers()
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->ReleaseUploadBuffers();
 
 }
@@ -738,7 +767,17 @@ bool Stage1::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 {
 	switch (nMessageID)
 	{
-	case WM_KEYDOWN:
+	case WM_KEYDOWN :
+		switch (wParam)
+		{
+		case VK_CONTROL:
+			break;
+		case 'F':
+			m_pBillboardShader[1]->SetActive(!m_pBillboardShader[1]->GetActive());
+			break;
+		default:
+			break;
+		}
 		break;
 	default:
 		break;
@@ -755,6 +794,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
+	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();
@@ -800,6 +840,7 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) m_ppBullets[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->Render(pd3dCommandList, pCamera, 0);
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
+	//for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);

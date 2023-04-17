@@ -17,7 +17,11 @@ public:
 
 private:
 	int									m_nReferences = 0;
-
+protected:
+	bool							m_bActive = true;
+public:
+	void SetActive(bool bActive) { m_bActive = bActive; }
+	bool GetActive() { return(m_bActive); }
 public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }

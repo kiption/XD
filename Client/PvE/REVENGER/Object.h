@@ -33,9 +33,14 @@ struct EXPLOSIONMATERIAL
 	XMFLOAT4						m_xmf4Emissive;
 };
 
-struct CB_STREAMGAMEOBJECT_INFO
+struct CB_GAMEOBJECT_INFO
 {
 	XMFLOAT4X4						m_xmf4x4World;
+	EXPLOSIONMATERIAL				m_material;
+
+	XMFLOAT4X4						m_xmf4x4Texture;
+	XMINT2							m_xmi2TextureTiling;
+	XMFLOAT2						m_xmf2TextureOffset;
 };
 class CShader;
 class CStandardShader;
@@ -44,7 +49,7 @@ class CPlayer;
 class CTexture
 {
 public:
-	CTexture(int nTextureResources, UINT nResourceType, int nSamplers, int nRootParameters);
+	CTexture(int nTextureResources, UINT nResourceType, int nSamplers, int nRootParameters, int nRows = 1, int nCols = 1);
 	virtual ~CTexture();
 
 private:
@@ -68,6 +73,13 @@ private:
 
 	int								m_nSamplers = 0;
 	D3D12_GPU_DESCRIPTOR_HANDLE* m_pd3dSamplerGpuDescriptorHandles = NULL;
+
+	int 							m_nRow = 0;
+	int 							m_nCol = 0;
+
+public:
+	int 							m_nRows = 1;
+	int 							m_nCols = 1;
 
 	XMFLOAT4X4						m_xmf4x4Texture;
 
@@ -105,6 +117,9 @@ public:
 	void CreateBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nElements, UINT nStride, DXGI_FORMAT dxgiFormat, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, UINT nIndex);
 
 	void ReleaseUploadBuffers();
+
+	virtual void Animate(float fTimeElapsed) {};
+	void AnimateRowColumn(float fTime = 0.0f);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -398,7 +413,7 @@ public:
 	BoundingBox						m_xmBoundingBox;
 public:
 	ID3D12Resource* m_pd3dcbGameObject = NULL;
-	CB_STREAMGAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
+	CB_GAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;
 public:
 	float m_fMovingSpeed = 0.0f;
 	float m_fMovingRange = 0.0f;

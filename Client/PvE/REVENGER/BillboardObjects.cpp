@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "BillboardObjects.h"
 #include "Shader.h"
-
+#include "Scene.h"
 CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
 {
 }
@@ -63,4 +63,103 @@ void CBillboardParticleObject::Animate(float fTimeElapsed)
 		m_xmf4x4ToParent._43 = newPosition.z;
 	}*/
 	CGameObject::Animate(fTimeElapsed);
+}
+
+CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
+{
+}
+
+CMultiSpriteObject::~CMultiSpriteObject()
+{
+}
+
+void CMultiSpriteObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
+	m_pd3dcbGameObject = ::CreateBufResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+	m_pd3dcbGameObject->Map(0, NULL, (void**)&m_pcbMappedGameObject);
+	CGameObject::CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CMultiSpriteObject::ReleaseShaderVariables()
+{
+	if (m_pd3dcbGameObject)
+	{
+		m_pd3dcbGameObject->Unmap(0, NULL);
+		m_pd3dcbGameObject->Release();
+	}
+	CGameObject::ReleaseShaderVariables();
+}
+
+void CMultiSpriteObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
+{
+	CGameObject::UpdateShaderVariable(pd3dCommandList, pxmf4x4World);
+	SceneManager* pScene = NULL;
+	if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+}
+
+void CMultiSpriteObject::Animate(float fTimeElapsed)
+{
+	for (int i = 0; i < m_nMaterials; i++)
+	{
+		if (m_ppMaterials[i] && m_ppMaterials[i]->m_pTexture)
+		{
+			m_fTime += fTimeElapsed * 0.5f;
+			if (m_fTime >= m_fSpeed) m_fTime = 0.0f;
+			m_ppMaterials[i]->m_pTexture->AnimateRowColumn(m_fTime);
+		}
+	}
+
+	CGameObject::Animate(fTimeElapsed);
+}
+
+void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	//OnPrepareRender();
+
+	SceneManager* pScene = NULL;
+	
+		if (m_nMaterials > 0)
+		{
+			for (int i = 0; i < m_nMaterials; i++)
+			{
+				if (m_ppMaterials[i])
+				{
+					if (m_ppMaterials[i]->m_pShader) {
+						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0);
+						UpdateShaderVariables(pd3dCommandList);
+					}
+					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+
+					if (m_ppMaterials[i]->m_pTexture)
+					{
+						m_ppMaterials[i]->m_pTexture->UpdateShaderVariables(pd3dCommandList);
+						if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&m_ppMaterials[i]->m_pTexture->m_xmf4x4Texture)));
+
+					}
+				}
+				pd3dCommandList->SetGraphicsRootDescriptorTable(19, pScene->m_d3dCbvGPUDescriptorNextHandle);
+				m_pMesh->Render(pd3dCommandList, i);
+			}
+
+		}
+		else
+		{
+			if ((m_nMaterials == 1) && (m_ppMaterials[0]))
+			{
+				if (m_ppMaterials[0]->m_pShader) m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera, 0);
+				m_ppMaterials[0]->UpdateShaderVariable(pd3dCommandList);
+			}
+			pd3dCommandList->SetGraphicsRootDescriptorTable(19, pScene->m_d3dCbvGPUDescriptorNextHandle);
+			if (m_ppMeshes)
+			{
+				for (int i = 0; i < m_nMeshes; i++)
+				{
+					if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList);
+				}
+			}
+		}
+		CGameObject::Render(pd3dCommandList, pCamera);
+
 }

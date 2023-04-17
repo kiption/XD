@@ -1,6 +1,6 @@
 #pragma once
 #include "Object.h"
-
+class SceneManager;
 class CBillboardObject : public CGameObject
 {
 public:
@@ -25,6 +25,21 @@ public:
 
 	float m_fRotationAngle = 0.0f;
 	float m_fRotationDelta = 1.0f;
+	float m_fSpeed = 0.1f;
+	float m_fTime = 0.0f;
+};
+class CMultiSpriteObject : public CGameObject
+{
+public:
+	CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CMultiSpriteObject();
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
+
+	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
+	virtual void Animate(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+
 	float m_fSpeed = 0.1f;
 	float m_fTime = 0.0f;
 };

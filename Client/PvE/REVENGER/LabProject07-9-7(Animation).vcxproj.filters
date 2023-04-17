@@ -172,14 +172,17 @@
     <ClInclude Include="Terrain.h">
       <Filter>Client\Object\Header</Filter>
     </ClInclude>
-    <ClInclude Include="GameFramework.h">
-      <Filter>Client\GameTime</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\Server\RelayServer\Protocol.h">
       <Filter>Server</Filter>
     </ClInclude>
     <ClInclude Include="mfplay.h">
       <Filter>Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="GameFramework.h">
+      <Filter>Client\FrameWork</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteAnimationBillboard.h">
+      <Filter>Client\Shader\Header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -287,6 +290,9 @@
     </ClCompile>
     <ClCompile Include="IlluminateMesh.cpp">
       <Filter>Client\Mesh\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteAnimationBillboard.cpp">
+      <Filter>Client\Shader\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

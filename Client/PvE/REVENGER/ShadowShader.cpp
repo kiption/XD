@@ -297,7 +297,7 @@ void CShadowMapShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	SceneManager* m_pScene =NULL;
 	//m_pScene->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, m_pDepthTexture->GetTextures());
 	//SceneManager::CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100);
-	SceneManager::CreateShaderResourceViews(pd3dDevice, m_pDepthTexture, 0, 22);
+	m_pScene->CreateShaderResourceViews(pd3dDevice, m_pDepthTexture, 0, 22);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }

@@ -6,44 +6,44 @@
 
 CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles) : CGameObject(1)
 {
-	CParticleMesh* pMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, fLifetime, xmf3Acceleration, xmf3Color, xmf2Size, nMaxParticles);
-	SetMesh(pMesh);
+	//CParticleMesh* pMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, fLifetime, xmf3Acceleration, xmf3Color, xmf2Size, nMaxParticles);
+	//SetMesh(pMesh);
 
-	CTexture* pParticleTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	pParticleTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/RoundSoftParticle.dds", RESOURCE_TEXTURE2D, 0);
+	//CTexture* pParticleTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	//pParticleTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/RoundSoftParticle.dds", RESOURCE_TEXTURE2D, 0);
 
-	CMaterial* pMaterial = new CMaterial(1);
-	pMaterial->SetTextures(pParticleTexture);  // D
+	//CMaterial* pMaterial = new CMaterial(1);
+	//pMaterial->SetTextures(pParticleTexture);  // D
 
-	srand((unsigned)time(NULL));
-	XMFLOAT4* pxmf4RandomValues = new XMFLOAT4[1024];
-	for (int i = 0; i < 1024; i++) { pxmf4RandomValues[i].x = float((rand() % 10000) - 5000) / 5000.0f; pxmf4RandomValues[i].y = float((rand() % 10000) - 5000) / 5000.0f; pxmf4RandomValues[i].z = float((rand() % 10000) - 5000) / 5000.0f; pxmf4RandomValues[i].w = float((rand() % 10000) - 5000) / 5000.0f; }
-	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
-	m_pRandowmValueTexture = new CTexture(1, RESOURCE_TEXTURE1D, 0, 1);
-	//	m_pRandowmValueTexture = new CTexture(1, RESOURCE_BUFFER, 0, 1);
-	m_pRandowmValueTexture->CreateBuffer(pd3dDevice, pd3dCommandList, pxmf4RandomValues, 1024, sizeof(XMFLOAT4), DXGI_FORMAT_R32G32B32A32_FLOAT, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, 0);
+	//srand((unsigned)time(NULL));
+	//XMFLOAT4* pxmf4RandomValues = new XMFLOAT4[1024];
+	//for (int i = 0; i < 1024; i++) { pxmf4RandomValues[i].x = float((rand() % 10000) - 5000) / 5000.0f; pxmf4RandomValues[i].y = float((rand() % 10000) - 5000) / 5000.0f; pxmf4RandomValues[i].z = float((rand() % 10000) - 5000) / 5000.0f; pxmf4RandomValues[i].w = float((rand() % 10000) - 5000) / 5000.0f; }
+	//DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
+	//m_pRandowmValueTexture = new CTexture(1, RESOURCE_TEXTURE1D, 0, 1);
+	////	m_pRandowmValueTexture = new CTexture(1, RESOURCE_BUFFER, 0, 1);
+	//m_pRandowmValueTexture->CreateBuffer(pd3dDevice, pd3dCommandList, pxmf4RandomValues, 1024, sizeof(XMFLOAT4), DXGI_FORMAT_R32G32B32A32_FLOAT, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, 0);
 
-	m_pRandowmValueOnSphereTexture = new CTexture(1, RESOURCE_TEXTURE1D, 0, 1);
-	m_pRandowmValueOnSphereTexture->CreateBuffer(pd3dDevice, pd3dCommandList, pxmf4RandomValues, 256, sizeof(XMFLOAT4), DXGI_FORMAT_R32G32B32A32_FLOAT, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, 0);
+	//m_pRandowmValueOnSphereTexture = new CTexture(1, RESOURCE_TEXTURE1D, 0, 1);
+	//m_pRandowmValueOnSphereTexture->CreateBuffer(pd3dDevice, pd3dCommandList, pxmf4RandomValues, 256, sizeof(XMFLOAT4), DXGI_FORMAT_R32G32B32A32_FLOAT, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, 0);
 
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	//CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	ParticleShader* pShader = new ParticleShader();
-	pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
-		D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
-	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	//ParticleShader* pShader = new ParticleShader();
+	//pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+	//	D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	//pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	SceneManager* pScene = NULL;
-	
-	pScene->CreateConstantBufferViews(pd3dDevice, 0, m_pd3dcbGameObject, ((sizeof(CB_STREAMGAMEOBJECT_INFO) + 255) & ~255));
-	pScene->CreateShaderResourceViews(pd3dDevice, pParticleTexture, 0, 16);
-	pScene->CreateShaderResourceViews(pd3dDevice, m_pRandowmValueTexture, 0, 17);
-	pScene->CreateShaderResourceViews(pd3dDevice, m_pRandowmValueOnSphereTexture, 0, 18);
+	//SceneManager* pScene = NULL;
+	//
+	//pScene->CreateConstantBufferViews(pd3dDevice, 0, m_pd3dcbGameObject, ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255));
+	//pScene->CreateShaderResourceViews(pd3dDevice, pParticleTexture, 0, 16);
+	//pScene->CreateShaderResourceViews(pd3dDevice, m_pRandowmValueTexture, 0, 17);
+	//pScene->CreateShaderResourceViews(pd3dDevice, m_pRandowmValueOnSphereTexture, 0, 18);
 
-	SetCbvGPUDescriptorHandle(pScene->GetGPUCbvDescriptorStartHandle());
+	//SetCbvGPUDescriptorHandle(pScene->GetGPUCbvDescriptorStartHandle());
 
-	pMaterial->SetShader(pShader);
-	SetMaterial(0, pMaterial);
+	//pMaterial->SetShader(pShader);
+	//SetMaterial(0, pMaterial);
 }
 
 
