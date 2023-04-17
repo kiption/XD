@@ -305,22 +305,17 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//}
 
 				// 7. Time 동기화
-				
+				gGameFramework.m_10MinOfTime = servertime_sec / 600;
+				gGameFramework.m_1MinOfTime = (servertime_sec - gGameFramework.m_10MinOfTime * 600) / 60;
+				gGameFramework.m_10SecOftime = (servertime_sec - gGameFramework.m_1MinOfTime * 60) / 10;
+				gGameFramework.m_1SecOfTime = servertime_sec % 10;
 			}
 			gGameFramework.FrameAdvance();
 		}
-		gGameFramework.m_10MinOfTime = servertime_sec / 600;
-		gGameFramework.m_1MinOfTime = (servertime_sec - gGameFramework.m_10MinOfTime * 600) / 60;
-		gGameFramework.m_10SecOftime = (servertime_sec - gGameFramework.m_1MinOfTime * 60) / 10;
-		gGameFramework.m_1SecOfTime = servertime_sec % 10;
-
 	}
 
 	gGameFramework.OnDestroy();
 	return((int)msg.wParam);
-
-
-
 }
 
 ATOM MyRegisterClass(HINSTANCE hInstance)
