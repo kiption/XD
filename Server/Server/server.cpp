@@ -7,7 +7,9 @@
 #include <vector>
 #include <chrono>
 #include <random>
+
 #include "Constant.h"
+#include "MathFuncs.h"
 #include "BulletsMgr.h"
 #include "../RelayServer/Protocol.h"
 #include "NPC.h"
@@ -65,10 +67,11 @@ public:
 	PLAYER_STATE pl_state;
 	int hp;
 	int bullet;
-	XMFLOAT3 pos;								// Position (x, y, z)
-	float pitch, yaw, roll;						// Rotated Degree
-	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;	// 현재 Look, Right, Up Vectors
+	XMFLOAT3 pos;									// Position (x, y, z)
+	float pitch, yaw, roll;							// Rotated Degree
+	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;		// 현재 Look, Right, Up Vectors
 	chrono::system_clock::time_point death_time;
+	chrono::system_clock::time_point last_move_rotate_keyinput_time;	// 마지막으로 키 입력이 된 시간
 
 	BoundingOrientedBox m_xoobb;	// Bounding Box
 
@@ -90,7 +93,7 @@ public:
 		m_upvec = { 0.0f, 1.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 1.0f };
 
-		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(heli_bbsize_x, heli_bbsize_y, heli_bbsize_z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	}
 
 	~SESSION() {}
@@ -127,7 +130,7 @@ public:
 	void send_rotate_packet(int client_id, short rotate_target);
 	void send_move_rotate_packet(int client_id, short update_target);
 
-	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(heli_bbsize_x, heli_bbsize_y, heli_bbsize_z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
+	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 };
 
 class HA_SERVER {
@@ -596,7 +599,6 @@ void process_packet(int client_id, char* packet)
 					clients[client_id].s_lock.lock();
 					// yaw 설정
 					clients[client_id].yaw += sign * YAW_ROTATE_SCALAR;
-
 					// right, up, look 벡터 업데이트
 					clients[client_id].m_rightvec = calcRotate(basic_coordinate.right
 						, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
@@ -604,8 +606,9 @@ void process_packet(int client_id, char* packet)
 						, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
 					clients[client_id].m_lookvec = calcRotate(basic_coordinate.look
 						, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
+					// 키입력 시간 업데이트
+					clients[client_id].last_move_rotate_keyinput_time = chrono::system_clock::now();
 
-					// unlock
 					clients[client_id].s_lock.unlock();
 
 					// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
@@ -622,16 +625,36 @@ void process_packet(int client_id, char* packet)
 					[[fallthrough]]
 				case KEY_W:
 					clients[client_id].s_lock.lock();
-
 					// 이동 계산 & 결과 업데이트
 					XMFLOAT3 move_result = calcMove(clients[client_id].pos, clients[client_id].m_upvec, ENGINE_SCALAR * sign);
 					clients[client_id].pos = move_result;
-
 					// 바운딩 박스 업데이트
 					clients[client_id].setBB();
-
-					// unlock
+					// 키입력 시간 업데이트
+					clients[client_id].last_move_rotate_keyinput_time = chrono::system_clock::now();
 					clients[client_id].s_lock.unlock();
+
+					// 비행고도가 최저높이 아래로 내려가면 사망
+					if (clients[client_id].pos.y < FLY_MIN_HEIGHT) {
+						// HP가 0이 됩니다.
+						clients[client_id].s_lock.lock();
+						clients[client_id].hp = 0;
+						clients[client_id].pos.y = 100.f;
+						if (clients[client_id].hp <= 0) {
+							clients[client_id].pl_state = PL_ST_DEAD;
+							clients[client_id].death_time = chrono::system_clock::now();
+						}
+						clients[client_id].s_lock.unlock();
+
+						// 플레이어에게 데미지를 알려줍니다.
+						SC_DAMAGED_PACKET pl_damage_packet;
+						pl_damage_packet.size = sizeof(SC_DAMAGED_PACKET);
+						pl_damage_packet.type = SC_DAMAGED;
+						pl_damage_packet.target = TARGET_PLAYER;
+						pl_damage_packet.id = clients[client_id].id;
+						pl_damage_packet.dec_hp = HELI_MAXHP;
+						clients[client_id].do_send(&pl_damage_packet);
+					}
 
 					// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
 					for (int j = 0; j < MAX_USER; j++) {
@@ -675,7 +698,7 @@ void process_packet(int client_id, char* packet)
 								bullets_arr[new_bullet_id].setLookvector(calcRotate(clients[client_id].m_lookvec, bullets_arr[new_bullet_id].getPitch(), 0.f, 0.f));
 								bullets_arr[new_bullet_id].setOwner(client_id);
 								bullets_arr[new_bullet_id].setInitialPos(bullets_arr[new_bullet_id].getPos());
-								bullets_arr[new_bullet_id].setBB_ex(XMFLOAT3{ vulcan_bullet_bbsize_x, vulcan_bullet_bbsize_y, vulcan_bullet_bbsize_z });
+								bullets_arr[new_bullet_id].setBB_ex(XMFLOAT3{ VULCAN_BULLET_BBSIZE_X, VULCAN_BULLET_BBSIZE_Y, VULCAN_BULLET_BBSIZE_Z });
 
 								bullets_arr[new_bullet_id].m_objlock.unlock();
 
@@ -786,7 +809,16 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].m_rightvec = calcRotate(basic_coordinate.right, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
 			clients[client_id].m_upvec = calcRotate(basic_coordinate.up, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
 			clients[client_id].m_lookvec = calcRotate(basic_coordinate.look, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
+			//test
+			//cout << "[Mouse Input] Client[" << client_id << "]의 pitch가 " << clients[client_id].pitch <<
+			//	"로, roll이 " << clients[client_id].roll << "로 변경되었습니다." << endl;
+			//cout << "Right: " << clients[client_id].m_rightvec.x << ", " << clients[client_id].m_rightvec.y << ", " << clients[client_id].m_rightvec.z << endl;
+			//cout << "Up: "    << clients[client_id].m_upvec.x    << ", " << clients[client_id].m_upvec.y    << ", " << clients[client_id].m_upvec.z    << endl;
+			//cout << "Look: "  << clients[client_id].m_lookvec.x  << ", " << clients[client_id].m_lookvec.y  << ", " << clients[client_id].m_lookvec.z  << endl;
+			//cout << endl;
 
+			// 키입력 시간 업데이트
+			clients[client_id].last_move_rotate_keyinput_time = chrono::system_clock::now();
 			clients[client_id].s_lock.unlock();
 
 			// 작동 중인 모든 클라이언트에게 회전 결과를 알려줍니다.
@@ -1136,37 +1168,100 @@ void timerFunc() {
 		for (auto& mv_target : clients) {
 			if (mv_target.s_state != ST_INGAME) continue;
 
+			// 1. Player가 살아있는 동안의 움직임
 			if (mv_target.pl_state == PL_ST_ALIVE) {
-				float proj_x = 0.f, proj_z = 0.f;		// proj_x는 UP벡터를 x축에 정사영시킨 정사영벡터, proj_z는 up벡터를 z축에 정사영시킨 정사영벡터입니다.
+				// 1) 마지막 이동or회전 키입력 이후, '자동수평비행모드 전환 시간'이 아직 지나지 않은 경우
+				//    => 기체의 수평 정도에 따른 이동을 합니다.
+				if (chrono::system_clock::now() < mv_target.last_move_rotate_keyinput_time + milliseconds(AUTO_LEVELOFF_TIME)) {
+					float proj_x = 0.f, proj_z = 0.f;		// proj_x는 UP벡터를 x축에 정사영시킨 정사영벡터, proj_z는 up벡터를 z축에 정사영시킨 정사영벡터입니다.
 
-				// pitch가 0이 아니면(= 앞or뒤로 기울어져 있다면) 헬기를 앞 또는 뒤로 이동시킵니다.
-				if (mv_target.pitch != 0.f) {
-					// pitch 각도에 따른 이동: proj_z = √(y^2 + z^2) cos(90˚ - pitch)
-					proj_z = sqrtf(powf(mv_target.m_upvec.y, 2) + powf(mv_target.m_upvec.z, 2)) * cos(XMConvertToRadians(90 - mv_target.pitch));
-					mv_target.pos = calcMove(mv_target.pos, mv_target.m_lookvec, proj_z * MOVE_SCALAR_FB);
-				}
+					// pitch가 0이 아니면(= 앞or뒤로 기울어져 있다면) 헬기를 앞 또는 뒤로 이동시킵니다.
+					if (mv_target.pitch != 0.f) {
+						// pitch 각도에 따른 이동: proj_z = √(y^2 + z^2) cos(90˚ - pitch)
+						proj_z = sqrtf(powf(mv_target.m_upvec.y, 2) + powf(mv_target.m_upvec.z, 2)) * cos(XMConvertToRadians(90 - mv_target.pitch));
+						mv_target.pos = calcMove(mv_target.pos, mv_target.m_lookvec, proj_z * MOVE_SCALAR_FB);
+					}
+					// roll이 0이 아니면(= 좌or우로 기울어져 있다면) 헬기를 좌 또는 우로 이동시킵니다.
+					if (mv_target.roll != 0.f) {
+						// roll 각도에 따른 이동: proj_x = √(x^2 + y^2) cos(90˚ - roll)
+						proj_x = sqrtf(powf(mv_target.m_upvec.x, 2) + powf(mv_target.m_upvec.y, 2)) * cos(XMConvertToRadians(90 - mv_target.roll));
+						mv_target.pos = calcMove(mv_target.pos, mv_target.m_rightvec, -1.f * proj_x * MOVE_SCALAR_LR);
+					}
+					// 바운딩 박스 업데이트
+					mv_target.setBB();
 
-				// roll이 0이 아니면(= 좌or우로 기울어져 있다면) 헬기를 좌 또는 우로 이동시킵니다.
-				if (mv_target.roll != 0.f) {
-					// roll 각도에 따른 이동: proj_x = √(x^2 + y^2) cos(90˚ - roll)
-					proj_x = sqrtf(powf(mv_target.m_upvec.x, 2) + powf(mv_target.m_upvec.y, 2)) * cos(XMConvertToRadians(90 - mv_target.roll));
-					mv_target.pos = calcMove(mv_target.pos, mv_target.m_rightvec, -1.f * proj_x * MOVE_SCALAR_LR);
-				}
+					// 최종 이동
+					if (mv_target.pitch != 0.f || mv_target.roll != 0.f) {
+						// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
+						for (auto& send_target : clients) {
+							if (send_target.s_state != ST_INGAME) continue;
 
-				// 바운딩 박스 업데이트
-				mv_target.setBB();
-
-				// 최종 이동
-				if (mv_target.pitch != 0.f || mv_target.roll != 0.f) {
-					// 작동 중인 모든 클라이언트에게 이동 결과를 알려줍니다.
-					for (auto& send_target : clients) {
-						if (send_target.s_state != ST_INGAME) continue;
-
-						lock_guard<mutex> lg{ send_target.s_lock };
-						send_target.send_move_packet(mv_target.id, TARGET_PLAYER);
+							lock_guard<mutex> lg{ send_target.s_lock };
+							send_target.send_move_packet(mv_target.id, TARGET_PLAYER);
+						}
 					}
 				}
+				// 2) 마지막 이동or회전 키입력 이후, '자동수평비행모드 전환 시간'이 지난 경우
+				//    => 서서히 기체를 수평 상태로 바꿉니다.
+				else {
+					bool b_auto_leveloff = false;
+					// pitch값을 0으로 서서히 바꿉니다.
+					if (mv_target.pitch != 0.f) {
+						//cout << "[Auto Before] pitch: " << mv_target.pitch << endl;
+						b_auto_leveloff = true;
 
+						mv_target.s_lock.lock();
+						mv_target.pitch = mv_target.pitch - mv_target.pitch / 100.f;
+						round_digit(mv_target.pitch, 5);	// 소수점 다섯째자리에서 반올림
+
+						if (-1.f < mv_target.pitch && mv_target.pitch < 1.f) mv_target.pitch = 0.f;
+						
+						// 객체를 회전시킵니다.
+						mv_target.m_rightvec = calcRotate(basic_coordinate.right, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.m_upvec = calcRotate(basic_coordinate.up, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.m_lookvec = calcRotate(basic_coordinate.look, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.s_lock.unlock();
+
+						//cout << "[자동 수평복구 시스템] Client[" << mv_target.id << "]의 pitch가 " << mv_target.pitch << "로 변경되었습니다." << endl;
+						//cout << "Right: " << mv_target.m_rightvec.x << ", " << mv_target.m_rightvec.y << ", " << mv_target.m_rightvec.z << endl;
+						//cout << "Up: " << mv_target.m_upvec.x << ", " << mv_target.m_upvec.y << ", " << mv_target.m_upvec.z << endl;
+						//cout << "Look: " << mv_target.m_lookvec.x << ", " << mv_target.m_lookvec.y << ", " << mv_target.m_lookvec.z << endl;
+					}
+					// roll값을 0으로 서서히 바꿉니다.
+					if (mv_target.roll != 0.f) {
+						//cout << "[Auto Before] roll: " << mv_target.roll << endl;
+						b_auto_leveloff = true;
+
+						mv_target.s_lock.lock();
+						mv_target.roll = mv_target.roll - mv_target.roll / 100.f;
+						round_digit(mv_target.roll, 5);	// 소수점 다섯째자리에서 반올림
+
+						if (-1.f < mv_target.roll && mv_target.roll < 1.f) mv_target.roll = 0.f;
+						
+						// 객체를 회전시킵니다.
+						mv_target.m_rightvec = calcRotate(basic_coordinate.right, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.m_upvec = calcRotate(basic_coordinate.up, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.m_lookvec = calcRotate(basic_coordinate.look, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.s_lock.unlock();
+
+						//cout << "[자동 수평복구 시스템] Client[" << mv_target.id << "]의 roll가 " << mv_target.roll << "로 변경되었습니다." << endl;
+						//cout << "Right: " << mv_target.m_rightvec.x << ", " << mv_target.m_rightvec.y << ", " << mv_target.m_rightvec.z << endl;
+						//cout << "Up: " << mv_target.m_upvec.x << ", " << mv_target.m_upvec.y << ", " << mv_target.m_upvec.z << endl;
+						//cout << "Look: " << mv_target.m_lookvec.x << ", " << mv_target.m_lookvec.y << ", " << mv_target.m_lookvec.z << endl;
+						//cout << endl;
+					}
+
+					// 만약 자동 수평복구가 이뤄졌다면, 결과를 모든 클라이언트(자신포함)에게 보냅니다.
+					if (b_auto_leveloff) {
+						for (auto& cl : clients) {
+							if (cl.s_state == ST_INGAME) {
+								cl.send_rotate_packet(mv_target.id, TARGET_PLAYER);
+							}
+						}
+						b_auto_leveloff = false;
+					}
+				}
+				
 				// 충돌체크
 				// 1. Player-Player
 				for (auto& other_pl : clients) {
@@ -1182,70 +1277,99 @@ void timerFunc() {
 					if (dist > 500.f)	continue;						// 멀리 떨어진 플레이어는 충돌검사 X
 
 					if (mv_target.m_xoobb.Intersects(other_pl.m_xoobb)) {
+						// 1) 자기 자신 데미지
 						mv_target.s_lock.lock();
 						mv_target.hp -= COLLIDE_PLAYER_DAMAGE;
-
 						if (mv_target.hp <= 0) {
+							mv_target.hp = 0;
 							mv_target.pl_state = PL_ST_DEAD;
 							mv_target.death_time = chrono::system_clock::now();
-
-							// 사망한 플레이어에게 게임오버 사실을 알립니다.
-							SC_PLAYER_STATE_PACKET hpzero_packet;
-							hpzero_packet.size = sizeof(SC_PLAYER_STATE_PACKET);
-							hpzero_packet.id = mv_target.id;
-							hpzero_packet.type = SC_PLAYER_STATE;
-							hpzero_packet.state = ST_PACK_DEAD;
-
-							mv_target.do_send(&hpzero_packet);
-						}
-						else {
-							// 충돌한 플레이어에게 충돌 사실을 알립니다.
-							SC_DAMAGED_PACKET damaged_by_player_packet;
-							damaged_by_player_packet.size = sizeof(SC_DAMAGED_PACKET);
-							damaged_by_player_packet.target = TARGET_PLAYER;
-							damaged_by_player_packet.id = mv_target.id;
-							damaged_by_player_packet.type = SC_DAMAGED;
-							damaged_by_player_packet.dec_hp = COLLIDE_PLAYER_DAMAGE;
-
-							mv_target.do_send(&damaged_by_player_packet);
 						}
 						mv_target.s_lock.unlock();
 
+						// 플레이어에게 충돌 사실을 알립니다.
+						SC_DAMAGED_PACKET pl_damage_packet;
+						pl_damage_packet.size = sizeof(SC_DAMAGED_PACKET);
+						pl_damage_packet.type = SC_DAMAGED;
+						pl_damage_packet.target = TARGET_PLAYER;
+						pl_damage_packet.id = mv_target.id;
+						pl_damage_packet.dec_hp = COLLIDE_PLAYER_DAMAGE;
+						mv_target.do_send(&pl_damage_packet);
+
+
+						// 2) 상대방 데미지
 						other_pl.s_lock.lock();
 						other_pl.hp -= COLLIDE_PLAYER_DAMAGE;
-
 						if (other_pl.hp <= 0) {
+							other_pl.hp = 0;
 							other_pl.pl_state = PL_ST_DEAD;
 							other_pl.death_time = chrono::system_clock::now();
-
-							// 사망한 플레이어에게 게임오버 사실을 알립니다.
-							SC_PLAYER_STATE_PACKET hpzero_packet;
-							hpzero_packet.size = sizeof(SC_PLAYER_STATE_PACKET);
-							hpzero_packet.id = other_pl.id;
-							hpzero_packet.type = SC_PLAYER_STATE;
-							hpzero_packet.state = ST_PACK_DEAD;
-
-							other_pl.do_send(&hpzero_packet);
-						}
-						else {
-							// 충돌한 플레이어에게 충돌 사실을 알립니다.
-							SC_DAMAGED_PACKET damaged_by_player_packet;
-							damaged_by_player_packet.size = sizeof(SC_DAMAGED_PACKET);
-							damaged_by_player_packet.target = TARGET_PLAYER;
-							damaged_by_player_packet.id = other_pl.id;
-							damaged_by_player_packet.type = SC_DAMAGED;
-							damaged_by_player_packet.dec_hp = COLLIDE_PLAYER_DAMAGE;
-
-							other_pl.do_send(&damaged_by_player_packet);
 						}
 						other_pl.s_lock.unlock();
+
+						// 충돌한 상대방에게 충돌 사실을 알립니다.
+						SC_DAMAGED_PACKET otherpl_damage_packet;
+						otherpl_damage_packet.size = sizeof(SC_DAMAGED_PACKET);
+						otherpl_damage_packet.type = SC_DAMAGED;
+						otherpl_damage_packet.target = TARGET_PLAYER;
+						otherpl_damage_packet.id = other_pl.id;
+						otherpl_damage_packet.dec_hp = COLLIDE_PLAYER_DAMAGE;
+						other_pl.do_send(&otherpl_damage_packet);
+
 					}//if (pl.m_xoobb.Intersects(other_pl.m_xoobb)) end
+
+					// 비행고도가 최저높이 아래로 내려가면 사망
+					if (mv_target.pos.y < FLY_MIN_HEIGHT) {
+						// HP가 0이 됩니다.
+						mv_target.s_lock.lock();
+						mv_target.hp = 0;
+						mv_target.pos.y = 100.f;
+						if (mv_target.hp <= 0) {
+							mv_target.pl_state = PL_ST_DEAD;
+							mv_target.death_time = chrono::system_clock::now();
+						}
+						mv_target.s_lock.unlock();
+
+						// 플레이어에게 데미지를 알려줍니다.
+						SC_DAMAGED_PACKET pl_damage_packet;
+						pl_damage_packet.size = sizeof(SC_DAMAGED_PACKET);
+						pl_damage_packet.type = SC_DAMAGED;
+						pl_damage_packet.target = TARGET_PLAYER;
+						pl_damage_packet.id = mv_target.id;
+						pl_damage_packet.dec_hp = HELI_MAXHP;
+						mv_target.do_send(&pl_damage_packet);
+					}
+
 				}//for (auto& other_pl : clients) end
 			}
+			// 2. Player가 죽어있는 동안의 움직임 (추락 연출)
 			else if (mv_target.pl_state == PL_ST_DEAD) {
-				if (chrono::system_clock::now() > mv_target.death_time + milliseconds(RESPAWN_TIME)) {	// 리스폰 시간이 지나면
+				// 1) 리스폰 시간이 아직 끝나지 않았다면
+				if (chrono::system_clock::now() < mv_target.death_time + milliseconds(RESPAWN_TIME)) {
 					mv_target.s_lock.lock();
+					if (mv_target.pos.y > FLY_MIN_HEIGHT) {
+						// 회전
+						mv_target.yaw += SHOOTDOWN_RT_DEGREE;
+						mv_target.m_rightvec = calcRotate(basic_coordinate.right, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.m_upvec = calcRotate(basic_coordinate.up, mv_target.roll, mv_target.yaw, mv_target.pitch);
+						mv_target.m_lookvec = calcRotate(basic_coordinate.look, mv_target.roll, mv_target.yaw, mv_target.pitch);
 
+						// 낙하
+						mv_target.pos = calcMove(mv_target.pos, mv_target.m_upvec, -1.f * SHOOTDOWN_MV_SCALAR);
+					}
+					mv_target.setBB();
+					mv_target.s_lock.unlock();
+
+					// 클라에게 전달
+					for (auto& cl : clients) {
+						if (cl.s_state == ST_INGAME) {
+							cl.send_move_rotate_packet(mv_target.id, TARGET_PLAYER);
+						}
+					}
+				}
+				// 2. 스폰 시간이 지났다면
+				else {
+					mv_target.s_lock.lock();
 					mv_target.pl_state = PL_ST_ALIVE;
 					mv_target.hp = 100;
 					mv_target.bullet = 100;
@@ -1257,45 +1381,14 @@ void timerFunc() {
 					mv_target.m_upvec = basic_coordinate.up;
 					mv_target.m_lookvec = basic_coordinate.look;
 					mv_target.setBB();
+					mv_target.s_lock.unlock();
 
-					// 부활한 플레이어에게 부활 사실을 알립니다.
-					SC_PLAYER_STATE_PACKET revival_packet;
-					revival_packet.size = sizeof(SC_PLAYER_STATE_PACKET);
-					revival_packet.id = mv_target.id;
-					revival_packet.type = SC_PLAYER_STATE;
-					revival_packet.state = ST_PACK_REVIVAL;
-
-					mv_target.do_send(&revival_packet);
-
-					// 부활구역으로 이동한 결과를 모든 클라이언트들에게 알립니다.
+					// 리스폰지역으로 이동한 결과를 모든 클라이언트(자신 포함)들에게 알립니다.
 					for (auto& cl : clients) {
 						if (cl.s_state == ST_INGAME) {
 							cl.send_move_rotate_packet(mv_target.id, TARGET_PLAYER);
 						}
 					}
-
-					mv_target.s_lock.unlock();
-				}
-				else {	// 아직 리스폰 대기중일때
-					mv_target.s_lock.lock();
-
-					if (mv_target.pos.y > 100) {
-						// 떨어지면서 빙글빙글도는 연출
-						mv_target.pos.y -= 0.0002;
-
-						mv_target.yaw += 0.005f;
-						mv_target.m_rightvec = calcRotate(basic_coordinate.right, mv_target.roll, mv_target.yaw, mv_target.pitch);
-						mv_target.m_upvec = calcRotate(basic_coordinate.up, mv_target.roll, mv_target.yaw, mv_target.pitch);
-						mv_target.m_lookvec = calcRotate(basic_coordinate.look, mv_target.roll, mv_target.yaw, mv_target.pitch);
-
-						for (auto& cl : clients) {
-							if (cl.s_state == ST_INGAME) {
-								cl.send_move_rotate_packet(mv_target.id, TARGET_PLAYER);
-							}
-						}
-					}
-
-					mv_target.s_lock.unlock();
 				}
 			}
 		}
@@ -1320,18 +1413,26 @@ void timerFunc() {
 				bullet.clear();
 			}
 			else {
+				bullet.m_objlock.lock();
 				bullet.moveObj(bullet.getLookvector(), BULLET_MOVE_SCALAR);		// 총알을 앞으로 이동시킵니다.
-				bullet.setBB_ex(XMFLOAT3(vulcan_bullet_bbsize_x, vulcan_bullet_bbsize_y, vulcan_bullet_bbsize_z));	// 바운딩박스 업데이트
+				bullet.setBB_ex(XMFLOAT3(VULCAN_BULLET_BBSIZE_X, VULCAN_BULLET_BBSIZE_Y, VULCAN_BULLET_BBSIZE_Z));	// 바운딩박스 업데이트
+				bullet.m_objlock.unlock();
+
+				bool bullet_alive = true;	// 총알이 충돌하지 않고 잘 살아있는지
 
 				// 충돌검사
-				bool bullet_alive = true;	// 총알이 충돌하지 않고 잘 살아있는지
 				// 1. Bullet-Player
 				for (auto& pl : clients) {
 					if (bullet.getOwner() == pl.id) continue;							// 총을 쏜 사람은 충돌체크 X
 					if (bullet.calcDistance(pl.pos) > BULLET_RANGE)	continue;			// 총알 사거리보다 멀리 떨어진 플레이어는 충돌체크 X
 
 					if (bullet.intersectsCheck(pl.m_xoobb)) {
-						// 우선 총알 객체를 없애고
+						// 1) 총알 객체 제거
+						bullet.m_objlock.lock();
+						bullet.clear();
+						bullet_alive = false;
+						bullet.m_objlock.unlock();
+
 						SC_REMOVE_OBJECT_PACKET remove_bullet_packet;
 						remove_bullet_packet.target = TARGET_BULLET;
 						remove_bullet_packet.size = sizeof(SC_REMOVE_OBJECT_PACKET);
@@ -1342,41 +1443,24 @@ void timerFunc() {
 								cl.do_send(&remove_bullet_packet);
 						}
 
-						// 충돌한 플레이어의 HP를 감소시킵니다.
+						// 2) 플레이어의 충돌 후처리
 						pl.s_lock.lock();
 						pl.hp -= BULLET_DAMAGE;
-						pl.s_lock.unlock();
-
 						if (pl.hp <= 0) {
+							pl.hp = 0;
 							pl.pl_state = PL_ST_DEAD;
 							pl.death_time = chrono::system_clock::now();
-
-							// 사망한 플레이어에게 게임오버 사실을 알립니다.
-							SC_PLAYER_STATE_PACKET hpzero_packet;
-							hpzero_packet.size = sizeof(SC_PLAYER_STATE_PACKET);
-							hpzero_packet.id = pl.id;
-							hpzero_packet.type = SC_PLAYER_STATE;
-							hpzero_packet.state = ST_PACK_DEAD;
-
-							pl.do_send(&hpzero_packet);
 						}
-						else {
-							// 충돌한 플레이어에게 충돌 사실을 알립니다.
-							SC_DAMAGED_PACKET damaged_by_bullet_packet;
-							damaged_by_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
-							damaged_by_bullet_packet.target = TARGET_PLAYER;
-							damaged_by_bullet_packet.id = pl.id;
-							damaged_by_bullet_packet.type = SC_DAMAGED;
-							damaged_by_bullet_packet.dec_hp = BULLET_DAMAGE;
+						pl.s_lock.unlock();
 
-							pl.do_send(&damaged_by_bullet_packet);
-						}
+						SC_DAMAGED_PACKET damaged_by_bullet_packet;
+						damaged_by_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
+						damaged_by_bullet_packet.type = SC_DAMAGED;
+						damaged_by_bullet_packet.target = TARGET_PLAYER;
+						damaged_by_bullet_packet.id = pl.id;
+						damaged_by_bullet_packet.dec_hp = BULLET_DAMAGE;
+						pl.do_send(&damaged_by_bullet_packet);
 
-						// 마지막으로 총알의 정보를 초기화합니다.
-						bullet.m_objlock.lock();
-						bullet.clear();
-						bullet_alive = false;
-						bullet.m_objlock.unlock();
 					}//bullet.intersectsCheck end
 				}//for(auto& pl:clients) end
 
@@ -1388,7 +1472,12 @@ void timerFunc() {
 					// 충돌검사.
 					if (bullet.intersectsCheck(npc_obj.m_xoobb)) {
 						cout << "Bullet is Collide with NPC[" << npc_obj.GetID() << "]!" << endl;//test
-						// 우선 총알 객체를 없애고
+						// 1) 총알 객체 제거
+						bullet.m_objlock.lock();
+						bullet.clear();
+						bullet_alive = false;
+						bullet.m_objlock.unlock();
+
 						SC_REMOVE_OBJECT_PACKET remove_bullet_packet;
 						remove_bullet_packet.target = TARGET_BULLET;
 						remove_bullet_packet.size = sizeof(SC_REMOVE_OBJECT_PACKET);
@@ -1399,7 +1488,7 @@ void timerFunc() {
 							cl.do_send(&remove_bullet_packet);
 						}
 
-						// 충돌한 플레이어의 HP를 감소시킵니다.
+						// 2) NPC 충돌 후처리
 						npc_obj.ST1_Damege_Calc(bullet.getOwner());
 
 						// NPC가 사망하면 객체(npc)제거패킷을 접속중인 모든 클라이언트에게 보냅니다.
@@ -1429,16 +1518,10 @@ void timerFunc() {
 							}
 						}
 
-						// 마지막으로 총알의 정보를 초기화합니다.
-						bullet.m_objlock.lock();
-						bullet.clear();
-						bullet_alive = false;
-						bullet.m_objlock.unlock();
-
 					}//bullet.intersectsCheck end
 				}//for(auto& npc:npcs) end
 
-				// 총알이 어디에도 충돌하지 않았다면 총알의 이동패킷을 보냅니다.
+				// 최종적으로 총알이 어디에도 충돌하지 않았을 때에만 총알의 이동패킷을 보냅니다.
 				if (bullet_alive) {
 					SC_MOVE_OBJECT_PACKET move_bullet_packet;
 					move_bullet_packet.target = TARGET_BULLET;

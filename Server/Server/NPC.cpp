@@ -37,7 +37,7 @@ ST1_NPC::ST1_NPC()
 	m_Speed = 3.0f;
 	m_chaseID = -1;
 
-	m_xoobb = BoundingOrientedBox(XMFLOAT3(m_Pos.x, m_Pos.y, m_Pos.z), XMFLOAT3(heli_bbsize_x, heli_bbsize_y, heli_bbsize_z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	m_xoobb = BoundingOrientedBox(XMFLOAT3(m_Pos.x, m_Pos.y, m_Pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 ST1_NPC::~ST1_NPC()

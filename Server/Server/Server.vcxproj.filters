@@ -56,5 +56,8 @@
     <ClInclude Include="CP_KEYS.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="MathFuncs.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

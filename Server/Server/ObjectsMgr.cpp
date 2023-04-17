@@ -14,13 +14,13 @@ XMFLOAT3 myNormalize(XMFLOAT3 vec)
 	return vec;
 }
 
-XMFLOAT3 calcMove(XMFLOAT3 vec1, XMFLOAT3 vec2, float scalar)
+XMFLOAT3 calcMove(XMFLOAT3 vec, XMFLOAT3 dir, float scalar)
 {
-	vec1.x = vec1.x + vec2.x * scalar;
-	vec1.y = vec1.y + vec2.y * scalar;
-	vec1.z = vec1.z + vec2.z * scalar;
+	vec.x = vec.x + dir.x * scalar;
+	vec.y = vec.y + dir.y * scalar;
+	vec.z = vec.z + dir.z * scalar;
 
-	return vec1;
+	return vec;
 }
 
 XMFLOAT3 calcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll)
