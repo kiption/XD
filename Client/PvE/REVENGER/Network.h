@@ -332,13 +332,11 @@ void processPacket(char* ptr)
 				my_info.m_damaged_effect_on = true;
 				my_info.m_hp -= recv_packet->dec_hp;
 				if (my_info.m_hp < 0) my_info.m_hp = 0;
-				q_damaged_obj_id.push(my_info);
 			}
 			else {
 				other_players[recv_packet->id].m_damaged_effect_on = true;
 				other_players[recv_packet->id].m_hp -= recv_packet->dec_hp;
 				if (other_players[recv_packet->id].m_hp < 0) other_players[recv_packet->id].m_hp = 0;
-				q_damaged_obj_id.push(other_players[recv_packet->id]);
 			}
 		}
 		// NPC Damaged
@@ -346,7 +344,6 @@ void processPacket(char* ptr)
 			npcs_info[recv_packet->id].m_damaged_effect_on = true;
 			npcs_info[recv_packet->id].m_hp -= recv_packet->dec_hp;
 			if (npcs_info[recv_packet->id].m_hp < 0) npcs_info[recv_packet->id].m_hp = 0;
-			q_damaged_obj_id.push(npcs_info[recv_packet->id]);
 		}
 
 		break;
