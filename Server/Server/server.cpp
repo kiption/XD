@@ -211,6 +211,7 @@ HA_SERVER relayserver;	// 릴레이서버
 
 void SESSION::send_login_info_packet()
 {
+	if (curr_stage != 1) return;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 	SC_LOGIN_INFO_PACKET login_info_packet;
 	login_info_packet.id = id;
 	login_info_packet.size = sizeof(SC_LOGIN_INFO_PACKET);
@@ -238,6 +239,7 @@ void SESSION::send_login_info_packet()
 }
 void SESSION::send_move_packet(int client_id, short move_target)
 {
+	if (curr_stage != 1) return;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 	SC_MOVE_OBJECT_PACKET move_pl_packet;
 	move_pl_packet.target = move_target;
 	move_pl_packet.id = client_id;
@@ -251,6 +253,7 @@ void SESSION::send_move_packet(int client_id, short move_target)
 }
 void SESSION::send_rotate_packet(int client_id, short rotate_target)
 {
+	if (curr_stage != 1) return;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 	SC_ROTATE_OBJECT_PACKET rotate_pl_packet;
 	rotate_pl_packet.target = rotate_target;
 	rotate_pl_packet.id = client_id;
@@ -273,6 +276,7 @@ void SESSION::send_rotate_packet(int client_id, short rotate_target)
 }
 void SESSION::send_move_rotate_packet(int client_id, short update_target)
 {
+	if (curr_stage != 1) return;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 	SC_MOVE_ROTATE_OBJECT_PACKET update_pl_packet;
 	update_pl_packet.target = update_target;
 	update_pl_packet.id = client_id;
@@ -324,6 +328,7 @@ void disconnect(int target_id, int target)
 				pl.s_lock.unlock();
 				continue;
 			}
+			if (pl.curr_stage != 1) break;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 			SC_REMOVE_OBJECT_PACKET remove_pl_packet;
 			remove_pl_packet.target = TARGET_PLAYER;
 			remove_pl_packet.id = target_id;
@@ -480,6 +485,7 @@ void process_packet(int client_id, char* packet)
 			auto& pl = clients[i];
 
 			if (pl.id == client_id) continue;
+			if (pl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 
 			pl.s_lock.lock();
 			if (pl.s_state != ST_INGAME) {
@@ -516,6 +522,7 @@ void process_packet(int client_id, char* packet)
 		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 클라이언트의 정보를 전송합니다.
 		for (auto& pl : clients) {
 			if (pl.id == client_id) continue;
+			if (pl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 
 			pl.s_lock.lock();
 			if (pl.s_state != ST_INGAME) {
@@ -575,6 +582,7 @@ void process_packet(int client_id, char* packet)
 			add_npc_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
 
 			for (int j = 0; j < MAX_USER; j++) {
+				if (clients[j].curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 				if (clients[j].s_state == ST_INGAME) {
 					clients[j].do_send(&add_npc_packet);
 				}
@@ -1234,6 +1242,7 @@ void timerFunc() {
 			servertime_lock.unlock();
 			for (auto& cl : clients) {
 				if (cl.s_state != ST_INGAME) continue;
+				if (cl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 				SC_TIME_TICKING_PACKET ticking_packet;
 				ticking_packet.size = sizeof(SC_TIME_TICKING_PACKET);
 				ticking_packet.type = SC_TIME_TICKING;
@@ -1245,6 +1254,7 @@ void timerFunc() {
 		// Helicopter
 		for (auto& mv_target : clients) {
 			if (mv_target.s_state != ST_INGAME) continue;
+			if (mv_target.curr_stage != 1) continue;		// 헬기는 1스테이지 전용 객체임.
 
 			// 1. Player가 살아있는 동안의 움직임
 			if (mv_target.pl_state == PL_ST_ALIVE) {
@@ -1484,6 +1494,7 @@ void timerFunc() {
 
 				for (auto& cl : clients) {
 					if (cl.s_state != ST_INGAME) continue;
+					if (cl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 					cl.do_send(&remove_bullet_packet);
 				}
 
@@ -1516,6 +1527,7 @@ void timerFunc() {
 						remove_bullet_packet.id = bullet.getId();
 						remove_bullet_packet.type = SC_REMOVE_OBJECT;
 						for (auto& cl : clients) {
+							if (cl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 							if (cl.s_state == ST_INGAME)
 								cl.do_send(&remove_bullet_packet);
 						}
@@ -1536,7 +1548,9 @@ void timerFunc() {
 						damaged_by_bullet_packet.target = TARGET_PLAYER;
 						damaged_by_bullet_packet.id = pl.id;
 						damaged_by_bullet_packet.dec_hp = BULLET_DAMAGE;
-						pl.do_send(&damaged_by_bullet_packet);
+						if (pl.curr_stage == 1) {// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
+							pl.do_send(&damaged_by_bullet_packet);
+						}
 
 					}//bullet.intersectsCheck end
 				}//for(auto& pl:clients) end
@@ -1561,6 +1575,7 @@ void timerFunc() {
 						remove_bullet_packet.id = bullet.getId();
 						remove_bullet_packet.type = SC_REMOVE_OBJECT;
 						for (auto& cl : clients) {
+							if (cl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 							if (cl.s_state != ST_INGAME) continue;
 							cl.do_send(&remove_bullet_packet);
 						}
@@ -1576,6 +1591,7 @@ void timerFunc() {
 							rm_npc_packet.target = TARGET_NPC;
 							rm_npc_packet.id = npc_obj.GetID();
 							for (auto& cl : clients) {
+								if (cl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 								if (cl.pl_state != ST_INGAME) continue;
 								cl.do_send(&rm_npc_packet);
 							}
@@ -1590,6 +1606,7 @@ void timerFunc() {
 							npc_damaged_by_bullet_packet.dec_hp = BULLET_DAMAGE;
 
 							for (auto& cl : clients) {
+								if (cl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 								if (cl.pl_state != ST_INGAME) continue;
 								cl.do_send(&npc_damaged_by_bullet_packet);
 							}
@@ -1610,6 +1627,7 @@ void timerFunc() {
 					move_bullet_packet.z = bullet.getPos().z;
 
 					for (auto& cl : clients) {
+						if (cl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 						if (cl.s_state == ST_INGAME)
 							cl.do_send(&move_bullet_packet);
 					}
@@ -1801,10 +1819,10 @@ void MoveNPC()
 			npc_update_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
 
 			for (auto& send_target : clients) {
-				lock_guard<mutex> lg{ send_target.s_lock };
+				if (send_target.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 				if (send_target.s_state != ST_INGAME) continue;
-				if (send_target.curr_stage != 1) continue;		// 임시코드.
 
+				lock_guard<mutex> lg{ send_target.s_lock };
 				send_target.do_send(&npc_update_packet);
 			}
 		}
