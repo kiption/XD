@@ -77,7 +77,7 @@ public:
 	bool Start = false;
 
 	int m_nSpriteBillboards = 0;
-	SpriteAnimationBillboard** m_ppSpriteBillboard = NULL;
+	CSpriteObjectsShader** m_ppSpriteBillboard = NULL;
 	CSkyBox* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;
 

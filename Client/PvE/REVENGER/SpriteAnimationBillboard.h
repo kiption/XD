@@ -34,10 +34,10 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 
-protected:
+public:
 	CGameObject** m_ppObjects = 0;
 	int	m_nObjects = 0;
-
+	XMFLOAT3 ExplosionPosition = XMFLOAT3(0.0,0.0,0.0);
 	ID3D12Resource* m_pd3dcbGameObjects = NULL;
 	CB_GAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
 };

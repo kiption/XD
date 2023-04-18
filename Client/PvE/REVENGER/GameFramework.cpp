@@ -1249,11 +1249,12 @@ void CGameFramework::SetVectors_PlayerObj(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMF
 }
 
 void CGameFramework::SetPosition_OtherPlayerObj(int id, XMFLOAT3 pos) {
-
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._41 = pos.x;
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._42 = pos.y;
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._43 = pos.z;
-
+	if (m_nMode == SCENE1STAGE)
+	{
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._41 = pos.x;
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._42 = pos.y;
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._43 = pos.z;
+	}
 	/*if (m_nMode == SCENE2STAGE)
 	{
 		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._41 = pos.x;
@@ -1262,10 +1263,13 @@ void CGameFramework::SetPosition_OtherPlayerObj(int id, XMFLOAT3 pos) {
 	}*/
 }
 void CGameFramework::SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec) {
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(1.0, 1.0, 1.0);
+	if (m_nMode == SCENE1STAGE)
+	{
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(1.0, 1.0, 1.0);
+	}
 	//if (m_nMode == SCENE2STAGE)
 	//{
 	//	((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->SetUp(upVec);
@@ -1274,8 +1278,11 @@ void CGameFramework::SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOA
 	//}
 }
 void CGameFramework::Remove_OtherPlayerObj(int id) {
-	if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
+	if (m_nMode == SCENE1STAGE)
+	{
+		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
+		}
 	}
 }
 
@@ -1287,25 +1294,31 @@ void CGameFramework::Create_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look)
 void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3right, XMFLOAT3 xmf3up, XMFLOAT3 xmf3look)
 {
 
-
-	((Stage1*)m_pScene)->m_ppBullets[id]->SetPosition(pos);
-	((Stage1*)m_pScene)->m_ppBullets[id]->SetRight(xmf3right);
-	((Stage1*)m_pScene)->m_ppBullets[id]->SetUp(xmf3up);
-	((Stage1*)m_pScene)->m_ppBullets[id]->SetLook(xmf3look);
-
+	if (m_nMode == SCENE1STAGE)
+	{
+		((Stage1*)m_pScene)->m_ppBullets[id]->SetPosition(pos);
+		((Stage1*)m_pScene)->m_ppBullets[id]->SetRight(xmf3right);
+		((Stage1*)m_pScene)->m_ppBullets[id]->SetUp(xmf3up);
+		((Stage1*)m_pScene)->m_ppBullets[id]->SetLook(xmf3look);
+	}
 }
 
 void CGameFramework::SetPosition_NPC(int id, XMFLOAT3 pos)
 {
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetPosition(pos);
+	if (m_nMode == SCENE1STAGE)
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetPosition(pos);
 }
 
 void CGameFramework::SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetRight(rightVec);
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetUp(upVec);
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetLook(lookVec);
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetScale(1.0f, 1.0f, 1.0f);
+	if (m_nMode == SCENE1STAGE)
+	{
+
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetRight(rightVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetUp(upVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetLook(lookVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetScale(1.0f, 1.0f, 1.0f);
+	}
 }
 
 

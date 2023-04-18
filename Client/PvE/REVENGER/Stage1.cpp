@@ -36,9 +36,9 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.43f, 0.43f, 0.43f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(+150, 550.0f, -900.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(-0.2, -1.0f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.1f, 0.1f);
+	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.1f, 0.001f);
 
-	m_pLights->m_pLights[1].m_bEnable = false;
+	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 2000.0f;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
@@ -213,7 +213,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pBillboardShader[0] = pBillboardParticleShader;
 
 	m_nSpriteBillboards = 1;
-	m_ppSpriteBillboard = new SpriteAnimationBillboard * [m_nSpriteBillboards];
+	m_ppSpriteBillboard = new CSpriteObjectsShader * [m_nSpriteBillboards];
 	SpriteAnimationBillboard* pSpriteAnimationBillboard = new SpriteAnimationBillboard();
 	pSpriteAnimationBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pSpriteAnimationBillboard->SetCurScene(SCENE1STAGE);
@@ -431,7 +431,7 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 
 	pd3dDescriptorRanges[15].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 	pd3dDescriptorRanges[15].NumDescriptors = 1;
-	pd3dDescriptorRanges[15].BaseShaderRegister = 9; // GameObject b6
+	pd3dDescriptorRanges[15].BaseShaderRegister = 9; // SpriteAnimation b9
 	pd3dDescriptorRanges[15].RegisterSpace = 0;
 	pd3dDescriptorRanges[15].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
@@ -534,19 +534,9 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dRootParameters[18].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[19].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	pd3dRootParameters[19].DescriptorTable.NumDescriptorRanges = 1; // ParticleObject b9
+	pd3dRootParameters[19].DescriptorTable.NumDescriptorRanges = 1; // SpriteAnimation b9
 	pd3dRootParameters[19].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[15];
 	pd3dRootParameters[19].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-
-	//pd3dRootParameters[19].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	//pd3dRootParameters[19].Descriptor.ShaderRegister = 9; //ParticleObject
-	//pd3dRootParameters[19].Descriptor.RegisterSpace = 0;
-	//pd3dRootParameters[19].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-
-	//pd3dRootParameters[20].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	//pd3dRootParameters[20].Descriptor.ShaderRegister = 10; //Material
-	//pd3dRootParameters[20].Descriptor.RegisterSpace = 0;
-	//pd3dRootParameters[20].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[20].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[20].Descriptor.ShaderRegister = 10; //Material
@@ -582,7 +572,7 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dSamplerDescs[0].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[0].ShaderRegister = 0;
 	pd3dSamplerDescs[0].RegisterSpace = 0;
-	pd3dSamplerDescs[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	pd3dSamplerDescs[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dSamplerDescs[1].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -667,7 +657,7 @@ void Stage1::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
 	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
-	//::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
+	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
 	//::memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
 	::memcpy(m_pcbMappedMaterials, &m_pMaterials, sizeof(MATERIALS));
 }
@@ -827,16 +817,7 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 {
 
 	UpdateShaderVariables(pd3dCommandList);
-	//if (m_pd3dcbLights)
-	//{
-	//	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
-	//	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
-	//}
-	//if (m_pd3dcbMaterials)
-	//{
-	//	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
-	//	pd3dCommandList->SetGraphicsRootConstantBufferView(20, d3dcbMaterialsGpuVirtualAddress); //Materials
-	//}
+
 	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
@@ -873,7 +854,7 @@ void Stage1::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 			XMMATRIX xmmtxProjection{};
 			if (m_pLights->m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
 			{
-				float fFovAngle = 120.0; m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
+				float fFovAngle = 120.0f; // m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
 				float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
 				xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fFovAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
 				//float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
@@ -884,12 +865,6 @@ void Stage1::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 				float fFovAngle = 60.0f; // m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
 				float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
 				xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fFovAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
-				
-				//float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
-				//xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
-				//float fFovAngle = m_pLights->m_pLights[j].m_fPhi; //m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
-				//float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
-				//xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fFovAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
 			}
 			else if (m_pLights->m_pLights[j].m_nType == POINT_LIGHT)
 			{
@@ -907,7 +882,7 @@ void Stage1::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 
 			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthRenderShader->m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-			FLOAT pfClearColor[4] = { 0.6f,0.6f,0.6f, 1.0 };
+			FLOAT pfClearColor[4] = { 0.7f,0.7f,0.7f, 1.0 };
 			pd3dCommandList->ClearRenderTargetView(m_pDepthRenderShader->m_pd3dRtvCPUDescriptorHandles[j], pfClearColor, 0, NULL);
 
 			pd3dCommandList->ClearDepthStencilView(m_pDepthRenderShader->m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, NULL);
@@ -950,7 +925,7 @@ void Stage1::ParticleAnimation()
 	m_pBillboardShader[0]->NextPosition.y = SmokePosition.y + 10.0f;
 	m_pBillboardShader[0]->NextPosition.z = SmokePosition.z;
 
-
+	ExplosingPosition = m_ppSpriteBillboard[0]->ExplosionPosition;
 }
 
 bool Stage1::CheckCollision(DirectX::BoundingOrientedBox& box1, DirectX::BoundingOrientedBox& box2, DirectX::XMFLOAT3& posA, DirectX::XMFLOAT3& lookA, DirectX::XMFLOAT3& upA, DirectX::XMFLOAT3& rightA)

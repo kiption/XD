@@ -177,34 +177,43 @@ D3D12_SHADER_BYTECODE SpriteAnimationBillboard::CreateVertexShader(ID3DBlob** pp
 
 void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
-	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
+	CTexture* ppSpriteTextures[2];
+	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
+	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
+	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
 
-	CMaterial* pTerrainMaterial = new CMaterial(1);
-	pTerrainMaterial->SetTexture(ppSpriteTextures,0);
+	CMaterial* pTerrainMaterial[2];
+	pTerrainMaterial[0] = new CMaterial(1);
+	pTerrainMaterial[1] = new CMaterial(1);
+
+	pTerrainMaterial[0]->SetTexture(ppSpriteTextures[0], 0);
+	pTerrainMaterial[1]->SetTexture(ppSpriteTextures[1], 0);
 
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 80.0, 80.0, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 50.0, 50.0, 0.0f, 0.0f, 0.0f, 0.0f);
 
 
-	m_nObjects = 1;
+	SceneManager* pScene = NULL;
+	m_nObjects = 2;
 	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	SceneManager* pScene = NULL;
-	pScene->CreateShaderResourceViews(pd3dDevice, ppSpriteTextures, 0, 15);//+
+	pScene->CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[0], 0, 15);//+
+	pScene->CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[1], 0, 15);//+
 	pScene->CreateConstantBufferView(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
+	m_ppObjects = new CGameObject * [m_nObjects];
+	CMultiSpriteObject** pThirdObject = new CMultiSpriteObject * [m_nObjects];
+	XMFLOAT3 xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < m_nObjects; i++)
 	{
 
-		m_ppObjects = new CGameObject * [m_nObjects];
-		CMultiSpriteObject* pThirdObject = NULL;
-		pThirdObject = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		pThirdObject->SetMesh(pSpriteMesh);
-		pThirdObject->SetMaterial(0, pTerrainMaterial);
+		pThirdObject[i] = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		pThirdObject[i]->SetMesh(pSpriteMesh);
+		pThirdObject[i]->SetMaterial(0, pTerrainMaterial[i]);
+		pThirdObject[i]->SetPosition(XMFLOAT3(xmf3Position.x, xmf3Position.y, xmf3Position.z));
 		pScene->SetCbvGPUDescriptorHandlePtr(((Stage1*)pScene)->m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
-
-		pThirdObject->m_fSpeed = 6.0f / (ppSpriteTextures->m_nRows * ppSpriteTextures->m_nCols);
-		m_ppObjects[i] = pThirdObject;
+		pThirdObject[i]->m_fSpeed = 6.0f / (ppSpriteTextures[i]->m_nRows * ppSpriteTextures[i]->m_nCols);
+		m_ppObjects[i] = pThirdObject[i];
 	}
 }
 
@@ -212,6 +221,7 @@ void SpriteAnimationBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList
 {
 	if (m_bActive)
 	{
+
 		XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
 		CPlayer* pPlayer = pCamera->GetPlayer();
 		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
@@ -222,7 +232,10 @@ void SpriteAnimationBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList
 		{
 			if (m_ppObjects[j])
 			{
-				m_ppObjects[j]->SetPosition(xmf3Position);
+				ExplosionPosition.x=m_ppObjects[j]->m_xmf4x4ToParent._41;
+				ExplosionPosition.y=m_ppObjects[j]->m_xmf4x4ToParent._42;
+				ExplosionPosition.z=m_ppObjects[j]->m_xmf4x4ToParent._43;
+				/*m_ppObjects[j]->SetPosition(xmf3PlayerPosition);*/
 				m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
 			}
 		}
@@ -243,5 +256,11 @@ void SpriteAnimationBillboard::ReleaseObjects()
 
 void SpriteAnimationBillboard::AnimateObjects(float fTimeElapsed)
 {
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		ExplosionPosition.x=m_ppObjects[j]->m_xmf4x4ToParent._41;
+		ExplosionPosition.y=m_ppObjects[j]->m_xmf4x4ToParent._42;
+		ExplosionPosition.z=m_ppObjects[j]->m_xmf4x4ToParent._43;
+	}
 	CSpriteObjectsShader::AnimateObjects(fTimeElapsed);
 }

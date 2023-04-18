@@ -89,6 +89,7 @@ public:
 	void SetCurScene(int nCurScene) { m_nCurScene = nCurScene; }
 	void ParticleAnimation();
 	XMFLOAT3 SmokePosition;
+	XMFLOAT3 ExplosingPosition;
 	GameSound gamesound;
 
 	CParticleObject** m_ppParticleObjects = NULL;

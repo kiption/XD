@@ -249,19 +249,19 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				// 3. Bullet 객체 최신화
 				for (int i = 0; i < MAX_BULLET; i++) {
 
-				
+
 
 					if (bullets_info[i].m_state == OBJ_ST_EMPTY) continue;
-					
+
 					if (bullets_info[i].m_state == OBJ_ST_LOGOUT) {	// Clear
 						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
 						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(0.01f, 0.01f, 0.01f);
 						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(45.0, 0.0, 0.0);
 						gGameFramework.m_pScene->m_pLights->m_pLights[4].m_xmf4Diffuse = XMFLOAT4(0.4, 0.4f, 0.4f, 1.0f);
 						gGameFramework.m_pScene->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.0, 0.0f, 0.0f, 1.0f);
-						
+
 						bullets_info[i].returnToInitialState();
-					
+
 					}
 					else if (bullets_info[i].m_state == OBJ_ST_RUNNING) {	// Update
 						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
@@ -296,19 +296,25 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				gGameFramework.m_currHp = my_info.m_hp;
 
 				// 6. NPC 움직임 최신화
-				//for (int i{}; i < MAX_NPCS; i++) {
-				//	if (gGameFramework.m_nMode == SCENE1STAGE) {	// 임시
-				//		gGameFramework.SetPosition_NPC(npcs_info[i].m_id, npcs_info[i].m_pos);
-				//		gGameFramework.SetVectors_NPC(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
-				//		gGameFramework.m_pScene->SmokePosition = npcs_info[i].m_pos;
-				//	}
-				//}
+				if (gGameFramework.m_nMode == SCENE1STAGE) {	// 임시
+					for (int i{}; i < MAX_NPCS; i++) {
+						gGameFramework.SetPosition_NPC(npcs_info[i].m_id, npcs_info[i].m_pos);
+						gGameFramework.SetVectors_NPC(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
+						gGameFramework.m_pScene->SmokePosition = npcs_info[i].m_pos;
+						((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(npcs_info[i].m_pos);
+					}
+				}
+			
 
 				// 7. Time 동기화
 				gGameFramework.m_10MinOfTime = servertime_sec / 600;
 				gGameFramework.m_1MinOfTime = (servertime_sec - gGameFramework.m_10MinOfTime * 600) / 60;
 				gGameFramework.m_10SecOftime = (servertime_sec - gGameFramework.m_1MinOfTime * 60) / 10;
 				gGameFramework.m_1SecOfTime = servertime_sec % 10;
+			}
+			if (gGameFramework.m_nMode == SCENE2STAGE)
+			{
+
 			}
 			gGameFramework.FrameAdvance();
 		}
