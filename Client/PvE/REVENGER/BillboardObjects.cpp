@@ -108,7 +108,7 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 		{
 			if (m_ppMaterials[i] && m_ppMaterials[i]->m_ppTextures[j])
 			{
-				m_fTime += fTimeElapsed * 0.5f;
+				m_fTime += fTimeElapsed * 2.0f;
 				if (m_fTime >= m_fSpeed) m_fTime = 0.0f;
 				m_ppMaterials[i]->m_ppTextures[j]->AnimateRowColumn(m_fTime);
 			}
