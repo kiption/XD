@@ -15,6 +15,8 @@ struct ObjectsInfo
 	XMFLOAT3 m_look_vec;
 	int m_state;
 
+	bool m_damaged_effect_on;
+
 	ObjectsInfo() {
 		m_id = -1;
 		m_hp = 100;
@@ -24,6 +26,7 @@ struct ObjectsInfo
 		m_up_vec = { 0.0f, 1.0f, 0.0f };
 		m_look_vec = { 0.0f, 0.0f, 1.0f };
 		m_state = OBJ_ST_EMPTY;
+		m_damaged_effect_on = false;
 	}
 
 	void returnToInitialState() {
@@ -35,6 +38,7 @@ struct ObjectsInfo
 		m_up_vec = { 0.0f, 1.0f, 0.0f };
 		m_look_vec = { 0.0f, 0.0f, 1.0f };
 		m_state = OBJ_ST_EMPTY;
+		m_damaged_effect_on = false;
 	}
 };
 
