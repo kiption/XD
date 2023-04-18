@@ -248,9 +248,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				}
 				// 3. Bullet 객체 최신화
 				for (int i = 0; i < MAX_BULLET; i++) {
-
-				
-
 					if (bullets_info[i].m_state == OBJ_ST_EMPTY) continue;
 					
 					if (bullets_info[i].m_state == OBJ_ST_LOGOUT) {	// Clear
@@ -309,6 +306,17 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				gGameFramework.m_1MinOfTime = (servertime_sec - gGameFramework.m_10MinOfTime * 600) / 60;
 				gGameFramework.m_10SecOftime = (servertime_sec - gGameFramework.m_1MinOfTime * 60) / 10;
 				gGameFramework.m_1SecOfTime = servertime_sec % 10;
+
+
+				//==================================================
+				//					충돌 관련
+				//==================================================
+				if (!q_damaged_obj_id.empty()) {
+					int target_id = q_damaged_obj_id.front();
+					q_damaged_obj_id.pop();
+
+					cout << target_id << endl;
+				}
 			}
 			gGameFramework.FrameAdvance();
 		}

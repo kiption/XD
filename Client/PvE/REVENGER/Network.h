@@ -327,10 +327,15 @@ void processPacket(char* ptr)
 
 		// Player Damaged
 		if (recv_packet->target == TARGET_PLAYER) {
+			gamesound.collisionSound();
+			q_damaged_obj_id.push(recv_packet->id);
 			if (recv_packet->id == my_id) {
 				my_info.m_hp -= recv_packet->dec_hp;
 				if (my_info.m_hp < 0) my_info.m_hp = 0;
-				gamesound.collisionSound();
+			}
+			else {
+				other_players[recv_packet->id].m_hp -= recv_packet->dec_hp;
+				if (other_players[recv_packet->id].m_hp < 0) other_players[recv_packet->id].m_hp = 0;
 			}
 		}
 		// NPC Damaged

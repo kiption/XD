@@ -857,13 +857,6 @@ void process_packet(int client_id, char* packet)
 				clients[client_id].m_rightvec = calcRotate(basic_coordinate.right, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
 				clients[client_id].m_upvec = calcRotate(basic_coordinate.up, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
 				clients[client_id].m_lookvec = calcRotate(basic_coordinate.look, clients[client_id].pitch, clients[client_id].yaw, clients[client_id].roll);
-				//test
-				//cout << "[Mouse Input] Client[" << client_id << "]의 pitch가 " << clients[client_id].pitch <<
-				//	"로, roll이 " << clients[client_id].roll << "로 변경되었습니다." << endl;
-				//cout << "Right: " << clients[client_id].m_rightvec.x << ", " << clients[client_id].m_rightvec.y << ", " << clients[client_id].m_rightvec.z << endl;
-				//cout << "Up: "    << clients[client_id].m_upvec.x    << ", " << clients[client_id].m_upvec.y    << ", " << clients[client_id].m_upvec.z    << endl;
-				//cout << "Look: "  << clients[client_id].m_lookvec.x  << ", " << clients[client_id].m_lookvec.y  << ", " << clients[client_id].m_lookvec.z  << endl;
-				//cout << endl;
 
 				// 키입력 시간 업데이트
 				clients[client_id].last_move_rotate_keyinput_time = chrono::system_clock::now();
@@ -1255,8 +1248,7 @@ void timerFunc() {
 
 			// 1. Player가 살아있는 동안의 움직임
 			if (mv_target.pl_state == PL_ST_ALIVE) {
-				// 1) 마지막 이동or회전 키입력 이후, '자동수평비행모드 전환 시간'이 아직 지나지 않은 경우
-				//    => 기체의 수평 정도에 따른 이동을 합니다.
+				// 헬기 기체의 수평상태에 따른 이동을 합니다.
 				if (chrono::system_clock::now() < mv_target.last_move_rotate_keyinput_time + milliseconds(AUTO_LEVELOFF_TIME)) {
 					float proj_x = 0.f, proj_z = 0.f;		// proj_x는 UP벡터를 x축에 정사영시킨 정사영벡터, proj_z는 up벡터를 z축에 정사영시킨 정사영벡터입니다.
 

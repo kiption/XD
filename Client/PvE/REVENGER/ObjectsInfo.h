@@ -43,3 +43,5 @@ std::array<ObjectsInfo, MAX_USER> other_players;
 std::array<ObjectsInfo, MAX_NPCS> npcs_info;
 
 std::array<ObjectsInfo, MAX_BULLET> bullets_info;
+
+queue<int> q_damaged_obj_id;
