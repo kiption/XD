@@ -230,7 +230,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				// 2. 다른 Player 객체 최신화
 				for (int i = 0; i < MAX_USER; i++) {
 					if (i == my_info.m_id) continue;
-
 					if (other_players[i].m_state == OBJ_ST_RUNNING) {
 						gGameFramework.SetPosition_OtherPlayerObj(i, other_players[i].m_pos);
 						gGameFramework.SetVectors_OtherPlayerObj(i, other_players[i].m_right_vec, other_players[i].m_up_vec, other_players[i].m_look_vec);
@@ -311,6 +310,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				gGameFramework.m_1MinOfTime = (servertime_sec - gGameFramework.m_10MinOfTime * 600) / 60;
 				gGameFramework.m_10SecOftime = (servertime_sec - gGameFramework.m_1MinOfTime * 60) / 10;
 				gGameFramework.m_1SecOfTime = servertime_sec % 10;
+
+				while (!q_damaged_obj_id.empty()) {
+					ObjectsInfo damaged_obj = q_damaged_obj_id.front();
+					q_damaged_obj_id.pop();
+					//((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(damaged_obj.m_pos);
+			
+					cout << damaged_obj.m_id << damaged_obj.m_hp << endl;
+				}
 			}
 			if (gGameFramework.m_nMode == SCENE2STAGE)
 			{

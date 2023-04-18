@@ -218,7 +218,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pSpriteAnimationBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pSpriteAnimationBillboard->SetCurScene(SCENE1STAGE);
 	pSpriteAnimationBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	pSpriteAnimationBillboard->SetActive(false);
+	pSpriteAnimationBillboard->SetActive(true);
 	m_ppSpriteBillboard[0] = pSpriteAnimationBillboard;
 
 
