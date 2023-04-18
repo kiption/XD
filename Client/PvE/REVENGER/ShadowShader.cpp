@@ -294,7 +294,7 @@ void CShadowMapShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	m_pDepthTexture = (CTexture*)pContext;
 	m_pDepthTexture->AddRef();
-	SceneManager* m_pScene =NULL;
+	SceneManager* m_pScene = NULL;
 	//m_pScene->CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, m_pDepthTexture->GetTextures());
 	//SceneManager::CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100);
 	m_pScene->CreateShaderResourceViews(pd3dDevice, m_pDepthTexture, 0, 22);
@@ -598,7 +598,7 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 
 void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	CShader::Render(pd3dCommandList, pCamera,0);
+	CShader::Render(pd3dCommandList, pCamera, 0);
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
@@ -676,7 +676,7 @@ void CTextureToViewportShader::ReleaseObjects()
 
 void CTextureToViewportShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CShader::Render(pd3dCommandList, pCamera,nPipelineState);
+	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
 	pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	pd3dCommandList->DrawInstanced(6, 1, 0, 0);

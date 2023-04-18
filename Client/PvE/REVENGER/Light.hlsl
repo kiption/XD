@@ -73,7 +73,7 @@ float Compute5x5ShadowFactor(float2 uv, float fDepth, uint nIndex)
 {
 	float fPercentLit = 0.0f;
 
-	return(fPercentLit /25.0f);
+	return(fPercentLit / 25.0f);
 }
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
@@ -99,8 +99,8 @@ float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
 		}
 	}
 
-	return((gLights[nIndex].m_cAmbient * gMaterial.m_cAmbient) 
-		+ (gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse) 
+	return((gLights[nIndex].m_cAmbient * gMaterial.m_cAmbient)
+		+ (gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse)
 		+ (gLights[nIndex].m_cSpecular * fSpecularFactor * gMaterial.m_cSpecular));
 }
 
@@ -130,7 +130,7 @@ float4 PointLight(int nIndex, float3 vPosition, float3 vNormal, float3 vToCamera
 #endif
 			}
 		}
-		float fAttenuationFactor = 1.0f / dot(gLights[nIndex].m_vAttenuation, float3(1.0f, fDistance, fDistance*fDistance));
+		float fAttenuationFactor = 1.0f / dot(gLights[nIndex].m_vAttenuation, float3(1.0f, fDistance, fDistance * fDistance));
 
 		return(((gLights[nIndex].m_cAmbient * gMaterial.m_cAmbient) + (gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse) + (gLights[nIndex].m_cSpecular * fSpecularFactor * gMaterial.m_cSpecular)) * fAttenuationFactor);
 	}
@@ -175,7 +175,7 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal, float3 vToCamera)
 #else
 		float fSpotFactor = pow(max(dot(-vToLight, gLights[i].m_vDirection), 0.0f), gLights[i].m_fFalloff);
 #endif
-		float fAttenuationFactor = 1.0f / dot(gLights[nIndex].m_vAttenuation, float3(1.0f, fDistance, fDistance*fDistance));
+		float fAttenuationFactor = 1.0f / dot(gLights[nIndex].m_vAttenuation, float3(1.0f, fDistance, fDistance * fDistance));
 
 		return(((gLights[nIndex].m_cAmbient * gMaterial.m_cAmbient) + (gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse) + (gLights[nIndex].m_cSpecular * fSpecularFactor * gMaterial.m_cSpecular)) * fAttenuationFactor * fSpotFactor);
 	}
@@ -201,12 +201,12 @@ float4 Lighting(float3 vPosition, float3 vNormal)
 			else if (gLights[i].m_nType == POINT_LIGHT)
 			{
 				cColor += PointLight(i, vPosition, vNormal, vToCamera);
-			
+
 			}
 			else if (gLights[i].m_nType == SPOT_LIGHT)
 			{
 				cColor += SpotLight(i, vPosition, vNormal, vToCamera);
-				
+
 
 			}
 		}
@@ -217,7 +217,7 @@ float4 Lighting(float3 vPosition, float3 vNormal)
 
 	return(cColor);
 }
-float4 Lightings(float3 vPosition, float3 vNormal,float4 vEmissive)
+float4 Lightings(float3 vPosition, float3 vNormal, float4 vEmissive)
 {
 	float3 vCameraPosition = float3(gvCameraPosition.x, gvCameraPosition.y, gvCameraPosition.z);
 	float3 vToCamera = normalize(vCameraPosition - vPosition);
@@ -281,7 +281,7 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 			else if (gLights[i].m_nType == SPOT_LIGHT)
 			{
 				cColor += SpotLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
-			
+
 				//cColor += SpotLight(i, vPosition, vNormal, vToCamera);
 			}
 			cColor += gLights[i].m_cAmbient * gMaterial.m_cAmbient;;
@@ -344,7 +344,7 @@ float4 EmiPlusSpotLight(int nIndex, float3 vPosition, float3 vNormal, float3 vTo
 #endif
 		float fAttenuationFactor = 1.0f / dot(gLights[nIndex].m_vAttenuation, float3(1.0f, fDistance, fDistance * fDistance));
 
-		return(((gLights[nIndex].m_cAmbient * gMaterial.m_cAmbient) + (gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse) + 
+		return(((gLights[nIndex].m_cAmbient * gMaterial.m_cAmbient) + (gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse) +
 			(gLights[nIndex].m_cSpecular * fSpecularFactor * gMaterial.m_cSpecular))
 			+ (gLights[nIndex].m_cEmissive * fDiffuseFactor * gMaterial.m_cEmissive) * fAttenuationFactor * fSpotFactor);
 	}

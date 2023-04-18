@@ -2,6 +2,7 @@
 #include "BillboardObjects.h"
 #include "Shader.h"
 #include "Scene.h"
+#include "Stage1.h"
 CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
 {
 }
@@ -94,8 +95,8 @@ void CMultiSpriteObject::ReleaseShaderVariables()
 
 void CMultiSpriteObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
 {
-	CGameObject::UpdateShaderVariable(pd3dCommandList, pxmf4x4World);
 	SceneManager* pScene = NULL;
+	CGameObject::UpdateShaderVariable(pd3dCommandList, pxmf4x4World);
 	if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
 }
 
@@ -103,11 +104,14 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 {
 	for (int i = 0; i < m_nMaterials; i++)
 	{
-		if (m_ppMaterials[i] && m_ppMaterials[i]->m_pTexture)
+		for (int j = 0; j < m_ppMaterials[i]->m_nTextures; j++)
 		{
-			m_fTime += fTimeElapsed * 0.5f;
-			if (m_fTime >= m_fSpeed) m_fTime = 0.0f;
-			m_ppMaterials[i]->m_pTexture->AnimateRowColumn(m_fTime);
+			if (m_ppMaterials[i] && m_ppMaterials[i]->m_ppTextures[j])
+			{
+				m_fTime += fTimeElapsed * 0.5f;
+				if (m_fTime >= m_fSpeed) m_fTime = 0.0f;
+				m_ppMaterials[i]->m_ppTextures[j]->AnimateRowColumn(m_fTime);
+			}
 		}
 	}
 
@@ -116,50 +120,42 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 
 void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	//OnPrepareRender();
+	OnPrepareRender();
 
-	SceneManager* pScene = NULL;
-	
-		if (m_nMaterials > 0)
+	SceneManager* m_pScene = NULL;
+
+	if (m_ppMaterials)
+	{
+		for (int i = 0; i < m_nMaterials; i++)
 		{
-			for (int i = 0; i < m_nMaterials; i++)
+
+			if (m_ppMaterials[i]->m_pShader)
 			{
-				if (m_ppMaterials[i])
-				{
-					if (m_ppMaterials[i]->m_pShader) {
-						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0);
-						UpdateShaderVariables(pd3dCommandList);
-					}
-					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+				m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0);
+				m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList);
 
-					if (m_ppMaterials[i]->m_pTexture)
-					{
-						m_ppMaterials[i]->m_pTexture->UpdateShaderVariables(pd3dCommandList);
-						if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&m_ppMaterials[i]->m_pTexture->m_xmf4x4Texture)));
-
-					}
-				}
-				pd3dCommandList->SetGraphicsRootDescriptorTable(19, pScene->m_d3dCbvGPUDescriptorNextHandle);
-				m_pMesh->Render(pd3dCommandList, i);
+				UpdateShaderVariables(pd3dCommandList);
 			}
+			for (int j = 0; j < m_ppMaterials[i]->m_nTextures; j++)
+			{
 
-		}
-		else
-		{
-			if ((m_nMaterials == 1) && (m_ppMaterials[0]))
-			{
-				if (m_ppMaterials[0]->m_pShader) m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera, 0);
-				m_ppMaterials[0]->UpdateShaderVariable(pd3dCommandList);
-			}
-			pd3dCommandList->SetGraphicsRootDescriptorTable(19, pScene->m_d3dCbvGPUDescriptorNextHandle);
-			if (m_ppMeshes)
-			{
-				for (int i = 0; i < m_nMeshes; i++)
+				if (m_ppMaterials[i]->m_ppTextures[j])
 				{
-					if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList);
+					m_ppMaterials[i]->m_ppTextures[j]->UpdateShaderVariables(pd3dCommandList);
+					if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&m_ppMaterials[i]->m_ppTextures[j]->m_xmf4x4Texture)));
 				}
 			}
 		}
-		CGameObject::Render(pd3dCommandList, pCamera);
+	}
+
+	pd3dCommandList->SetGraphicsRootDescriptorTable(19, ((Stage1*)m_pScene)->m_d3dCbvGPUDescriptorStartHandle);
+
+	if (m_pMesh)
+	{
+
+		if (m_pMesh) m_pMesh->Render(pd3dCommandList);
+	}
+
+	CGameObject::Render(pd3dCommandList, pCamera);
 
 }

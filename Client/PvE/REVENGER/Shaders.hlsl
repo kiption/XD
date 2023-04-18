@@ -46,7 +46,7 @@ cbuffer cbFrameworkInfo : register(b11)
 cbuffer cbStreamGameObjectInfo : register(b9)
 {
 	matrix		gmtxWorld : packoffset(c0);
-	EXPLOSIONMATERIAL				gAniMaterial : packoffset(c4);
+	EXPLOSIONMATERIAL	gAniMaterial : packoffset(c4);
 
 };
 
@@ -201,7 +201,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	//float4 cIllumination = Lighting(input.positionW, normalize(input.normalW));
 	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
 
-	return(lerp(cColor, cIllumination, 0.3f));
+	return(lerp(cColor, cIllumination, 0.4f));
 }
 
 float4 PSParticleStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
@@ -233,12 +233,7 @@ float4 PSParticleStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 
 	float4 uvs[MAX_LIGHTS];
 	float2 uv = input.uv;
-
-	for (int i = 0; i < MAX_LIGHTS; i++)
-	{
-		uvs[i].xy = uv.xy;
-	}
-	float4 cIllumination = ParticleLighting(input.positionW, normalize(input.normalW), false, uvs);
+	float4 cIllumination = ParticleLighting(input.positionW, normalize(input.normalW), true, uvs);
 
 	return(lerp(cColor, cIllumination, 0.5f));
 }
@@ -276,7 +271,7 @@ float4 PSBulletStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	}
 
 	float4 uvs[MAX_LIGHTS];
-	float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
 
 	return(lerp(cColor, cIllumination, 0.5f));
 }
@@ -392,7 +387,7 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
 	//	float4 cColor = (cBaseTexColor * cDetailTexColor);
 		//cIllumination =Lighting(input.positionW, input.normalW);
-		float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
+		float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
 
 
 		cColor = lerp(cColor, cIllumination, 0.5f);
@@ -507,7 +502,22 @@ float4 PSSmokeBillBoardTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 	return (cColor);
 }
 
+VS_TEXTURED_OUTPUT VSSpritTextured(VS_TEXTURED_INPUT input)
+{
+	VS_TEXTURED_OUTPUT output;
 
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	output.uv = input.uv;
+
+	return(output);
+}
+
+float4 PSSpritTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
+{
+	float4 cColor = gtxtBillboardTexture.Sample(gssWrap, input.uv);
+
+	return(cColor);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -988,29 +998,14 @@ float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 
 	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
 
-	if (gnTexturesMask & MATERIAL_ALBEDO_MAP)cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv); else cAlbedoColor = gMaterial.m_cAmbient;
+	if (gnTexturesMask & MATERIAL_ALBEDO_MAP)cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv); else cAlbedoColor = gMaterials[gnMaterial].m_cDiffuse;
 	//if (gnTexturesMask & MATERIAL_SPECULAR_MAP)cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv); else cSpecularColor = gMaterial.m_cSpecular;
 	//if (gnTexturesMask & MATERIAL_METALLIC_MAP)cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv); else cMetallicColor = gMaterial.m_cAmbient;
 //	float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gssWrap, input.uv);
 	//gMaterial.m_cAmbient
-	
+
 	cColor = cAlbedoColor;
 
-	return(lerp(cColor, cIllumination, 0.9f));
-	return(cIllumination);
+	return(lerp(cColor, cIllumination, 0.4f));
+
 }
-
-
-
-//float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
-//if (gnTexturesMask & MATERIAL_ALBEDO_MAP) cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
-/*float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-if (gnTexturesMask & MATERIAL_SPECULAR_MAP) cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
-float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-if (gnTexturesMask & MATERIAL_NORMAL_MAP) cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
-float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
-float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);*/
-//float4 cColor = cAlbedoColor /*+ cSpecularColor + cEmissionColor*/;
-//	cIllumination = saturate(gtxtDepthTextures[3].SampleLevel(gssProjector, f3uvw.xy, 0).r);

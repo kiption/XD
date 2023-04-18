@@ -238,7 +238,7 @@ void CTexture::CreateBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 CMaterial::CMaterial(int nTextures)
 {
 	m_nTextures = nTextures;
-	//m_pTexture = NULL;
+	m_pTexture = NULL;
 	m_ppTextures = new CTexture * [m_nTextures];
 	m_ppstrTextureNames = new _TCHAR[m_nTextures][64];
 	for (int i = 0; i < m_nTextures; i++) m_ppTextures[i] = NULL;
@@ -976,9 +976,7 @@ void CGameObject::SetTrackAnimationPosition(int nAnimationTrack, float fPosition
 void CGameObject::Animate(float fTimeElapsed)
 {
 	OnPrepareRender();
-
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->AdvanceTime(fTimeElapsed, this);
-
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
 	if (m_pChild) m_pChild->Animate(fTimeElapsed);
 }
@@ -1023,10 +1021,9 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 
 					for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
 					{
-						if (m_ppMaterials[i]->m_pTexture) m_ppMaterials[i]->m_pTexture->UpdateShaderVariables(pd3dCommandList);
+						if (m_ppMaterials[i]->m_ppTextures[k]) m_ppMaterials[i]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
 					}
 				}
-				//if(m_nCurScene==SCENE1STAGE)pd3dCommandList->SetGraphicsRootDescriptorTable(19, pScene->m_d3dCbvGPUDescriptorNextHandle);
 				m_pMesh->Render(pd3dCommandList, i);
 			}
 
@@ -1037,8 +1034,10 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 			{
 				if (m_ppMaterials[0]->m_pShader) m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera, 0);
 				m_ppMaterials[0]->UpdateShaderVariable(pd3dCommandList);
-
-				if (m_ppMaterials[0]->m_pTexture) m_ppMaterials[0]->m_pTexture->UpdateShaderVariables(pd3dCommandList);
+				for (int k = 0; k < m_ppMaterials[0]->m_nTextures; k++)
+				{
+					if (m_ppMaterials[0]->m_ppTextures[k]) m_ppMaterials[0]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
+				}
 
 			}
 			//if (m_nCurScene == SCENE1STAGE)pd3dCommandList->SetGraphicsRootDescriptorTable(19, pScene->m_d3dCbvGPUDescriptorNextHandle);

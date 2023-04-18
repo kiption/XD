@@ -41,12 +41,12 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[1].m_bEnable = false;
 	m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 2000.0f;
-	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.83f, 0.83f, 0.83f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.83f, 0.83f, 0.83f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(+250, 660.0f, -1000.0f);
 	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(-0.1f, -1.0f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.1f, 0.1f);
+	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.1f, 0.5f);
 	m_pLights->m_pLights[1].m_fFalloff = 9.0f;
 	m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(60.0f));
 	m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
@@ -66,7 +66,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 
 
 
-	m_pLights->m_pLights[3].m_bEnable = true;
+	m_pLights->m_pLights[3].m_bEnable = false;
 	m_pLights->m_pLights[3].m_nType = SPOT_LIGHT;
 	m_pLights->m_pLights[3].m_fRange = 700.0f;
 	m_pLights->m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
@@ -88,7 +88,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[4].m_xmf3Position = XMFLOAT3(0.0f, 128.0f, 0.0f);
 	m_pLights->m_pLights[4].m_xmf3Direction = XMFLOAT3(+1.0f, -1.0f, 0.0f);
 
-	m_pLights->m_pLights[5].m_bEnable = true;
+	m_pLights->m_pLights[5].m_bEnable = false;
 	m_pLights->m_pLights[5].m_nType = SPOT_LIGHT;
 	m_pLights->m_pLights[5].m_fRange = 50.0f;
 	m_pLights->m_pLights[5].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
@@ -186,7 +186,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 76); //SuperCobra(17), Gunship(2), Player:Mi24(1), Angrybot()
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 300); 
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
@@ -204,7 +204,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	//m_pTerrain->m_xmf4x4World._42 = -50.0f;
 	//m_pTerrain->m_xmf4x4World._43 = -3500.0f;
 
-	m_nBillboardShaders = 2;
+	m_nBillboardShaders = 1;
 	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
 	BillboardParticleShader* pBillboardParticleShader = new BillboardParticleShader();
 	pBillboardParticleShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
@@ -212,21 +212,16 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pBillboardParticleShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[0] = pBillboardParticleShader;
 
+	m_nSpriteBillboards = 1;
+	m_ppSpriteBillboard = new SpriteAnimationBillboard * [m_nSpriteBillboards];
 	SpriteAnimationBillboard* pSpriteAnimationBillboard = new SpriteAnimationBillboard();
 	pSpriteAnimationBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pSpriteAnimationBillboard->SetCurScene(SCENE1STAGE);
 	pSpriteAnimationBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pSpriteAnimationBillboard->SetActive(false);
-	m_pBillboardShader[1] = pSpriteAnimationBillboard;
+	m_ppSpriteBillboard[0] = pSpriteAnimationBillboard;
 
-	m_nSpriteBillboards = 1;
-	m_ppSpriteBillboard = new SpriteAnimationBillboard * [m_nSpriteBillboards];
-	SpriteAnimationBillboard* pSpriteAnimationBillboard2 = new SpriteAnimationBillboard();
-	pSpriteAnimationBillboard2->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
-	pSpriteAnimationBillboard2->SetCurScene(SCENE1STAGE);
-	pSpriteAnimationBillboard2->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 
-	m_ppSpriteBillboard[0] = pSpriteAnimationBillboard2;
 
 	m_nFragShaders = 1;
 	m_ppFragShaders = new CFragmentsShader * [m_nFragShaders];
@@ -541,7 +536,7 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dRootParameters[19].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[19].DescriptorTable.NumDescriptorRanges = 1; // ParticleObject b9
 	pd3dRootParameters[19].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[15];
-	pd3dRootParameters[19].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dRootParameters[19].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 
 	//pd3dRootParameters[19].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	//pd3dRootParameters[19].Descriptor.ShaderRegister = 9; //ParticleObject
@@ -587,7 +582,7 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dSamplerDescs[0].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[0].ShaderRegister = 0;
 	pd3dSamplerDescs[0].RegisterSpace = 0;
-	pd3dSamplerDescs[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dSamplerDescs[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	pd3dSamplerDescs[1].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -672,7 +667,8 @@ void Stage1::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
 	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
-
+	//::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
+	//::memcpy(&m_pcbMappedLights->m_nLights, &m_nLights, sizeof(int));
 	::memcpy(m_pcbMappedMaterials, &m_pMaterials, sizeof(MATERIALS));
 }
 
@@ -773,7 +769,7 @@ bool Stage1::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 		case VK_CONTROL:
 			break;
 		case 'F':
-			m_pBillboardShader[1]->SetActive(!m_pBillboardShader[1]->GetActive());
+			m_ppSpriteBillboard[0]->SetActive(!m_ppSpriteBillboard[0]->GetActive());
 			break;
 		default:
 			break;
@@ -818,10 +814,10 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		for (int i = 0; i < 5; i++)
 		{
 			m_pLights->m_pLights[5].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[0]->GetPosition();
-			m_pLights->m_pLights[6].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[2]->GetPosition();
-			m_pLights->m_pLights[7].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[4]->GetPosition();
-			m_pLights->m_pLights[8].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[6]->GetPosition();
-			m_pLights->m_pLights[9].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[8]->GetPosition();
+			//m_pLights->m_pLights[6].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[2]->GetPosition();
+			//m_pLights->m_pLights[7].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[4]->GetPosition();
+			//m_pLights->m_pLights[8].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[6]->GetPosition();
+			//m_pLights->m_pLights[9].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[8]->GetPosition();
 		}
 	}
 	ParticleAnimation();
@@ -831,6 +827,16 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 {
 
 	UpdateShaderVariables(pd3dCommandList);
+	//if (m_pd3dcbLights)
+	//{
+	//	D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+	//	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
+	//}
+	//if (m_pd3dcbMaterials)
+	//{
+	//	D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
+	//	pd3dCommandList->SetGraphicsRootConstantBufferView(20, d3dcbMaterialsGpuVirtualAddress); //Materials
+	//}
 	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
@@ -840,8 +846,8 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) m_ppBullets[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->Render(pd3dCommandList, pCamera, 0);
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
-	//for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
+	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
@@ -875,9 +881,9 @@ void Stage1::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 			}
 			else if (m_pLights->m_pLights[j].m_nType == SPOT_LIGHT)
 			{
-				//float fFovAngle = 60.0f; // m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
-				//float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
-				//xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fFovAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
+				float fFovAngle = 60.0f; // m_pLights->m_pLights[j].m_fPhi = cos(60.0f);
+				float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
+				xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fFovAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
 				
 				//float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
 				//xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);

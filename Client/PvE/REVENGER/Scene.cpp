@@ -183,7 +183,7 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
 	OpeningBillboardBanner* pBillboardParticleShader = new OpeningBillboardBanner();
 	pBillboardParticleShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList,
-		m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+		m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, 0, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pBillboardParticleShader->SetCurScene(OPENINGSCENE);
 	pBillboardParticleShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[0] = pBillboardParticleShader;
