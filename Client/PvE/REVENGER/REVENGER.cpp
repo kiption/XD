@@ -312,10 +312,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//					충돌 관련
 				//==================================================
 				if (!q_damaged_obj_id.empty()) {
-					int target_id = q_damaged_obj_id.front();
+					ObjectsInfo damaged_obj = q_damaged_obj_id.front();
 					q_damaged_obj_id.pop();
 
-					cout << target_id << endl;
+					cout << damaged_obj.m_id << damaged_obj.m_hp << endl;
 				}
 			}
 			gGameFramework.FrameAdvance();
