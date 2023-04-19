@@ -313,6 +313,8 @@ void processPacket(char* ptr)
 			npcs_info[npc_id].m_id = -1;
 			npcs_info[npc_id].m_pos = { 0.f ,0.f ,0.f };
 			npcs_info[npc_id].m_state = OBJ_ST_LOGOUT;
+			left_npc--;
+			if (left_npc < 0) left_npc = 0;
 		}
 		else {
 			cout << "[REMOVE ERROR] Unknown Target!" << endl;

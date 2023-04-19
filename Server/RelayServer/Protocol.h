@@ -95,6 +95,7 @@ struct CS_RELOGIN_PACKET {
 // ================================
 //			2. SC Packet
 // ================================
+// 1) 기본 조작 관련 패킷
 struct SC_LOGIN_INFO_PACKET {
 	unsigned char size;
 	char type;
@@ -169,13 +170,16 @@ struct SC_BULLET_COUNT_PACKET {
 	short id;
 	int bullet_cnt;
 };
-
+// ================================
+// 2) UI 및 컨텐츠 관련 패킷
 struct SC_TIME_TICKING_PACKET {
 	unsigned char size;
 	char type;
 	int servertime_ms;	// 단위: ms
 };
 
+// ================================
+// 3) 이중화 관련 패킷
 struct SC_ACTIVE_DOWN_PACKET {	// 현재는 클라-서버 -> 추후에 클라-릴레이서버 로 바꿀 예정.
 	unsigned char size;
 	char type;

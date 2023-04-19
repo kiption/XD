@@ -448,6 +448,13 @@ void process_packet(int client_id, char* packet)
 			break;
 		}
 
+		// 서버구동 이후 첫번째 클라이언트의 접속이라면 그때부터 서버시간이 흐르기 시작합니다.
+		if (b_isfirstplayer) {
+			cout << "서버 시간이 흐르기 시작합니다.\n" << endl;
+			g_s_start_time = system_clock::now();
+			b_isfirstplayer = false;
+		}
+
 		// 새로 접속한 플레이어의 초기 정보를 설정합니다.
 		clients[client_id].pl_state = PL_ST_ALIVE;
 		clients[client_id].curr_stage = 1;
@@ -1085,12 +1092,6 @@ void do_worker()
 				SOCKET c_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
 				int client_id = get_new_client_id();
 				if (client_id != -1) {
-					// 서버구동 이후 첫번째 클라이언트의 접속
-					if (b_isfirstplayer) {
-						cout << "서버 시간이 흐르기 시작합니다.\n" << endl;
-						g_s_start_time = system_clock::now();
-						b_isfirstplayer = false;
-					}
 					// 클라이언트 id, 소켓
 					clients[client_id].s_lock.lock();
 					clients[client_id].id = client_id;
@@ -1234,7 +1235,7 @@ void do_worker()
 void timerFunc() {
 	while (true) {
 		auto start_t = system_clock::now();
-
+		// ================================
 		// 서버 시간 업데이트
 		if (b_active_server && !b_isfirstplayer) {
 			servertime_lock.lock();
@@ -1246,11 +1247,13 @@ void timerFunc() {
 				SC_TIME_TICKING_PACKET ticking_packet;
 				ticking_packet.size = sizeof(SC_TIME_TICKING_PACKET);
 				ticking_packet.type = SC_TIME_TICKING;
-				ticking_packet.servertime_ms = static_cast<int>(g_curr_servertime.count());
+				int left_time = STAGE1_TIMELIMIT * 1000 - static_cast<int>(g_curr_servertime.count());
+				if (left_time < 0) left_time = 0;
+				ticking_packet.servertime_ms = left_time;
 				cl.do_send(&ticking_packet);
 			}
 		}
-
+		// ================================
 		// Helicopter
 		for (auto& mv_target : clients) {
 			if (mv_target.s_state != ST_INGAME) continue;
@@ -1479,7 +1482,7 @@ void timerFunc() {
 				}
 			}
 		}
-
+		// ================================
 		// Bullet
 		for (auto& bullet : bullets_arr) {
 			if (bullet.getId() == -1) continue;
@@ -1509,6 +1512,7 @@ void timerFunc() {
 				bool bullet_alive = true;	// 총알이 충돌하지 않고 잘 살아있는지
 
 				// 충돌검사
+				// =================
 				// 1. Bullet-Player
 				for (auto& pl : clients) {
 					if (bullet.getOwner() == pl.id) continue;							// 총을 쏜 사람은 충돌체크 X
@@ -1554,7 +1558,7 @@ void timerFunc() {
 
 					}//bullet.intersectsCheck end
 				}//for(auto& pl:clients) end
-
+				// =================
 				// 2. Bullet-NPC
 				for (auto& npc_obj : npcs) {
 					// 총알 사거리보다 멀리 떨어진 플레이어는 충돌체크 X
