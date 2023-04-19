@@ -181,6 +181,8 @@ void processPacket(char* ptr)
 			npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 			npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
 			npcs_info[recv_id].m_state = OBJ_ST_RUNNING;
+
+			left_npc++;
 		}
 		else {
 			cout << "[ADD ERROR] Unknown Target!" << endl;
