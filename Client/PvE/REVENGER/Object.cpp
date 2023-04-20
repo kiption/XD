@@ -1331,6 +1331,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 					}
 				}
 			}
+			
 			pMaterial->SetReflection(nMaterial);
 			SetMaterial(nMaterial, pMaterial);
 
@@ -1721,7 +1722,7 @@ void CGunshipObject::Animate(float fTimeElapsed)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CMi24Object::CMi24Object(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+CMi24Object::CMi24Object(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) 
 {
 }
 
@@ -1962,4 +1963,19 @@ CRotatingObject::~CRotatingObject()
 void CRotatingObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Rotate(&m_xmf3RotationAxis, m_fRotationSpeed * fTimeElapsed);
+}
+
+CCityObject::CCityObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(4)
+{
+}
+
+CCityObject::~CCityObject()
+{
+}
+void CCityObject::OnPrepareAnimate()
+{
+}
+
+void CCityObject::Animate(float fTimeElapsed)
+{
 }

@@ -110,10 +110,23 @@ extern HINSTANCE						ghAppInstance;
 #define _WITH_DIRECT2D_IMAGE_EFFECT
 #endif
 
+#define ANIMATION_TYPE_ONCE				0
+#define ANIMATION_TYPE_LOOP				1
+#define ANIMATION_TYPE_PINGPONG			2
+
+#define ANIMATION_CALLBACK_EPSILON		0.00165f
+
+#define MAX_LIGHTS						8
+#define MAX_MATERIALS					16
+#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
+#define POINT_LIGHT						1
+#define SPOT_LIGHT						2
+#define DIRECTIONAL_LIGHT				3
+
 #define OPENINGSCENE 0x00
 #define SCENE1STAGE 0x01
 #define SCENE2STAGE 0x02
-#define BULLETS					150
+#define BULLETS					100
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 
 extern int gnCurrentParticles;
@@ -151,18 +164,7 @@ inline bool IsEqual(float fA, float fB, float fEpsilon) { return(::IsZero(fA - f
 inline float InverseSqrt(float fValue) { return 1.0f / sqrtf(fValue); }
 inline void Swap(float *pfS, float *pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT = fTemp; }
 
-#define ANIMATION_TYPE_ONCE				0
-#define ANIMATION_TYPE_LOOP				1
-#define ANIMATION_TYPE_PINGPONG			2
 
-#define ANIMATION_CALLBACK_EPSILON		0.00165f
-
-#define MAX_LIGHTS						16
-#define MAX_MATERIALS					512
-#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
-#define POINT_LIGHT						1
-#define SPOT_LIGHT						2
-#define DIRECTIONAL_LIGHT				3
 namespace Vector3
 {
 	inline XMFLOAT3 XMVectorToFloat3(XMVECTOR& xmvVector)

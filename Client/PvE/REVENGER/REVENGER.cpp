@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "REVENGER.h"
 #include "GameFramework.h"
-#include "Network.h"
 #include "BillboardObjectsShader.h"
 #define MAX_LOADSTRING 100
 
@@ -101,35 +100,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	HWND hwnd{};
 	HACCEL hAccelTable;
 
-	//==================================================
-	//					Server Code
-	//==================================================
-	wcout.imbue(locale("korean"));
-	WSADATA WSAData;
-	WSAStartup(MAKEWORD(2, 2), &WSAData);
-
-	active_servernum = MAX_SERVER - 1;
-
-	CS_LOGIN_PACKET login_pack;
-	login_pack.size = sizeof(CS_LOGIN_PACKET);
-	login_pack.type = CS_LOGIN;
-	strcpy_s(login_pack.name, "COPTER");
-
-	// Active Server에 연결
-	sockets[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	SOCKADDR_IN server0_addr;
-	ZeroMemory(&server0_addr, sizeof(server0_addr));
-	server0_addr.sin_family = AF_INET;
-	int new_portnum = PORT_NUM_S0 + active_servernum;
-	server0_addr.sin_port = htons(new_portnum);
-	//server0_addr.sin_port = htons(PORTNUM_RELAY2CLIENT_0);		// 릴레이서버로 연결하려면 123,124를 지우고 여기를 주석해제하면됨.
-	inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);
-	connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
-
-	sendPacket(&login_pack, active_servernum);
-	recvPacket(active_servernum);
-	//==================================================
-
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	(void)HeapSetInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
@@ -190,155 +160,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		}
 		else
 		{
-
-			if (gGameFramework.m_nMode != SCENE2STAGE && gGameFramework.m_nMode == SCENE1STAGE)
-			{
-
-				//==================================================
-				//		새로운 키 입력을 서버에게 전달합니다.
-				//==================================================
-				if (!gGameFramework.CheckNewInputExist_Keyboard()) {
-					short keyValue = gGameFramework.PopInputVal_Keyboard();
-					CS_INPUT_KEYBOARD_PACKET keyinput_pack;
-					keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
-					keyinput_pack.type = CS_INPUT_KEYBOARD;
-					keyinput_pack.direction = keyValue;
-
-					sendPacket(&keyinput_pack, active_servernum);
-				}
-
-				if (!gGameFramework.CheckNewInputExist_Mouse()) {
-					MouseInputVal mouseValue = gGameFramework.PopInputVal_Mouse();
-					CS_INPUT_MOUSE_PACKET mouseinput_pack;
-					mouseinput_pack.size = sizeof(CS_INPUT_MOUSE_PACKET);
-					mouseinput_pack.type = CS_INPUT_MOUSE;
-					mouseinput_pack.key_val = mouseValue.button;
-					mouseinput_pack.delta_x = mouseValue.delX;
-					mouseinput_pack.delta_y = mouseValue.delY;
-
-					sendPacket(&mouseinput_pack, active_servernum);
-				}
-				//==================================================
-
-				//==================================================
-				//	    서버로부터 받은 값으로 최신화해줍니다.
-				//==================================================
-				// 1. 자기자신 Player 객체 최신화
-				gGameFramework.SetPosition_PlayerObj(my_info.m_pos);
-				gGameFramework.SetVectors_PlayerObj(my_info.m_right_vec, my_info.m_up_vec, my_info.m_look_vec);
-
-				// 2. 다른 Player 객체 최신화
-				for (int i = 0; i < MAX_USER; i++) {
-					if (i == my_info.m_id) continue;
-					if (other_players[i].m_state == OBJ_ST_RUNNING) {
-						gGameFramework.SetPosition_OtherPlayerObj(i, other_players[i].m_pos);
-						gGameFramework.SetVectors_OtherPlayerObj(i, other_players[i].m_right_vec, other_players[i].m_up_vec, other_players[i].m_look_vec);
-					}
-					else if (other_players[i].m_state == OBJ_ST_LOGOUT) {
-						other_players[i].m_state = OBJ_ST_EMPTY;
-						gGameFramework.Remove_OtherPlayerObj(i);
-					}
-
-					if (gGameFramework.m_nMode == SCENE2STAGE)
-					{
-						other_players[i].m_state == OBJ_ST_LOGOUT;
-						gGameFramework.Remove_OtherPlayerObj(i);
-					}
-				}
-				// 3. Bullet 객체 최신화
-				for (int i = 0; i < MAX_BULLET; i++) {
-
-
-
-					if (bullets_info[i].m_state == OBJ_ST_EMPTY) continue;
-
-					if (bullets_info[i].m_state == OBJ_ST_LOGOUT) {	// Clear
-						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
-						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(0.01f, 0.01f, 0.01f);
-						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(45.0, 0.0, 0.0);
-						gGameFramework.m_pScene->m_pLights->m_pLights[4].m_xmf4Diffuse = XMFLOAT4(0.4, 0.4f, 0.4f, 1.0f);
-						gGameFramework.m_pScene->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.0, 0.0f, 0.0f, 1.0f);
-
-						bullets_info[i].returnToInitialState();
-
-					}
-					else if (bullets_info[i].m_state == OBJ_ST_RUNNING) {	// Update
-						gGameFramework.SetPosition_Bullet(i, bullets_info[i].m_pos, bullets_info[i].m_right_vec, bullets_info[i].m_up_vec, bullets_info[i].m_look_vec);
-
-						gGameFramework.m_pScene->m_ppBullets[i]->SetScale(4.0, 4.0, 18.0);
-						gGameFramework.m_pScene->m_ppBullets[i]->Rotate(100.0, 0.0, 0.0);
-						gGameFramework.m_pScene->m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(bullets_info[i].m_pos);
-						gGameFramework.m_pScene->m_pLights->m_pLights[3].m_xmf3Direction = XMFLOAT3(bullets_info[i].m_look_vec);
-						gGameFramework.m_pScene->m_pLights->m_pLights[4].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.6f, 0.4f, 1.0f);
-						gGameFramework.m_pScene->m_pLights->m_pLights[4].m_xmf4Emissive = XMFLOAT4(0.9f, 0.6f, 0.4f, 1.0f);
-						//	gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerPosition = bullets_info[i].m_pos;
-						//	gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerLook= my_info.m_look_vec;
-
-						XMFLOAT3 xmf3bulletPosition = bullets_info[i].m_pos;
-						XMFLOAT3 xmf3bulletLook = my_info.m_look_vec;
-						//	XMFLOAT3 xmf3Position= Vector3::Add(gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerPosition, Vector3::ScalarProduct(gGameFramework.m_pScene->m_pBillboardShader[1]->xmf3PlayerLook, 60.0f, false));
-						//	gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(bullets_info[i].m_pos);
-						//	gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetLook(my_info.m_look_vec);
-						//	gGameFramework.m_pScene->m_pBillboardShader[1]->m_ppObjects[0]->SetLookAt(xmf3Position, XMFLOAT3(0.0f, 0.1, 0.0f));
-
-					}
-				}
-				// 4. 자신의 총알 개수 최신화 (UI)
-				wchar_t MyBullet[20];
-				_itow_s(my_info.m_bullet, MyBullet, sizeof(MyBullet), 10);
-				wcscpy_s(gGameFramework.m_myBullet, MyBullet);
-
-				// 5. HP 최신화	(UI)
-				wchar_t MyHp[20];
-				_itow_s(my_info.m_hp, MyHp, sizeof(MyHp), 10);
-				wcscpy_s(gGameFramework.m_myhp, MyHp);
-				gGameFramework.m_currHp = my_info.m_hp;
-
-				// 6. NPC 움직임 최신화
-				if (gGameFramework.m_nMode == SCENE1STAGE) {	// 임시
-					for (int i{}; i < MAX_NPCS; i++) {
-						gGameFramework.SetPosition_NPC(npcs_info[i].m_id, npcs_info[i].m_pos);
-						gGameFramework.SetVectors_NPC(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
-						gGameFramework.m_pScene->SmokePosition = npcs_info[i].m_pos;
-						((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(npcs_info[i].m_pos);
-					}
-				}
-			
-
-				// 7. Time 동기화
-				gGameFramework.m_10MinOfTime = servertime_sec / 600;
-				gGameFramework.m_1MinOfTime = (servertime_sec - gGameFramework.m_10MinOfTime * 600) / 60;
-				gGameFramework.m_10SecOftime = (servertime_sec - gGameFramework.m_1MinOfTime * 60) / 10;
-				gGameFramework.m_1SecOfTime = servertime_sec % 10;
-
-
-				//==================================================
-				//					충돌 이펙트 관련
-				//==================================================
-				// 1. 자기 자신
-				if (my_info.m_damaged_effect_on) {
-					// 여기에 이펙트 넣어줘.
-				}
-
-				// 2. 다른 플레이어
-				for (auto& other_pl : other_players) {
-					if (other_pl.m_damaged_effect_on) {
-						//((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(other_pl.m_pos);
-					}
-				}
-
-				// 3. NPC
-				for (auto& npc : npcs_info) {
-					if (npc.m_damaged_effect_on) {
-						// 여기에 이펙트 넣어줘.
-					}
-				}
-
-			}
-			if (gGameFramework.m_nMode == SCENE2STAGE)
-			{
-
-			}
 			gGameFramework.FrameAdvance();
 		}
 	}

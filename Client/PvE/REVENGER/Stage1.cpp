@@ -30,15 +30,15 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_xmf4GlobalAmbient = XMFLOAT4(0.15,0.15,0.15,0.5);
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[0].m_fRange = 3000.0f;
+	m_pLights->m_pLights[0].m_fRange = 2000.0f;
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.43f, 0.43f, 0.43f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.43f, 0.43f, 0.43f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(+150, 550.0f, -900.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(-0.2, -1.0f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.1f, 0.001f);
+	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.1f, 0.01f);
 
-	m_pLights->m_pLights[1].m_bEnable = true;
+	m_pLights->m_pLights[1].m_bEnable = false;
 	m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 2000.0f;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
@@ -47,7 +47,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(+250, 660.0f, -1000.0f);
 	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(-0.1f, -1.0f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.1f, 0.5f);
-	m_pLights->m_pLights[1].m_fFalloff = 9.0f;
+	m_pLights->m_pLights[1].m_fFalloff = 15.0f;
 	m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(60.0f));
 	m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
 
@@ -791,8 +791,8 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		//		m_pLights->m_pLights[1].m_xmf3Direction = m_pPlayer->GetCamera()->GetLookVector();
 
 		m_fLightRotationAngle += fTimeElapsed;
-	//	XMMATRIX xmmtxRotation = XMMatrixRotationY(fTimeElapsed * 0.2f);
-	//	XMStoreFloat3(&m_pLights->m_pLights[1].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[1].m_xmf3Direction), xmmtxRotation));
+		XMMATRIX xmmtxRotation = XMMatrixRotationY(fTimeElapsed * 0.2f);
+	XMStoreFloat3(&m_pLights->m_pLights[1].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[1].m_xmf3Direction), xmmtxRotation));
 	}
 
 	if (m_pLights)

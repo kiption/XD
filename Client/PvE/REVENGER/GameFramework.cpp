@@ -382,15 +382,11 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case '1':
 		{
-			short key1 = INPUT_KEY_1;//S
-			q_keyboardInput.push(key1);//S
 			ChangeScene(SCENE1STAGE);
 			break;
 		}
 		case '2':
 		{
-			short key2 = INPUT_KEY_2;//S
-			q_keyboardInput.push(key2);//S
 			ChangeScene(SCENE2STAGE);
 			break;
 		}
@@ -498,7 +494,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 	m_pCamera->SetMode(FIRST_PERSON_CAMERA);
-	m_pScene->m_pPlayer->SetPosition(XMFLOAT3(500.0, 200.0, 500.0));
+	m_pScene->m_pPlayer->SetPosition(XMFLOAT3(500.0, 100.0, 500.0));
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
@@ -527,7 +523,6 @@ void CGameFramework::ProcessInput()
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
 	if (!bProcessedByScene)
 	{
-		char inputKeyValue = 0;//S
 		DWORD dwDirection = 0;
 
 		if (pKeysBuffer[KEY_W] & 0xF0) {
@@ -537,8 +532,6 @@ void CGameFramework::ProcessInput()
 			}
 			if (m_nMode != SCENE2STAGE)
 			{
-				inputKeyValue += INPUT_KEY_W;//S
-
 			}
 		}
 		if (pKeysBuffer[KEY_S] & 0xF0) {
@@ -548,8 +541,6 @@ void CGameFramework::ProcessInput()
 			}
 			if (m_nMode != SCENE2STAGE)
 			{
-				inputKeyValue += INPUT_KEY_S;//S
-
 			}
 		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
@@ -560,8 +551,6 @@ void CGameFramework::ProcessInput()
 			dwDirection |= DIR_RIGHT;
 			if (m_nMode != SCENE2STAGE)
 			{
-				inputKeyValue += INPUT_KEY_D;//S
-
 			}
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
@@ -570,65 +559,21 @@ void CGameFramework::ProcessInput()
 			}
 			dwDirection |= DIR_LEFT;
 
-			inputKeyValue += INPUT_KEY_A;//S
-
 
 		}
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
-			inputKeyValue += INPUT_KEY_Q;//S
 			dwDirection |= DIR_UP;
 			m_pCamera->SetTimeLag(0.05);
 		}
 		if (pKeysBuffer[KEY_E] & 0xF0) {
-			inputKeyValue += INPUT_KEY_E;//S
 			dwDirection |= DIR_DOWN;
 			m_pCamera->SetTimeLag(0.05);
 		}
 
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
-			inputKeyValue += INPUT_SPACEBAR;//S
 		}
 
-		// 마우스 조작이 익숙하지 않은 유저를 위한 방향키를 통한 이동조작
-		if (pKeysBuffer[VK_UP] & 0xF0) {
-			MouseInputVal inputMouseValueU;
-			inputMouseValueU.button = L_BUTTON;
-			inputMouseValueU.delX = 0.0f;
-			inputMouseValueU.delY = -3.0f;
-
-			q_mouseInput.push(inputMouseValueU);
-		}
-		if (pKeysBuffer[VK_DOWN] & 0xF0) {
-			MouseInputVal inputMouseValueD;
-			inputMouseValueD.button = L_BUTTON;
-			inputMouseValueD.delX = 0.0f;
-			inputMouseValueD.delY = 3.0f;
-
-			q_mouseInput.push(inputMouseValueD);
-		}
-		if (pKeysBuffer[VK_LEFT] & 0xF0) {
-			MouseInputVal inputMouseValueL;
-			inputMouseValueL.button = L_BUTTON;
-			inputMouseValueL.delX = -3.0f;
-			inputMouseValueL.delY = 0.0f;
-
-			q_mouseInput.push(inputMouseValueL);
-		}
-		if (pKeysBuffer[VK_RIGHT] & 0xF0) {
-			MouseInputVal inputMouseValueR;
-			inputMouseValueR.button = L_BUTTON;
-			inputMouseValueR.delX = 3.0f;
-			inputMouseValueR.delY = 0.0f;
-
-			q_mouseInput.push(inputMouseValueR);
-		}
-		//
-
-		// Server
-		if (inputKeyValue != 0) {
-			q_keyboardInput.push(inputKeyValue);
-		}//
 
 		float cxDelta = 0.0f, cyDelta = 0.0f, czDelta = 0.0f;
 		POINT ptCursorPos;
@@ -646,23 +591,15 @@ void CGameFramework::ProcessInput()
 		{
 			if (cxDelta || cyDelta)
 			{
-				// Server
-				MouseInputVal inputMouseValue;
-
 				if (WM_LBUTTONUP)
 				{
-
-					if (pKeysBuffer[VK_LBUTTON] & 0xF0)
-						inputMouseValue.button = L_BUTTON;
-					else if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-						inputMouseValue.button = R_BUTTON;
-					inputMouseValue.delX = cxDelta;
-					inputMouseValue.delY = cyDelta;
-
-					q_mouseInput.push(inputMouseValue);
+					if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
+					}
+					else if (pKeysBuffer[VK_RBUTTON] & 0xF0) {
+					}
 				}
-				//====
-				if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
+
+				if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE)
 				{
 					if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 						m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
@@ -670,7 +607,7 @@ void CGameFramework::ProcessInput()
 						m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 				}
 			}
-			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
+			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE)
 				if (dwDirection) m_pPlayer->Move(dwDirection, 9.25f, true);
 
 		}
@@ -756,7 +693,7 @@ void CGameFramework::FrameAdvance()
 {
 	SleepEx(1, TRUE);//Server
 	if (m_nMode == SCENE2STAGE)m_GameTimer.Tick(30.0f);
-	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick(60.0f);
+	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick();
 
 	ProcessInput();
 
@@ -772,11 +709,15 @@ void CGameFramework::FrameAdvance()
 
 
 	}
-
-	//d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-	//d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	//d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	//m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
+	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
+	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
+	d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	d3dResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	d3dResourceBarrier.Transition.pResource = m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex];
+	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * ::gnRtvDescriptorIncrementSize);
@@ -804,17 +745,10 @@ void CGameFramework::FrameAdvance()
 	//}
 
 	// Stage2
-	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
-	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
-	d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	d3dResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	d3dResourceBarrier.Transition.pResource = m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex];
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
-
-
 	hResult = m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
@@ -839,65 +773,11 @@ void CGameFramework::FrameAdvance()
 
 	}
 	else if (m_nMode = SCENE1STAGE) {
-
-		D2D_POINT_2F d2dPoint = { 60.0f, 650.0f };
-		D2D_RECT_F d2dRect = { 0.0f, 0.0f, 190.0f, 45.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[0] : m_pd2dfxGaussianBlur[0], &d2dPoint, &d2dRect);
-
-		D2D_POINT_2F d2BHPPoint = { 60.0f, 700.0f };
-		D2D_RECT_F d2BHPRect = { 0.0f , 0.0f, 190.0f, 45.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2BHPPoint, &d2BHPRect);
-
-		D2D_POINT_2F d2T_M2Point = { 560.0f, 50.0f };
-		D2D_RECT_F d2T_M2Rect = { m_10MinOfTime * 40.0f , 0.0f, 40.0f + m_10MinOfTime * 40.0f, 50.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[2] : m_pd2dfxGaussianBlur[2], &d2T_M2Point, &d2T_M2Rect);
-
-		D2D_POINT_2F d2T_M1Point = { 590.0f, 50.0f };
-		D2D_RECT_F d2T_M1Rect = { m_1MinOfTime * 40.0f , 0.0f, 40.0f + m_1MinOfTime * 40.0f, 50.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[3] : m_pd2dfxGaussianBlur[3], &d2T_M1Point, &d2T_M1Rect);
-
-		D2D_POINT_2F d2T_SectionPoint = { 620.0f, 50.0f };
-		D2D_RECT_F d2T_SectionRect = { 282.0f , 420.0f, 300.0f, 475.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[4] : m_pd2dfxGaussianBlur[4], &d2T_SectionPoint, &d2T_SectionRect);
-
-		D2D_POINT_2F d2T_S2Point = { 650.0f, 50.0f };
-		D2D_RECT_F d2T_S2Rect = { m_10SecOftime * 40.0f , 0.0f, 40.0f + m_10SecOftime * 40.0f, 50.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[5] : m_pd2dfxGaussianBlur[5], &d2T_S2Point, &d2T_S2Rect);
-
-		D2D_POINT_2F d2T_S1Point = { 680.0f, 50.0f };
-		D2D_RECT_F d2T_S1Rect = { m_1SecOfTime * 40.0f , 0.0f, 40.0f + m_1SecOfTime * 40.0f, 50.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[6] : m_pd2dfxGaussianBlur[6], &d2T_S1Point, &d2T_S1Rect);
-
-		D2D_POINT_2F d2d_BulletPoint = { 1000.0f, 680.0f };
-		D2D_RECT_F d2d_BulletRect = { 0.0f , 0.0f, 32.0f, 32.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[7] : m_pd2dfxGaussianBlur[7], &d2d_BulletPoint, &d2d_BulletRect);
-
-		D2D_POINT_2F d2_DirectionPoint = { 550.0f, -10.0f };
-		D2D_RECT_F d2_DirectionRect = { 0.0f , 0.0f, 180.0f, 90.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[8] : m_pd2dfxGaussianBlur[8], &d2_DirectionPoint, &d2_DirectionRect);
 	}
 
 #endif
 
 	if (m_nMode == SCENE1STAGE) {
-		D2D1_SIZE_F szRenderTarget = m_ppd2dRenderTargets[m_nSwapChainBufferIndex]->GetSize();
-		D2D1_RECT_F rcUpperText = D2D1::RectF(0, 0, szRenderTarget.width, szRenderTarget.height * 0.25f);
-		m_pd2dDeviceContext->DrawTextW(L"", (UINT32)wcslen(L""), m_pdwFont, &rcUpperText, m_pd2dbrText);
-
-		D2D1_RECT_F rcLowerText = D2D1::RectF(0, szRenderTarget.height * 0.8f, szRenderTarget.width, szRenderTarget.height);
-		m_pd2dDeviceContext->DrawTextW(L" ", (UINT32)wcslen(L" "), m_pdwFont, &rcLowerText, m_pd2dbrText);
-
-		D2D1_RECT_F rcBulletText = D2D1::RectF(850, 950, szRenderTarget.width, szRenderTarget.height * 0.5f);
-		m_pd2dDeviceContext->DrawTextW(m_myBullet, (UINT32)wcslen(m_myBullet), m_pdwFont, &rcBulletText, m_pd2dbrText);
-
-		D2D1_RECT_F rcMaxBulletText = D2D1::RectF(950, 950, szRenderTarget.width, szRenderTarget.height * 0.5f);
-		m_pd2dDeviceContext->DrawTextW(L"/100", (UINT32)wcslen(L"/100"), m_pdwFont, &rcMaxBulletText, m_pd2dbrText);
-
-		D2D1_RECT_F rcCurrHpText = D2D1::RectF(-1025, 920, szRenderTarget.width, szRenderTarget.height * 0.5f);
-		m_pd2dDeviceContext->DrawTextW(m_myhp, (UINT32)wcslen(m_myhp), m_pdwFont, &rcCurrHpText, m_pd2dbrText);
-
-		D2D1_RECT_F rcMaxHpText = D2D1::RectF(-925, 920, szRenderTarget.width, szRenderTarget.height * 0.5f);
-		m_pd2dDeviceContext->DrawTextW(L"/100", (UINT32)wcslen(L"/100"), m_pdwFont, &rcMaxHpText, m_pd2dbrText);
 	}
 
 	m_pd2dDeviceContext->EndDraw();
@@ -1215,110 +1095,5 @@ void CGameFramework::CreateDirect2DDevice()
 }
 #endif
 
-
-
-
-//==================================================
-//			    Function for Networking
-//==================================================
-bool CGameFramework::CheckNewInputExist_Keyboard() {
-	return q_keyboardInput.empty();
-}
-bool CGameFramework::CheckNewInputExist_Mouse() {
-	return q_mouseInput.empty();
-}
-
-short CGameFramework::PopInputVal_Keyboard() {
-	short val = q_keyboardInput.front();
-	q_keyboardInput.pop();
-
-	return val;
-}
-MouseInputVal CGameFramework::PopInputVal_Mouse() {
-	MouseInputVal val = q_mouseInput.front();
-	q_mouseInput.pop();
-
-	return val;
-}
-
-void CGameFramework::SetPosition_PlayerObj(XMFLOAT3 pos) {
-	m_pPlayer->m_xmf3Position = pos;
-}
-void CGameFramework::SetVectors_PlayerObj(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec) {
-	m_pPlayer->SetVectorsByServer(rightVec, upVec, lookVec);
-}
-
-void CGameFramework::SetPosition_OtherPlayerObj(int id, XMFLOAT3 pos) {
-	if (m_nMode == SCENE1STAGE)
-	{
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._41 = pos.x;
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._42 = pos.y;
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._43 = pos.z;
-	}
-	/*if (m_nMode == SCENE2STAGE)
-	{
-		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._41 = pos.x;
-		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._42 = pos.y;
-		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->m_xmf4x4ToParent._43 = pos.z;
-	}*/
-}
-void CGameFramework::SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec) {
-	if (m_nMode == SCENE1STAGE)
-	{
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(1.0, 1.0, 1.0);
-	}
-	//if (m_nMode == SCENE2STAGE)
-	//{
-	//	((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->SetUp(upVec);
-	//	((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->SetRight(rightVec);
-	//	((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[id]->SetLook(lookVec);
-	//}
-}
-void CGameFramework::Remove_OtherPlayerObj(int id) {
-	if (m_nMode == SCENE1STAGE)
-	{
-		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
-		}
-	}
-}
-
-void CGameFramework::Create_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look)
-{
-
-}
-
-void CGameFramework::SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3right, XMFLOAT3 xmf3up, XMFLOAT3 xmf3look)
-{
-
-	if (m_nMode == SCENE1STAGE)
-	{
-		((Stage1*)m_pScene)->m_ppBullets[id]->SetPosition(pos);
-		((Stage1*)m_pScene)->m_ppBullets[id]->SetRight(xmf3right);
-		((Stage1*)m_pScene)->m_ppBullets[id]->SetUp(xmf3up);
-		((Stage1*)m_pScene)->m_ppBullets[id]->SetLook(xmf3look);
-	}
-}
-
-void CGameFramework::SetPosition_NPC(int id, XMFLOAT3 pos)
-{
-	if (m_nMode == SCENE1STAGE)
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetPosition(pos);
-}
-
-void CGameFramework::SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
-{
-	if (m_nMode == SCENE1STAGE)
-	{
-
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetRight(rightVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetUp(upVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetLook(lookVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetScale(1.0f, 1.0f, 1.0f);
-	}
-}
 
 

@@ -23,7 +23,7 @@ public:
 	int GetHeightMapLength() { return(m_nLength); }
 };
 
-class CHeightMapGridMesh : public CMeshIlluminated
+class CHeightMapGridMesh : public CMesh
 {
 protected:
 	int								m_nWidth;

@@ -227,7 +227,7 @@ void SpriteAnimationBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList
 		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
 
-		XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 50.0f, false));
+		XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 500.0f, false));
 		for (int j = 0; j < m_nObjects; j++)
 		{
 			if (m_ppObjects[j])
@@ -235,7 +235,7 @@ void SpriteAnimationBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList
 				ExplosionPosition.x=m_ppObjects[j]->m_xmf4x4ToParent._41;
 				ExplosionPosition.y=m_ppObjects[j]->m_xmf4x4ToParent._42;
 				ExplosionPosition.z=m_ppObjects[j]->m_xmf4x4ToParent._43;
-				/*m_ppObjects[j]->SetPosition(xmf3PlayerPosition);*/
+				m_ppObjects[j]->SetPosition(xmf3PlayerPosition);
 				m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
 			}
 		}

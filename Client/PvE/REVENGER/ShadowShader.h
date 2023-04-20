@@ -35,6 +35,10 @@ public:
 	float m_fBulletEffectiveRange = 2000.0f;
 	CBulletObject* pBulletObject = NULL;
 	CBulletObject* m_ppBullets[BULLETS];
+public:
+	CGameObject** m_ppObjects = 0;
+	int									m_nObjects = 0;
+
 };
 
 struct TOOBJECTSPACEINFO
@@ -133,7 +137,7 @@ public:
 
 public:
 	CObjectsShader* m_pObjectsShader = NULL;
-	CTexture* m_pDepthTexture = NULL;
+	//CTexture* m_pDepthTexture = NULL;
 };
 
 class CTextureToViewportShader : public CShader

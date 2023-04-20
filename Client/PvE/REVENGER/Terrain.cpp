@@ -30,10 +30,10 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	m_pScene->CreateShaderResourceViews(pd3dDevice, pTerrainBaseTexture[0], 0, 13);
 	m_pScene->CreateShaderResourceViews(pd3dDevice, pTerrainBaseTexture[1], 0, 14);
 
-	CMaterial* pTerrainMaterial = new CMaterial(3);
+	CMaterial* pTerrainMaterial = new CMaterial(2);
 	pTerrainMaterial->SetTexture(pTerrainBaseTexture[0], 0);
 	pTerrainMaterial->SetTexture(pTerrainBaseTexture[1], 1);
-	pTerrainMaterial->SetReflection(1);
+	pTerrainMaterial->SetReflection(2);
 	pTerrainMaterial->SetShader(pTerrainShader);
 
 	SetMaterial(0,pTerrainMaterial);

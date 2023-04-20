@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------
-#define MAX_LIGHTS			16
-#define MAX_MATERIALS		512
+#define MAX_LIGHTS			8
+#define MAX_MATERIALS		16
 
 #define POINT_LIGHT			1
 #define SPOT_LIGHT			2
@@ -39,7 +39,7 @@ cbuffer cbLights : register(b4)
 	float4					gcGlobalAmbientLight;
 	int						gnLights;
 };
-#define FRAME_BUFFER_WIDTH		1280
+#define FRAME_BUFFER_WIDTH		1480
 #define FRAME_BUFFER_HEIGHT		1024
 
 #define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 4)

@@ -1,4 +1,4 @@
-#define MAX_LIGHTS 16
+#define MAX_LIGHTS 8
 struct MATERIAL
 {
 	float4					m_cAmbient;
@@ -918,6 +918,7 @@ static matrix gmxTexture = { 0.5,0.0,0.0,0.0,
 							0.0,-0.5,0.0,0.0,
 							0.0,0.0,1.0,0.0,
 							0.5,0.5,0.0,1.0 };
+
 VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 {
 	VS_SHADOW_MAP_OUTPUT output = (VS_SHADOW_MAP_OUTPUT)0;
@@ -926,7 +927,6 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 	output.positionW = positionW.xyz;
 	output.position = mul(mul(positionW, gmtxView), gmtxProjection);
 	output.normalW = mul(float4(input.normal, 0.0f), gmtxGameObject).xyz;
-	//output.uv = mul(output.positionW, mul(mul(gmtxView, gmtxProjection), gmxTexture));
 	output.uv = input.uv;
 
 	for (int i = 0; i < MAX_LIGHTS; i++)
@@ -941,23 +941,17 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 {
 	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
 	
 	if (gnTexturesMask & MATERIAL_ALBEDO_MAP)
 		cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
 	else 
 		cAlbedoColor = gMaterial.m_cDiffuse;
 
+	
 	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
-
-	//if (gnTexturesMask & MATERIAL_SPECULAR_MAP)cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv); else cSpecularColor = gMaterial.m_cSpecular;
-	//if (gnTexturesMask & MATERIAL_METALLIC_MAP)cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv); else cMetallicColor = gMaterial.m_cAmbient;
-//	float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gssWrap, input.uv);
-	//gMaterial.m_cAmbient
-
 	float4 cColor = cAlbedoColor;
+	cColor += GetColorFromDepth(cColor.r);
 
-	return(lerp(cColor, cIllumination, 0.4f));
-
+	return(lerp(cColor, cIllumination, 0.7f));
 }
