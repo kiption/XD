@@ -15,6 +15,8 @@ D3D12_GPU_DESCRIPTOR_HANDLE	Stage2::m_d3dSrvGPUDescriptorNextHandle;
 
 Stage2::Stage2() : SceneManager()
 {
+	m_d3dSrvCPUDescriptorStartHandle.ptr = NULL;
+	m_d3dSrvGPUDescriptorStartHandle.ptr = NULL;
 }
 
 Stage2::~Stage2()
@@ -45,7 +47,7 @@ void Stage2::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
 	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights->m_pLights[1].m_fFalloff = 8.0f;
+	m_pLights->m_pLights[1].m_fFalloff = 6.0f;
 	m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 	m_pLights->m_pLights[2].m_bEnable = true;
@@ -63,7 +65,7 @@ void Stage2::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(550.0f, 330.0f, 530.0f);
 	m_pLights->m_pLights[3].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 1.0f);
 	m_pLights->m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights->m_pLights[3].m_fFalloff = 8.0f;
+	m_pLights->m_pLights[3].m_fFalloff =6.0f;
 	m_pLights->m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(90.0f));
 	m_pLights->m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(30.0f));
 	m_pLights->m_pLights[4].m_bEnable = true;
@@ -146,16 +148,6 @@ void Stage2::ReleaseObjects()
 		}
 		delete[] m_ppStageMapShaders;
 	}
-	//if (m_pBillboardShader)
-	//{
-	//	for (int i = 0; i < m_nBillboardShaders; i++)
-	//	{
-	//		m_pBillboardShader[i]->ReleaseShaderVariables();
-	//		m_pBillboardShader[i]->ReleaseObjects();
-	//		m_pBillboardShader[i]->Release();
-	//	}
-	//	delete[] m_pBillboardShader;
-	//}
 	if (m_ppShaders)
 	{
 		for (int i = 0; i < m_nShaders; i++)
@@ -168,12 +160,6 @@ void Stage2::ReleaseObjects()
 	}
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
-
-	/*if (m_ppHierarchicalGameObjects)
-	{
-		for (int i = 0; i < m_nHierarchicalGameObjects; i++) if (m_ppHierarchicalGameObjects[i]) m_ppHierarchicalGameObjects[i]->Release();
-		delete[] m_ppHierarchicalGameObjects;
-	}*/
 
 	ReleaseShaderVariables();
 	if (m_pLights) delete[] m_pLights;
@@ -507,7 +493,6 @@ bool Stage2::ProcessInput(UCHAR* pKeysBuffer)
 
 void Stage2::AnimateObjects(float fTimeElapsed)
 {
-	//SceneManager::AnimateObjects(fTimeElapsed);
 	m_fElapsedTime = fTimeElapsed;
 
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);

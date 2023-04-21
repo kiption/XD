@@ -148,7 +148,7 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 		}
 	}
 
-	pd3dCommandList->SetGraphicsRootDescriptorTable(19, ((Stage1*)m_pScene)->m_d3dCbvGPUDescriptorStartHandle);
+	pd3dCommandList->SetGraphicsRootDescriptorTable(19, m_pScene->m_d3dCbvGPUDescriptorStartHandle);
 
 	if (m_pMesh)
 	{

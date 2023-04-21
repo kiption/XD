@@ -20,43 +20,45 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 1000.0, 0.0f, _PLANE_HEIGHT + 1000.0, 0.0f, 0.0f, 0.0f);
-	CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 100.0f, 100.0f, 100.0f);
-
+	CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 300.0f, 300.0f, 300.0f);
 
 	CMaterial* pPlaneMaterial = new CMaterial(3);
 	pPlaneMaterial->SetReflection(3);
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 	m_ppObjects[0] = new CGameObject(1);
 	m_ppObjects[0]->SetMesh(pPlaneMesh);
-	m_ppObjects[0]->SetMaterial(pPlaneMaterial);
+	m_ppObjects[0]->SetMaterial(0,pPlaneMaterial);
 	m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 0.0, 100.0f));
-	CShadowMapShader* pShadowMap = NULL;
-	XMFLOAT3 xmf3Scale(5.0f, 0.3, 5.0f);
+
+	XMFLOAT3 xmf3Scale(6.0f, 0.2, 6.0f);
 	XMFLOAT3 xmf3Normal(0.0f, 0.0f, 0.0f);
-	CMaterial* pPlaneMaterial2 = new CMaterial(1);
-	pPlaneMaterial2->SetReflection(1);
-	pPlaneMaterial2->SetTexture(m_pDepthTexture,0);
+	CMaterial* pTerrianMeterial = new CMaterial(1);
+	pTerrianMeterial->SetReflection(1);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, _T("Terrain/terrain033.raw"), 512, 512, xmf3Scale, xmf3Normal);
-	m_pTerrain->SetMaterial(0,pPlaneMaterial2);
-	m_pTerrain->SetPosition(-1000.0, -10.0, -1000.0);
+	pTerrianMeterial->SetTexture(m_pDepthTexture, 0);
+	m_pTerrain->SetMaterial(0, pTerrianMeterial);
+	m_pTerrain->SetPosition(-1000.0, -8.0, -1000.0);
 	m_ppObjects[2] = m_pTerrain;
 
 	CMaterial* pMaterial = new CMaterial(3);
 	pMaterial->SetReflection(3);
 	m_ppObjects[1] = new CGameObject(1);
 	m_ppObjects[1]->SetMesh(pCubeMesh);
-	m_ppObjects[1]->SetMaterial(pMaterial);
-	m_ppObjects[1]->SetPosition(-500.0f, 15.0, 500.0f);
+	m_ppObjects[1]->SetMaterial(0,pMaterial);
+	m_ppObjects[1]->Rotate(0,90,0);
+	m_ppObjects[1]->SetPosition(-400.0f, 50.0, 1300.0f);
 
 	m_ppObjects[3] = new CGameObject(1);
 	m_ppObjects[3]->SetMesh(pCubeMesh);
-	m_ppObjects[3]->SetMaterial(pMaterial);
-	m_ppObjects[3]->SetPosition(-500.0f, 15.0, 500.0f);
+	m_ppObjects[3]->SetMaterial(0,pMaterial);
+	m_ppObjects[3]->Rotate(0,90,0);
+	m_ppObjects[3]->SetPosition(-400.0f, 50.0, 1300.0f);
 
 	m_ppObjects[4] = new CGameObject(1);
 	m_ppObjects[4]->SetMesh(pCubeMesh);
-	m_ppObjects[4]->SetMaterial(pMaterial);
-	m_ppObjects[4]->SetPosition(-500.0f, 15.0, 500.0f);
+	m_ppObjects[4]->SetMaterial(0,pMaterial);
+	m_ppObjects[4]->Rotate(0,90,0);
+	m_ppObjects[4]->SetPosition(-400.0f, 50.0, 1300.0f);
 
 	m_nHierarchicalGameObjects = 5;
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
@@ -114,6 +116,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	pCityMaterial[2]->SetReflection(1);
 	pCityMaterial[3]->SetReflection(1);
 	int Cities = 4;
+
 	m_ppCityGameObjects = new CGameObject * [Cities];
 	CStandardMesh* pMesh = new CStandardMesh(pd3dDevice, pd3dCommandList);
 	for (int i = 0; i < Cities; i++)
@@ -133,10 +136,10 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[17] = m_ppCityGameObjects[2];
 	m_ppObjects[18] = m_ppCityGameObjects[3];
 
-	m_ppObjects[15]->SetPosition(550.0, 22.5, -550.0);
-	m_ppObjects[16]->SetPosition(-550.0,22.5, 550.0);
-	m_ppObjects[17]->SetPosition(250.0, 22.5, -200.0);
-	m_ppObjects[18]->SetPosition(950.0, 22.5, 670.0);
+	m_ppObjects[15]->SetPosition(550.0, 22.0, -550.0);
+	m_ppObjects[16]->SetPosition(-550.0,22.0, 550.0);
+	m_ppObjects[17]->SetPosition(250.0, 22.0, -200.0);
+	m_ppObjects[18]->SetPosition(950.0, 22.0, 670.0);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

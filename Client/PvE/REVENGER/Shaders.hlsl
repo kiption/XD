@@ -951,7 +951,7 @@ float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 	
 	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
 	float4 cColor = cAlbedoColor;
-	cColor += GetColorFromDepth(cColor.r);
+	
 
-	return(lerp(cColor, cIllumination, 0.7f));
+	return(lerp(cColor, cIllumination, 0.8f));
 }
