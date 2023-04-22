@@ -69,7 +69,7 @@ void CrossHairShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, nRenderTargets, pdxgiRtvFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, nPipelineState);
 }
 
 D3D12_SHADER_BYTECODE CrossHairShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
@@ -182,7 +182,7 @@ void BillboardParticleShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevi
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, nRenderTargets, pdxgiRtvFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, nPipelineState);
 
 }
 
@@ -304,49 +304,49 @@ void BillboardParticleShader::AnimateObjects(float fTimeElapsed)
 
 
 
-	//for (int j = 0; j < m_nObjects; j++)
-	//{
-	//	
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		
 
-	//	randomX = uidx(dre);
-	//	randomY = uidy(dre);
-	//	randomZ = uidz(dre);
-	//	XMFLOAT3 xf_Velocity = XMFLOAT3(0.001, 0.0, 0.0f);
-	//	XMFLOAT3 xf_GravityAccel = XMFLOAT3(0.0, 1.8f, 0.0);
-	//	float f_EmmitTime = 2.0;
-	//	float a_LifeTime = 1.0;
-	//	float f_ResetTime = {};
-	//	float NewY{};
-	//	fTimeElapsed += 0.0165;
-	//
-	//	float Time = fTimeElapsed - f_EmmitTime;
-	//	if (Time < 0.0)
-	//	{
+		randomX = uidx(dre);
+		randomY = uidy(dre);
+		randomZ = uidz(dre);
+		XMFLOAT3 xf_Velocity = XMFLOAT3(0.001, 0.0, 0.0f);
+		XMFLOAT3 xf_GravityAccel = XMFLOAT3(0.0, 1.8f, 0.0);
+		float f_EmmitTime = 2.0;
+		float a_LifeTime = 1.0;
+		float f_ResetTime = {};
+		float NewY{};
+		fTimeElapsed += 0.0165;
+	
+		float Time = fTimeElapsed - f_EmmitTime;
+		if (Time < 0.0)
+		{
 
-	//	}
-	//	else
-	//	{
-	//		m_fWidth = 1.0f;
-	//		m_fHeight = 1.0f;
-	//	
-	//		randomLiftHeight = uidha(dre);
-	//		randomLiftHeighiest = uidhs(dre);
-	//		Time = a_LifeTime * XMScalarModAngle(Time / a_LifeTime);
-	//		newPosition.x = m_ppObjects[j]->m_xmf4x4ToParent._41 + xf_Velocity.x * Time + 0.5 * xf_GravityAccel.x * Time * Time + randomX;
-	//		newPosition.y = m_ppObjects[j]->m_xmf4x4ToParent._42 + xf_Velocity.y * Time + 0.5 * xf_GravityAccel.y * Time * Time + randomY;
-	//		newPosition.z = m_ppObjects[j]->m_xmf4x4ToParent._43 + xf_Velocity.z * Time + 0.5 * xf_GravityAccel.z * Time * Time + randomZ;
-	//		if (newPosition.y > 800.0)
-	//		{
-	//			newPosition.y= NextPosition.y;
-	//			newPosition.x= NextPosition.x;
-	//			newPosition.z= NextPosition.z;
-	//		}
-	//		m_ppObjects[j]->m_xmf4x4ToParent._43 = newPosition.z;
-	//		m_ppObjects[j]->m_xmf4x4ToParent._42 = newPosition.y;
-	//		m_ppObjects[j]->m_xmf4x4ToParent._41 = newPosition.x;
-	//	}
+		}
+		else
+		{
+			m_fWidth = 1.0f;
+			m_fHeight = 1.0f;
+		
+			randomLiftHeight = uidha(dre);
+			randomLiftHeighiest = uidhs(dre);
+			Time = a_LifeTime * XMScalarModAngle(Time / a_LifeTime);
+			newPosition.x = m_ppObjects[j]->m_xmf4x4ToParent._41 + xf_Velocity.x * Time + 0.5 * xf_GravityAccel.x * Time * Time + randomX;
+			newPosition.y = m_ppObjects[j]->m_xmf4x4ToParent._42 + xf_Velocity.y * Time + 0.5 * xf_GravityAccel.y * Time * Time + randomY;
+			newPosition.z = m_ppObjects[j]->m_xmf4x4ToParent._43 + xf_Velocity.z * Time + 0.5 * xf_GravityAccel.z * Time * Time + randomZ;
+			if (newPosition.y > 800.0)
+			{
+				newPosition.y= NextPosition.y;
+				newPosition.x= NextPosition.x;
+				newPosition.z= NextPosition.z;
+			}
+			m_ppObjects[j]->m_xmf4x4ToParent._43 = newPosition.z;
+			m_ppObjects[j]->m_xmf4x4ToParent._42 = newPosition.y;
+			m_ppObjects[j]->m_xmf4x4ToParent._41 = newPosition.x;
+		}
 
-	//}
+	}
 	BillboardShader::AnimateObjects(fTimeElapsed);
 }
 
@@ -396,7 +396,7 @@ void OpeningBillboardBanner::CreateGraphicsPipelineState(ID3D12Device* pd3dDevic
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 0, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, nRenderTargets, pdxgiRtvFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, nPipelineState);
 
 }
 

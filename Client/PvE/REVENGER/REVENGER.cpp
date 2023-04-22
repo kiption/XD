@@ -5,7 +5,6 @@
 #include "REVENGER.h"
 #include "GameFramework.h"
 #include "BillboardObjectsShader.h"
-#include "Network.h"//Server
 #define MAX_LOADSTRING 100
 
 HINSTANCE						ghAppInstance;
@@ -100,36 +99,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	MSG msg{};
 	HWND hwnd{};
 	HACCEL hAccelTable;
-
-	//==================================================
-	//					Server Code
-	//==================================================
-	wcout.imbue(locale("korean"));
-	WSADATA WSAData;
-	WSAStartup(MAKEWORD(2, 2), &WSAData);
-
-	active_servernum = MAX_SERVER - 1;
-
-	CS_LOGIN_PACKET login_pack;
-	login_pack.size = sizeof(CS_LOGIN_PACKET);
-	login_pack.type = CS_LOGIN;
-	strcpy_s(login_pack.name, "COPTER");
-
-	// Active Server에 연결
-	sockets[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	SOCKADDR_IN server0_addr;
-	ZeroMemory(&server0_addr, sizeof(server0_addr));
-	server0_addr.sin_family = AF_INET;
-	int new_portnum = PORT_NUM_S0 + active_servernum;
-	server0_addr.sin_port = htons(new_portnum);
-	//server0_addr.sin_port = htons(PORTNUM_RELAY2CLIENT_0);		// 릴레이서버로 연결하려면 123,124를 지우고 여기를 주석해제하면됨.
-	inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);
-	connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
-
-	sendPacket(&login_pack, active_servernum);
-	recvPacket(active_servernum);
-	//==================================================
-
 
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
