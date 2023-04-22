@@ -185,38 +185,6 @@ void process_packet(int client_id, char* packet)
 	case CS_INPUT_KEYBOARD: {
 		CS_INPUT_KEYBOARD_PACKET* inputkey_p = reinterpret_cast<CS_INPUT_KEYBOARD_PACKET*>(packet);
 
-		enum InputKey { KEY_Q, KEY_E, KEY_A, KEY_D, KEY_S, KEY_W, KEY_SPACEBAR };
-
-		for (int i = 0; i <= 6; i++) {
-			if ((inputkey_p->direction >> i) & 1) {
-				switch (i) {
-				case KEY_Q:
-					cout << "Q" << endl;
-					break;
-				case KEY_E:
-					cout << "E" << endl;
-					break;
-				case KEY_A:
-					cout << "E" << endl;
-					break;
-				case KEY_D:
-					cout << "D" << endl;
-					break;
-				case KEY_S:
-					cout << "S" << endl;
-					break;
-				case KEY_W:
-					cout << "W" << endl;
-					break;
-				case KEY_SPACEBAR:
-					cout << "SPACEBAR" << endl;
-					break;
-				default:
-					cout << "UNKNOWN KEY" << endl;
-					break;
-				}
-			}
-		}
 		break;
 	}// CS_INPUT_KEYBOARD end
 	case CS_INPUT_MOUSE: {
@@ -224,9 +192,9 @@ void process_packet(int client_id, char* packet)
 
 		if (clients[client_id].s_state == ST_FREE)	break;
 
-		if (rt_p->key_val == RT_LBUTTON)
+		if (rt_p->buttontype == PACKET_BUTTON_L)
 			cout << "LEFT BUTTON" << endl;
-		else if (rt_p->key_val == RT_RBUTTON)
+		else if (rt_p->buttontype == PACKET_BUTTON_R)
 			cout << "RIGHT BUTTON" << endl;
 		else
 			cout << "UNKNOWN BUTTON" << endl;

@@ -191,6 +191,160 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		}
 		else
 		{
+			//==================================================
+			//		새로운 키 입력을 서버에게 전달합니다.
+			//==================================================
+			if (gGameFramework.checkNewInput_Keyboard()) {
+				short keyValue = gGameFramework.popInputVal_Keyboard();
+
+				switch (keyValue) {
+				case PACKET_KEY_NUM1:
+				case PACKET_KEY_NUM2:
+					CS_INPUT_KEYBOARD_PACKET keyinput_pack;
+					keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+					keyinput_pack.type = CS_INPUT_KEYBOARD;
+					keyinput_pack.keytype = keyValue;
+					sendPacket(&keyinput_pack, active_servernum);
+					break;
+				case PACKET_KEY_W:
+				case PACKET_KEY_S:
+					CS_MOVE_PACKET move_pack;
+					move_pack.size = sizeof(CS_MOVE_PACKET);
+					move_pack.type = CS_MOVE;
+					move_pack.x = gGameFramework.getMyPosition().x;
+					move_pack.y = gGameFramework.getMyPosition().y;
+					move_pack.z = gGameFramework.getMyPosition().z;
+					sendPacket(&move_pack, active_servernum);
+					break;
+				case PACKET_KEY_A:
+				case PACKET_KEY_D:
+					CS_ROTATE_PACKET rotate_pack;
+					rotate_pack.size = sizeof(CS_MOVE_PACKET);
+					rotate_pack.type = CS_ROTATE;
+					rotate_pack.right_x = gGameFramework.getMyRightVec().x;
+					rotate_pack.right_y = gGameFramework.getMyRightVec().y;
+					rotate_pack.right_z = gGameFramework.getMyRightVec().z;
+					rotate_pack.up_x = gGameFramework.getMyUpVec().x;
+					rotate_pack.up_y = gGameFramework.getMyUpVec().y;
+					rotate_pack.up_z = gGameFramework.getMyUpVec().z;
+					rotate_pack.look_x = gGameFramework.getMyLookVec().x;
+					rotate_pack.look_y = gGameFramework.getMyLookVec().y;
+					rotate_pack.look_z = gGameFramework.getMyLookVec().z;
+					sendPacket(&rotate_pack, active_servernum);
+					break;
+				case PACKET_KEY_UP:
+				case PACKET_KEY_DOWN:
+				case PACKET_KEY_LEFT:
+				case PACKET_KEY_RIGHT:
+					CS_MOVE_PACKET move_pack2;
+					move_pack2.size = sizeof(CS_MOVE_PACKET);
+					move_pack2.type = CS_MOVE;
+					move_pack2.x = gGameFramework.getMyPosition().x;
+					move_pack2.y = gGameFramework.getMyPosition().y;
+					move_pack2.z = gGameFramework.getMyPosition().z;
+					sendPacket(&move_pack2, active_servernum);
+					break;
+				case PACKET_KEY_SPACEBAR:
+					CS_ATTACK_PACKET attack_pack;
+					attack_pack.size = sizeof(CS_ATTACK_PACKET);
+					attack_pack.type = CS_ATTACK;
+					sendPacket(&rotate_pack, active_servernum);
+					break;
+				default:
+					cout << "[KeyInput Error] Unknown Key Type." << endl;
+				}
+				
+			}
+			if (gGameFramework.checkNewInput_Mouse()) {
+				MouseInputVal mouseValue = gGameFramework.popInputVal_Mouse();
+				CS_INPUT_MOUSE_PACKET mouseinput_pack;
+				mouseinput_pack.size = sizeof(CS_INPUT_MOUSE_PACKET);
+				mouseinput_pack.type = CS_INPUT_MOUSE;
+				mouseinput_pack.buttontype = mouseValue.button;
+				mouseinput_pack.delta_x = mouseValue.delX;
+				mouseinput_pack.delta_y = mouseValue.delY;
+
+				sendPacket(&mouseinput_pack, active_servernum);
+			}
+
+			//==================================================
+			//				   플레이어 동기화
+			//==================================================
+			//1. 다른 플레이어 업데이트
+			for (int i = 0; i < MAX_USER; i++) {
+				if (i == my_info.m_id) continue;
+				if (other_players[i].m_state == OBJ_ST_RUNNING) {
+					gGameFramework.setPosition_OtherPlayer(i, other_players[i].m_pos);
+					gGameFramework.setVectors_OtherPlayer(i, other_players[i].m_right_vec, other_players[i].m_up_vec, other_players[i].m_look_vec);
+				}
+				else if (other_players[i].m_state == OBJ_ST_LOGOUT) {
+					other_players[i].m_state = OBJ_ST_EMPTY;
+					gGameFramework.remove_OtherPlayer(i);
+				}
+
+				if (gGameFramework.m_nMode == SCENE2STAGE)
+				{
+					other_players[i].m_state = OBJ_ST_LOGOUT;
+					other_players[i].InfoClear();
+					gGameFramework.remove_OtherPlayer(i);
+				}
+			}
+
+			// 2. NPC 움직임 최신화
+			if (gGameFramework.m_nMode == SCENE1STAGE) {
+				for (int i{}; i < MAX_NPCS; i++) {
+					gGameFramework.setPosition_Npc(npcs_info[i].m_id, npcs_info[i].m_pos);
+					gGameFramework.setVectors_Npc(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
+					gGameFramework.m_pScene->SmokePosition = npcs_info[i].m_pos;
+					((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(npcs_info[i].m_pos);
+				}
+			}
+
+			//==================================================
+			//					  UI 동기화
+			//==================================================
+			// 1. 총알 업데이트
+			wchar_t MyBullet[20];
+			_itow_s(my_info.m_bullet, MyBullet, sizeof(MyBullet), 10);
+			wcscpy_s(gGameFramework.m_myBullet, MyBullet);
+
+			// 2. HP 업데이트
+			wchar_t MyHp[20];
+			_itow_s(my_info.m_hp, MyHp, sizeof(MyHp), 10);
+			wcscpy_s(gGameFramework.m_myhp, MyHp);
+			gGameFramework.m_currHp = my_info.m_hp;
+
+			// 3. 시간 동기화
+			gGameFramework.m_10MinOfTime = servertime_sec / 600;
+			gGameFramework.m_1MinOfTime = (servertime_sec - gGameFramework.m_10MinOfTime * 600) / 60;
+			gGameFramework.m_10SecOftime = (servertime_sec - gGameFramework.m_1MinOfTime * 60) / 10;
+			gGameFramework.m_1SecOfTime = servertime_sec % 10;
+
+
+			//==================================================
+			//					충돌 이펙트 관련
+			//==================================================
+			// 1. 자기 자신
+			if (my_info.m_damaged_effect_on) {
+				// 여기에 이펙트 넣어줘.
+			}
+
+			// 2. 다른 플레이어
+			for (auto& other_pl : other_players) {
+				if (other_pl.m_damaged_effect_on) {
+					//((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(other_pl.m_pos);
+				}
+			}
+
+			// 3. NPC
+			for (auto& npc : npcs_info) {
+				if (npc.m_damaged_effect_on) {
+					// 여기에 이펙트 넣어줘.
+				}
+			}
+
+			//==================================================
+
 			gGameFramework.FrameAdvance();
 		}
 	}

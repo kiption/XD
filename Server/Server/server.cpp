@@ -434,7 +434,8 @@ void disconnect(int target_id, int target)
 void process_packet(int client_id, char* packet)
 {
 	switch (packet[1]) {
-	case CS_LOGIN: {
+	case CS_LOGIN:
+	{
 		CS_LOGIN_PACKET* login_packet = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
 
 		clients[client_id].s_lock.lock();
@@ -597,128 +598,117 @@ void process_packet(int client_id, char* packet)
 		}
 		break;
 	}// CS_LOGIN end
-	case CS_INPUT_KEYBOARD: {
+	case CS_MOVE:
+	{
+		if (!b_active_server) break;
+		CS_MOVE_PACKET* cl_move_packet = reinterpret_cast<CS_MOVE_PACKET*>(packet);
+		// 1. 충돌체크를 한다.
+
+		// 2. 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
+
+		// 3. 그게 아니라면 세션 정보를 업데이트 한다.
+		clients[client_id].s_lock.lock();
+		clients[client_id].pos = { cl_move_packet->x, cl_move_packet->y, cl_move_packet->z };
+		clients[client_id].s_lock.unlock();
+		
+		// 4. 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
+		for (auto& other_pl : clients) {
+			if (other_pl.id == client_id) continue;
+			if (other_pl.s_state != ST_INGAME) continue;
+
+			lock_guard<mutex> lg{ other_pl.s_lock };
+			other_pl.send_move_packet(client_id, TARGET_PLAYER);
+		}
+		break;
+	}// CS_MOVE end
+	case CS_ROTATE:
+	{
+		if (!b_active_server) break;
+		CS_ROTATE_PACKET* cl_rotate_packet = reinterpret_cast<CS_ROTATE_PACKET*>(packet);
+		// 1. 충돌체크를 한다.
+
+		// 2. 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
+
+		// 3. 그게 아니라면 세션 정보를 업데이트 한다.
+		clients[client_id].s_lock.lock();
+		clients[client_id].m_rightvec = { cl_rotate_packet->right_x, cl_rotate_packet->right_y, cl_rotate_packet->right_z };
+		clients[client_id].m_upvec = { cl_rotate_packet->up_x, cl_rotate_packet->up_y, cl_rotate_packet->up_z };
+		clients[client_id].m_lookvec = { cl_rotate_packet->look_x, cl_rotate_packet->look_y, cl_rotate_packet->look_z };
+		clients[client_id].s_lock.unlock();
+		
+		// 4. 다른 클라이언트에게 플레이어가 회전한 방향을 알려준다.
+		for (auto& other_pl : clients) {
+			if (other_pl.id == client_id) continue;
+			if (other_pl.s_state != ST_INGAME) continue;
+
+			lock_guard<mutex> lg{ other_pl.s_lock };
+			other_pl.send_rotate_packet(client_id, TARGET_PLAYER);
+		}
+		break;
+	}// CS_ROTATE end
+	case CS_ATTACK:
+	{
+		if (!b_active_server) break;
+		CS_ATTACK_PACKET* cl_attack_packet = reinterpret_cast<CS_ATTACK_PACKET*>(packet);
+		// Bullet Cooldown Check
+		milliseconds shoot_term = duration_cast<milliseconds>(chrono::system_clock::now() - shoot_time);
+		if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) {	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
+			milliseconds left_cooldown = duration_cast<milliseconds>(milliseconds(SHOOT_COOLDOWN_BULLET) - shoot_term);
+			break;
+		}
+		cout << "발싸\n" << endl;
+
+		// empty space check
+		int new_bullet_id = -1;
+		int arr_cnt = -1;
+		if (clients[client_id].bullet > 0) {		// 남은 총알이 있다면,
+			// 총알 하나 사용
+			clients[client_id].s_lock.lock();
+			clients[client_id].bullet -= 1;
+			clients[client_id].s_lock.unlock();
+
+			// 발사한 사용자에게 총알 사용했음을 알려줍니다.
+			SC_BULLET_COUNT_PACKET bullet_packet;
+			bullet_packet.size = sizeof(bullet_packet);
+			bullet_packet.type = SC_BULLET_COUNT;
+			bullet_packet.id = client_id;
+			bullet_packet.bullet_cnt = clients[client_id].bullet;
+			clients[client_id].do_send(&bullet_packet);
+		}
+		else {	// 남은 탄환이 0이라면 reload
+			clients[client_id].s_lock.lock();
+			clients[client_id].bullet = 100;
+			clients[client_id].s_lock.unlock();
+
+			// 발사한 사용자에게 총알 장전했음을 알려줍니다.
+			SC_BULLET_COUNT_PACKET bullet_packet;
+			bullet_packet.size = sizeof(bullet_packet);
+			bullet_packet.type = SC_BULLET_COUNT;
+			bullet_packet.id = client_id;
+			bullet_packet.bullet_cnt = clients[client_id].bullet;
+			clients[client_id].do_send(&bullet_packet);
+		}
+		break;
+	}// CS_ATTACK end
+	case CS_INPUT_KEYBOARD:
+	{
 		if (!b_active_server) break;		// Active 서버만 패킷을 처리합니다.
 		CS_INPUT_KEYBOARD_PACKET* inputkey_p = reinterpret_cast<CS_INPUT_KEYBOARD_PACKET*>(packet);
 
-		if (inputkey_p->direction == 128) {
+		float sign = 1.0f;					// right/up/look벡터 방향으로 움직이는지, 반대 방향으로 움직이는지
+		switch (inputkey_p->keytype) {
+		case PACKET_KEY_NUM1:
 			clients[client_id].s_lock.lock();
 			clients[client_id].curr_stage = 1;
 			clients[client_id].s_lock.unlock();
-			cout << "Client[" << client_id << "]가 Stage1로 전환함." << endl;//test
+			cout << "Client[" << client_id << "] Stage1로 전환." << endl;//test
 			break;
-		}
-		else if (inputkey_p->direction == 256) {
+		case PACKET_KEY_NUM2:
 			clients[client_id].s_lock.lock();
 			clients[client_id].curr_stage = 2;
 			clients[client_id].s_lock.unlock();
-			cout << "Client[" << client_id << "]가 Stage2로 전환함." << endl;//test
+			cout << "Client[" << client_id << "] Stage2로 전환." << endl;//test
 			break;
-		}
-
-		enum InputKey { KEY_Q, KEY_E, KEY_A, KEY_D, KEY_S, KEY_W, KEY_SPACEBAR };
-		for (int i = 0; i <= 6; i++) {
-			if ((inputkey_p->direction >> i) & 1) {
-				float sign = 1.0f;					// right/up/look벡터 방향으로 움직이는지, 반대 방향으로 움직이는지
-				switch (i) {
-				case KEY_Q:
-				case KEY_E:
-					clients[client_id].s_lock.lock();
-					// 아직 기능 없음.
-
-					// unlock
-					clients[client_id].s_lock.unlock();
-					break;
-
-				case KEY_A:			// D, A는 기체의 yaw회전 키입니다. 기체를 y축 기준으로 회전시킵니다.
-					sign = -1.0f;	// A는 right벡터 반대 방향으로 움직이기 때문에 -1을 곱해줍니다.
-					[[fallthrough]]
-				case KEY_D:
-					// 1스테이지 로직
-					if (clients[client_id].curr_stage == 1) {
-						// 1. 충돌체크를 한다.
-
-						// 2. 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
-
-						// 3. 그게 아니라면 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
-
-					}
-					// 2스테이지 로직
-					else if (clients[client_id].curr_stage == 2) {
-						// 미구현.
-					}
-
-					break;
-
-				case KEY_S:			// W, S는 엔진출력 조절 키입니다. 기체를 상승 또는 하강시킵니다.
-					sign = -1.0f;	// S는 up벡터 반대 방향으로 움직이기 때문에 -1을 곱해줍니다.
-					[[fallthrough]]
-				case KEY_W:
-					// 1스테이지 로직
-					if (clients[client_id].curr_stage == 1) {
-						// 1. 충돌체크를 한다.
-
-						// 2. 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
-
-						// 3. 그게 아니라면 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
-
-					}
-					// 2스테이지 로직
-					else if (clients[client_id].curr_stage == 2) {
-						// 미구현
-					}
-
-					break;
-
-				case KEY_SPACEBAR:	// 스페이스바는 공격 키입니다. 바라보는 방향으로 총을 쏩니다.
-					// 1스테이지 로직
-					if (clients[client_id].curr_stage == 1) {
-						// Bullet Cooldown Check
-						milliseconds shoot_term = duration_cast<milliseconds>(chrono::system_clock::now() - shoot_time);
-						if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) {	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
-							milliseconds left_cooldown = duration_cast<milliseconds>(milliseconds(SHOOT_COOLDOWN_BULLET) - shoot_term);
-							break;
-						}
-
-						// empty space check
-						int new_bullet_id = -1;
-						int arr_cnt = -1;
-						if (clients[client_id].bullet > 0) {		// 남은 총알이 있다면,
-							// 총알 하나 사용
-							clients[client_id].s_lock.lock();
-							clients[client_id].bullet -= 1;
-							clients[client_id].s_lock.unlock();
-
-							// 발사한 사용자에게 총알 사용했음을 알려줍니다.
-							SC_BULLET_COUNT_PACKET bullet_packet;
-							bullet_packet.size = sizeof(bullet_packet);
-							bullet_packet.type = SC_BULLET_COUNT;
-							bullet_packet.id = client_id;
-							bullet_packet.bullet_cnt = clients[client_id].bullet;
-							clients[client_id].do_send(&bullet_packet);
-						}
-						else {	// 남은 탄환이 0이라면 reload
-							clients[client_id].s_lock.lock();
-							clients[client_id].bullet = 100;
-							clients[client_id].s_lock.unlock();
-
-							// 발사한 사용자에게 총알 장전했음을 알려줍니다.
-							SC_BULLET_COUNT_PACKET bullet_packet;
-							bullet_packet.size = sizeof(bullet_packet);
-							bullet_packet.type = SC_BULLET_COUNT;
-							bullet_packet.id = client_id;
-							bullet_packet.bullet_cnt = clients[client_id].bullet;
-							clients[client_id].do_send(&bullet_packet);
-						}
-					}
-					// 2스테이지 로직
-					else if (clients[client_id].curr_stage == 2) {
-						// 미구현
-					}
-
-					break;
-				}
-			}
 		}
 
 		break;
@@ -733,7 +723,7 @@ void process_packet(int client_id, char* packet)
 			break;
 		}
 
-		if (rt_p->key_val == RT_LBUTTON) {			// 마우스 좌클릭
+		if (rt_p->buttontype == PACKET_BUTTON_L) {			// 마우스 좌클릭
 			// 1스테이지 로직
 			if (clients[client_id].curr_stage == 1) {
 				float rotate_scalar = 0.0f;
@@ -745,12 +735,12 @@ void process_packet(int client_id, char* packet)
 				clients[client_id].s_lock.unlock();
 
 				// 작동 중인 다른 클라이언트에게 회전 결과를 알려줍니다.
-				for (auto& send_target : clients) {
-					if (send_target.id == client_id) continue;
-					if (send_target.s_state != ST_INGAME) continue;
+				for (auto& other_pl : clients) {
+					if (other_pl.id == client_id) continue;
+					if (other_pl.s_state != ST_INGAME) continue;
 
-					lock_guard<mutex> lg{ send_target.s_lock };
-					send_target.send_rotate_packet(client_id, TARGET_PLAYER);
+					lock_guard<mutex> lg{ other_pl.s_lock };
+					other_pl.send_rotate_packet(client_id, TARGET_PLAYER);
 				}
 			}
 			// 2스테이지 로직
@@ -759,7 +749,7 @@ void process_packet(int client_id, char* packet)
 			}
 
 		}
-		else if (rt_p->key_val == RT_RBUTTON) {		// 마우스 우클릭 드래그: 기능 미정.
+		else if (rt_p->buttontype == PACKET_BUTTON_R) {		// 마우스 우클릭 드래그: 기능 미정.
 			// 1스테이지 로직
 			if (clients[client_id].curr_stage == 1) {
 
