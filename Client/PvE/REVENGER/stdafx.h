@@ -87,6 +87,8 @@ using namespace std;
 #pragma comment(lib, "mfuuid.lib")
 #pragma comment(lib, "mfreadwrite.lib")
 
+#pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
+
 using namespace std;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
