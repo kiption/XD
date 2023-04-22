@@ -51,7 +51,7 @@ void CALLBACK sendCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED lp_over, 
 OVER_EX g_recv_over;
 void recvPacket(short servernum)
 {
-	cout << "Do RECV" << endl;
+	//cout << "Do RECV" << endl;
 	DWORD recv_flag = 0;
 
 	memset(&g_recv_over.overlapped, 0, sizeof(g_recv_over.overlapped));
@@ -64,7 +64,7 @@ void recvPacket(short servernum)
 }
 void sendPacket(void* packet, short servernum)
 {
-	cout << "Do SEND" << endl;
+	//cout << "Do SEND" << endl;
 	OVER_EX* s_data = new OVER_EX{ reinterpret_cast<char*>(packet) };
 	if (WSASend(sockets[servernum], &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback) == SOCKET_ERROR) {
 		int err_no = GetLastError();

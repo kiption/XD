@@ -51,7 +51,7 @@ constexpr char INPUT_KEY_E = 0b000001;
 
 // Packet ID
 enum PacketID {
-	CS_LOGIN, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_RELOGIN
+	CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_RELOGIN
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
 	, SC_DAMAGED, SC_BULLET_COUNT, SC_TIME_TICKING, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
@@ -71,17 +71,40 @@ struct CS_LOGIN_PACKET {
 	char name[NAME_SIZE];
 };
 
+struct CS_MOVE_PACKET {
+	unsigned char size;
+	char type;
+	float x, y, z;
+};
+
+struct CS_ROTATE_PACKET {
+	unsigned char size;
+	char type;
+	float right_x, right_y, right_z;
+	float up_x, up_y, up_z;
+	float look_x, look_y, look_z;
+};
+
+struct CS_ATTACK_PACKET {
+	unsigned char size;
+	char type;
+};
+
+enum PACKET_KEY_TYPE { PACKET_KEY_NUM1, PACKET_KEY_NUM2,
+	PACKET_KEY_W, PACKET_KEY_A, PACKET_KEY_S, PACKET_KEY_D,
+	PACKET_KEY_UP, PACKET_KEY_LEFT, PACKET_KEY_DOWN, PACKET_KEY_RIGHT,
+	PACKET_KEY_SPACEBAR };
 struct CS_INPUT_KEYBOARD_PACKET {
 	unsigned char size;
 	char type;
-	short direction;
+	short keytype;
 };
 
-enum rotate_type { RT_LBUTTON, RT_RBUTTON, RT_BOTH };
+enum PACKET_MOUSE_BUTTON { PACKET_BUTTON_L, PACKET_BUTTON_R };
 struct CS_INPUT_MOUSE_PACKET {
 	unsigned char size;
 	char type;
-	char key_val;
+	char buttontype;
 	float delta_x, delta_y;
 	//float roll, pitch, yaw;
 };

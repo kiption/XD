@@ -8,17 +8,23 @@
 #include "Scene.h"
 #include "Stage1.h"
 #include "Stage2.h"
-
-//==== S
-#include <queue>
-enum MButton { L_BUTTON, R_BUTTON };
 #include "GameSound.h"
+
+// Server
+#include <queue>
+enum SEND_MOUSE_BUTTON { SEND_BUTTON_L, SEND_R_BUTTON_L };
+enum SEND_KEY_TYPE {
+	SEND_KEY_NUM1, SEND_KEY_NUM2,
+	SEND_KEY_W, SEND_KEY_A, SEND_KEY_S, SEND_KEY_D,
+	SEND_KEY_UP, SEND_KEY_LEFT, SEND_KEY_DOWN, SEND_KEY_RIGHT,
+	SEND_KEY_SPACEBAR
+};
 
 struct MouseInputVal {
 	char button;
 	float delX, delY;
 };
-//==== S
+//====
 #define KEY_A         0x41
 #define KEY_D         0x44
 #define KEY_S         0x53
@@ -164,7 +170,6 @@ private:
 	_TCHAR						m_pszFrameRate[70];
 
 
-
 //==================================================
 //			  서버 통신을 위한 것들...
 //==================================================
@@ -185,37 +190,37 @@ public:
 	int m_1MinOfTime;
 	int m_10SecOftime;
 	int m_1SecOfTime;
-	//==================================================
+//==================================================
 
-	//==================================================
-	//			  서버 통신에 필요한 함수들
-	//==================================================
+//==================================================
+//			  서버 통신에 필요한 함수들
+//==================================================
 public:
 	// 새로운 입력이 있는지 확인하는 함수입니다.
-	bool CheckNewInputExist_Keyboard();
-	bool CheckNewInputExist_Mouse();
+	bool checkNewInput_Keyboard();
+	bool checkNewInput_Mouse();
 
 	// 키입력 큐에서 값을 하나 꺼내옵니다.
-	short PopInputVal_Keyboard();
-	MouseInputVal PopInputVal_Mouse();
+	short popInputVal_Keyboard();
+	MouseInputVal popInputVal_Mouse();
+
+	// 객체 값을 얻는 함수입니다.
+	XMFLOAT3 getMyPosition();
+	XMFLOAT3 getMyRightVec();
+	XMFLOAT3 getMyLookVec();
+	XMFLOAT3 getMyUpVec();
 
 	// 객체 값 최신화 함수입니다.
-	void SetPosition_PlayerObj(XMFLOAT3 pos);
-	void SetVectors_PlayerObj(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+	void setPosition_OtherPlayer(int id, XMFLOAT3 pos);
+	void setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+	void remove_OtherPlayer(int id);
 
-	void SetPosition_OtherPlayerObj(int id, XMFLOAT3 pos);
-	void SetVectors_OtherPlayerObj(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
-	void Remove_OtherPlayerObj(int id);
-
-	void Create_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3look);
+	void setPosition_Npc(int id, XMFLOAT3 pos);
+	void setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+	void remove_Npcs(int id);
 
 
-	void SetPosition_NPC(int id, XMFLOAT3 pos);
-	void SetVectors_NPC(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
-
-	void SetPosition_Bullet(int id, XMFLOAT3 pos, XMFLOAT3 xmf3right, XMFLOAT3 xmf3up, XMFLOAT3 xmf3look);
-
-	//==================================================
+//==================================================
 
 };
 

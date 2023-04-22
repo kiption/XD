@@ -29,7 +29,7 @@ struct ObjectsInfo
 		m_damaged_effect_on = false;
 	}
 
-	void returnToInitialState() {
+	void InfoClear() {
 		m_id = -1;
 		m_hp = 100;
 		m_bullet = 100;

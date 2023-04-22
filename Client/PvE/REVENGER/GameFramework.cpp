@@ -5,18 +5,6 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 
-// key value (for Server)
-constexpr short INPUT_KEY_2 = 256;
-constexpr short INPUT_KEY_1 = 128;
-constexpr short INPUT_SPACEBAR = 0b1000000;
-constexpr short INPUT_KEY_W = 0b0100000;
-constexpr short INPUT_KEY_S = 0b0010000;
-constexpr short INPUT_KEY_D = 0b0001000;
-constexpr short INPUT_KEY_A = 0b0000100;
-constexpr short INPUT_KEY_E = 0b0000010;
-constexpr short INPUT_KEY_Q = 0b0000001;
-//====
-
 CGameFramework::CGameFramework()
 {
 	m_pdxgiFactory = NULL;
@@ -382,11 +370,13 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case '1':
 		{
+			q_keyboardInput.push(SEND_KEY_NUM1);//S
 			ChangeScene(SCENE1STAGE);
 			break;
 		}
 		case '2':
 		{
+			q_keyboardInput.push(SEND_KEY_NUM2);//S
 			ChangeScene(SCENE2STAGE);
 			break;
 		}
@@ -525,7 +515,9 @@ void CGameFramework::ProcessInput()
 		DWORD dwDirection = 0;
 
 		if (pKeysBuffer[KEY_W] & 0xF0) {
-			dwDirection |= DIR_FORWARD;
+			dwDirection |= DIR_UP;
+			q_keyboardInput.push(SEND_KEY_W);//S
+
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
 			{
 			}
@@ -534,7 +526,9 @@ void CGameFramework::ProcessInput()
 			}
 		}
 		if (pKeysBuffer[KEY_S] & 0xF0) {
-			dwDirection |= DIR_BACKWARD;
+			dwDirection |= DIR_DOWN;
+			q_keyboardInput.push(SEND_KEY_S);//S
+
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
 			{
 			}
@@ -543,22 +537,42 @@ void CGameFramework::ProcessInput()
 			}
 		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
+			//dwDirection |= DIR_RIGHT;
+			m_pPlayer->Rotate(0.5f, 0.5f, 0.0f);
+			q_keyboardInput.push(SEND_KEY_D);//S
 
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
 			{
 			}
-			dwDirection |= DIR_RIGHT;
 			if (m_nMode != SCENE2STAGE)
 			{
 			}
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
+			//dwDirection |= DIR_LEFT;
+			m_pPlayer->Rotate(-0.5f, -0.5f, 0.0f);
+			q_keyboardInput.push(SEND_KEY_A);//S
+
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
 			{
 			}
+		}
+
+		if (pKeysBuffer[VK_UP] & 0xF0) {
+			dwDirection |= DIR_FORWARD;
+			q_keyboardInput.push(SEND_KEY_UP);//S
+		}
+		if (pKeysBuffer[VK_DOWN] & 0xF0) {
+			dwDirection |= DIR_BACKWARD;
+			q_keyboardInput.push(SEND_KEY_DOWN);//S
+		}
+		if (pKeysBuffer[VK_LEFT] & 0xF0) {
 			dwDirection |= DIR_LEFT;
-
-
+			q_keyboardInput.push(SEND_KEY_LEFT);//S
+		}
+		if (pKeysBuffer[VK_RIGHT] & 0xF0) {
+			dwDirection |= DIR_RIGHT;
+			q_keyboardInput.push(SEND_KEY_RIGHT);//S
 		}
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
@@ -571,6 +585,7 @@ void CGameFramework::ProcessInput()
 		}
 
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
+			q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
 		}
 
 
@@ -607,7 +622,7 @@ void CGameFramework::ProcessInput()
 				}
 			}
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE)
-				if (dwDirection) m_pPlayer->Move(dwDirection, 9.25f, true);
+				if (dwDirection) m_pPlayer->Move(dwDirection, 2.71f, true);
 
 		}
 	}
@@ -1089,4 +1104,88 @@ void CGameFramework::CreateDirect2DDevice()
 #endif
 
 
+//==================================================
+//			  서버 통신에 필요한 함수들
+//==================================================
+bool CGameFramework::checkNewInput_Keyboard()
+{
+	if (!q_keyboardInput.empty()) {
+		return true;
+	}
+	return false;
+}
+bool CGameFramework::checkNewInput_Mouse()
+{
+	if (!q_mouseInput.empty()) {
+		return true;
+	}
+	return false;
+}
 
+
+short CGameFramework::popInputVal_Keyboard()
+{
+	if (!q_keyboardInput.empty()) {
+		short val = q_keyboardInput.front();
+		q_keyboardInput.pop();
+		return val;
+	}
+	return -1;
+}
+MouseInputVal CGameFramework::popInputVal_Mouse()
+{
+	MouseInputVal val;
+	if (!q_mouseInput.empty()) {
+		val = q_mouseInput.front();
+		q_mouseInput.pop();
+		return val;
+	}
+	val.button = -1;
+	return val;
+}
+
+XMFLOAT3 CGameFramework::getMyPosition()
+{
+	return m_pPlayer->GetPosition();
+}
+XMFLOAT3 CGameFramework::getMyRightVec()
+{
+	return m_pPlayer->GetRightVector();
+}
+XMFLOAT3 CGameFramework::getMyUpVec()
+{
+	return m_pPlayer->GetUpVector();
+}
+XMFLOAT3 CGameFramework::getMyLookVec()
+{
+	return m_pPlayer->GetLookVector();
+}
+
+
+void CGameFramework::setPosition_OtherPlayer(int id, XMFLOAT3 pos)
+{
+	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetPosition(pos);
+}
+void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
+{
+	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
+}
+void CGameFramework::remove_OtherPlayer(int id)
+{
+	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
+}
+
+
+void CGameFramework::setPosition_Npc(int id, XMFLOAT3 pos)
+{
+}
+void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
+{
+}
+void CGameFramework::remove_Npcs(int id)
+{
+}
