@@ -508,10 +508,9 @@ void CGameFramework::BuildObjects()
 
 void CGameFramework::ReleaseObjects()
 {
-	ReleaseShaderVariables();
+	//ReleaseShaderVariables();
 
 	if (m_pPlayer) m_pPlayer->Release();
-
 	if (m_pScene) m_pScene->ReleaseObjects();
 	//if (m_pScene) delete m_pScene;
 }
@@ -652,28 +651,25 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::CreateShaderVariables()
 {
-	//UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256의 배수
-	//m_pd3dcbFrameworkInfo = ::CreateBufResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes,
-	//	D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
-	//m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
+	UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256의 배수
+	m_pd3dcbFrameworkInfo = ::CreateBufResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes,
+		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+	m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
 
 }
 
 void CGameFramework::ReleaseShaderVariables()
 {
-	/*if (m_nMode != SCENE2STAGE)
-	{
 		if (m_pd3dcbFrameworkInfo)
 		{
 			m_pd3dcbFrameworkInfo->Unmap(0, NULL);
 			m_pd3dcbFrameworkInfo->Release();
 		}
-	}*/
 }
 
 void CGameFramework::UpdateShaderVariables()
 {
-	/*m_pcbMappedFrameworkInfo->m_fCurrentTime = m_GameTimer.GetTotalTime();
+	m_pcbMappedFrameworkInfo->m_fCurrentTime = m_GameTimer.GetTotalTime();
 	m_pcbMappedFrameworkInfo->m_fElapsedTime = m_GameTimer.GetTimeElapsed();
 	m_pcbMappedFrameworkInfo->m_fSecondsPerFirework = 0.5f;
 	m_pcbMappedFrameworkInfo->m_nFlareParticlesToEmit = 100;
@@ -681,7 +677,7 @@ void CGameFramework::UpdateShaderVariables()
 	m_pcbMappedFrameworkInfo->m_nMaxFlareType2Particles = 15 * 1.5f;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
-	m_pd3dCommandList->SetGraphicsRootConstantBufferView(21, d3dGpuVirtualAddress);*/
+	m_pd3dCommandList->SetGraphicsRootConstantBufferView(21, d3dGpuVirtualAddress);
 
 }
 
@@ -706,7 +702,7 @@ void CGameFramework::FrameAdvance()
 	{
 		m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
 		m_pScene->OnPreRender(m_pd3dCommandList, m_pCamera);
-
+		//UpdateShaderVariables();
 
 	}
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;

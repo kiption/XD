@@ -1,4 +1,15 @@
 #define MAX_LIGHTS 8
+//
+#define PARTICLE_TYPE_EMITTER		0
+#define PARTICLE_TYPE_SHELL			1
+#define PARTICLE_TYPE_FLARE01		2
+#define PARTICLE_TYPE_FLARE02		3
+#define PARTICLE_TYPE_FLARE03		4
+
+#define SHELL_PARTICLE_LIFETIME		3.0f
+#define FLARE01_PARTICLE_LIFETIME	2.5f
+#define FLARE02_PARTICLE_LIFETIME	1.5f
+#define FLARE03_PARTICLE_LIFETIME	2.0f
 struct MATERIAL
 {
 	float4					m_cAmbient;
@@ -167,7 +178,58 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	return(lerp(cColor, cIllumination, 0.4f));
 }
 
-float4 PSParticleStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
+
+float3 ParticleLogic()
+{
+	float3 newPosition = float3(0, 0, 0);
+	float3 a_Position = float3(0, 0, 0);
+	float t = gfElapsedTime - gnFlareParticlesToEmit;
+
+	if (t < 0.0)
+	{
+	}
+	else
+	{
+		float newT = FLARE01_PARTICLE_LIFETIME * frac(t / FLARE01_PARTICLE_LIFETIME);
+		newPosition.xyz = a_Position + 10.0f * newT + 0.5 * 10.0 * newT * newT;
+	}
+	return newPosition;
+}
+struct VS_PARTICLES_INPUT
+{
+	float3 position : POSITION;
+	float2 uv : TEXCOORD;
+	float3 normal : NORMAL;
+	float3 tangent : TANGENT;
+	float3 bitangent : BITANGENT;
+};
+
+struct VS_PARTICLES_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float3 positionW : POSITION;
+	float3 normalW : NORMAL;
+	float3 tangentW : TANGENT;
+	float3 bitangentW : BITANGENT;
+	float2 uv : TEXCOORD;
+};
+
+VS_PARTICLES_OUTPUT VSParticleStandard(VS_PARTICLES_INPUT input)
+{
+	VS_PARTICLES_OUTPUT output;
+
+	output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
+	output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
+	output.normalW += ParticleLogic();
+	output.tangentW = mul(input.tangent, (float3x3)gmtxGameObject);
+	output.bitangentW = mul(input.bitangent, (float3x3)gmtxGameObject);
+	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+	output.uv = input.uv;
+
+	return(output);
+}
+
+float4 PSParticleStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
 {
 
 	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -195,7 +257,6 @@ float4 PSParticleStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	}
 
 	float4 uvs[MAX_LIGHTS];
-	float2 uv = input.uv;
 	float4 cIllumination = ParticleLighting(input.positionW, normalize(input.normalW), true, uvs);
 
 	return(lerp(cColor, cIllumination, 0.5f));
@@ -485,17 +546,7 @@ float4 PSSpritTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
-//
-#define PARTICLE_TYPE_EMITTER		0
-#define PARTICLE_TYPE_SHELL			1
-#define PARTICLE_TYPE_FLARE01		2
-#define PARTICLE_TYPE_FLARE02		3
-#define PARTICLE_TYPE_FLARE03		4
 
-#define SHELL_PARTICLE_LIFETIME		3.0f
-#define FLARE01_PARTICLE_LIFETIME	2.5f
-#define FLARE02_PARTICLE_LIFETIME	1.5f
-#define FLARE03_PARTICLE_LIFETIME	2.0f
 
 struct VS_PARTICLE_INPUT
 {
@@ -955,3 +1006,6 @@ float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 
 	return(lerp(cColor, cIllumination, 0.8f));
 }
+
+////////////////////////////////////////////////////////////////
+

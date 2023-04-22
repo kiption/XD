@@ -1,6 +1,7 @@
 #pragma once
 #include "SkinAnimationShader.h"
 #include "Terrain.h"
+#include "ParticleObject.h"
 
 class CHellicopterObjectsShader : public CStandardObjectsShader
 {
@@ -60,10 +61,20 @@ public:
 	virtual void ReleaseObjects();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void ReleaseUploadBuffers();
-
+	XMFLOAT3 ParticlePosition{};
 	bool m_bActive = false;
+	
+	XMFLOAT3 RandomDirection(float EleapsedTime);
+	
+	XMFLOAT4X4					m_pxmf4x4Transforms[EXPLOSION_DEBRISES];
 
+	float						m_fElapsedTimes = 0.0f;
+	float						m_fDuration = 20.0f;
+	float						m_fExplosionSpeed = 10.0f;
+	float						m_fExplosionRotation = 720.0f;
+	XMFLOAT3 m_pxmf3SphereVectors[EXPLOSION_DEBRISES];
 };

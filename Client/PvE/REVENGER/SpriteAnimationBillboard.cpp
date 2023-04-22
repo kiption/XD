@@ -235,7 +235,7 @@ void SpriteAnimationBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList
 				ExplosionPosition.x=m_ppObjects[j]->m_xmf4x4ToParent._41;
 				ExplosionPosition.y=m_ppObjects[j]->m_xmf4x4ToParent._42;
 				ExplosionPosition.z=m_ppObjects[j]->m_xmf4x4ToParent._43;
-				m_ppObjects[j]->SetPosition(xmf3PlayerPosition);
+				//m_ppObjects[j]->SetPosition(xmf3PlayerPosition);
 				m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
 			}
 		}

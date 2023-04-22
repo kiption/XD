@@ -284,32 +284,47 @@ void CBulletEffectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState);
 }
 
+D3D12_SHADER_BYTECODE CFragmentsShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSParticleStandard", "vs_5_1", ppd3dShaderBlob));
+}
 D3D12_SHADER_BYTECODE CFragmentsShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSParticleStandard", "ps_5_1", ppd3dShaderBlob));
 }
+inline float RandF(float fMin, float fMax)
+{
+	return(fMin + ((float)rand() / (float)RAND_MAX) * (fMax - fMin));
+}
+XMVECTOR RandomUnitVectorOnSphere()
+{
+	XMVECTOR xmvOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
+	XMVECTOR xmvZero = XMVectorZero();
 
+	while (true)
+	{
+		XMVECTOR v = XMVectorSet(RandF(-1.0f, 1.0f), RandF(-1.0f, 1.0f), RandF(-1.0f, 1.0f), 0.0f);
+		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
+	}
+}
 void CFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
 
-	m_nObjects = 80;
+	m_nObjects = EXPLOSION_DEBRISES;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	CGameObject* pFragmentModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Sphere.bin", this);
-	m_ppObjects[0] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	m_ppObjects[0]->SetScale(300.0, 300.0, 300.0);
-	m_ppObjects[0]->SetChild(pFragmentModel, false);
-	m_ppObjects[0]->SetPosition(18.0, 55.0, -45.0);
-	pFragmentModel->AddRef();
-	for (int i = 1; i < m_nObjects; i++)
+	for (int i = 0; i < m_nObjects; i++)
 	{
-		m_ppObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppObjects[i] = new CExplosiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pFragmentModel, false);
 		m_ppObjects[i]->SetScale(50.0, 50.0, 50.0);
+		m_ppObjects[i]->SetPosition(0.0, 400.0, 0.0);
 		pFragmentModel->AddRef();
+		ParticlePosition = m_ppObjects[i]->GetPosition();
 	}
-
+	for (int i = 0; i < EXPLOSION_DEBRISES; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomUnitVectorOnSphere());
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -355,49 +370,88 @@ D3D12_INPUT_LAYOUT_DESC CFragmentsShader::CreateInputLayout(int nPipelineState)
 	return(d3dInputLayoutDesc);
 }
 
+
+
 void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 {
-	random_device rd;
-	default_random_engine dre(rd());
-	uniform_real_distribution<float>uidr(50.0, 60.0);
-	uniform_real_distribution<float>uidy(80.0, 90.0);
-	uniform_real_distribution<float>uidz(-0.5, 0.5);
+	{
+		random_device rd;
+		default_random_engine dre(rd());
+		uniform_real_distribution<float>uidr(50.0, 60.0);
+		uniform_real_distribution<float>uidy(80.0, 90.0);
+		uniform_real_distribution<float>uidz(-0.5, 0.5);
 
-	float gravity = 9.8f;
-	float time = fTimeElapsed;
-	float velocity = time * uidy(dre);
-	float radian = uidr(dre);
-	float dirtheta = XMConvertToRadians(radian);
-
-	//float randomX{};
-	//float randomY{};
-	//float randomZ{};
-
-	//theta->Random°ª (-180 ~ 180) 
-	//vx ->Random°ª t * RANDOM;
-
+		float gravity = 9.8f;
+		float EmmitTime = 1.0f;
+		float time = fTimeElapsed - EmmitTime;
+		float a_LifeTime = 3.5f;
+		XMFLOAT3 velocity = XMFLOAT3(1.f * ((float)rand() / (float)RAND_MAX), 1.f * ((float)rand() / (float)RAND_MAX), 1.f * ((float)rand() / (float)RAND_MAX));
+		XMFLOAT3 Accel = XMFLOAT3(0.0, -3.0, 0.0);
+		float radian = uidr(dre);
+		float dirtheta = XMConvertToRadians(radian);
+	}
 
 	if (m_bActive == true)
 	{
-
-		for (int j = 1; j < m_nObjects; j++)
-		{
-			radian = uidr(dre);
-			dirtheta = XMConvertToRadians(radian);
-			time += 0.01f;
-			m_ppObjects[j]->m_xmf4x4ToParent._41 += (velocity * cos(dirtheta)) * time;
-			m_ppObjects[j]->m_xmf4x4ToParent._42 += -0.5 * gravity * time * time + (velocity * sin(dirtheta) * time);
-			m_ppObjects[j]->m_xmf4x4ToParent._43 += (velocity * cos(dirtheta)) * time;
-
-			if (m_ppObjects[j]->m_xmf4x4ToParent._42 < 0.0f)
+		//for (int j = 1; j < m_nObjects; j++)
+		//{
+		//	if (time < 0.0)
+		//	{
+		//	}
+		//	else
+		//	{
+		//		radian = uidr(dre);
+		//		dirtheta = XMConvertToRadians(radian);
+		//		float newT = a_LifeTime * fmod(time , a_LifeTime);
+		//		ParticlePosition.x = m_ppObjects[j]->m_xmf4x4ToParent._41 + velocity.x * newT + 0.5 * Accel.x*newT*newT;
+		//		ParticlePosition.y = m_ppObjects[j]->m_xmf4x4ToParent._42 + velocity.y * newT + 0.5 * Accel.y*newT*newT;
+		//		ParticlePosition.z = m_ppObjects[j]->m_xmf4x4ToParent._43 + velocity.z * newT + 0.5 * Accel.z*newT*newT;
+		//		/*		m_ppObjects[j]->m_xmf4x4ToParent._41 += (velocity * cos(dirtheta)) * time;
+		//				m_ppObjects[j]->m_xmf4x4ToParent._42 += -0.5 * gravity * time * time + (velocity * sin(dirtheta) * time);
+		//				m_ppObjects[j]->m_xmf4x4ToParent._43 += (velocity * cos(dirtheta)) * time;*/
+		//		m_ppObjects[j]->m_xmf4x4ToParent._41+=ParticlePosition.x;
+		//		m_ppObjects[j]->m_xmf4x4ToParent._42+=ParticlePosition.y;
+		//		m_ppObjects[j]->m_xmf4x4ToParent._43+=ParticlePosition.z;
+		//	}
+		//}
+		
+			m_fElapsedTimes += fTimeElapsed * 6.0f;
+			if (m_fElapsedTimes <= m_fDuration)
 			{
-				m_ppObjects[j]->SetPosition(65.0, 155.0, 18.0);
+				for (int i = 0; i < EXPLOSION_DEBRISES; i++)
+				{
+				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
+				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes;
+				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes;
+				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes;
+				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
+
+				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
+				m_ppObjects[i]->m_xmf4x4ToParent._42 = m_pxmf4x4Transforms[i]._42;
+				m_ppObjects[i]->m_xmf4x4ToParent._43 = m_pxmf4x4Transforms[i]._43;
+				m_ppObjects[i]->Rotate(5.0, 8.0, 10.0);
+				}
 			}
-		}
+			else
+			{
+
+				m_fElapsedTimes = 0.0f;
+			}
+		
 	}
+
+
+
 }
 
 void CFragmentsShader::ReleaseUploadBuffers()
 {
 	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
+}
+
+XMFLOAT3 CFragmentsShader::RandomDirection(float EleapsedTime)
+{
+	int u = UINT(EleapsedTime + 10 + EleapsedTime * 1000.0f) % 1024;
+
+	return XMFLOAT3(u, u, u);
 }

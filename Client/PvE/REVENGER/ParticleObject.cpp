@@ -90,8 +90,8 @@ void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	if (m_pMesh) m_pMesh->PreRender(pd3dCommandList, 0); //Stream Output
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList, 0); //Stream Output
 	if (m_pMesh) m_pMesh->PostRender(pd3dCommandList, 0); //Stream Output
-   for (int i = 0; i < m_nMaterials; i++)
-	   if (m_ppMaterials[i] && m_ppMaterials[i]->m_pShader)m_ppMaterials[i]->m_pShader->OnPrepareRender(pd3dCommandList, 1);
+	for (int i = 0; i < m_nMaterials; i++)
+		if (m_ppMaterials[i] && m_ppMaterials[i]->m_pShader)m_ppMaterials[i]->m_pShader->OnPrepareRender(pd3dCommandList, 1);
 	if (m_pMesh)m_pMesh->PreRender(pd3dCommandList, 1); //Draw
 	if (m_pMesh) m_pMesh->Render(pd3dCommandList, 1); //Draw
 }
@@ -100,3 +100,27 @@ void CParticleObject::OnPostRender()
 {
 	if (m_pMesh) m_pMesh->OnPostRender(0); //Read Stream Output Buffer Filled Size
 }
+
+
+CExplosiveObject::CExplosiveObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
+{
+}
+
+CExplosiveObject::~CExplosiveObject()
+{
+}
+
+void CExplosiveObject::Animate(float fElapsedTime)
+{
+	
+
+	CGameObject::Animate(fElapsedTime);
+
+}
+
+void CExplosiveObject::PrepareExplosion()
+{
+	
+}
+
+

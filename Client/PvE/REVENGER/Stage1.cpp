@@ -90,7 +90,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[4].m_xmf3Position = XMFLOAT3(0.0f, 128.0f, 0.0f);
 	m_pLights->m_pLights[4].m_xmf3Direction = XMFLOAT3(+1.0f, -1.0f, 0.0f);
 
-	m_pLights->m_pLights[5].m_bEnable = false;
+	m_pLights->m_pLights[5].m_bEnable = true;
 	m_pLights->m_pLights[5].m_nType = SPOT_LIGHT;
 	m_pLights->m_pLights[5].m_fRange = 50.0f;
 	m_pLights->m_pLights[5].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
@@ -761,10 +761,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		for (int i = 0; i < 5; i++)
 		{
 			m_pLights->m_pLights[5].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[0]->GetPosition();
-			//m_pLights->m_pLights[6].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[2]->GetPosition();
-			//m_pLights->m_pLights[7].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[4]->GetPosition();
-			//m_pLights->m_pLights[8].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[6]->GetPosition();
-			//m_pLights->m_pLights[9].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[8]->GetPosition();
+			
 		}
 	}
 	ParticleAnimation();
@@ -880,8 +877,6 @@ void Stage1::ParticleAnimation()
 	m_pBillboardShader[0]->NextPosition.x = SmokePosition.x;
 	m_pBillboardShader[0]->NextPosition.y = SmokePosition.y + 10.0f;
 	m_pBillboardShader[0]->NextPosition.z = SmokePosition.z;
-
-	ExplosingPosition = m_ppSpriteBillboard[0]->ExplosionPosition;
 }
 
 bool Stage1::CheckCollision(DirectX::BoundingOrientedBox& box1, DirectX::BoundingOrientedBox& box2, DirectX::XMFLOAT3& posA, DirectX::XMFLOAT3& lookA, DirectX::XMFLOAT3& upA, DirectX::XMFLOAT3& rightA)
