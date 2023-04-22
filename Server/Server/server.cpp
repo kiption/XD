@@ -31,6 +31,7 @@ chrono::system_clock::time_point g_s_start_time;	// 서버 시작시간  (단위: ms)
 milliseconds g_curr_servertime;
 bool b_isfirstplayer;	// 첫 player입장인지. (첫 클라 접속부터 서버시간이 흐르도록 하기 위함)
 mutex servertime_lock;	// 서버시간 lock
+vector<City_Info>Cities;
 
 class OVER_EX {
 public:
@@ -414,7 +415,7 @@ void disconnect(int target_id, int target)
 			}
 		}
 		break;
-		
+
 	case SESSION_RELAY:
 		relayserver.s_lock.lock();
 		if (relayserver.s_state == ST_FREE) {
@@ -610,7 +611,7 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].s_lock.lock();
 		clients[client_id].pos = { cl_move_packet->x, cl_move_packet->y, cl_move_packet->z };
 		clients[client_id].s_lock.unlock();
-		
+
 		// 4. 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
 		for (auto& other_pl : clients) {
 			if (other_pl.id == client_id) continue;
@@ -635,7 +636,7 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].m_upvec = { cl_rotate_packet->up_x, cl_rotate_packet->up_y, cl_rotate_packet->up_z };
 		clients[client_id].m_lookvec = { cl_rotate_packet->look_x, cl_rotate_packet->look_y, cl_rotate_packet->look_z };
 		clients[client_id].s_lock.unlock();
-		
+
 		// 4. 다른 클라이언트에게 플레이어가 회전한 방향을 알려준다.
 		for (auto& other_pl : clients) {
 			if (other_pl.id == client_id) continue;
@@ -1191,10 +1192,10 @@ void timerFunc() {
 				// 2. Bullet-NPC
 				for (auto& npc_obj : npcs) {
 					// 총알 사거리보다 멀리 떨어진 플레이어는 충돌체크 X
-					if (bullet.calcDistance(npc_obj.GetPosition()) > BULLET_RANGE)	continue;	
+					if (bullet.calcDistance(npc_obj.GetPosition()) > BULLET_RANGE)	continue;
 
 					// 충돌검사.
-					if (bullet.intersectsCheck(npc_obj.m_xoobb)) {
+					if (bullet.intersectsCheck(npc_obj.m_xoobb_Body)) {
 						cout << "Bullet is Collide with NPC[" << npc_obj.GetID() << "]!" << endl;//test
 						// 1) 총알 객체 제거
 						bullet.m_objlock.lock();
@@ -1376,9 +1377,28 @@ void replicaSessions() {	// 서버간 세션데이터를 복제하는 함수
 	}
 }
 
-
 void init_npc()
 {
+	for (int i{}; i < 3; ++i) {
+		City_Info temp;
+		temp.id = i;
+		temp.Centerx = C_cx[i];
+		temp.Centerz = C_cz[i];
+
+		for (int j{}; j < 3; ++j) {
+			temp.SectionNum[j].ID = j;
+			temp.SectionNum[j].lx = LX_range[3 * i + j];
+			temp.SectionNum[j].lz = LZ_range[3 * i + j];
+			temp.SectionNum[j].sx = SX_range[3 * i + j];
+			temp.SectionNum[j].sz = SZ_range[3 * i + j];
+		}
+		Cities.emplace_back(temp);
+	}
+
+	/*for (int i{}; i < Cities.size(); ++i) {
+		Cities[i].print();
+	}*/
+
 	for (int i{}; i < MAX_NPCS; i++) {
 		int npc_id = i;
 		npcs[i].SetID(npc_id);
@@ -1389,9 +1409,128 @@ void init_npc()
 		random_device rd;
 		default_random_engine dre(rd());
 		uniform_real_distribution<float>AirHigh(50, 270);
-		uniform_real_distribution<float>AirPos(600, 800);
+		
+		uniform_int_distribution<int>Sec_num(0, 2);
 
-		npcs[i].SetPosition(AirPos(dre), AirHigh(dre), AirPos(dre));
+		int ran_num = Sec_num(dre);
+
+		switch (ran_num)
+		{
+		case 0:
+		{
+			npcs[i].SetIdleCity(ran_num);
+			int sec = Sec_num(dre);
+			float lx, lz, sx, sz = 0;
+			switch (sec)
+			{
+			case 0:
+			{
+				sx = Cities[ran_num].SectionNum[sec].sx;
+				lx = Cities[ran_num].SectionNum[sec].lx;
+				sz = Cities[ran_num].SectionNum[sec].sz;
+				lz = Cities[ran_num].SectionNum[sec].lz;
+			}
+			break;
+			case 1:
+			{
+				sx = Cities[ran_num].SectionNum[sec].sx;
+				lx = Cities[ran_num].SectionNum[sec].lx;
+				sz = Cities[ran_num].SectionNum[sec].sz;
+				lz = Cities[ran_num].SectionNum[sec].lz;
+			}
+			break;
+			case 2:
+			{
+				sx = Cities[ran_num].SectionNum[sec].sx;
+				lx = Cities[ran_num].SectionNum[sec].lx;
+				sz = Cities[ran_num].SectionNum[sec].sz;
+				lz = Cities[ran_num].SectionNum[sec].lz;
+			}
+			break;
+			}
+			uniform_real_distribution<float>AirXPos(sx, lx);
+			uniform_real_distribution<float>AirZPos(sz, lz);
+			npcs[i].SetPosition(AirXPos(dre), AirHigh(dre), AirZPos(dre));
+			npcs[i].SetIdleSection(sec);
+		}
+		break;
+		case 1:
+		{
+			npcs[i].SetIdleCity(ran_num);
+			int sec = Sec_num(dre);
+			float lx, lz, sx, sz = 0;
+			switch (sec)
+			{
+			case 0:
+			{
+				sx = Cities[ran_num].SectionNum[sec].sx;
+				lx = Cities[ran_num].SectionNum[sec].lx;
+				sz = Cities[ran_num].SectionNum[sec].sz;
+				lz = Cities[ran_num].SectionNum[sec].lz;
+			}
+			break;
+			case 1:
+			{
+				sx = Cities[ran_num].SectionNum[sec].sx;
+				lx = Cities[ran_num].SectionNum[sec].lx;
+				sz = Cities[ran_num].SectionNum[sec].sz;
+				lz = Cities[ran_num].SectionNum[sec].lz;
+			}
+			break;
+			case 2:
+			{
+				sx = Cities[ran_num].SectionNum[sec].sx;
+				lx = Cities[ran_num].SectionNum[sec].lx;
+				sz = Cities[ran_num].SectionNum[sec].sz;
+				lz = Cities[ran_num].SectionNum[sec].lz;
+			}
+			break;
+			}
+			uniform_real_distribution<float>AirXPos(sx, lx);
+			uniform_real_distribution<float>AirZPos(sz, lz);
+			npcs[i].SetPosition(AirXPos(dre), AirHigh(dre), AirZPos(dre));
+			npcs[i].SetIdleSection(sec);
+		}
+		break;
+		case 2:
+		{
+			npcs[i].SetIdleCity(ran_num);
+			int sec = Sec_num(dre);
+			float lx, lz, sx, sz = 0;
+			switch (sec)
+			{
+			case 0:
+			{
+				sx = Cities[ran_num].SectionNum[sec].sx;
+				lx = Cities[ran_num].SectionNum[sec].lx;
+				sz = Cities[ran_num].SectionNum[sec].sz;
+				lz = Cities[ran_num].SectionNum[sec].lz;
+			}
+			break;
+			case 1:
+			{
+				sx = Cities[ran_num].SectionNum[sec].sx;
+				lx = Cities[ran_num].SectionNum[sec].lx;
+				sz = Cities[ran_num].SectionNum[sec].sz;
+				lz = Cities[ran_num].SectionNum[sec].lz;
+			}
+			break;
+			case 2:
+			{
+				sx = Cities[ran_num].SectionNum[sec].sx;
+				lx = Cities[ran_num].SectionNum[sec].lx;
+				sz = Cities[ran_num].SectionNum[sec].sz;
+				lz = Cities[ran_num].SectionNum[sec].lz;
+			}
+			break;
+			}
+			uniform_real_distribution<float>AirXPos(sx, lx);
+			uniform_real_distribution<float>AirZPos(sz, lz);
+			npcs[i].SetPosition(AirXPos(dre), AirHigh(dre), AirZPos(dre));
+			npcs[i].SetIdleSection(sec);
+		}
+		break;
+		}
 		npcs[i].SetOrgPosition(npcs[i].GetPosition());
 
 		uniform_real_distribution<float>rTheta(0.6f, 1.0f);
@@ -1424,9 +1563,13 @@ void MoveNPC()
 				npcs[i].SetUser_Pos(clients[npcs[i].GetChaseID()].pos, npcs[i].GetChaseID());
 			}
 
+			// npc pos 확인
+			/*cout << i << "번째 NPC의 도시 ID: " << npcs[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcs[i].GetIdleSection() << endl;
+			cout << i << "번째 NPC의 Pos: " << npcs[i].GetPosition().x << ',' << npcs[i].GetPosition().y << ',' << npcs[i].GetPosition().z << endl;*/
+
 			// 상태마다 다른 움직임을 하는 매니지먼트
 			npcs[i].ST1_State_Manegement(npcs[i].GetState());
-			
+
 			// Send Move&Rotate Packet
 			SC_MOVE_ROTATE_OBJECT_PACKET npc_update_packet;
 			npc_update_packet.size = sizeof(SC_MOVE_ROTATE_OBJECT_PACKET);
@@ -1459,6 +1602,8 @@ void MoveNPC()
 				send_target.do_send(&npc_update_packet);
 			}
 		}
+
+		//cout << "=============" << endl;
 	}
 }
 

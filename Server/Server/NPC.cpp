@@ -37,7 +37,8 @@ ST1_NPC::ST1_NPC()
 	m_Speed = 3.0f;
 	m_chaseID = -1;
 
-	m_xoobb = BoundingOrientedBox(XMFLOAT3(m_Pos.x, m_Pos.y, m_Pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	m_xoobb_Pro = BoundingOrientedBox(XMFLOAT3(m_Pos.x, m_Pos.y, m_Pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	m_xoobb_Body = BoundingOrientedBox(XMFLOAT3(m_Pos.x, m_Pos.y, m_Pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 ST1_NPC::~ST1_NPC()
@@ -62,6 +63,16 @@ void ST1_NPC::SetNpcType(int type)
 void ST1_NPC::SetChaseID(int id)
 {
 	m_chaseID = id;
+}
+
+void ST1_NPC::SetIdleCity(int num)
+{
+	m_IdleCity = num;
+}
+
+void ST1_NPC::SetIdleSection(int num)
+{
+	m_IdleSection = num;
 }
 
 void ST1_NPC::SetRotate(float y, float p, float r)
@@ -140,6 +151,16 @@ int ST1_NPC::GetState()
 	return m_state;
 }
 
+int ST1_NPC::GetIdleCity()
+{
+	return m_IdleCity;
+}
+
+int ST1_NPC::GetIdleSection()
+{
+	return m_IdleSection;
+}
+
 float ST1_NPC::GetRotate()
 {
 	return m_yaw, m_pitch, m_roll;
@@ -194,7 +215,7 @@ void ST1_NPC::ST1_State_Manegement(int state)
 	{
 	case NPC_IDLE: // 매복 혹은 특정 운동을 하는 중.
 	{
-		MovetoRotate();
+		//MovetoRotate();
 		for (int i{}; i < 3; ++i) {
 			if (m_Distance[i] <= 400) {
 				if (m_chaseID != -1) {
@@ -307,7 +328,8 @@ void ST1_NPC::ST1_State_Manegement(int state)
 	default:
 		break;
 	}
-	setBB();
+	setBB_Pro();
+	setBB_Body();
 }
 
 void ST1_NPC::ST1_Death_motion()
@@ -334,6 +356,11 @@ void ST1_NPC::MovetoRotate()
 	m_Acc += m_theta;
 	m_Pos.x = m_range * cos(m_Acc * PI / 360) + m_saveOrgPos.x;
 	m_Pos.z = m_range * sin(m_Acc * PI / 360) + m_saveOrgPos.z;
+}
+
+void ST1_NPC::MoveInSection()
+{
+	// 
 }
 
 
