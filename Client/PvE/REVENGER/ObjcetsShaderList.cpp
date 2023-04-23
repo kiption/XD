@@ -320,7 +320,7 @@ void CFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		m_ppObjects[i] = new CExplosiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pFragmentModel, false);
 		m_ppObjects[i]->SetScale(50.0, 50.0, 50.0);
-		m_ppObjects[i]->SetPosition(0.0, 400.0, 0.0);
+		m_ppObjects[i]->SetPosition(215.0, 60.0, -70.0);
 		pFragmentModel->AddRef();
 		ParticlePosition = m_ppObjects[i]->GetPosition();
 	}

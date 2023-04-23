@@ -77,7 +77,7 @@ public:
 	int m_nSpriteBillboards = 0;
 	CSpriteObjectsShader** m_ppSpriteBillboard = NULL;
 	CSkyBox* m_pSkyBox = NULL;
-	CHeightMapTerrain* m_pTerrain = NULL;
+	CHeightMapTerrain*m_pTerrain = NULL;
 
 	int									m_nLights = 0;
 

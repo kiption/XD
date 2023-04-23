@@ -37,7 +37,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, _T("Terrain/terrain033.raw"), 512, 512, xmf3Scale, xmf3Normal);
 	pTerrianMeterial->SetTexture(m_pDepthTexture, 0);
 	m_pTerrain->SetMaterial(0, pTerrianMeterial);
-	m_pTerrain->SetPosition(-1000.0, -8.0, -1000.0);
+	m_pTerrain->SetPosition(-1000.0, -25.0, -1000.0);
 	m_ppObjects[2] = m_pTerrain;
 
 	CMaterial* pMaterial = new CMaterial(3);

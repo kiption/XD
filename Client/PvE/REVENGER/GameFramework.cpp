@@ -380,10 +380,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			ChangeScene(SCENE2STAGE);
 			break;
 		}
-		/*case VK_SPACE:
-			if (m_nMode == SCENE1STAGE)gamesound.shootingSound();
+		case VK_SPACE:
 			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
-			break;*/
+			break;
 		default:
 			break;
 		}
@@ -395,7 +394,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
 			break;
 		case VK_SPACE:
-			if (m_nMode == SCENE1STAGE)gamesound.shootingSound();
+
 			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
 			break;
 		default:
@@ -628,7 +627,7 @@ void CGameFramework::ProcessInput()
 				}
 			}
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE)
-				if (dwDirection) m_pPlayer->Move(dwDirection, 8.71f, true);
+				if (dwDirection) m_pPlayer->Move(dwDirection, 7.71f, true);
 
 		}
 	}

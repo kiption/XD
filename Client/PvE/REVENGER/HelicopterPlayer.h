@@ -3,6 +3,8 @@
 #include "MissileObject.h"
 #include "ShadowShader.h"
 #include "ObjcetsShaderList.h"
+#include "GameSound.h"
+
 #define BULLETS					150
 class HeliPlayer : public CPlayer
 {
@@ -31,4 +33,7 @@ public:
 	virtual void Update(float fTimeElapsed);
 
 	BoundingOrientedBox m_xoobb = BoundingOrientedBox(XMFLOAT3(),XMFLOAT3(),XMFLOAT4());
+
+private:
+	GameSound gamesound;
 };

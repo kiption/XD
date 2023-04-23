@@ -70,14 +70,14 @@ void Stage1::BuildDefaultLightsAndMaterials()
 
 	m_pLights->m_pLights[3].m_bEnable = true;
 	m_pLights->m_pLights[3].m_nType = SPOT_LIGHT;
-	m_pLights->m_pLights[3].m_fRange = 700.0f;
+	m_pLights->m_pLights[3].m_fRange = 500.0f;
 	m_pLights->m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
 	m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+	m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
 	m_pLights->m_pLights[3].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 1.0f);
 	m_pLights->m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights->m_pLights[3].m_fFalloff = 8.0f;
+	m_pLights->m_pLights[3].m_fFalloff = 4.0f;
 	m_pLights->m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights->m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
@@ -156,11 +156,9 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	XMFLOAT3 xmf3Scale(35.0f, 2.0f, 35.0);
 	XMFLOAT3 xmf3Normal(0.0f, 0.3f, 0.0f);
-	//m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/waterterrain8bit.raw"), 257, 257, xmf3Scale, xmf3Normal);
-	//m_pTerrain->SetCurScene(SCENE1STAGE);
-	//m_pTerrain->m_xmf4x4World._41 = -3000.0f;
-	//m_pTerrain->m_xmf4x4World._42 = -50.0f;
-	//m_pTerrain->m_xmf4x4World._43 = -3500.0f;
+	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/waterterrain8bit.raw"), 257, 257, xmf3Scale, xmf3Normal);
+	m_pTerrain->SetCurScene(SCENE1STAGE);
+
 
 	m_nBillboardShaders = 1;
 	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
@@ -719,7 +717,7 @@ bool Stage1::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			m_ppSpriteBillboard[0]->SetActive(!m_ppSpriteBillboard[0]->GetActive());
 			break;
 		case 'D':
-			
+
 			break;
 		default:
 			break;
@@ -744,7 +742,10 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();
-
+	if (m_pPlayer->m_bCollisionTerrain == true)
+	{
+		m_ppSpriteBillboard[0]->m_bActive = true;
+	}
 	if (m_pLights)
 	{
 		//		m_pLights->m_pLights[1].m_xmf3Position = m_pPlayer->GetCamera()->GetPosition();
@@ -759,7 +760,13 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	{
 		m_pLights->m_pLights[3].m_xmf3Position = xmfPosition;
 		m_pLights->m_pLights[3].m_xmf3Direction = m_pPlayer->GetLook();
+		if (((CValkanObject*)m_pPlayer)->m_bActive == true)
+			m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.5, 0.0, 1.0);
+		else
+		{
 
+			m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.4, 0.4, 0.4, 1.0);
+		}
 
 		for (int i = 0; i < 5; i++)
 		{

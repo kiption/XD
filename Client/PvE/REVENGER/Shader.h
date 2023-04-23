@@ -17,7 +17,8 @@ public:
 
 private:
 	int									m_nReferences = 0;
-protected:
+
+public:
 	bool							m_bActive = true;
 public:
 	void SetActive(bool bActive) { m_bActive = bActive; }

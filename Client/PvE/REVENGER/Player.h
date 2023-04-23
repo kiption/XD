@@ -37,6 +37,7 @@ protected:
 
 	CCamera						*m_pCamera = NULL;
 	CHeightMapTerrain* pTerrain = NULL;
+	
 public:
 	CPlayer();
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
@@ -86,6 +87,8 @@ public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
+	bool m_bCollisionTerrain = false;
+
 
 	//Server
 	void SetVectorsByServer(const XMFLOAT3& xmf3right, const XMFLOAT3& xmf3up, const XMFLOAT3& xmf3look) { m_xmf3Right = xmf3right; m_xmf3Up = xmf3up; m_xmf3Look = xmf3look; }
