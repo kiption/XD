@@ -1,7 +1,7 @@
 #pragma once
 #include "Player.h"
 #include "MissileObject.h"
-
+#include "ShadowShader.h"
 #include "ObjcetsShaderList.h"
 #define BULLETS					150
 class HeliPlayer : public CPlayer
@@ -11,7 +11,7 @@ public:
 	virtual ~HeliPlayer();
 	CGameObject* m_pMainRotorFrame = NULL;
 	CGameObject* m_pTailRotorFrame = NULL;
-
+	CGameObject* pGameObject = NULL;
 public:
 	float m_fBulletEffectiveRange = 2000.0f;
 	CBulletEffectShader* pBCBulletEffectShader = NULL;

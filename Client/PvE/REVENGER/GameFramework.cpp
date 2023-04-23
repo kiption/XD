@@ -628,7 +628,7 @@ void CGameFramework::ProcessInput()
 				}
 			}
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE)
-				if (dwDirection) m_pPlayer->Move(dwDirection, 2.71f, true);
+				if (dwDirection) m_pPlayer->Move(dwDirection, 8.71f, true);
 
 		}
 	}
@@ -1170,19 +1170,39 @@ XMFLOAT3 CGameFramework::getMyLookVec()
 
 void CGameFramework::setPosition_OtherPlayer(int id, XMFLOAT3 pos)
 {
-	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetPosition(pos);
+	
+		if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
+		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])
+		{
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._41 = pos.x;
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._42 = pos.y;
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._43 = pos.z;
+		}
+
+
 }
 void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
-	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
+
+		if (id < 0|| id > 5) return;	// 배열 범위 벗어나는 거 방지
+		
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(1.0, 1.0, 1.0);
+
+
+	
 }
 void CGameFramework::remove_OtherPlayer(int id)
 {
-	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
+
+		if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지	
+		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
+		}
+
+
 }
 
 

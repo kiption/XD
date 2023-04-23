@@ -7,7 +7,8 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
-	CGameObject* pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
+	pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
+	
 	SetChild(pGameObject, false);
 	pGameObject->SetScale(1.0, 1.0, 1.0);
 	pGameObject->SetCurScene(SCENE1STAGE);
@@ -20,6 +21,7 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
 		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, false);
+		pBulletObject->SetShader(pBCBulletEffectShader);
 		pBulletObject->SetMovingSpeed(1500.0f);
 		pBulletObject->SetActive(false);
 		m_ppBullets[i] = pBulletObject;
@@ -216,7 +218,7 @@ void HeliPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 void HeliPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	if (m_nCurScene != OPENINGSCENE) CPlayer::Render(pd3dCommandList, pCamera);
-
+	if (m_nCurScene != OPENINGSCENE)
 	for (int i = 0; i < BULLETS; i++)if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
 
 	if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);

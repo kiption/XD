@@ -155,7 +155,7 @@ public:
 	XMFLOAT3							m_xmf3RotatePosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	int									m_nShaders = 0;
-	CShader** m_ppShaders = NULL;
+	CObjectsShader** m_ppShaders = NULL;
 	CShader* m_pShader = NULL;
 	CBulletEffectShader* m_pBulletEffect = NULL;
 	CUseWaterMoveTerrain* m_pUseWaterMove = NULL;

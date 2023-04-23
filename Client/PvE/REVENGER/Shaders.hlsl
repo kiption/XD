@@ -257,7 +257,7 @@ float4 PSParticleStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
 	}
 
 	float4 uvs[MAX_LIGHTS];
-	float4 cIllumination = ParticleLighting(input.positionW, normalize(input.normalW), true, uvs);
+	float4 cIllumination = ParticleLighting(input.positionW, normalize(input.normalW), false, uvs);
 
 	return(lerp(cColor, cIllumination, 0.5f));
 }
@@ -297,7 +297,7 @@ float4 PSBulletStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	float4 uvs[MAX_LIGHTS];
 	float4 cIllumination = ParticleLighting(input.positionW, input.normalW, false, uvs);
 
-	return(lerp(cColor, cIllumination, 0.5f));
+	return(lerp(cColor, cIllumination, 0.7f));
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //

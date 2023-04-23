@@ -16,7 +16,7 @@ CObjectsShader::~CObjectsShader()
 
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nObjects = 19;
+	m_nObjects = 20;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 1000.0, 0.0f, _PLANE_HEIGHT + 1000.0, 0.0f, 0.0f, 0.0f);
@@ -71,8 +71,9 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppHierarchicalGameObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 		m_ppHierarchicalGameObjects[i]->SetChild(pOtherPlayerModel, false);
-		m_ppHierarchicalGameObjects[i]->SetMaterial(pOtherPlayerMaterial);
-		m_ppHierarchicalGameObjects[i]->SetScale(0.0, 0.0, 0.0);
+		m_ppHierarchicalGameObjects[i]->SetMaterial(0,pOtherPlayerMaterial);
+		m_ppHierarchicalGameObjects[i]->SetScale(2.0, 2.0, 2.0);
+		m_ppHierarchicalGameObjects[i]->SetPosition(1300.0, 120.0, 1200.0);
 		m_ppHierarchicalGameObjects[i]->OnPrepareAnimate();
 		pOtherPlayerModel->AddRef();
 	}
@@ -141,6 +142,8 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[17]->SetPosition(250.0, 22.0, -200.0);
 	m_ppObjects[18]->SetPosition(950.0, 22.0, 670.0);
 
+	m_ppObjects[19] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -174,11 +177,13 @@ void CObjectsShader::ReleaseUploadBuffers()
 void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
 	CIlluminatedShader::Render(pd3dCommandList, pCamera, nPipelineState);
-
+	CPlayer *pPlayer = pCamera->GetPlayer();
+	m_ppObjects[6] = ((HeliPlayer*)pPlayer)->pGameObject;
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
 		{
+			
 			m_ppObjects[j]->UpdateShaderVariables(pd3dCommandList);
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}
