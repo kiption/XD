@@ -1208,9 +1208,19 @@ void CGameFramework::remove_OtherPlayer(int id)
 
 void CGameFramework::setPosition_Npc(int id, XMFLOAT3 pos)
 {
+	if (m_nMode == SCENE1STAGE)
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetPosition(pos);
 }
 void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
+	if (m_nMode == SCENE1STAGE)
+	{
+
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetRight(rightVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetUp(upVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetLook(lookVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetScale(1.0f, 1.0f, 1.0f);
+	}
 }
 void CGameFramework::remove_Npcs(int id)
 {

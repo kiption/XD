@@ -13,6 +13,20 @@ XMFLOAT3 NPCNormalize(XMFLOAT3 vec)
 	return vec;
 }
 
+float Calculation_Distance(XMFLOAT3 vec, vector<City_Info>const& v, int c_id) // vec-> Player's pos, v -> city's center pos 
+{
+	float dist = sqrtf(powf(vec.x - v[c_id].Centerx, 2) + powf(vec.z - v[c_id].Centerz, 2));
+	return dist;
+}
+
+float Calculation_Distance(XMFLOAT3 vec, vector<City_Info>const& v, int c_id, int s_id)
+{
+	float cx = (v[c_id].SectionNum[s_id].lx + v[c_id].SectionNum[s_id].sx) / 2;
+	float cz = (v[c_id].SectionNum[s_id].lz + v[c_id].SectionNum[s_id].sz) / 2;
+	
+	float dist = sqrtf(powf(vec.x - cx, 2) + powf(vec.z - cz, 2));
+	return dist;
+}
 // ===========================================
 // =============      BASE      ==============
 // ===========================================
@@ -23,7 +37,7 @@ ST1_NPC::ST1_NPC()
 	m_curr_coordinate.up = { 0.0f, 1.0f, 0.0f };
 	m_curr_coordinate.look = { 0.0f, 0.0f, 1.0f };
 
-	for (int i{}; i < 3; ++i) {
+	for (int i{}; i < User_num; ++i) {
 		m_Distance[i] = { 10000 };
 	}
 
@@ -34,9 +48,9 @@ ST1_NPC::ST1_NPC()
 
 	m_attack = 25;
 	m_defence = 100;
-	m_Speed = 3.0f;
 	m_chaseID = -1;
 
+	m_SectionMoveDir = true;
 	m_xoobb_Pro = BoundingOrientedBox(XMFLOAT3(m_Pos.x, m_Pos.y, m_Pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	m_xoobb_Body = BoundingOrientedBox(XMFLOAT3(m_Pos.x, m_Pos.y, m_Pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 }
@@ -92,11 +106,6 @@ void ST1_NPC::SetPosition(XMFLOAT3 pos)
 	m_Pos = pos;
 }
 
-void ST1_NPC::SetOrgPosition(XMFLOAT3 pos)
-{
-	m_saveOrgPos = pos;
-}
-
 void ST1_NPC::SetCurr_coordinate(Coordinate cor)
 {
 	m_curr_coordinate = cor;
@@ -107,24 +116,19 @@ void ST1_NPC::SetUser_Pos(XMFLOAT3 pos, int id)
 	m_User_Pos[id] = pos;
 }
 
-void ST1_NPC::SetTheta(float t)
+void ST1_NPC::SetInitSection(vector<City_Info> const& v)
 {
-	m_theta = t;
-}
-
-void ST1_NPC::SetRange(float r)
-{
-	m_range = r;
-}
-
-void ST1_NPC::SetAcc(float acc)
-{
-	m_Acc = acc;
+	m_Section = v;
 }
 
 void ST1_NPC::SetDistance(float dis)
 {
 	*m_Distance = dis;
+}
+
+void ST1_NPC::SetSpeed(float spd)
+{
+	m_Speed = spd;
 }
 
 // ===========================================
@@ -176,34 +180,24 @@ XMFLOAT3 ST1_NPC::GetPosition()
 	return m_Pos;
 }
 
-XMFLOAT3 ST1_NPC::GetOrgPosition()
-{
-	return m_saveOrgPos;
-}
-
 Coordinate ST1_NPC::GetCurr_coordinate()
 {
 	return m_curr_coordinate;
 }
 
-float ST1_NPC::GetTheta()
-{
-	return m_theta;
-}
-
-float ST1_NPC::GetRange()
-{
-	return m_range;
-}
-
-float ST1_NPC::GetAcc()
-{
-	return m_Acc;
-}
-
 float ST1_NPC::GetDistance(int id)
 {
 	return m_Distance[id];
+}
+
+float ST1_NPC::GetSpeed(float spd)
+{
+	return m_Speed;
+}
+
+vector<City_Info> ST1_NPC::GetCityInfo()
+{
+	return m_Section;
 }
 
 // ===========================================
@@ -215,8 +209,8 @@ void ST1_NPC::ST1_State_Manegement(int state)
 	{
 	case NPC_IDLE: // 매복 혹은 특정 운동을 하는 중.
 	{
-		//MovetoRotate();
-		for (int i{}; i < 3; ++i) {
+		MoveInSection();
+		for (int i{}; i < User_num; ++i) {
 			if (m_Distance[i] <= 400) {
 				if (m_chaseID != -1) {
 					if (m_Distance[i] < m_Distance[m_chaseID]) {
@@ -242,7 +236,7 @@ void ST1_NPC::ST1_State_Manegement(int state)
 		FlyOnNpc(m_User_Pos[m_chaseID], m_chaseID); // 대상 플레이어와의 y 좌표를 비슷하게 맞춤.
 		bool State_check = false;
 
-		for (int i{}; i < 3; ++i) {
+		for (int i{}; i < User_num; ++i) {
 			if (m_Distance[i] <= 200) {  // 추적상태로 변환
 				State_check = true;
 				if (m_Distance[i] < m_Distance[m_chaseID]) {
@@ -251,26 +245,27 @@ void ST1_NPC::ST1_State_Manegement(int state)
 				m_state = NPC_CHASE; // 날기 후 추적 상태로 돌입
 				m_chaseID = i;
 			}
-			else if (i == 2 && !State_check) { // 자신의 상태 유지
+			else if (i == User_num - 1 && !State_check) { // 자신의 상태 유지
 				m_state = NPC_FLY;
 			}
 		}
 
 		int Idle_Change = 0;
 		if (m_state == NPC_FLY) {
-			for (int i{}; i < 3; ++i) {
+			for (int i{}; i < User_num; ++i) {
 				if (m_Distance[i] > 400) {
 					Idle_Change++;
 				}
 			}
 		}
-		if (Idle_Change == 3) {
+		if (Idle_Change == User_num) {
 			m_state = NPC_IDLE;
 			m_chaseID = -1;
 			// Idle로 돌아가니까, NPC 객체 하나당 갖고있던 플레이어들의 거리 배열을 초기화
-			for (int i{}; i < 3; ++i) {
+			for (int i{}; i < User_num; ++i) {
 				m_Distance[i] = 10000;
 			}
+			MoveChangeIdle(); // City, Section 지정
 		}
 	}
 	break;
@@ -281,7 +276,7 @@ void ST1_NPC::ST1_State_Manegement(int state)
 
 		bool State_check = false;
 
-		for (int i{}; i < 3; ++i) {
+		for (int i{}; i < User_num; ++i) {
 			if (m_Distance[i] <= 150) {  // 공격상태로 변환
 				State_check = true;
 				if (m_Distance[i] < m_Distance[m_chaseID]) {
@@ -290,20 +285,20 @@ void ST1_NPC::ST1_State_Manegement(int state)
 				//m_state = NPC_ATTACK; // 날기 후 공격 상태로 돌입
 				m_chaseID = i;
 			}
-			else if (i == 2 && !State_check) { // 자신의 상태 유지
+			else if (i == User_num - 1 && !State_check) { // 자신의 상태 유지
 				m_state = NPC_CHASE;
 			}
 		}
 
 		int Fly_Change = 0;
 		if (m_state == NPC_CHASE) {
-			for (int i{}; i < 3; ++i) {
+			for (int i{}; i < User_num; ++i) {
 				if (m_Distance[i] > 200) {
 					Fly_Change++;
 				}
 			}
 		}
-		if (Fly_Change == 3) {
+		if (Fly_Change == User_num) {
 			m_state = NPC_FLY;
 			m_chaseID = -1;
 		}
@@ -345,22 +340,205 @@ void ST1_NPC::ST1_Death_motion()
 	m_curr_coordinate.look = NPCcalcRotate(base_coordinate.look, m_pitch, m_yaw, m_roll);
 }
 
-void ST1_NPC::MovetoRotate()
-{
-	m_yaw += 1.0f * m_theta;
-	Coordinate base_coordinate;
-	m_curr_coordinate.right = NPCcalcRotate(base_coordinate.right, m_pitch, m_yaw, m_roll);
-	m_curr_coordinate.up = NPCcalcRotate(base_coordinate.up, m_pitch, m_yaw, m_roll);
-	m_curr_coordinate.look = NPCcalcRotate(base_coordinate.look, m_pitch, m_yaw, m_roll);
-
-	m_Acc += m_theta;
-	m_Pos.x = m_range * cos(m_Acc * PI / 360) + m_saveOrgPos.x;
-	m_Pos.z = m_range * sin(m_Acc * PI / 360) + m_saveOrgPos.z;
-}
-
 void ST1_NPC::MoveInSection()
 {
-	// 
+	if (m_SectionMoveDir) {
+		switch (m_IdleSection)
+		{
+		case 0:
+		{
+			if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sx - m_Pos.x)) {
+				m_IdleSection++;
+			}
+			else {
+				XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].sx, m_Pos.y, m_Pos.z };
+				XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+				XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+				// Right
+				Coordinate base_coordinate;
+				base_coordinate.up = { 0,1,0 };
+
+				XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+				XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+				// up
+				XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+				XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+				m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+			}
+		}
+		break;
+		case 1:
+		{
+			if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lz - m_Pos.z)) {
+				m_IdleSection++;
+			}
+			else {
+				XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].lz };
+				XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+				XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+				// Right
+				Coordinate base_coordinate;
+				base_coordinate.up = { 0,1,0 };
+
+				XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+				XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+				// up
+				XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+				XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+				m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+			}
+		}
+		break;
+		case 2:
+		{
+			if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lx - m_Pos.x)) {
+				m_SectionMoveDir = false;
+			}
+			else {
+				XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].lx, m_Pos.y, m_Pos.z };
+				XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+				XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+				// Right
+				Coordinate base_coordinate;
+				base_coordinate.up = { 0,1,0 };
+
+				XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+				XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+				// up
+				XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+				XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+				m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+			}
+		}
+		break;
+		}
+	}
+	else {
+		switch (m_IdleSection)
+		{
+		case 0:
+		{
+			if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lx - m_Pos.x)) {
+				m_SectionMoveDir = true;
+			}
+			else {
+				XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].lx, m_Pos.y, m_Pos.z };
+				XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+				XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+				// Right
+				Coordinate base_coordinate;
+				base_coordinate.up = { 0,1,0 };
+
+				XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+				XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+				// up
+				XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+				XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+				m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+			}
+		}
+		break;
+		case 1:
+		{
+			if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sz - m_Pos.z)) {
+				m_IdleSection--;
+			}
+			else {
+				XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].sz };
+				XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+				XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+				// Right
+				Coordinate base_coordinate;
+				base_coordinate.up = { 0,1,0 };
+
+				XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+				XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+				// up
+				XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+				XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+				m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+			}
+		}
+		break;
+		case 2:
+		{
+			if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sx - m_Pos.x)) {
+				m_IdleSection--;
+			}
+			else {
+				XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].sx, m_Pos.y, m_Pos.z };
+				XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+				XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+				// Right
+				Coordinate base_coordinate;
+				base_coordinate.up = { 0,1,0 };
+
+				XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+				XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+				// up
+				XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+				XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+				m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+			}
+		}
+		break;
+		}
+	}
+}
+
+void ST1_NPC::MoveChangeIdle()
+{
+	float City_dis{};
+	float Min_DisofCity = 100000;
+	int id{};
+	for (int i{}; i < 3; ++i) {
+		City_dis = Calculation_Distance(m_Pos, m_Section, i);
+		if (Min_DisofCity > City_dis) {
+			Min_DisofCity = City_dis;
+			id = i;
+		}
+	}
+
+	if (Min_DisofCity > 600.0f) {
+		// 계산한 값이 거리가 일정 구간 안이 아닐 경우	
+		float dis{};
+		int s_id{};
+		float Min_DisofSec = 100000;
+		for (int i{}; i < 3; ++i) {
+			dis = Calculation_Distance(m_Pos, m_Section, id, i);
+			if (Min_DisofSec > dis) {
+				Min_DisofSec = dis;
+				s_id = i;
+			}
+		}
+		// 구역 지정
+		m_IdleCity = id;
+		m_IdleSection = s_id;
+
+	}
+	//else {
+	//	// 일정 구간 안인 경우
+
+	//	m_Section[m_IdleCity].SectionNum[m_IdleSection];
+	//}
 }
 
 
@@ -467,8 +645,3 @@ void ST1_NPC::PlayerChasing()
 	m_Pos.y += m_Speed * m_curr_coordinate.look.y;
 	m_Pos.z += m_Speed * m_curr_coordinate.look.z;
 }
-
-
-
-
-

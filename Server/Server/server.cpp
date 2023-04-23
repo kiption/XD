@@ -1531,14 +1531,10 @@ void init_npc()
 		}
 		break;
 		}
-		npcs[i].SetOrgPosition(npcs[i].GetPosition());
-
-		uniform_real_distribution<float>rTheta(0.6f, 1.0f);
-		npcs[i].SetTheta(rTheta(dre));
-		npcs[i].SetAcc(npcs[i].GetTheta());
-
-		uniform_int_distribution<int>rRange(100, 200);
-		npcs[i].SetRange(rRange(dre));
+		uniform_real_distribution<float>SpdSet(1.1f, 3.5f);
+		float speed = SpdSet(dre);
+		npcs[i].SetSpeed(speed);
+		npcs[i].SetInitSection(Cities);
 	}
 }
 
@@ -1553,8 +1549,11 @@ void MoveNPC()
 
 		for (int i = 0; i < MAX_NPCS; ++i) {
 			// 클라이언트들과 NPC 사이의 거리 계산
+			
 			for (auto& cl : clients) {
-				npcs[i].Caculation_Distance(cl.pos, cl.id);
+				if (cl.id != -1) {
+					npcs[i].Caculation_Distance(cl.pos, cl.id);
+				}
 			}
 			//cout << i << "번째 Status - " << npcs[i].GetState() << endl;
 
