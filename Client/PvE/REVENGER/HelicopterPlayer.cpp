@@ -11,16 +11,20 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	SetChild(pGameObject, false);
 	pGameObject->SetScale(1.0, 1.0, 1.0);
 	pGameObject->SetCurScene(SCENE1STAGE);
-	CLoadedModelInfo* pBulletMesh = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", NULL);
+	pBCBulletEffectShader = new CBulletEffectShader();
+	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
+
 	for (int i = 0; i < BULLETS; i++)
 	{
-		pBulletObject = new CBulletObject(m_fBulletEffectiveRange);
-		pBulletObject->SetChild(pBulletMesh->m_pModelRootObject, true);
-		pBulletObject->SetMovingSpeed(4000.0f);
+		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
+		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
+		pBulletObject->SetChild(pBulletMesh, false);
+		pBulletObject->SetMovingSpeed(1500.0f);
 		pBulletObject->SetActive(false);
-		pBulletObject->m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 0, pBulletMesh);
 		m_ppBullets[i] = pBulletObject;
 		m_ppBullets[i]->SetCurScene(SCENE1STAGE);
+		pBulletMesh->AddRef();
 	}
 
 	SetPlayerUpdatedContext(pContext);
@@ -29,49 +33,46 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-	SetPosition(XMFLOAT3(310.0f, 590.0f, 590.0f));
-	SetScale(XMFLOAT3(1.2, 1.2, 1.2));
+	SetPosition(XMFLOAT3(310.0f, 390.0f, 590.0f));
+
 
 	m_xoobb = BoundingOrientedBox(XMFLOAT3(this->GetPosition()), XMFLOAT3(15.0, 13.0, 20.0), XMFLOAT4(0, 0, 0, 1));
-
-	if (pBulletMesh) delete pBulletMesh;
 }
 
 HeliPlayer::~HeliPlayer()
 {
-	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
+	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) delete[] m_ppBullets[i];
 }
 
 void HeliPlayer::Firevalkan(CGameObject* pLockedObject)
 {
-	CBulletObject* pBulletObject = NULL;
+	CValkanObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS; i++)
 	{
 		if (!m_ppBullets[i]->m_bActive)
 		{
 			pBulletObject = m_ppBullets[i];
-			pBulletObject->Reset();
+			//	pBulletObject->Reset();
 			break;
 		}
 	}
-	XMFLOAT3 PlayerLook = this->GetLookVector();
-	XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
-	XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
+
 	if (pBulletObject)
 	{
-
+		XMFLOAT3 PlayerLook = this->GetLookVector();
+		XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
+		XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
 		XMFLOAT3 xmf3Position = this->GetPosition();
 		XMFLOAT3 xmf3Direction = PlayerLook;
-		xmf3Direction.y -= 0.1f;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 6.0f, false));
 
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
+		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-		pBulletObject->Rotate(130.0, 0.0, 0.0);
-		pBulletObject->SetScale(15.0, 15.0, 25.0);
+		pBulletObject->Rotate(90.0, 0.0, 0.0);
+		pBulletObject->SetScale(10.0, 10.0, 25.0);
 		pBulletObject->SetActive(true);
-	
+
 	}
 }
 
@@ -100,7 +101,7 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f,2.6f, 0.5f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 2.6f, 0.5f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -135,18 +136,28 @@ void HeliPlayer::OnPrepareAnimate()
 }
 void HeliPlayer::Animate(float fTimeElapsed)
 {
-	/*for (int i = 0; i < BULLETS; i++)
+	for (int i = 0; i < BULLETS; i++)
 	{
 		if (m_ppBullets[i]->m_bActive) {
 
 			m_ppBullets[i]->Animate(fTimeElapsed);
 		}
-	}*/
+	}
+
+
 	CPlayer::Animate(fTimeElapsed);
 }
 
 void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 {
+	for (int i = 0; i < BULLETS; i++)
+	{
+		if (m_ppBullets[i]->m_bActive)
+		{
+			m_ppBullets[i]->Animate(fTimeElapse);
+
+		}
+	}
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 10.0f) * fTimeElapse);
@@ -204,8 +215,11 @@ void HeliPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 void HeliPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	if(m_nCurScene!=OPENINGSCENE) CPlayer::Render(pd3dCommandList, pCamera);
+	if (m_nCurScene != OPENINGSCENE) CPlayer::Render(pd3dCommandList, pCamera);
 
+	for (int i = 0; i < BULLETS; i++)if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
+
+	if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
 }
 
 void HeliPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)

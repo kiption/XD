@@ -199,11 +199,11 @@ D3D12_SHADER_BYTECODE BillboardParticleShader::CreatePixelShader(ID3DBlob** ppd3
 void BillboardParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/smoke2.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/40Smoke2.dds", RESOURCE_TEXTURE2D, 0);
 	CTexture* ppSpriteTextures2 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures2->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/smoke2.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures2->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/40Smoke2.dds", RESOURCE_TEXTURE2D, 0);
 	CTexture* ppSpriteTextures3 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/smoke2.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/45Smoke2.dds", RESOURCE_TEXTURE2D, 0);
 
 	pSpriteMaterial = new CMaterial(1);
 	pSpriteMaterial2 = new CMaterial(1);

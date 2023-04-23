@@ -117,7 +117,7 @@ void CPlayer::Rotate(float x, float y, float z)
 			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 		}
 	}
-	else if (nCurrentCameraMode == SPACESHIP_CAMERA)
+	else if (nCurrentCameraMode == SPACESHIP_CAMERA )
 	{
 		m_pCamera->Rotate(x, y, z);
 		if (x != 0.0f)

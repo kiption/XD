@@ -1,6 +1,8 @@
 #pragma once
 #include "Player.h"
 #include "MissileObject.h"
+
+#include "ObjcetsShaderList.h"
 #define BULLETS					150
 class HeliPlayer : public CPlayer
 {
@@ -12,8 +14,9 @@ public:
 
 public:
 	float m_fBulletEffectiveRange = 2000.0f;
-	CBulletObject* pBulletObject = NULL;
-	CBulletObject* m_ppBullets[BULLETS];
+	CBulletEffectShader* pBCBulletEffectShader = NULL;
+	CValkanObject* pBulletObject = NULL;
+	CValkanObject* m_ppBullets[BULLETS];
 	void Firevalkan(CGameObject* pLockedObject);
 public:
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);

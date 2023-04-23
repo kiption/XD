@@ -380,9 +380,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			ChangeScene(SCENE2STAGE);
 			break;
 		}
-		case VK_SPACE:
-
-			break;
+		/*case VK_SPACE:
+			if (m_nMode == SCENE1STAGE)gamesound.shootingSound();
+			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
+			break;*/
 		default:
 			break;
 		}
@@ -392,6 +393,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		{
 		case VK_CONTROL:
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
+			break;
+		case VK_SPACE:
+			if (m_nMode == SCENE1STAGE)gamesound.shootingSound();
+			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
 			break;
 		default:
 			break;
@@ -537,8 +542,9 @@ void CGameFramework::ProcessInput()
 			}
 		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
-			//dwDirection |= DIR_RIGHT;
-			m_pPlayer->Rotate(0.5f, 0.5f, 0.0f);
+			dwDirection |= DIR_RIGHT;
+			//m_pPlayer->Rotate(0.5f, 0.5f, 0.0f);
+			(m_pPlayer)->Rotate(0.0, 0.0, 0.5);
 			q_keyboardInput.push(SEND_KEY_D);//S
 
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
@@ -549,7 +555,7 @@ void CGameFramework::ProcessInput()
 			}
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
-			//dwDirection |= DIR_LEFT;
+			dwDirection |= DIR_LEFT;
 			m_pPlayer->Rotate(-0.5f, -0.5f, 0.0f);
 			q_keyboardInput.push(SEND_KEY_A);//S
 
@@ -675,11 +681,11 @@ void CGameFramework::CreateShaderVariables()
 
 void CGameFramework::ReleaseShaderVariables()
 {
-		if (m_pd3dcbFrameworkInfo)
-		{
-			m_pd3dcbFrameworkInfo->Unmap(0, NULL);
-			m_pd3dcbFrameworkInfo->Release();
-		}
+	if (m_pd3dcbFrameworkInfo)
+	{
+		m_pd3dcbFrameworkInfo->Unmap(0, NULL);
+		m_pd3dcbFrameworkInfo->Release();
+	}
 }
 
 void CGameFramework::UpdateShaderVariables()
