@@ -19,6 +19,9 @@
     <Filter Include="소스 파일\Objects\Bullets">
       <UniqueIdentifier>{40acdfc4-97d4-4494-b319-642a2ec2bd51}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\Map">
+      <UniqueIdentifier>{2e8114fa-b11d-4b02-adb4-f6cb49bac482}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="server.cpp">
@@ -32,6 +35,9 @@
     </ClCompile>
     <ClCompile Include="BulletsMgr.cpp">
       <Filter>소스 파일\Objects\Bullets</Filter>
+    </ClCompile>
+    <ClCompile Include="MapObjects.cpp">
+      <Filter>소스 파일\Map</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -58,6 +64,9 @@
     </ClInclude>
     <ClInclude Include="MathFuncs.h">
       <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MapObjects.h">
+      <Filter>소스 파일\Map</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

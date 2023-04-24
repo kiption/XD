@@ -130,6 +130,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BulletsMgr.cpp" />
+    <ClCompile Include="MapObjects.cpp" />
     <ClCompile Include="NPC.cpp" />
     <ClCompile Include="ObjectsMgr.cpp" />
     <ClCompile Include="server.cpp" />
@@ -148,6 +150,7 @@
     <ClInclude Include="BulletsMgr.h" />
     <ClInclude Include="Constant.h" />
     <ClInclude Include="CP_KEYS.h" />
+    <ClInclude Include="MapObjects.h" />
     <ClInclude Include="MathFuncs.h" />
     <ClInclude Include="MyVectors.h" />
     <ClInclude Include="NPC.h" />

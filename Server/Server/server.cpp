@@ -7,6 +7,7 @@
 #include <chrono>
 #include <random>
 
+#include "MapObjects.h"
 #include "Constant.h"
 #include "MathFuncs.h"
 #include "BulletsMgr.h"
@@ -17,7 +18,6 @@
 
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
-
 using namespace std;
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_CONNECT };
@@ -31,7 +31,10 @@ chrono::system_clock::time_point g_s_start_time;	// 서버 시작시간  (단위: ms)
 milliseconds g_curr_servertime;
 bool b_isfirstplayer;	// 첫 player입장인지. (첫 클라 접속부터 서버시간이 흐르도록 하기 위함)
 mutex servertime_lock;	// 서버시간 lock
+
 vector<City_Info>Cities;
+
+vector<MapObject> buildings_info;	// Map Buildings CollideBox
 
 class OVER_EX {
 public:
@@ -1806,6 +1809,108 @@ int main(int argc, char* argv[])
 	// [ Main ]
 	init_npc();
 	shoot_time = chrono::system_clock::now();
+
+	// [ Main - 맵 정보 로드 ]
+	// 1. 디렉토리 검색
+	string filename;
+	vector<string> readTargets;
+
+	filesystem::path collidebox_path(".\\Collideboxes");
+	if (filesystem::exists(collidebox_path)) {
+		filesystem::recursive_directory_iterator itr(collidebox_path);
+		while (itr != filesystem::end(itr)) {
+			const filesystem::directory_entry& entry = *itr;
+			//cout << entry.path().string() << endl;
+			string path_name = entry.path().string();
+			if (path_name.find(".txt") != string::npos) {	// .txt 가 들어간 파일만 저장합니다. (디렉토리 이름만 있는 path 배제)
+				readTargets.push_back(path_name);
+			}
+			itr++;
+		}
+	}
+	else {
+		cout << "[Directory Search Error] Unknown Directory." << endl;
+	}
+
+	// 2. 파일 읽기
+	for (auto& fname : readTargets) {
+		cout << "=======================================================" << endl;
+		cout << "Curr Filename: " << fname << endl;
+		cout << "=======================================================\n" << endl;
+		//string fname = readTargets[0];
+		ifstream txtfile(fname);
+
+		string line;
+
+		int line_cnt = 0;
+
+		char b_pos = 0;
+		int pos_count = 0;
+
+		char b_scale = 0;
+		int scale_count = 0;
+
+		float tmp_pos[3] = { 0.f, 0.f, 0.f }; // 뽑은 좌표정보를 임시 저장할 공간, 3개 꽉차면 벡터에 넣어주고 비워두자.
+		float tmp_scale[3] = { 0.f, 0.f, 0.f }; // 뽑은 크기정보를 임시 저장할 공간, 3개 꽉차면 벡터에 넣어주고 비워두자.
+		if (txtfile.is_open()) {
+			while (txtfile >> line) {
+				if (line == "Position:") {
+					b_pos = 1;
+					pos_count = 0;
+				}
+				else if (line == "Size:") {
+					b_scale = 1;
+					scale_count = 0;
+				}
+				else {
+					if (b_pos == 1) {
+						tmp_pos[pos_count] = string2data(line);
+
+						if (pos_count == 2) {
+							tmp_pos[pos_count] = string2data(line);
+
+							b_pos = 0;
+							pos_count = 0;
+
+							//XMFLOAT3 tempF3(tmp_pos[0], tmp_pos[1], tmp_pos[2]);
+							//cout << "New Position Data. [" << tmp_pos[0] << ", " << tmp_pos[1] << ", " << tmp_pos[2] << "]" << endl;
+							//posArr.push_back(tempF3);
+							//memset(tmp_pos, 0, sizeof(tmp_pos));
+						}
+						else {
+							pos_count += 1;
+						}
+					}
+					else if (b_scale == 1) {
+						tmp_scale[scale_count] = string2data(line);
+
+						if (scale_count == 2) {
+							tmp_scale[scale_count] = string2data(line);
+							b_scale = 0;
+							scale_count = 0;
+
+							MapObject tmp_mapobj(tmp_pos[0], tmp_pos[1], tmp_pos[2], tmp_scale[0], tmp_scale[1], tmp_scale[2]);
+							cout << "New MapObject[Building] is Added." << endl;
+							cout << "Position Data: [" << tmp_mapobj.getPosX() << ", " << tmp_mapobj.getPosY() << ", " << tmp_mapobj.getPosZ() << "]" << endl;
+							cout << "Scale Data: [" << tmp_mapobj.getScaleX() << ", " << tmp_mapobj.getScaleY() << ", " << tmp_mapobj.getScaleZ() << "]\n" << endl;
+							buildings_info.push_back(tmp_mapobj);
+							memset(tmp_pos, 0, sizeof(tmp_pos));
+							memset(tmp_scale, 0, sizeof(tmp_scale));
+						}
+						else {
+							scale_count += 1;
+						}
+					}
+				}
+				line_cnt++;
+			}
+		}
+		else {
+			cout << "[Error] Unknown File." << endl;
+		}
+		cout << "\n";
+		txtfile.close();
+	}
 
 	//======================================================================
 	// [ Main - 클라이언트 연결 ]
