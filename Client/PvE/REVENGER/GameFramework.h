@@ -86,6 +86,7 @@ public:
 	DWORD						m_nMode = OPENINGSCENE;
 	GameSound gamesound;
 	int m_NumOfUI = 10;
+	bool UI_Switch = false;
 protected:
 	ID3D12Resource* m_pd3dcbFrameworkInfo = NULL;
 	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;

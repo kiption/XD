@@ -380,6 +380,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			ChangeScene(SCENE2STAGE);
 			break;
 		}
+		case '3':
+			UI_Switch = !UI_Switch;
+			break;
 		case VK_SPACE:
 			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
 			break;
@@ -541,7 +544,7 @@ void CGameFramework::ProcessInput()
 			}
 		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
-			m_pPlayer->Rotate(0.5f, 0.5f, 0.0f);
+			(m_pPlayer)->Rotate(0.0f, 0.5f, 0.0f);
 			q_keyboardInput.push(SEND_KEY_D);//S
 
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
@@ -552,10 +555,13 @@ void CGameFramework::ProcessInput()
 			}
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
-			m_pPlayer->Rotate(-0.5f, -0.5f, 0.0f);
+			m_pPlayer->Rotate(0.0f, -0.5f, 0.0f);
 			q_keyboardInput.push(SEND_KEY_A);//S
 
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
+			{
+			}
+			if (m_nMode != SCENE2STAGE)
 			{
 			}
 		}
@@ -781,14 +787,74 @@ void CGameFramework::FrameAdvance()
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	if (m_nMode == OPENINGSCENE) {
 		D2D_POINT_2F d2dPoint = { 0.0f, 0.0f };
-		D2D_RECT_F d2dRect = { 0.0f, 0.0f, 1280.0f, 1024.0f };
+		D2D_RECT_F d2dRect = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[9] : m_pd2dfxGaussianBlur[9], &d2dPoint, &d2dRect);
 
 	}
-	else if (m_nMode = SCENE1STAGE) {
+
+	if (UI_Switch) {
+		if (m_nMode = SCENE1STAGE) {
+			D2D_POINT_2F d2dPoint = { 60.0f, 650.0f };
+			D2D_RECT_F d2dRect = { 0.0f, 0.0f, 190.0f, 45.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[0] : m_pd2dfxGaussianBlur[0], &d2dPoint, &d2dRect);
+
+			D2D_POINT_2F d2BHPPoint = { 60.0f, 700.0f };
+			D2D_RECT_F d2BHPRect = { 0.0f , 0.0f, 190.0f, 45.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2BHPPoint, &d2BHPRect);
+
+			D2D_POINT_2F d2T_M2Point = { 550.0f, 50.0f };
+			D2D_RECT_F d2T_M2Rect = { m_10MinOfTime * 40.0f , 0.0f, 40.0f + m_10MinOfTime * 40.0f, 50.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[2] : m_pd2dfxGaussianBlur[2], &d2T_M2Point, &d2T_M2Rect);
+
+			D2D_POINT_2F d2T_M1Point = { 575.0f, 50.0f };
+			D2D_RECT_F d2T_M1Rect = { m_1MinOfTime * 40.0f , 0.0f, 40.0f + m_1MinOfTime * 40.0f, 50.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[3] : m_pd2dfxGaussianBlur[3], &d2T_M1Point, &d2T_M1Rect);
+
+			D2D_POINT_2F d2T_SectionPoint = { 620.0f, 50.0f };
+			D2D_RECT_F d2T_SectionRect = { 282.0f , 420.0f, 300.0f, 475.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[4] : m_pd2dfxGaussianBlur[4], &d2T_SectionPoint, &d2T_SectionRect);
+
+			D2D_POINT_2F d2T_S2Point = { 650.0f, 50.0f };
+			D2D_RECT_F d2T_S2Rect = { m_10SecOftime * 40.0f , 0.0f, 40.0f + m_10SecOftime * 40.0f, 50.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[5] : m_pd2dfxGaussianBlur[5], &d2T_S2Point, &d2T_S2Rect);
+
+			D2D_POINT_2F d2T_S1Point = { 680.0f, 50.0f };
+			D2D_RECT_F d2T_S1Rect = { m_1SecOfTime * 40.0f , 0.0f, 40.0f + m_1SecOfTime * 40.0f, 50.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[6] : m_pd2dfxGaussianBlur[6], &d2T_S1Point, &d2T_S1Rect);
+
+			D2D_POINT_2F d2d_BulletPoint = { 1000.0f, 700.0f };
+			D2D_RECT_F d2d_BulletRect = { 0.0f , 0.0f, 32.0f, 32.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[7] : m_pd2dfxGaussianBlur[7], &d2d_BulletPoint, &d2d_BulletRect);
+
+			D2D_POINT_2F d2_DirectionPoint = { 550.0f, -10.0f };
+			D2D_RECT_F d2_DirectionRect = { 0.0f , 0.0f, 180.0f, 90.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[8] : m_pd2dfxGaussianBlur[8], &d2_DirectionPoint, &d2_DirectionRect);
+		}
 	}
 
 #endif
+	if (UI_Switch) {
+		if (m_nMode == SCENE1STAGE) {
+			/*D2D1_SIZE_F szRenderTarget = m_ppd2dRenderTargets[m_nSwapChainBufferIndex]->GetSize();
+			D2D1_RECT_F rcUpperText = D2D1::RectF(0, 0, szRenderTarget.width, szRenderTarget.height * 0.25f);
+			m_pd2dDeviceContext->DrawTextW(L"", (UINT32)wcslen(L""), m_pdwFont, &rcUpperText, m_pd2dbrText);
+
+			D2D1_RECT_F rcLowerText = D2D1::RectF(0, szRenderTarget.height * 0.8f, szRenderTarget.width, szRenderTarget.height);
+			m_pd2dDeviceContext->DrawTextW(L" ", (UINT32)wcslen(L" "), m_pdwFont, &rcLowerText, m_pd2dbrText);
+
+			D2D1_RECT_F rcBulletText = D2D1::RectF(850, 950, szRenderTarget.width, szRenderTarget.height * 0.5f);
+			m_pd2dDeviceContext->DrawTextW(m_myBullet, (UINT32)wcslen(m_myBullet), m_pdwFont, &rcBulletText, m_pd2dbrText);
+
+			D2D1_RECT_F rcMaxBulletText = D2D1::RectF(950, 950, szRenderTarget.width, szRenderTarget.height * 0.5f);
+			m_pd2dDeviceContext->DrawTextW(L"/100", (UINT32)wcslen(L"/100"), m_pdwFont, &rcMaxBulletText, m_pd2dbrText);
+
+			D2D1_RECT_F rcCurrHpText = D2D1::RectF(-1025, 920, szRenderTarget.width, szRenderTarget.height * 0.5f);
+			m_pd2dDeviceContext->DrawTextW(m_myhp, (UINT32)wcslen(m_myhp), m_pdwFont, &rcCurrHpText, m_pd2dbrText);
+
+			D2D1_RECT_F rcMaxHpText = D2D1::RectF(-925, 920, szRenderTarget.width, szRenderTarget.height * 0.5f);
+			m_pd2dDeviceContext->DrawTextW(L"/100", (UINT32)wcslen(L"/100"), m_pdwFont, &rcMaxHpText, m_pd2dbrText);*/
+		}
+	}
 
 	m_pd2dDeviceContext->EndDraw();
 
@@ -1166,37 +1232,37 @@ XMFLOAT3 CGameFramework::getMyLookVec()
 
 void CGameFramework::setPosition_OtherPlayer(int id, XMFLOAT3 pos)
 {
-	
-		if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
-		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])
-		{
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._41 = pos.x;
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._42 = pos.y;
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._43 = pos.z;
-		}
+
+	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
+	if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])
+	{
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._41 = pos.x;
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._42 = pos.y;
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._43 = pos.z;
+	}
 
 
 }
 void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
 
-		if (id < 0|| id > 5) return;	// 배열 범위 벗어나는 거 방지
-		
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(1.0, 1.0, 1.0);
+	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
+
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
+	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(1.0, 1.0, 1.0);
 
 
-	
+
 }
 void CGameFramework::remove_OtherPlayer(int id)
 {
 
-		if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지	
-		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
-		}
+	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지	
+	if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
+	}
 
 
 }
