@@ -541,9 +541,7 @@ void CGameFramework::ProcessInput()
 			}
 		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
-			dwDirection |= DIR_RIGHT;
-			//m_pPlayer->Rotate(0.5f, 0.5f, 0.0f);
-			(m_pPlayer)->Rotate(0.0, 0.0, 0.5);
+			m_pPlayer->Rotate(0.5f, 0.5f, 0.0f);
 			q_keyboardInput.push(SEND_KEY_D);//S
 
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
@@ -554,7 +552,6 @@ void CGameFramework::ProcessInput()
 			}
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
-			dwDirection |= DIR_LEFT;
 			m_pPlayer->Rotate(-0.5f, -0.5f, 0.0f);
 			q_keyboardInput.push(SEND_KEY_A);//S
 

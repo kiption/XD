@@ -247,11 +247,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						sendPacket(&move_pack2, active_servernum);
 						break;
 					case PACKET_KEY_SPACEBAR:
-						CS_ATTACK_PACKET attack_pack;
+						/*CS_ATTACK_PACKET attack_pack;
 						attack_pack.size = sizeof(CS_ATTACK_PACKET);
 						attack_pack.type = CS_ATTACK;
 						sendPacket(&rotate_pack, active_servernum);
-						break;
+						break;*/
 					default:
 						cout << "[KeyInput Error] Unknown Key Type." << endl;
 					}
@@ -295,13 +295,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				// 2. NPC 움직임 최신화
 				if (gGameFramework.m_nMode == SCENE1STAGE) {
 					for (int i{}; i < MAX_NPCS; i++) {
-						cout << npcs_info[i].m_id << "번째 Pos:" << npcs_info[i].m_pos.x << ',' << npcs_info[i].m_pos.y << ',' << npcs_info[i].m_pos.z << endl;
+						//cout << npcs_info[i].m_id << "번째 Pos:" << npcs_info[i].m_pos.x << ',' << npcs_info[i].m_pos.y << ',' << npcs_info[i].m_pos.z << endl;
 						gGameFramework.setPosition_Npc(npcs_info[i].m_id, npcs_info[i].m_pos);
 						gGameFramework.setVectors_Npc(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
 						gGameFramework.m_pScene->SmokePosition = npcs_info[i].m_pos;
 						((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(npcs_info[i].m_pos);
 					}
-					cout << "====================" << endl;
+					//cout << "====================" << endl;
 				}
 
 				//==================================================
