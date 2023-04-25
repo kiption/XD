@@ -643,8 +643,17 @@ void CGameFramework::ProcessInput()
 				}
 			}
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE)
-				if (dwDirection) m_pPlayer->Move(dwDirection, 5.71f, true);
+			{
 
+				if (m_bCollisionCheck == false)
+				{
+					if (dwDirection) m_pPlayer->Move(dwDirection, 5.71f, true);
+				}
+				if (m_bCollisionCheck == true)
+				{
+					if (dwDirection) m_pPlayer->Move(dwDirection, 0.0f, true);
+				}
+			}
 		}
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
@@ -657,6 +666,20 @@ void CGameFramework::AnimateObjects()
 
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed());
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed(), NULL);
+
+	if (m_bCollisionCheck == true)
+	{
+		m_pPlayer->m_xmf3Position.y -= 2.0f;
+		m_pCamera->GetPosition().y -= 2.0f;
+		m_pPlayer->Rotate(0.0, 1.5, 1.5);
+		m_fResponCount += 0.1f;
+	}
+	if (m_fResponCount > 7.0)
+	{
+		m_pPlayer->SetPosition(XMFLOAT3(500.0, 60.0, 400.0));
+		m_fResponCount = 0.0f;
+		m_bCollisionCheck = false;
+	}
 }
 
 void CGameFramework::WaitForGpuComplete()
@@ -734,7 +757,7 @@ void CGameFramework::FrameAdvance()
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-	
+
 	calculation_Bullet();
 
 	if (m_nMode == SCENE1STAGE)
@@ -1183,7 +1206,7 @@ void CGameFramework::CreateDirect2DDevice()
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
 #endif
-}
+		}
 #endif
 
 
@@ -1319,5 +1342,22 @@ void CGameFramework::calculation_Bullet()
 		else {
 			m_shoot_info.pop();
 		}
+	}
+}
+
+void CGameFramework::CollisionObjectbyPlayer(XMFLOAT3 pos, XMFLOAT3 extents)
+{
+	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(10.0, 10.0, 10.0), XMFLOAT4(0, 0, 0, 1));
+	for (int i = 0; i < 100; i++)
+	{
+
+
+	}
+	m_xmoobb = BoundingOrientedBox(pos, extents, XMFLOAT4(0, 0, 0, 1));
+	if (m_xmoobb.Intersects(m_pPlayer->m_xoobb))
+	{
+
+		m_bCollisionCheck = true;
+		cout << "CollisionCheck!" << endl;
 	}
 }

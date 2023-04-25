@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------
 #define MAX_LIGHTS			8
-#define MAX_MATERIALS		10
+#define MAX_MATERIALS		16
 
 #define POINT_LIGHT			1
 #define SPOT_LIGHT			2
@@ -272,11 +272,12 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 			if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
 			{
 				cColor += DirectionalLight(i, vNormal, vToCamera) * fShadowFactor;
+			
 			}
 			else if (gLights[i].m_nType == POINT_LIGHT)
 			{
 				cColor += PointLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
-				cColor += EmissiveLight(i);
+			
 			}
 			else if (gLights[i].m_nType == SPOT_LIGHT)
 			{

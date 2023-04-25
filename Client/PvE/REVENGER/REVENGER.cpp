@@ -139,42 +139,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	if (!InitInstance(hInstance, &hwnd, nCmdShow))return(FALSE);
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LABPROJECT0797ANIMATION));
 
-	/*if (FAILED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)))
-	{
-		return 0;
-	}*/
-	//if (g_TurnOpening == false) {
-	//	PlayMediaFile(hwnd, L"C:/Users/재성/Desktop/Direct12-예제 프로젝트/LabProject02-1/Opening/TEST.avi");
-	//	while (GetMessage(&msg, NULL, 0, 0))
-	//	{
-	//		TranslateMessage(&msg);
-	//		DispatchMessage(&msg);
-	//		if (g_TurnOpening == true)
-	//		{
-	//			DestroyWindow(hwnd);
-	//			CoUninitialize();
-	//			break;
-	//		}
-	//	}*/
 
-	//}
-	//else
-	//{
-	//}
-
-	//if (g_TurnOpening == false)
-	//{
-	//	PlayMediaFile(hwnd, L"C:/Users/재성/Desktop/Direct12-예제 프로젝트/LabProject02-1/Opening/TEST.avi");
-	//	while (GetMessage(&msg, NULL, 0, 0))
-	//	{
-	//		TranslateMessage(&msg);
-	//		DispatchMessage(&msg);
-	//		if (g_TurnOpening == true)break;
-	//	}
-
-	//}
-	//else
-	//{
 	while (1)
 	{
 
@@ -342,7 +307,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					cout << "============" << endl;
 
 				}*/
-
+				gGameFramework.CollisionObjectbyPlayer(XMFLOAT3(100.0, 100.0, 100.0), XMFLOAT3(50.0, 50.0, 50.0));
 				//==================================================
 				//					  UI 동기화
 				//==================================================

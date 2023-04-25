@@ -991,9 +991,9 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 
 float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 {
-		float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+		float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	if (gnTexturesMask & MATERIAL_ALBEDO_MAP)
 		cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
@@ -1006,10 +1006,10 @@ float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 		cSpecularColor = gMaterial.m_cSpecular;
 	
 	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
-	cColor += cAlbedoColor + cSpecularColor;
+	cColor = cAlbedoColor+ cSpecularColor;
 	
 
-	return(lerp(cColor, cIllumination, 0.7f));
+	return(lerp(cColor, cIllumination, 0.75f));
 }
 
 ////////////////////////////////////////////////////////////////
