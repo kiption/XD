@@ -52,6 +52,7 @@ std::array<ObjectsInfo, MAX_BULLET> bullets_info;
 
 struct MapObjectsInfo
 {
+
 	XMFLOAT3 m_pos;
 	XMFLOAT3 m_scale;
 	BoundingOrientedBox m_xoobb;

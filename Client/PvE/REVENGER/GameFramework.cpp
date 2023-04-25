@@ -385,6 +385,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case VK_SPACE:
 			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
+
 			break;
 		default:
 			break;
@@ -519,7 +520,7 @@ void CGameFramework::ProcessInput()
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
 	if (!bProcessedByScene)
 	{
-		DWORD dwDirection = 0;
+		WORD dwDirection = 0;
 
 		if (pKeysBuffer[KEY_W] & 0xF0) {
 			dwDirection |= DIR_UP;
@@ -630,7 +631,19 @@ void CGameFramework::ProcessInput()
 				}
 			}
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE)
-				if (dwDirection) m_pPlayer->Move(dwDirection, 5.71f, true);
+			{
+				if (m_bCollisionCheck == false)
+				{
+					if (dwDirection) m_pPlayer->Move(dwDirection, 5.71f, true);
+				}
+				if (m_bCollisionCheck == true)
+				{
+					if (dwDirection) m_pPlayer->Move(dwDirection, 0.0f, true);
+
+
+
+				}
+			}
 
 		}
 	}
@@ -644,6 +657,19 @@ void CGameFramework::AnimateObjects()
 
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed());
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed(), NULL);
+	if (m_bCollisionCheck == true)
+	{
+		m_pPlayer->m_xmf3Position.y -= 2.0f;
+		m_pCamera->GetPosition().y -= 2.0f;
+		m_pPlayer->Rotate(0.0, 1.5, 1.5);
+		m_fResponCount += 0.1f;
+	}
+	if (m_fResponCount > 7.0)
+	{
+		m_pPlayer->SetPosition(XMFLOAT3(500.0, 60.0, 400.0));
+		m_fResponCount = 0.0f;
+		m_bCollisionCheck = false;
+	}
 }
 
 void CGameFramework::WaitForGpuComplete()
@@ -712,7 +738,7 @@ void CGameFramework::FrameAdvance()
 {
 	SleepEx(1, TRUE);//Server
 	if (m_nMode == SCENE2STAGE)m_GameTimer.Tick(30.0f);
-	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick();
+	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick(60.0f);
 
 	ProcessInput();
 
@@ -884,7 +910,7 @@ void CGameFramework::FrameAdvance()
 	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
 	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
-}
+	}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -921,7 +947,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 		}
 		}
 	}
-}
+		}
 
 #ifdef _WITH_DIRECT2D
 void CGameFramework::CreateDirect2DDevice()
@@ -960,7 +986,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-	}
+}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -1168,7 +1194,7 @@ void CGameFramework::CreateDirect2DDevice()
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
 #endif
-}
+	}
 #endif
 
 
@@ -1286,4 +1312,22 @@ void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, X
 }
 void CGameFramework::remove_Npcs(int id)
 {
+}
+
+void CGameFramework::CollisionObjectbyPlayer(XMFLOAT3 pos, XMFLOAT3 extents)
+{
+
+	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(10.0, 10.0, 10.0), XMFLOAT4(0, 0, 0, 1));
+	for (int i = 0; i < 100; i++)
+	{
+
+
+	}
+	m_xmoobb = BoundingOrientedBox(pos, extents, XMFLOAT4(0, 0, 0, 1));
+	if (m_xmoobb.Intersects(m_pPlayer->m_xoobb))
+	{
+
+		m_bCollisionCheck = true;
+		cout << "CollisionCheck!" << endl;
+	}
 }

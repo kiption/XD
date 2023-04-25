@@ -418,6 +418,13 @@ public:
 
 
 	BoundingBox						m_xmBoundingBox;
+
+	BoundingOrientedBox m_xmOOBoundingBox;
+	BoundingOrientedBox GetBoundingBox() { return(m_xmOOBoundingBox); }
+
+public:
+	//게임 객체가 카메라에 보인는 가를 검사한다.
+	bool IsVisible(CCamera* pCamera = NULL);
 public:
 	ID3D12Resource* m_pd3dcbGameObject = NULL;
 	CB_GAMEOBJECT_INFO* m_pcbMappedGameObject = NULL;

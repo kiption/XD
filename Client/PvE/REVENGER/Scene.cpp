@@ -451,8 +451,8 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
-	if (m_pBillboardShader) m_pBillboardShader[0]->Render(pd3dCommandList, pCamera,0);
+	//if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
+	//if (m_pBillboardShader) m_pBillboardShader[0]->Render(pd3dCommandList, pCamera,0);
 
 
 

@@ -854,6 +854,17 @@ void CGameObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
 	}
 }
 
+bool CGameObject::IsVisible(CCamera* pCamera)
+{
+	OnPrepareRender();
+	bool bIsVisible = false;
+	BoundingOrientedBox xmBoundingBox = m_pMesh->GetBoundingBox();
+	//모델 좌표계의 바운딩 박스를 월드 좌표계로 변환한다. 
+	xmBoundingBox.Transform(xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
+	if (pCamera) bIsVisible = pCamera->IsInFrustum(xmBoundingBox);
+	return(bIsVisible);
+}
+
 void CGameObject::SetMovingDirection(const XMFLOAT3& xmf3MovingDirection)
 {
 	XMStoreFloat3(&m_xmf3MovingDirection, XMVector3Normalize(XMLoadFloat3(&xmf3MovingDirection)));
@@ -999,57 +1010,63 @@ void CGameObject::AnimateObject(CCamera* pCamera, float fTimeElapsed)
 
 void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	SceneManager* pScene = NULL;
+
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
 	OnPrepareRender();
-
+	//게임 객체가 카메라에 보이면 렌더링한다. 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-	if (m_pMesh)
-	{
-		if (m_nMaterials > 0)
+	/*if (IsVisible(pCamera))
+	{*/
+		if (m_pMesh)
 		{
-			for (int i = 0; i < m_nMaterials; i++)
-			{
-				if (m_ppMaterials[i])
-				{
-					if (m_ppMaterials[i]->m_pShader) {
-						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0);
-						UpdateShaderVariables(pd3dCommandList);
-					}
-					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 
-					for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
+			if (m_nMaterials > 0)
+			{
+				for (int i = 0; i < m_nMaterials; i++)
+				{
+					if (m_ppMaterials[i])
 					{
-						if (m_ppMaterials[i]->m_ppTextures[k]) m_ppMaterials[i]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
+						if (m_ppMaterials[i]->m_pShader)
+						{
+							m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0);
+							UpdateShaderVariables(pd3dCommandList);
+						}
+
+						m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+
+						for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
+							if (m_ppMaterials[i]->m_ppTextures[k]) m_ppMaterials[i]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
 					}
+
+					m_pMesh->Render(pd3dCommandList, i);
+
 				}
-				m_pMesh->Render(pd3dCommandList, i);
+			}
+		}
+	else
+	{
+		if ((m_nMaterials == 1) && (m_ppMaterials[0]))
+		{
+			if (m_ppMaterials[0]->m_pShader) m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera, 0);
+			m_ppMaterials[0]->UpdateShaderVariable(pd3dCommandList);
+			for (int k = 0; k < m_ppMaterials[0]->m_nTextures; k++)
+			{
+				if (m_ppMaterials[0]->m_ppTextures[k]) m_ppMaterials[0]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
 			}
 
 		}
-		else
+		//if (m_nCurScene == SCENE1STAGE)pd3dCommandList->SetGraphicsRootDescriptorTable(19, pScene->m_d3dCbvGPUDescriptorNextHandle);
+		if (m_ppMeshes)
 		{
-			if ((m_nMaterials == 1) && (m_ppMaterials[0]))
+			for (int i = 0; i < m_nMeshes; i++)
 			{
-				if (m_ppMaterials[0]->m_pShader) m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera, 0);
-				m_ppMaterials[0]->UpdateShaderVariable(pd3dCommandList);
-				for (int k = 0; k < m_ppMaterials[0]->m_nTextures; k++)
-				{
-					if (m_ppMaterials[0]->m_ppTextures[k]) m_ppMaterials[0]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
-				}
-
-			}
-			//if (m_nCurScene == SCENE1STAGE)pd3dCommandList->SetGraphicsRootDescriptorTable(19, pScene->m_d3dCbvGPUDescriptorNextHandle);
-			if (m_ppMeshes)
-			{
-				for (int i = 0; i < m_nMeshes; i++)
-				{
-					if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList);
-				}
+				if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList);
 			}
 		}
 	}
+	//}
+
 
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
@@ -1072,7 +1089,7 @@ void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLi
 	if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
 	pd3dCommandList->SetGraphicsRootDescriptorTable(19, pScene->m_d3dCbvGPUDescriptorStartHandle);*/
 
-	
+
 }
 
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
@@ -1163,10 +1180,10 @@ void CGameObject::SetScale(float x, float y, float z)
 
 void CGameObject::CalculateBoundingBox()
 {
-	for (int i = 1; i < m_nMeshes; i++)
+	for (int i = 0; i < m_nMeshes; i++)
 	{
-		m_xmBoundingBox = m_ppMeshes[i]->m_xmBoundingBox;
-		BoundingBox::CreateMerged(m_xmBoundingBox, m_xmBoundingBox, m_ppMeshes[i]->m_xmBoundingBox);
+		m_xmBoundingBox = m_pMesh->m_xmBoundingBox;
+		BoundingBox::CreateMerged(m_xmBoundingBox, m_xmBoundingBox, m_pMesh->m_xmBoundingBox);
 	}
 	m_xmBoundingBox.Transform(m_xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
 }
@@ -1331,7 +1348,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 					}
 				}
 			}
-			
+
 			pMaterial->SetReflection(nMaterial);
 			SetMaterial(nMaterial, pMaterial);
 
@@ -1647,7 +1664,7 @@ CLoadedModelInfo* CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device* pd
 #endif
 
 	return(pLoadedModel);
-}
+	}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //

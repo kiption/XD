@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------
 #define MAX_LIGHTS			8
-#define MAX_MATERIALS		16
+#define MAX_MATERIALS		10
 
 #define POINT_LIGHT			1
 #define SPOT_LIGHT			2

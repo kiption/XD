@@ -222,6 +222,11 @@ public:
 
 
 //==================================================
-
+ 
+	// 서버에서 받은 Bound 값과의 충돌설정 함수입니다.
+	void CollisionObjectbyPlayer(XMFLOAT3 pos, XMFLOAT3 extents);
+	BoundingOrientedBox m_xmoobb;
+	bool m_bCollisionCheck = false;
+	float m_fResponCount = 0.0;
 };
 

@@ -178,8 +178,9 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_d3dIndexBufferView.SizeInBytes = sizeof(UINT) * m_nIndices;
 
 	
-
+	CalculateBoundingBox((XMFLOAT3*)m_pxmf3Positions, sizeof(XMFLOAT3));
 	delete[] pnIndices;
+	
 }
 
 CHeightMapGridMesh::~CHeightMapGridMesh()

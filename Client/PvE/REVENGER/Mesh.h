@@ -56,6 +56,8 @@ public:
 	XMFLOAT3						m_xmf3AABBExtents = XMFLOAT3(0.0f, 0.0f, 0.0f);
 public:
 	BoundingBox						m_xmBoundingBox;
+	BoundingOrientedBox						m_xmBoundingOrientedBox;
+	BoundingOrientedBox GetBoundingBox() { return(m_xmBoundingOrientedBox); }
 protected:
 	UINT							m_nType = 0x00;
 
