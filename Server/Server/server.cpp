@@ -492,6 +492,8 @@ void process_packet(int client_id, char* packet)
 		cout << "새로운 오브젝트가 생성되었습니다! - POS:(" << clients[client_id].pos.x
 			<< "," << clients[client_id].pos.y << "," << clients[client_id].pos.z << ")." << endl;
 
+		//====================
+		// 1. Player 객체 정보
 		// 현재 접속해 있는 모든 클라이언트에게 새로운 클라이언트(client_id)의 정보를 전송합니다.
 		for (int i = 0; i < MAX_USER; ++i) {
 			auto& pl = clients[i];
@@ -599,6 +601,26 @@ void process_packet(int client_id, char* packet)
 					clients[j].do_send(&add_npc_packet);
 				}
 			}
+		}
+
+		//====================
+		// 2. 맵 정보
+		// 새로 접속한 클라이언트에게 맵 정보를 보내줍니다.
+		for (auto& building : buildings_info) {
+			SC_MAP_OBJINFO_PACKET building_packet;
+			building_packet.type = SC_MAP_OBJINFO;
+			building_packet.size = sizeof(SC_MAP_OBJINFO_PACKET);
+
+			building_packet.pos_x = building.getPosX();
+			building_packet.pos_y = building.getPosY();
+			building_packet.pos_z = building.getPosZ();
+
+			building_packet.scale_x = building.getScaleX();
+			building_packet.scale_y = building.getScaleY();
+			building_packet.scale_z = building.getScaleZ();
+			cout << "New MapObject Send - Pos: (" << building_packet.pos_x << ", " << building_packet.pos_y << ", " << building_packet.pos_z
+				<< "), Scale: (" << building_packet.scale_x << ", " << building_packet.scale_y << ", " << building_packet.scale_z << ")" << endl;
+			clients[client_id].do_send(&building_packet);
 		}
 		break;
 	}// CS_LOGIN end
@@ -878,7 +900,7 @@ void do_worker()
 				cout << "Accept Error";
 			}
 			else if (ex_over->process_type == OP_CONNECT) {
-				cout << "Connect Error" << endl;
+				//cout << "Connect Error" << endl;
 
 				// 비동기Conn를 다시 시도합니다.
 				SOCKET temp_s = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -917,8 +939,9 @@ void do_worker()
 				BOOL bret = connectExFP(right_ex_server_sock, reinterpret_cast<sockaddr*>(&ha_server_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over->overlapped);
 				if (FALSE == bret) {
 					int err_no = GetLastError();
-					if (ERROR_IO_PENDING == err_no)
-						cout << "Server Connect 재시도 중...\n" << endl;
+					if (ERROR_IO_PENDING == err_no) {
+						//cout << "Server Connect 재시도 중...\n" << endl;
+					}
 					else {
 						cout << "ConnectEX Error - " << err_no << endl;
 						cout << WSAGetLastError() << endl;
@@ -1871,11 +1894,6 @@ int main(int argc, char* argv[])
 
 							b_pos = 0;
 							pos_count = 0;
-
-							//XMFLOAT3 tempF3(tmp_pos[0], tmp_pos[1], tmp_pos[2]);
-							//cout << "New Position Data. [" << tmp_pos[0] << ", " << tmp_pos[1] << ", " << tmp_pos[2] << "]" << endl;
-							//posArr.push_back(tempF3);
-							//memset(tmp_pos, 0, sizeof(tmp_pos));
 						}
 						else {
 							pos_count += 1;

@@ -53,7 +53,7 @@ constexpr char INPUT_KEY_E = 0b000001;
 enum PacketID {
 	CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_RELOGIN
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
-	, SC_DAMAGED, SC_BULLET_COUNT, SC_TIME_TICKING, SC_ACTIVE_DOWN
+	, SC_DAMAGED, SC_BULLET_COUNT, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
 };
 
@@ -202,7 +202,16 @@ struct SC_TIME_TICKING_PACKET {
 };
 
 // ================================
-// 3) 이중화 관련 패킷
+// 3) 맵 정보 관련 패킷
+struct SC_MAP_OBJINFO_PACKET {
+	unsigned char size;
+	char type;
+	float pos_x, pos_y, pos_z;
+	float scale_x, scale_y, scale_z;
+};
+
+// ================================
+// 4) 이중화 관련 패킷
 struct SC_ACTIVE_DOWN_PACKET {	// 현재는 클라-서버 -> 추후에 클라-릴레이서버 로 바꿀 예정.
 	unsigned char size;
 	char type;
