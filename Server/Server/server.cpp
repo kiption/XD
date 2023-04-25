@@ -1857,9 +1857,7 @@ int main(int argc, char* argv[])
 
 	// 2. 파일 읽기
 	for (auto& fname : readTargets) {
-		cout << "=======================================================" << endl;
-		cout << "Curr Filename: " << fname << endl;
-		cout << "=======================================================\n" << endl;
+		cout << "[Map Loading...] " << fname;
 		//string fname = readTargets[0];
 		ifstream txtfile(fname);
 
@@ -1908,9 +1906,6 @@ int main(int argc, char* argv[])
 							scale_count = 0;
 
 							MapObject tmp_mapobj(tmp_pos[0], tmp_pos[1], tmp_pos[2], tmp_scale[0], tmp_scale[1], tmp_scale[2]);
-							cout << "New MapObject[Building] is Added." << endl;
-							cout << "Position Data: [" << tmp_mapobj.getPosX() << ", " << tmp_mapobj.getPosY() << ", " << tmp_mapobj.getPosZ() << "]" << endl;
-							cout << "Scale Data: [" << tmp_mapobj.getScaleX() << ", " << tmp_mapobj.getScaleY() << ", " << tmp_mapobj.getScaleZ() << "]\n" << endl;
 							buildings_info.push_back(tmp_mapobj);
 							memset(tmp_pos, 0, sizeof(tmp_pos));
 							memset(tmp_scale, 0, sizeof(tmp_scale));
@@ -1922,6 +1917,7 @@ int main(int argc, char* argv[])
 				}
 				line_cnt++;
 			}
+			cout << " ---- OK.";
 		}
 		else {
 			cout << "[Error] Unknown File." << endl;
