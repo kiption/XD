@@ -23,7 +23,7 @@ float Calculation_Distance(XMFLOAT3 vec, vector<City_Info>const& v, int c_id, in
 {
 	float cx = (v[c_id].SectionNum[s_id].lx + v[c_id].SectionNum[s_id].sx) / 2;
 	float cz = (v[c_id].SectionNum[s_id].lz + v[c_id].SectionNum[s_id].sz) / 2;
-	
+
 	float dist = sqrtf(powf(vec.x - cx, 2) + powf(vec.z - cz, 2));
 	return dist;
 }

@@ -1589,8 +1589,9 @@ void MoveNPC()
 			}
 
 			// npc pos 확인
-			/*cout << i << "번째 NPC의 도시 ID: " << npcs[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcs[i].GetIdleSection() << endl;
-			cout << i << "번째 NPC의 Pos: " << npcs[i].GetPosition().x << ',' << npcs[i].GetPosition().y << ',' << npcs[i].GetPosition().z << endl;*/
+		/*	cout << i << "번째 NPC의 도시 ID: " << npcs[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcs[i].GetIdleSection() << endl;
+			cout << i << "번째 NPC의 Pos: " << npcs[i].GetPosition().x << ',' << npcs[i].GetPosition().y << ',' << npcs[i].GetPosition().z << endl;
+			cout << i << "번째 NPC의 상태: " << npcs[i].GetState() << endl;*/
 
 			// 상태마다 다른 움직임을 하는 매니지먼트
 			npcs[i].ST1_State_Manegement(npcs[i].GetState());

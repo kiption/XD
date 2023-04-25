@@ -6,7 +6,6 @@
 #include "GameFramework.h"
 #include "Network.h"//Server
 #include "BillboardObjectsShader.h"
-
 #define MAX_LOADSTRING 100
 
 HINSTANCE						ghAppInstance;
@@ -115,21 +114,21 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	login_pack.size = sizeof(CS_LOGIN_PACKET);
 	login_pack.type = CS_LOGIN;
 	strcpy_s(login_pack.name, "COPTER");
-	
-		// Active Server에 연결
-		sockets[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-		SOCKADDR_IN server0_addr;
-		ZeroMemory(&server0_addr, sizeof(server0_addr));
-		server0_addr.sin_family = AF_INET;
-		int new_portnum = PORT_NUM_S0 + active_servernum;
-		server0_addr.sin_port = htons(new_portnum);
-		//server0_addr.sin_port = htons(PORTNUM_RELAY2CLIENT_0);		// 릴레이서버로 연결하려면 123,124를 지우고 여기를 주석해제하면됨.
-		inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);
-		connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
 
-		sendPacket(&login_pack, active_servernum);
-		recvPacket(active_servernum);
-		//==================================================
+	// Active Server에 연결
+	sockets[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	SOCKADDR_IN server0_addr;
+	ZeroMemory(&server0_addr, sizeof(server0_addr));
+	server0_addr.sin_family = AF_INET;
+	int new_portnum = PORT_NUM_S0 + active_servernum;
+	server0_addr.sin_port = htons(new_portnum);
+	//server0_addr.sin_port = htons(PORTNUM_RELAY2CLIENT_0);		// 릴레이서버로 연결하려면 123,124를 지우고 여기를 주석해제하면됨.
+	inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);
+	connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
+
+	sendPacket(&login_pack, active_servernum);
+	recvPacket(active_servernum);
+	//==================================================
 
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
@@ -140,7 +139,42 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	if (!InitInstance(hInstance, &hwnd, nCmdShow))return(FALSE);
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LABPROJECT0797ANIMATION));
 
-	
+	/*if (FAILED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)))
+	{
+		return 0;
+	}*/
+	//if (g_TurnOpening == false) {
+	//	PlayMediaFile(hwnd, L"C:/Users/재성/Desktop/Direct12-예제 프로젝트/LabProject02-1/Opening/TEST.avi");
+	//	while (GetMessage(&msg, NULL, 0, 0))
+	//	{
+	//		TranslateMessage(&msg);
+	//		DispatchMessage(&msg);
+	//		if (g_TurnOpening == true)
+	//		{
+	//			DestroyWindow(hwnd);
+	//			CoUninitialize();
+	//			break;
+	//		}
+	//	}*/
+
+	//}
+	//else
+	//{
+	//}
+
+	//if (g_TurnOpening == false)
+	//{
+	//	PlayMediaFile(hwnd, L"C:/Users/재성/Desktop/Direct12-예제 프로젝트/LabProject02-1/Opening/TEST.avi");
+	//	while (GetMessage(&msg, NULL, 0, 0))
+	//	{
+	//		TranslateMessage(&msg);
+	//		DispatchMessage(&msg);
+	//		if (g_TurnOpening == true)break;
+	//	}
+
+	//}
+	//else
+	//{
 	while (1)
 	{
 
@@ -213,10 +247,25 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						sendPacket(&move_pack2, active_servernum);
 						break;
 					case PACKET_KEY_SPACEBAR:
-						CS_ATTACK_PACKET attack_pack;
-						attack_pack.size = sizeof(CS_ATTACK_PACKET);
-						attack_pack.type = CS_ATTACK;
-						sendPacket(&rotate_pack, active_servernum);
+						//for (int i{}; i < gGameFramework.m_shoot_info.size(); ++i) {
+						//	BulletPos infoBullet = gGameFramework.m_shoot_info.front();
+						//	
+						//	CS_ATTACK_PACKET attack_pack;
+						//	attack_pack.size = sizeof(CS_ATTACK_PACKET);
+						//	attack_pack.type = CS_ATTACK;
+						//	attack_pack.id = my_id;
+						//	attack_pack.x = infoBullet.x;
+						//	attack_pack.y = infoBullet.y;
+						//	attack_pack.z = infoBullet.z;
+						//	
+
+						//	gGameFramework.m_shoot_info.pop();
+						//	cout << i << "번째 총알 좌표: " << infoBullet.x << ',' << infoBullet.y << ',' << infoBullet.z << endl;
+						//	
+						//	//attack_pack.x = gGameFramework.
+
+						//	sendPacket(&attack_pack, active_servernum);
+						//}
 						break;
 					default:
 						cout << "[KeyInput Error] Unknown Key Type." << endl;
@@ -258,8 +307,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 				}
 
-				gGameFramework.CollisionObjectbyPlayer(XMFLOAT3(100.0,100.0,100.0), XMFLOAT3(50.0, 50.0, 50.0));
-
 				// 2. NPC 움직임 최신화
 				if (gGameFramework.m_nMode == SCENE1STAGE) {
 					for (int i{}; i < MAX_NPCS; i++) {
@@ -271,7 +318,31 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 					//cout << "====================" << endl;
 				}
-			
+
+				// 3. Bullet 전송
+				for (int i{}; i < gGameFramework.m_shoot_info.size(); ++i) {
+					BulletPos infoBullet = gGameFramework.m_shoot_info.front();
+
+					CS_ATTACK_PACKET attack_pack;
+					attack_pack.size = sizeof(CS_ATTACK_PACKET);
+					attack_pack.type = CS_ATTACK;
+					attack_pack.id = my_id;
+					attack_pack.x = infoBullet.x;
+					attack_pack.y = infoBullet.y;
+					attack_pack.z = infoBullet.z;
+
+					gGameFramework.m_shoot_info.pop();
+					gGameFramework.m_shoot_info.push(infoBullet);
+
+					//cout << i << "번째 총알 좌표: " << infoBullet.x << ',' << infoBullet.y << ',' << infoBullet.z << endl;
+
+					sendPacket(&attack_pack, active_servernum);
+				}
+				/*if (gGameFramework.m_shoot_info.size() != 0) {
+					cout << "============" << endl;
+
+				}*/
+
 				//==================================================
 				//					  UI 동기화
 				//==================================================
@@ -315,7 +386,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 				}
 
-				
 				//==================================================
 
 			}
