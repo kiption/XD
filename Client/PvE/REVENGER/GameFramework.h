@@ -24,6 +24,10 @@ struct MouseInputVal {
 	char button;
 	float delX, delY;
 };
+
+struct BulletPos {
+	float x, y, z;
+};
 //====
 #define KEY_A         0x41
 #define KEY_D         0x44
@@ -191,6 +195,8 @@ public:
 	int m_1MinOfTime;
 	int m_10SecOftime;
 	int m_1SecOfTime;
+
+	queue<BulletPos> m_shoot_info;
 //==================================================
 
 //==================================================
@@ -220,7 +226,8 @@ public:
 	void setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void remove_Npcs(int id);
 
-
+	// 총알 좌표 계산하는 함수입니다.
+	void calculation_Bullet();
 //==================================================
 
 };
