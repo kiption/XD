@@ -1,6 +1,6 @@
 #pragma once
 #include <array>
-#include <queue>
+#include <vector>
 #include "../../../Server/RelayServer/Protocol.h"
 
 enum OBJECT_STATE { OBJ_ST_EMPTY, OBJ_ST_STANDBY, OBJ_ST_LOGOUT, OBJ_ST_RUNNING };
@@ -48,3 +48,29 @@ std::array<ObjectsInfo, MAX_NPCS> npcs_info;
 int left_npc;
 
 std::array<ObjectsInfo, MAX_BULLET> bullets_info;
+
+
+struct MapObjectsInfo
+{
+	XMFLOAT3 m_pos;
+	XMFLOAT3 m_scale;
+	BoundingOrientedBox m_xoobb;
+
+	MapObjectsInfo() {
+		m_pos = { 0.0f, 0.0f, 0.0f };
+		m_scale = { 0.0f, 0.0f, 0.0f };;
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
+
+	void InfoClear() {
+		m_pos = { 0.0f, 0.0f, 0.0f };
+		m_scale = { 0.0f, 0.0f, 0.0f };
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
+
+	void setBB() {
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pos.x, m_pos.y, m_pos.z), XMFLOAT3(m_scale.x, m_scale.y, m_scale.z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
+};
+
+std::vector<MapObjectsInfo> stage1_mapobj_info;

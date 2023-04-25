@@ -366,7 +366,19 @@ void processPacket(char* ptr)
 
 		servertime_ms = recv_packet->servertime_ms;
 		servertime_sec = servertime_ms / 1000;
+		break;
 	}//SC_TIME_TICKING case end
+	case SC_MAP_OBJINFO:
+	{
+		SC_MAP_OBJINFO_PACKET* recv_packet = reinterpret_cast<SC_MAP_OBJINFO_PACKET*>(ptr);
+
+		MapObjectsInfo temp;
+		temp.m_pos = { recv_packet->pos_x, recv_packet->pos_y, recv_packet->pos_z };
+		temp.m_scale = { recv_packet->scale_x, recv_packet->scale_y, recv_packet->scale_z };
+		temp.setBB();
+		stage1_mapobj_info.push_back(temp);
+		break;
+	}//SC_MAP_OBJINFO case end
 	case SC_ACTIVE_DOWN:
 	{
 		SC_ACTIVE_DOWN_PACKET* recv_packet = reinterpret_cast<SC_ACTIVE_DOWN_PACKET*>(ptr);
