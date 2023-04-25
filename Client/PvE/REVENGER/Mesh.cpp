@@ -258,6 +258,7 @@ CSkyBoxMesh::~CSkyBoxMesh()
 //
 CStandardMesh::CStandardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
 {
+	
 }
 
 CStandardMesh::~CStandardMesh()
@@ -327,7 +328,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
 				m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 			}
-	
+			CalculateBoundingBox(m_pxmf3Positions, sizeof(XMFLOAT3));
 		}
 		else if (!strcmp(pstrToken, "<Colors>:"))
 		{
@@ -463,7 +464,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 						}
 					}
-					CalculateVertexNormals(m_pxmf3Normals, m_pxmf3Positions, m_nVertices, m_ppnSubSetIndices[i], m_nSubMeshes);
+					//CalculateVertexNormals(m_pxmf3Normals, m_pxmf3Positions, m_nVertices, m_ppnSubSetIndices[i], m_nSubMeshes);
 				}
 			}
 		}

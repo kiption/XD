@@ -69,7 +69,8 @@ void CrossHairShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, nRenderTargets, pdxgiRtvFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, nPipelineState);
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, d3dPrimitiveTopology, 
+		nRenderTargets, pdxgiRtvFormats, dxgiDsvFormat, nPipelineState);
 }
 
 D3D12_SHADER_BYTECODE CrossHairShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
@@ -182,7 +183,8 @@ void BillboardParticleShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevi
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, nRenderTargets, pdxgiRtvFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, nPipelineState);
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, d3dPrimitiveTopology, nRenderTargets, 
+		pdxgiRtvFormats, dxgiDsvFormat, nPipelineState);
 
 }
 
@@ -396,7 +398,8 @@ void OpeningBillboardBanner::CreateGraphicsPipelineState(ID3D12Device* pd3dDevic
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, nRenderTargets, pdxgiRtvFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, nPipelineState);
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, d3dPrimitiveTopology, nRenderTargets,
+		pdxgiRtvFormats, dxgiDsvFormat, nPipelineState);
 
 }
 

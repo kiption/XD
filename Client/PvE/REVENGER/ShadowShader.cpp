@@ -37,25 +37,25 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, _T("Terrain/terrain033.raw"), 512, 512, xmf3Scale, xmf3Normal);
 	pTerrianMeterial->SetTexture(m_pDepthTexture, 0);
 	m_pTerrain->SetMaterial(0, pTerrianMeterial);
-	m_pTerrain->SetPosition(-1000.0, -25.0, -1000.0);
+	m_pTerrain->SetPosition(-1000.0, -20.0, -1000.0);
 	m_ppObjects[2] = m_pTerrain;
 
 	CMaterial* pMaterial = new CMaterial(3);
 	pMaterial->SetReflection(3);
 	m_ppObjects[1] = new CGameObject(1);
-	m_ppObjects[1]->SetMesh(pCubeMesh);
+	m_ppObjects[1]->SetMesh(NULL);
 	m_ppObjects[1]->SetMaterial(0,pMaterial);
 	m_ppObjects[1]->Rotate(0,90,0);
 	m_ppObjects[1]->SetPosition(-400.0f, 50.0, 1300.0f);
 
 	m_ppObjects[3] = new CGameObject(1);
-	m_ppObjects[3]->SetMesh(pCubeMesh);
+	m_ppObjects[3]->SetMesh(NULL);
 	m_ppObjects[3]->SetMaterial(0,pMaterial);
 	m_ppObjects[3]->Rotate(0,90,0);
 	m_ppObjects[3]->SetPosition(-400.0f, 50.0, 1300.0f);
 
 	m_ppObjects[4] = new CGameObject(1);
-	m_ppObjects[4]->SetMesh(pCubeMesh);
+	m_ppObjects[4]->SetMesh(NULL);
 	m_ppObjects[4]->SetMaterial(0,pMaterial);
 	m_ppObjects[4]->Rotate(0,90,0);
 	m_ppObjects[4]->SetPosition(-400.0f, 50.0, 1300.0f);
@@ -192,6 +192,13 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 
 void CObjectsShader::OnPostRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+}
+
+void CObjectsShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
+{
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, d3dPrimitiveTopology,
+		nRenderTargets, pdxgiRtvFormats, dxgiDsvFormat, nPipelineState);
+
 }
 
 BoundingBox CObjectsShader::CalculateBoundingBox()
@@ -350,7 +357,8 @@ void CShadowMapShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, nRenderTargets, pdxgiRtvFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, nPipelineState);
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, d3dPrimitiveTopology, 
+		nRenderTargets, pdxgiRtvFormats, dxgiDsvFormat, nPipelineState);
 }
 
 CDepthRenderShader::CDepthRenderShader(CObjectsShader* pObjectsShader, LIGHT* pLights)
@@ -550,71 +558,71 @@ void CDepthRenderShader::ReleaseObjects()
 void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
-	//for (int j = 0; j < MAX_LIGHTS; j++)
-	//{
+	for (int j = 0; j < MAX_LIGHTS; j++)
+	{
 
-	//	if (m_pLights[j].m_bEnable)
-	//	{
-	//		XMFLOAT3 xmf3Position = m_pLights[j].m_xmf3Position;
-	//		XMFLOAT3 xmf3Look = m_pLights[j].m_xmf3Direction;
-	//		XMFLOAT3 xmf3Up = XMFLOAT3(0.0f, +1.0f, 0.0f);
+		if (m_pLights[j].m_bEnable)
+		{
+			XMFLOAT3 xmf3Position = m_pLights[j].m_xmf3Position;
+			XMFLOAT3 xmf3Look = m_pLights[j].m_xmf3Direction;
+			XMFLOAT3 xmf3Up = XMFLOAT3(0.0f, +1.0f, 0.0f);
 
-	//		XMMATRIX xmmtxView = XMMatrixLookToLH(XMLoadFloat3(&xmf3Position), XMLoadFloat3(&xmf3Look), XMLoadFloat3(&xmf3Up));
+			XMMATRIX xmmtxView = XMMatrixLookToLH(XMLoadFloat3(&xmf3Position), XMLoadFloat3(&xmf3Look), XMLoadFloat3(&xmf3Up));
 
-	//		float fNearPlaneDistance = 10.0f, fFarPlaneDistance = m_pLights[j].m_fRange;
+			float fNearPlaneDistance = 20.0f, fFarPlaneDistance = m_pLights[j].m_fRange;
 
-	//		XMMATRIX xmmtxProjection;
-	//		if (m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
-	//		{
-	//			float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
-	//			xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
-	//			//float fLeft = -(_PLANE_WIDTH * 0.5f), fRight = +(_PLANE_WIDTH * 0.5f), fTop = +(_PLANE_HEIGHT * 0.5f), fBottom = -(_PLANE_HEIGHT * 0.5f);
-	//			//xmmtxProjection = XMMatrixOrthographicOffCenterLH(fLeft * 6.0f, fRight * 6.0f, fBottom * 6.0f, fTop * 6.0f, fBack, fFront);
-	//		}
-	//		else if (m_pLights[j].m_nType == SPOT_LIGHT)
-	//		{
-	//			/*float fFovAngle = 60.0f; */m_pLights[j].m_fPhi = cos(60.0f);
-	//			float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
-	//			xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(m_pLights[j].m_fPhi), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
-	//		}
-	//		else if (m_pLights[j].m_nType == POINT_LIGHT)
-	//		{
-	//			//ShadowMap[6]
-	//		}
+			XMMATRIX xmmtxProjection;
+			if (m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
+			{
+				float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
+				xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
+				//float fLeft = -(_PLANE_WIDTH * 0.5f), fRight = +(_PLANE_WIDTH * 0.5f), fTop = +(_PLANE_HEIGHT * 0.5f), fBottom = -(_PLANE_HEIGHT * 0.5f);
+				//xmmtxProjection = XMMatrixOrthographicOffCenterLH(fLeft * 6.0f, fRight * 6.0f, fBottom * 6.0f, fTop * 6.0f, fBack, fFront);
+			}
+			else if (m_pLights[j].m_nType == SPOT_LIGHT)
+			{
+				/*float fFovAngle = 60.0f; */m_pLights[j].m_fPhi = cos(120.0f);
+				float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
+				xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(m_pLights[j].m_fPhi), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
+			}
+			else if (m_pLights[j].m_nType == POINT_LIGHT)
+			{
+				//ShadowMap[6]
+			}
 
-	//		m_ppDepthRenderCameras[j]->SetPosition(xmf3Position);
-	//		XMStoreFloat4x4(&m_ppDepthRenderCameras[j]->m_xmf4x4View, xmmtxView);
-	//		XMStoreFloat4x4(&m_ppDepthRenderCameras[j]->m_xmf4x4Projection, xmmtxProjection);
-	//		//
-	//		XMMATRIX xmmtxToTexture = XMMatrixTranspose(xmmtxView * xmmtxProjection * m_xmProjectionToTexture);
-	//		XMStoreFloat4x4(&m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4x4ToTexture, xmmtxToTexture);
+			m_ppDepthRenderCameras[j]->SetPosition(xmf3Position);
+			XMStoreFloat4x4(&m_ppDepthRenderCameras[j]->m_xmf4x4View, xmmtxView);
+			XMStoreFloat4x4(&m_ppDepthRenderCameras[j]->m_xmf4x4Projection, xmmtxProjection);
+			//
+			XMMATRIX xmmtxToTexture = XMMatrixTranspose(xmmtxView * xmmtxProjection * m_xmProjectionToTexture);
+			XMStoreFloat4x4(&m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4x4ToTexture, xmmtxToTexture);
 
-	//		m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4Position = XMFLOAT4(xmf3Position.x, xmf3Position.y, xmf3Position.z, 1.0f);
+			m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4Position = XMFLOAT4(xmf3Position.x, xmf3Position.y, xmf3Position.z, 1.0f);
 
-	//		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthRenderShader->m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-	//		FLOAT pfClearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	//		pd3dCommandList->ClearRenderTargetView(m_pDepthRenderShader->m_pd3dRtvCPUDescriptorHandles[j], pfClearColor, 0, NULL);
+			FLOAT pfClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+			pd3dCommandList->ClearRenderTargetView(m_pd3dRtvCPUDescriptorHandles[j], pfClearColor, 0, NULL);
 
-	//		pd3dCommandList->ClearDepthStencilView(m_pDepthRenderShader->m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, NULL);
+			pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, NULL);
 
-	//		pd3dCommandList->OMSetRenderTargets(1, &m_pDepthRenderShader->m_pd3dRtvCPUDescriptorHandles[j], TRUE, &m_pDepthRenderShader->m_d3dDsvDescriptorCPUHandle);
+			pd3dCommandList->OMSetRenderTargets(1, &m_pd3dRtvCPUDescriptorHandles[j], TRUE, &m_d3dDsvDescriptorCPUHandle);
 
-	//		Render(pd3dCommandList, m_pDepthRenderShader->m_ppDepthRenderCameras[j]);
+			Render(pd3dCommandList, m_ppDepthRenderCameras[j],0);
 
-	//		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthRenderShader->m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
-	//	}
-	//	else
-	//	{
-	//		m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4Position.w = 0.0f;
-	//	}
-	//}
+			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
+		}
+		else
+		{
+			m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4Position.w = 0.0f;
+		}
+	}
 
 }
 
-void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera,int nPipelinestates)
 {
-	CShader::Render(pd3dCommandList, pCamera, 0);
+	CShader::Render(pd3dCommandList, pCamera, nPipelinestates);
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
@@ -633,7 +641,8 @@ void CDepthRenderShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, I
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, nRenderTargets, pdxgiRtvFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, nPipelineState);
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, d3dPrimitiveTopology,
+		nRenderTargets, pdxgiRtvFormats, dxgiDsvFormat, nPipelineState);
 
 }
 
@@ -703,6 +712,7 @@ void CTextureToViewportShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDev
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, nRenderTargets, pdxgiRtvFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, nPipelineState);
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, d3dPrimitiveTopology,
+		nRenderTargets, pdxgiRtvFormats, dxgiDsvFormat, nPipelineState);
 }
 

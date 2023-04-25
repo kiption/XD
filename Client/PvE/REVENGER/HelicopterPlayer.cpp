@@ -116,7 +116,7 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		break;
 	case THIRD_PERSON_CAMERA:
 		SetFriction(250.0f);
-		SetGravity(XMFLOAT3(0.0f, -1.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, -.0f, 0.0f));
 		SetMaxVelocityXZ(300.0f);
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
@@ -158,7 +158,7 @@ void HeliPlayer::Animate(float fTimeElapsed)
 	}
 	if (m_xmf3Position.y < 10.0)
 	{
-		SetGravity(XMFLOAT3(0.0f, -5.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, -0.0f, 0.0f));
 		m_bCollisionTerrain = true;
 	}
 	else

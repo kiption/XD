@@ -320,7 +320,7 @@ CCubeMeshIlluminated::CCubeMeshIlluminated(ID3D12Device* pd3dDevice, ID3D12Graph
 	pxmf3Positions[i++] = XMFLOAT3(-fx, -y3, -fz);
 
 	XMFLOAT3 pxmf3Normals[72];
-	CalculateVertexNormals(pxmf3Normals, pxmf3Positions, m_nVertices, NULL, 0);
+	//CalculateVertexNormals(pxmf3Normals, pxmf3Positions, m_nVertices, NULL, 0);
 
 	CIlluminatedVertex pVertices[72];
 	for (int i = 0; i < 72; i++) pVertices[i] = CIlluminatedVertex(pxmf3Positions[i], pxmf3Normals[i]);
@@ -331,7 +331,7 @@ CCubeMeshIlluminated::CCubeMeshIlluminated(ID3D12Device* pd3dDevice, ID3D12Graph
 	m_d3dPositionBufferView.StrideInBytes = m_nStride;
 	m_d3dPositionBufferView.SizeInBytes = m_nStride * m_nVertices;
 
-	CalculateBoundingBox((XMFLOAT3*)pxmf3Positions, sizeof(XMFLOAT3));
+	CalculateBoundingBox((XMFLOAT3*)pxmf3Positions, m_nStride);
 }
 
 CCubeMeshIlluminated::~CCubeMeshIlluminated()
