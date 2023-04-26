@@ -317,11 +317,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//==================================================
 				//					  Map Test
 				//==================================================
-				//for (auto& mapobj : stage1_mapobj_info) {
-				//	cout << "Map Obj - Pos: " << mapobj.m_pos.x << ", " << mapobj.m_pos.y << ", " << mapobj.m_pos.z
-				//		<< " Scale: " << mapobj.m_scale.x << ", " << mapobj.m_scale.y << ", " << mapobj.m_scale.z << "." << endl;
-				//}
-
+				for (auto& mapobj : stage1_mapobj_info) {
+					/*cout << "Map Obj - Pos: " << mapobj.m_pos.x << ", " << mapobj.m_pos.y << ", " << mapobj.m_pos.z
+						<< " Scale: " << mapobj.m_scale.x << ", " << mapobj.m_scale.y << ", " << mapobj.m_scale.z << "." << endl;*/
+					
+					gGameFramework.CollisionObjectbyPlayer(XMFLOAT3(mapobj.m_xoobb.Center), XMFLOAT3(mapobj.m_xoobb.Extents));
+					
+				}
 				//==================================================
 			}
 			gGameFramework.FrameAdvance();

@@ -384,7 +384,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			UI_Switch = !UI_Switch;
 			break;
 		case VK_SPACE:
-			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
+			//if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
 
 			break;
 		default:
@@ -398,7 +398,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
 			break;
 		case VK_SPACE:
-
 			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
 			break;
 		default:
@@ -635,7 +634,7 @@ void CGameFramework::ProcessInput()
 
 				if (m_bCollisionCheck == false)
 				{
-					if (dwDirection) m_pPlayer->Move(dwDirection, 5.71f, true);
+					if (dwDirection) m_pPlayer->Move(dwDirection, 2.71f, true);
 				}
 				if (m_bCollisionCheck == true)
 				{
@@ -664,7 +663,7 @@ void CGameFramework::AnimateObjects()
 	}
 	if (m_fResponCount > 7.0)
 	{
-		m_pPlayer->SetPosition(XMFLOAT3(500.0, 60.0, 400.0));
+		m_pPlayer->SetPosition(XMFLOAT3(500.0, 400.0, 400.0));
 		m_fResponCount = 0.0f;
 		m_bCollisionCheck = false;
 	}
@@ -763,8 +762,8 @@ void CGameFramework::FrameAdvance()
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
 
-	//D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	//d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * ::gnRtvDescriptorIncrementSize);
+	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * ::gnRtvDescriptorIncrementSize);
 
 
 
@@ -917,6 +916,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 	if (nMode != m_nMode)
 	{
 		ReleaseObjects();
+		m_pd3dCommandAllocator->Reset();
 		m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 		switch (nMode)
 		{
@@ -1192,7 +1192,7 @@ void CGameFramework::CreateDirect2DDevice()
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
 #endif
-		}
+}
 #endif
 
 
@@ -1315,17 +1315,14 @@ void CGameFramework::remove_Npcs(int id)
 
 void CGameFramework::CollisionObjectbyPlayer(XMFLOAT3 pos, XMFLOAT3 extents)
 {
-	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(10.0, 10.0, 10.0), XMFLOAT4(0, 0, 0, 1));
-	for (int i = 0; i < 100; i++)
-	{
-
-
-	}
+	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(1.0, 2.0, 3.0), XMFLOAT4(0, 0, 0, 1));
+	
 	m_xmoobb = BoundingOrientedBox(pos, extents, XMFLOAT4(0, 0, 0, 1));
 	if (m_xmoobb.Intersects(m_pPlayer->m_xoobb))
 	{
-
 		m_bCollisionCheck = true;
-		cout << "CollisionCheck!" << endl;
+		cout << "CollisionCheck!" << m_xmoobb.Center.x << m_xmoobb.Center.z << endl;
 	}
+	
+
 }

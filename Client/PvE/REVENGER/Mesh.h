@@ -57,7 +57,7 @@ public:
 public:
 	BoundingBox						m_xmBoundingBox;
 	BoundingOrientedBox						m_xmBoundingOrientedBox;
-	BoundingOrientedBox GetBoundingBox() { return(m_xmBoundingOrientedBox); }
+	BoundingBox GetBoundingBox() { return(m_xmBoundingBox); }
 protected:
 	UINT							m_nType = 0x00;
 

@@ -16,29 +16,34 @@ CObjectsShader::~CObjectsShader()
 
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nObjects = 20;
+	m_nObjects = 19;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 1500.0, 0.0f, _PLANE_HEIGHT + 1500.0, 0.0f, 0.0f, 0.0f);
 	CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 300.0f, 300.0f, 300.0f);
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
 	CMaterial* pPlaneMaterial = new CMaterial(3);
 	pPlaneMaterial->SetReflection(3);
-	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 	m_ppObjects[0] = new CGameObject(1);
 	m_ppObjects[0]->SetMesh(pPlaneMesh);
 	m_ppObjects[0]->SetMaterial(0,pPlaneMaterial);
 	m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 0.0, 100.0f));
 
-	XMFLOAT3 xmf3Scale(10.0f, 0.2, 10.0f);
-	XMFLOAT3 xmf3Normal(0.0f, 0.0f, 0.0f);
-	CMaterial* pTerrianMeterial = new CMaterial(1);
-	pTerrianMeterial->SetReflection(1);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, _T("Terrain/terrain033.raw"), 512, 512, xmf3Scale, xmf3Normal);
-	pTerrianMeterial->SetTexture(m_pDepthTexture, 0);
-	m_pTerrain->SetMaterial(0, pTerrianMeterial);
-	m_pTerrain->SetPosition(-1000.0, -30.0, -1000.0);
-	m_ppObjects[2] = m_pTerrain;
+	//XMFLOAT3 xmf3Scale(10.0f, 0.2, 10.0f);
+	//XMFLOAT3 xmf3Normal(0.0f, 0.0f, 0.0f);
+	//CMaterial* pTerrianMeterial = new CMaterial(1);
+	//pTerrianMeterial->SetReflection(1);
+	//m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, _T("Terrain/terrain033.raw"), 512, 512, xmf3Scale, xmf3Normal);
+	//pTerrianMeterial->SetTexture(m_pDepthTexture, 0);
+	//m_pTerrain->SetMaterial(0, pTerrianMeterial);
+	//m_pTerrain->SetPosition(-1000.0, -30.0, -1000.0);
+	//m_ppObjects[2] = m_pTerrain;
+
+	m_ppObjects[2] = new CGameObject(1);
+	m_ppObjects[2]->SetMesh(NULL);
+	m_ppObjects[2]->SetMaterial(0, pPlaneMaterial);
+	m_ppObjects[2]->SetPosition(XMFLOAT3(100.0f, 0.0, 100.0f));
 
 	CMaterial* pMaterial = new CMaterial(3);
 	pMaterial->SetReflection(3);
@@ -142,7 +147,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[17]->SetPosition(250.0, 22.0, -200.0);
 	m_ppObjects[18]->SetPosition(950.0, 22.0, 670.0);
 
-	m_ppObjects[19] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -569,7 +574,7 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 
 			XMMATRIX xmmtxView = XMMatrixLookToLH(XMLoadFloat3(&xmf3Position), XMLoadFloat3(&xmf3Look), XMLoadFloat3(&xmf3Up));
 
-			float fNearPlaneDistance = 20.0f, fFarPlaneDistance = m_pLights[j].m_fRange;
+			float fNearPlaneDistance = 60.0f, fFarPlaneDistance = m_pLights[j].m_fRange;
 
 			XMMATRIX xmmtxProjection{};
 			if (m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
@@ -601,7 +606,7 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 
 			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-			FLOAT pfClearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+			FLOAT pfClearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 			pd3dCommandList->ClearRenderTargetView(m_pd3dRtvCPUDescriptorHandles[j], pfClearColor, 0, NULL);
 
 			pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, NULL);

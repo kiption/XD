@@ -858,7 +858,7 @@ bool CGameObject::IsVisible(CCamera* pCamera)
 {
 	OnPrepareRender();
 	bool bIsVisible = false;
-	BoundingOrientedBox xmBoundingBox = m_pMesh->GetBoundingBox();
+	BoundingBox xmBoundingBox = m_pMesh->GetBoundingBox();
 	//모델 좌표계의 바운딩 박스를 월드 좌표계로 변환한다. 
 	xmBoundingBox.Transform(xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
 	if (pCamera) bIsVisible = pCamera->IsInFrustum(xmBoundingBox);
@@ -1016,35 +1016,37 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	OnPrepareRender();
 	//게임 객체가 카메라에 보이면 렌더링한다. 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-	/*if (IsVisible(pCamera))
-	{*/
-		if (m_pMesh)
+	if (m_pMesh)
+	{
+
+
+
+		if (m_nMaterials > 0)
 		{
-
-			if (m_nMaterials > 0)
+			for (int i = 0; i < m_nMaterials; i++)
 			{
-				for (int i = 0; i < m_nMaterials; i++)
+				if (m_ppMaterials[i])
 				{
-					if (m_ppMaterials[i])
+					if (m_ppMaterials[i]->m_pShader)
 					{
-						if (m_ppMaterials[i]->m_pShader)
-						{
-							m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0);
-							UpdateShaderVariables(pd3dCommandList);
-						}
-
-						m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
-
-						for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
-							if (m_ppMaterials[i]->m_ppTextures[k]) m_ppMaterials[i]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
+						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0);
+						UpdateShaderVariables(pd3dCommandList);
 					}
 
+					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+
+					for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
+						if (m_ppMaterials[i]->m_ppTextures[k]) m_ppMaterials[i]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
+				}
+				//if (IsVisible(pCamera))
+				//{
 					m_pMesh->Render(pd3dCommandList, i);
 
-				}
+				//}
 			}
 		}
-	else
+	}
+	/*else
 	{
 		if ((m_nMaterials == 1) && (m_ppMaterials[0]))
 		{
@@ -1054,9 +1056,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 			{
 				if (m_ppMaterials[0]->m_ppTextures[k]) m_ppMaterials[0]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
 			}
-
 		}
-		//if (m_nCurScene == SCENE1STAGE)pd3dCommandList->SetGraphicsRootDescriptorTable(19, pScene->m_d3dCbvGPUDescriptorNextHandle);
 		if (m_ppMeshes)
 		{
 			for (int i = 0; i < m_nMeshes; i++)
@@ -1064,8 +1064,8 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 				if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList);
 			}
 		}
-	}
-	//}
+	}*/
+
 
 
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
@@ -1664,7 +1664,7 @@ CLoadedModelInfo* CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device* pd
 #endif
 
 	return(pLoadedModel);
-	}
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //

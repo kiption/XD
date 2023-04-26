@@ -232,9 +232,9 @@ void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y + 0.0, xmf3FirePosition.z));
+		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
 		pBulletObject->Rotate(130.0, 0.0, 0.0);
-		pBulletObject->SetScale(1.0, 1.0, 1.5);
+		pBulletObject->SetScale(5.0, 5.0, 10.5);
 		pBulletObject->SetActive(true);
 	
 	}
