@@ -513,9 +513,6 @@ void CGameFramework::ReleaseObjects()
 
 void CGameFramework::ProcessInput()
 {
-	/*cout << "누르기 전 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
-	cout << "누르기 전 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;*/
-	
 	static UCHAR pKeysBuffer[256];
 	bool bProcessedByScene = false;
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
@@ -554,8 +551,8 @@ void CGameFramework::ProcessInput()
 			}
 			if (m_nMode != SCENE2STAGE)
 			{
-				
-				
+
+
 			}
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
@@ -573,20 +570,10 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[VK_UP] & 0xF0) {
 			dwDirection |= DIR_FORWARD;
 			q_keyboardInput.push(SEND_KEY_UP);//S
-
-			if (((HeliPlayer*)m_pPlayer)->m_fPitch < 15.0f) {
-				((HeliPlayer*)m_pPlayer)->Rotate(0.2f, 0.0f, 0.0f);
-				//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
-			}
-
 		}
 		if (pKeysBuffer[VK_DOWN] & 0xF0) {
 			dwDirection |= DIR_BACKWARD;
 			q_keyboardInput.push(SEND_KEY_DOWN);//S
-			if (((HeliPlayer*)m_pPlayer)->m_fPitch > -15.0f) {
-				((HeliPlayer*)m_pPlayer)->Rotate(-0.2f, 0.0f, 0.0f);
-				//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
-			}
 		}
 		if (pKeysBuffer[VK_LEFT] & 0xF0) {
 			dwDirection |= DIR_LEFT;
@@ -597,11 +584,6 @@ void CGameFramework::ProcessInput()
 				m_pPlayerRotate_z += 0.02f;
 				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, m_pPlayerRotate_z);
 			}*/
-
-			if (((HeliPlayer*)m_pPlayer)->m_fRoll < 35.0f) {
-				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, 0.2f);
-				//cout << "누르기 후 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
-			}
 		}
 		if (pKeysBuffer[VK_RIGHT] & 0xF0) {
 			dwDirection |= DIR_RIGHT;
@@ -610,13 +592,9 @@ void CGameFramework::ProcessInput()
 			{
 				m_pPlayerRotate_z -= 0.02f;
 				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, m_pPlayerRotate_z);
-			}
-			*/
-			if (((HeliPlayer*)m_pPlayer)->m_fRoll > -35.0f) {
-				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, -0.2f);
-				//cout << "누르기 후 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
-			}
-			
+			}*/
+
+
 		}
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
@@ -635,7 +613,7 @@ void CGameFramework::ProcessInput()
 
 		float cxDelta = 0.0f, cyDelta = 0.0f, czDelta = 0.0f;
 		POINT ptCursorPos;
-		/*if (GetCapture() == m_hWnd)
+		if (GetCapture() == m_hWnd)
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
@@ -643,7 +621,7 @@ void CGameFramework::ProcessInput()
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 2.0f;
 			czDelta = ((float)(ptCursorPos.y - m_ptOldCursorPos.y) + (float)(ptCursorPos.x - m_ptOldCursorPos.x)) / 3.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-		}*/
+		}
 
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
@@ -854,12 +832,12 @@ void CGameFramework::FrameAdvance()
 
 	if (UI_Switch) {
 		if (m_nMode = SCENE1STAGE) {
-			// 내구도 관련 UI 
+			// ������ ���� UI 
 			D2D_POINT_2F d2dPoint = { 60.0f, 650.0f };
 			D2D_RECT_F d2dRect = { 0.0f, 0.0f, 240.0f, 160.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[0] : m_pd2dfxGaussianBlur[0], &d2dPoint, &d2dRect);
 
-			// 남아있는 NPC 수 관련 UI
+			// �����ִ� NPC ���� UI
 			D2D_POINT_2F d2BHPPoint = { 1200.0f, 200.0f };
 			D2D_RECT_F d2BHPRect = { 26.0f * (m_remainNPC - 1) , 0.0f, 26.0f * m_remainNPC, 36.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2BHPPoint, &d2BHPRect);
@@ -868,7 +846,7 @@ void CGameFramework::FrameAdvance()
 			D2D_RECT_F d2BHPRect = { 0.0f , 0.0f, 190.0f, 45.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2BHPPoint, &d2BHPRect);*/
 
-			// Timer 관련 UI 
+			// Timer ���� UI 
 			D2D_POINT_2F d2T_M2Point = { 550.0f, 50.0f };
 			D2D_RECT_F d2T_M2Rect = { m_10MinOfTime * 40.0f , 0.0f, 40.0f + m_10MinOfTime * 40.0f, 50.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[2] : m_pd2dfxGaussianBlur[2], &d2T_M2Point, &d2T_M2Rect);
@@ -890,12 +868,12 @@ void CGameFramework::FrameAdvance()
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[6] : m_pd2dfxGaussianBlur[6], &d2T_S1Point, &d2T_S1Rect);
 
 
-			// 총알 갯수 관련 UI
+			// �Ѿ� ���� ���� UI
 			D2D_POINT_2F d2d_BulletPoint = { 1000.0f, 700.0f };
 			D2D_RECT_F d2d_BulletRect = { 0.0f , 0.0f, 32.0f, 32.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[7] : m_pd2dfxGaussianBlur[7], &d2d_BulletPoint, &d2d_BulletRect);
 
-			// 방향 관련 UI 
+			// ���� ���� UI 
 			D2D_POINT_2F d2_DirectionPoint = { 550.0f, -10.0f };
 			D2D_RECT_F d2_DirectionRect = { 0.0f , 0.0f, 180.0f, 90.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[8] : m_pd2dfxGaussianBlur[8], &d2_DirectionPoint, &d2_DirectionRect);
@@ -1358,29 +1336,73 @@ void CGameFramework::remove_Npcs(int id)
 }
 
 
-void CGameFramework::CollisionMap_by_Player(XMFLOAT3 pos, XMFLOAT3 extents)
+void CGameFramework::CollisionMap_by_PLAYER(XMFLOAT3 pos, XMFLOAT3 extents)
 {
-	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(2.5, 2.0,4.0), XMFLOAT4(0, 0, 0, 1));
-	m_xmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents.x / 2.5f, extents.y / 2.0f, extents.z / 2.5f), XMFLOAT4(0, 0, 0, 1));
-	if (m_xmoobb.Intersects(m_pPlayer->m_xoobb))
+	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(2.5, 2.0, 4.0), XMFLOAT4(0, 0, 0, 1));
+	m_mapxmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents.x / 2.5f, extents.y / 2.0f, extents.z / 2.5f), XMFLOAT4(0, 0, 0, 1));
+	if (m_mapxmoobb.Intersects(m_pPlayer->m_xoobb))
 	{
 		m_bCollisionCheck = true;
-		cout << "CollisionCheck!" << m_xmoobb.Center.x << m_xmoobb.Center.z << endl;
+		//cout << "CollisionCheck!" << m_xmoobb.Center.x << m_xmoobb.Center.z << endl;
 	}
-	
+
 
 }
 
-void CGameFramework::CollisionNPC_by_PLAYER(XMFLOAT3 pos, XMFLOAT3 extents)
+void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos, XMFLOAT3 mapextents)
 {
+	m_mapxmoobb = BoundingOrientedBox(mappos, mapextents, XMFLOAT4(0, 0, 0, 1));
+
+	CValkanObject** ppBullets = ((HeliPlayer*)m_pPlayer)->m_ppBullets;
+	for (int i = 0; i < BULLETS; i++)
+	{
+		ppBullets[i]->m_xmOOBoundingBox = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
+		if (ppBullets[i]->m_xmOOBoundingBox.Intersects(m_mapxmoobb))
+		{
+			// 충돌 모션 
+			ppBullets[i]->Reset();
+		}
+	}
+}
+
+void CGameFramework::CollisionNPC_by_PLAYER(XMFLOAT3 npcpos, XMFLOAT3 npcextents)
+{
+	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(2.5, 2.0, 4.0), XMFLOAT4(0, 0, 0, 1));
+	m_npcoobb = BoundingOrientedBox(npcpos, npcextents, XMFLOAT4(0, 0, 0, 1));
+
+	if (m_npcoobb.Intersects(m_pPlayer->m_xoobb))
+	{
+		// 충돌 모션
+		//cout << "CollisionCheck!" << m_npcoobb.Center.x << m_npcoobb.Center.z << endl;
+	}
+
 }
 
 void CGameFramework::CollisionNPC_by_MAP(XMFLOAT3 npcpos, XMFLOAT3 npcextents, XMFLOAT3 mapcenter, XMFLOAT3 mapextents)
 {
+	m_npcoobb = BoundingOrientedBox(npcpos, npcextents, XMFLOAT4(0, 0, 0, 1));
+	m_mapxmoobb = BoundingOrientedBox(mapcenter, XMFLOAT3(mapextents.x / 2.5f, mapextents.y / 2.0f, mapextents.z / 2.5f), XMFLOAT4(0, 0, 0, 1));
+	if (m_mapxmoobb.Intersects(m_npcoobb))
+	{
+		//cout << "CollisionCheck!" << m_npcoobb.Center.x << m_npcoobb.Center.z <<m_xmoobb.mapcenter.z endl;
+	}
+
 }
 
-void CGameFramework::CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents, XMFLOAT3 bulletpos, XMFLOAT3 bulletextents)
+void CGameFramework::CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents)
 {
+	m_npcoobb = BoundingOrientedBox(npcpos, npcextents, XMFLOAT4(0, 0, 0, 1));
+
+	CValkanObject** ppBullets = ((HeliPlayer*)m_pPlayer)->m_ppBullets;
+	for (int i = 0; i < BULLETS; i++)
+	{
+		ppBullets[i]->m_xmOOBoundingBox = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
+		if (ppBullets[i]->m_xmOOBoundingBox.Intersects(m_npcoobb))
+		{
+			// 충돌 모션 
+			ppBullets[i]->Reset();
+		}
+	}
 }
 
 void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
@@ -1394,7 +1416,7 @@ void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
 	if (result == DISJOINT) {
 
 		m_bCollisionCheck = true;
-	
+
 	}
 
 

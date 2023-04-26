@@ -232,13 +232,16 @@ public:
 //==================================================
 	// 서버에서 받은 Bound 값과의 충돌설정 함수입니다.
 	//player - map
-	void CollisionMap_by_Player(XMFLOAT3 mappos, XMFLOAT3 mapextents);
-	//npc - player
+	void CollisionMap_by_PLAYER(XMFLOAT3 mappos, XMFLOAT3 mapextents);
+	//bullet - map
+	void CollisionMap_by_BULLET(XMFLOAT3 mappos, XMFLOAT3 mapextents);
+	//npc - (player/map/bullet)
 	void CollisionNPC_by_PLAYER(XMFLOAT3 npcpos, XMFLOAT3 npcextents);
 	void CollisionNPC_by_MAP(XMFLOAT3 npcpos, XMFLOAT3 npcextents, XMFLOAT3 mapcenter, XMFLOAT3 mapextents);
-	void CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents,XMFLOAT3 bulletpos, XMFLOAT3 bulletextents);
+	void CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents);
 	void CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents);
-	BoundingOrientedBox m_xmoobb;
+	BoundingOrientedBox m_mapxmoobb;
+	BoundingOrientedBox m_npcoobb;
 	BoundingOrientedBox m_worldmoobb;
 	bool m_bCollisionCheck = false;
 	float m_fResponCount = 0.0;
