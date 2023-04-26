@@ -226,10 +226,7 @@ public:
 	void setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void remove_Npcs(int id);
 
-	// 총알 좌표 계산하는 함수입니다.
-	void calculation_Bullet();
 //==================================================
- 
 	// 서버에서 받은 Bound 값과의 충돌설정 함수입니다.
 	void CollisionObjectbyPlayer(XMFLOAT3 pos, XMFLOAT3 extents);
 	BoundingOrientedBox m_xmoobb;

@@ -88,8 +88,6 @@ struct CS_ROTATE_PACKET {
 struct CS_ATTACK_PACKET {
 	unsigned char size;
 	char type;
-	short id;
-	float x, y, z;
 };
 
 enum PACKET_KEY_TYPE { PACKET_KEY_NUM1, PACKET_KEY_NUM2,

@@ -618,8 +618,7 @@ void process_packet(int client_id, char* packet)
 			building_packet.scale_x = building.getScaleX();
 			building_packet.scale_y = building.getScaleY();
 			building_packet.scale_z = building.getScaleZ();
-			cout << "New MapObject Send - Pos: (" << building_packet.pos_x << ", " << building_packet.pos_y << ", " << building_packet.pos_z
-				<< "), Scale: (" << building_packet.scale_x << ", " << building_packet.scale_y << ", " << building_packet.scale_z << ")" << endl;
+
 			clients[client_id].do_send(&building_packet);
 		}
 		break;
@@ -676,44 +675,19 @@ void process_packet(int client_id, char* packet)
 	{
 		if (!b_active_server) break;
 		CS_ATTACK_PACKET* cl_attack_packet = reinterpret_cast<CS_ATTACK_PACKET*>(packet);
-		// Bullet Cooldown Check
+		// Bullet 쿨타임 체크
 		milliseconds shoot_term = duration_cast<milliseconds>(chrono::system_clock::now() - shoot_time);
 		if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) {	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
 			milliseconds left_cooldown = duration_cast<milliseconds>(milliseconds(SHOOT_COOLDOWN_BULLET) - shoot_term);
 			break;
 		}
-		cout << "발싸\n" << endl;
 
-		// empty space check
-		int new_bullet_id = -1;
-		int arr_cnt = -1;
-		if (clients[client_id].bullet > 0) {		// 남은 총알이 있다면,
-			// 총알 하나 사용
-			clients[client_id].s_lock.lock();
-			clients[client_id].bullet -= 1;
-			clients[client_id].s_lock.unlock();
+		// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
 
-			// 발사한 사용자에게 총알 사용했음을 알려줍니다.
-			SC_BULLET_COUNT_PACKET bullet_packet;
-			bullet_packet.size = sizeof(bullet_packet);
-			bullet_packet.type = SC_BULLET_COUNT;
-			bullet_packet.id = client_id;
-			bullet_packet.bullet_cnt = clients[client_id].bullet;
-			clients[client_id].do_send(&bullet_packet);
-		}
-		else {	// 남은 탄환이 0이라면 reload
-			clients[client_id].s_lock.lock();
-			clients[client_id].bullet = 100;
-			clients[client_id].s_lock.unlock();
+		// 건물 등 지형지물과 충돌하면 break
 
-			// 발사한 사용자에게 총알 장전했음을 알려줍니다.
-			SC_BULLET_COUNT_PACKET bullet_packet;
-			bullet_packet.size = sizeof(bullet_packet);
-			bullet_packet.type = SC_BULLET_COUNT;
-			bullet_packet.id = client_id;
-			bullet_packet.bullet_cnt = clients[client_id].bullet;
-			clients[client_id].do_send(&bullet_packet);
-		}
+		// Player, Npc와 충돌하면 대상의 HP를 감소시키고 클라이언트에게 피격 패킷을 보내야 합니다.
+		
 		break;
 	}// CS_ATTACK end
 	case CS_INPUT_KEYBOARD:
@@ -1918,14 +1892,14 @@ int main(int argc, char* argv[])
 				}
 				line_cnt++;
 			}
-			cout << " ---- OK.";
+			cout << " ---- OK." << endl;
 		}
 		else {
 			cout << "[Error] Unknown File." << endl;
 		}
-		cout << "\n";
 		txtfile.close();
 	}
+	cout << "\n";
 
 	//======================================================================
 	// [ Main - 클라이언트 연결 ]

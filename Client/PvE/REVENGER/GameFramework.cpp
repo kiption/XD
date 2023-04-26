@@ -385,18 +385,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case VK_SPACE:
 			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
-			for (int i{}; i < BULLETS; ++i)
-			{
-				if (((HeliPlayer*)m_pPlayer)->m_ppBullets[i]->m_bActive)
-				{
-					BulletPos temp;
-					temp.x = ((HeliPlayer*)m_pPlayer)->m_ppBullets[i]->GetPosition().x;
-					temp.y = ((HeliPlayer*)m_pPlayer)->m_ppBullets[i]->GetPosition().y;
-					temp.z = ((HeliPlayer*)m_pPlayer)->m_ppBullets[i]->GetPosition().z;
-					m_shoot_info.push(temp);
-				}
-			}
-
 
 			break;
 		default:
@@ -757,8 +745,6 @@ void CGameFramework::FrameAdvance()
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-
-	calculation_Bullet();
 
 	if (m_nMode == SCENE1STAGE)
 	{
@@ -1326,24 +1312,6 @@ void CGameFramework::remove_Npcs(int id)
 {
 }
 
-void CGameFramework::calculation_Bullet()
-{
-	for (int i{}; i < m_shoot_info.size(); ++i)
-	{
-		BulletPos temp = m_shoot_info.front();
-		if (((HeliPlayer*)m_pPlayer)->m_ppBullets[i]->m_bActive)
-		{
-			temp.x = ((HeliPlayer*)m_pPlayer)->m_ppBullets[i]->GetPosition().x;
-			temp.y = ((HeliPlayer*)m_pPlayer)->m_ppBullets[i]->GetPosition().y;
-			temp.z = ((HeliPlayer*)m_pPlayer)->m_ppBullets[i]->GetPosition().z;
-			m_shoot_info.pop();
-			m_shoot_info.push(temp);
-		}
-		else {
-			m_shoot_info.pop();
-		}
-	}
-}
 
 void CGameFramework::CollisionObjectbyPlayer(XMFLOAT3 pos, XMFLOAT3 extents)
 {

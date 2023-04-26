@@ -212,25 +212,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						sendPacket(&move_pack2, active_servernum);
 						break;
 					case PACKET_KEY_SPACEBAR:
-						//for (int i{}; i < gGameFramework.m_shoot_info.size(); ++i) {
-						//	BulletPos infoBullet = gGameFramework.m_shoot_info.front();
-						//	
-						//	CS_ATTACK_PACKET attack_pack;
-						//	attack_pack.size = sizeof(CS_ATTACK_PACKET);
-						//	attack_pack.type = CS_ATTACK;
-						//	attack_pack.id = my_id;
-						//	attack_pack.x = infoBullet.x;
-						//	attack_pack.y = infoBullet.y;
-						//	attack_pack.z = infoBullet.z;
-						//	
-
-						//	gGameFramework.m_shoot_info.pop();
-						//	cout << i << "번째 총알 좌표: " << infoBullet.x << ',' << infoBullet.y << ',' << infoBullet.z << endl;
-						//	
-						//	//attack_pack.x = gGameFramework.
-
-						//	sendPacket(&attack_pack, active_servernum);
-						//}
+						CS_ATTACK_PACKET attack_pack;
+						attack_pack.size = sizeof(CS_ATTACK_PACKET);
+						attack_pack.type = CS_ATTACK;
+						sendPacket(&rotate_pack, active_servernum);
 						break;
 					default:
 						cout << "[KeyInput Error] Unknown Key Type." << endl;
@@ -284,30 +269,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					//cout << "====================" << endl;
 				}
 
-				// 3. Bullet 전송
-				for (int i{}; i < gGameFramework.m_shoot_info.size(); ++i) {
-					BulletPos infoBullet = gGameFramework.m_shoot_info.front();
-
-					CS_ATTACK_PACKET attack_pack;
-					attack_pack.size = sizeof(CS_ATTACK_PACKET);
-					attack_pack.type = CS_ATTACK;
-					attack_pack.id = my_id;
-					attack_pack.x = infoBullet.x;
-					attack_pack.y = infoBullet.y;
-					attack_pack.z = infoBullet.z;
-
-					gGameFramework.m_shoot_info.pop();
-					gGameFramework.m_shoot_info.push(infoBullet);
-
-					//cout << i << "번째 총알 좌표: " << infoBullet.x << ',' << infoBullet.y << ',' << infoBullet.z << endl;
-
-					sendPacket(&attack_pack, active_servernum);
-				}
-				/*if (gGameFramework.m_shoot_info.size() != 0) {
-					cout << "============" << endl;
-
-				}*/
-				gGameFramework.CollisionObjectbyPlayer(XMFLOAT3(100.0, 100.0, 100.0), XMFLOAT3(50.0, 50.0, 50.0));
 				//==================================================
 				//					  UI 동기화
 				//==================================================
@@ -353,6 +314,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 				//==================================================
 
+				//==================================================
+				//					  Map Test
+				//==================================================
+				//for (auto& mapobj : stage1_mapobj_info) {
+				//	cout << "Map Obj - Pos: " << mapobj.m_pos.x << ", " << mapobj.m_pos.y << ", " << mapobj.m_pos.z
+				//		<< " Scale: " << mapobj.m_scale.x << ", " << mapobj.m_scale.y << ", " << mapobj.m_scale.z << "." << endl;
+				//}
+
+				//==================================================
 			}
 			gGameFramework.FrameAdvance();
 		}
