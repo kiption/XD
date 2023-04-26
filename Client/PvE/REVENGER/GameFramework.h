@@ -226,10 +226,14 @@ public:
 	void setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void remove_Npcs(int id);
 
+	float m_pPlayerRotate_z = 0.0f;
+	float m_pPlayerRotate_x = 0.0f;
 //==================================================
 	// 서버에서 받은 Bound 값과의 충돌설정 함수입니다.
 	void CollisionObjectbyPlayer(XMFLOAT3 pos, XMFLOAT3 extents);
+	void CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents);
 	BoundingOrientedBox m_xmoobb;
+	BoundingOrientedBox m_worldmoobb;
 	bool m_bCollisionCheck = false;
 	float m_fResponCount = 0.0;
 };

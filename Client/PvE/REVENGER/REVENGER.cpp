@@ -324,6 +324,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					gGameFramework.CollisionObjectbyPlayer(XMFLOAT3(mapobj.m_xoobb.Center), XMFLOAT3(mapobj.m_xoobb.Extents));
 					
 				}
+				gGameFramework.CollisionEndWorldObject(XMFLOAT3(300.0, 150.0, 50.0), XMFLOAT3(800.0, 110.0, 800.0));
 				//==================================================
 			}
 			gGameFramework.FrameAdvance();

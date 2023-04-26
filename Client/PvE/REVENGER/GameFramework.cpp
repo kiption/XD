@@ -552,6 +552,8 @@ void CGameFramework::ProcessInput()
 			}
 			if (m_nMode != SCENE2STAGE)
 			{
+				
+				
 			}
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
@@ -577,10 +579,23 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[VK_LEFT] & 0xF0) {
 			dwDirection |= DIR_LEFT;
 			q_keyboardInput.push(SEND_KEY_LEFT);//S
+
+			/*if (m_pPlayerRotate_z < 1.5 && m_pPlayerRotate_z >= 0.0)
+			{
+				m_pPlayerRotate_z += 0.02f;
+				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, m_pPlayerRotate_z);
+			}*/
 		}
 		if (pKeysBuffer[VK_RIGHT] & 0xF0) {
 			dwDirection |= DIR_RIGHT;
 			q_keyboardInput.push(SEND_KEY_RIGHT);//S
+			/*if (m_pPlayerRotate_z > -1.5 && m_pPlayerRotate_z <= 0.0)
+			{
+				m_pPlayerRotate_z -= 0.02f;
+				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, m_pPlayerRotate_z);
+			}*/
+		
+			
 		}
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
@@ -634,7 +649,7 @@ void CGameFramework::ProcessInput()
 
 				if (m_bCollisionCheck == false)
 				{
-					if (dwDirection) m_pPlayer->Move(dwDirection, 2.71f, true);
+					if (dwDirection) m_pPlayer->Move(dwDirection, 4.71f, true);
 				}
 				if (m_bCollisionCheck == true)
 				{
@@ -660,10 +675,11 @@ void CGameFramework::AnimateObjects()
 		m_pCamera->GetPosition().y -= 2.0f;
 		m_pPlayer->Rotate(0.0, 1.5, 1.5);
 		m_fResponCount += 0.1f;
+		m_pPlayerRotate_z = 0.0;
 	}
 	if (m_fResponCount > 7.0)
 	{
-		m_pPlayer->SetPosition(XMFLOAT3(500.0, 400.0, 400.0));
+		m_pPlayer->SetPosition(XMFLOAT3(500.0, 200.0, 400.0));
 		m_fResponCount = 0.0f;
 		m_bCollisionCheck = false;
 	}
@@ -1315,9 +1331,9 @@ void CGameFramework::remove_Npcs(int id)
 
 void CGameFramework::CollisionObjectbyPlayer(XMFLOAT3 pos, XMFLOAT3 extents)
 {
-	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(1.0, 2.0, 3.0), XMFLOAT4(0, 0, 0, 1));
+	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(2.5, 2.0,4.0), XMFLOAT4(0, 0, 0, 1));
 	
-	m_xmoobb = BoundingOrientedBox(pos, extents, XMFLOAT4(0, 0, 0, 1));
+	m_xmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents.x/2.5, extents.y / 4.5, extents.z / 2.5), XMFLOAT4(0, 0, 0, 1));
 	if (m_xmoobb.Intersects(m_pPlayer->m_xoobb))
 	{
 		m_bCollisionCheck = true;
@@ -1325,4 +1341,19 @@ void CGameFramework::CollisionObjectbyPlayer(XMFLOAT3 pos, XMFLOAT3 extents)
 	}
 	
 
+}
+
+void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
+{
+	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(2.5, 2.0, 4.0), XMFLOAT4(0, 0, 0, 1));
+
+	m_worldmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents), XMFLOAT4(0, 0, 0, 1));
+
+	ContainmentType result = m_worldmoobb.Contains(m_pPlayer->m_xoobb);
+
+	if (result == DISJOINT) {
+
+		m_bCollisionCheck = true;
+	
+	}
 }

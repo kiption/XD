@@ -132,7 +132,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppCityGameObjects[i]->SetChild(pGeneratorModel, false);
 		m_ppCityGameObjects[i]->SetMaterial(0, pCityMaterial[i]);
 		m_ppCityGameObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-		m_ppCityGameObjects[i]->SetScale(4.5, 4.5, 4.5);
+		m_ppCityGameObjects[i]->SetScale(4.5, 6.5, 4.5);
 		m_ppCityGameObjects[i]->OnPrepareAnimate();
 		pGeneratorModel->AddRef();
 	}
@@ -574,13 +574,14 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 
 			XMMATRIX xmmtxView = XMMatrixLookToLH(XMLoadFloat3(&xmf3Position), XMLoadFloat3(&xmf3Look), XMLoadFloat3(&xmf3Up));
 
-			float fNearPlaneDistance = 60.0f, fFarPlaneDistance = m_pLights[j].m_fRange;
+			float fNearPlaneDistance = 20.0f, fFarPlaneDistance = m_pLights[j].m_fRange;
 
 			XMMATRIX xmmtxProjection{};
 			if (m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
 			{
 				float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
-				xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
+				float fAspectRatio = _PLANE_WIDTH / _PLANE_HEIGHT;
+				xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(120.0), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
 				//float fLeft = -(_PLANE_WIDTH * 0.5f), fRight = +(_PLANE_WIDTH * 0.5f), fTop = +(_PLANE_HEIGHT * 0.5f), fBottom = -(_PLANE_HEIGHT * 0.5f);
 				//xmmtxProjection = XMMatrixOrthographicOffCenterLH(fLeft * 6.0f, fRight * 6.0f, fBottom * 6.0f, fTop * 6.0f, fBack, fFront);
 			}
