@@ -124,7 +124,8 @@ void CrossHairShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
 	XMFLOAT3 xmf3Position = Vector3::Add(xmf3CameraPosition, Vector3::ScalarProduct(xmf3CameraLook, 120.0f, false));
-
+	xmf3Position.y += 5.0f;
+	xmf3Position.z += 30.0f;
 	m_ppObjects[0]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
 	m_ppObjects[0]->SetPosition(xmf3Position);
 	BillboardShader::Render(pd3dCommandList, pCamera,0);
@@ -200,7 +201,7 @@ D3D12_SHADER_BYTECODE BillboardParticleShader::CreatePixelShader(ID3DBlob** ppd3
 void BillboardParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/40Smoke2.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/45Smoke2.dds", RESOURCE_TEXTURE2D, 0);
 	CTexture* ppSpriteTextures2 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppSpriteTextures2->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/40Smoke2.dds", RESOURCE_TEXTURE2D, 0);
 	CTexture* ppSpriteTextures3 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -230,28 +231,29 @@ void BillboardParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	CBillboardParticleObject** ppParticleObject = new CBillboardParticleObject * [m_nObjects];
 
 	
-		for (int j = 0; j < m_nObjects-200; j++)
+		for (int j = 0; j < m_nObjects-40; j++)
 		{
-			m_ppObjects[j] = new CBillboardParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			m_ppObjects[j]->SetMesh(pSpriteMesh);
-			m_ppObjects[j]->SetMaterial(0, pSpriteMaterial);
-			m_ppObjects[j]->SetPosition(0.0,0.0,0.0);
-
+			ppParticleObject[j] = new CBillboardParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			ppParticleObject[j]->SetMesh(pSpriteMesh);
+			ppParticleObject[j]->SetMaterial(0, pSpriteMaterial);
+			ppParticleObject[j]->SetPosition(0.0,0.0,0.0);
+			m_ppObjects[j] = ppParticleObject[j];
 		}
-		for (int k = m_nObjects-200; k < m_nObjects-100; k++)
+		for (int k = m_nObjects-40; k < m_nObjects-60; k++)
 		{
-			m_ppObjects[k] = new CBillboardParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			m_ppObjects[k]->SetMesh(pSpriteMesh);
-			m_ppObjects[k]->SetMaterial(0, pSpriteMaterial2);
-			m_ppObjects[k]->SetPosition(0.0,0.0,0.0);
-		
+			ppParticleObject[k] = new CBillboardParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			ppParticleObject[k]->SetMesh(pSpriteMesh);
+			ppParticleObject[k]->SetMaterial(0, pSpriteMaterial2);
+			ppParticleObject[k]->SetPosition(0.0,0.0,0.0);
+			m_ppObjects[k] = ppParticleObject[k];
 		}
-		for (int k = m_nObjects-100; k < m_nObjects; k++)
+		for (int k = m_nObjects-60; k < m_nObjects; k++)
 		{
-			m_ppObjects[k] = new CBillboardParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			m_ppObjects[k]->SetMesh(pSpriteMesh);
-			m_ppObjects[k]->SetMaterial(0, pSpriteMaterial3);
-			m_ppObjects[k]->SetPosition(0.0, 0.0, 0.0);
+			ppParticleObject[k] = new CBillboardParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			ppParticleObject[k]->SetMesh(pSpriteMesh);
+			ppParticleObject[k]->SetMaterial(0, pSpriteMaterial3);
+			ppParticleObject[k]->SetPosition(0.0, 0.0, 0.0);
+			m_ppObjects[k] = ppParticleObject[k];
 
 		}
 		NextPosition = XMFLOAT3(0.0,0.0,0.0);
@@ -273,15 +275,8 @@ void BillboardParticleShader::Render(ID3D12GraphicsCommandList* pd3dCommandList,
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		/*if (m_ppObjects[j]->m_xmf4x4ToParent._42 > randomLiftHeight)
-		{
-			m_ppObjects[j]->SetMaterial(0, pSpriteMaterial2);
-		}
-		if (m_ppObjects[j]->m_xmf4x4ToParent._42 > randomLiftHeighiest)
-		{
-			m_ppObjects[j]->SetMaterial(0, pSpriteMaterial2);
-		}*/
-		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3Position, XMFLOAT3(0.0f, 0.1, 0.0f));
+		
+		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3Position, XMFLOAT3(0.0f, 0.5, 0.0f));
 		
 	}
 	BillboardShader::Render(pd3dCommandList, pCamera,0);
@@ -356,8 +351,19 @@ void BillboardParticleShader::ReleaseUploadBuffers()
 	BillboardShader::ReleaseUploadBuffers();
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-D3D12_INPUT_LAYOUT_DESC OpeningBillboardBanner::CreateInputLayout(int nPipelineState)
+
+
+
+
+
+
+
+
+
+
+
+
+D3D12_INPUT_LAYOUT_DESC ResponeEffectShader::CreateInputLayout(int nPipelineState)
 {
 	UINT nInputElementDescs = 2;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
@@ -372,7 +378,7 @@ D3D12_INPUT_LAYOUT_DESC OpeningBillboardBanner::CreateInputLayout(int nPipelineS
 	return(d3dInputLayoutDesc);
 }
 
-D3D12_BLEND_DESC OpeningBillboardBanner::CreateBlendState(int nPipelineState)
+D3D12_BLEND_DESC ResponeEffectShader::CreateBlendState(int nPipelineState)
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
 	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
@@ -392,7 +398,7 @@ D3D12_BLEND_DESC OpeningBillboardBanner::CreateBlendState(int nPipelineState)
 	return(d3dBlendDesc);
 }
 
-void OpeningBillboardBanner::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
+void ResponeEffectShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
@@ -402,71 +408,77 @@ void OpeningBillboardBanner::CreateGraphicsPipelineState(ID3D12Device* pd3dDevic
 
 }
 
-D3D12_SHADER_BYTECODE OpeningBillboardBanner::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE ResponeEffectShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
 }
 
-D3D12_SHADER_BYTECODE OpeningBillboardBanner::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE ResponeEffectShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSmokeBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
 }
 
-void OpeningBillboardBanner::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+void ResponeEffectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Opening.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Effect.dds", RESOURCE_TEXTURE2D, 0);
 
-	CMaterial* pTerrainMaterial = new CMaterial(1);
-	pTerrainMaterial->SetTexture(ppSpriteTextures, 0);
+
+	CMaterial *pSpriteMaterial = new CMaterial(1);
+
+	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 120.0, 80.0, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 6.0f,10.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-
-	m_nObjects = 1;
-
+	m_nObjects = 30;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures, 0, 15);
 
-	for (int i = 0; i < m_nObjects; i++)
+	m_ppObjects = new CGameObject * [m_nObjects];
+	CResponeObject** pResponObject = new CResponeObject * [m_nObjects];
+	for (int j = 0; j < m_nObjects; j++)
 	{
-		SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures, 0, 15);//+
-		m_ppObjects = new CGameObject * [m_nObjects];
-		CBillboardObject* pThirdObject = NULL;
-		pThirdObject = new CBillboardObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		pThirdObject->SetMesh(pSpriteMesh);
-		pThirdObject->SetMaterial(0, pTerrainMaterial);
-		m_ppObjects[i] = pThirdObject;
+		pResponObject[j] = new CResponeObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		pResponObject[j]->SetMesh(pSpriteMesh);
+		pResponObject[j]->SetMaterial(0, pSpriteMaterial);
+		pResponObject[j]->SetPosition(XMFLOAT3(RandomBillboardPositionInSphere(XMFLOAT3(50.0,20.0,350.0), 60, 8, 8)));
+		//pResponObject[j]->SetPosition(XMFLOAT3(50.0,60.0,350.0));
+		m_ppObjects[j] = pResponObject[j];
 	}
+	
+
 }
 
-void OpeningBillboardBanner::ReleaseObjects()
+void ResponeEffectShader::ReleaseObjects()
 {
 	BillboardShader::ReleaseObjects();
 }
 
-void OpeningBillboardBanner::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+void ResponeEffectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
-	XMFLOAT3 xmf3CameraLook = pCamera->GetLookVector();
 	CPlayer* pPlayer = pCamera->GetPlayer();
 	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
-	XMFLOAT3 xmf3Position = Vector3::Add(xmf3CameraPosition, Vector3::ScalarProduct(xmf3CameraLook, 120.0f, false));
-	xmf3Position.y += 5.0f;
-	xmf3Position.x -= 10.0f;
-	xmf3Position.z += 80.0f;
-	m_ppObjects[0]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
-	m_ppObjects[0]->SetPosition(xmf3Position);
+	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 0.0f, false));
+
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		
+		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3Position, XMFLOAT3(0.0f, 1.0, 0.0f));
+
+	}
 	BillboardShader::Render(pd3dCommandList, pCamera, 0);
 }
 
-void OpeningBillboardBanner::AnimateObjects(float fTimeElapsed)
+void ResponeEffectShader::AnimateObjects(float fTimeElapsed)
 {
+
 	BillboardShader::AnimateObjects(fTimeElapsed);
 }
 
-void OpeningBillboardBanner::ReleaseUploadBuffers()
+void ResponeEffectShader::ReleaseUploadBuffers()
 {
 	BillboardShader::ReleaseUploadBuffers();
 }
+

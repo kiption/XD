@@ -384,8 +384,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			UI_Switch = !UI_Switch;
 			break;
 		case VK_SPACE:
-			//if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
-
+			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
 			break;
 		default:
 			break;
@@ -679,7 +678,7 @@ void CGameFramework::AnimateObjects()
 	}
 	if (m_fResponCount > 7.0)
 	{
-		m_pPlayer->SetPosition(XMFLOAT3(500.0, 200.0, 400.0));
+		m_pPlayer->SetPosition(XMFLOAT3(85.0, 80.0, 360.0));
 		m_fResponCount = 0.0f;
 		m_bCollisionCheck = false;
 	}
@@ -1333,7 +1332,7 @@ void CGameFramework::CollisionObjectbyPlayer(XMFLOAT3 pos, XMFLOAT3 extents)
 {
 	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(2.5, 2.0,4.0), XMFLOAT4(0, 0, 0, 1));
 	
-	m_xmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents.x/2.5, extents.y / 4.5, extents.z / 2.5), XMFLOAT4(0, 0, 0, 1));
+	m_xmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents.x/2.5, extents.y / 2.5, extents.z / 2.5), XMFLOAT4(0, 0, 0, 1));
 	if (m_xmoobb.Intersects(m_pPlayer->m_xoobb))
 	{
 		m_bCollisionCheck = true;

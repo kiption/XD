@@ -78,7 +78,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppHierarchicalGameObjects[i]->SetChild(pOtherPlayerModel, false);
 		m_ppHierarchicalGameObjects[i]->SetMaterial(0,pOtherPlayerMaterial);
 		m_ppHierarchicalGameObjects[i]->SetScale(2.0, 2.0, 2.0);
-		m_ppHierarchicalGameObjects[i]->SetPosition(1300.0, 120.0, 1200.0);
+		m_ppHierarchicalGameObjects[i]->SetPosition(0.0, 0.0, 0.0);
 		m_ppHierarchicalGameObjects[i]->OnPrepareAnimate();
 		pOtherPlayerModel->AddRef();
 	}
@@ -132,7 +132,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppCityGameObjects[i]->SetChild(pGeneratorModel, false);
 		m_ppCityGameObjects[i]->SetMaterial(0, pCityMaterial[i]);
 		m_ppCityGameObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-		m_ppCityGameObjects[i]->SetScale(4.5, 6.5, 4.5);
+		m_ppCityGameObjects[i]->SetScale(4.5, 4.5, 4.5);
 		m_ppCityGameObjects[i]->OnPrepareAnimate();
 		pGeneratorModel->AddRef();
 	}

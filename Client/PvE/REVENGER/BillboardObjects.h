@@ -14,7 +14,17 @@ public:
 	float m_fSpeed = 0.1f;
 	float m_fTime = 0.0f;
 };
+class CResponeObject : public CGameObject
+{
+public:
+	CResponeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CResponeObject();
 
+	virtual void Animate(float fTimeElapsed);
+	bool m_bResponeAnimation = false;
+	float m_fSpeed = 0.1f;
+	float m_fTime = 0.0f;
+};
 class CBillboardParticleObject : public CGameObject
 {
 public:

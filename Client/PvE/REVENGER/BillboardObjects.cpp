@@ -159,3 +159,30 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	CGameObject::Render(pd3dCommandList, pCamera);
 
 }
+
+CResponeObject::CResponeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
+{
+}
+
+CResponeObject::~CResponeObject()
+{
+}
+
+void CResponeObject::Animate(float fTimeElapsed)
+{
+
+	if (m_xmf4x4ToParent._42 < 0.0f)
+	{
+		m_bResponeAnimation = true;
+	}
+	if (m_bResponeAnimation == true)
+	{
+		m_xmf4x4ToParent._42 = 120.0f;
+		m_bResponeAnimation = false;
+	}
+	if (m_bResponeAnimation == false)
+	{
+		m_xmf4x4ToParent._42 -= 20.0f;
+	}
+	CGameObject::Animate(fTimeElapsed);
+}

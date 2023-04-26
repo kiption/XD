@@ -68,27 +68,13 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 800);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 700);
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	BuildDefaultLightsAndMaterials();
 
 	m_pSkyBox = new COpeningBackScene(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pSkyBox->SetCurScene(OPENINGSCENE);
-
-	XMFLOAT3 xmf3Scale(5.0f, 4.0f, 5.0f);
-	XMFLOAT3 xmf3Normal(1.0f, 1.0f, 1.0f);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf3Normal);
-	m_pTerrain->SetCurScene(OPENINGSCENE);
-	m_pTerrain->SetPosition(-500.0, -70.0, -500.0);
-
-	m_nBillboardShaders = 1;
-	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
-	OpeningBillboardBanner* pBillboardParticleShader = new OpeningBillboardBanner();
-	pBillboardParticleShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList,m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
-	pBillboardParticleShader->SetCurScene(OPENINGSCENE);
-	pBillboardParticleShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_pBillboardShader[0] = pBillboardParticleShader;
 
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -111,7 +97,6 @@ void SceneManager::ReleaseObjects()
 		delete[] m_ppShaders;
 	}
 	
-	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
 
 	ReleaseShaderVariables();
@@ -434,8 +419,8 @@ void SceneManager::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
 
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
-	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
+	//for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
+	
 
 }
 
@@ -451,18 +436,11 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 
 	UpdateShaderVariables(pd3dCommandList);
 
-	//if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
-	//if (m_pBillboardShader) m_pBillboardShader[0]->Render(pd3dCommandList, pCamera,0);
-
-
-
-
 }
 
 void SceneManager::ReleaseUploadBuffers()
 {
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
-	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 
 

@@ -65,7 +65,7 @@ public:
 	XMFLOAT3 newPosition = XMFLOAT3(0, 0, 0);
 	XMFLOAT3 NextPosition = XMFLOAT3(0, 0, 0);
 	
-	int								m_nObjects = 0;
+	int	m_nObjects = 0;
 	CGameObject** m_ppObjects = 0;
 
 };

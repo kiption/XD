@@ -53,18 +53,18 @@ public:
 	float m_fWidth = 0.0f;
 	float m_fHeight = 0.0f;
 	CMaterial* pSpriteMaterial = NULL;
-		CMaterial* pSpriteMaterial2 = NULL;
-		CMaterial* pSpriteMaterial3 = NULL;
+	CMaterial* pSpriteMaterial2 = NULL;
+	CMaterial* pSpriteMaterial3 = NULL;
 
 };
 
 
 
-class OpeningBillboardBanner : public BillboardShader
+class ResponeEffectShader : public BillboardShader
 {
 public:
-	OpeningBillboardBanner() {};
-	virtual ~OpeningBillboardBanner() {};
+	ResponeEffectShader() {};
+	virtual ~ResponeEffectShader() {};
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);
@@ -79,8 +79,8 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void ReleaseUploadBuffers();
 
-	float m_fWidth = 0.0f;
-	float m_fHeight = 0.0f;
+	bool m_bResponeAnimation = false;
+
 };
 
 
