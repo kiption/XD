@@ -27,7 +27,6 @@ protected:
 	float           				m_fRoll;
 	float           				m_fYaw;
 
-	DWORD							m_nMode;
 
 	XMFLOAT3						m_xmf3LookAtWorld;
 	XMFLOAT3						m_xmf3Offset;
@@ -42,6 +41,8 @@ protected:
 	ID3D12Resource					*m_pd3dcbCamera = NULL;
 	VS_CB_CAMERA_INFO				*m_pcbMappedCamera = NULL;
 
+public:
+	DWORD							m_nMode;
 public:
 
 	XMFLOAT4X4						m_xmf4x4View;

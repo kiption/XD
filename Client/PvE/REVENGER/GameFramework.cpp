@@ -670,7 +670,14 @@ void CGameFramework::ProcessInput()
 
 				if (m_bCollisionCheck == false)
 				{
-					if (dwDirection) m_pPlayer->Move(dwDirection, 4.71f, true);
+					if (m_pCamera->m_nMode == SPACESHIP_CAMERA)
+					{
+						if (dwDirection) m_pPlayer->Move(dwDirection, 2.5f, true);
+					}
+					else
+					{
+						if (dwDirection) m_pPlayer->Move(dwDirection, 4.5f, true);
+					}
 				}
 				if (m_bCollisionCheck == true)
 				{
@@ -689,12 +696,13 @@ void CGameFramework::AnimateObjects()
 
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed());
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed(), NULL);
-
+	DWORD CameraMode = m_pCamera->GetMode();
 	if (m_bCollisionCheck == true)
 	{
 		m_pPlayer->m_xmf3Position.y -= 2.0f;
 		m_pCamera->GetPosition().y -= 2.0f;
 		m_pPlayer->Rotate(0.0, 1.5, 1.5);
+		m_pCamera = m_pPlayer->ChangeCamera(SPACESHIP_CAMERA, m_GameTimer.GetTimeElapsed());
 		m_fResponCount += 0.1f;
 		m_pPlayerRotate_z = 0.0;
 	}
@@ -703,7 +711,9 @@ void CGameFramework::AnimateObjects()
 		m_pPlayer->SetPosition(XMFLOAT3(85.0, 80.0, 360.0));
 		m_fResponCount = 0.0f;
 		m_bCollisionCheck = false;
+		m_pCamera=m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
 	}
+	
 }
 
 void CGameFramework::WaitForGpuComplete()
