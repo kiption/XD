@@ -33,7 +33,23 @@ mutex servertime_lock;	// 서버시간 lock
 
 vector<City_Info>Cities;
 
-vector<MapObject> buildings_info;	// Map Buildings CollideBox
+class Building : public MapObject
+{
+public:
+	Building() : MapObject() {}
+	Building(float px, float py, float pz, float sx, float sy, float sz) : MapObject(px, py, pz, sx, sy, sz) {}
+
+public:
+	BoundingOrientedBox m_xoobb;
+
+public:
+	void setBB() {
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()),
+									  XMFLOAT3(this->getScaleX(), this->getScaleY(), this->getScaleZ()),
+									  XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
+};
+vector<Building> buildings_info;	// Map Buildings CollideBox
 
 class OVER_EX {
 public:
@@ -625,16 +641,48 @@ void process_packet(int client_id, char* packet)
 	{
 		if (!b_active_server) break;
 		CS_MOVE_PACKET* cl_move_packet = reinterpret_cast<CS_MOVE_PACKET*>(packet);
-		// 1. 충돌체크를 한다.
-		
-		// 2. 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
+		// 1. 충돌체크를 한다. -> 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
+		/*
+		bool b_isCollide = false;
+		// 1) 맵 오브젝트
+		for (auto& building : buildings_info) {
+			if (clients[client_id].m_xoobb.Intersects(building.m_xoobb)) {
+				// 맵과 충돌하면 플레이어가 사망하게 됩니다.
+				clients[client_id].s_lock.lock();
+				clients[client_id].hp = 0;
+				//clients[client_id].pl_state = PL_ST_DEAD;
+				clients[client_id].s_lock.unlock();
 
-		// 3. 그게 아니라면 세션 정보를 업데이트 한다.
+				b_isCollide = true;
+			}
+		}
+		// 2) 다른 플레이어
+		for (auto& other_cl : clients) {
+			if (other_cl.id == client_id) continue;
+			if (clients[client_id].m_xoobb.Intersects(other_cl.m_xoobb)) {
+				// 다른 플레이어와 충돌하면 자기자신과 상대 플레이어 둘다 사망하게 됩니다.
+				clients[client_id].s_lock.lock();
+				clients[client_id].hp = 0;
+				//clients[client_id].pl_state = PL_ST_DEAD;
+				clients[client_id].s_lock.unlock();
+
+				other_cl.s_lock.lock();
+				other_cl.hp = 0;
+				//other_cl.pl_state = PL_ST_DEAD;
+				other_cl.s_lock.unlock();
+
+				b_isCollide = true;
+			}
+		}
+		if (b_isCollide) break;
+		*/
+		// 2. 충돌이 아니라면 세션 정보를 업데이트 한다.
 		clients[client_id].s_lock.lock();
 		clients[client_id].pos = { cl_move_packet->x, cl_move_packet->y, cl_move_packet->z };
+		clients[client_id].setBB();
 		clients[client_id].s_lock.unlock();
 
-		// 4. 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
+		// 3. 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
 		for (auto& other_pl : clients) {
 			if (other_pl.id == client_id) continue;
 			if (other_pl.s_state != ST_INGAME) continue;
@@ -648,19 +696,16 @@ void process_packet(int client_id, char* packet)
 	{
 		if (!b_active_server) break;
 		CS_ROTATE_PACKET* cl_rotate_packet = reinterpret_cast<CS_ROTATE_PACKET*>(packet);
-		// 1. 충돌체크를 한다.
-		
-		// 2. 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
 
-		// 3. 그게 아니라면 세션 정보를 업데이트 한다.
+		// 1. 세션 정보를 업데이트 한다.
 		clients[client_id].s_lock.lock();
 		clients[client_id].m_rightvec = { cl_rotate_packet->right_x, cl_rotate_packet->right_y, cl_rotate_packet->right_z };
 		clients[client_id].m_upvec = { cl_rotate_packet->up_x, cl_rotate_packet->up_y, cl_rotate_packet->up_z };
 		clients[client_id].m_lookvec = { cl_rotate_packet->look_x, cl_rotate_packet->look_y, cl_rotate_packet->look_z };
-		cout << "\n";
+		clients[client_id].setBB();
 		clients[client_id].s_lock.unlock();
 
-		// 4. 다른 클라이언트에게 플레이어가 회전한 방향을 알려준다.
+		// 2. 다른 클라이언트에게 플레이어가 회전한 방향을 알려준다.
 		for (auto& other_pl : clients) {
 			if (other_pl.id == client_id) continue;
 			if (other_pl.s_state != ST_INGAME) continue;
@@ -725,22 +770,7 @@ void process_packet(int client_id, char* packet)
 		if (rt_p->buttontype == PACKET_BUTTON_L) {			// 마우스 좌클릭
 			// 1스테이지 로직
 			if (clients[client_id].curr_stage == 1) {
-				float rotate_scalar = 0.0f;
 
-				clients[client_id].s_lock.lock();
-
-				// 클라이언트에서 받은 벡터값으로 세션 정보의 벡터들을 업데이트합니다.
-
-				clients[client_id].s_lock.unlock();
-
-				// 작동 중인 다른 클라이언트에게 회전 결과를 알려줍니다.
-				for (auto& other_pl : clients) {
-					if (other_pl.id == client_id) continue;
-					if (other_pl.s_state != ST_INGAME) continue;
-
-					lock_guard<mutex> lg{ other_pl.s_lock };
-					other_pl.send_rotate_packet(client_id, TARGET_PLAYER);
-				}
 			}
 			// 2스테이지 로직
 			else if (clients[client_id].curr_stage == 2) {
@@ -1728,7 +1758,8 @@ int main(int argc, char* argv[])
 							b_scale = 0;
 							scale_count = 0;
 
-							MapObject tmp_mapobj(tmp_pos[0], tmp_pos[1], tmp_pos[2], tmp_scale[0], tmp_scale[1], tmp_scale[2]);
+							Building tmp_mapobj(tmp_pos[0], tmp_pos[1], tmp_pos[2], tmp_scale[0], tmp_scale[1], tmp_scale[2]);
+							tmp_mapobj.setBB();
 							buildings_info.push_back(tmp_mapobj);
 							memset(tmp_pos, 0, sizeof(tmp_pos));
 							memset(tmp_scale, 0, sizeof(tmp_scale));

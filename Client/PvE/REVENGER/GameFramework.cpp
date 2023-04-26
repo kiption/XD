@@ -708,7 +708,7 @@ void CGameFramework::AnimateObjects()
 	}
 	if (m_fResponCount > 7.0)
 	{
-		m_pPlayer->SetPosition(XMFLOAT3(85.0, 80.0, 360.0));
+		m_pPlayer->SetPosition(XMFLOAT3(-1000.f, 60.f, 500.f));
 		m_fResponCount = 0.0f;
 		m_bCollisionCheck = false;
 		m_pCamera=m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());

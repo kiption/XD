@@ -226,7 +226,6 @@ void processPacket(char* ptr)
 				other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 				other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 				other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-				cout << "Player[" << recv_id << "] rotate - Lookvec: (" << recv_packet->look_x << ", " << recv_packet->look_y << ", " << recv_packet->look_z << ")" << endl;
 			}
 		}
 		// 2. Rotate Npc
@@ -326,19 +325,19 @@ void processPacket(char* ptr)
 			gamesound.collisionSound();
 			if (recv_packet->id == my_id) {
 				my_info.m_damaged_effect_on = true;
-				my_info.m_hp -= recv_packet->dec_hp;
+				my_info.m_hp -= recv_packet->damage;
 				if (my_info.m_hp < 0) my_info.m_hp = 0;
 			}
 			else {
 				other_players[recv_packet->id].m_damaged_effect_on = true;
-				other_players[recv_packet->id].m_hp -= recv_packet->dec_hp;
+				other_players[recv_packet->id].m_hp -= recv_packet->damage;
 				if (other_players[recv_packet->id].m_hp < 0) other_players[recv_packet->id].m_hp = 0;
 			}
 		}
 		// NPC Damaged
 		else if (recv_packet->target == TARGET_NPC) {
 			npcs_info[recv_packet->id].m_damaged_effect_on = true;
-			npcs_info[recv_packet->id].m_hp -= recv_packet->dec_hp;
+			npcs_info[recv_packet->id].m_hp -= recv_packet->damage;
 			if (npcs_info[recv_packet->id].m_hp < 0) npcs_info[recv_packet->id].m_hp = 0;
 		}
 

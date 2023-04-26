@@ -29,6 +29,7 @@ public:
 		scale_x = sz, scale_y = sy, scale_z = sz;
 	}
 
+public:
 	float getPosX() { return pos_x; }
 	float getPosY() { return pos_y; }
 	float getPosZ() { return pos_z; }

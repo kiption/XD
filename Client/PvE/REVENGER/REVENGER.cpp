@@ -186,7 +186,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					case PACKET_KEY_A:
 					case PACKET_KEY_D:
 						CS_ROTATE_PACKET rotate_pack;
-						rotate_pack.size = sizeof(CS_MOVE_PACKET);
+						rotate_pack.size = sizeof(CS_ROTATE_PACKET);
 						rotate_pack.type = CS_ROTATE;
 						rotate_pack.right_x = gGameFramework.getMyRightVec().x;
 						rotate_pack.right_y = gGameFramework.getMyRightVec().y;
