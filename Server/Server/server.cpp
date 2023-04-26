@@ -10,7 +10,6 @@
 #include "MapObjects.h"
 #include "Constant.h"
 #include "MathFuncs.h"
-#include "BulletsMgr.h"
 #include "../RelayServer/Protocol.h"
 #include "NPC.h"
 #include "Timer.h"
@@ -196,7 +195,6 @@ int user_count = 0;
 array<SESSION, MAX_USER> clients;
 array<ST1_NPC, MAX_NPCS> npcs;
 
-array<Bullets, MAX_BULLET> bullets_arr;
 chrono::system_clock::time_point shoot_time;
 
 HANDLE h_iocp;				// IOCP 핸들
@@ -1112,162 +1110,11 @@ void timerFunc() {
 				cl.do_send(&ticking_packet);
 			}
 		}
+
 		// ================================
-		// Bullet
-		for (auto& bullet : bullets_arr) {
-			if (bullet.getId() == -1) continue;
+		// --- 업데이트
 
-			if (bullet.calcDistance(bullet.getInitialPos()) > BULLET_RANGE) {	// 만약 총알이 초기 위치로부터 멀리 떨어졌다면 제거합니다.
-				// 객체 제거패킷을 모든 클라이언트에게 보냅니다.
-				SC_REMOVE_OBJECT_PACKET remove_bullet_packet;
-				remove_bullet_packet.target = TARGET_BULLET;
-				remove_bullet_packet.size = sizeof(SC_REMOVE_OBJECT_PACKET);
-				remove_bullet_packet.id = bullet.getId();
-				remove_bullet_packet.type = SC_REMOVE_OBJECT;
 
-				for (auto& cl : clients) {
-					if (cl.s_state != ST_INGAME) continue;
-					if (cl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
-					cl.do_send(&remove_bullet_packet);
-				}
-
-				bullet.clear();
-			}
-			else {
-				bullet.m_objlock.lock();
-				bullet.moveObj(bullet.getLookvector(), BULLET_MOVE_SCALAR);		// 총알을 앞으로 이동시킵니다.
-				bullet.setBB_ex(XMFLOAT3(VULCAN_BULLET_BBSIZE_X, VULCAN_BULLET_BBSIZE_Y, VULCAN_BULLET_BBSIZE_Z));	// 바운딩박스 업데이트
-				bullet.m_objlock.unlock();
-
-				bool bullet_alive = true;	// 총알이 충돌하지 않고 잘 살아있는지
-
-				// 충돌검사
-				// =================
-				// 1. Bullet-Player
-				for (auto& pl : clients) {
-					if (bullet.getOwner() == pl.id) continue;							// 총을 쏜 사람은 충돌체크 X
-					if (bullet.calcDistance(pl.pos) > BULLET_RANGE)	continue;			// 총알 사거리보다 멀리 떨어진 플레이어는 충돌체크 X
-
-					if (bullet.intersectsCheck(pl.m_xoobb)) {
-						// 1) 총알 객체 제거
-						bullet.m_objlock.lock();
-						bullet.clear();
-						bullet_alive = false;
-						bullet.m_objlock.unlock();
-
-						SC_REMOVE_OBJECT_PACKET remove_bullet_packet;
-						remove_bullet_packet.target = TARGET_BULLET;
-						remove_bullet_packet.size = sizeof(SC_REMOVE_OBJECT_PACKET);
-						remove_bullet_packet.id = bullet.getId();
-						remove_bullet_packet.type = SC_REMOVE_OBJECT;
-						for (auto& cl : clients) {
-							if (cl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
-							if (cl.s_state == ST_INGAME)
-								cl.do_send(&remove_bullet_packet);
-						}
-
-						// 2) 플레이어의 충돌 후처리
-						pl.s_lock.lock();
-						pl.hp -= BULLET_DAMAGE;
-						if (pl.hp <= 0) {
-							pl.hp = 0;
-							pl.pl_state = PL_ST_DEAD;
-							pl.death_time = chrono::system_clock::now();
-						}
-						pl.s_lock.unlock();
-
-						SC_DAMAGED_PACKET damaged_by_bullet_packet;
-						damaged_by_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
-						damaged_by_bullet_packet.type = SC_DAMAGED;
-						damaged_by_bullet_packet.target = TARGET_PLAYER;
-						damaged_by_bullet_packet.id = pl.id;
-						damaged_by_bullet_packet.dec_hp = BULLET_DAMAGE;
-						if (pl.curr_stage == 1) {// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
-							pl.do_send(&damaged_by_bullet_packet);
-						}
-
-					}//bullet.intersectsCheck end
-				}//for(auto& pl:clients) end
-				// =================
-				// 2. Bullet-NPC
-				for (auto& npc_obj : npcs) {
-					// 총알 사거리보다 멀리 떨어진 플레이어는 충돌체크 X
-					if (bullet.calcDistance(npc_obj.GetPosition()) > BULLET_RANGE)	continue;
-
-					// 충돌검사.
-					if (bullet.intersectsCheck(npc_obj.m_xoobb_Body)) {
-						cout << "Bullet is Collide with NPC[" << npc_obj.GetID() << "]!" << endl;//test
-						// 1) 총알 객체 제거
-						bullet.m_objlock.lock();
-						bullet.clear();
-						bullet_alive = false;
-						bullet.m_objlock.unlock();
-
-						SC_REMOVE_OBJECT_PACKET remove_bullet_packet;
-						remove_bullet_packet.target = TARGET_BULLET;
-						remove_bullet_packet.size = sizeof(SC_REMOVE_OBJECT_PACKET);
-						remove_bullet_packet.id = bullet.getId();
-						remove_bullet_packet.type = SC_REMOVE_OBJECT;
-						for (auto& cl : clients) {
-							if (cl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
-							if (cl.s_state != ST_INGAME) continue;
-							cl.do_send(&remove_bullet_packet);
-						}
-
-						// 2) NPC 충돌 후처리
-						npc_obj.ST1_Damege_Calc(bullet.getOwner());
-
-						// NPC가 사망하면 객체(npc)제거패킷을 접속중인 모든 클라이언트에게 보냅니다.
-						if (npc_obj.GetState() == NPC_DEATH) {
-							SC_REMOVE_OBJECT_PACKET rm_npc_packet;
-							rm_npc_packet.size = sizeof(SC_REMOVE_OBJECT_PACKET);
-							rm_npc_packet.type = SC_REMOVE_OBJECT;
-							rm_npc_packet.target = TARGET_NPC;
-							rm_npc_packet.id = npc_obj.GetID();
-							for (auto& cl : clients) {
-								if (cl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
-								if (cl.pl_state != ST_INGAME) continue;
-								cl.do_send(&rm_npc_packet);
-							}
-						}
-						else {
-							// 접속중인 모든 플레이어에게 npc의 HP감소 사실을 알립니다.
-							SC_DAMAGED_PACKET npc_damaged_by_bullet_packet;
-							npc_damaged_by_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
-							npc_damaged_by_bullet_packet.target = TARGET_PLAYER;
-							npc_damaged_by_bullet_packet.id = npc_obj.GetID();
-							npc_damaged_by_bullet_packet.type = SC_DAMAGED;
-							npc_damaged_by_bullet_packet.dec_hp = BULLET_DAMAGE;
-
-							for (auto& cl : clients) {
-								if (cl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
-								if (cl.pl_state != ST_INGAME) continue;
-								cl.do_send(&npc_damaged_by_bullet_packet);
-							}
-						}
-
-					}//bullet.intersectsCheck end
-				}//for(auto& npc:npcs) end
-
-				// 최종적으로 총알이 어디에도 충돌하지 않았을 때에만 총알의 이동패킷을 보냅니다.
-				if (bullet_alive) {
-					SC_MOVE_OBJECT_PACKET move_bullet_packet;
-					move_bullet_packet.target = TARGET_BULLET;
-					move_bullet_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
-					move_bullet_packet.id = bullet.getId();
-					move_bullet_packet.type = SC_MOVE_OBJECT;
-					move_bullet_packet.x = bullet.getPos().x;
-					move_bullet_packet.y = bullet.getPos().y;
-					move_bullet_packet.z = bullet.getPos().z;
-
-					for (auto& cl : clients) {
-						if (cl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
-						if (cl.s_state == ST_INGAME)
-							cl.do_send(&move_bullet_packet);
-					}
-				}
-			}
-		}//for (auto& bullet : bullets_arr) end
 
 		auto curr_t = system_clock::now();
 		if (curr_t - start_t < 33ms) {

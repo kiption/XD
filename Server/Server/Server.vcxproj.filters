@@ -13,12 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="소스 파일\Objects">
-      <UniqueIdentifier>{fd68cbca-93d5-467d-a5a1-e779796e6d82}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="소스 파일\Objects\Bullets">
-      <UniqueIdentifier>{40acdfc4-97d4-4494-b319-642a2ec2bd51}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\Map">
       <UniqueIdentifier>{2e8114fa-b11d-4b02-adb4-f6cb49bac482}</UniqueIdentifier>
     </Filter>
@@ -29,12 +23,6 @@
     </ClCompile>
     <ClCompile Include="NPC.cpp">
       <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjectsMgr.cpp">
-      <Filter>소스 파일\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="BulletsMgr.cpp">
-      <Filter>소스 파일\Objects\Bullets</Filter>
     </ClCompile>
     <ClCompile Include="MapObjects.cpp">
       <Filter>소스 파일\Map</Filter>
@@ -52,12 +40,6 @@
     </ClInclude>
     <ClInclude Include="Timer.h">
       <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjectsMgr.h">
-      <Filter>소스 파일\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="BulletsMgr.h">
-      <Filter>소스 파일\Objects\Bullets</Filter>
     </ClInclude>
     <ClInclude Include="CP_KEYS.h">
       <Filter>헤더 파일</Filter>
