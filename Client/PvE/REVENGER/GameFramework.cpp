@@ -833,14 +833,21 @@ void CGameFramework::FrameAdvance()
 
 	if (UI_Switch) {
 		if (m_nMode = SCENE1STAGE) {
+			// 내구도 관련 UI 
 			D2D_POINT_2F d2dPoint = { 60.0f, 650.0f };
-			D2D_RECT_F d2dRect = { 0.0f, 0.0f, 190.0f, 45.0f };
+			D2D_RECT_F d2dRect = { 0.0f, 0.0f, 240.0f, 160.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[0] : m_pd2dfxGaussianBlur[0], &d2dPoint, &d2dRect);
 
-			D2D_POINT_2F d2BHPPoint = { 60.0f, 700.0f };
-			D2D_RECT_F d2BHPRect = { 0.0f , 0.0f, 190.0f, 45.0f };
+			// 남아있는 NPC 관련 UI
+			D2D_POINT_2F d2BHPPoint = { 1200.0f, 200.0f };
+			D2D_RECT_F d2BHPRect = { 26.0f * (m_remainNPC - 1) , 0.0f, 26.0f * m_remainNPC, 36.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2BHPPoint, &d2BHPRect);
 
+			/*D2D_POINT_2F d2BHPPoint = { 800.0f, 50.0f };
+			D2D_RECT_F d2BHPRect = { 0.0f , 0.0f, 190.0f, 45.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2BHPPoint, &d2BHPRect);*/
+
+			// Timer 관련 UI 
 			D2D_POINT_2F d2T_M2Point = { 550.0f, 50.0f };
 			D2D_RECT_F d2T_M2Rect = { m_10MinOfTime * 40.0f , 0.0f, 40.0f + m_10MinOfTime * 40.0f, 50.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[2] : m_pd2dfxGaussianBlur[2], &d2T_M2Point, &d2T_M2Rect);
@@ -861,10 +868,13 @@ void CGameFramework::FrameAdvance()
 			D2D_RECT_F d2T_S1Rect = { m_1SecOfTime * 40.0f , 0.0f, 40.0f + m_1SecOfTime * 40.0f, 50.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[6] : m_pd2dfxGaussianBlur[6], &d2T_S1Point, &d2T_S1Rect);
 
+
+			// 총알 개수 관련 UI
 			D2D_POINT_2F d2d_BulletPoint = { 1000.0f, 700.0f };
 			D2D_RECT_F d2d_BulletRect = { 0.0f , 0.0f, 32.0f, 32.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[7] : m_pd2dfxGaussianBlur[7], &d2d_BulletPoint, &d2d_BulletRect);
 
+			// 방향 관련 UI 
 			D2D_POINT_2F d2_DirectionPoint = { 550.0f, -10.0f };
 			D2D_RECT_F d2_DirectionRect = { 0.0f , 0.0f, 180.0f, 90.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[8] : m_pd2dfxGaussianBlur[8], &d2_DirectionPoint, &d2_DirectionRect);
@@ -1050,7 +1060,7 @@ void CGameFramework::CreateDirect2DDevice()
 	}
 
 	IWICBitmapDecoder* pwicBitmapDecoder;
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/green_button05.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/heilcopter.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	IWICBitmapFrameDecode* pwicFrameDecode;
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
@@ -1068,7 +1078,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/yellow_button05.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/Numbering.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -1333,7 +1343,7 @@ void CGameFramework::CollisionObjectbyPlayer(XMFLOAT3 pos, XMFLOAT3 extents)
 {
 	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(2.5, 2.0,4.0), XMFLOAT4(0, 0, 0, 1));
 	
-	m_xmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents.x/2.5, extents.y / 4.5, extents.z / 2.5), XMFLOAT4(0, 0, 0, 1));
+	m_xmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents.x / 2.5f, extents.y / 2.0f, extents.z / 2.5f), XMFLOAT4(0, 0, 0, 1));
 	if (m_xmoobb.Intersects(m_pPlayer->m_xoobb))
 	{
 		m_bCollisionCheck = true;

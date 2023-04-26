@@ -16,7 +16,7 @@ CObjectsShader::~CObjectsShader()
 
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_nObjects = 19;
+	m_nObjects = 21;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 1500.0, 0.0f, _PLANE_HEIGHT + 1500.0, 0.0f, 0.0f, 0.0f);
@@ -111,28 +111,41 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[14] = m_ppNpcObjects[4];
 
 
-	CMaterial* pCityMaterial[4];
+	CMaterial* pCityMaterial[6];
 	pCityMaterial[0] = new CMaterial(1);
 	pCityMaterial[1] = new CMaterial(1);
 	pCityMaterial[2] = new CMaterial(1);
 	pCityMaterial[3] = new CMaterial(1);
+	pCityMaterial[4] = new CMaterial(1);
+	pCityMaterial[5] = new CMaterial(1);
+
 
 	pCityMaterial[0]->SetReflection(1);
 	pCityMaterial[1]->SetReflection(1);
 	pCityMaterial[2]->SetReflection(1);
 	pCityMaterial[3]->SetReflection(1);
-	int Cities = 4;
+	pCityMaterial[4]->SetReflection(1);
+	pCityMaterial[5]->SetReflection(1);
+
+	int Cities = 6;
 
 	m_ppCityGameObjects = new CGameObject * [Cities];
 	CStandardMesh* pMesh = new CStandardMesh(pd3dDevice, pd3dCommandList);
 	for (int i = 0; i < Cities; i++)
 	{
+		string filename{ "Model/Stage1_(" };
+		string num = to_string(i + 1);
+		filename += num;
+		filename += ").bin";
+		cout << filename << endl;
+		char* c_filename = const_cast<char*>(filename.c_str());
+
 		m_ppCityGameObjects[i] = new CCityObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1.bin", NULL);
+		CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, c_filename, NULL);
 		m_ppCityGameObjects[i]->SetChild(pGeneratorModel, false);
 		m_ppCityGameObjects[i]->SetMaterial(0, pCityMaterial[i]);
-		m_ppCityGameObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-		m_ppCityGameObjects[i]->SetScale(4.5, 6.5, 4.5);
+		m_ppCityGameObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
+		m_ppCityGameObjects[i]->SetScale(1.0f, 1.0f, 1.0f);
 		m_ppCityGameObjects[i]->OnPrepareAnimate();
 		pGeneratorModel->AddRef();
 	}
@@ -141,13 +154,15 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[16] = m_ppCityGameObjects[1];
 	m_ppObjects[17] = m_ppCityGameObjects[2];
 	m_ppObjects[18] = m_ppCityGameObjects[3];
+	m_ppObjects[19] = m_ppCityGameObjects[4];
+	m_ppObjects[20] = m_ppCityGameObjects[5];
 
-	m_ppObjects[15]->SetPosition(550.0, 22.0, -550.0);
-	m_ppObjects[16]->SetPosition(-550.0,22.0, 550.0);
-	m_ppObjects[17]->SetPosition(250.0, 22.0, -200.0);
-	m_ppObjects[18]->SetPosition(950.0, 22.0, 670.0);
-
-
+	m_ppObjects[15]->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[16]->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[17]->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[18]->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[19]->SetPosition(0.0f, 0.0f, 0.0f);
+	m_ppObjects[20]->SetPosition(0.0f, 0.0f, 0.0f);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

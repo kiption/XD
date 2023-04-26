@@ -196,6 +196,7 @@ public:
 	int m_10SecOftime;
 	int m_1SecOfTime;
 
+	int m_remainNPC;
 	queue<BulletPos> m_shoot_info;
 //==================================================
 
