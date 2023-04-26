@@ -708,7 +708,7 @@ void CGameFramework::AnimateObjects()
 	}
 	if (m_fResponCount > 7.0)
 	{
-		m_pPlayer->SetPosition(XMFLOAT3(85.0, 80.0, 360.0));
+		m_pPlayer->SetPosition(XMFLOAT3(-1000.f, 60.f, 500.f));
 		m_fResponCount = 0.0f;
 
 		m_pPlayer->SetMyRight(XMFLOAT3(1.0f, 0.0f, 0.0f));
