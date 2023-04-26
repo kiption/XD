@@ -1,4 +1,4 @@
-//-----------------------------------------------------------------------------
+ï»¿//-----------------------------------------------------------------------------
 // File: CGameFramework.cpp
 //-----------------------------------------------------------------------------
 
@@ -712,7 +712,7 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::CreateShaderVariables()
 {
-	UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
+	UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256ì˜ ë°°ìˆ˜
 	m_pd3dcbFrameworkInfo = ::CreateBufResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes,
 		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
 	m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
@@ -812,7 +812,7 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 	WaitForGpuComplete();
 
-	// -> DIRECT2D ERROR ¼ÛÃâ
+	// -> DIRECT2D ERROR ì†¡ì¶œ
 #ifdef _WITH_DIRECT2D
 	//Direct2D Drawing
 	m_pd2dDeviceContext->SetTarget(m_ppd2dRenderTargets[m_nSwapChainBufferIndex]);
@@ -832,14 +832,21 @@ void CGameFramework::FrameAdvance()
 
 	if (UI_Switch) {
 		if (m_nMode = SCENE1STAGE) {
+			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ UI 
 			D2D_POINT_2F d2dPoint = { 60.0f, 650.0f };
-			D2D_RECT_F d2dRect = { 0.0f, 0.0f, 190.0f, 45.0f };
+			D2D_RECT_F d2dRect = { 0.0f, 0.0f, 240.0f, 160.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[0] : m_pd2dfxGaussianBlur[0], &d2dPoint, &d2dRect);
 
-			D2D_POINT_2F d2BHPPoint = { 60.0f, 700.0f };
-			D2D_RECT_F d2BHPRect = { 0.0f , 0.0f, 190.0f, 45.0f };
+			// ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ NPC ï¿½ï¿½ï¿½ï¿½ UI
+			D2D_POINT_2F d2BHPPoint = { 1200.0f, 200.0f };
+			D2D_RECT_F d2BHPRect = { 26.0f * (m_remainNPC - 1) , 0.0f, 26.0f * m_remainNPC, 36.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2BHPPoint, &d2BHPRect);
 
+			/*D2D_POINT_2F d2BHPPoint = { 800.0f, 50.0f };
+			D2D_RECT_F d2BHPRect = { 0.0f , 0.0f, 190.0f, 45.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2BHPPoint, &d2BHPRect);*/
+
+			// Timer ï¿½ï¿½ï¿½ï¿½ UI 
 			D2D_POINT_2F d2T_M2Point = { 550.0f, 50.0f };
 			D2D_RECT_F d2T_M2Rect = { m_10MinOfTime * 40.0f , 0.0f, 40.0f + m_10MinOfTime * 40.0f, 50.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[2] : m_pd2dfxGaussianBlur[2], &d2T_M2Point, &d2T_M2Rect);
@@ -860,10 +867,13 @@ void CGameFramework::FrameAdvance()
 			D2D_RECT_F d2T_S1Rect = { m_1SecOfTime * 40.0f , 0.0f, 40.0f + m_1SecOfTime * 40.0f, 50.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[6] : m_pd2dfxGaussianBlur[6], &d2T_S1Point, &d2T_S1Rect);
 
+
+			// ï¿½Ñ¾ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ UI
 			D2D_POINT_2F d2d_BulletPoint = { 1000.0f, 700.0f };
 			D2D_RECT_F d2d_BulletRect = { 0.0f , 0.0f, 32.0f, 32.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[7] : m_pd2dfxGaussianBlur[7], &d2d_BulletPoint, &d2d_BulletRect);
 
+			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ UI 
 			D2D_POINT_2F d2_DirectionPoint = { 550.0f, -10.0f };
 			D2D_RECT_F d2_DirectionRect = { 0.0f , 0.0f, 180.0f, 90.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[8] : m_pd2dfxGaussianBlur[8], &d2_DirectionPoint, &d2_DirectionRect);
@@ -1017,11 +1027,11 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(0.3f, 0.0f, 0.0f, 0.5f), &m_pd2dbrBackground);
 	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF(0x9ACD32, 1.0f)), &m_pd2dbrBorder);
 
-	hResult = m_pdWriteFactory->CreateTextFormat(L"ÅØ½ºÆ® ·¹ÀÌ¾Æ¿ô", NULL, DWRITE_FONT_WEIGHT_DEMI_BOLD, DWRITE_FONT_STYLE_OBLIQUE, DWRITE_FONT_STRETCH_NORMAL, 24.0f, L"ko-kr", &m_pdwFont);
+	hResult = m_pdWriteFactory->CreateTextFormat(L"í…ìŠ¤íŠ¸ ë ˆì´ì•„ì›ƒ", NULL, DWRITE_FONT_WEIGHT_DEMI_BOLD, DWRITE_FONT_STYLE_OBLIQUE, DWRITE_FONT_STRETCH_NORMAL, 24.0f, L"ko-kr", &m_pdwFont);
 	hResult = m_pdwFont->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	hResult = m_pdwFont->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::DarkBlue, 0.8f), &m_pd2dbrText);
-	hResult = m_pdWriteFactory->CreateTextLayout(L"ÅØ½ºÆ® ·¹ÀÌ¾Æ¿ô", 6, m_pdwFont, 1024, 1024, &m_pdwTextLayout);
+	hResult = m_pdWriteFactory->CreateTextLayout(L"í…ìŠ¤íŠ¸ ë ˆì´ì•„ì›ƒ", 6, m_pdwFont, 1024, 1024, &m_pdwTextLayout);
 
 	float fDpi = (float)GetDpiForWindow(m_hWnd);
 	D2D1_BITMAP_PROPERTIES1 d2dBitmapProperties = D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW, D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED), fDpi, fDpi);
@@ -1049,8 +1059,7 @@ void CGameFramework::CreateDirect2DDevice()
 	}
 
 	IWICBitmapDecoder* pwicBitmapDecoder;
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/green_button05.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-	IWICBitmapFrameDecode* pwicFrameDecode;
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/heilcopter.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);	IWICBitmapFrameDecode* pwicFrameDecode;
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -1067,8 +1076,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/yellow_button05.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/Numbering.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
 	m_pd2dfxBitmapSource[1]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
@@ -1212,7 +1220,7 @@ void CGameFramework::CreateDirect2DDevice()
 
 
 //==================================================
-//			  ¼­¹ö Åë½Å¿¡ ÇÊ¿äÇÑ ÇÔ¼öµé
+//			  ì„œë²„ í†µì‹ ì— í•„ìš”í•œ í•¨ìˆ˜ë“¤
 //==================================================
 bool CGameFramework::checkNewInput_Keyboard()
 {
@@ -1272,7 +1280,7 @@ XMFLOAT3 CGameFramework::getMyLookVec()
 void CGameFramework::setPosition_OtherPlayer(int id, XMFLOAT3 pos)
 {
 
-	if (id < 0 || id > 5) return;	// ¹è¿­ ¹üÀ§ ¹ş¾î³ª´Â °Å ¹æÁö
+	if (id < 0 || id > 5) return;	// ë°°ì—´ ë²”ìœ„ ë²—ì–´ë‚˜ëŠ” ê±° ë°©ì§€
 	if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])
 	{
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._41 = pos.x;
@@ -1285,7 +1293,7 @@ void CGameFramework::setPosition_OtherPlayer(int id, XMFLOAT3 pos)
 void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
 
-	if (id < 0 || id > 5) return;	// ¹è¿­ ¹üÀ§ ¹ş¾î³ª´Â °Å ¹æÁö
+	if (id < 0 || id > 5) return;	// ë°°ì—´ ë²”ìœ„ ë²—ì–´ë‚˜ëŠ” ê±° ë°©ì§€
 
 	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
 	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
@@ -1298,7 +1306,7 @@ void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 
 void CGameFramework::remove_OtherPlayer(int id)
 {
 
-	if (id < 0 || id > 5) return;	// ¹è¿­ ¹üÀ§ ¹ş¾î³ª´Â °Å ¹æÁö	
+	if (id < 0 || id > 5) return;	// ë°°ì—´ ë²”ìœ„ ë²—ì–´ë‚˜ëŠ” ê±° ë°©ì§€	
 	if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
 	}
@@ -1332,7 +1340,7 @@ void CGameFramework::CollisionObjectbyPlayer(XMFLOAT3 pos, XMFLOAT3 extents)
 {
 	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(2.5, 2.0,4.0), XMFLOAT4(0, 0, 0, 1));
 	
-	m_xmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents.x/2.5, extents.y / 2.5, extents.z / 2.5), XMFLOAT4(0, 0, 0, 1));
+	m_xmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents.x / 2.5f, extents.y / 2.0f, extents.z / 2.5f), XMFLOAT4(0, 0, 0, 1));
 	if (m_xmoobb.Intersects(m_pPlayer->m_xoobb))
 	{
 		m_bCollisionCheck = true;
