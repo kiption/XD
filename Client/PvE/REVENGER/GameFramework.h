@@ -231,7 +231,12 @@ public:
 	float m_pPlayerRotate_x = 0.0f;
 //==================================================
 	// 서버에서 받은 Bound 값과의 충돌설정 함수입니다.
-	void CollisionObjectbyPlayer(XMFLOAT3 pos, XMFLOAT3 extents);
+	//player - map
+	void CollisionMap_by_Player(XMFLOAT3 mappos, XMFLOAT3 mapextents);
+	//npc - player
+	void CollisionNPC_by_PLAYER(XMFLOAT3 npcpos, XMFLOAT3 npcextents);
+	void CollisionNPC_by_MAP(XMFLOAT3 npcpos, XMFLOAT3 npcextents, XMFLOAT3 mapcenter, XMFLOAT3 mapextents);
+	void CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents,XMFLOAT3 bulletpos, XMFLOAT3 bulletextents);
 	void CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents);
 	BoundingOrientedBox m_xmoobb;
 	BoundingOrientedBox m_worldmoobb;
@@ -239,3 +244,7 @@ public:
 	float m_fResponCount = 0.0;
 };
 
+
+
+//npc - map
+//npc - bullet

@@ -322,7 +322,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					/*cout << "Map Obj - Pos: " << mapobj.m_pos.x << ", " << mapobj.m_pos.y << ", " << mapobj.m_pos.z
 						<< " Scale: " << mapobj.m_scale.x << ", " << mapobj.m_scale.y << ", " << mapobj.m_scale.z << "." << endl;*/
 					
-					gGameFramework.CollisionObjectbyPlayer(XMFLOAT3(mapobj.m_xoobb.Center), XMFLOAT3(mapobj.m_xoobb.Extents));
+					gGameFramework.CollisionMap_by_Player(XMFLOAT3(mapobj.m_xoobb.Center), XMFLOAT3(mapobj.m_xoobb.Extents));
 					
 				}
 				//gGameFramework.CollisionEndWorldObject(XMFLOAT3(300.0, 150.0, 50.0), XMFLOAT3(800.0, 110.0, 800.0));

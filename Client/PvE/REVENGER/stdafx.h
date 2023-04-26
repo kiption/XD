@@ -27,6 +27,8 @@ using namespace std;
 
 #include <d3d12.h>
 #include <dxgi1_4.h>
+#include <dxgi1_6.h>
+#include <d3d12shader.h>
 #include <D3Dcompiler.h>
 #include <DirectXMath.h>
 #include <DirectXPackedVector.h>
@@ -34,6 +36,8 @@ using namespace std;
 #include <DirectXCollision.h>
 #include <DirectXMath.h>
 #include <Mmsystem.h>
+
+
 
 
 #ifdef _DEBUG
@@ -67,6 +71,8 @@ using namespace std;
 #pragma comment(lib, "windowscodecs.lib")
 #pragma comment(lib, "Winmm.lib")
 #pragma comment(lib, "mfplay.lib")
+
+
 #ifdef _DEBUG
 #include <dxgidebug.h>
 #endif

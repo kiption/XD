@@ -19,7 +19,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_nObjects = 21;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
-	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 1500.0, 0.0f, _PLANE_HEIGHT + 1500.0, 0.0f, 0.0f, 0.0f);
+	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
 	CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 300.0f, 300.0f, 300.0f);
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
@@ -28,7 +28,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[0] = new CGameObject(1);
 	m_ppObjects[0]->SetMesh(pPlaneMesh);
 	m_ppObjects[0]->SetMaterial(0,pPlaneMaterial);
-	m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 0.0, 100.0f));
+	m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 5.0, 100.0f));
 
 	//XMFLOAT3 xmf3Scale(10.0f, 0.2, 10.0f);
 	//XMFLOAT3 xmf3Normal(0.0f, 0.0f, 0.0f);

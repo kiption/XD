@@ -1336,10 +1336,9 @@ void CGameFramework::remove_Npcs(int id)
 }
 
 
-void CGameFramework::CollisionObjectbyPlayer(XMFLOAT3 pos, XMFLOAT3 extents)
+void CGameFramework::CollisionMap_by_Player(XMFLOAT3 pos, XMFLOAT3 extents)
 {
 	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(2.5, 2.0,4.0), XMFLOAT4(0, 0, 0, 1));
-	
 	m_xmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents.x / 2.5f, extents.y / 2.0f, extents.z / 2.5f), XMFLOAT4(0, 0, 0, 1));
 	if (m_xmoobb.Intersects(m_pPlayer->m_xoobb))
 	{
@@ -1348,6 +1347,18 @@ void CGameFramework::CollisionObjectbyPlayer(XMFLOAT3 pos, XMFLOAT3 extents)
 	}
 	
 
+}
+
+void CGameFramework::CollisionNPC_by_PLAYER(XMFLOAT3 pos, XMFLOAT3 extents)
+{
+}
+
+void CGameFramework::CollisionNPC_by_MAP(XMFLOAT3 npcpos, XMFLOAT3 npcextents, XMFLOAT3 mapcenter, XMFLOAT3 mapextents)
+{
+}
+
+void CGameFramework::CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents, XMFLOAT3 bulletpos, XMFLOAT3 bulletextents)
+{
 }
 
 void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
@@ -1363,4 +1374,6 @@ void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
 		m_bCollisionCheck = true;
 	
 	}
+
+
 }
