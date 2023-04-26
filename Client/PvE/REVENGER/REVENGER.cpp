@@ -289,7 +289,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				gGameFramework.m_10SecOftime = (servertime_sec - gGameFramework.m_1MinOfTime * 60) / 10;
 				gGameFramework.m_1SecOfTime = servertime_sec % 10;
 
-
+				// 4. NPC 객체 수 동기화
+				gGameFramework.m_remainNPC = left_npc;
 				//==================================================
 				//					충돌 이펙트 관련
 				//==================================================
@@ -324,7 +325,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					gGameFramework.CollisionObjectbyPlayer(XMFLOAT3(mapobj.m_xoobb.Center), XMFLOAT3(mapobj.m_xoobb.Extents));
 					
 				}
-				gGameFramework.CollisionEndWorldObject(XMFLOAT3(300.0, 150.0, 50.0), XMFLOAT3(800.0, 110.0, 800.0));
+				//gGameFramework.CollisionEndWorldObject(XMFLOAT3(300.0, 150.0, 50.0), XMFLOAT3(800.0, 110.0, 800.0));
 				//==================================================
 			}
 			gGameFramework.FrameAdvance();
