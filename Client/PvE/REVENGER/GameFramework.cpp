@@ -513,6 +513,9 @@ void CGameFramework::ReleaseObjects()
 
 void CGameFramework::ProcessInput()
 {
+	cout << "키 눌림 전 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+	cout << "키 눌림 전 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
+	
 	static UCHAR pKeysBuffer[256];
 	bool bProcessedByScene = false;
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
@@ -570,10 +573,20 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[VK_UP] & 0xF0) {
 			dwDirection |= DIR_FORWARD;
 			q_keyboardInput.push(SEND_KEY_UP);//S
+
+			if (((HeliPlayer*)m_pPlayer)->m_fPitch < 15.0f) {
+				((HeliPlayer*)m_pPlayer)->Rotate(0.2f, 0.0f, 0.0f);
+				cout << "키 눌림 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+			}
+
 		}
 		if (pKeysBuffer[VK_DOWN] & 0xF0) {
 			dwDirection |= DIR_BACKWARD;
 			q_keyboardInput.push(SEND_KEY_DOWN);//S
+			if (((HeliPlayer*)m_pPlayer)->m_fPitch > -15.0f) {
+				((HeliPlayer*)m_pPlayer)->Rotate(-0.2f, 0.0f, 0.0f);
+				cout << "키 눌림 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+			}
 		}
 		if (pKeysBuffer[VK_LEFT] & 0xF0) {
 			dwDirection |= DIR_LEFT;
@@ -584,6 +597,11 @@ void CGameFramework::ProcessInput()
 				m_pPlayerRotate_z += 0.02f;
 				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, m_pPlayerRotate_z);
 			}*/
+
+			if (abs(((HeliPlayer*)m_pPlayer)->m_fRoll) < 45.0f) {
+				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, 0.2f);
+				cout << "키 눌림 후 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
+			}
 		}
 		if (pKeysBuffer[VK_RIGHT] & 0xF0) {
 			dwDirection |= DIR_RIGHT;
@@ -592,8 +610,12 @@ void CGameFramework::ProcessInput()
 			{
 				m_pPlayerRotate_z -= 0.02f;
 				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, m_pPlayerRotate_z);
-			}*/
-		
+			}
+			*/
+			if (abs(((HeliPlayer*)m_pPlayer)->m_fRoll) < 45.0f) {
+				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, -0.2f);
+				cout << "키 눌림 후 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
+			}
 			
 		}
 
@@ -613,7 +635,7 @@ void CGameFramework::ProcessInput()
 
 		float cxDelta = 0.0f, cyDelta = 0.0f, czDelta = 0.0f;
 		POINT ptCursorPos;
-		if (GetCapture() == m_hWnd)
+		/*if (GetCapture() == m_hWnd)
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
@@ -621,7 +643,7 @@ void CGameFramework::ProcessInput()
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 2.0f;
 			czDelta = ((float)(ptCursorPos.y - m_ptOldCursorPos.y) + (float)(ptCursorPos.x - m_ptOldCursorPos.x)) / 3.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-		}
+		}*/
 
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
