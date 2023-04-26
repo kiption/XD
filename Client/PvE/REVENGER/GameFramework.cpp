@@ -574,19 +574,19 @@ void CGameFramework::ProcessInput()
 			dwDirection |= DIR_FORWARD;
 			q_keyboardInput.push(SEND_KEY_UP);//S
 
-			if (((HeliPlayer*)m_pPlayer)->m_fPitch < 15.0f) {
-				((HeliPlayer*)m_pPlayer)->Rotate(0.5f, 0.0f, 0.0f);
-				//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
-			}
+			//if (((HeliPlayer*)m_pPlayer)->m_fPitch < 15.0f) {
+			//	((HeliPlayer*)m_pPlayer)->Rotate(0.5f, 0.0f, 0.0f);
+			//	//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+			//}
 
 		}
 		if (pKeysBuffer[VK_DOWN] & 0xF0) {
 			dwDirection |= DIR_BACKWARD;
 			q_keyboardInput.push(SEND_KEY_DOWN);//S
-			if (((HeliPlayer*)m_pPlayer)->m_fPitch > -15.0f) {
-				((HeliPlayer*)m_pPlayer)->Rotate(-0.5f, 0.0f, 0.0f);
-				//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
-			}
+			//if (((HeliPlayer*)m_pPlayer)->m_fPitch > -15.0f) {
+			//	((HeliPlayer*)m_pPlayer)->Rotate(-0.5f, 0.0f, 0.0f);
+			//	//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+			//}
 		}
 		if (pKeysBuffer[VK_LEFT] & 0xF0) {
 			dwDirection |= DIR_LEFT;
@@ -598,10 +598,10 @@ void CGameFramework::ProcessInput()
 				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, m_pPlayerRotate_z);
 			}*/
 
-			if (((HeliPlayer*)m_pPlayer)->m_fRoll < 25.0f) {
-				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, 0.7f);
-				//cout << "누르기 후 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
-			}
+			//if (((HeliPlayer*)m_pPlayer)->m_fRoll < 25.0f) {
+			//	((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, 0.7f);
+			//	//cout << "누르기 후 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
+			//}
 		}
 		if (pKeysBuffer[VK_RIGHT] & 0xF0) {
 			dwDirection |= DIR_RIGHT;
@@ -612,10 +612,10 @@ void CGameFramework::ProcessInput()
 				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, m_pPlayerRotate_z);
 			}
 			*/
-			if (((HeliPlayer*)m_pPlayer)->m_fRoll > -25.0f) {
-				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, -0.7f);
-				//cout << "누르기 후 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
-			}
+			//if (((HeliPlayer*)m_pPlayer)->m_fRoll > -25.0f) {
+			//	((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, -0.7f);
+			//	//cout << "누르기 후 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
+			//}
 
 		}
 
