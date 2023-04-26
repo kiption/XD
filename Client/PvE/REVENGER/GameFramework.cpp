@@ -575,7 +575,7 @@ void CGameFramework::ProcessInput()
 			q_keyboardInput.push(SEND_KEY_UP);//S
 
 			if (((HeliPlayer*)m_pPlayer)->m_fPitch < 15.0f) {
-				((HeliPlayer*)m_pPlayer)->Rotate(0.2f, 0.0f, 0.0f);
+				((HeliPlayer*)m_pPlayer)->Rotate(0.5f, 0.0f, 0.0f);
 				//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
 			}
 
@@ -584,7 +584,7 @@ void CGameFramework::ProcessInput()
 			dwDirection |= DIR_BACKWARD;
 			q_keyboardInput.push(SEND_KEY_DOWN);//S
 			if (((HeliPlayer*)m_pPlayer)->m_fPitch > -15.0f) {
-				((HeliPlayer*)m_pPlayer)->Rotate(-0.2f, 0.0f, 0.0f);
+				((HeliPlayer*)m_pPlayer)->Rotate(-0.5f, 0.0f, 0.0f);
 				//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
 			}
 		}
@@ -598,8 +598,8 @@ void CGameFramework::ProcessInput()
 				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, m_pPlayerRotate_z);
 			}*/
 
-			if (((HeliPlayer*)m_pPlayer)->m_fRoll < 35.0f) {
-				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, 0.2f);
+			if (((HeliPlayer*)m_pPlayer)->m_fRoll < 25.0f) {
+				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, 0.7f);
 				//cout << "누르기 후 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
 			}
 		}
@@ -612,8 +612,8 @@ void CGameFramework::ProcessInput()
 				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, m_pPlayerRotate_z);
 			}
 			*/
-			if (((HeliPlayer*)m_pPlayer)->m_fRoll > -35.0f) {
-				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, -0.2f);
+			if (((HeliPlayer*)m_pPlayer)->m_fRoll > -25.0f) {
+				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, -0.7f);
 				//cout << "누르기 후 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
 			}
 
@@ -710,6 +710,15 @@ void CGameFramework::AnimateObjects()
 	{
 		m_pPlayer->SetPosition(XMFLOAT3(85.0, 80.0, 360.0));
 		m_fResponCount = 0.0f;
+
+		m_pPlayer->SetMyRight(XMFLOAT3(1.0f, 0.0f, 0.0f));
+		m_pPlayer->SetMyUp(XMFLOAT3(0.0f, 1.0f, 0.0f));
+		m_pPlayer->SetMyLook(XMFLOAT3(0.0f, 0.0f, 1.0f));
+
+		m_pPlayer->m_fPitch = 0.0f;
+		m_pPlayer->m_fYaw = 0.0f;
+		m_pPlayer->m_fRoll = 0.0f;
+
 		m_bCollisionCheck = false;
 		m_pCamera=m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
 	}
@@ -907,7 +916,11 @@ void CGameFramework::FrameAdvance()
 
 			// 방향 관련 UI 
 			D2D_POINT_2F d2_DirectionPoint = { 550.0f, -10.0f };
-			D2D_RECT_F d2_DirectionRect = { 0.0f , 0.0f, 180.0f, 90.0f };
+			float myAngle = abs(m_pPlayer->m_fYaw);
+			if (myAngle > 315.0f) {
+				myAngle -= 360.0f;
+			}
+			D2D_RECT_F d2_DirectionRect = { 45.0f + myAngle , 0.0f, 225.0f + myAngle, 90.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[8] : m_pd2dfxGaussianBlur[8], &d2_DirectionPoint, &d2_DirectionRect);
 		}
 	}
