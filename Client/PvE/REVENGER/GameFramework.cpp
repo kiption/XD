@@ -513,8 +513,8 @@ void CGameFramework::ReleaseObjects()
 
 void CGameFramework::ProcessInput()
 {
-	cout << "Å° ´­¸² Àü Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
-	cout << "Å° ´­¸² Àü Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
+	/*cout << "ëˆ„ë¥´ê¸° ì „ Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+	cout << "ëˆ„ë¥´ê¸° ì „ Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;*/
 	
 	static UCHAR pKeysBuffer[256];
 	bool bProcessedByScene = false;
@@ -576,7 +576,7 @@ void CGameFramework::ProcessInput()
 
 			if (((HeliPlayer*)m_pPlayer)->m_fPitch < 15.0f) {
 				((HeliPlayer*)m_pPlayer)->Rotate(0.2f, 0.0f, 0.0f);
-				cout << "Å° ´­¸² ÈÄ Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+				//cout << "ëˆ„ë¥´ê¸° í›„ Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
 			}
 
 		}
@@ -585,7 +585,7 @@ void CGameFramework::ProcessInput()
 			q_keyboardInput.push(SEND_KEY_DOWN);//S
 			if (((HeliPlayer*)m_pPlayer)->m_fPitch > -15.0f) {
 				((HeliPlayer*)m_pPlayer)->Rotate(-0.2f, 0.0f, 0.0f);
-				cout << "Å° ´­¸² ÈÄ Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+				//cout << "ëˆ„ë¥´ê¸° í›„ Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
 			}
 		}
 		if (pKeysBuffer[VK_LEFT] & 0xF0) {
@@ -598,9 +598,9 @@ void CGameFramework::ProcessInput()
 				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, m_pPlayerRotate_z);
 			}*/
 
-			if (abs(((HeliPlayer*)m_pPlayer)->m_fRoll) < 45.0f) {
+			if (((HeliPlayer*)m_pPlayer)->m_fRoll < 35.0f) {
 				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, 0.2f);
-				cout << "Å° ´­¸² ÈÄ Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
+				//cout << "ëˆ„ë¥´ê¸° í›„ Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
 			}
 		}
 		if (pKeysBuffer[VK_RIGHT] & 0xF0) {
@@ -612,9 +612,9 @@ void CGameFramework::ProcessInput()
 				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, m_pPlayerRotate_z);
 			}
 			*/
-			if (abs(((HeliPlayer*)m_pPlayer)->m_fRoll) < 45.0f) {
+			if (((HeliPlayer*)m_pPlayer)->m_fRoll > -35.0f) {
 				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, -0.2f);
-				cout << "Å° ´­¸² ÈÄ Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
+				//cout << "ëˆ„ë¥´ê¸° í›„ Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
 			}
 			
 		}
@@ -854,12 +854,12 @@ void CGameFramework::FrameAdvance()
 
 	if (UI_Switch) {
 		if (m_nMode = SCENE1STAGE) {
-			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ UI 
+			// ë‚´êµ¬ë„ ê´€ë ¨ UI 
 			D2D_POINT_2F d2dPoint = { 60.0f, 650.0f };
 			D2D_RECT_F d2dRect = { 0.0f, 0.0f, 240.0f, 160.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[0] : m_pd2dfxGaussianBlur[0], &d2dPoint, &d2dRect);
 
-			// ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ NPC ï¿½ï¿½ï¿½ï¿½ UI
+			// ë‚¨ì•„ìžˆëŠ” NPC ìˆ˜ ê´€ë ¨ UI
 			D2D_POINT_2F d2BHPPoint = { 1200.0f, 200.0f };
 			D2D_RECT_F d2BHPRect = { 26.0f * (m_remainNPC - 1) , 0.0f, 26.0f * m_remainNPC, 36.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2BHPPoint, &d2BHPRect);
@@ -868,7 +868,7 @@ void CGameFramework::FrameAdvance()
 			D2D_RECT_F d2BHPRect = { 0.0f , 0.0f, 190.0f, 45.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2BHPPoint, &d2BHPRect);*/
 
-			// Timer ï¿½ï¿½ï¿½ï¿½ UI 
+			// Timer ê´€ë ¨ UI 
 			D2D_POINT_2F d2T_M2Point = { 550.0f, 50.0f };
 			D2D_RECT_F d2T_M2Rect = { m_10MinOfTime * 40.0f , 0.0f, 40.0f + m_10MinOfTime * 40.0f, 50.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[2] : m_pd2dfxGaussianBlur[2], &d2T_M2Point, &d2T_M2Rect);
@@ -890,12 +890,12 @@ void CGameFramework::FrameAdvance()
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[6] : m_pd2dfxGaussianBlur[6], &d2T_S1Point, &d2T_S1Rect);
 
 
-			// ï¿½Ñ¾ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ UI
+			// ì´ì•Œ ê°¯ìˆ˜ ê´€ë ¨ UI
 			D2D_POINT_2F d2d_BulletPoint = { 1000.0f, 700.0f };
 			D2D_RECT_F d2d_BulletRect = { 0.0f , 0.0f, 32.0f, 32.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[7] : m_pd2dfxGaussianBlur[7], &d2d_BulletPoint, &d2d_BulletRect);
 
-			// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ UI 
+			// ë°©í–¥ ê´€ë ¨ UI 
 			D2D_POINT_2F d2_DirectionPoint = { 550.0f, -10.0f };
 			D2D_RECT_F d2_DirectionRect = { 0.0f , 0.0f, 180.0f, 90.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[8] : m_pd2dfxGaussianBlur[8], &d2_DirectionPoint, &d2_DirectionRect);
