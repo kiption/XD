@@ -626,7 +626,7 @@ void process_packet(int client_id, char* packet)
 		if (!b_active_server) break;
 		CS_MOVE_PACKET* cl_move_packet = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 		// 1. 충돌체크를 한다.
-
+		
 		// 2. 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
 
 		// 3. 그게 아니라면 세션 정보를 업데이트 한다.
@@ -649,7 +649,7 @@ void process_packet(int client_id, char* packet)
 		if (!b_active_server) break;
 		CS_ROTATE_PACKET* cl_rotate_packet = reinterpret_cast<CS_ROTATE_PACKET*>(packet);
 		// 1. 충돌체크를 한다.
-
+		
 		// 2. 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
 
 		// 3. 그게 아니라면 세션 정보를 업데이트 한다.
@@ -657,6 +657,7 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].m_rightvec = { cl_rotate_packet->right_x, cl_rotate_packet->right_y, cl_rotate_packet->right_z };
 		clients[client_id].m_upvec = { cl_rotate_packet->up_x, cl_rotate_packet->up_y, cl_rotate_packet->up_z };
 		clients[client_id].m_lookvec = { cl_rotate_packet->look_x, cl_rotate_packet->look_y, cl_rotate_packet->look_z };
+		cout << "\n";
 		clients[client_id].s_lock.unlock();
 
 		// 4. 다른 클라이언트에게 플레이어가 회전한 방향을 알려준다.
