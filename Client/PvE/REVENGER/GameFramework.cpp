@@ -1019,6 +1019,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 			m_pCamera = m_pPlayer->GetCamera();
 			m_pScene->SetCurScene(SCENE1STAGE);
+			gamesound.SpeakMusic();
 			break;
 		}
 		case SCENE2STAGE:
