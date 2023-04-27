@@ -89,7 +89,7 @@ public:
 	void ChangeScene(DWORD nMode);
 	DWORD						m_nMode = OPENINGSCENE;
 	GameSound gamesound;
-	int m_NumOfUI = 10;
+	int m_NumOfUI = 14;
 	bool UI_Switch = false;
 protected:
 	ID3D12Resource* m_pd3dcbFrameworkInfo = NULL;
@@ -119,9 +119,9 @@ protected:
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
-	ID2D1Effect* m_pd2dfxBitmapSource[10];
-	ID2D1Effect* m_pd2dfxGaussianBlur[10];
-	ID2D1Effect* m_pd2dfxEdgeDetection[10];
+	ID2D1Effect* m_pd2dfxBitmapSource[14];
+	ID2D1Effect* m_pd2dfxGaussianBlur[14];
+	ID2D1Effect* m_pd2dfxEdgeDetection[14];
 	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState = NULL;
 	IWICFormatConverter* m_pwicFormatConverter = NULL;
 	int							m_nDrawEffectImage = 0;
@@ -197,6 +197,8 @@ public:
 	int m_1SecOfTime;
 
 	int m_remainNPC;
+
+	int m_occupationnum;
 	queue<BulletPos> m_shoot_info;
 //==================================================
 
