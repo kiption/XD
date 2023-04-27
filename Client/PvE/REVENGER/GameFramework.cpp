@@ -703,12 +703,12 @@ void CGameFramework::AnimateObjects()
 		m_pCamera->GetPosition().y -= 2.0f;
 		m_pPlayer->Rotate(0.0, 1.5, 1.5);
 		m_pCamera = m_pPlayer->ChangeCamera(SPACESHIP_CAMERA, m_GameTimer.GetTimeElapsed());
-		m_fResponCount += 0.1f;
+		m_fResponCount += 0.2f;
 		m_pPlayerRotate_z = 0.0;
 	}
 	if (m_fResponCount > 7.0)
 	{
-		m_pPlayer->SetPosition(XMFLOAT3(-1000.f, 60.f, 500.f));
+		m_pPlayer->SetPosition(XMFLOAT3(140.0, 20.0, -270.0));
 		m_fResponCount = 0.0f;
 
 		m_pPlayer->SetMyRight(XMFLOAT3(1.0f, 0.0f, 0.0f));
