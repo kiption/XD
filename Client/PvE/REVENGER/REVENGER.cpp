@@ -329,11 +329,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						}
 						else {
 							// id번째 Player 사망 연출 후 객체 삭제(또는 안보이는 곳에 숨겨두기)
-
+						
 						}
 						break;
 					case D_OBJ_NPC:
 						// id번째 Npc 사망 연출 후 객체 삭제(또는 안보이는 곳에 숨겨두기)
+						((Stage1*)gGameFramework.m_pScene)->m_ppShaders[0]->m_ppObjects[10 + new_deadobj.obj_id]->m_xmf4x4ToParent._42 = 0.0f;
 
 						break;
 					}

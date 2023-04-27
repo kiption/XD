@@ -442,7 +442,7 @@ void ResponeEffectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		pResponObject[j] = new CResponeObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		pResponObject[j]->SetMesh(pSpriteMesh);
 		pResponObject[j]->SetMaterial(0, pSpriteMaterial);
-		pResponObject[j]->SetPosition(XMFLOAT3(RandomBillboardPositionInSphere(XMFLOAT3(50.0,20.0,350.0), 60, 8, 8)));
+		pResponObject[j]->SetPosition(XMFLOAT3(RandomBillboardPositionInSphere(XMFLOAT3(140.0,20.0,-270.0), 60, 8, 8)));
 		//pResponObject[j]->SetPosition(XMFLOAT3(50.0,60.0,350.0));
 		m_ppObjects[j] = pResponObject[j];
 	}

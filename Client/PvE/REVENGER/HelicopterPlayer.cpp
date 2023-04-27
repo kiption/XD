@@ -38,7 +38,7 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-	SetPosition(XMFLOAT3(-1000.f, 60.f, 500.f));
+	SetPosition(XMFLOAT3(140.f, 60.f, -270.f));
 	m_xoobb = BoundingOrientedBox(XMFLOAT3(this->GetPosition()), XMFLOAT3(15.0, 13.0, 20.0), XMFLOAT4(0, 0, 0, 1));
 }
 
