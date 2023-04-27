@@ -38,6 +38,8 @@ private:
 	XMFLOAT3 m_Pos;
 	Coordinate m_curr_coordinate;				// ÇöÀç Look, Right, Up Vectors
 
+	int m_hp;
+
 	XMFLOAT3 m_User_Pos[5];
 	int m_state;
 
@@ -69,6 +71,7 @@ public:
 	// ===========================================
 	// =============       SET      ==============
 	// ===========================================
+	void SetHp(int hp);
 	void SetID(int id);
 	void SetNpcType(int type);
 	void SetChaseID(int id);
@@ -86,6 +89,7 @@ public:
 	// ===========================================
 	// =============       GET      ==============
 	// ===========================================
+	int GetHp();
 	int GetID();
 	int GetChaseID();
 	int GetType();

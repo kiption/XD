@@ -336,13 +336,49 @@ void processPacket(char* ptr)
 		}
 		// NPC Damaged
 		else if (recv_packet->target == TARGET_NPC) {
+			gamesound.collisionSound();
 			npcs_info[recv_packet->id].m_damaged_effect_on = true;
 			npcs_info[recv_packet->id].m_hp -= recv_packet->damage;
 			if (npcs_info[recv_packet->id].m_hp < 0) npcs_info[recv_packet->id].m_hp = 0;
 		}
 
 		break;
-	}//SC_HP_COUNT case end
+	}//SC_DAMAGED case end
+	case SC_DEATH:
+	{
+
+		SC_DAMAGED_PACKET* recv_packet = reinterpret_cast<SC_DAMAGED_PACKET*>(ptr);
+
+		// Player Death
+		if (recv_packet->target == TARGET_PLAYER) {
+			gamesound.collisionSound();
+			if (recv_packet->id == my_id) {
+				my_info.m_damaged_effect_on = true;
+				my_info.m_hp = 0;
+				
+				DeathInfo deadobj{ D_OBJ_PLAYER, recv_packet->id };
+				new_death_objs.push(deadobj);
+			}
+			else {
+				other_players[recv_packet->id].m_damaged_effect_on = true;
+				other_players[recv_packet->id].m_hp = 0;
+
+				DeathInfo deadobj{ D_OBJ_PLAYER, recv_packet->id };
+				new_death_objs.push(deadobj);
+			}
+		}
+		// NPC Death
+		else if (recv_packet->target == TARGET_NPC) {
+			gamesound.collisionSound();
+			npcs_info[recv_packet->id].m_damaged_effect_on = true;
+			npcs_info[recv_packet->id].m_hp = 0;
+
+			DeathInfo deadobj{ D_OBJ_NPC, recv_packet->id };
+			new_death_objs.push(deadobj);
+		}
+
+		break;
+	}//SC_DEATH case end
 	case SC_BULLET_COUNT:
 	{
 		SC_BULLET_COUNT_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COUNT_PACKET*>(ptr);

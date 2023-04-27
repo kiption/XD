@@ -642,7 +642,6 @@ void process_packet(int client_id, char* packet)
 		if (!b_active_server) break;
 		CS_MOVE_PACKET* cl_move_packet = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 		// 1. 충돌체크를 한다. -> 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
-		/*
 		bool b_isCollide = false;
 		// 1) 맵 오브젝트
 		for (auto& building : buildings_info) {
@@ -674,8 +673,37 @@ void process_packet(int client_id, char* packet)
 				b_isCollide = true;
 			}
 		}
-		if (b_isCollide) break;
-		*/
+		// 3) NPC
+		for (auto& npc : npcs) {
+			if (npc.GetHp() <= 0) continue;
+			BoundingOrientedBox tmp_xoobb;
+			tmp_xoobb = BoundingOrientedBox(XMFLOAT3(npc.GetPosition().x, npc.GetPosition().y, npc.GetPosition().z),
+											XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+
+			if (clients[client_id].m_xoobb.Intersects(tmp_xoobb)) {
+				npc.SetHp(npc.GetHp() - COLLIDE_PLAYER_DAMAGE);
+				cout << "NPC[" << npc.GetID() << "] HP: " << npc.GetHp() << endl;
+				// NPC 사망
+				if (npc.GetHp() <= 0) {
+					npc.SetHp(0);
+					SC_DEATH_PACKET npc_death_pack;
+					npc_death_pack.type = SC_DEATH;
+					npc_death_pack.size = sizeof(SC_DEATH_PACKET);
+					npc_death_pack.target = TARGET_NPC;
+					npc_death_pack.id = npc.GetID();
+					cout << "NPC[" << npc_death_pack.id << "] DEATH" << endl;
+					for (auto& cl : clients) {
+						if (cl.s_state != ST_INGAME) continue;
+
+						lock_guard<mutex> lg{ cl.s_lock };
+						cl.do_send(&npc_death_pack);
+					}
+				}
+				// NPC 피해는 클라로 보내줄 필요가 없음. 기획이 바껴서 npc hp도 UI연동을 해야한다면 여기에 else로 이어가면 됨.
+			}
+		}
+		//if (b_isCollide) break;
+
 		// 2. 충돌이 아니라면 세션 정보를 업데이트 한다.
 		clients[client_id].s_lock.lock();
 		clients[client_id].pos = { cl_move_packet->x, cl_move_packet->y, cl_move_packet->z };

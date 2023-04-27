@@ -33,6 +33,7 @@ float Calculation_Distance(XMFLOAT3 vec, vector<City_Info>const& v, int c_id, in
 
 ST1_NPC::ST1_NPC()
 {
+	m_hp = 100;
 	m_curr_coordinate.right = { 1.0f, 0.0f, 0.0f };
 	m_curr_coordinate.up = { 0.0f, 1.0f, 0.0f };
 	m_curr_coordinate.look = { 0.0f, 0.0f, 1.0f };
@@ -63,6 +64,10 @@ ST1_NPC::~ST1_NPC()
 // ===========================================
 // =============       SET      ==============
 // ===========================================
+void ST1_NPC::SetHp(int hp)
+{
+	m_hp = hp;
+}
 
 void ST1_NPC::SetID(int id)
 {
@@ -134,6 +139,10 @@ void ST1_NPC::SetSpeed(float spd)
 // ===========================================
 // =============       GET      ==============
 // ===========================================
+int ST1_NPC::GetHp()
+{
+	return m_hp;
+}
 
 int ST1_NPC::GetID()
 {

@@ -75,3 +75,14 @@ struct MapObjectsInfo
 };
 
 std::vector<MapObjectsInfo> stage1_mapobj_info;
+
+enum DeadObjType { D_OBJ_PLAYER, D_OBJ_NPC };
+struct DeathInfo
+{
+	char obj_type;
+	int  obj_id;
+
+	DeathInfo() { obj_type = -1; obj_id = -1; }
+	DeathInfo(char type, int id) { obj_type = type; obj_id = id; }
+};
+std::queue<DeathInfo> new_death_objs;

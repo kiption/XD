@@ -291,6 +291,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 				// 4. NPC 객체 수 동기화
 				gGameFramework.m_remainNPC = left_npc;
+
 				//==================================================
 				//					충돌 이펙트 관련
 				//==================================================
@@ -314,9 +315,35 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				}
 
 				//==================================================
+				//				객체 사망 후처리 관련
+				//==================================================
+				while (!new_death_objs.empty()) {
+					DeathInfo new_deadobj = new_death_objs.front();
+					new_death_objs.pop();
+
+					switch (new_deadobj.obj_type) {
+					case D_OBJ_PLAYER:
+						if (new_deadobj.obj_id == my_id) {
+							// 게임오버 화면 전환
+
+						}
+						else {
+							// id번째 Player 사망 연출 후 객체 삭제(또는 안보이는 곳에 숨겨두기)
+
+						}
+						break;
+					case D_OBJ_NPC:
+						// id번째 Npc 사망 연출 후 객체 삭제(또는 안보이는 곳에 숨겨두기)
+
+						break;
+					}
+				}
+
 
 				//==================================================
-				//					  Map Test
+
+				//==================================================
+				//					Map 충돌 관련
 				//==================================================
 				for (auto& mapobj : stage1_mapobj_info) {
 					/*cout << "Map Obj - Pos: " << mapobj.m_pos.x << ", " << mapobj.m_pos.y << ", " << mapobj.m_pos.z
