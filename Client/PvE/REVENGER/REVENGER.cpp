@@ -175,6 +175,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						break;
 					case PACKET_KEY_W:
 					case PACKET_KEY_S:
+					case PACKET_KEY_A:
+					case PACKET_KEY_D:
 						CS_MOVE_PACKET move_pack;
 						move_pack.size = sizeof(CS_MOVE_PACKET);
 						move_pack.type = CS_MOVE;
@@ -183,33 +185,31 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						move_pack.z = gGameFramework.getMyPosition().z;
 						sendPacket(&move_pack, active_servernum);
 						break;
-					case PACKET_KEY_A:
-					case PACKET_KEY_D:
-						CS_ROTATE_PACKET rotate_pack;
-						rotate_pack.size = sizeof(CS_ROTATE_PACKET);
-						rotate_pack.type = CS_ROTATE;
-						rotate_pack.right_x = gGameFramework.getMyRightVec().x;
-						rotate_pack.right_y = gGameFramework.getMyRightVec().y;
-						rotate_pack.right_z = gGameFramework.getMyRightVec().z;
-						rotate_pack.up_x = gGameFramework.getMyUpVec().x;
-						rotate_pack.up_y = gGameFramework.getMyUpVec().y;
-						rotate_pack.up_z = gGameFramework.getMyUpVec().z;
-						rotate_pack.look_x = gGameFramework.getMyLookVec().x;
-						rotate_pack.look_y = gGameFramework.getMyLookVec().y;
-						rotate_pack.look_z = gGameFramework.getMyLookVec().z;
-						sendPacket(&rotate_pack, active_servernum);
-						break;
 					case PACKET_KEY_UP:
 					case PACKET_KEY_DOWN:
+						CS_MOVE_PACKET updown_move_pack;
+						updown_move_pack.size = sizeof(CS_MOVE_PACKET);
+						updown_move_pack.type = CS_MOVE;
+						updown_move_pack.x = gGameFramework.getMyPosition().x;
+						updown_move_pack.y = gGameFramework.getMyPosition().y;
+						updown_move_pack.z = gGameFramework.getMyPosition().z;
+						sendPacket(&updown_move_pack, active_servernum);
+						break;
 					case PACKET_KEY_LEFT:
 					case PACKET_KEY_RIGHT:
-						CS_MOVE_PACKET move_pack2;
-						move_pack2.size = sizeof(CS_MOVE_PACKET);
-						move_pack2.type = CS_MOVE;
-						move_pack2.x = gGameFramework.getMyPosition().x;
-						move_pack2.y = gGameFramework.getMyPosition().y;
-						move_pack2.z = gGameFramework.getMyPosition().z;
-						sendPacket(&move_pack2, active_servernum);
+						CS_ROTATE_PACKET yaw_rotate_pack;
+						yaw_rotate_pack.size = sizeof(CS_ROTATE_PACKET);
+						yaw_rotate_pack.type = CS_ROTATE;
+						yaw_rotate_pack.right_x = gGameFramework.getMyRightVec().x;
+						yaw_rotate_pack.right_y = gGameFramework.getMyRightVec().y;
+						yaw_rotate_pack.right_z = gGameFramework.getMyRightVec().z;
+						yaw_rotate_pack.up_x = gGameFramework.getMyUpVec().x;
+						yaw_rotate_pack.up_y = gGameFramework.getMyUpVec().y;
+						yaw_rotate_pack.up_z = gGameFramework.getMyUpVec().z;
+						yaw_rotate_pack.look_x = gGameFramework.getMyLookVec().x;
+						yaw_rotate_pack.look_y = gGameFramework.getMyLookVec().y;
+						yaw_rotate_pack.look_z = gGameFramework.getMyLookVec().z;
+						sendPacket(&yaw_rotate_pack, active_servernum);
 						break;
 					case PACKET_KEY_SPACEBAR:
 						//CS_ATTACK_PACKET attack_pack;

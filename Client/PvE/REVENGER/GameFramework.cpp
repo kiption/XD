@@ -523,74 +523,71 @@ void CGameFramework::ProcessInput()
 	{
 		DWORD dwDirection = 0;
 
-		if (pKeysBuffer[KEY_W] & 0xF0) {
-			dwDirection |= DIR_UP;
-			q_keyboardInput.push(SEND_KEY_W);//S
-
-			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
-			{
-			}
-			if (m_nMode != SCENE2STAGE)
-			{
-			}
-		}
-		if (pKeysBuffer[KEY_S] & 0xF0) {
-			dwDirection |= DIR_DOWN;
-			q_keyboardInput.push(SEND_KEY_S);//S
-
-			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
-			{
-			}
-			if (m_nMode != SCENE2STAGE)
-			{
-			}
-		}
-		if (pKeysBuffer[KEY_D] & 0xF0) {
-			(m_pPlayer)->Rotate(0.0f, 0.5f, 0.0f);
-			q_keyboardInput.push(SEND_KEY_D);//S
-
-			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
-			{
-			}
-			if (m_nMode != SCENE2STAGE)
-			{
-
-
-			}
-		}
-		if (pKeysBuffer[KEY_A] & 0xF0) {
-			m_pPlayer->Rotate(0.0f, -0.5f, 0.0f);
-			q_keyboardInput.push(SEND_KEY_A);//S
-
-			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
-			{
-			}
-			if (m_nMode != SCENE2STAGE)
-			{
-			}
-		}
-
 		if (pKeysBuffer[VK_UP] & 0xF0) {
-			dwDirection |= DIR_FORWARD;
+			dwDirection |= DIR_UP;
 			q_keyboardInput.push(SEND_KEY_UP);//S
+
+			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
+			{
+			}
+			if (m_nMode != SCENE2STAGE)
+			{
+			}
+		}
+		if (pKeysBuffer[VK_DOWN] & 0xF0) {
+			dwDirection |= DIR_DOWN;
+			q_keyboardInput.push(SEND_KEY_DOWN);//S
+
+			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
+			{
+			}
+			if (m_nMode != SCENE2STAGE)
+			{
+			}
+		}
+		if (pKeysBuffer[VK_LEFT] & 0xF0) {
+			m_pPlayer->Rotate(0.0f, -0.5f, 0.0f);
+			q_keyboardInput.push(SEND_KEY_LEFT);//S
+
+			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
+			{
+			}
+			if (m_nMode != SCENE2STAGE)
+			{
+			}
+		}
+		if (pKeysBuffer[VK_RIGHT] & 0xF0) {
+			(m_pPlayer)->Rotate(0.0f, 0.5f, 0.0f);
+			q_keyboardInput.push(SEND_KEY_RIGHT);//S
+
+			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
+			{
+			}
+			if (m_nMode != SCENE2STAGE)
+			{
+			}
+		}
+
+		if (pKeysBuffer[KEY_W] & 0xF0) {
+			dwDirection |= DIR_FORWARD;
+			q_keyboardInput.push(SEND_KEY_W);//S
 
 			//if (((HeliPlayer*)m_pPlayer)->m_fPitch < 15.0f) {
 			//	((HeliPlayer*)m_pPlayer)->Rotate(0.5f, 0.0f, 0.0f);
 			//	//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
 			//}
-
 		}
-		if (pKeysBuffer[VK_DOWN] & 0xF0) {
+		if (pKeysBuffer[KEY_S] & 0xF0) {
 			dwDirection |= DIR_BACKWARD;
-			q_keyboardInput.push(SEND_KEY_DOWN);//S
+			q_keyboardInput.push(SEND_KEY_S);//S
 			//if (((HeliPlayer*)m_pPlayer)->m_fPitch > -15.0f) {
 			//	((HeliPlayer*)m_pPlayer)->Rotate(-0.5f, 0.0f, 0.0f);
 			//	//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
 			//}
 		}
-		if (pKeysBuffer[VK_LEFT] & 0xF0) {
+		if (pKeysBuffer[KEY_A] & 0xF0) {
 			dwDirection |= DIR_LEFT;
-			q_keyboardInput.push(SEND_KEY_LEFT);//S
+			q_keyboardInput.push(SEND_KEY_A);//S
 
 			/*if (m_pPlayerRotate_z < 1.5 && m_pPlayerRotate_z >= 0.0)
 			{
@@ -603,9 +600,9 @@ void CGameFramework::ProcessInput()
 			//	//cout << "누르기 후 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
 			//}
 		}
-		if (pKeysBuffer[VK_RIGHT] & 0xF0) {
+		if (pKeysBuffer[KEY_D] & 0xF0) {
 			dwDirection |= DIR_RIGHT;
-			q_keyboardInput.push(SEND_KEY_RIGHT);//S
+			q_keyboardInput.push(SEND_KEY_D);//S
 			/*if (m_pPlayerRotate_z > -1.5 && m_pPlayerRotate_z <= 0.0)
 			{
 				m_pPlayerRotate_z -= 0.02f;
@@ -616,7 +613,6 @@ void CGameFramework::ProcessInput()
 			//	((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, -0.7f);
 			//	//cout << "누르기 후 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
 			//}
-
 		}
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
