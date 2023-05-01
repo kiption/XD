@@ -625,7 +625,7 @@ void CGameFramework::ProcessInput()
 		}
 
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
-			//q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
+			q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
 		}
 
 

@@ -417,7 +417,7 @@ void disconnect(int target_id, int target)
 				ZeroMemory(&ha_server_addr, sizeof(ha_server_addr));
 				ha_server_addr.sin_family = AF_INET;
 				ha_server_addr.sin_port = htons(target_portnum);	// 수평확장된 서버군에서 자기 오른쪽에 있는 서버
-				inet_pton(AF_INET, "127.0.0.1", &ha_server_addr.sin_addr);
+				inet_pton(AF_INET, IPADDR_HA_LOGIC_0, &ha_server_addr.sin_addr);
 
 				BOOL bret = connectExFP(right_ex_server_sock, reinterpret_cast<sockaddr*>(&ha_server_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over->overlapped);
 				if (FALSE == bret) {
@@ -747,6 +747,7 @@ void process_packet(int client_id, char* packet)
 	{
 		if (!b_active_server) break;
 		CS_ATTACK_PACKET* cl_attack_packet = reinterpret_cast<CS_ATTACK_PACKET*>(packet);
+
 		// Bullet 쿨타임 체크
 		milliseconds shoot_term = duration_cast<milliseconds>(chrono::system_clock::now() - shoot_time);
 		if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) {	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
@@ -754,10 +755,51 @@ void process_packet(int client_id, char* packet)
 			break;
 		}
 
+		// [야매 방법]
+		XMFLOAT3 bullet_pos = clients[client_id].pos;
+		XMFLOAT3 bullet_look = clients[client_id].m_lookvec;
+		BoundingOrientedBox bullet_xoobb;
+		bullet_xoobb = BoundingOrientedBox(clients[client_id].pos
+			, XMFLOAT3(VULCAN_BULLET_BBSIZE_X, VULCAN_BULLET_BBSIZE_Y, VULCAN_BULLET_BBSIZE_Z)
+			, XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+		bool is_collide = false;
+		float dist = 0.0f;
+		while (dist <= BULLET_RANGE) {
+			for (auto& cl : clients) {
+				if (cl.s_state != ST_INGAME) continue;
+				if (cl.id == client_id) continue;
+				if (bullet_xoobb.Intersects(cl.m_xoobb)) {
+					is_collide = true;
+					cout << "Bullet Collide with Client[" << cl.id << "].\n" << endl;
+					break;
+				}
+			}
+			for (auto& building : buildings_info) {
+				if (bullet_xoobb.Intersects(building.m_xoobb)) {
+					is_collide = true;
+					cout << "Bullet Collide with Building. - Pos: " << building.getPosX() << ", " << building.getPosY() << ", " << building.getPosZ() << "\n" << endl;
+					break;
+				}
+			}
+			if (is_collide) break;
+
+			bullet_pos.x += bullet_look.x * BULLET_MOVE_SCALAR;
+			bullet_pos.y += bullet_look.y * BULLET_MOVE_SCALAR;
+			bullet_pos.z += bullet_look.z * BULLET_MOVE_SCALAR;
+			bullet_xoobb = BoundingOrientedBox(bullet_pos
+				, XMFLOAT3(VULCAN_BULLET_BBSIZE_X, VULCAN_BULLET_BBSIZE_Y, VULCAN_BULLET_BBSIZE_Z)
+				, XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+			cout << "Bullet move to Pos(" << bullet_pos.x << ", " << bullet_pos.y << ", " << bullet_pos.z << ")." << endl;
+
+			dist = sqrtf(powf((clients[client_id].pos.x - bullet_pos.x), 2)
+				+ powf((clients[client_id].pos.y - bullet_pos.y), 2)
+				+ powf((clients[client_id].pos.z - bullet_pos.z), 2));
+			cout << "Bullet Move Distance: " << dist << "\n" << endl;
+		}
+
+		// [정석 방법]: Raycast를 구현하고나서는 아래의 방법으로 바꿔야함.
 		// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
-
 		// 건물 등 지형지물과 충돌하면 break
-
 		// Player, Npc와 충돌하면 대상의 HP를 감소시키고 클라이언트에게 피격 패킷을 보내야 합니다.
 		
 		break;
@@ -965,7 +1007,7 @@ void do_worker()
 				ZeroMemory(&ha_server_addr, sizeof(ha_server_addr));
 				ha_server_addr.sin_family = AF_INET;
 				ha_server_addr.sin_port = htons(target_portnum);
-				inet_pton(AF_INET, "127.0.0.1", &ha_server_addr.sin_addr);
+				inet_pton(AF_INET, IPADDR_HA_LOGIC_0, &ha_server_addr.sin_addr);
 
 				BOOL bret = connectExFP(right_ex_server_sock, reinterpret_cast<sockaddr*>(&ha_server_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over->overlapped);
 				if (FALSE == bret) {
@@ -1615,7 +1657,7 @@ int main(int argc, char* argv[])
 	ZeroMemory(&relaysvr_addr, sizeof(relaysvr_addr));
 	relaysvr_addr.sin_family = AF_INET;
 	relaysvr_addr.sin_port = htons(PORTNUM_RELAY2LOGIC_0);
-	inet_pton(AF_INET, "127.0.0.1", &relaysvr_addr.sin_addr);
+	inet_pton(AF_INET, IPADDR_RELAY2LOGIC_0, &relaysvr_addr.sin_addr);
 
 	BOOL bret_relay = connectExFP_relay(g_relay_sock, reinterpret_cast<sockaddr*>(&relaysvr_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over_relay->overlapped);
 	if (FALSE == bret_relay) {
@@ -1690,7 +1732,7 @@ int main(int argc, char* argv[])
 		ZeroMemory(&ha_server_addr, sizeof(ha_server_addr));
 		ha_server_addr.sin_family = AF_INET;
 		ha_server_addr.sin_port = htons(right_portnum);	// 수평확장된 서버군에서 자기 오른쪽에 있는 서버
-		inet_pton(AF_INET, "127.0.0.1", &ha_server_addr.sin_addr);
+		inet_pton(AF_INET, IPADDR_HA_LOGIC_0, &ha_server_addr.sin_addr);
 
 		BOOL bret = connectExFP(right_ex_server_sock, reinterpret_cast<sockaddr*>(&ha_server_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over->overlapped);
 		if (FALSE == bret) {

@@ -3,24 +3,32 @@
 constexpr int MAX_RELAY_SERVER = 2;
 constexpr int PORTNUM_RELAY2CLIENT_0 = 9800;
 constexpr int PORTNUM_RELAY2CLIENT_1 = 9801;
+const char* IPADDR_RELAY2CLIENT_0 = "127.0.0.1";
+const char* IPADDR_RELAY2CLIENT_1 = "127.0.0.1";
 
 // 릴레이서버-인증서버 통신
 constexpr int MAX_LOGIN_SERVER = 2;
 constexpr int PORTNUM_RELAY2LOGIN_0 = 9900;
 constexpr int PORTNUM_RELAY2LOGIN_1 = 9901;
+const char* IPADDR_RELAY2LOGIN_0 = "127.0.0.1";
+const char* IPADDR_RELAY2LOGIN_1 = "127.0.0.1";
 
 // 릴레이서버-로직서버 통신
 constexpr int MAX_LOGIC_SERVER = 2;
 constexpr int PORTNUM_RELAY2LOGIC_0 = 9910;
 constexpr int PORTNUM_RELAY2LOGIC_1 = 9911;
+const char* IPADDR_RELAY2LOGIC_0 = "127.0.0.1";
+const char* IPADDR_RELAY2LOGIC_1 = "127.0.0.1";
 
 // 서버 (포트번호는 릴레이서버 완성전까지만 임시로 사용할 예정)
 constexpr int MAX_SERVER = 2;
 constexpr int PORT_NUM_S0 = 9000;
 constexpr int PORT_NUM_S1 = 9001;
-// 서버(HA)
+// [수평확장] 로직서버-로직서버 통신
 constexpr int HA_PORTNUM_S0 = 9100;
 constexpr int HA_PORTNUM_S1 = 9101;
+const char* IPADDR_HA_LOGIC_0 = "127.0.0.1";
+const char* IPADDR_HA_LOGIC_1 = "127.0.0.1";
 
 constexpr int SERIAL_NUM_CLIENT = 0;
 constexpr int SERIAL_NUM_EXSERVER = 1000;
