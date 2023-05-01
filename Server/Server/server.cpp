@@ -48,8 +48,11 @@ public:
 									  XMFLOAT3(this->getScaleX(), this->getScaleY(), this->getScaleZ()),
 									  XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	}
+	XMFLOAT3 getPos() { return XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()); }
 };
 vector<Building> buildings_info;	// Map Buildings CollideBox
+MyVector3 exc_XMFtoMyVec(XMFLOAT3 xmf3) { return MyVector3{ xmf3.x, xmf3.y, xmf3.z }; }
+XMFLOAT3 exc_MyVectoXMF(MyVector3 mv3) { return XMFLOAT3{ mv3.x, mv3.y, mv3.z }; }
 
 class OVER_EX {
 public:
@@ -755,52 +758,28 @@ void process_packet(int client_id, char* packet)
 			break;
 		}
 
-		// [야매 방법]
-		XMFLOAT3 bullet_pos = clients[client_id].pos;
-		XMFLOAT3 bullet_look = clients[client_id].m_lookvec;
-		BoundingOrientedBox bullet_xoobb;
-		bullet_xoobb = BoundingOrientedBox(clients[client_id].pos
-			, XMFLOAT3(VULCAN_BULLET_BBSIZE_X, VULCAN_BULLET_BBSIZE_Y, VULCAN_BULLET_BBSIZE_Z)
-			, XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
-		bool is_collide = false;
-		float dist = 0.0f;
-		while (dist <= BULLET_RANGE) {
-			for (auto& cl : clients) {
-				if (cl.s_state != ST_INGAME) continue;
-				if (cl.id == client_id) continue;
-				if (bullet_xoobb.Intersects(cl.m_xoobb)) {
-					is_collide = true;
-					cout << "Bullet Collide with Client[" << cl.id << "].\n" << endl;
-					break;
-				}
-			}
-			for (auto& building : buildings_info) {
-				if (bullet_xoobb.Intersects(building.m_xoobb)) {
-					is_collide = true;
-					cout << "Bullet Collide with Building. - Pos: " << building.getPosX() << ", " << building.getPosY() << ", " << building.getPosZ() << "\n" << endl;
-					break;
-				}
-			}
-			if (is_collide) break;
-
-			bullet_pos.x += bullet_look.x * BULLET_MOVE_SCALAR;
-			bullet_pos.y += bullet_look.y * BULLET_MOVE_SCALAR;
-			bullet_pos.z += bullet_look.z * BULLET_MOVE_SCALAR;
-			bullet_xoobb = BoundingOrientedBox(bullet_pos
-				, XMFLOAT3(VULCAN_BULLET_BBSIZE_X, VULCAN_BULLET_BBSIZE_Y, VULCAN_BULLET_BBSIZE_Z)
-				, XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
-			cout << "Bullet move to Pos(" << bullet_pos.x << ", " << bullet_pos.y << ", " << bullet_pos.z << ")." << endl;
-
-			dist = sqrtf(powf((clients[client_id].pos.x - bullet_pos.x), 2)
-				+ powf((clients[client_id].pos.y - bullet_pos.y), 2)
-				+ powf((clients[client_id].pos.z - bullet_pos.z), 2));
-			cout << "Bullet Move Distance: " << dist << "\n" << endl;
-		}
-
 		// [정석 방법]: Raycast를 구현하고나서는 아래의 방법으로 바꿔야함.
 		// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
 		// 건물 등 지형지물과 충돌하면 break
+		for (auto& building : buildings_info) {
+			Cube bd_obj{ exc_XMFtoMyVec(building.getPos()), building.getScaleX(), building.getScaleY(), building.getScaleZ() };
+			MyVector3 bd_intersect = GetInterSection_Line2Cube(exc_XMFtoMyVec(clients[client_id].pos), exc_XMFtoMyVec(clients[client_id].m_lookvec), bd_obj);
+			if (bd_intersect != defaultVec) {
+				cout << "Bullet Collide with Building.\n" << endl;
+				break;
+			}
+		}
 		// Player, Npc와 충돌하면 대상의 HP를 감소시키고 클라이언트에게 피격 패킷을 보내야 합니다.
+		for (auto& cl : clients) {
+			if (cl.s_state != ST_INGAME) continue;
+			if (cl.id == client_id) continue;
+			Cube pl_obj{ exc_XMFtoMyVec(cl.pos), HELI_BBSIZE_X,  HELI_BBSIZE_Y, HELI_BBSIZE_Z };
+			MyVector3 pl_intersect = GetInterSection_Line2Cube(exc_XMFtoMyVec(clients[client_id].pos), exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj);
+			if (pl_intersect != defaultVec) {
+				cout << "Bullet Collide with Player[" << cl.id << "].\n" << endl;
+				break;
+			}
+		}
 		
 		break;
 	}// CS_ATTACK end
