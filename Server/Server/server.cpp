@@ -97,7 +97,7 @@ public:
 	float pitch, yaw, roll;							// Rotated Degree
 	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;		// 현재 Look, Right, Up Vectors
 	chrono::system_clock::time_point death_time;
-	chrono::system_clock::time_point last_move_rotate_keyinput_time;	// 마지막으로 키 입력이 된 시간
+	chrono::system_clock::time_point shoot_time;	// 총 발사 시간
 
 	short curr_stage;
 
@@ -213,8 +213,6 @@ public:
 int user_count = 0;
 array<SESSION, MAX_USER> clients;
 array<ST1_NPC, MAX_NPCS> npcs;
-
-chrono::system_clock::time_point shoot_time;
 
 HANDLE h_iocp;				// IOCP 핸들
 SOCKET g_sc_listensock;		// 클라이언트 통신 listen소켓
@@ -481,6 +479,8 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].pl_state = PL_ST_ALIVE;
 		clients[client_id].curr_stage = 1;
 
+		clients[client_id].hp = 100;
+
 		clients[client_id].pos.x = RESPAWN_POS_X + client_id * 50;
 		clients[client_id].pos.y = RESPAWN_POS_Y;
 		clients[client_id].pos.z = RESPAWN_POS_Z - client_id * 50;
@@ -650,10 +650,10 @@ void process_packet(int client_id, char* packet)
 		for (auto& building : buildings_info) {
 			if (clients[client_id].m_xoobb.Intersects(building.m_xoobb)) {
 				// 맵과 충돌하면 플레이어가 사망하게 됩니다.
-				clients[client_id].s_lock.lock();
-				clients[client_id].hp = 0;
+				//clients[client_id].s_lock.lock();
+				//clients[client_id].hp = 0;
 				//clients[client_id].pl_state = PL_ST_DEAD;
-				clients[client_id].s_lock.unlock();
+				//clients[client_id].s_lock.unlock();
 
 				b_isCollide = true;
 			}
@@ -663,15 +663,15 @@ void process_packet(int client_id, char* packet)
 			if (other_cl.id == client_id) continue;
 			if (clients[client_id].m_xoobb.Intersects(other_cl.m_xoobb)) {
 				// 다른 플레이어와 충돌하면 자기자신과 상대 플레이어 둘다 사망하게 됩니다.
-				clients[client_id].s_lock.lock();
-				clients[client_id].hp = 0;
+				//clients[client_id].s_lock.lock();
+				//clients[client_id].hp = 0;
 				//clients[client_id].pl_state = PL_ST_DEAD;
-				clients[client_id].s_lock.unlock();
+				//clients[client_id].s_lock.unlock();
 
-				other_cl.s_lock.lock();
-				other_cl.hp = 0;
+				//other_cl.s_lock.lock();
+				//other_cl.hp = 0;
 				//other_cl.pl_state = PL_ST_DEAD;
-				other_cl.s_lock.unlock();
+				//other_cl.s_lock.unlock();
 
 				b_isCollide = true;
 			}
@@ -752,14 +752,59 @@ void process_packet(int client_id, char* packet)
 		CS_ATTACK_PACKET* cl_attack_packet = reinterpret_cast<CS_ATTACK_PACKET*>(packet);
 
 		// Bullet 쿨타임 체크
-		milliseconds shoot_term = duration_cast<milliseconds>(chrono::system_clock::now() - shoot_time);
-		if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) {	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
-			milliseconds left_cooldown = duration_cast<milliseconds>(milliseconds(SHOOT_COOLDOWN_BULLET) - shoot_term);
-			break;
-		}
+		milliseconds shoot_term = duration_cast<milliseconds>(chrono::system_clock::now() - clients[client_id].shoot_time);
+		if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) break;	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
+
+		clients[client_id].s_lock.lock();
+		clients[client_id].shoot_time = chrono::system_clock::now();	// 발사 시간 업데이트
+		clients[client_id].s_lock.unlock();
+
+		//cout << "Shoot Point: Pos(" << clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.z << ") & LookVec("
+		//	<< clients[client_id].m_lookvec.x << ", " << clients[client_id].m_lookvec.y << ", " << clients[client_id].m_lookvec.z << ").\n" << endl;
 
 		// [정석 방법]: Raycast를 구현하고나서는 아래의 방법으로 바꿔야함.
 		// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
+
+		// Player, Npc와 충돌하면 대상의 HP를 감소시키고 클라이언트에게 피격 패킷을 보내야 합니다.
+		bool b_collide = false;
+		for (auto& cl : clients) {
+			if (cl.s_state != ST_INGAME) continue;
+			if (cl.id == client_id) continue;
+			Cube pl_obj{ exc_XMFtoMyVec(cl.pos), HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
+			MyVector3 pl_intersect = GetInterSection_Line2Cube(exc_XMFtoMyVec(clients[client_id].pos), exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj);
+			if (pl_intersect != defaultVec) {
+				cout << "Bullet(Owner: Player[" << client_id << "]) Collide with Player[" << cl.id << "].\n" << endl;
+				b_collide = true;
+
+				cl.s_lock.lock();
+				cl.hp -= BULLET_DAMAGE;
+				cl.s_lock.unlock();
+				if (cl.hp > 0) {
+					//cout << "Send Damage Packet to Player[" << cl.id << "].\n" << endl;
+					SC_DAMAGED_PACKET dmg_bullet_packet;
+					dmg_bullet_packet.type = SC_DAMAGED;
+					dmg_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
+					dmg_bullet_packet.target = TARGET_PLAYER;
+					dmg_bullet_packet.id = cl.id;
+					dmg_bullet_packet.damage = BULLET_DAMAGE;
+					lock_guard<mutex> lg{ cl.s_lock };
+					cl.do_send(&dmg_bullet_packet);
+				}
+				else {
+					//cout << "Send Death Packet to Player[" << cl.id << "].\n" << endl;
+					SC_DEATH_PACKET death_packet;
+					death_packet.type = SC_DEATH;
+					death_packet.size = sizeof(SC_DEATH_PACKET);
+					death_packet.target = TARGET_PLAYER;
+					death_packet.id = cl.id;
+					lock_guard<mutex> lg{ cl.s_lock };
+					cl.do_send(&death_packet);
+				}
+				break;
+			}
+		}
+		if (b_collide) break;	// 플레이어와 충돌했으면 건물과 충돌할 필요X
+
 		// 건물 등 지형지물과 충돌하면 break
 		for (auto& building : buildings_info) {
 			Cube bd_obj{ exc_XMFtoMyVec(building.getPos()), building.getScaleX(), building.getScaleY(), building.getScaleZ() };
@@ -769,18 +814,7 @@ void process_packet(int client_id, char* packet)
 				break;
 			}
 		}
-		// Player, Npc와 충돌하면 대상의 HP를 감소시키고 클라이언트에게 피격 패킷을 보내야 합니다.
-		for (auto& cl : clients) {
-			if (cl.s_state != ST_INGAME) continue;
-			if (cl.id == client_id) continue;
-			Cube pl_obj{ exc_XMFtoMyVec(cl.pos), HELI_BBSIZE_X,  HELI_BBSIZE_Y, HELI_BBSIZE_Z };
-			MyVector3 pl_intersect = GetInterSection_Line2Cube(exc_XMFtoMyVec(clients[client_id].pos), exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj);
-			if (pl_intersect != defaultVec) {
-				cout << "Bullet Collide with Player[" << cl.id << "].\n" << endl;
-				break;
-			}
-		}
-		
+
 		break;
 	}// CS_ATTACK end
 	case CS_INPUT_KEYBOARD:
@@ -806,7 +840,8 @@ void process_packet(int client_id, char* packet)
 
 		break;
 	}// CS_INPUT_KEYBOARD end
-	case CS_INPUT_MOUSE: {
+	case CS_INPUT_MOUSE:
+	{
 		if (!b_active_server) break;		// Active 서버만 패킷을 처리합니다.
 		CS_INPUT_MOUSE_PACKET* rt_p = reinterpret_cast<CS_INPUT_MOUSE_PACKET*>(packet);
 
@@ -1733,7 +1768,6 @@ int main(int argc, char* argv[])
 	//======================================================================
 	// [ Main ]
 	init_npc();
-	shoot_time = chrono::system_clock::now();
 
 	// [ Main - 맵 정보 로드 ]
 	// 1. 디렉토리 검색

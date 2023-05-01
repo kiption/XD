@@ -38,7 +38,7 @@
 //============================================================
 //						공격 관련 상수
 //============================================================
-#define SHOOT_COOLDOWN_BULLET 100		// 총알 발사 쿨타임(ms)
+#define SHOOT_COOLDOWN_BULLET 200		// 총알 발사 쿨타임(ms)
 
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
 #define BULLET_DAMAGE 10				// 총알 피격데미지
@@ -60,9 +60,13 @@
 //============================================================
 #define HELI_MAXHP 100
 
-#define HELI_BBSIZE_X 4.8f				// 헬기 BB크기
-#define HELI_BBSIZE_Y 4.5f
-#define HELI_BBSIZE_Z 5.5f
+#define HELI_BBSIZE_X 2.5f				// 헬기 BB크기 (CollideBox)
+#define HELI_BBSIZE_Y 2.7f
+#define HELI_BBSIZE_Z 2.7f
+
+#define HELI_BOXSIZE_X 6.0f			// 헬기 Box크기 (Raycast)
+#define HELI_BOXSIZE_Y 5.0f
+#define HELI_BOXSIZE_Z 24.5f
 
 #define AUTO_LEVELOFF_TIME 3000			// 몇 초(ms)동안 키입력이 없어야 자동 수평비행 전환이 되는가
 #define RESPAWN_TIME 5000				// 리스폰 시간 (ms)

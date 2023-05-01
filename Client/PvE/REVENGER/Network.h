@@ -329,11 +329,15 @@ void processPacket(char* ptr)
 				my_info.m_damaged_effect_on = true;
 				my_info.m_hp -= recv_packet->damage;
 				if (my_info.m_hp < 0) my_info.m_hp = 0;
+				//cout << "내Player[]가 피해를 받았다. (HP: " << my_info.m_hp + recv_packet->damage
+				//	<< " -> " << my_info.m_hp << ")\n" << endl;
 			}
 			else {
 				other_players[recv_packet->id].m_damaged_effect_on = true;
 				other_players[recv_packet->id].m_hp -= recv_packet->damage;
 				if (other_players[recv_packet->id].m_hp < 0) other_players[recv_packet->id].m_hp = 0;
+				//cout << "OtherPlayer[" << recv_packet->id << "]가 피해를 받았다. (HP: " << other_players[recv_packet->id].m_hp + recv_packet->damage
+				//	<< " -> " << other_players[recv_packet->id].m_hp << ")\n" << endl;
 			}
 		}
 		// NPC Damaged
@@ -342,6 +346,8 @@ void processPacket(char* ptr)
 			npcs_info[recv_packet->id].m_damaged_effect_on = true;
 			npcs_info[recv_packet->id].m_hp -= recv_packet->damage;
 			if (npcs_info[recv_packet->id].m_hp < 0) npcs_info[recv_packet->id].m_hp = 0;
+			//cout << "NPC[" << recv_packet->id << "]가 피해를 받았다. (HP: " << npcs_info[recv_packet->id].m_hp + recv_packet->damage
+			//	<< " -> " << npcs_info[recv_packet->id].m_hp << ")\n" << endl;
 		}
 
 		break;
