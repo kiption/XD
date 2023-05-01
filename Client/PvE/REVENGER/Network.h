@@ -10,7 +10,9 @@ GameSound gamesound;
 #pragma comment (lib, "WS2_32.LIB")
 #pragma comment(lib, "MSWSock.lib")
 
-const char* SERVER_ADDR = "127.0.0.1";
+//const char* SERVER_ADDR = "127.0.0.1";	// 루프백 용
+const char* SERVER_ADDR = "192.168.0.30";	// 리모트 용
+
 SOCKET s_socket;
 short active_servernum = 1;
 array<SOCKET, MAX_SERVER> sockets;
