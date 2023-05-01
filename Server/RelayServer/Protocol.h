@@ -4,8 +4,8 @@ constexpr int MAX_RELAY_SERVER = 2;
 constexpr int PORTNUM_RELAY2CLIENT_0 = 9800;
 constexpr int PORTNUM_RELAY2CLIENT_1 = 9801;
 // 리모트 모드 (실행 시 아래의 리모트 모드를 주석 해제하고 그 아랫 부분을 주석할 것)
-const char* IPADDR_RELAY2CLIENT_0 = "172.30.1.87";
-const char* IPADDR_RELAY2CLIENT_1 = "172.30.1.87";
+const char* IPADDR_RELAY2CLIENT_0 = "218.101.227.89";
+const char* IPADDR_RELAY2CLIENT_1 = "218.101.227.89";
 // 루프백 모드 (실행 시 위의 리모트 모드를 주석하고 아랫 부분을 주석 해제할 것)
 //const char* IPADDR_RELAY2CLIENT_0 = "127.0.0.1";
 //const char* IPADDR_RELAY2CLIENT_1 = "127.0.0.1";
@@ -15,8 +15,8 @@ constexpr int MAX_LOGIN_SERVER = 2;
 constexpr int PORTNUM_RELAY2LOGIN_0 = 9900;
 constexpr int PORTNUM_RELAY2LOGIN_1 = 9901;
 // 리모트 모드 (실행 시 아래의 리모트 모드를 주석 해제하고 그 아랫 부분을 주석할 것)
-const char* IPADDR_RELAY2LOGIN_0 = "172.30.1.87";
-const char* IPADDR_RELAY2LOGIN_1 = "172.30.1.87";
+const char* IPADDR_RELAY2LOGIN_0 = "218.101.227.89";
+const char* IPADDR_RELAY2LOGIN_1 = "218.101.227.89";
 // 루프백 모드 (실행 시 위의 리모트 모드를 주석하고 아랫 부분을 주석 해제할 것)
 //const char* IPADDR_RELAY2LOGIN_0 = "127.0.0.1";
 //const char* IPADDR_RELAY2LOGIN_1 = "127.0.0.1";
@@ -26,8 +26,8 @@ constexpr int MAX_LOGIC_SERVER = 2;
 constexpr int PORTNUM_RELAY2LOGIC_0 = 9910;
 constexpr int PORTNUM_RELAY2LOGIC_1 = 9911;
 // 리모트 모드 (실행 시 아래의 리모트 모드를 주석 해제하고 그 아랫 부분을 주석할 것)
-const char* IPADDR_RELAY2LOGIC_0 = "172.30.1.87";
-const char* IPADDR_RELAY2LOGIC_1 = "172.30.1.87";
+const char* IPADDR_RELAY2LOGIC_0 = "218.101.227.89";
+const char* IPADDR_RELAY2LOGIC_1 = "218.101.227.89";
 // 루프백 모드 (실행 시 위의 리모트 모드를 주석하고 아랫 부분을 주석 해제할 것)
 //const char* IPADDR_RELAY2LOGIC_0 = "127.0.0.1";
 //const char* IPADDR_RELAY2LOGIC_1 = "127.0.0.1";
@@ -40,8 +40,8 @@ constexpr int PORT_NUM_S1 = 9001;
 constexpr int HA_PORTNUM_S0 = 9100;
 constexpr int HA_PORTNUM_S1 = 9101;
 // 리모트 모드 (실행 시 아래의 리모트 모드를 주석 해제하고 그 아랫 부분을 주석할 것)
-const char* IPADDR_HA_LOGIC_0 = "172.30.1.87";
-const char* IPADDR_HA_LOGIC_1 = "172.30.1.87";
+const char* IPADDR_HA_LOGIC_0 = "218.101.227.89";
+const char* IPADDR_HA_LOGIC_1 = "218.101.227.89";
 // 루프백 모드 (실행 시 위의 리모트 모드를 주석하고 아랫 부분을 주석 해제할 것)
 //const char* IPADDR_HA_LOGIC_0 = "127.0.0.1";
 //const char* IPADDR_HA_LOGIC_1 = "127.0.0.1";
