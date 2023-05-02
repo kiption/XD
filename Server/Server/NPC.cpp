@@ -136,6 +136,46 @@ void ST1_NPC::SetSpeed(float spd)
 	m_Speed = spd;
 }
 
+void ST1_NPC::SetFrustum()
+{
+	// NPC의 위치와 Look 벡터를 가져온다.
+	XMVECTOR position = XMLoadFloat3(&m_Pos);
+	XMVECTOR look = XMLoadFloat3(&m_curr_coordinate.look);
+
+	// Frustum의 사이드 범위와 상하 범위를 설정한다.
+	float width = 50.0f;
+	float height = 50.0f;
+
+	// Frustum의 시작점을 설정한다.
+	XMVECTOR startPoint = position;
+
+	// Frustum의 끝점을 설정한다.
+	XMVECTOR endPoint = position + (look * 50.0f);
+
+	// Frustum의 Up 벡터를 설정한다.
+	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	// Frustum을 생성하고 설정한다.
+	BoundingFrustum frustum;
+
+	// Frustum의 Origin을 설정한다.
+	XMStoreFloat3(&frustum.Origin, startPoint);
+
+	// Frustum의 Orientation을 설정한다.
+	XMMATRIX viewMatrix = XMMatrixLookAtRH(startPoint, endPoint, up);
+	XMVECTOR quaternion = XMQuaternionRotationMatrix(viewMatrix);
+	XMStoreFloat4(&frustum.Orientation, quaternion);
+
+	frustum.RightSlope = width / 50.0f;
+	frustum.LeftSlope = width / -50.0f;
+	frustum.TopSlope = height / 50.0f;
+	frustum.BottomSlope = height / -50.0f;
+	frustum.Near = 0.1f;
+	frustum.Far = 50.0f;
+
+	m_frustum = frustum;
+}
+
 // ===========================================
 // =============       GET      ==============
 // ===========================================
@@ -286,12 +326,13 @@ void ST1_NPC::ST1_State_Manegement(int state)
 		bool State_check = false;
 
 		for (int i{}; i < User_num; ++i) {
-			if (m_Distance[i] <= 150) {  // 공격상태로 변환
+			if (PlayerDetact()) {  // 공격상태로 변환
+				
 				State_check = true;
 				if (m_Distance[i] < m_Distance[m_chaseID]) {
 					m_chaseID = i;
 				}
-				//m_state = NPC_ATTACK; // 날기 후 공격 상태로 돌입
+				m_state = NPC_ATTACK; // 날기 후 공격 상태로 돌입
 				m_chaseID = i;
 			}
 			else if (i == User_num - 1 && !State_check) { // 자신의 상태 유지
@@ -317,7 +358,7 @@ void ST1_NPC::ST1_State_Manegement(int state)
 	case NPC_ATTACK:
 	{
 		// bullet 관리
-
+	
 
 
 	}
@@ -334,6 +375,7 @@ void ST1_NPC::ST1_State_Manegement(int state)
 	}
 	setBB_Pro();
 	setBB_Body();
+	SetFrustum();
 }
 
 void ST1_NPC::ST1_Death_motion()
@@ -653,4 +695,35 @@ void ST1_NPC::PlayerChasing()
 	m_Pos.x += m_Speed * m_curr_coordinate.look.x;
 	m_Pos.y += m_Speed * m_curr_coordinate.look.y;
 	m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+}
+
+bool ST1_NPC::PlayerDetact()
+{
+	XMVECTOR PlayerPos = XMLoadFloat3(&m_User_Pos[m_chaseID]);
+
+	XMVECTOR FrustumOrigin = XMLoadFloat3(&m_frustum.Origin);
+	XMVECTOR FrustumOrientation = XMLoadFloat4(&m_frustum.Orientation);
+
+	// Frustum의 꼭짓점 8개를 구한다.
+	XMFLOAT3 corners[8];
+	m_frustum.GetCorners(corners);
+
+	// Frustum과 Player의 bounding sphere와의 거리를 구한다.
+	float distance = FLT_MAX;
+	for (int i = 0; i < 8; i++)
+	{
+		float d = XMVectorGetX(XMVector3Length(PlayerPos - XMLoadFloat3(&corners[i])));
+		if (d < distance)
+		{
+			distance = d;
+		}
+	}
+
+	// 거리가 bounding sphere의 반지름보다 작으면 충돌했다고 판단한다.
+	if (distance < 50.0f)
+	{
+		return true;
+	}
+
+	return false;
 }
