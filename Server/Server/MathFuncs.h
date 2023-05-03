@@ -1,3 +1,4 @@
+#pragma once
 #include <cmath>
 
 double round_digit(double num, int d) {
