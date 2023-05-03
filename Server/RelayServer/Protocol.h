@@ -1,36 +1,22 @@
 #pragma once
+// IP 주소
+const char* IPADDR_LOOPBACK = "127.0.0.1";		// 릴레이-하위서버 통신은 모두 루프백 통신이다. 또한 하위서버끼리의 이중화 역시 루프백이다.
+const char* IPADDR_RELAY = "127.0.0.1";			// 원격 접속할때는 얘만 바꿔주면됨. (릴레이는 다른 PC에서 실행될 수도 있기 때문)
+
 // 릴레이서버-클라이언트 통신
 constexpr int MAX_RELAY_SERVER = 2;
 constexpr int PORTNUM_RELAY2CLIENT_0 = 9800;
 constexpr int PORTNUM_RELAY2CLIENT_1 = 9801;
-// 리모트 모드 (실행 시 아래의 리모트 모드를 주석 해제하고 그 아랫 부분을 주석할 것)
-//const char* IPADDR_RELAY2CLIENT_0 = "10.30.22.39";
-//const char* IPADDR_RELAY2CLIENT_1 = "218.101.227.89";
-// 루프백 모드 (실행 시 위의 리모트 모드를 주석하고 아랫 부분을 주석 해제할 것)
-const char* IPADDR_RELAY2CLIENT_0 = "127.0.0.1";
-const char* IPADDR_RELAY2CLIENT_1 = "127.0.0.1";
 
 // 릴레이서버-인증서버 통신
 constexpr int MAX_LOGIN_SERVER = 2;
 constexpr int PORTNUM_RELAY2LOGIN_0 = 9900;
 constexpr int PORTNUM_RELAY2LOGIN_1 = 9901;
-// 리모트 모드 (실행 시 아래의 리모트 모드를 주석 해제하고 그 아랫 부분을 주석할 것)
-//const char* IPADDR_RELAY2LOGIN_0 = "218.101.227.89";
-//const char* IPADDR_RELAY2LOGIN_1 = "218.101.227.89";
-// 루프백 모드 (실행 시 위의 리모트 모드를 주석하고 아랫 부분을 주석 해제할 것)
-const char* IPADDR_RELAY2LOGIN_0 = "127.0.0.1";
-const char* IPADDR_RELAY2LOGIN_1 = "127.0.0.1";
 
 // 릴레이서버-로직서버 통신
 constexpr int MAX_LOGIC_SERVER = 2;
 constexpr int PORTNUM_RELAY2LOGIC_0 = 9910;
 constexpr int PORTNUM_RELAY2LOGIC_1 = 9911;
-// 리모트 모드 (실행 시 아래의 리모트 모드를 주석 해제하고 그 아랫 부분을 주석할 것)
-//const char* IPADDR_RELAY2LOGIC_0 = "218.101.227.89";
-//const char* IPADDR_RELAY2LOGIC_1 = "218.101.227.89";
-// 루프백 모드 (실행 시 위의 리모트 모드를 주석하고 아랫 부분을 주석 해제할 것)
-const char* IPADDR_RELAY2LOGIC_0 = "127.0.0.1";
-const char* IPADDR_RELAY2LOGIC_1 = "127.0.0.1";
 
 // 서버 (포트번호는 릴레이서버 완성전까지만 임시로 사용할 예정)
 constexpr int MAX_SERVER = 2;
@@ -39,13 +25,6 @@ constexpr int PORT_NUM_S1 = 9001;
 // [수평확장] 로직서버-로직서버 통신
 constexpr int HA_PORTNUM_S0 = 9100;
 constexpr int HA_PORTNUM_S1 = 9101;
-// 리모트 모드 (실행 시 아래의 리모트 모드를 주석 해제하고 그 아랫 부분을 주석할 것)
-//const char* IPADDR_HA_LOGIC_0 = "218.101.227.89";
-//const char* IPADDR_HA_LOGIC_1 = "218.101.227.89";
-// 루프백 모드 (실행 시 위의 리모트 모드를 주석하고 아랫 부분을 주석 해제할 것)
-const char* IPADDR_HA_LOGIC_0 = "127.0.0.1";
-const char* IPADDR_HA_LOGIC_1 = "127.0.0.1";
-
 
 constexpr int SERIAL_NUM_CLIENT = 0;
 constexpr int SERIAL_NUM_EXSERVER = 1000;

@@ -418,7 +418,7 @@ void disconnect(int target_id, int target)
 				ZeroMemory(&ha_server_addr, sizeof(ha_server_addr));
 				ha_server_addr.sin_family = AF_INET;
 				ha_server_addr.sin_port = htons(target_portnum);	// 수평확장된 서버군에서 자기 오른쪽에 있는 서버
-				inet_pton(AF_INET, IPADDR_HA_LOGIC_0, &ha_server_addr.sin_addr);
+				inet_pton(AF_INET, IPADDR_LOOPBACK, &ha_server_addr.sin_addr);
 
 				BOOL bret = connectExFP(right_ex_server_sock, reinterpret_cast<sockaddr*>(&ha_server_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over->overlapped);
 				if (FALSE == bret) {
@@ -1021,7 +1021,7 @@ void do_worker()
 				ZeroMemory(&ha_server_addr, sizeof(ha_server_addr));
 				ha_server_addr.sin_family = AF_INET;
 				ha_server_addr.sin_port = htons(target_portnum);
-				inet_pton(AF_INET, IPADDR_HA_LOGIC_0, &ha_server_addr.sin_addr);
+				inet_pton(AF_INET, IPADDR_LOOPBACK, &ha_server_addr.sin_addr);
 
 				BOOL bret = connectExFP(right_ex_server_sock, reinterpret_cast<sockaddr*>(&ha_server_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over->overlapped);
 				if (FALSE == bret) {
@@ -1671,7 +1671,7 @@ int main(int argc, char* argv[])
 	ZeroMemory(&relaysvr_addr, sizeof(relaysvr_addr));
 	relaysvr_addr.sin_family = AF_INET;
 	relaysvr_addr.sin_port = htons(PORTNUM_RELAY2LOGIC_0);
-	inet_pton(AF_INET, IPADDR_RELAY2LOGIC_0, &relaysvr_addr.sin_addr);
+	inet_pton(AF_INET, IPADDR_LOOPBACK, &relaysvr_addr.sin_addr);
 
 	BOOL bret_relay = connectExFP_relay(g_relay_sock, reinterpret_cast<sockaddr*>(&relaysvr_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over_relay->overlapped);
 	if (FALSE == bret_relay) {
@@ -1746,7 +1746,7 @@ int main(int argc, char* argv[])
 		ZeroMemory(&ha_server_addr, sizeof(ha_server_addr));
 		ha_server_addr.sin_family = AF_INET;
 		ha_server_addr.sin_port = htons(right_portnum);	// 수평확장된 서버군에서 자기 오른쪽에 있는 서버
-		inet_pton(AF_INET, IPADDR_HA_LOGIC_0, &ha_server_addr.sin_addr);
+		inet_pton(AF_INET, IPADDR_LOOPBACK, &ha_server_addr.sin_addr);
 
 		BOOL bret = connectExFP(right_ex_server_sock, reinterpret_cast<sockaddr*>(&ha_server_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over->overlapped);
 		if (FALSE == bret) {
