@@ -259,62 +259,20 @@ void ST1_NPC::ST1_State_Manegement(int state)
 	case NPC_IDLE: // 매복 혹은 특정 운동을 하는 중.
 	{
 		MoveInSection();
-		for (int i{}; i < User_num; ++i) {
-			if (m_Distance[i] <= 400) {
-				if (m_chaseID != -1) {
-					if (m_Distance[i] < m_Distance[m_chaseID]) {
-						m_chaseID = i;
-						m_state = NPC_FLY; // 수시로 탐색 후 날기 상태로 돌입
-					}
-					else {
-						break;
-					}
-				}
-				else {
-					m_state = NPC_FLY; // 수시로 탐색 후 날기 상태로 돌입
-					m_chaseID = i;
 
-				}
-			}
-		}
+		SetTrackingIDbyDistance(500.0f, NPC_IDLE, NPC_FLY);
 	}
 	break;
 	case NPC_FLY:
 	{
 		// Fly 지속 or Fly -> chase or Fly -> Idle
 		FlyOnNpc(m_User_Pos[m_chaseID], m_chaseID); // 대상 플레이어와의 y 좌표를 비슷하게 맞춤.
-		bool State_check = false;
-
-		for (int i{}; i < User_num; ++i) {
-			if (m_Distance[i] <= 200) {  // 추적상태로 변환
-				State_check = true;
-				if (m_Distance[i] < m_Distance[m_chaseID]) {
-					m_chaseID = i;
-				}
-				m_state = NPC_CHASE; // 날기 후 추적 상태로 돌입
-				m_chaseID = i;
-			}
-			else if (i == User_num - 1 && !State_check) { // 자신의 상태 유지
-				m_state = NPC_FLY;
-			}
-		}
-
-		int Idle_Change = 0;
-		if (m_state == NPC_FLY) {
-			for (int i{}; i < User_num; ++i) {
-				if (m_Distance[i] > 400) {
-					Idle_Change++;
-				}
-			}
-		}
-		if (Idle_Change == User_num) {
-			m_state = NPC_IDLE;
+		
+		SetTrackingIDbyDistance(350.0f, NPC_FLY, NPC_CHASE);
+		
+		if (!SetTrackingPrevStatebyDistance(350.0f, NPC_FLY, NPC_IDLE)) {
+			MoveChangeIdle();
 			m_chaseID = -1;
-			// Idle로 돌아가니까, NPC 객체 하나당 갖고있던 플레이어들의 거리 배열을 초기화
-			for (int i{}; i < User_num; ++i) {
-				m_Distance[i] = 10000;
-			}
-			MoveChangeIdle(); // City, Section 지정
 		}
 	}
 	break;
@@ -322,45 +280,25 @@ void ST1_NPC::ST1_State_Manegement(int state)
 	{
 		// chase -> chase or chase -> attack or chase -> fly	
 		PlayerChasing();
-
-		bool State_check = false;
-
-		for (int i{}; i < User_num; ++i) {
-			if (PlayerDetact()) {  // 공격상태로 변환
-				
-				State_check = true;
-				if (m_Distance[i] < m_Distance[m_chaseID]) {
-					m_chaseID = i;
-				}
-				m_state = NPC_ATTACK; // 날기 후 공격 상태로 돌입
-				m_chaseID = i;
-			}
-			else if (i == User_num - 1 && !State_check) { // 자신의 상태 유지
-				m_state = NPC_CHASE;
-			}
+		SetTrackingIDbyDistance(300.0f, NPC_CHASE, NPC_ATTACK); // ID 탐색
+		if (PlayerDetact()) { // Id 탐색은 이미 가장 가까운 대상으로 지정하기에 따로 탐색은 하지 않음.
+			m_state = NPC_ATTACK; // 다음 상태
 		}
-
-		int Fly_Change = 0;
-		if (m_state == NPC_CHASE) {
-			for (int i{}; i < User_num; ++i) {
-				if (m_Distance[i] > 200) {
-					Fly_Change++;
-				}
-			}
+		else {
+			SetTrackingPrevStatebyDistance(300.0f, NPC_FLY, NPC_IDLE);
 		}
-		if (Fly_Change == User_num) {
-			m_state = NPC_FLY;
-			m_chaseID = -1;
-		}
-
 	}
 	break;
 	case NPC_ATTACK:
 	{
 		// bullet 관리
-	
-
-
+		SetTrackingIDbyDistance(200.0f, NPC_ATTACK, NPC_ATTACK); // ID 탐색
+		if (!PlayerDetact()) { // Id 탐색은 이미 가장 가까운 대상으로 지정하기에 따로 탐색은 하지 않음.
+			m_state = NPC_CHASE; // 이전 상태
+		}
+		else {
+			PlayerAttack();
+		}
 	}
 	break;
 	case NPC_DEATH:
@@ -389,6 +327,47 @@ void ST1_NPC::ST1_Death_motion()
 	m_curr_coordinate.right = NPCcalcRotate(base_coordinate.right, m_pitch, m_yaw, m_roll);
 	m_curr_coordinate.up = NPCcalcRotate(base_coordinate.up, m_pitch, m_yaw, m_roll);
 	m_curr_coordinate.look = NPCcalcRotate(base_coordinate.look, m_pitch, m_yaw, m_roll);
+}
+
+void ST1_NPC::SetTrackingIDbyDistance(float setDistance, int curState, int nextState)
+{
+	bool State_check = false;
+	
+	for (int i{}; i < User_num; ++i) {
+		if (m_Distance[i] <= setDistance) {  // 상태로 변환하기 위한 조건 및 추적 ID 갱신
+			State_check = true;
+			if (m_Distance[i] < m_Distance[m_chaseID]) {
+				m_chaseID = i;
+			}
+			m_state = nextState; // 자신의 상태를 다음 상태로 변경
+		}
+		if (i == User_num - 1 && !State_check) { // 자신의 상태 유지
+			m_state = curState;
+		}
+	}
+}
+
+bool ST1_NPC::SetTrackingPrevStatebyDistance(float setDistance, int curState, int prevState)
+{
+	int change_cnt = 0;
+
+	for (int i{}; i < User_num; ++i) {
+		if (m_Distance[i] >= setDistance) {  // 상태로 변환하기 위한 조건 및 추적 ID 갱신
+			change_cnt++;
+		}
+	}
+
+	if (change_cnt != User_num) {
+		m_state = curState;
+		return true;
+	}
+	else {
+		for (int i{}; i < User_num; ++i) {
+			m_Distance[i] = 10000;
+		}
+		m_state = prevState;
+		return false;
+	}
 }
 
 void ST1_NPC::MoveInSection()
@@ -583,13 +562,7 @@ void ST1_NPC::MoveChangeIdle()
 		// 구역 지정
 		m_IdleCity = id;
 		m_IdleSection = s_id;
-
 	}
-	//else {
-	//	// 일정 구간 안인 경우
-
-	//	m_Section[m_IdleCity].SectionNum[m_IdleSection];
-	//}
 }
 
 
@@ -726,4 +699,112 @@ bool ST1_NPC::PlayerDetact()
 	}
 
 	return false;
+}
+
+void ST1_NPC::PlayerAttack()
+{
+
+}
+
+// Ray Casting
+Npc_Vector3 ST1_NPC::NPC_calcCrossProduct(Npc_Vector3 lval, Npc_Vector3 rval)
+{
+	float cp_x = lval.y * rval.z - lval.z * rval.y;
+	float cp_y = lval.z * rval.x - lval.x * rval.z;
+	float cp_z = lval.x * rval.y - lval.y * rval.x;
+	return Npc_Vector3{ cp_x, cp_y, cp_z };
+}
+
+Npc_Vector3 ST1_NPC::NPC_getNormalVec(Npc_Vector3 v1, Npc_Vector3 v2, Npc_Vector3 v3)
+{
+	Npc_Vector3 vec_21 = v1 - v2;
+	Npc_Vector3 vec_23 = v3 - v2;
+	return (NPC_calcCrossProduct(vec_21, vec_23));
+}
+
+Npc_Vector3 ST1_NPC::NPC_GetIntersection_Line2Plane(Npc_Vector3 pos, Npc_Vector3 look, Npc_Vector3 plane_p1, Npc_Vector3 plane_p2, Npc_Vector3 plane_p3)
+{
+	// 법선벡터 구하기
+	Npc_Vector3 normal = NPC_getNormalVec(plane_p1, plane_p2, plane_p3);
+	float a = normal.x;
+	float b = normal.y;
+	float c = normal.z;
+	float d = -(a * plane_p1.x + b * plane_p1.y + c * plane_p1.z);
+
+
+	Npc_Vector3 intersection;
+	float t_denominator = a * look.x + b * look.y + c * look.z;	// 매개변수t의 분모
+	if (t_denominator == 0) {
+		intersection = pos;
+	}
+	else {
+		float t = -1.0f * (a * pos.x + b * pos.y + c * pos.z + d) / (a * look.x + b * look.y + c * look.z);	// 매개변수 t
+		if (t >= 0) {
+			intersection = pos + Npc_Vector3{ look.x * t, look.y * t, look.z * t };
+		}
+		else {
+			return Npc_defaultVec;
+		}
+	}
+
+	if (a * intersection.x + b * intersection.y + c * intersection.z + d != 0) {
+		return Npc_defaultVec;
+	}
+	return intersection;
+
+}
+
+float ST1_NPC::NPC_calcDistance(Npc_Vector3 v1, Npc_Vector3 v2)
+{
+	return sqrtf(powf((v1.x - v2.x), 2) + powf((v1.y - v2.y), 2) + powf(v1.z - v2.z, 2));
+}
+
+Npc_Vector3 ST1_NPC::GetInterSection_Line2Cube(Npc_Vector3 p, Npc_Vector3 lkvec, NPCCube bb)
+{
+	Npc_Vector3 Intersections[6] = { Npc_defaultVec, Npc_defaultVec, Npc_defaultVec, Npc_defaultVec, Npc_defaultVec, Npc_defaultVec };
+	// ㅁp1p2p3p4 평면방정식과 반직선의 충돌점 구하기
+	Npc_Vector3 Intersection_1234 = NPC_GetIntersection_Line2Plane(p, lkvec, bb.getP1(), bb.getP2(), bb.getP3());
+	Intersections[0] = Intersection_1234;
+
+	// ㅁp1p3p5p7 평면방정식과 반직선의 충돌점 구하기
+	Npc_Vector3 Intersection_1357 = NPC_GetIntersection_Line2Plane(p, lkvec, bb.getP1(), bb.getP3(), bb.getP5());
+	Intersections[1] = Intersection_1357;
+
+	// ㅁp3p4p7p8 평면방정식과 반직선의 충돌점 구하기
+	Npc_Vector3 Intersection_3478 = NPC_GetIntersection_Line2Plane(p, lkvec, bb.getP3(), bb.getP4(), bb.getP7());
+	Intersections[2] = Intersection_3478;
+
+	// ㅁp4p2p8p6 평면방정식과 반직선의 충돌점 구하기
+	Npc_Vector3 Intersection_4286 = NPC_GetIntersection_Line2Plane(p, lkvec, bb.getP4(), bb.getP2(), bb.getP8());
+	Intersections[3] = Intersection_4286;
+
+	// ㅁp2p1p6p5 평면방정식과 반직선의 충돌점 구하기
+	Npc_Vector3 Intersection_2165 = NPC_GetIntersection_Line2Plane(p, lkvec, bb.getP2(), bb.getP1(), bb.getP6());
+	Intersections[4] = Intersection_2165;
+
+	// ㅁp5p6p7p8 평면방정식과 반직선의 충돌점 구하기
+	Npc_Vector3 Intersection_7856 = NPC_GetIntersection_Line2Plane(p, lkvec, bb.getP7(), bb.getP8(), bb.getP5());
+	Intersections[5] = Intersection_7856;
+
+	// 3. p와 교차하는 점들 사이의 거리를 계산해서 가장 가까운 점이 교점이다.
+	float min_dist = INFINITY;
+	int min_index = 0;
+	for (int i = 0; i < 5; ++i) {
+		if (Intersections[i] == Npc_defaultVec) continue;
+		float cur_dist = NPC_calcDistance(p, Intersections[i]);
+		if (cur_dist < min_dist) {
+			min_dist = cur_dist;
+			min_index = i;
+		}
+	}
+
+	// 4. 그 충돌점이 큐브 안에 있는지 검사한다.
+	if ((bb.getP3().x <= Intersections[min_index].x && Intersections[min_index].x <= bb.getP4().x)
+		&& (bb.getP7().y <= Intersections[min_index].y && Intersections[min_index].y <= bb.getP3().y)
+		&& (bb.getP3().z <= Intersections[min_index].z && Intersections[min_index].z <= bb.getP1().z)) {
+		return Intersections[min_index];
+	}
+
+	// 5. 큐브 안에 없다면 충돌하지 않은 것이다.
+	return Npc_defaultVec;
 }

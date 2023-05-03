@@ -61,6 +61,8 @@ enum PacketID {
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
 };
 
+enum PLAYER_STATE { PL_ST_ALIVE, PL_ST_IDLE, PL_ST_FLY, PL_ST_CHASE, PL_ST_ATTACK, PL_ST_DEAD };
+
 // Target Type
 enum TargetType { TARGET_PLAYER, TARGET_BULLET, TARGET_NPC };
 
@@ -213,6 +215,14 @@ struct SC_TIME_TICKING_PACKET {
 	unsigned char size;
 	char type;
 	int servertime_ms;	// ¥‹¿ß: ms
+};
+
+struct SC_OBJECT_STATE_PACKET {
+	unsigned char size;
+	char type;
+	short target;
+	short id;
+	short state;
 };
 
 // ================================
