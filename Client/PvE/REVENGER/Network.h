@@ -11,7 +11,8 @@ GameSound gamesound;
 #pragma comment(lib, "MSWSock.lib")
 
 const char* SERVER_ADDR = IPADDR_LOOPBACK;	// 루프백 용
-//const char* SERVER_ADDR = IPADDR_RELAY;	// 리모트 용
+const char* RELAY1_ADDR = IPADDR_RELAY1;	// 리모트 용
+const char* RELAY2_ADDR = IPADDR_RELAY2;	// 리모트 용
 
 SOCKET s_socket;
 short active_servernum = 1;
