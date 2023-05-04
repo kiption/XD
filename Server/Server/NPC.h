@@ -150,6 +150,8 @@ public:
 	float GetSpeed(float spd);
 
 	vector<City_Info>GetCityInfo();
+
+	bool PrintRayCast = false;
 public:
 
 	// ===========================================

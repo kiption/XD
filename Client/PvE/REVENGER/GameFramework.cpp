@@ -372,8 +372,8 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		{
 
 			m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
-	/*		FRAME_BUFFER_WIDTH = GetSystemMetrics(SM_CXSCREEN);
-			#define FRAME_BUFFER_HEIGHT		GetSystemMetrics(SM_CYSCREEN)*/
+			/*		FRAME_BUFFER_WIDTH = GetSystemMetrics(SM_CXSCREEN);
+					#define FRAME_BUFFER_HEIGHT		GetSystemMetrics(SM_CYSCREEN)*/
 			q_keyboardInput.push(SEND_KEY_NUM1);//S
 			ChangeScene(SCENE1STAGE);
 			break;
@@ -867,59 +867,60 @@ void CGameFramework::FrameAdvance()
 	m_pd2dDeviceContext->BeginDraw();
 
 	m_pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	if (m_nMode == OPENINGSCENE) {
-		D2D_POINT_2F d2dPoint = { FRAME_BUFFER_WIDTH/8,0};
-		D2D_RECT_F d2dRect = { FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0, 0 };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[9] : m_pd2dfxGaussianBlur[9], &d2dPoint, &d2dRect);
 
+		D2D_POINT_2F d2d_Point = { FRAME_BUFFER_WIDTH / 6,0.0f };
+		D2D_RECT_F d2d_Rect = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[9] : m_pd2dfxGaussianBlur[9], &d2d_Point, &d2d_Rect);
 	}
 
 	if (UI_Switch) {
 		if (m_nMode = SCENE1STAGE) {
 			// 내구도 관련 UI 
-			D2D_POINT_2F d2_HPPoint = { 60.0f, 650.0f };
+			D2D_POINT_2F d2_HPPoint = { FRAME_BUFFER_WIDTH / 16, (FRAME_BUFFER_HEIGHT / 4) * 3 };
 			D2D_RECT_F d2_HPRect = { 0.0f, 0.0f, 240.0f, 160.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[0] : m_pd2dfxGaussianBlur[0], &d2_HPPoint, &d2_HPRect);
-
+			
 			// 남아있는 NPC 수 관련 UI
-			D2D_POINT_2F d2_NPCremain = { 1200.0f, 200.0f };
-			D2D_RECT_F d2_remainRect = { 26.0f * (m_remainNPC - 1) , 0.0f, 26.0f * m_remainNPC, 36.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2_NPCremain, &d2_remainRect);
+			D2D_POINT_2F d2_NPCremainOne = { (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 8) };
+			D2D_RECT_F d2_remainRectOne = { 26.0f * (m_remainNPC - 1) , 0.0f, 26.0f * m_remainNPC, 36.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2_NPCremainOne, &d2_remainRectOne);
 
-			/*D2D_POINT_2F d2BHPPoint = { 800.0f, 50.0f };
-			D2D_RECT_F d2BHPRect = { 0.0f , 0.0f, 190.0f, 45.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2BHPPoint, &d2BHPRect);*/
+			D2D_POINT_2F d2_NPCremainTen = { (FRAME_BUFFER_WIDTH / 16) * 15 - 26.0f, (FRAME_BUFFER_HEIGHT / 8) };
+			D2D_RECT_F d2_remainRectTen = { 26.0f * (m_remainNPC - 1) , 0.0f, 26.0f * m_remainNPC, 36.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[14] : m_pd2dfxGaussianBlur[14], &d2_NPCremainTen, &d2_remainRectTen);
 
 			// Timer 관련 UI 
-			D2D_POINT_2F d2T_M2Point = { 550.0f, 50.0f };
+			D2D_POINT_2F d2T_M2Point = { (FRAME_BUFFER_WIDTH / 16) * 7, (FRAME_BUFFER_HEIGHT / 20) };
 			D2D_RECT_F d2T_M2Rect = { m_10MinOfTime * 40.0f , 0.0f, 40.0f + m_10MinOfTime * 40.0f, 50.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[2] : m_pd2dfxGaussianBlur[2], &d2T_M2Point, &d2T_M2Rect);
 
-			D2D_POINT_2F d2T_M1Point = { 575.0f, 50.0f };
+			D2D_POINT_2F d2T_M1Point = { (FRAME_BUFFER_WIDTH / 32) * 15, (FRAME_BUFFER_HEIGHT / 20) };
 			D2D_RECT_F d2T_M1Rect = { m_1MinOfTime * 40.0f , 0.0f, 40.0f + m_1MinOfTime * 40.0f, 50.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[3] : m_pd2dfxGaussianBlur[3], &d2T_M1Point, &d2T_M1Rect);
 
-			D2D_POINT_2F d2T_SectionPoint = { 620.0f, 50.0f };
+			D2D_POINT_2F d2T_SectionPoint = { FRAME_BUFFER_WIDTH / 2, (FRAME_BUFFER_HEIGHT / 20) };
 			D2D_RECT_F d2T_SectionRect = { 282.0f , 420.0f, 300.0f, 475.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[4] : m_pd2dfxGaussianBlur[4], &d2T_SectionPoint, &d2T_SectionRect);
 
-			D2D_POINT_2F d2T_S2Point = { 650.0f, 50.0f };
+			D2D_POINT_2F d2T_S2Point = { (FRAME_BUFFER_WIDTH / 32) * 17, (FRAME_BUFFER_HEIGHT / 20) };
 			D2D_RECT_F d2T_S2Rect = { m_10SecOftime * 40.0f , 0.0f, 40.0f + m_10SecOftime * 40.0f, 50.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[5] : m_pd2dfxGaussianBlur[5], &d2T_S2Point, &d2T_S2Rect);
 
-			D2D_POINT_2F d2T_S1Point = { 680.0f, 50.0f };
+			D2D_POINT_2F d2T_S1Point = { (FRAME_BUFFER_WIDTH / 16) * 9, (FRAME_BUFFER_HEIGHT / 20) };
 			D2D_RECT_F d2T_S1Rect = { m_1SecOfTime * 40.0f , 0.0f, 40.0f + m_1SecOfTime * 40.0f, 50.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[6] : m_pd2dfxGaussianBlur[6], &d2T_S1Point, &d2T_S1Rect);
 
 
 			// 총알 갯수 관련 UI
-			D2D_POINT_2F d2d_BulletPoint = { 1000.0f, 700.0f };
+			D2D_POINT_2F d2d_BulletPoint = { (FRAME_BUFFER_WIDTH / 8) * 7, (FRAME_BUFFER_HEIGHT / 8) * 7 - 16.0f };
 			D2D_RECT_F d2d_BulletRect = { 0.0f , 0.0f, 32.0f, 32.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[7] : m_pd2dfxGaussianBlur[7], &d2d_BulletPoint, &d2d_BulletRect);
 
 			// 방향 관련 UI 
-			D2D_POINT_2F d2_DirectionPoint = { 550.0f, -10.0f };
+			D2D_POINT_2F d2_DirectionPoint = { (FRAME_BUFFER_WIDTH / 2) - 90.0f, 0.0f };
 			float myAngle = abs(m_pPlayer->m_fYaw);
 			if (myAngle > 315.0f) {
 				myAngle -= 360.0f;
@@ -927,24 +928,24 @@ void CGameFramework::FrameAdvance()
 			D2D_RECT_F d2_DirectionRect = { 45.0f + myAngle , 0.0f, 225.0f + myAngle, 90.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[8] : m_pd2dfxGaussianBlur[8], &d2_DirectionPoint, &d2_DirectionRect);
 
-			D2D_POINT_2F d2_dirPoint = { 617.0f, -15.0f };
+			D2D_POINT_2F d2_dirPoint = { (FRAME_BUFFER_WIDTH / 2) - 17.5f, -10.0f };
 			D2D_RECT_F d2d_dirRect = { 0.0f , 0.0f, 35.0f, 37.0f };
+
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[10] : m_pd2dfxGaussianBlur[10], &d2_dirPoint, &d2d_dirRect);
+			//CreateTexture2DResource(,)
 
 			// 점령율 관련 UI
-			D2D_POINT_2F d2_OccupationPoint = { 400.0f, 100.0f };
+			D2D_POINT_2F d2_OccupationPoint = { (FRAME_BUFFER_WIDTH / 32) * 11, (FRAME_BUFFER_HEIGHT / 10) };
 			D2D_RECT_F d2_OccupationRect = { 0.0f , 0.0f, 92.0f, 49.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[11] : m_pd2dfxGaussianBlur[11], &d2_OccupationPoint, &d2_OccupationRect);
 
-			D2D_POINT_2F d2_BackBarPoint = { 500.0f, 115.0f };
+			D2D_POINT_2F d2_BackBarPoint = { (FRAME_BUFFER_WIDTH / 2) - (375 / 2), (FRAME_BUFFER_HEIGHT / 10) + 11.5f };
 			D2D_RECT_F d2_BackBarRect = { 0.0f , 0.0f, 375.0f, 26.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[12] : m_pd2dfxGaussianBlur[12], &d2_BackBarPoint, &d2_BackBarRect);
 
-			D2D_POINT_2F d2_ProcessBarPoint = { 500.0f, 115.0f };
+			D2D_POINT_2F d2_ProcessBarPoint = { (FRAME_BUFFER_WIDTH / 2) - (375 / 2), (FRAME_BUFFER_HEIGHT / 10) + 11.5f + 4.5f };
 			D2D_RECT_F d2T_ProcessBarRect = { 0.0f , 0.0f, (350.0f / 100 * m_occupationnum), 17.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[13] : m_pd2dfxGaussianBlur[13], &d2_ProcessBarPoint, &d2T_ProcessBarRect);
-
-
 
 		}
 	}
@@ -952,24 +953,11 @@ void CGameFramework::FrameAdvance()
 #endif
 	if (UI_Switch) {
 		if (m_nMode == SCENE1STAGE) {
-			/*D2D1_SIZE_F szRenderTarget = m_ppd2dRenderTargets[m_nSwapChainBufferIndex]->GetSize();
-			D2D1_RECT_F rcUpperText = D2D1::RectF(0, 0, szRenderTarget.width, szRenderTarget.height * 0.25f);
-			m_pd2dDeviceContext->DrawTextW(L"", (UINT32)wcslen(L""), m_pdwFont, &rcUpperText, m_pd2dbrText);
-
-			D2D1_RECT_F rcLowerText = D2D1::RectF(0, szRenderTarget.height * 0.8f, szRenderTarget.width, szRenderTarget.height);
-			m_pd2dDeviceContext->DrawTextW(L" ", (UINT32)wcslen(L" "), m_pdwFont, &rcLowerText, m_pd2dbrText);
-
-			D2D1_RECT_F rcBulletText = D2D1::RectF(850, 950, szRenderTarget.width, szRenderTarget.height * 0.5f);
+			D2D1_RECT_F rcBulletText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 28, (FRAME_BUFFER_HEIGHT / 4) * 3, (FRAME_BUFFER_WIDTH / 32) * 30, (FRAME_BUFFER_HEIGHT));
 			m_pd2dDeviceContext->DrawTextW(m_myBullet, (UINT32)wcslen(m_myBullet), m_pdwFont, &rcBulletText, m_pd2dbrText);
 
-			D2D1_RECT_F rcMaxBulletText = D2D1::RectF(950, 950, szRenderTarget.width, szRenderTarget.height * 0.5f);
+			D2D1_RECT_F rcMaxBulletText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 29, (FRAME_BUFFER_HEIGHT / 4) * 3, (FRAME_BUFFER_WIDTH / 32) * 31, (FRAME_BUFFER_HEIGHT));
 			m_pd2dDeviceContext->DrawTextW(L"/100", (UINT32)wcslen(L"/100"), m_pdwFont, &rcMaxBulletText, m_pd2dbrText);
-
-			D2D1_RECT_F rcCurrHpText = D2D1::RectF(-1025, 920, szRenderTarget.width, szRenderTarget.height * 0.5f);
-			m_pd2dDeviceContext->DrawTextW(m_myhp, (UINT32)wcslen(m_myhp), m_pdwFont, &rcCurrHpText, m_pd2dbrText);
-
-			D2D1_RECT_F rcMaxHpText = D2D1::RectF(-925, 920, szRenderTarget.width, szRenderTarget.height * 0.5f);
-			m_pd2dDeviceContext->DrawTextW(L"/100", (UINT32)wcslen(L"/100"), m_pdwFont, &rcMaxHpText, m_pd2dbrText);*/
 		}
 	}
 
@@ -1016,7 +1004,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 		{
 		case SCENE1STAGE:
 		{
-			
+
 			m_nMode = nMode;
 			m_pScene = new Stage1();
 			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
@@ -1098,10 +1086,10 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(0.3f, 0.0f, 0.0f, 0.5f), &m_pd2dbrBackground);
 	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF(0x9ACD32, 1.0f)), &m_pd2dbrBorder);
 
-	hResult = m_pdWriteFactory->CreateTextFormat(L"텍스트 레이아웃", NULL, DWRITE_FONT_WEIGHT_DEMI_BOLD, DWRITE_FONT_STYLE_OBLIQUE, DWRITE_FONT_STRETCH_NORMAL, 24.0f, L"ko-kr", &m_pdwFont);
+	hResult = m_pdWriteFactory->CreateTextFormat(L"NanumSquare_acEB.ttf", NULL, DWRITE_FONT_WEIGHT_DEMI_BOLD, DWRITE_FONT_STYLE_OBLIQUE, DWRITE_FONT_STRETCH_NORMAL, 35.0f, L"ko-kr", &m_pdwFont);
 	hResult = m_pdwFont->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
 	hResult = m_pdwFont->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::DarkBlue, 0.8f), &m_pd2dbrText);
+	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White, 5.0f), &m_pd2dbrText);
 	hResult = m_pdWriteFactory->CreateTextLayout(L"텍스트 레이아웃", 6, m_pdwFont, 1024, 1024, &m_pdwTextLayout);
 
 	float fDpi = (float)GetDpiForWindow(m_hWnd);
@@ -1147,7 +1135,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[0]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/Numbering.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/newNumbering.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
 	m_pd2dfxBitmapSource[1]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
@@ -1349,6 +1337,17 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[13]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
 	m_pd2dfxEdgeDetection[13]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[13]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	m_pd2dfxGaussianBlur[14]->SetInputEffect(0, m_pd2dfxBitmapSource[1]);
+	m_pd2dfxGaussianBlur[14]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[14]->SetInputEffect(0, m_pd2dfxBitmapSource[1]);
+	m_pd2dfxEdgeDetection[14]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[14]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[14]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[14]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[14]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
 
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();

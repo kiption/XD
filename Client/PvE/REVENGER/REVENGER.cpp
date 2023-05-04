@@ -24,11 +24,6 @@ INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-
-
-
-
-
 	//==================================================
 	//					Server Code
 	//==================================================
@@ -51,8 +46,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	int new_portnum = PORT_NUM_S0 + active_servernum;
 	server0_addr.sin_port = htons(new_portnum);
 	//server0_addr.sin_port = htons(PORTNUM_RELAY2CLIENT_0);		// 릴레이서버로 연결하려면 123,124를 지우고 여기를 주석해제하면됨.
-	inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);
-	//inet_pton(AF_INET, RELAY1_ADDR, &server0_addr.sin_addr);
+	//inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);
+	inet_pton(AF_INET, RELAY1_ADDR, &server0_addr.sin_addr);
 	connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
 
 	sendPacket(&login_pack, active_servernum);

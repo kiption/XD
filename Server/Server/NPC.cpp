@@ -150,7 +150,7 @@ void ST1_NPC::SetFrustum()
 	XMVECTOR startPoint = position;
 
 	// Frustum의 끝점을 설정한다.
-	XMVECTOR endPoint = position + (look * 50.0f);
+	XMVECTOR endPoint = position + (look * 200.0f);
 
 	// Frustum의 Up 벡터를 설정한다.
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
@@ -267,12 +267,13 @@ void ST1_NPC::ST1_State_Manegement(int state)
 	{
 		// Fly 지속 or Fly -> chase or Fly -> Idle
 		FlyOnNpc(m_User_Pos[m_chaseID], m_chaseID); // 대상 플레이어와의 y 좌표를 비슷하게 맞춤.
-		
+
 		SetTrackingIDbyDistance(350.0f, NPC_FLY, NPC_CHASE);
-		
-		if (!SetTrackingPrevStatebyDistance(350.0f, NPC_FLY, NPC_IDLE)) {
-			MoveChangeIdle();
-			m_chaseID = -1;
+		if (m_state == NPC_FLY) {
+			if (!SetTrackingPrevStatebyDistance(350.0f, NPC_FLY, NPC_IDLE)) {
+				MoveChangeIdle();
+				m_chaseID = -1;
+			}
 		}
 	}
 	break;
@@ -285,7 +286,7 @@ void ST1_NPC::ST1_State_Manegement(int state)
 			m_state = NPC_ATTACK; // 다음 상태
 		}
 		else {
-			SetTrackingPrevStatebyDistance(300.0f, NPC_FLY, NPC_IDLE);
+			SetTrackingPrevStatebyDistance(300.0f, NPC_CHASE, NPC_FLY);
 		}
 	}
 	break;
@@ -295,6 +296,7 @@ void ST1_NPC::ST1_State_Manegement(int state)
 		SetTrackingIDbyDistance(200.0f, NPC_ATTACK, NPC_ATTACK); // ID 탐색
 		if (!PlayerDetact()) { // Id 탐색은 이미 가장 가까운 대상으로 지정하기에 따로 탐색은 하지 않음.
 			m_state = NPC_CHASE; // 이전 상태
+			PrintRayCast = false;
 		}
 		else {
 			PlayerAttack();
@@ -332,12 +334,13 @@ void ST1_NPC::ST1_Death_motion()
 void ST1_NPC::SetTrackingIDbyDistance(float setDistance, int curState, int nextState)
 {
 	bool State_check = false;
-	
+	float MinDis = 50000;
 	for (int i{}; i < User_num; ++i) {
-		if (m_Distance[i] <= setDistance) {  // 상태로 변환하기 위한 조건 및 추적 ID 갱신
+		if (m_Distance[i] < setDistance) {  // 상태로 변환하기 위한 조건 및 추적 ID 갱신
 			State_check = true;
-			if (m_Distance[i] < m_Distance[m_chaseID]) {
+			if (m_Distance[i] < MinDis) {
 				m_chaseID = i;
+				MinDis = m_Distance[i];
 			}
 			m_state = nextState; // 자신의 상태를 다음 상태로 변경
 		}
@@ -657,7 +660,7 @@ void ST1_NPC::PlayerChasing()
 	XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
 	XMStoreFloat3(&m_curr_coordinate.up, uptemp);
 
-	if (m_Distance[m_chaseID] < 30) {
+	if (m_Distance[m_chaseID] < 50) {
 		m_Speed = 0;
 	}
 	else {
@@ -703,7 +706,46 @@ bool ST1_NPC::PlayerDetact()
 
 void ST1_NPC::PlayerAttack()
 {
+	// Look
+	XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&m_User_Pos[m_chaseID]), XMLoadFloat3(&m_Pos)));
+	XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
 
+	// Right
+	Coordinate base_coordinate;
+	base_coordinate.up = { 0,1,0 };
+
+	XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+	XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+	// up
+	XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+	XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+	
+	if (m_Distance[m_chaseID] < 30) {
+		m_Speed = 0;
+	}
+	else {
+		m_Speed = 1.5f;
+	}
+
+	// 위치 변환
+	m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+	m_Pos.y += m_Speed * m_curr_coordinate.look.y;
+	m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+
+	// Attack
+	NPCCube ChasePlayer{ {m_User_Pos[m_chaseID].x, m_User_Pos[m_chaseID].y, m_User_Pos[m_chaseID].z }, 
+		HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z	};
+	Npc_Vector3 NPC_bullet_Pos = { m_Pos.x, m_Pos.y , m_Pos.z };
+	Npc_Vector3 NPC_Look_Vec = { m_curr_coordinate.look.x, m_curr_coordinate.look.y , m_curr_coordinate.look.z };
+	Npc_Vector3 NPC_result;
+	NPC_result = GetInterSection_Line2Cube(NPC_bullet_Pos, NPC_Look_Vec, ChasePlayer);
+	if (NPC_result != Npc_defaultVec) {
+		PrintRayCast = false;
+	}
+	else {
+		PrintRayCast = true;
+	}
 }
 
 // Ray Casting
