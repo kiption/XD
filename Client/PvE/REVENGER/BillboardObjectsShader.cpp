@@ -352,17 +352,6 @@ void BillboardParticleShader::ReleaseUploadBuffers()
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
 D3D12_INPUT_LAYOUT_DESC ResponeEffectShader::CreateInputLayout(int nPipelineState)
 {
 	UINT nInputElementDescs = 2;

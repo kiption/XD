@@ -127,8 +127,8 @@ void CGameFramework::CreateSwapChain()
 		::PostQuitMessage(0);
 		return;
 	}
-	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 	hResult = m_pdxgiFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
+	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 
 #ifndef _WITH_SWAPCHAIN_FULLSCREEN_STATE
 	CreateRenderTargetViews();
@@ -370,6 +370,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case '1':
 		{
+
+			m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
+	/*		FRAME_BUFFER_WIDTH = GetSystemMetrics(SM_CXSCREEN);
+			#define FRAME_BUFFER_HEIGHT		GetSystemMetrics(SM_CYSCREEN)*/
 			q_keyboardInput.push(SEND_KEY_NUM1);//S
 			ChangeScene(SCENE1STAGE);
 			break;
@@ -679,6 +683,10 @@ void CGameFramework::ProcessInput()
 				{
 					if (dwDirection) m_pPlayer->Move(dwDirection, 0.0f, true);
 				}
+				if (m_nMode == SCENE2STAGE)
+				{
+					if (dwDirection) m_pPlayer->Move(dwDirection, 10.0f, true);
+				}
 			}
 		}
 	}
@@ -716,9 +724,9 @@ void CGameFramework::AnimateObjects()
 		m_pPlayer->m_fRoll = 0.0f;
 
 		m_bCollisionCheck = false;
-		m_pCamera=m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
+		m_pCamera = m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
 	}
-	
+
 }
 
 void CGameFramework::WaitForGpuComplete()
@@ -819,7 +827,7 @@ void CGameFramework::FrameAdvance()
 
 
 
-	float pfClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
+	float pfClearColor[4] = { 0.0f, 0.0f, 0.0f, 0.5f };
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], pfClearColor/*Colors::Azure*/, 0, NULL);
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], TRUE, &d3dDsvCPUDescriptorHandle);
@@ -861,8 +869,8 @@ void CGameFramework::FrameAdvance()
 	m_pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	if (m_nMode == OPENINGSCENE) {
-		D2D_POINT_2F d2dPoint = { 0.0f, 0.0f };
-		D2D_RECT_F d2dRect = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
+		D2D_POINT_2F d2dPoint = { FRAME_BUFFER_WIDTH/8,0};
+		D2D_RECT_F d2dRect = { FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0, 0 };
 		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[9] : m_pd2dfxGaussianBlur[9], &d2dPoint, &d2dRect);
 
 	}
@@ -992,7 +1000,7 @@ void CGameFramework::FrameAdvance()
 	size_t nLength = _tcslen(m_pszFrameRate);
 	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
 	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
-	::SetWindowText(m_hWnd, m_pszFrameRate);
+	::SetWindowText(m_hWnd, L"REVENGER");
 }
 
 void CGameFramework::ChangeScene(DWORD nMode)
@@ -1008,6 +1016,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 		{
 		case SCENE1STAGE:
 		{
+			
 			m_nMode = nMode;
 			m_pScene = new Stage1();
 			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
