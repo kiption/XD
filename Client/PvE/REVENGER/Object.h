@@ -51,6 +51,8 @@ struct CB_GAMEOBJECT_INFO
 
 class CShader;
 class CStandardShader;
+class CBulletEffectShader;
+class CValkanObject;
 class CPlayer;
 
 class CTexture
@@ -576,19 +578,27 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-class CMi24Object : public CGameObject
+class CHelicopterObjects : public CGameObject
 {
 public:
-	CMi24Object(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
-	virtual ~CMi24Object();
+	CHelicopterObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	virtual ~CHelicopterObjects();
 
 private:
 	CGameObject					*m_pMainRotorFrame = NULL;
 	CGameObject					*m_pTailRotorFrame = NULL;
-
+	CGameObject					*m_pTailRotor2Frame = NULL;
+	CCamera* m_pCamera = NULL;
+public:
+	float m_fBulletEffectiveRange = 2000.0f;
+	CBulletEffectShader* pBCBulletEffectShader = NULL;
+	CValkanObject* pBulletObject = NULL;
+	CValkanObject* m_ppBullets[BULLETS];
+	void Firevalkan(CGameObject* pLockedObject);
 public:
 	virtual void OnPrepareAnimate();
 	virtual void Animate(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 };
 class CCityObject : public CGameObject
 {
@@ -599,6 +609,7 @@ public:
 public:
 	virtual void OnPrepareAnimate();
 	virtual void Animate(float fTimeElapsed);
+
 };
 class CAngrybotAnimationController : public CAnimationController
 {
@@ -616,14 +627,6 @@ public:
 	virtual ~CAngrybotObject();
 };
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-class CMonsterObject : public CGameObject
-{
-public:
-	CMonsterObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks);
-	virtual ~CMonsterObject();
-};
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -666,23 +669,6 @@ class CBilldingObject : public CGameObject
 public:
 	CBilldingObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks);
 	virtual ~CBilldingObject();
-};
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-class CLionObject : public CGameObject
-{
-public:
-	CLionObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks);
-	virtual ~CLionObject();
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-class CZebraObject : public CGameObject
-{
-public:
-	CZebraObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks);
-	virtual ~CZebraObject();
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

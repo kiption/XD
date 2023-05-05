@@ -16,7 +16,7 @@ void CMapObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1.bin", NULL);
 	for (int i = 0; i < GeneratorModels; i++)
 	{
-		m_ppObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppObjects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pGeneratorModel, false);
 
 		m_ppObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
@@ -140,7 +140,7 @@ void CStage2MapObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphi
 	CGameObject* pSceneModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/GameObject.bin", NULL);
 	for (int i = 0; i < 2; i++)
 	{
-		m_ppObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppObjects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pSceneModel, false);
 		m_ppObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
 		m_ppObjects[i]->SetScale(16.0, 16.0, 16.0);

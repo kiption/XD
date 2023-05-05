@@ -23,8 +23,8 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 300.0f, 300.0f, 300.0f);
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
-	CMaterial* pPlaneMaterial = new CMaterial(3);
-	pPlaneMaterial->SetReflection(3);
+	CMaterial* pPlaneMaterial = new CMaterial(2);
+	pPlaneMaterial->SetReflection(2);
 	m_ppObjects[0] = new CGameObject(1);
 	m_ppObjects[0]->SetMesh(pPlaneMesh);
 	m_ppObjects[0]->SetMaterial(0,pPlaneMaterial);
@@ -65,37 +65,33 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[4]->Rotate(0,90,0);
 	m_ppObjects[4]->SetPosition(-400.0f, 50.0, 1300.0f);
 
-	m_nHierarchicalGameObjects = 5;
+	m_nHierarchicalGameObjects = 3;
 	m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
-	CMaterial* pOtherPlayerMaterial = new CMaterial(5);
-	pOtherPlayerMaterial->SetReflection(5);
+	CMaterial* pOtherPlayerMaterial = new CMaterial(3);
+	pOtherPlayerMaterial->SetReflection(3);
 
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++)
 	{
 
-		m_ppHierarchicalGameObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
-		m_ppHierarchicalGameObjects[i]->SetChild(pOtherPlayerModel, false);
+		m_ppHierarchicalGameObjects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppHierarchicalGameObjects[i]->SetMaterial(0,pOtherPlayerMaterial);
-		m_ppHierarchicalGameObjects[i]->SetScale(2.0, 2.0, 2.0);
 		m_ppHierarchicalGameObjects[i]->SetPosition(0.0, 0.0, 0.0);
 		m_ppHierarchicalGameObjects[i]->OnPrepareAnimate();
-		pOtherPlayerModel->AddRef();
+		
 	}
 	m_ppObjects[5] = m_ppHierarchicalGameObjects[0];
 	m_ppObjects[6] = m_ppHierarchicalGameObjects[1];
 	m_ppObjects[7] = m_ppHierarchicalGameObjects[2];
-	m_ppObjects[8] = m_ppHierarchicalGameObjects[3];
-	m_ppObjects[9] = m_ppHierarchicalGameObjects[4];
 
-	m_nNpcObjects = 5;
+
+	m_nNpcObjects = 7;
 	m_ppNpcObjects = new CGameObject * [m_nNpcObjects];
-	CMaterial* pNpcMaterial = new CMaterial(5);
-	pNpcMaterial->SetReflection(5);
+	CMaterial* pNpcMaterial = new CMaterial(7);
+	pNpcMaterial->SetReflection(7);
 	for (int i = 0; i < m_nNpcObjects; i++)
 	{
 
-		m_ppNpcObjects[i] = new CMi24Object(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppNpcObjects[i] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		CGameObject* pNpcModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 		m_ppNpcObjects[i]->SetChild(pNpcModel, false);
 		m_ppNpcObjects[i]->SetMaterial(pNpcMaterial);
@@ -104,11 +100,14 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppNpcObjects[i]->OnPrepareAnimate();
 		pNpcModel->AddRef();
 	}
-	m_ppObjects[10] = m_ppNpcObjects[0];
-	m_ppObjects[11] = m_ppNpcObjects[1];
-	m_ppObjects[12] = m_ppNpcObjects[2];
-	m_ppObjects[13] = m_ppNpcObjects[3];
-	m_ppObjects[14] = m_ppNpcObjects[4];
+	
+	m_ppObjects[8] = m_ppNpcObjects[0];
+	m_ppObjects[9] = m_ppNpcObjects[1]; 
+	m_ppObjects[10] = m_ppNpcObjects[2];
+	m_ppObjects[11] = m_ppNpcObjects[3];
+	m_ppObjects[12] = m_ppNpcObjects[4];
+	m_ppObjects[13] = m_ppNpcObjects[5];
+	m_ppObjects[14] = m_ppNpcObjects[6];
 
 
 	CMaterial* pCityMaterial[6];
@@ -198,7 +197,7 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 {
 	CIlluminatedShader::Render(pd3dCommandList, pCamera, nPipelineState);
 	CPlayer *pPlayer = pCamera->GetPlayer();
-	m_ppObjects[6] = ((HeliPlayer*)pPlayer)->pGameObject;
+	
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])

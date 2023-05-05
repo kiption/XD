@@ -5,6 +5,8 @@
 #include "stdafx.h"
 #include "Object.h"
 #include "Shader.h"
+#include "ObjcetsShaderList.h"
+#include "MissileObject.h"
 #include "Scene.h"
 #include "Stage1.h"
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1018,9 +1020,6 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 	if (m_pMesh)
 	{
-
-
-
 		if (m_nMaterials > 0)
 		{
 			for (int i = 0; i < m_nMaterials; i++)
@@ -1040,7 +1039,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 				}
 				//if (IsVisible(pCamera))
 				//{
-					m_pMesh->Render(pd3dCommandList, i);
+				m_pMesh->Render(pd3dCommandList, i);
 
 				//}
 			}
@@ -1706,7 +1705,7 @@ void CSuperCobraObject::Animate(float fTimeElapsed)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CGunshipObject::CGunshipObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+CGunshipObject::CGunshipObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(7)
 {
 	SetScale(1.2, 1.2, 1.2);
 }
@@ -1734,39 +1733,119 @@ void CGunshipObject::Animate(float fTimeElapsed)
 		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
 	}
 
+
 	CGameObject::Animate(fTimeElapsed);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CMi24Object::CMi24Object(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(10)
+CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(1)
 {
+	CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Apache.bin", NULL);
+	SetChild(pOtherPlayerModel, false);
+	SetScale(0.5,0.5,0.5);
+	pOtherPlayerModel->AddRef();
+	pBCBulletEffectShader = new CBulletEffectShader();
+	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
+
+
+	for (int i = 0; i < BULLETS2; i++)
+	{
+
+		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
+		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
+		pBulletObject->SetChild(pBulletMesh, false);
+		pBulletObject->SetMovingSpeed(100.0f);
+		pBulletObject->SetActive(false);
+		pBulletObject->SetCurScene(SCENE1STAGE);
+		m_ppBullets[i] = pBulletObject;
+		pBulletMesh->AddRef();
+	}
+	OnPrepareAnimate();
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
-CMi24Object::~CMi24Object()
+CHelicopterObjects::~CHelicopterObjects()
 {
+	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
 }
 
-void CMi24Object::OnPrepareAnimate()
+void CHelicopterObjects::Firevalkan(CGameObject* pLockedObject)
 {
-	m_pTailRotorFrame = FindFrame("rescue_2");
-	m_pMainRotorFrame = FindFrame("rescue_1");
+	CValkanObject* pBulletObject = NULL;
+	for (int i = 0; i < BULLETS2; i++)
+	{
+		if (!m_ppBullets[i]->m_bActive)
+		{
+			pBulletObject = m_ppBullets[i];
+			pBulletObject->Reset();
+			break;
+		}
+	}
+
+	if (pBulletObject)
+	{
+		XMFLOAT3 PlayerLook = GetLook();
+		XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
+		XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
+		XMFLOAT3 xmf3Position = GetPosition();
+		XMFLOAT3 xmf3Direction = PlayerLook;
+		xmf3Direction.y += 0.1;
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 7.0f, false));
+
+		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
+		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+		pBulletObject->SetMovingDirection(xmf3Direction);
+		pBulletObject->Rotate(89.0, 0.0, 0.0);
+		pBulletObject->SetScale(3.0, 20.0, 3.0);
+		pBulletObject->SetActive(true);
+
+	}
 }
 
-void CMi24Object::Animate(float fTimeElapsed)
+void CHelicopterObjects::OnPrepareAnimate()
+{
+	CGameObject::OnPrepareAnimate();
+	m_pTailRotorFrame = FindFrame("black_m_6");
+	m_pTailRotor2Frame = FindFrame("black_m_7");
+	m_pMainRotorFrame = FindFrame("rotor");
+}
+
+void CHelicopterObjects::Animate(float fTimeElapsed)
 {
 	if (m_pMainRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 10.0f) * fTimeElapsed);
+		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 15.0f) * fTimeElapsed);
 		m_pMainRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4ToParent);
 	}
 	if (m_pTailRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 10.0f) * fTimeElapsed);
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 15.0f) * fTimeElapsed);
 		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
 	}
+	if (m_pTailRotor2Frame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 15.0f) * fTimeElapsed);
+		m_pTailRotor2Frame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotor2Frame->m_xmf4x4ToParent);
+	}
+	for (int i = 0; i < BULLETS2; i++)
+	{
+		if (m_ppBullets[i]->m_bActive)
+		{
+			m_ppBullets[i]->Animate(fTimeElapsed);
 
+		}
+	}
 	CGameObject::Animate(fTimeElapsed);
+}
+
+void CHelicopterObjects::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CGameObject::Render(pd3dCommandList, pCamera);
+	if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
+	for (int i = 0; i < BULLETS2; i++)if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1799,20 +1878,7 @@ CAngrybotObject::~CAngrybotObject()
 {
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks)
-{
-	CLoadedModelInfo* pMonsterModel = pModel;
-	if (!pMonsterModel) pMonsterModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Monster.bin", NULL);
 
-	SetChild(pMonsterModel->m_pModelRootObject, true);
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pMonsterModel);
-}
-
-CMonsterObject::~CMonsterObject()
-{
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1906,38 +1972,7 @@ CBilldingObject::CBilldingObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 CBilldingObject::~CBilldingObject()
 {
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-CLionObject::CLionObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks)
-{
-	CLoadedModelInfo* pLionModel = pModel;
-	if (!pLionModel) pLionModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Lion.bin", NULL);
 
-	SetChild(pLionModel->m_pModelRootObject, true);
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pLionModel);
-}
-
-CLionObject::~CLionObject()
-{
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-CZebraObject::CZebraObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks)
-{
-	CLoadedModelInfo* pZebraModel = pModel;
-	if (!pZebraModel) pZebraModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Zebra.bin", NULL);
-
-	SetChild(pZebraModel->m_pModelRootObject, true);
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pZebraModel);
-}
-
-CZebraObject::~CZebraObject()
-{
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 CEagleAnimationController::CEagleAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel) : CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pModel)
 {
 }

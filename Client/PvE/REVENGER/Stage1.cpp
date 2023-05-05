@@ -131,7 +131,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 1200);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 900);
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
@@ -192,13 +192,6 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
 	m_pBulletEffect = pBCBulletEffectShader;
 
-	/*CGameObject* pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", m_pBulletEffect);
-	for (int i = 0; i < 100; i++)
-	{
-		pBulletObject = new CBulletObject(NULL);
-		pBulletObject->SetChild(pGameObject, false);
-		m_ppBullets[i] = pBulletObject;
-	}*/
 
 	m_nShaders = 1;
 	m_ppShaders = new CObjectsShader * [m_nShaders];
@@ -279,7 +272,7 @@ void Stage1::ReleaseObjects()
 		m_pDepthRenderShader->ReleaseObjects();
 		m_pDepthRenderShader->Release();
 	}
-	//for (int i = 0; i < 100; i++)if (m_ppBullets[i]) delete m_ppBullets[i];
+
 	if (m_pShadowShader)delete m_pShadowShader;
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
@@ -741,6 +734,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
+
 	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();
 	if (m_pPlayer->m_bCollisionTerrain == true)
 	{
@@ -787,8 +781,8 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	if (m_pBulletEffect) m_pBulletEffect->Render(pd3dCommandList, pCamera, 0);
-	//for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) m_ppBullets[i]->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->Render(pd3dCommandList, pCamera, 0);
+	for (int i = 5; i < 10; i++) if (m_ppShaders[0])m_ppShaders[0]->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);

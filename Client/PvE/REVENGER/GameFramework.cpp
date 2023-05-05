@@ -372,8 +372,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		{
 
 			m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
-			/*		FRAME_BUFFER_WIDTH = GetSystemMetrics(SM_CXSCREEN);
-					#define FRAME_BUFFER_HEIGHT		GetSystemMetrics(SM_CYSCREEN)*/
 			q_keyboardInput.push(SEND_KEY_NUM1);//S
 			ChangeScene(SCENE1STAGE);
 			break;
@@ -389,6 +387,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case VK_SPACE:
 			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
+			break;
+		case 'L':
+			for(int i=5;i<10;i++)
+				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5])->Firevalkan(NULL);
 			break;
 		default:
 			break;

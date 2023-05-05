@@ -9,20 +9,21 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
-	pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
+	pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Apache.bin", NULL);
 
 	SetChild(pGameObject, false);
-	pGameObject->SetScale(1.0, 1.0, 1.0);
+	pGameObject->SetScale(0.2, 0.2, 0.1);
 	pGameObject->SetCurScene(SCENE1STAGE);
 
 
 	pBCBulletEffectShader = new CBulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
+	
 	for (int i = 0; i < BULLETS; i++)
 	{
+
 		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
-		
 		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, false);
 		pBulletObject->SetMovingSpeed(1000.0f);
@@ -75,7 +76,7 @@ void HeliPlayer::Firevalkan(CGameObject* pLockedObject)
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->Rotate(89.0, 0.0, 0.0);
-		pBulletObject->SetScale(3.0, 3.0, 20.0);
+		pBulletObject->SetScale(3.0, 20.0, 3.0);
 		pBulletObject->SetActive(true);
 
 	}
@@ -101,13 +102,13 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		break;
 	case SPACESHIP_CAMERA:
 		SetFriction(5.0f);
-		SetGravity(XMFLOAT3(0.0f, -0.2f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, -0.0f, 0.0f));
 		SetMaxVelocityXZ(300.0f);
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 1.66f, 1.8f));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
+		m_pCamera->SetOffset(XMFLOAT3(0.3f, 0.6, 0.7f));
+		m_pCamera->GenerateProjectionMatrix(1.01f, 7000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
@@ -135,8 +136,9 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 void HeliPlayer::OnPrepareAnimate()
 {
 	CPlayer::OnPrepareAnimate();
-	m_pTailRotorFrame = FindFrame("rescue_2");
-	m_pMainRotorFrame = FindFrame("rescue_1");
+	m_pTailRotorFrame = FindFrame("black_m_6");
+	m_pTail2RotorFrame = FindFrame("black_m_7");
+	m_pMainRotorFrame = FindFrame("rotor");
 
 }
 //void HeliPlayer::Animate(float fTimeElapsed)
@@ -164,8 +166,13 @@ void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 	}
 	if (m_pTailRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 10.0f) * fTimeElapse);
+		XMMATRIX xmmtxRotate = XMMatrixRotationZ(XMConvertToRadians(360.0f * 15.0f) * fTimeElapse);
 		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
+	}
+	if (m_pTail2RotorFrame)
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 15.0f) * fTimeElapse);
+		m_pTail2RotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTail2RotorFrame->m_xmf4x4ToParent);
 	}
 	if (m_xmf3Position.y > 200.0f)
 	{
@@ -180,7 +187,7 @@ void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 	{
 		m_bCollisionTerrain = false;
 	}
-	
+
 }
 
 void HeliPlayer::OnPlayerUpdateCallback(float fTimeElapsed)
@@ -228,10 +235,10 @@ void HeliPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 void HeliPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	CPlayer::Render(pd3dCommandList, pCamera);
-	
+
 	if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < BULLETS; i++)if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
-	
+
 
 }
 
