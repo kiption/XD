@@ -66,7 +66,7 @@ void CBillboardParticleObject::Animate(float fTimeElapsed)
 	CGameObject::Animate(fTimeElapsed);
 }
 
-CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
+CMultiSpriteObject::CMultiSpriteObject(/*ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature*/) : CGameObject(1)
 {
 }
 
@@ -93,10 +93,8 @@ void CMultiSpriteObject::ReleaseShaderVariables()
 	CGameObject::ReleaseShaderVariables();
 }
 
-void CMultiSpriteObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
+void CMultiSpriteObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	SceneManager* pScene = NULL;
-	CGameObject::UpdateShaderVariable(pd3dCommandList, pxmf4x4World);
 	if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
 }
 
@@ -115,7 +113,7 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 		}
 	}
 
-	CGameObject::Animate(fTimeElapsed);
+	//CGameObject::Animate(fTimeElapsed);
 }
 
 void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)

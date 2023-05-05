@@ -561,16 +561,16 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-class CGunshipObject : public CGameObject
+class CNpcHelicopterObject : public CGameObject
 {
 public:
-	CGunshipObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
-	virtual ~CGunshipObject();
+	CNpcHelicopterObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	virtual ~CNpcHelicopterObject();
 
 private:
 	CGameObject					*m_pMainRotorFrame = NULL;
 	CGameObject					*m_pTailRotorFrame = NULL;
-
+	CGameObject					*m_pTail2RotorFrame = NULL;
 public:
 	virtual void OnPrepareAnimate();
 	virtual void Animate(float fTimeElapsed);

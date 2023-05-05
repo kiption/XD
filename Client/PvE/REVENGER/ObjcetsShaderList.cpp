@@ -48,7 +48,7 @@ void CHellicopterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 	for (int i = 0; i < m_nObjects; i++)
 	{
 
-		m_ppObjects[i] = new CGunshipObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppObjects[i] = new CNpcHelicopterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pGunshipModel->m_pModelRootObject, true);
 
 		m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), Random(20.0f, 100.0f), nColumnSize - int(floor(nColumnSize / 2.0f)), nColumnSpace));

@@ -131,7 +131,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 900);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 2, 900);
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
@@ -176,6 +176,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pSpriteAnimationBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pSpriteAnimationBillboard->SetActive(false);
 	m_ppSpriteBillboard[0] = pSpriteAnimationBillboard;
+
 
 
 
@@ -745,6 +746,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		m_ppSpriteBillboard[0]->m_bActive = false;
 
 	}
+
 	if (m_pLights)
 	{
 		//		m_pLights->m_pLights[1].m_xmf3Position = m_pPlayer->GetCamera()->GetPosition();

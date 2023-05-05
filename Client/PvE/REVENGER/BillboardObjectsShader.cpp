@@ -201,11 +201,11 @@ D3D12_SHADER_BYTECODE BillboardParticleShader::CreatePixelShader(ID3DBlob** ppd3
 void BillboardParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/45Smoke2.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/40Smoke2.dds", RESOURCE_TEXTURE2D, 0);
 	CTexture* ppSpriteTextures2 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppSpriteTextures2->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/40Smoke2.dds", RESOURCE_TEXTURE2D, 0);
 	CTexture* ppSpriteTextures3 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/45Smoke2.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/40Smoke2.dds", RESOURCE_TEXTURE2D, 0);
 
 	pSpriteMaterial = new CMaterial(1);
 	pSpriteMaterial2 = new CMaterial(1);
@@ -215,12 +215,12 @@ void BillboardParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	pSpriteMaterial2->SetTexture(ppSpriteTextures2, 0);
 	pSpriteMaterial3->SetTexture(ppSpriteTextures3, 0);
 
-	m_fWidth = 20.0f;
-	m_fHeight = 20.0f;
+	m_fWidth = 100.0f;
+	m_fHeight = 100.0f;
 	CTexturedRectMesh* pSpriteMesh;
 	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, m_fWidth, m_fHeight, 0.0f, 0.0f, 0.0f, 0.0f);
 
-	m_nObjects = 200;
+	m_nObjects = 100;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures, 0, 15);
 	SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures2, 0, 15);
@@ -231,7 +231,7 @@ void BillboardParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	CBillboardParticleObject** ppParticleObject = new CBillboardParticleObject * [m_nObjects];
 
 	
-		for (int j = 0; j < m_nObjects-40; j++)
+		for (int j = 0; j <60; j++)
 		{
 			ppParticleObject[j] = new CBillboardParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			ppParticleObject[j]->SetMesh(pSpriteMesh);
@@ -239,7 +239,7 @@ void BillboardParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 			ppParticleObject[j]->SetPosition(0.0,0.0,0.0);
 			m_ppObjects[j] = ppParticleObject[j];
 		}
-		for (int k = m_nObjects-40; k < m_nObjects-60; k++)
+		for (int k = 60; k < 80; k++)
 		{
 			ppParticleObject[k] = new CBillboardParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			ppParticleObject[k]->SetMesh(pSpriteMesh);
@@ -247,13 +247,13 @@ void BillboardParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 			ppParticleObject[k]->SetPosition(0.0,0.0,0.0);
 			m_ppObjects[k] = ppParticleObject[k];
 		}
-		for (int k = m_nObjects-60; k < m_nObjects; k++)
+		for (int i = 80; i < m_nObjects; i++)
 		{
-			ppParticleObject[k] = new CBillboardParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			ppParticleObject[k]->SetMesh(pSpriteMesh);
-			ppParticleObject[k]->SetMaterial(0, pSpriteMaterial3);
-			ppParticleObject[k]->SetPosition(0.0, 0.0, 0.0);
-			m_ppObjects[k] = ppParticleObject[k];
+			ppParticleObject[i] = new CBillboardParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			ppParticleObject[i]->SetMesh(pSpriteMesh);
+			ppParticleObject[i]->SetMaterial(0, pSpriteMaterial3);
+			ppParticleObject[i]->SetPosition(0.0, 0.0, 0.0);
+			m_ppObjects[i] = ppParticleObject[i];
 
 		}
 		NextPosition = XMFLOAT3(0.0,0.0,0.0);
@@ -308,12 +308,12 @@ void BillboardParticleShader::AnimateObjects(float fTimeElapsed)
 		randomY = uidy(dre);
 		randomZ = uidz(dre);
 		XMFLOAT3 xf_Velocity = XMFLOAT3(0.001, 0.0, 0.0f);
-		XMFLOAT3 xf_GravityAccel = XMFLOAT3(0.0, 1.8f, 0.0);
+		XMFLOAT3 xf_GravityAccel = XMFLOAT3(0.0, 5.8f, 0.0);
 		float f_EmmitTime = 2.0;
 		float a_LifeTime = 1.0;
 		float f_ResetTime = {};
 		float NewY{};
-		fTimeElapsed += 0.0165;
+		fTimeElapsed += 0.0345;
 	
 		float Time = fTimeElapsed - f_EmmitTime;
 		if (Time < 0.0)
@@ -322,8 +322,6 @@ void BillboardParticleShader::AnimateObjects(float fTimeElapsed)
 		}
 		else
 		{
-			m_fWidth = 1.0f;
-			m_fHeight = 1.0f;
 		
 			randomLiftHeight = uidha(dre);
 			randomLiftHeighiest = uidhs(dre);

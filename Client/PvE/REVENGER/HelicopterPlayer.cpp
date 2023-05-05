@@ -9,10 +9,10 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
-	pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Apache.bin", NULL);
+	pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 
 	SetChild(pGameObject, false);
-	pGameObject->SetScale(1.0, 1.0, 1.0);
+	pGameObject->SetScale(1.0, 1.0, 1.2);
 	pGameObject->SetCurScene(SCENE1STAGE);
 
 
@@ -70,13 +70,13 @@ void HeliPlayer::Firevalkan(CGameObject* pLockedObject)
 		XMFLOAT3 xmf3Position = GetPosition();
 		XMFLOAT3 xmf3Direction = PlayerLook;
 		xmf3Direction.y += 0.1;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 7.0f, false));
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 5.0f, false));
 
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->Rotate(89.0, 0.0, 0.0);
-		pBulletObject->SetScale(3.0, 20.0, 3.0);
+		pBulletObject->Rotate(90.0, 0.0, 0.0);
+		pBulletObject->SetScale(4.0, 20.0, 4.0);
 		pBulletObject->SetActive(true);
 
 	}
@@ -107,8 +107,8 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(0.3f, 0.6, 0.7f));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 7000.0f, ASPECT_RATIO, 60.0f);
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 1.5, 2.6f));
+		m_pCamera->GenerateProjectionMatrix(1.01f,4000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
@@ -119,7 +119,7 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 6.0f, -20.0f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 7.0f, -20.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 8000.0f, ASPECT_RATIO, 80.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -136,17 +136,12 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 void HeliPlayer::OnPrepareAnimate()
 {
 	CPlayer::OnPrepareAnimate();
-	m_pTailRotorFrame = FindFrame("black_m_6");
-	m_pTail2RotorFrame = FindFrame("black_m_7");
-	m_pMainRotorFrame = FindFrame("rotor");
+	m_pTailRotorFrame = FindFrame("rescue_2");
+	m_pMainRotorFrame = FindFrame("rescue_1");
+	m_pTail2RotorFrame = FindFrame("NULL");
 
 }
-//void HeliPlayer::Animate(float fTimeElapsed)
-//{
-//
-//	CPlayer::Animate(fTimeElapsed);
-//	
-//}
+
 
 void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 {
@@ -166,14 +161,14 @@ void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 	}
 	if (m_pTailRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationZ(XMConvertToRadians(360.0f * 15.0f) * fTimeElapse);
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 15.0f) * fTimeElapse);
 		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
 	}
-	if (m_pTail2RotorFrame)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 15.0f) * fTimeElapse);
-		m_pTail2RotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTail2RotorFrame->m_xmf4x4ToParent);
-	}
+	//if (m_pTail2RotorFrame)
+	//{
+	//	XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 15.0f) * fTimeElapse);
+	//	m_pTail2RotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTail2RotorFrame->m_xmf4x4ToParent);
+	//}
 	if (m_xmf3Position.y > 200.0f)
 	{
 		//SetGravity(XMFLOAT3(0.0f, -20.0f, 0.0f));
