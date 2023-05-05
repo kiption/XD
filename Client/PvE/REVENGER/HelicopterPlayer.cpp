@@ -12,7 +12,7 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Apache.bin", NULL);
 
 	SetChild(pGameObject, false);
-	pGameObject->SetScale(0.2, 0.2, 0.1);
+	pGameObject->SetScale(1.0, 1.0, 1.0);
 	pGameObject->SetCurScene(SCENE1STAGE);
 
 
