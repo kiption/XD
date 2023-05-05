@@ -7,6 +7,7 @@ enum OBJECT_STATE { OBJ_ST_EMPTY, OBJ_ST_STANDBY, OBJ_ST_LOGOUT, OBJ_ST_RUNNING 
 struct ObjectsInfo
 {
 	short m_id;
+	char m_name[20];
 	int m_hp;
 	int m_bullet;
 	XMFLOAT3 m_pos;
@@ -19,6 +20,7 @@ struct ObjectsInfo
 
 	ObjectsInfo() {
 		m_id = -1;
+		m_name[0] = '\n';
 		m_hp = 100;
 		m_bullet = 100;
 		m_pos = { 0.0f, 0.0f, 0.0f };
@@ -31,6 +33,7 @@ struct ObjectsInfo
 
 	void InfoClear() {
 		m_id = -1;
+		m_name[0] = '\n';
 		m_hp = 100;
 		m_bullet = 100;
 		m_pos = { 0.0f, 0.0f, 0.0f };

@@ -232,6 +232,7 @@ void SESSION::send_login_info_packet()
 	if (curr_stage != 1) return;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 	SC_LOGIN_INFO_PACKET login_info_packet;
 	login_info_packet.id = id;
+	strcpy_s(login_info_packet.name, name);
 	login_info_packet.size = sizeof(SC_LOGIN_INFO_PACKET);
 	login_info_packet.type = SC_LOGIN_INFO;
 	login_info_packet.x = pos.x;

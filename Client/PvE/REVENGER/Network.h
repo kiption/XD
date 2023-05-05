@@ -135,6 +135,7 @@ void processPacket(char* ptr)
 		// Player 초기정보 설정
 		my_id = recv_packet->id;
 		my_info.m_id = recv_packet->id;
+		strcpy_s(my_info.m_name, recv_packet->name);
 		my_info.m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 		my_info.m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 		my_info.m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
@@ -154,6 +155,7 @@ void processPacket(char* ptr)
 
 			if (recv_id < MAX_USER) {		// Player 추가
 				other_players[recv_id].m_id = recv_id;
+				strcpy_s(other_players[recv_id].m_name, recv_packet->name);
 				other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 				other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 				other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };

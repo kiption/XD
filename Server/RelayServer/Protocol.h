@@ -130,6 +130,7 @@ struct SC_LOGIN_INFO_PACKET {
 	unsigned char size;
 	char type;
 	short id;
+	char name[20];
 	float x, y, z;
 	float right_x, right_y, right_z;
 	float up_x, up_y, up_z;
