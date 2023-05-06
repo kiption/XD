@@ -355,41 +355,68 @@ void processPacket(char* ptr)
 
 		break;
 	}//SC_DAMAGED case end
-	case SC_DEATH:
+	case SC_OBJECT_STATE:
 	{
+		SC_OBJECT_STATE_PACKET* recv_packet = reinterpret_cast<SC_OBJECT_STATE_PACKET*>(ptr);
+		
+		short recvd_id = recv_packet->id;
+		short recvd_target = recv_packet->target;
+		short recvd_state = recv_packet->state;
 
-		SC_DAMAGED_PACKET* recv_packet = reinterpret_cast<SC_DAMAGED_PACKET*>(ptr);
+		if (recvd_target == TARGET_PLAYER) {
+			if (recvd_state == PL_ST_ALIVE) {
 
-		// Player Death
-		if (recv_packet->target == TARGET_PLAYER) {
-			gamesound.collisionSound();
-			if (recv_packet->id == my_id) {
-				my_info.m_damaged_effect_on = true;
-				my_info.m_hp = 0;
-				
-				DeathInfo deadobj{ D_OBJ_PLAYER, recv_packet->id };
-				new_death_objs.push(deadobj);
 			}
-			else {
-				other_players[recv_packet->id].m_damaged_effect_on = true;
-				other_players[recv_packet->id].m_hp = 0;
+			else if (recvd_state == PL_ST_ATTACK) {
+				if (recvd_id == my_id) break;	// 자기자신은 공격상태로 바꿀 필요도 없고 바뀔 일도 없다.
 
-				DeathInfo deadobj{ D_OBJ_PLAYER, recv_packet->id };
-				new_death_objs.push(deadobj);
+				other_players[recvd_id].m_ingame_state = PL_ST_ATTACK;
+			}
+			else if (recvd_state == PL_ST_DEAD) {
+				gamesound.collisionSound();
+				if (recvd_id == my_id) {
+					my_info.m_damaged_effect_on = true;
+					my_info.m_hp = 0;
+					my_info.m_ingame_state = PL_ST_DEAD;
+
+					DeathInfo deadobj{ D_OBJ_PLAYER, recvd_id };
+					new_death_objs.push(deadobj);
+				}
+				else {
+					other_players[recvd_id].m_damaged_effect_on = true;
+					other_players[recvd_id].m_hp = 0;
+
+					DeathInfo deadobj{ D_OBJ_PLAYER, recvd_id };
+					new_death_objs.push(deadobj);
+				}
 			}
 		}
-		// NPC Death
-		else if (recv_packet->target == TARGET_NPC) {
-			gamesound.collisionSound();
-			npcs_info[recv_packet->id].m_damaged_effect_on = true;
-			npcs_info[recv_packet->id].m_hp = 0;
+		else if (recvd_target == TARGET_NPC) {
+			if (recvd_state == PL_ST_ALIVE) {
 
-			DeathInfo deadobj{ D_OBJ_NPC, recv_packet->id };
-			new_death_objs.push(deadobj);
+			}
+			else if (recvd_state == PL_ST_ATTACK) {
+
+			}
+			else if (recvd_state == PL_ST_IDLE) {
+
+			}
+			else if (recvd_state == PL_ST_CHASE) {
+
+			}
+			else if (recvd_state == PL_ST_DEAD) {
+				gamesound.collisionSound();
+				npcs_info[recvd_id].m_damaged_effect_on = true;
+				npcs_info[recvd_id].m_hp = 0;
+				npcs_info[recvd_id].m_ingame_state = PL_ST_DEAD;
+
+				DeathInfo deadobj{ D_OBJ_NPC, recvd_id };
+				new_death_objs.push(deadobj);
+			}
 		}
 
 		break;
-	}//SC_DEATH case end
+	}//SC_OBJECT_STATE case end
 	case SC_BULLET_COUNT:
 	{
 		SC_BULLET_COUNT_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COUNT_PACKET*>(ptr);

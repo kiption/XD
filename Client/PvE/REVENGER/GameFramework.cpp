@@ -388,10 +388,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_SPACE:
 			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
 			break;
-		case 'L':
-			for(int i=5;i<10;i++)
-				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5])->Firevalkan(NULL);
-			break;
+		//case 'L':
+		//	for(int i=5;i<10;i++)
+		//		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5])->Firevalkan(NULL);
+		//	break;
 		default:
 			break;
 		}
@@ -1542,6 +1542,11 @@ void CGameFramework::CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents
 			ppBullets[i]->Reset();
 		}
 	}
+}
+
+void CGameFramework::otherPlayerShooting(int p_id)
+{
+	((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->Firevalkan(NULL);
 }
 
 void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)

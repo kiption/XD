@@ -14,7 +14,8 @@ struct ObjectsInfo
 	XMFLOAT3 m_right_vec;
 	XMFLOAT3 m_up_vec;
 	XMFLOAT3 m_look_vec;
-	int m_state;
+	int m_state;		// 세션 상태
+	int m_ingame_state;	// 인게임내 상태
 
 	bool m_damaged_effect_on;
 
@@ -28,6 +29,7 @@ struct ObjectsInfo
 		m_up_vec = { 0.0f, 1.0f, 0.0f };
 		m_look_vec = { 0.0f, 0.0f, 1.0f };
 		m_state = OBJ_ST_EMPTY;
+		m_ingame_state = PL_ST_DEAD;
 		m_damaged_effect_on = false;
 	}
 
@@ -41,6 +43,7 @@ struct ObjectsInfo
 		m_up_vec = { 0.0f, 1.0f, 0.0f };
 		m_look_vec = { 0.0f, 0.0f, 1.0f };
 		m_state = OBJ_ST_EMPTY;
+		m_ingame_state = PL_ST_DEAD;
 		m_damaged_effect_on = false;
 	}
 };

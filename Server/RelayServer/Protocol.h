@@ -58,7 +58,7 @@ constexpr char INPUT_KEY_E = 0b000001;
 enum PacketID {
 	CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_RELOGIN
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
-	, SC_DAMAGED, SC_DEATH, SC_BULLET_COUNT, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_ACTIVE_DOWN
+	, SC_DAMAGED, SC_OBJECT_STATE, SC_BULLET_COUNT, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
 };
 
@@ -197,11 +197,14 @@ struct SC_DAMAGED_PACKET {
 	int damage;
 };
 
-struct SC_DEATH_PACKET {
+// ================================
+// 3) 컨텐츠 관련 패킷
+struct SC_OBJECT_STATE_PACKET {
 	unsigned char size;
 	char type;
 	short target;
 	short id;
+	short state;
 };
 
 struct SC_BULLET_COUNT_PACKET {
@@ -212,19 +215,11 @@ struct SC_BULLET_COUNT_PACKET {
 };
 
 // ================================
-// 3) UI 및 컨텐츠 관련 패킷
+// 4) UI 관련 패킷
 struct SC_TIME_TICKING_PACKET {
 	unsigned char size;
 	char type;
 	int servertime_ms;	// 단위: ms
-};
-
-struct SC_OBJECT_STATE_PACKET {
-	unsigned char size;
-	char type;
-	short target;
-	short id;
-	short state;
 };
 
 // ================================

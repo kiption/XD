@@ -167,14 +167,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//				   플레이어 동기화
 				//==================================================
 				//1. 다른 플레이어 업데이트
-				for (int i = 0; i < MAX_USER; i++) {
+				// 1) 좌표 및 벡터 업데이트
+				for (int i = 0; i < MAX_USER; ++i) {
 					if (i == my_info.m_id) continue;
 					if (other_players[i].m_state == OBJ_ST_RUNNING) {
 						gGameFramework.setPosition_OtherPlayer(i, other_players[i].m_pos);
 						gGameFramework.setVectors_OtherPlayer(i, other_players[i].m_right_vec, other_players[i].m_up_vec, other_players[i].m_look_vec);
 					}
 					else if (other_players[i].m_state == OBJ_ST_LOGOUT) {
-						other_players[i].m_state = OBJ_ST_EMPTY;
+						other_players[i].InfoClear();
 						gGameFramework.remove_OtherPlayer(i);
 					}
 
@@ -185,10 +186,23 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						gGameFramework.remove_OtherPlayer(i);
 					}
 				}
+				// 2) 객체 인게임 상태 업데이트
+				for (int i = 0; i < MAX_USER; ++i) {
+					if (i == my_info.m_id) continue;
+
+					if (other_players[i].m_ingame_state == PL_ST_ATTACK) {
+						gGameFramework.otherPlayerShooting(i);
+
+						other_players[i].m_ingame_state = PL_ST_ALIVE;
+					}
+					else if (other_players[i].m_ingame_state == PL_ST_DEAD) {
+						// 상대방이 죽으면 해야하는 처리
+					}
+				}
 
 				// 2. NPC 움직임 최신화
 				if (gGameFramework.m_nMode == SCENE1STAGE) {
-					for (int i{}; i < MAX_NPCS; i++) {
+					for (int i{}; i < MAX_NPCS; ++i) {
 						//cout << npcs_info[i].m_id << "번째 Pos:" << npcs_info[i].m_pos.x << ',' << npcs_info[i].m_pos.y << ',' << npcs_info[i].m_pos.z << endl;
 						gGameFramework.setPosition_Npc(npcs_info[i].m_id, npcs_info[i].m_pos);
 						gGameFramework.setVectors_Npc(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);

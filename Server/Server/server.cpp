@@ -689,11 +689,12 @@ void process_packet(int client_id, char* packet)
 				// NPC 사망
 				if (npc.GetHp() <= 0) {
 					npc.SetHp(0);
-					SC_DEATH_PACKET npc_death_pack;
-					npc_death_pack.type = SC_DEATH;
-					npc_death_pack.size = sizeof(SC_DEATH_PACKET);
+					SC_OBJECT_STATE_PACKET npc_death_pack;
+					npc_death_pack.type = SC_OBJECT_STATE;
+					npc_death_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
 					npc_death_pack.target = TARGET_NPC;
 					npc_death_pack.id = npc.GetID();
+					npc_death_pack.state = PL_ST_DEAD;
 					cout << "NPC[" << npc_death_pack.id << "] DEATH" << endl;
 					for (auto& cl : clients) {
 						if (cl.s_state != ST_INGAME) continue;
@@ -758,20 +759,29 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].s_lock.lock();
 		clients[client_id].shoot_time = chrono::system_clock::now();	// 발사 시간 업데이트
 		clients[client_id].s_lock.unlock();
-
 		//cout << "Shoot Point: Pos(" << clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.z << ") & LookVec("
 		//	<< clients[client_id].m_lookvec.x << ", " << clients[client_id].m_lookvec.y << ", " << clients[client_id].m_lookvec.z << ").\n" << endl;
 
-		// [정석 방법]: Raycast를 구현하고나서는 아래의 방법으로 바꿔야함.
-		// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
-
-		// Player, Npc와 충돌하면 대상의 HP를 감소시키고 클라이언트에게 피격 패킷을 보내야 합니다.
 		bool b_collide = false;
+		// 1. 클라이언트와 충돌검사
 		for (auto& cl : clients) {
 			if (cl.s_state != ST_INGAME) continue;
 			if (cl.id == client_id) continue;
+
+			// 우선 이 플레이어가 총알을 발사했다는 정보를 모든 클라이언트에게 알려줍니다. (총알 나가는 모션 동기화를 위함)
+			SC_OBJECT_STATE_PACKET atk_pack;
+			atk_pack.type = SC_OBJECT_STATE;
+			atk_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
+			atk_pack.target = TARGET_PLAYER;
+			atk_pack.id = client_id;
+			atk_pack.state = PL_ST_ATTACK;
+			cl.do_send(&atk_pack);
+
+			// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
 			Cube pl_obj{ exc_XMFtoMyVec(cl.pos), HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
 			MyVector3 pl_intersect = GetInterSection_Line2Cube(exc_XMFtoMyVec(clients[client_id].pos), exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj);
+
+			// 레이캐스트에서 충돌으로 판단되면 대상의 HP를 감소시키고 클라이언트에게 피격 패킷을 보내야 합니다.
 			if (pl_intersect != defaultVec) {
 				cout << "Bullet(Owner: Player[" << client_id << "]) Collide with Player[" << cl.id << "].\n" << endl;
 				b_collide = true;
@@ -792,20 +802,28 @@ void process_packet(int client_id, char* packet)
 				}
 				else {
 					//cout << "Send Death Packet to Player[" << cl.id << "].\n" << endl;
-					SC_DEATH_PACKET death_packet;
-					death_packet.type = SC_DEATH;
-					death_packet.size = sizeof(SC_DEATH_PACKET);
-					death_packet.target = TARGET_PLAYER;
-					death_packet.id = cl.id;
-					lock_guard<mutex> lg{ cl.s_lock };
-					cl.do_send(&death_packet);
+					SC_OBJECT_STATE_PACKET death_pack;
+					death_pack.type = SC_OBJECT_STATE;
+					death_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
+					death_pack.target = TARGET_PLAYER;
+					death_pack.id = client_id;
+					death_pack.state = PL_ST_DEAD;
+					cl.do_send(&death_pack);
 				}
 				break;
 			}
 		}
-		if (b_collide) break;	// 플레이어와 충돌했으면 건물과 충돌할 필요X
+		if (b_collide) break;	// 플레이어와 충돌했으면 더이상 충돌처리를 할 필요X
 
-		// 건물 등 지형지물과 충돌하면 break
+		/*미구현
+		// 2. NPC와 충돌검사
+		for (auto& npc : npcs) {
+
+		}
+		if (b_collide) break;	// NPC와 충돌했으면 더이상 충돌처리를 할 필요X
+		*/
+
+		// 3. 건물과 충돌검사
 		for (auto& building : buildings_info) {
 			Cube bd_obj{ exc_XMFtoMyVec(building.getPos()), building.getScaleX(), building.getScaleY(), building.getScaleZ() };
 			MyVector3 bd_intersect = GetInterSection_Line2Cube(exc_XMFtoMyVec(clients[client_id].pos), exc_XMFtoMyVec(clients[client_id].m_lookvec), bd_obj);

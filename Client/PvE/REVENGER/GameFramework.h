@@ -229,6 +229,9 @@ public:
 	void setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void remove_Npcs(int id);
 
+	// 다른 클라이언트 객체의 총알 발사 함수
+	void otherPlayerShooting(int p_id);
+
 	float m_pPlayerRotate_z = 0.0f;
 	float m_pPlayerRotate_x = 0.0f;
 //==================================================
