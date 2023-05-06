@@ -166,21 +166,49 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							}
 						}
 						break;
+
+					case PACKET_KEYUP_MOVEKEY:
+						CS_INPUT_KEYBOARD_PACKET mv_keyup_pack;
+						mv_keyup_pack.type = CS_INPUT_KEYBOARD;
+						mv_keyup_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+						mv_keyup_pack.keytype = PACKET_KEYUP_MOVEKEY;
+						sendPacket(&mv_keyup_pack, active_servernum);
+						break;
+
 					default:
 						cout << "[KeyInput Error] Unknown Key Type." << endl;
 					}
 
 				}
+
 				if (gGameFramework.checkNewInput_Mouse()) {
 					MouseInputVal mouseValue = gGameFramework.popInputVal_Mouse();
-					CS_INPUT_MOUSE_PACKET mouseinput_pack;
-					mouseinput_pack.size = sizeof(CS_INPUT_MOUSE_PACKET);
-					mouseinput_pack.type = CS_INPUT_MOUSE;
-					mouseinput_pack.buttontype = mouseValue.button;
-					mouseinput_pack.delta_x = mouseValue.delX;
-					mouseinput_pack.delta_y = mouseValue.delY;
 
-					sendPacket(&mouseinput_pack, active_servernum);
+					switch (mouseValue.button) {
+					case SEND_NONCLICK:
+						break;
+					case SEND_BUTTON_L:
+						if (gGameFramework.m_nMode == SCENE2STAGE) {
+							CS_ATTACK_PACKET st2_atk_pack;
+							st2_atk_pack.type = CS_ATTACK;
+							st2_atk_pack.size = sizeof(CS_ATTACK_PACKET);
+							sendPacket(&st2_atk_pack, active_servernum);
+						}
+						break;
+					case SEND_BUTTON_R:
+						/*미구현
+						CS_INPUT_MOUSE_PACKET mouseinput_pack;
+						mouseinput_pack.size = sizeof(CS_INPUT_MOUSE_PACKET);
+						mouseinput_pack.type = CS_INPUT_MOUSE;
+						mouseinput_pack.buttontype = mouseValue.button;
+						mouseinput_pack.delta_x = mouseValue.delX;
+						mouseinput_pack.delta_y = mouseValue.delY;
+
+						sendPacket(&mouseinput_pack, active_servernum);
+						break;
+						*/
+						break;
+					}
 				}
 
 				//==================================================
@@ -207,21 +235,26 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					//}
 				}
 
-				if (gGameFramework.m_nMode != SCENE2STAGE) {
-					// 2) 객체 인게임 상태 업데이트
-					for (int i = 0; i < MAX_USER; ++i) {
-						if (i == my_info.m_id) continue;
+				// 2) 객체 인게임 상태 업데이트
+				for (int i = 0; i < MAX_USER; ++i) {
+					if (i == my_info.m_id) continue;
 
-						if (other_players[i].m_ingame_state == PL_ST_ATTACK) {
-							gGameFramework.otherPlayerShooting(i);
-
-							other_players[i].m_ingame_state = PL_ST_ALIVE;
-						}
-						else if (other_players[i].m_ingame_state == PL_ST_DEAD) {
-							// 상대방이 죽으면 해야하는 처리
-						}
+					if (other_players[i].m_ingame_state == PL_ST_IDLE) {
+						gGameFramework.otherPlayerReturnToIdle(i);
 					}
+					else if (other_players[i].m_ingame_state == PL_ST_MOVE) {
+						gGameFramework.otherPlayerMovingMotion(i);
+					}
+					else if (other_players[i].m_ingame_state == PL_ST_ATTACK) {
+						gGameFramework.otherPlayerShootingMotion(i);
+						other_players[i].m_ingame_state = PL_ST_IDLE;	// 한번쏘고 바로 제자리.
+					}
+					else if (other_players[i].m_ingame_state == PL_ST_DEAD) {
+						// 상대방이 죽으면 해야하는 처리
+					}
+				}
 
+				if (gGameFramework.m_nMode != SCENE2STAGE) {
 					// 2. NPC 움직임 최신화
 					if (gGameFramework.m_nMode == SCENE1STAGE) {
 						for (int i{}; i < MAX_NPCS; ++i) {

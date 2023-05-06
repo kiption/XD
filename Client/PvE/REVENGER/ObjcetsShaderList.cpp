@@ -225,10 +225,9 @@ void CHumanObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 	for (int x = 0; x <= m_nObjects; x++)
 	{
-
 		m_ppObjects[x] = new CEthanObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pEthanModel, 1);
 		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.25f);
+		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.85f);
 		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackPosition(0, 0);
 		XMFLOAT3 xmf3Position = XMFLOAT3(1610.0, 146.0f, 2250.0f);
 		xmf3Position.y = pTerrain->GetHeight(xmf3Position.x, xmf3Position.z);

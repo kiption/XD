@@ -111,7 +111,7 @@ public:
 		remain_size = 0;
 		name[0] = 0;
 
-		pl_state = PL_ST_ALIVE;
+		pl_state = PL_ST_IDLE;
 		hp = 100;
 		remain_bullet = 100;
 		pos = { 0.0f, 0.0f, 0.0f };
@@ -472,7 +472,7 @@ void process_packet(int client_id, char* packet)
 		}
 
 		// 새로 접속한 플레이어의 초기 정보를 설정합니다.
-		clients[client_id].pl_state = PL_ST_ALIVE;
+		clients[client_id].pl_state = PL_ST_IDLE;
 		clients[client_id].curr_stage = 1;
 
 		clients[client_id].hp = 100;
@@ -640,6 +640,7 @@ void process_packet(int client_id, char* packet)
 	{
 		if (!b_active_server) break;
 		CS_MOVE_PACKET* cl_move_packet = reinterpret_cast<CS_MOVE_PACKET*>(packet);
+
 		// 1. 충돌체크를 한다. -> 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
 		bool b_isCollide = false;
 		// 1) 맵 오브젝트
@@ -708,6 +709,7 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].s_lock.lock();
 		clients[client_id].pos = { cl_move_packet->x, cl_move_packet->y, cl_move_packet->z };
 		clients[client_id].setBB();
+		clients[client_id].pl_state = PL_ST_MOVE;
 		clients[client_id].s_lock.unlock();
 
 		// 3. 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
@@ -762,75 +764,82 @@ void process_packet(int client_id, char* packet)
 		if (clients[client_id].remain_bullet == 0) clients[client_id].remain_bullet = MAX_BULLET;
 		clients[client_id].s_lock.unlock();
 
-		bool b_collide = false;
-		// 1. 클라이언트와 충돌검사
-		for (auto& cl : clients) {
-			if (cl.s_state != ST_INGAME) continue;
-			if (cl.id == client_id) continue;
+		// 1. 스테이지 1 로직
+		if (clients[client_id].curr_stage == 1) {
+			bool b_collide = false;
+			// 1. 클라이언트와 충돌검사
+			for (auto& cl : clients) {
+				if (cl.s_state != ST_INGAME) continue;
+				if (cl.id == client_id) continue;
 
-			// 우선 이 플레이어가 총알을 발사했다는 정보를 모든 클라이언트에게 알려줍니다. (총알 나가는 모션 동기화를 위함)
-			SC_OBJECT_STATE_PACKET atk_pack;
-			atk_pack.type = SC_OBJECT_STATE;
-			atk_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
-			atk_pack.target = TARGET_PLAYER;
-			atk_pack.id = client_id;
-			atk_pack.state = PL_ST_ATTACK;
-			cl.do_send(&atk_pack);
+				// 우선 이 플레이어가 총알을 발사했다는 정보를 모든 클라이언트에게 알려줍니다. (총알 나가는 모션 동기화를 위함)
+				SC_OBJECT_STATE_PACKET atk_pack;
+				atk_pack.type = SC_OBJECT_STATE;
+				atk_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
+				atk_pack.target = TARGET_PLAYER;
+				atk_pack.id = client_id;
+				atk_pack.state = PL_ST_ATTACK;
+				cl.do_send(&atk_pack);
 
-			// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
-			Cube pl_obj{ exc_XMFtoMyVec(cl.pos), HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
-			MyVector3 pl_intersect = GetInterSection_Line2Cube(exc_XMFtoMyVec(clients[client_id].pos), exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj);
+				// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
+				Cube pl_obj{ exc_XMFtoMyVec(cl.pos), HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
+				MyVector3 pl_intersect = GetInterSection_Line2Cube(exc_XMFtoMyVec(clients[client_id].pos), exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj);
 
-			// 레이캐스트에서 충돌으로 판단되면 대상의 HP를 감소시키고 클라이언트에게 피격 패킷을 보내야 합니다.
-			if (pl_intersect != defaultVec) {
-				cout << "Bullet(Owner: Player[" << client_id << "]) Collide with Player[" << cl.id << "].\n" << endl;
-				b_collide = true;
+				// 레이캐스트에서 충돌으로 판단되면 대상의 HP를 감소시키고 클라이언트에게 피격 패킷을 보내야 합니다.
+				if (pl_intersect != defaultVec) {
+					cout << "Bullet(Owner: Player[" << client_id << "]) Collide with Player[" << cl.id << "].\n" << endl;
+					b_collide = true;
 
-				cl.s_lock.lock();
-				cl.hp -= BULLET_DAMAGE;
-				cl.s_lock.unlock();
-				if (cl.hp > 0) {
-					//cout << "Send Damage Packet to Player[" << cl.id << "].\n" << endl;
-					SC_DAMAGED_PACKET dmg_bullet_packet;
-					dmg_bullet_packet.type = SC_DAMAGED;
-					dmg_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
-					dmg_bullet_packet.target = TARGET_PLAYER;
-					dmg_bullet_packet.id = cl.id;
-					dmg_bullet_packet.damage = BULLET_DAMAGE;
-					lock_guard<mutex> lg{ cl.s_lock };
-					cl.do_send(&dmg_bullet_packet);
+					cl.s_lock.lock();
+					cl.hp -= BULLET_DAMAGE;
+					cl.s_lock.unlock();
+					if (cl.hp > 0) {
+						//cout << "Send Damage Packet to Player[" << cl.id << "].\n" << endl;
+						SC_DAMAGED_PACKET dmg_bullet_packet;
+						dmg_bullet_packet.type = SC_DAMAGED;
+						dmg_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
+						dmg_bullet_packet.target = TARGET_PLAYER;
+						dmg_bullet_packet.id = cl.id;
+						dmg_bullet_packet.damage = BULLET_DAMAGE;
+						lock_guard<mutex> lg{ cl.s_lock };
+						cl.do_send(&dmg_bullet_packet);
+					}
+					else {
+						//cout << "Send Death Packet to Player[" << cl.id << "].\n" << endl;
+						SC_OBJECT_STATE_PACKET death_pack;
+						death_pack.type = SC_OBJECT_STATE;
+						death_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
+						death_pack.target = TARGET_PLAYER;
+						death_pack.id = client_id;
+						death_pack.state = PL_ST_DEAD;
+						cl.do_send(&death_pack);
+					}
+					break;
 				}
-				else {
-					//cout << "Send Death Packet to Player[" << cl.id << "].\n" << endl;
-					SC_OBJECT_STATE_PACKET death_pack;
-					death_pack.type = SC_OBJECT_STATE;
-					death_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
-					death_pack.target = TARGET_PLAYER;
-					death_pack.id = client_id;
-					death_pack.state = PL_ST_DEAD;
-					cl.do_send(&death_pack);
+			}
+			if (b_collide) break;	// 플레이어와 충돌했으면 더이상 충돌처리를 할 필요X
+
+			/*미구현
+			// 2. NPC와 충돌검사
+			for (auto& npc : npcs) {
+
+			}
+			if (b_collide) break;	// NPC와 충돌했으면 더이상 충돌처리를 할 필요X
+			*/
+
+			// 3. 건물과 충돌검사
+			for (auto& building : buildings_info) {
+				Cube bd_obj{ exc_XMFtoMyVec(building.getPos()), building.getScaleX(), building.getScaleY(), building.getScaleZ() };
+				MyVector3 bd_intersect = GetInterSection_Line2Cube(exc_XMFtoMyVec(clients[client_id].pos), exc_XMFtoMyVec(clients[client_id].m_lookvec), bd_obj);
+				if (bd_intersect != defaultVec) {
+					cout << "Bullet Collide with Building.\n" << endl;
+					break;
 				}
-				break;
 			}
 		}
-		if (b_collide) break;	// 플레이어와 충돌했으면 더이상 충돌처리를 할 필요X
+		// 2. 스테이지 2 로직
+		else if (clients[client_id].curr_stage == 2) {
 
-		/*미구현
-		// 2. NPC와 충돌검사
-		for (auto& npc : npcs) {
-
-		}
-		if (b_collide) break;	// NPC와 충돌했으면 더이상 충돌처리를 할 필요X
-		*/
-
-		// 3. 건물과 충돌검사
-		for (auto& building : buildings_info) {
-			Cube bd_obj{ exc_XMFtoMyVec(building.getPos()), building.getScaleX(), building.getScaleY(), building.getScaleZ() };
-			MyVector3 bd_intersect = GetInterSection_Line2Cube(exc_XMFtoMyVec(clients[client_id].pos), exc_XMFtoMyVec(clients[client_id].m_lookvec), bd_obj);
-			if (bd_intersect != defaultVec) {
-				cout << "Bullet Collide with Building.\n" << endl;
-				break;
-			}
 		}
 
 		break;
@@ -854,6 +863,28 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].s_lock.unlock();
 			cout << "Client[" << client_id << "] Stage2로 전환." << endl;//test
 			break;
+		case PACKET_KEYUP_MOVEKEY:
+			if (clients[client_id].pl_state == PL_ST_MOVE) {
+				clients[client_id].s_lock.lock();
+				clients[client_id].pl_state = PL_ST_IDLE;
+				clients[client_id].s_lock.unlock();
+
+				SC_OBJECT_STATE_PACKET change2idle_pack;
+				change2idle_pack.type = SC_OBJECT_STATE;
+				change2idle_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
+				change2idle_pack.target = TARGET_PLAYER;
+				change2idle_pack.id = client_id;
+				change2idle_pack.state = PL_ST_IDLE;
+
+				for (auto& cl : clients) {
+					if (cl.s_state != ST_INGAME) continue;
+					if (cl.id == client_id) continue;
+
+					lock_guard<mutex> lg{ cl.s_lock };
+					cl.do_send(&change2idle_pack);
+				}
+			}
+			break;
 		}
 
 		break;
@@ -869,16 +900,14 @@ void process_packet(int client_id, char* packet)
 			break;
 		}
 
-		if (rt_p->buttontype == PACKET_BUTTON_L) {			// 마우스 좌클릭
+		if (rt_p->buttontype == PACKET_NONCLICK) {			// 버튼 안누름 (그냥 이동만 한 경우)
+		}
+		else if (rt_p->buttontype == PACKET_BUTTON_L) {			// 마우스 좌클릭
 			// 1스테이지 로직
 			if (clients[client_id].curr_stage == 1) {
 
 			}
-			// 2스테이지 로직
-			else if (clients[client_id].curr_stage == 2) {
-				// 미구현
-			}
-
+			// 2스테이지에선 ATTACK_PACKET을 보냄.
 		}
 		else if (rt_p->buttontype == PACKET_BUTTON_R) {		// 마우스 우클릭 드래그: 기능 미정.
 			// 1스테이지 로직

@@ -323,21 +323,29 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	if (m_pScene) m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
 	switch (nMessageID)
 	{
-	case WM_RBUTTONDOWN:
+	case WM_LBUTTONDOWN:
+	{
+		::SetCapture(hWnd);
+		::GetCursorPos(&m_ptOldCursorPos);
+
 		if (m_nMode == SCENE2STAGE)((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 		if (m_nMode == SCENE2STAGE)gamesound.shootingSound();
 		if (m_nMode == SCENE2STAGE)((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
-	case WM_LBUTTONDOWN:
+
+		MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
+		q_mouseInput.push(lclick);//s
+	}
+	case WM_RBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
-		break;
-	case WM_RBUTTONUP:
 
+		break;
+	case WM_LBUTTONUP:
 		if (m_nMode == SCENE2STAGE)
 		{
 			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 		}
-	case WM_LBUTTONUP:
+	case WM_RBUTTONUP:
 		::ReleaseCapture();
 		break;
 	case WM_MOUSEMOVE:
@@ -385,13 +393,15 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case '3':
 			UI_Switch = !UI_Switch;
 			break;
+		case KEY_W:
+		case KEY_A:
+		case KEY_S:
+		case KEY_D:
+			q_keyboardInput.push(SEND_KEYUP_MOVEKEY);//S
+			break;
 		case VK_SPACE:
 			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
 			break;
-		//case 'L':
-		//	for(int i=5;i<10;i++)
-		//		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5])->Firevalkan(NULL);
-		//	break;
 		default:
 			break;
 		}
@@ -687,7 +697,7 @@ void CGameFramework::ProcessInput()
 				}
 				if (m_nMode == SCENE2STAGE)
 				{
-					if (dwDirection) m_pPlayer->Move(dwDirection, 10.0f, true);
+					if (dwDirection) m_pPlayer->Move(dwDirection, 6.0f, true);
 				}
 			}
 		}
@@ -1577,9 +1587,33 @@ void CGameFramework::CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents
 	}
 }
 
-void CGameFramework::otherPlayerShooting(int p_id)
+
+void CGameFramework::otherPlayerReturnToIdle(int p_id)
 {
-	((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->Firevalkan(NULL);
+	if (m_nMode == SCENE1STAGE) {
+
+	}
+	else if (m_nMode == SCENE2STAGE) {
+		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	}
+}
+void CGameFramework::otherPlayerMovingMotion(int p_id)
+{
+	if (m_nMode == SCENE1STAGE) {
+
+	}
+	else if (m_nMode == SCENE2STAGE) {
+		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+	}
+}
+void CGameFramework::otherPlayerShootingMotion(int p_id)
+{
+	if (m_nMode == SCENE1STAGE) {
+		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->Firevalkan(NULL);
+	}
+	else if (m_nMode == SCENE2STAGE) {
+		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	}
 }
 
 void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)

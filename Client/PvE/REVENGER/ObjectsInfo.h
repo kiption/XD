@@ -53,8 +53,6 @@ std::array<ObjectsInfo, MAX_USER> other_players;
 std::array<ObjectsInfo, MAX_NPCS> npcs_info;
 int left_npc;
 
-std::array<ObjectsInfo, MAX_BULLET> bullets_info;
-
 
 struct MapObjectsInfo
 {

@@ -12,17 +12,21 @@
 
 // Server
 #include <queue>
-enum SEND_MOUSE_BUTTON { SEND_BUTTON_L, SEND_R_BUTTON_L };
+enum SEND_MOUSE_BUTTON { SEND_NONCLICK, SEND_BUTTON_L, SEND_BUTTON_R };
 enum SEND_KEY_TYPE {
 	SEND_KEY_NUM1, SEND_KEY_NUM2,
 	SEND_KEY_W, SEND_KEY_A, SEND_KEY_S, SEND_KEY_D,
 	SEND_KEY_UP, SEND_KEY_LEFT, SEND_KEY_DOWN, SEND_KEY_RIGHT,
-	SEND_KEY_SPACEBAR
+	SEND_KEY_SPACEBAR,
+	SEND_KEYUP_MOVEKEY
 };
 
 struct MouseInputVal {
 	char button;
 	float delX, delY;
+
+	MouseInputVal() { button = SEND_NONCLICK; delX = delY = 0.f; }
+	MouseInputVal(char btn, float dx, float dy) { button = btn; delX = dx; delY = dy; }
 };
 
 struct BulletPos {
@@ -220,7 +224,7 @@ public:
 	XMFLOAT3 getMyLookVec();
 	XMFLOAT3 getMyUpVec();
 
-	// 객체 값 최신화 함수입니다.
+	// 객체 좌표,벡터 값 최신화 함수입니다.
 	void setPosition_OtherPlayer(int id, XMFLOAT3 pos);
 	void setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void remove_OtherPlayer(int id);
@@ -229,8 +233,10 @@ public:
 	void setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void remove_Npcs(int id);
 
-	// 다른 클라이언트 객체의 총알 발사 함수
-	void otherPlayerShooting(int p_id);
+	// 다른 클라이언트 객체의 상태 최신화 함수
+	void otherPlayerReturnToIdle(int p_id);
+	void otherPlayerMovingMotion(int p_id);
+	void otherPlayerShootingMotion(int p_id);
 
 	float m_pPlayerRotate_z = 0.0f;
 	float m_pPlayerRotate_x = 0.0f;

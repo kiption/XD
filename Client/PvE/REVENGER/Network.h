@@ -166,17 +166,7 @@ void processPacket(char* ptr)
 				cout << "Exceed Max User." << endl;
 			}
 		}
-		// 2. Add Bullet
-		else if (recv_packet->target == TARGET_BULLET) {
-			gamesound.shootingSound();
-			bullets_info[recv_id].m_id = recv_id;
-			bullets_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-			bullets_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-			bullets_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-			bullets_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-			bullets_info[recv_id].m_state = OBJ_ST_RUNNING;
-		}
-		// 3. Add NPC (Helicopter)
+		// 2. Add NPC (Helicopter)
 		else if (recv_packet->target == TARGET_NPC) {
 			if (npcs_info[recv_id].m_state != OBJ_ST_EMPTY) break;
 
@@ -201,15 +191,13 @@ void processPacket(char* ptr)
 
 		// 1. Move Player
 		if (recv_packet->target == TARGET_PLAYER) {
-			if (0 <= recv_id && recv_id < MAX_USER && recv_id != my_info.m_id) {
-				other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };		// 상대방Players Object 이동
-			}
+			if (recv_id == my_info.m_id) break;				// 자기자신은 클라에서 움직여주고 있음.
+			if (recv_id < 0 || recv_id > MAX_USER) break;	// 잘못된 ID값
+
+			other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };		// 상대방Players Object 이동
+			other_players[recv_id].m_ingame_state = PL_ST_MOVE;
 		}
-		// 2. Move Bullet
-		else if (recv_packet->target == TARGET_BULLET) {
-			bullets_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-		}
-		// 3. Move Npc
+		// 2. Move Npc
 		else if (recv_packet->target == TARGET_NPC) {
 			npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 		}
@@ -226,12 +214,13 @@ void processPacket(char* ptr)
 
 		// 1. Rotate Player
 		if (recv_packet->target == TARGET_PLAYER) {
-			if (0 <= recv_id && recv_id < MAX_USER) {
-				// 상대 Object 회전
-				other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-				other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-				other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-			}
+			if (recv_id == my_info.m_id) break;				// 자기자신은 클라에서 움직여주고 있음.
+			if (recv_id < 0 || recv_id > MAX_USER) break;	// 잘못된 ID값
+
+			// 상대 Object 회전
+			other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+			other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+			other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
 		}
 		// 2. Rotate Npc
 		else if (recv_packet->target == TARGET_NPC) {
@@ -252,22 +241,16 @@ void processPacket(char* ptr)
 
 		// 1. Rotate Player
 		if (recv_packet->target == TARGET_PLAYER) {
-			if (recv_id == my_info.m_id) {
-				// Player 이동
-				my_info.m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-				// Player 회전
-				my_info.m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-				my_info.m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-				my_info.m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-			}
-			else if (0 <= recv_id && recv_id < MAX_USER) {
-				// 상대 Object 이동
-				other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-				// 상대 Object 회전
-				other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-				other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-				other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-			}
+			if (recv_id == my_info.m_id) break;				// 자기자신은 클라에서 움직여주고 있음.
+			if (recv_id < 0 || recv_id > MAX_USER) break;	// 잘못된 ID값
+
+			// 상대 Object 이동
+			other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+			other_players[recv_id].m_ingame_state = PL_ST_MOVE;
+			// 상대 Object 회전
+			other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+			other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+			other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
 		}
 		// 2. Rotate Npc
 		else if (recv_packet->target == TARGET_NPC) {
@@ -300,12 +283,7 @@ void processPacket(char* ptr)
 				other_players[recv_id].m_state = OBJ_ST_LOGOUT;
 			}
 		}
-		// 2. Remove Bullet
-		else if (recv_packet->target == TARGET_BULLET) {
-			bullets_info[recv_id].m_pos = { 0.f , -100.f ,0.f };
-			bullets_info[recv_id].m_state = OBJ_ST_LOGOUT;
-		}
-		// 3. Remove Npc
+		// 2. Remove Npc
 		else if (recv_packet->target == TARGET_NPC) {
 			int npc_id = recv_id - MAX_USER;
 			npcs_info[npc_id].m_id = -1;
@@ -322,7 +300,6 @@ void processPacket(char* ptr)
 	}//SC_REMOVE_PLAYER case end
 	case SC_DAMAGED:
 	{
-		
 		SC_DAMAGED_PACKET* recv_packet = reinterpret_cast<SC_DAMAGED_PACKET*>(ptr);
 
 		// Player Damaged
@@ -364,8 +341,13 @@ void processPacket(char* ptr)
 		short recvd_state = recv_packet->state;
 
 		if (recvd_target == TARGET_PLAYER) {
-			if (recvd_state == PL_ST_ALIVE) {
-
+			if (recvd_state == PL_ST_IDLE) {
+				if (recvd_id == my_id) {
+					my_info.m_ingame_state = PL_ST_IDLE;
+				}
+				else {
+					other_players[recvd_id].m_ingame_state = PL_ST_IDLE;
+				}
 			}
 			else if (recvd_state == PL_ST_ATTACK) {
 				if (recvd_id == my_id) break;	// 자기자신은 공격상태로 바꿀 필요도 없고 바뀔 일도 없다.
@@ -385,6 +367,7 @@ void processPacket(char* ptr)
 				else {
 					other_players[recvd_id].m_damaged_effect_on = true;
 					other_players[recvd_id].m_hp = 0;
+					other_players[recvd_id].m_ingame_state = PL_ST_DEAD;
 
 					DeathInfo deadobj{ D_OBJ_PLAYER, recvd_id };
 					new_death_objs.push(deadobj);
@@ -392,7 +375,7 @@ void processPacket(char* ptr)
 			}
 		}
 		else if (recvd_target == TARGET_NPC) {
-			if (recvd_state == PL_ST_ALIVE) {
+			if (recvd_state == PL_ST_IDLE) {
 
 			}
 			else if (recvd_state == PL_ST_ATTACK) {
