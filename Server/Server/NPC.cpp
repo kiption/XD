@@ -176,6 +176,12 @@ void ST1_NPC::SetFrustum()
 	m_frustum = frustum;
 }
 
+void ST1_NPC::SetBuildingInfo(XMFLOAT3 bPos, XMFLOAT3 bScale)
+{	
+	BoundingOrientedBox temp = BoundingOrientedBox(bPos, XMFLOAT3(bScale.x / 2.5f, bScale.y / 2.0f, bScale.z / 2.5f), XMFLOAT4(0, 0, 0, 1));
+	m_mapxmoobb.emplace_back(temp);
+}
+
 // ===========================================
 // =============       GET      ==============
 // ===========================================
@@ -249,6 +255,11 @@ vector<City_Info> ST1_NPC::GetCityInfo()
 	return m_Section;
 }
 
+XMFLOAT3 ST1_NPC::GetBuildingInfo(int id)
+{
+	return m_mapxmoobb[id].Center;
+}
+
 // ===========================================
 // =============     NORMAL     ==============
 // ===========================================
@@ -313,6 +324,9 @@ void ST1_NPC::ST1_State_Manegement(int state)
 	default:
 		break;
 	}
+
+	BuildingToNPC_Distance();
+	ST1_CheckNPC_HP();
 	setBB_Pro();
 	setBB_Body();
 	SetFrustum();
@@ -535,6 +549,7 @@ void ST1_NPC::MoveInSection()
 		break;
 		}
 	}
+	NPCtoBuilding_collide();
 }
 
 void ST1_NPC::MoveChangeIdle()
@@ -601,6 +616,12 @@ void ST1_NPC::Caculation_Distance(XMFLOAT3 vec, int id) // 서버에서 따로 부를 것
 	m_Distance[id] = sqrtf(pow((vec.x - m_Pos.x), 2) + pow((vec.y - m_Pos.y), 2) + pow((vec.z - m_Pos.z), 2));
 }
 
+float ST1_NPC::Building_Caculation_Distance(XMFLOAT3 vec)
+{
+	float dis = sqrtf(pow((vec.x - m_Pos.x), 2) + pow((vec.y - m_Pos.y), 2) + pow((vec.z - m_Pos.z), 2));
+	return dis;
+}
+
 void ST1_NPC::ST1_Damege_Calc(int id)
 {
 	if (m_Hit == g_body) {
@@ -627,7 +648,10 @@ void ST1_NPC::ST1_Damege_Calc(int id)
 		m_ProfellerHP -= damege;
 		m_Hit = g_none;
 	}
+}
 
+void ST1_NPC::ST1_CheckNPC_HP()
+{
 	if ((m_BodyHP <= 0) || (m_ProfellerHP <= 0)) {
 		m_state = NPC_DEATH;
 	}
@@ -671,6 +695,7 @@ void ST1_NPC::PlayerChasing()
 	m_Pos.x += m_Speed * m_curr_coordinate.look.x;
 	m_Pos.y += m_Speed * m_curr_coordinate.look.y;
 	m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+	NPCtoBuilding_collide();
 }
 
 bool ST1_NPC::PlayerDetact()
@@ -745,6 +770,32 @@ void ST1_NPC::PlayerAttack()
 	}
 	else {
 		PrintRayCast = true;
+	}
+
+	NPCtoBuilding_collide();
+}
+
+void ST1_NPC::BuildingToNPC_Distance()
+{
+	int array_size = m_mapxmoobb.size();
+	
+	for (int i{}; i < m_mapxmoobb.size(); ++i) {
+		float d = Building_Caculation_Distance(m_mapxmoobb[i].Center);
+		NPCtoBuilding_Dis[i] = d;
+	}
+}
+
+void ST1_NPC::NPCtoBuilding_collide()
+{
+	for (int i{}; i < m_mapxmoobb.size(); ++i) {
+		if (NPCtoBuilding_Dis[i] >= 200) {
+			continue;
+		}
+		if (m_xoobb_Body.Intersects(m_mapxmoobb[i]))
+		{
+			m_Pos.y += 3.0f;
+			m_BodyHP -= 10.0f;
+		}
 	}
 }
 
