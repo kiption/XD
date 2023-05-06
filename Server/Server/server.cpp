@@ -91,7 +91,7 @@ public:
 
 	PLAYER_STATE pl_state;
 	int hp;
-	int bullet;
+	int remain_bullet;
 	XMFLOAT3 pos;									// Position (x, y, z)
 	float pitch, yaw, roll;							// Rotated Degree
 	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;		// 현재 Look, Right, Up Vectors
@@ -113,7 +113,7 @@ public:
 
 		pl_state = PL_ST_ALIVE;
 		hp = 100;
-		bullet = 100;
+		remain_bullet = 100;
 		pos = { 0.0f, 0.0f, 0.0f };
 		pitch = yaw = roll = 0.0f;
 		m_rightvec = { 1.0f, 0.0f, 0.0f };
@@ -252,7 +252,7 @@ void SESSION::send_login_info_packet()
 	login_info_packet.look_z = basic_coordinate.look.z;
 
 	login_info_packet.hp = hp;
-	login_info_packet.remain_bullet = bullet;
+	login_info_packet.remain_bullet = remain_bullet;
 
 	do_send(&login_info_packet);
 }
@@ -756,11 +756,15 @@ void process_packet(int client_id, char* packet)
 		milliseconds shoot_term = duration_cast<milliseconds>(chrono::system_clock::now() - clients[client_id].shoot_time);
 		if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) break;	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
 
+		// Bullet 개수 체크
+		if (clients[client_id].remain_bullet <= 0) break;	// 총알이 0개보다 작거나 같으면 발사하지 않습니다. (애초에 정상적인 클라에서는 0이하일때에는 패킷을 보내지않음)
+
+		// 세션정보 업데이트
 		clients[client_id].s_lock.lock();
 		clients[client_id].shoot_time = chrono::system_clock::now();	// 발사 시간 업데이트
+		clients[client_id].remain_bullet -= 1;
+		if (clients[client_id].remain_bullet == 0) clients[client_id].remain_bullet = MAX_BULLET;
 		clients[client_id].s_lock.unlock();
-		//cout << "Shoot Point: Pos(" << clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.z << ") & LookVec("
-		//	<< clients[client_id].m_lookvec.x << ", " << clients[client_id].m_lookvec.y << ", " << clients[client_id].m_lookvec.z << ").\n" << endl;
 
 		bool b_collide = false;
 		// 1. 클라이언트와 충돌검사
@@ -936,7 +940,7 @@ void process_packet(int client_id, char* packet)
 		clients[replica_id].s_lock.lock();
 		clients[replica_id].id = replica_id;
 		clients[replica_id].hp = replica_pack->hp;
-		clients[replica_id].bullet = replica_pack->bullet_cnt;
+		clients[replica_id].remain_bullet = replica_pack->bullet_cnt;
 
 		strcpy_s(clients[replica_id].name, replica_pack->name);
 
@@ -1322,7 +1326,7 @@ void replicaSessions() {	// 서버간 세션데이터를 복제하는 함수
 				replica_pack.id = cl.id;
 				strcpy_s(replica_pack.name, cl.name);
 				replica_pack.hp = cl.hp;
-				replica_pack.bullet_cnt = cl.bullet;
+				replica_pack.bullet_cnt = cl.remain_bullet;
 
 				replica_pack.x = cl.pos.x;
 				replica_pack.y = cl.pos.y;

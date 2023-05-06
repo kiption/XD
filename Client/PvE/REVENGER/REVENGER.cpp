@@ -141,10 +141,16 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						sendPacket(&yaw_rotate_pack, active_servernum);
 						break;
 					case PACKET_KEY_SPACEBAR:
-						CS_ATTACK_PACKET attack_pack;
-						attack_pack.size = sizeof(CS_ATTACK_PACKET);
-						attack_pack.type = CS_ATTACK;
-						sendPacket(&attack_pack, active_servernum);
+						if (my_info.m_bullet > 0) {
+							my_info.m_bullet--;
+							CS_ATTACK_PACKET attack_pack;
+							attack_pack.size = sizeof(CS_ATTACK_PACKET);
+							attack_pack.type = CS_ATTACK;
+							sendPacket(&attack_pack, active_servernum);
+						}
+						else {
+							my_info.m_bullet = MAX_BULLET;
+						}
 						break;
 					default:
 						cout << "[KeyInput Error] Unknown Key Type." << endl;
