@@ -251,6 +251,7 @@ float4 Lightings(float3 vPosition, float3 vNormal, float4 vEmissive)
 
 	return(cColor);
 }
+
 float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_LIGHTS])
 {
 	float3 vCameraPosition = float3(gvCameraPosition.x, gvCameraPosition.y, gvCameraPosition.z);

@@ -156,6 +156,11 @@ public:
 
 	int									m_nShaders = 0;
 	CObjectsShader** m_ppShaders = NULL;
+
+	int									m_nShadowShaders = 0;
+	CObjectsShader** m_ppShadowShaders = NULL;
+
+
 	CShader* m_pShader = NULL;
 	CBulletEffectShader* m_pBulletEffect = NULL;
 	CUseWaterMoveTerrain* m_pUseWaterMove = NULL;

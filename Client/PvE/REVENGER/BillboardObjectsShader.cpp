@@ -519,7 +519,7 @@ void HelicopterSparkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList,0.2f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	m_nObjects = EXPLOSION_SPARK;
 	m_ppObjects = new CGameObject * [m_nObjects];
@@ -534,7 +534,7 @@ void HelicopterSparkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 		pResponObject[j]->SetMaterial(0, pSpriteMaterial);
 		pResponObject[j]->SetPosition(XMFLOAT3(330.0, 40.0, -230.0));
 		m_ppObjects[j] = pResponObject[j];
-		ParticlePosition = m_ppObjects[j]->GetPosition();;
+		
 	}
 
 	for (int i = 0; i < EXPLOSION_SPARK; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomUnitVectorOnSphereBillboard());
@@ -549,13 +549,14 @@ void HelicopterSparkBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList
 {
 	CPlayer* pPlayer = pCamera->GetPlayer();
 	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
+	XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
 	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
 	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 0.0f, false));
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		
-		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3Position, XMFLOAT3(0.0f, 1.0, 0.0f));
+		ParticlePosition = pPlayer->GetPosition();
+		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0, 0.0f));
 
 	}
 	BillboardShader::Render(pd3dCommandList, pCamera, 0);
@@ -567,19 +568,19 @@ void HelicopterSparkBillboard::AnimateObjects(float fTimeElapsed)
 	if (m_bActive == true)
 	{
 		XMFLOAT3 gravity = XMFLOAT3(0, -9.8f, 0);
-		m_fElapsedTimes += fTimeElapsed * 12.0f;
+		m_fElapsedTimes += fTimeElapsed * 15.0f;
 		if (m_fElapsedTimes <= m_fDuration)
 		{
 			for (int i = 0; i < EXPLOSION_SPARK; i++)
 			{
-				gravity = XMFLOAT3(0, -RandomBillboard(6.0f, 9.8f), 0);
-				m_fExplosionSpeed = RandomBillboard(1.0f, 4.0f);
+				gravity = XMFLOAT3(0, -RandomBillboard(2.0f, 6.0f), 0);
+				m_fExplosionSpeed = RandomBillboard(4.0f, 6.5f);
 				//m_fExplosionSpeed = 6.0f;
 
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
-				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + gravity.x;
-				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;
-				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes + gravity.z;
+				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes+gravity.x;
+				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes +0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;
+				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes+ gravity.z;
 				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
 
 				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;

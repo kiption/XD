@@ -77,15 +77,16 @@ void HeliPlayer::Firevalkan(CGameObject* pLockedObject)
 			xmf3Direction.y += 0.1f;
 			XMFLOAT3 xmf3FirePosition = Vector3::Add(CaemraPosition, Vector3::ScalarProduct(xmf3Direction, 60.0f, false));
 			pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+			pBulletObject->Rotate(80.0, 0.0, 0.0);
 		}
 		else
 		{
-
+			xmf3Position.y += 2.0f;
 			XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
 			pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+			pBulletObject->Rotate(90.0, 0.0, 0.0);
 		}
 		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->Rotate(90.0, 0.0, 0.0);
 		pBulletObject->SetScale(4.0, 10.0, 4.0);
 		pBulletObject->SetActive(true);
 
@@ -171,7 +172,7 @@ void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 	}
 	if (m_pTailRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 15.0f) * fTimeElapse);
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 10.0f) * fTimeElapse);
 		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
 	}
 	//if (m_pTail2RotorFrame)

@@ -819,11 +819,11 @@ void CGameFramework::FrameAdvance()
 
 	if (m_nMode == SCENE1STAGE)
 	{
+	}
 		m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
 		m_pScene->OnPreRender(m_pd3dCommandList, m_pCamera);
 		//UpdateShaderVariables();
 
-	}
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
 	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
 	d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -845,7 +845,7 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], TRUE, &d3dDsvCPUDescriptorHandle);
 	//if (m_nMode != SCENE2STAGE) UpdateShaderVariables();
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
-
+	if (m_nMode == SCENE2STAGE)m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
@@ -1024,7 +1024,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 			m_pCamera = m_pPlayer->GetCamera();
 			m_pScene->SetCurScene(SCENE1STAGE);
-			gamesound.SpeakMusic();
+			if(m_nMode==SCENE1STAGE)gamesound.SpeakMusic();
 			break;
 		}
 		case SCENE2STAGE:
@@ -1458,11 +1458,11 @@ void CGameFramework::setPosition_OtherPlayer(int id, XMFLOAT3 pos)
 		}
 	}
 	else if (m_nMode == SCENE2STAGE) {
-		if (((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])
+		if (((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id])
 		{
-			((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._41 = pos.x;
-			((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._42 = pos.y;
-			((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._43 = pos.z;
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->m_xmf4x4ToParent._41 = pos.x;
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->m_xmf4x4ToParent._42 = pos.y;
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->m_xmf4x4ToParent._43 = pos.z;
 		}
 	}
 }
@@ -1470,29 +1470,33 @@ void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 
 {
 	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE) {
+		
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(1.0, 1.0, 1.2);
 	}
 	else if (m_nMode == SCENE2STAGE) {
-		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
-		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
-		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
-		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(14.0, 14.0, 14.0);
+	
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetUp(upVec);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetRight(rightVec);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetLook(lookVec);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetScale(14.0, 14.0, 14.0);
 	}
 }
 void CGameFramework::remove_OtherPlayer(int id)
 {
-	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지	
+	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE) {
+	
 		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
 			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
 		}
 	}
-	else if (m_nMode == SCENE2STAGE) {
-		if (((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
-			((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
+	if (m_nMode == SCENE2STAGE) {
+	
+		if (((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]) {
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetScale(0.0, 0.0, 0.0);
 		}
 	}
 }
@@ -1500,11 +1504,15 @@ void CGameFramework::remove_OtherPlayer(int id)
 
 void CGameFramework::setPosition_Npc(int id, XMFLOAT3 pos)
 {
+	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE)
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetPosition(pos);
+	if (m_nMode == SCENE2STAGE) {
+	}
 }
 void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
+	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE)
 	{
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetRight(rightVec);
@@ -1512,9 +1520,13 @@ void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, X
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetLook(lookVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetScale(1.4, 1.0, 1.0);
 	}
+	if (m_nMode == SCENE2STAGE) {
+	}
 }
 void CGameFramework::remove_Npcs(int id)
 {
+	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
+	
 }
 
 
@@ -1594,7 +1606,7 @@ void CGameFramework::otherPlayerReturnToIdle(int p_id)
 
 	}
 	else if (m_nMode == SCENE2STAGE) {
-		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	}
 }
 void CGameFramework::otherPlayerMovingMotion(int p_id)
@@ -1603,7 +1615,7 @@ void CGameFramework::otherPlayerMovingMotion(int p_id)
 
 	}
 	else if (m_nMode == SCENE2STAGE) {
-		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
 	}
 }
 void CGameFramework::otherPlayerShootingMotion(int p_id)
@@ -1612,7 +1624,7 @@ void CGameFramework::otherPlayerShootingMotion(int p_id)
 		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->Firevalkan(NULL);
 	}
 	else if (m_nMode == SCENE2STAGE) {
-		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	}
 }
 

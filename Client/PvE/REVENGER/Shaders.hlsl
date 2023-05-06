@@ -141,8 +141,6 @@ VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 	return(output);
 }
 
-
-
 float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 {
 
@@ -177,7 +175,6 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 
 	return(lerp(cColor, cIllumination, 0.4f));
 }
-
 
 float3 ParticleLogic()
 {

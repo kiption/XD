@@ -1761,16 +1761,24 @@ void CHelicopterObjects::Firevalkan(CGameObject* pLockedObject)
 	{
 		XMFLOAT3 PlayerLook = GetLook();
 		XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
+		XMFLOAT3 CaemraPosition = m_pCamera->GetPosition();
 		XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
 		XMFLOAT3 xmf3Position = GetPosition();
-		XMFLOAT3 xmf3Direction = PlayerLook;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
-		if (SPACESHIP_CAMERA)
-		{
-			xmf3FirePosition.y += 5.0f;
-		}
+		XMFLOAT3 xmf3Direction = TotalLookVector;
+
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+		if (m_pCamera->m_nMode == SPACESHIP_CAMERA)
+		{
+			xmf3Direction.y += 0.3f;
+			XMFLOAT3 xmf3FirePosition = Vector3::Add(CaemraPosition, Vector3::ScalarProduct(xmf3Direction, 60.0f, false));
+			pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+		}
+		else
+		{
+			xmf3Position.y += 2.0f;
+			XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
+			pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+		}
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->Rotate(90.0, 0.0, 0.0);
 		pBulletObject->SetScale(4.0, 10.0, 4.0);
@@ -1858,7 +1866,7 @@ CAngrybotObject::~CAngrybotObject()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CHumanoidObject::CHumanoidObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks)
+CHumanoidObject::CHumanoidObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(10)
 {
 	CLoadedModelInfo* pHumanoidModel = pModel;
 	if (!pHumanoidModel) pHumanoidModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Humanoid.bin", NULL);

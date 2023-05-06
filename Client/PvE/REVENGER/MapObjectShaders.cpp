@@ -133,12 +133,12 @@ void CStage2MapObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphi
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
 
-	m_nObjects = 2;
+	m_nObjects = 1;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 
 	CGameObject* pSceneModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/GameObject.bin", NULL);
-	for (int i = 0; i < 2; i++)
+	for (int i = 0; i < 1; i++)
 	{
 		m_ppObjects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pSceneModel, false);
@@ -147,9 +147,6 @@ void CStage2MapObjectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphi
 		pSceneModel->AddRef();
 	}
 	m_ppObjects[0]->SetPosition(XMFLOAT3(1000.0f, pTerrain->GetHeight(1000.0f, 1500.0f) - 9.8f, 1500.0f));
-	m_ppObjects[1]->SetPosition(XMFLOAT3(2500.0f, pTerrain->GetHeight(2500.0f, 2500.0f) + 120.0f, 2500.0f));
-
-	
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 

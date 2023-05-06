@@ -131,7 +131,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 2, 900);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 2, 800);
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
@@ -141,7 +141,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pSkyBox->SetCurScene(SCENE1STAGE);
 
-	XMFLOAT3 xmf3Scale(35.0f, 2.0f, 35.0);
+	XMFLOAT3 xmf3Scale(35.0f, 3.0f, 35.0);
 	XMFLOAT3 xmf3Normal(0.0f, 0.3f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/waterterrain8bit.raw"), 257, 257, xmf3Scale, xmf3Normal);
 	m_pTerrain->SetCurScene(SCENE1STAGE);
@@ -192,12 +192,6 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pFragmentsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppFragShaders[0] = pFragmentsShader;
 
-	CBulletEffectShader* pBCBulletEffectShader = new CBulletEffectShader();
-	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
-	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
-	m_pBulletEffect = pBCBulletEffectShader;
-
-
 	m_nShaders = 1;
 	m_ppShaders = new CObjectsShader * [m_nShaders];
 
@@ -221,7 +215,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 
 
-	gamesound.backGroundMusic();
+	//gamesound.backGroundMusic();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }
