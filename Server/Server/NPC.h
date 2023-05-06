@@ -3,6 +3,7 @@
 #include "Constant.h"
 #include "MyVectors.h"
 #include <vector>
+#include <DirectXCollision.h>
 
 enum NpcType { NPC_Helicopter, NPC_Bunker, NPC_Terret };
 enum St1_NPCState { NPC_IDLE, NPC_FLY, NPC_CHASE, NPC_ATTACK, NPC_DEATH };
@@ -16,18 +17,30 @@ struct Section_Info {
 	int ID;
 };
 struct City_Info {
-	Section_Info SectionNum[3];
+	Section_Info SectionNum[6];
 	float Centerx, Centerz;
 	int id;
 };
 
 // 도시 위치 바뀌면 위치가 정리된 파일을 읽던가 이렇게 배열 형태로 해서 가져다 쓰던가로 해야함. --> 임시
-const float SX_range[9] = { 520.0f, 520.0f, 520.0f, -980.0f,-980.0f, -980.0f, -385.0f, -180.0f, -180.0f };
-const float LX_range[9] = { 1000.0f, 580.0f, 1550.0f, -300.0f,-900.0f, 50.0f, -100.0f, -100.0f, 845.0f };
-const float SZ_range[9] = { 350.0f, 350.0f, 770.0f, 240.0f,240.0f, 660.0f, -535.0f, -535.0f, -110.0f };
-const float LZ_range[9] = { 410.0f, 835.0f, 840.0f,  295.0f,720.0f,720.0f, -455.0f, -30.0f, -30.0f };
-const float C_cx[3] = { 782.0f, -680.0f, -17.0f };
-const float C_cz[3] = { 592.0f, 477.5f, -282.0f };
+const float SX_range[18] = {
+	-780.0f, -780.0f, -380.0f, -380.0f, -75.0f, -75.0f,
+	110.0f, 110.0f, 110.0f, 1090.0f, 660.0f, 660.0f,
+	150.0f, -400.0f, -400.0f, -600.0f, -600.0f, -1550.0f };
+const float LX_range[18] = { 
+	-710.0f, -300.0f, -300.0f, 10.0f, 10.0f, 950.0f,
+	690.0f, 200.0f, 1150.0f, 1150.0f, 1150.0f, 740.0f,
+	230.0f, 230.0f, -370.0f, -370.0f, -520.0f, -520.0f };
+const float SZ_range[18] = { 
+	-900.0f, -430.0f, -1390.0f, -1390.0f, -1390.0f, -980.0f, 
+	-690.0f, -690.0f, -260.0f, -260.0f, 30.0f, 30.0f,
+	140.0f, 140.0f, 140.0f , 350.0f, -60.0f, -60.0f };
+const float LZ_range[18] = {
+	-350.0f, -350.0f, -350.0f, -1330.0f, -900.0f, -900.0f,
+	-600.0f, -190.0f, -190.0f, 110.0f, 110.0f, 1060.0f,
+	720.0f, 200.0f, 410.0f, 410.0f, 410.0f, 0.0f };
+const float C_cx[3] = { -396.0f, 651.0f, -393.0f };
+const float C_cz[3] = { -888.0f, -128.0f, 233.0f };
 //
 struct Npc_Vector3
 {
@@ -95,13 +108,16 @@ private:
 	float m_Speed;
 
 	float m_Distance[5];
-
+	//float* m_BtoN_distance = NULL;
 	bool m_SectionMoveDir;
 	vector<City_Info>m_Section;
+	float NPCtoBuilding_Dis[600];
 public:
+	bool PrintRayCast = false;
+
 	BoundingOrientedBox m_xoobb_Pro;
 	BoundingOrientedBox m_xoobb_Body;
-
+	vector<BoundingOrientedBox>m_mapxmoobb;
 	BoundingFrustum m_frustum;
 
 	Npc_Vector3 Npc_defaultVec{ -9999.f, -9999.f, -9999.f };
@@ -131,6 +147,7 @@ public:
 	void SetDistance(float dis);
 	void SetSpeed(float spd);
 	void SetFrustum();
+	void SetBuildingInfo(XMFLOAT3 bPos, XMFLOAT3 bScale);
 	// ===========================================
 	// =============       GET      ==============
 	// ===========================================
@@ -150,18 +167,18 @@ public:
 	float GetSpeed(float spd);
 
 	vector<City_Info>GetCityInfo();
-
-	bool PrintRayCast = false;
+	XMFLOAT3 GetBuildingInfo(int id);
 public:
 
 	// ===========================================
 	// =============     NORMAL     ==============
 	// ===========================================
-
 	// State
 	void ST1_State_Manegement(int state); // 상태 관리
 
 	void Caculation_Distance(XMFLOAT3 vec, int id); // 범위 내 플레이어 탐색
+	float Building_Caculation_Distance(XMFLOAT3 vec);
+
 	void ST1_Death_motion(); // HP 0
 
 	// Find Distance
@@ -172,6 +189,7 @@ public:
 
 	// Damege
 	void ST1_Damege_Calc(int id);
+	void ST1_CheckNPC_HP();
 
 	// Idle
 	void MoveInSection();
@@ -190,8 +208,12 @@ public:
 	// Rotate
 	XMFLOAT3 NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll);
 
-	void setBB_Pro() { m_xoobb_Pro = BoundingOrientedBox(XMFLOAT3(m_Pos.x, m_Pos.y, m_Pos.z), XMFLOAT3(HELI_BBSIZE_X * 2 , HELI_BBSIZE_Y * 2, HELI_BBSIZE_Z * 2), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
+	void setBB_Pro() { m_xoobb_Pro = BoundingOrientedBox(XMFLOAT3(m_Pos.x, m_Pos.y, m_Pos.z), XMFLOAT3(HELI_BBSIZE_X * 2, HELI_BBSIZE_Y * 2, HELI_BBSIZE_Z * 2), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 	void setBB_Body() { m_xoobb_Body = BoundingOrientedBox(XMFLOAT3(m_Pos.x, m_Pos.y, m_Pos.z), XMFLOAT3(HELI_BBSIZE_X * 2, HELI_BBSIZE_Y * 2, HELI_BBSIZE_Z * 2), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
+
+	// Building Collide
+	void BuildingToNPC_Distance();
+	void NPCtoBuilding_collide();
 
 
 	// Ray Cast

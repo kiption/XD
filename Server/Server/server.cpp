@@ -1394,12 +1394,12 @@ void init_npc()
 		temp.Centerx = C_cx[i];
 		temp.Centerz = C_cz[i];
 
-		for (int j{}; j < 3; ++j) {
+		for (int j{}; j < 6; ++j) {
 			temp.SectionNum[j].ID = j;
-			temp.SectionNum[j].lx = LX_range[3 * i + j];
-			temp.SectionNum[j].lz = LZ_range[3 * i + j];
-			temp.SectionNum[j].sx = SX_range[3 * i + j];
-			temp.SectionNum[j].sz = SZ_range[3 * i + j];
+			temp.SectionNum[j].lx = LX_range[6 * i + j];
+			temp.SectionNum[j].lz = LZ_range[6 * i + j];
+			temp.SectionNum[j].sx = SX_range[6 * i + j];
+			temp.SectionNum[j].sz = SZ_range[6 * i + j];
 		}
 		Cities.emplace_back(temp);
 	}
@@ -1414,136 +1414,41 @@ void init_npc()
 		npcs[i].SetNpcType(NPC_Helicopter);
 		npcs[i].SetRotate(0.0f, 0.0f, 0.0f);
 		//npcs[i].SetActive(false);
-
+		
 		random_device rd;
 		default_random_engine dre(rd());
 		uniform_real_distribution<float>AirHigh(50, 270);
 		
-		uniform_int_distribution<int>Sec_num(0, 2);
+		uniform_int_distribution<int>Ci_num(0, 2);
+		uniform_int_distribution<int>Sec_num(0, 5);
 
-		int ran_num = Sec_num(dre);
+		int city_num = Ci_num(dre);
+		int section_num = Sec_num(dre);
 
-		switch (ran_num)
-		{
-		case 0:
-		{
-			npcs[i].SetIdleCity(ran_num);
-			int sec = Sec_num(dre);
-			float lx, lz, sx, sz = 0;
-			switch (sec)
-			{
-			case 0:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			case 1:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			case 2:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			}
-			uniform_real_distribution<float>AirXPos(sx, lx);
-			uniform_real_distribution<float>AirZPos(sz, lz);
-			npcs[i].SetPosition(AirXPos(dre), AirHigh(dre), AirZPos(dre));
-			npcs[i].SetIdleSection(sec);
-		}
-		break;
-		case 1:
-		{
-			npcs[i].SetIdleCity(ran_num);
-			int sec = Sec_num(dre);
-			float lx, lz, sx, sz = 0;
-			switch (sec)
-			{
-			case 0:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			case 1:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			case 2:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			}
-			uniform_real_distribution<float>AirXPos(sx, lx);
-			uniform_real_distribution<float>AirZPos(sz, lz);
-			npcs[i].SetPosition(AirXPos(dre), AirHigh(dre), AirZPos(dre));
-			npcs[i].SetIdleSection(sec);
-		}
-		break;
-		case 2:
-		{
-			npcs[i].SetIdleCity(ran_num);
-			int sec = Sec_num(dre);
-			float lx, lz, sx, sz = 0;
-			switch (sec)
-			{
-			case 0:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			case 1:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			case 2:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			}
-			uniform_real_distribution<float>AirXPos(sx, lx);
-			uniform_real_distribution<float>AirZPos(sz, lz);
-			npcs[i].SetPosition(AirXPos(dre), AirHigh(dre), AirZPos(dre));
-			npcs[i].SetIdleSection(sec);
-		}
-		break;
-		}
-		uniform_real_distribution<float>SpdSet(1.1f, 3.5f);
+		float lx, lz, sx, sz = 0;
+
+		sx = Cities[city_num].SectionNum[section_num].sx;
+		lx = Cities[city_num].SectionNum[section_num].lx;
+		sz = Cities[city_num].SectionNum[section_num].sz;
+		lz = Cities[city_num].SectionNum[section_num].lz;
+
+		npcs[i].SetIdleCity(city_num);
+		npcs[i].SetIdleSection(section_num);
+
+		uniform_real_distribution<float>AirXPos(sx, lx);
+		uniform_real_distribution<float>AirZPos(sz, lz);
+		npcs[i].SetPosition(AirXPos(dre), AirHigh(dre), AirZPos(dre));
+
+		uniform_real_distribution<float>SpdSet(3.5f, 5.2f);
 		float speed = SpdSet(dre);
 		npcs[i].SetSpeed(speed);
 		npcs[i].SetInitSection(Cities);
+
+		for (int j{}; j < buildings_info.size(); ++j) {
+			XMFLOAT3 Build_pos = { buildings_info[j].getPos() };
+			XMFLOAT3 Build_scale = { buildings_info[j].getScaleX(),buildings_info[j].getScaleY() ,buildings_info[j].getScaleZ() };
+			npcs[i].SetBuildingInfo(Build_pos, Build_scale);
+		}
 	}
 }
 
@@ -1572,11 +1477,11 @@ void MoveNPC()
 			}
 
 			// npc pos 확인
-		/*	cout << i << "번째 NPC의 도시 ID: " << npcs[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcs[i].GetIdleSection() << endl;
+			//cout << i << "번째 NPC의 도시 ID: " << npcs[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcs[i].GetIdleSection() << endl;
 			cout << i << "번째 NPC의 Pos: " << npcs[i].GetPosition().x << ',' << npcs[i].GetPosition().y << ',' << npcs[i].GetPosition().z << endl;
 			cout << i << "번째 NPC의 상태: " << npcs[i].GetState() << endl;
 
-			if (npcs[i].PrintRayCast) {
+			/*if (npcs[i].PrintRayCast) {
 				cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
 			}*/
 
@@ -1616,7 +1521,7 @@ void MoveNPC()
 			}
 		}
 
-		//cout << "=============" << endl;
+		cout << "=============" << endl;
 	}
 }
 
@@ -1818,7 +1723,7 @@ int main(int argc, char* argv[])
 
 	//======================================================================
 	// [ Main ]
-	init_npc();
+	
 
 	// [ Main - 맵 정보 로드 ]
 	// 1. 디렉토리 검색
@@ -1913,6 +1818,8 @@ int main(int argc, char* argv[])
 		txtfile.close();
 	}
 	cout << "\n";
+
+	init_npc();
 
 	//======================================================================
 	// [ Main - 클라이언트 연결 ]
