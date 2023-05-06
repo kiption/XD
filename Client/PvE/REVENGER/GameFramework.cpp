@@ -990,7 +990,7 @@ void CGameFramework::FrameAdvance()
 	size_t nLength = _tcslen(m_pszFrameRate);
 	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
 	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
-	::SetWindowText(m_hWnd, L"REVENGER");
+	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 
 void CGameFramework::ChangeScene(DWORD nMode)
@@ -1400,57 +1400,91 @@ MouseInputVal CGameFramework::popInputVal_Mouse()
 
 XMFLOAT3 CGameFramework::getMyPosition()
 {
-	return m_pPlayer->GetPosition();
+	if (m_nMode == SCENE1STAGE) {
+		return ((HeliPlayer*)m_pPlayer)->GetPosition();
+	}
+	else if (m_nMode == SCENE2STAGE) {
+		return ((CHumanPlayer*)m_pPlayer)->GetPosition();
+	}
 }
 XMFLOAT3 CGameFramework::getMyRightVec()
 {
-	return m_pPlayer->GetRightVector();
+	if (m_nMode == SCENE1STAGE) {
+		return ((HeliPlayer*)m_pPlayer)->GetRightVector();
+	}
+	else if (m_nMode == SCENE2STAGE) {
+		return ((CHumanPlayer*)m_pPlayer)->GetRightVector();
+	}
 }
 XMFLOAT3 CGameFramework::getMyUpVec()
 {
-	return m_pPlayer->GetUpVector();
+	if (m_nMode == SCENE1STAGE) {
+		return ((HeliPlayer*)m_pPlayer)->GetUpVector();
+	}
+	else if (m_nMode == SCENE2STAGE) {
+		return ((CHumanPlayer*)m_pPlayer)->GetUpVector();
+	}
 }
 XMFLOAT3 CGameFramework::getMyLookVec()
 {
-	return m_pPlayer->GetLookVector();
+	if (m_nMode == SCENE1STAGE) {
+		return ((HeliPlayer*)m_pPlayer)->GetLookVector();
+	}
+	else if (m_nMode == SCENE2STAGE) {
+		return ((CHumanPlayer*)m_pPlayer)->GetLookVector();
+	}
 }
 
 
 void CGameFramework::setPosition_OtherPlayer(int id, XMFLOAT3 pos)
 {
-
 	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
-	if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])
-	{
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._41 = pos.x;
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._42 = pos.y;
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._43 = pos.z;
+	if (m_nMode == SCENE1STAGE) {
+		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])
+		{
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._41 = pos.x;
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._42 = pos.y;
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._43 = pos.z;
+		}
 	}
-
-
+	else if (m_nMode == SCENE2STAGE) {
+		if (((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])
+		{
+			((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._41 = pos.x;
+			((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._42 = pos.y;
+			((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._43 = pos.z;
+		}
+	}
 }
 void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
-
 	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
-
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
-	((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(1.0, 1.0, 1.2);
-
-
-
+	if (m_nMode == SCENE1STAGE) {
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(1.0, 1.0, 1.2);
+	}
+	else if (m_nMode == SCENE2STAGE) {
+		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
+		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
+		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
+		((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(14.0, 14.0, 14.0);
+	}
 }
 void CGameFramework::remove_OtherPlayer(int id)
 {
-
 	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지	
-	if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
+	if (m_nMode == SCENE1STAGE) {
+		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
+		}
 	}
-
-
+	else if (m_nMode == SCENE2STAGE) {
+		if (((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
+			((Stage2*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
+		}
+	}
 }
 
 
@@ -1463,7 +1497,6 @@ void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, X
 {
 	if (m_nMode == SCENE1STAGE)
 	{
-
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetRight(rightVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetUp(upVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetLook(lookVec);

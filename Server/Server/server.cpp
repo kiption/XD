@@ -258,7 +258,6 @@ void SESSION::send_login_info_packet()
 }
 void SESSION::send_move_packet(int client_id, short move_target)
 {
-	if (curr_stage != 1) return;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 	SC_MOVE_OBJECT_PACKET move_pl_packet;
 	move_pl_packet.target = move_target;
 	move_pl_packet.id = client_id;
@@ -272,7 +271,6 @@ void SESSION::send_move_packet(int client_id, short move_target)
 }
 void SESSION::send_rotate_packet(int client_id, short rotate_target)
 {
-	if (curr_stage != 1) return;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 	SC_ROTATE_OBJECT_PACKET rotate_pl_packet;
 	rotate_pl_packet.target = rotate_target;
 	rotate_pl_packet.id = client_id;
@@ -295,7 +293,6 @@ void SESSION::send_rotate_packet(int client_id, short rotate_target)
 }
 void SESSION::send_move_rotate_packet(int client_id, short update_target)
 {
-	if (curr_stage != 1) return;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 	SC_MOVE_ROTATE_OBJECT_PACKET update_pl_packet;
 	update_pl_packet.target = update_target;
 	update_pl_packet.id = client_id;
@@ -347,7 +344,6 @@ void disconnect(int target_id, int target)
 				pl.s_lock.unlock();
 				continue;
 			}
-			if (pl.curr_stage != 1) break;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 			SC_REMOVE_OBJECT_PACKET remove_pl_packet;
 			remove_pl_packet.target = TARGET_PLAYER;
 			remove_pl_packet.id = target_id;

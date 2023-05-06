@@ -84,9 +84,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		}
 		else
 		{
-			if (gGameFramework.m_nMode != SCENE2STAGE && gGameFramework.m_nMode != OPENINGSCENE)
+			if (gGameFramework.m_nMode != OPENINGSCENE)
 			{
-
 				//==================================================
 				//		새로운 키 입력을 서버에게 전달합니다.
 				//==================================================
@@ -95,13 +94,23 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 					switch (keyValue) {
 					case PACKET_KEY_NUM1:
+						if (gGameFramework.m_nMode != SCENE1STAGE) {
+							CS_INPUT_KEYBOARD_PACKET keyinput_pack;
+							keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+							keyinput_pack.type = CS_INPUT_KEYBOARD;
+							keyinput_pack.keytype = keyValue;
+							sendPacket(&keyinput_pack, active_servernum);
+							break;
+						}
 					case PACKET_KEY_NUM2:
-						CS_INPUT_KEYBOARD_PACKET keyinput_pack;
-						keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
-						keyinput_pack.type = CS_INPUT_KEYBOARD;
-						keyinput_pack.keytype = keyValue;
-						sendPacket(&keyinput_pack, active_servernum);
-						break;
+						if (gGameFramework.m_nMode != SCENE2STAGE) {
+							CS_INPUT_KEYBOARD_PACKET keyinput_pack;
+							keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+							keyinput_pack.type = CS_INPUT_KEYBOARD;
+							keyinput_pack.keytype = keyValue;
+							sendPacket(&keyinput_pack, active_servernum);
+							break;
+						}
 					case PACKET_KEY_W:
 					case PACKET_KEY_S:
 					case PACKET_KEY_A:
@@ -116,13 +125,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						break;
 					case PACKET_KEY_UP:
 					case PACKET_KEY_DOWN:
-						CS_MOVE_PACKET updown_move_pack;
-						updown_move_pack.size = sizeof(CS_MOVE_PACKET);
-						updown_move_pack.type = CS_MOVE;
-						updown_move_pack.x = gGameFramework.getMyPosition().x;
-						updown_move_pack.y = gGameFramework.getMyPosition().y;
-						updown_move_pack.z = gGameFramework.getMyPosition().z;
-						sendPacket(&updown_move_pack, active_servernum);
+						if (gGameFramework.m_nMode == SCENE1STAGE) {
+							CS_MOVE_PACKET updown_move_pack;
+							updown_move_pack.size = sizeof(CS_MOVE_PACKET);
+							updown_move_pack.type = CS_MOVE;
+							updown_move_pack.x = gGameFramework.getMyPosition().x;
+							updown_move_pack.y = gGameFramework.getMyPosition().y;
+							updown_move_pack.z = gGameFramework.getMyPosition().z;
+							sendPacket(&updown_move_pack, active_servernum);
+						}
 						break;
 					case PACKET_KEY_LEFT:
 					case PACKET_KEY_RIGHT:
@@ -139,17 +150,20 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						yaw_rotate_pack.look_y = gGameFramework.getMyLookVec().y;
 						yaw_rotate_pack.look_z = gGameFramework.getMyLookVec().z;
 						sendPacket(&yaw_rotate_pack, active_servernum);
+
 						break;
 					case PACKET_KEY_SPACEBAR:
-						if (my_info.m_bullet > 0) {
-							my_info.m_bullet--;
-							CS_ATTACK_PACKET attack_pack;
-							attack_pack.size = sizeof(CS_ATTACK_PACKET);
-							attack_pack.type = CS_ATTACK;
-							sendPacket(&attack_pack, active_servernum);
-						}
-						else {
-							my_info.m_bullet = MAX_BULLET;
+						if (gGameFramework.m_nMode == SCENE1STAGE) {
+							if (my_info.m_bullet > 0) {
+								my_info.m_bullet--;
+								CS_ATTACK_PACKET attack_pack;
+								attack_pack.size = sizeof(CS_ATTACK_PACKET);
+								attack_pack.type = CS_ATTACK;
+								sendPacket(&attack_pack, active_servernum);
+							}
+							else {
+								my_info.m_bullet = MAX_BULLET;
+							}
 						}
 						break;
 					default:
@@ -185,129 +199,126 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						gGameFramework.remove_OtherPlayer(i);
 					}
 
-					if (gGameFramework.m_nMode == SCENE2STAGE)
-					{
-						other_players[i].m_state = OBJ_ST_LOGOUT;
-						other_players[i].InfoClear();
-						gGameFramework.remove_OtherPlayer(i);
-					}
-				}
-				// 2) 객체 인게임 상태 업데이트
-				for (int i = 0; i < MAX_USER; ++i) {
-					if (i == my_info.m_id) continue;
-
-					if (other_players[i].m_ingame_state == PL_ST_ATTACK) {
-						gGameFramework.otherPlayerShooting(i);
-
-						other_players[i].m_ingame_state = PL_ST_ALIVE;
-					}
-					else if (other_players[i].m_ingame_state == PL_ST_DEAD) {
-						// 상대방이 죽으면 해야하는 처리
-					}
+					//if (gGameFramework.m_nMode == SCENE2STAGE)
+					//{
+					//	other_players[i].m_state = OBJ_ST_LOGOUT;
+					//	other_players[i].InfoClear();
+					//	gGameFramework.remove_OtherPlayer(i);
+					//}
 				}
 
-				// 2. NPC 움직임 최신화
-				if (gGameFramework.m_nMode == SCENE1STAGE) {
-					for (int i{}; i < MAX_NPCS; ++i) {
-						//cout << npcs_info[i].m_id << "번째 Pos:" << npcs_info[i].m_pos.x << ',' << npcs_info[i].m_pos.y << ',' << npcs_info[i].m_pos.z << endl;
-						gGameFramework.setPosition_Npc(npcs_info[i].m_id, npcs_info[i].m_pos);
-						gGameFramework.setVectors_Npc(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
-						gGameFramework.m_pScene->SmokePosition = npcs_info[i].m_pos;
-						((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(npcs_info[i].m_pos);
+				if (gGameFramework.m_nMode != SCENE2STAGE) {
+					// 2) 객체 인게임 상태 업데이트
+					for (int i = 0; i < MAX_USER; ++i) {
+						if (i == my_info.m_id) continue;
+
+						if (other_players[i].m_ingame_state == PL_ST_ATTACK) {
+							gGameFramework.otherPlayerShooting(i);
+
+							other_players[i].m_ingame_state = PL_ST_ALIVE;
+						}
+						else if (other_players[i].m_ingame_state == PL_ST_DEAD) {
+							// 상대방이 죽으면 해야하는 처리
+						}
 					}
-					//cout << "====================" << endl;
-				}
 
-				//==================================================
-				//					  UI 동기화
-				//==================================================
-				// 1. 총알 업데이트
-				wchar_t MyBullet[20];
-				_itow_s(my_info.m_bullet, MyBullet, sizeof(MyBullet), 10);
-				wcscpy_s(gGameFramework.m_myBullet, MyBullet);
-
-				// 2. HP 업데이트
-				wchar_t MyHp[20];
-				_itow_s(my_info.m_hp, MyHp, sizeof(MyHp), 10);
-				wcscpy_s(gGameFramework.m_myhp, MyHp);
-				gGameFramework.m_currHp = my_info.m_hp;
-
-				// 3. 시간 동기화
-				gGameFramework.m_10MinOfTime = servertime_sec / 600;
-				gGameFramework.m_1MinOfTime = (servertime_sec - gGameFramework.m_10MinOfTime * 600) / 60;
-				gGameFramework.m_10SecOftime = (servertime_sec - gGameFramework.m_1MinOfTime * 60) / 10;
-				gGameFramework.m_1SecOfTime = servertime_sec % 10;
-
-				// 4. NPC 객체 수 동기화
-				gGameFramework.m_remainNPC = left_npc;
-
-				//==================================================
-				//					충돌 이펙트 관련
-				//==================================================
-				// 1. 자기 자신
-				if (my_info.m_damaged_effect_on) {
-					// 여기에 이펙트 넣어줘.
-				}
-
-				// 2. 다른 플레이어
-				for (auto& other_pl : other_players) {
-					if (other_pl.m_damaged_effect_on) {
-						//((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(other_pl.m_pos);
+					// 2. NPC 움직임 최신화
+					if (gGameFramework.m_nMode == SCENE1STAGE) {
+						for (int i{}; i < MAX_NPCS; ++i) {
+							//cout << npcs_info[i].m_id << "번째 Pos:" << npcs_info[i].m_pos.x << ',' << npcs_info[i].m_pos.y << ',' << npcs_info[i].m_pos.z << endl;
+							gGameFramework.setPosition_Npc(npcs_info[i].m_id, npcs_info[i].m_pos);
+							gGameFramework.setVectors_Npc(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
+							gGameFramework.m_pScene->SmokePosition = npcs_info[i].m_pos;
+							((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(npcs_info[i].m_pos);
+						}
+						//cout << "====================" << endl;
 					}
-				}
 
-				// 3. NPC
-				for (auto& npc : npcs_info) {
-					if (npc.m_damaged_effect_on) {
+					//==================================================
+					//					  UI 동기화
+					//==================================================
+					// 1. 총알 업데이트
+					wchar_t MyBullet[20];
+					_itow_s(my_info.m_bullet, MyBullet, sizeof(MyBullet), 10);
+					wcscpy_s(gGameFramework.m_myBullet, MyBullet);
+
+					// 2. HP 업데이트
+					wchar_t MyHp[20];
+					_itow_s(my_info.m_hp, MyHp, sizeof(MyHp), 10);
+					wcscpy_s(gGameFramework.m_myhp, MyHp);
+					gGameFramework.m_currHp = my_info.m_hp;
+
+					// 3. 시간 동기화
+					gGameFramework.m_10MinOfTime = servertime_sec / 600;
+					gGameFramework.m_1MinOfTime = (servertime_sec - gGameFramework.m_10MinOfTime * 600) / 60;
+					gGameFramework.m_10SecOftime = (servertime_sec - gGameFramework.m_1MinOfTime * 60) / 10;
+					gGameFramework.m_1SecOfTime = servertime_sec % 10;
+
+					// 4. NPC 객체 수 동기화
+					gGameFramework.m_remainNPC = left_npc;
+
+					//==================================================
+					//					충돌 이펙트 관련
+					//==================================================
+					/*
+					// 1. 자기 자신
+					if (my_info.m_damaged_effect_on) {
 						// 여기에 이펙트 넣어줘.
 					}
-				}
 
-				//==================================================
-				//				객체 사망 후처리 관련
-				//==================================================
-				while (!new_death_objs.empty()) {
-					DeathInfo new_deadobj = new_death_objs.front();
-					new_death_objs.pop();
-
-					switch (new_deadobj.obj_type) {
-					case D_OBJ_PLAYER:
-						if (new_deadobj.obj_id == my_id) {
-							// 게임오버 화면 전환
-
+					// 2. 다른 플레이어
+					for (auto& other_pl : other_players) {
+						if (other_pl.m_damaged_effect_on) {
+							//((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(other_pl.m_pos);
 						}
-						else {
-							// id번째 Player 사망 연출 후 객체 삭제(또는 안보이는 곳에 숨겨두기)
-						
-						}
-						break;
-					case D_OBJ_NPC:
-						// id번째 Npc 사망 연출 후 객체 삭제(또는 안보이는 곳에 숨겨두기)
-						((Stage1*)gGameFramework.m_pScene)->m_ppShaders[0]->m_ppObjects[10 + new_deadobj.obj_id]->m_xmf4x4ToParent._42 = 0.0f;
-
-						break;
 					}
+
+					// 3. NPC
+					for (auto& npc : npcs_info) {
+						if (npc.m_damaged_effect_on) {
+							// 여기에 이펙트 넣어줘.
+						}
+					}
+					*/
+
+					//==================================================
+					//				객체 사망 후처리 관련
+					//==================================================
+					while (!new_death_objs.empty()) {
+						DeathInfo new_deadobj = new_death_objs.front();
+						new_death_objs.pop();
+
+						switch (new_deadobj.obj_type) {
+						case D_OBJ_PLAYER:
+							if (new_deadobj.obj_id == my_id) {
+								// 게임오버 화면 전환
+
+							}
+							else {
+								// id번째 Player 사망 연출 후 객체 삭제(또는 안보이는 곳에 숨겨두기)
+
+							}
+							break;
+						case D_OBJ_NPC:
+							// id번째 Npc 사망 연출 후 객체 삭제(또는 안보이는 곳에 숨겨두기)
+							((Stage1*)gGameFramework.m_pScene)->m_ppShaders[0]->m_ppObjects[10 + new_deadobj.obj_id]->m_xmf4x4ToParent._42 = 0.0f;
+
+							break;
+						}
+					}
+
+					//==================================================
+					//					Map 충돌 관련
+					//==================================================
+					for (auto& mapobj : stage1_mapobj_info) {
+						gGameFramework.CollisionMap_by_PLAYER(XMFLOAT3(mapobj.m_xoobb.Center), XMFLOAT3(mapobj.m_xoobb.Extents));
+					}
+					//gGameFramework.CollisionEndWorldObject(XMFLOAT3(0.0, 0.0, 0.0), XMFLOAT3(1200.0, 110.0, 1200.0));
+					gGameFramework.CollisionMap_by_BULLET(XMFLOAT3(/*MAP CENTER*/), XMFLOAT3(/*MAP EXTENTS*/));
+					gGameFramework.CollisionNPC_by_BULLET(XMFLOAT3(/*NPC CENTER*/), XMFLOAT3(/*NPC EXTENTS*/));
+					gGameFramework.CollisionNPC_by_MAP(XMFLOAT3(/*NPC CENTER*/), XMFLOAT3(/*NPC EXTENTS*/), XMFLOAT3(/*MAP CENTER*/), XMFLOAT3(/*MAP EXTENTS*/));
+					gGameFramework.CollisionNPC_by_PLAYER(XMFLOAT3(/*NPC CENTER*/), XMFLOAT3(/*NPC EXTENTS*/));
 				}
-
-
-				//==================================================
-
-				//==================================================
-				//					Map 충돌 관련
-				//==================================================
-				for (auto& mapobj : stage1_mapobj_info) {
-					/*cout << "Map Obj - Pos: " << mapobj.m_pos.x << ", " << mapobj.m_pos.y << ", " << mapobj.m_pos.z
-						<< " Scale: " << mapobj.m_scale.x << ", " << mapobj.m_scale.y << ", " << mapobj.m_scale.z << "." << endl;*/
-					
-					gGameFramework.CollisionMap_by_PLAYER(XMFLOAT3(mapobj.m_xoobb.Center), XMFLOAT3(mapobj.m_xoobb.Extents));
-					
-				}
-				//gGameFramework.CollisionEndWorldObject(XMFLOAT3(0.0, 0.0, 0.0), XMFLOAT3(1200.0, 110.0, 1200.0));
-				gGameFramework.CollisionMap_by_BULLET(XMFLOAT3(/*MAP CENTER*/), XMFLOAT3(/*MAP EXTENTS*/));
-				gGameFramework.CollisionNPC_by_BULLET(XMFLOAT3(/*NPC CENTER*/), XMFLOAT3(/*NPC EXTENTS*/));
-				gGameFramework.CollisionNPC_by_MAP(XMFLOAT3(/*NPC CENTER*/), XMFLOAT3(/*NPC EXTENTS*/), XMFLOAT3(/*MAP CENTER*/), XMFLOAT3(/*MAP EXTENTS*/));
-				gGameFramework.CollisionNPC_by_PLAYER(XMFLOAT3(/*NPC CENTER*/), XMFLOAT3(/*NPC EXTENTS*/));
-				//==================================================
 			}
 			gGameFramework.FrameAdvance();
 		}

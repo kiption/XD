@@ -116,14 +116,17 @@ void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pMapObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 	m_ppStageMapShaders[0] = pMapObjectShader;
 
-	m_nShaders = 1;
+	m_nShaders = 5;
 	m_ppShaders = new CSkinnedAnimationObjectsShader * [m_nShaders];
 
-	CHumanObjectsShader* pOtherPlayerShader = new CHumanObjectsShader();
-	pOtherPlayerShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
-	pOtherPlayerShader->SetCurScene(SCENE2STAGE);
-	pOtherPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, m_pTerrain);
-	m_ppShaders[0] = pOtherPlayerShader;
+	for (int i = 0; i < m_nShaders; i++)
+	{
+		CHumanObjectsShader* pOtherPlayerShader = new CHumanObjectsShader();
+		pOtherPlayerShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+		pOtherPlayerShader->SetCurScene(SCENE2STAGE);
+		pOtherPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, m_pTerrain);
+		m_ppShaders[i] = pOtherPlayerShader;
+	}
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
