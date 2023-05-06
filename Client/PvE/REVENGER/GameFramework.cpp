@@ -969,7 +969,7 @@ void CGameFramework::FrameAdvance()
 			m_pd2dDeviceContext->DrawTextW(m_myBullet, (UINT32)wcslen(m_myBullet), m_pdwFont, &rcBulletText, m_pd2dbrText);
 
 			D2D1_RECT_F rcMaxBulletText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 29, (FRAME_BUFFER_HEIGHT / 4) * 3, (FRAME_BUFFER_WIDTH / 32) * 31, (FRAME_BUFFER_HEIGHT));
-			m_pd2dDeviceContext->DrawTextW(L"/100", (UINT32)wcslen(L"/100"), m_pdwFont, &rcMaxBulletText, m_pd2dbrText);
+			m_pd2dDeviceContext->DrawTextW(L"/50", (UINT32)wcslen(L"/50"), m_pdwFont, &rcMaxBulletText, m_pd2dbrText);
 		}
 	}
 

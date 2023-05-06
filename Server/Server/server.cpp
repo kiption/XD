@@ -767,12 +767,16 @@ void process_packet(int client_id, char* packet)
 		// 1. 스테이지 1 로직
 		if (clients[client_id].curr_stage == 1) {
 			bool b_collide = false;
-			// 1. 클라이언트와 충돌검사
-			for (auto& cl : clients) {
-				if (cl.s_state != ST_INGAME) continue;
-				if (cl.id == client_id) continue;
 
-				// 우선 이 플레이어가 총알을 발사했다는 정보를 모든 클라이언트에게 알려줍니다. (총알 나가는 모션 동기화를 위함)
+			// 1. 클라이언트와 충돌검사
+			MyVector3 intersect_result;
+			int intersect_id = -1;
+			float min_dist = FLT_MAX;
+			for (auto& cl : clients) {
+				if (cl.s_state != ST_INGAME) continue;	// 게임중이 아닌 세션은 검사할 필요X
+				if (cl.id == client_id) continue;		// 자기자신은 검사하면 안됨.
+
+				// 우선 이 플레이어가 총알을 발사했다는 정보를 "자기자신을 제외한" 클라이언트에게 알려줍니다. (총알 나가는 모션 동기화를 위함)
 				SC_OBJECT_STATE_PACKET atk_pack;
 				atk_pack.type = SC_OBJECT_STATE;
 				atk_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
@@ -783,39 +787,64 @@ void process_packet(int client_id, char* packet)
 
 				// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
 				Cube pl_obj{ exc_XMFtoMyVec(cl.pos), HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
-				MyVector3 pl_intersect = GetInterSection_Line2Cube(exc_XMFtoMyVec(clients[client_id].pos), exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj);
+				MyVector3 tmp_intersect = GetInterSection_Line2Cube(exc_XMFtoMyVec(clients[client_id].pos), exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj);
 
-				// 레이캐스트에서 충돌으로 판단되면 대상의 HP를 감소시키고 클라이언트에게 피격 패킷을 보내야 합니다.
-				if (pl_intersect != defaultVec) {
-					cout << "Bullet(Owner: Player[" << client_id << "]) Collide with Player[" << cl.id << "].\n" << endl;
+				// 충돌했다면
+				if (tmp_intersect != defaultVec) {
 					b_collide = true;
 
-					cl.s_lock.lock();
-					cl.hp -= BULLET_DAMAGE;
-					cl.s_lock.unlock();
-					if (cl.hp > 0) {
-						//cout << "Send Damage Packet to Player[" << cl.id << "].\n" << endl;
+					// 쏜 사람과의 충돌점과의 거리를 잽니다.
+					float cur_dist = calcDistance(exc_XMFtoMyVec(clients[client_id].pos), tmp_intersect);
+					cout << "[TEST] Dist: cur_dist" << endl;//test
+
+					// 그 거리가 최소거리보다 작다면 업데이트해줍니다.
+					if (cur_dist < min_dist) {
+						cout << "[TEST] Intersection Update" << endl;//test
+						min_dist = cur_dist;
+						intersect_id = cl.id;
+						intersect_result = tmp_intersect;
+					}
+				}
+			}
+
+			// 레이캐스트에서 충돌으로 판단되었다면
+			if (intersect_result != defaultVec) {
+				if (intersect_id == -1) break;	//err
+				cout << "Bullet(Owner: Player[" << client_id << "]) Collide at Player[" << intersect_id << "] ("
+					<< intersect_result.x << ", " << intersect_result.y << ", " << intersect_result.z << ").\n" << endl;
+
+				// 우선 충돌한 플레이어의 HP를 감소시킵니다.
+				clients[intersect_id].s_lock.lock();
+				clients[intersect_id].hp -= BULLET_DAMAGE;
+				clients[intersect_id].s_lock.unlock();
+
+				// 충돌한 정보는 "접속 중인 모든" 클라이언트들에게 보냅니다. (피격 및 사망 연출 동기화를 위함)
+				for (auto& cl : clients) {
+					if (cl.s_state != ST_INGAME) continue;
+
+					if (clients[intersect_id].hp > 0) {
+						cout << "Send Damage Packet to Player[" << clients[intersect_id].id << "].\n" << endl;
 						SC_DAMAGED_PACKET dmg_bullet_packet;
 						dmg_bullet_packet.type = SC_DAMAGED;
 						dmg_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
 						dmg_bullet_packet.target = TARGET_PLAYER;
-						dmg_bullet_packet.id = cl.id;
+						dmg_bullet_packet.id = clients[intersect_id].id;
 						dmg_bullet_packet.damage = BULLET_DAMAGE;
-						lock_guard<mutex> lg{ cl.s_lock };
+						lock_guard<mutex> lg{ clients[intersect_id].s_lock };
 						cl.do_send(&dmg_bullet_packet);
 					}
 					else {
-						//cout << "Send Death Packet to Player[" << cl.id << "].\n" << endl;
+						cout << "Send Death Packet to Player[" << clients[intersect_id].id << "].\n" << endl;
 						SC_OBJECT_STATE_PACKET death_pack;
 						death_pack.type = SC_OBJECT_STATE;
 						death_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
 						death_pack.target = TARGET_PLAYER;
-						death_pack.id = cl.id;
+						death_pack.id = clients[intersect_id].id;
 						death_pack.state = PL_ST_DEAD;
 						cl.do_send(&death_pack);
 					}
-					break;
 				}
+				break;
 			}
 			if (b_collide) break;	// 플레이어와 충돌했으면 더이상 충돌처리를 할 필요X
 
@@ -1394,12 +1423,12 @@ void init_npc()
 		temp.Centerx = C_cx[i];
 		temp.Centerz = C_cz[i];
 
-		for (int j{}; j < 3; ++j) {
+		for (int j{}; j < 6; ++j) {
 			temp.SectionNum[j].ID = j;
-			temp.SectionNum[j].lx = LX_range[3 * i + j];
-			temp.SectionNum[j].lz = LZ_range[3 * i + j];
-			temp.SectionNum[j].sx = SX_range[3 * i + j];
-			temp.SectionNum[j].sz = SZ_range[3 * i + j];
+			temp.SectionNum[j].lx = LX_range[6 * i + j];
+			temp.SectionNum[j].lz = LZ_range[6 * i + j];
+			temp.SectionNum[j].sx = SX_range[6 * i + j];
+			temp.SectionNum[j].sz = SZ_range[6 * i + j];
 		}
 		Cities.emplace_back(temp);
 	}
@@ -1414,136 +1443,41 @@ void init_npc()
 		npcs[i].SetNpcType(NPC_Helicopter);
 		npcs[i].SetRotate(0.0f, 0.0f, 0.0f);
 		//npcs[i].SetActive(false);
-
+		
 		random_device rd;
 		default_random_engine dre(rd());
 		uniform_real_distribution<float>AirHigh(50, 270);
 		
-		uniform_int_distribution<int>Sec_num(0, 2);
+		uniform_int_distribution<int>Ci_num(0, 2);
+		uniform_int_distribution<int>Sec_num(0, 5);
 
-		int ran_num = Sec_num(dre);
+		int city_num = Ci_num(dre);
+		int section_num = Sec_num(dre);
 
-		switch (ran_num)
-		{
-		case 0:
-		{
-			npcs[i].SetIdleCity(ran_num);
-			int sec = Sec_num(dre);
-			float lx, lz, sx, sz = 0;
-			switch (sec)
-			{
-			case 0:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			case 1:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			case 2:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			}
-			uniform_real_distribution<float>AirXPos(sx, lx);
-			uniform_real_distribution<float>AirZPos(sz, lz);
-			npcs[i].SetPosition(AirXPos(dre), AirHigh(dre), AirZPos(dre));
-			npcs[i].SetIdleSection(sec);
-		}
-		break;
-		case 1:
-		{
-			npcs[i].SetIdleCity(ran_num);
-			int sec = Sec_num(dre);
-			float lx, lz, sx, sz = 0;
-			switch (sec)
-			{
-			case 0:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			case 1:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			case 2:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			}
-			uniform_real_distribution<float>AirXPos(sx, lx);
-			uniform_real_distribution<float>AirZPos(sz, lz);
-			npcs[i].SetPosition(AirXPos(dre), AirHigh(dre), AirZPos(dre));
-			npcs[i].SetIdleSection(sec);
-		}
-		break;
-		case 2:
-		{
-			npcs[i].SetIdleCity(ran_num);
-			int sec = Sec_num(dre);
-			float lx, lz, sx, sz = 0;
-			switch (sec)
-			{
-			case 0:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			case 1:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			case 2:
-			{
-				sx = Cities[ran_num].SectionNum[sec].sx;
-				lx = Cities[ran_num].SectionNum[sec].lx;
-				sz = Cities[ran_num].SectionNum[sec].sz;
-				lz = Cities[ran_num].SectionNum[sec].lz;
-			}
-			break;
-			}
-			uniform_real_distribution<float>AirXPos(sx, lx);
-			uniform_real_distribution<float>AirZPos(sz, lz);
-			npcs[i].SetPosition(AirXPos(dre), AirHigh(dre), AirZPos(dre));
-			npcs[i].SetIdleSection(sec);
-		}
-		break;
-		}
-		uniform_real_distribution<float>SpdSet(1.1f, 3.5f);
+		float lx, lz, sx, sz = 0;
+
+		sx = Cities[city_num].SectionNum[section_num].sx;
+		lx = Cities[city_num].SectionNum[section_num].lx;
+		sz = Cities[city_num].SectionNum[section_num].sz;
+		lz = Cities[city_num].SectionNum[section_num].lz;
+
+		npcs[i].SetIdleCity(city_num);
+		npcs[i].SetIdleSection(section_num);
+
+		uniform_real_distribution<float>AirXPos(sx, lx);
+		uniform_real_distribution<float>AirZPos(sz, lz);
+		npcs[i].SetPosition(AirXPos(dre), AirHigh(dre), AirZPos(dre));
+
+		uniform_real_distribution<float>SpdSet(3.5f, 5.2f);
 		float speed = SpdSet(dre);
 		npcs[i].SetSpeed(speed);
 		npcs[i].SetInitSection(Cities);
+
+		for (int j{}; j < buildings_info.size(); ++j) {
+			XMFLOAT3 Build_pos = { buildings_info[j].getPos() };
+			XMFLOAT3 Build_scale = { buildings_info[j].getScaleX(),buildings_info[j].getScaleY() ,buildings_info[j].getScaleZ() };
+			npcs[i].SetBuildingInfo(Build_pos, Build_scale);
+		}
 	}
 }
 
@@ -1572,11 +1506,11 @@ void MoveNPC()
 			}
 
 			// npc pos 확인
-		/*	cout << i << "번째 NPC의 도시 ID: " << npcs[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcs[i].GetIdleSection() << endl;
-			cout << i << "번째 NPC의 Pos: " << npcs[i].GetPosition().x << ',' << npcs[i].GetPosition().y << ',' << npcs[i].GetPosition().z << endl;
-			cout << i << "번째 NPC의 상태: " << npcs[i].GetState() << endl;
+			//cout << i << "번째 NPC의 도시 ID: " << npcs[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcs[i].GetIdleSection() << endl;
+			/*cout << i << "번째 NPC의 Pos: " << npcs[i].GetPosition().x << ',' << npcs[i].GetPosition().y << ',' << npcs[i].GetPosition().z << endl;
+			cout << i << "번째 NPC의 상태: " << npcs[i].GetState() << endl;*/
 
-			if (npcs[i].PrintRayCast) {
+			/*if (npcs[i].PrintRayCast) {
 				cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
 			}*/
 
@@ -1818,7 +1752,7 @@ int main(int argc, char* argv[])
 
 	//======================================================================
 	// [ Main ]
-	init_npc();
+	
 
 	// [ Main - 맵 정보 로드 ]
 	// 1. 디렉토리 검색
@@ -1913,6 +1847,8 @@ int main(int argc, char* argv[])
 		txtfile.close();
 	}
 	cout << "\n";
+
+	init_npc();
 
 	//======================================================================
 	// [ Main - 클라이언트 연결 ]
