@@ -1,8 +1,8 @@
 #pragma once
 // IP 주소
 const char* IPADDR_LOOPBACK = "127.0.0.1";		// 릴레이-하위서버 통신은 모두 루프백 통신이다. 또한 하위서버끼리의 이중화 역시 루프백이다.
-const char* IPADDR_RELAY1 = "127.0.0.1";		// 원격 접속할때는 얘 바꿔주면됨. (릴레이는 다른 PC에서 실행될 수도 있기 때문)
-const char* IPADDR_RELAY2 = "127.0.0.1";		// 원격 접속할때는 얘 바꿔주면됨. (릴레이는 다른 PC에서 실행될 수도 있기 때문)
+const char* IPADDR_RELAY1 = "218.101.227.89";		// 원격 접속할때는 얘 바꿔주면됨. (릴레이는 다른 PC에서 실행될 수도 있기 때문)
+const char* IPADDR_RELAY2 = "218.101.227.89";		// 원격 접속할때는 얘 바꿔주면됨. (릴레이는 다른 PC에서 실행될 수도 있기 때문)
 
 // 릴레이서버-클라이언트 통신
 constexpr int MAX_RELAY_SERVER = 2;

@@ -373,70 +373,35 @@ D3D12_INPUT_LAYOUT_DESC CFragmentsShader::CreateInputLayout(int nPipelineState)
 
 void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 {
-	{
-		random_device rd;
-		default_random_engine dre(rd());
-		uniform_real_distribution<float>uidr(50.0, 60.0);
-		uniform_real_distribution<float>uidy(80.0, 90.0);
-		uniform_real_distribution<float>uidz(-0.5, 0.5);
-
-		float gravity = 9.8f;
-		float EmmitTime = 1.0f;
-		float time = fTimeElapsed - EmmitTime;
-		float a_LifeTime = 3.5f;
-		XMFLOAT3 velocity = XMFLOAT3(1.f * ((float)rand() / (float)RAND_MAX), 1.f * ((float)rand() / (float)RAND_MAX), 1.f * ((float)rand() / (float)RAND_MAX));
-		XMFLOAT3 Accel = XMFLOAT3(0.0, -3.0, 0.0);
-		float radian = uidr(dre);
-		float dirtheta = XMConvertToRadians(radian);
-	}
-
+	
 	if (m_bActive == true)
 	{
-		//for (int j = 1; j < m_nObjects; j++)
-		//{
-		//	if (time < 0.0)
-		//	{
-		//	}
-		//	else
-		//	{
-		//		radian = uidr(dre);
-		//		dirtheta = XMConvertToRadians(radian);
-		//		float newT = a_LifeTime * fmod(time , a_LifeTime);
-		//		ParticlePosition.x = m_ppObjects[j]->m_xmf4x4ToParent._41 + velocity.x * newT + 0.5 * Accel.x*newT*newT;
-		//		ParticlePosition.y = m_ppObjects[j]->m_xmf4x4ToParent._42 + velocity.y * newT + 0.5 * Accel.y*newT*newT;
-		//		ParticlePosition.z = m_ppObjects[j]->m_xmf4x4ToParent._43 + velocity.z * newT + 0.5 * Accel.z*newT*newT;
-		//		/*		m_ppObjects[j]->m_xmf4x4ToParent._41 += (velocity * cos(dirtheta)) * time;
-		//				m_ppObjects[j]->m_xmf4x4ToParent._42 += -0.5 * gravity * time * time + (velocity * sin(dirtheta) * time);
-		//				m_ppObjects[j]->m_xmf4x4ToParent._43 += (velocity * cos(dirtheta)) * time;*/
-		//		m_ppObjects[j]->m_xmf4x4ToParent._41+=ParticlePosition.x;
-		//		m_ppObjects[j]->m_xmf4x4ToParent._42+=ParticlePosition.y;
-		//		m_ppObjects[j]->m_xmf4x4ToParent._43+=ParticlePosition.z;
-		//	}
-		//}
-		
-			m_fElapsedTimes += fTimeElapsed * 6.0f;
-			if (m_fElapsedTimes <= m_fDuration)
+		XMFLOAT3 gravity = XMFLOAT3(0, -5.8f, 0);
+		m_fElapsedTimes += fTimeElapsed * 6.0f;
+		if (m_fElapsedTimes <= m_fDuration)
+		{
+			for (int i = 0; i < EXPLOSION_DEBRISES; i++)
 			{
-				for (int i = 0; i < EXPLOSION_DEBRISES; i++)
-				{
+				m_fExplosionSpeed = Random(1.0f, 20.0f);
+				
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
-				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes;
-				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes;
-				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes;
+				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + gravity.x;
+				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y* m_fElapsedTimes* m_fElapsedTimes;
+				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes + gravity.z;
 				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
 
 				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
 				m_ppObjects[i]->m_xmf4x4ToParent._42 = m_pxmf4x4Transforms[i]._42;
 				m_ppObjects[i]->m_xmf4x4ToParent._43 = m_pxmf4x4Transforms[i]._43;
-				m_ppObjects[i]->Rotate(5.0, 8.0, 10.0);
-				}
+				m_ppObjects[i]->Rotate(10.0, 15.0, 20.0);
 			}
-			else
-			{
+		}
+		else
+		{
 
-				m_fElapsedTimes = 0.0f;
-			}
-		
+			m_fElapsedTimes = 0.0f;
+		}
+
 	}
 
 
@@ -448,9 +413,4 @@ void CFragmentsShader::ReleaseUploadBuffers()
 	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
 }
 
-XMFLOAT3 CFragmentsShader::RandomDirection(float EleapsedTime)
-{
-	int u = UINT(EleapsedTime + 10 + EleapsedTime * 1000.0f) % 1024;
 
-	return XMFLOAT3(u, u, u);
-}

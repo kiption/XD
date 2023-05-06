@@ -147,7 +147,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pTerrain->SetCurScene(SCENE1STAGE);
 
 
-	m_nBillboardShaders = 3;
+	m_nBillboardShaders = 4;
 	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
 
 	BillboardParticleShader* pBillboardParticleShader = new BillboardParticleShader();
@@ -168,6 +168,13 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pResponeEffectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[2] = pResponeEffectShader;
 
+	HelicopterSparkBillboard* pHelicopterSparkBillboard = new HelicopterSparkBillboard();
+	pHelicopterSparkBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	pHelicopterSparkBillboard->SetCurScene(SCENE1STAGE);
+	pHelicopterSparkBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	pHelicopterSparkBillboard->m_bActive = true;
+	m_pBillboardShader[3] = pHelicopterSparkBillboard;
+
 	m_nSpriteBillboards = 1;
 	m_ppSpriteBillboard = new CSpriteObjectsShader * [m_nSpriteBillboards];
 	SpriteAnimationBillboard* pSpriteAnimationBillboard = new SpriteAnimationBillboard();
@@ -176,9 +183,6 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pSpriteAnimationBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pSpriteAnimationBillboard->SetActive(false);
 	m_ppSpriteBillboard[0] = pSpriteAnimationBillboard;
-
-
-
 
 	m_nFragShaders = 1;
 	m_ppFragShaders = new CFragmentsShader * [m_nFragShaders];

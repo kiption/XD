@@ -1764,14 +1764,16 @@ void CHelicopterObjects::Firevalkan(CGameObject* pLockedObject)
 		XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
 		XMFLOAT3 xmf3Position = GetPosition();
 		XMFLOAT3 xmf3Direction = PlayerLook;
-		xmf3Direction.y += 0.1;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 7.0f, false));
-
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
+		if (SPACESHIP_CAMERA)
+		{
+			xmf3FirePosition.y += 5.0f;
+		}
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->Rotate(90.0, 0.0, 0.0);
-		pBulletObject->SetScale(4.0, 20.0, 4.0);
+		pBulletObject->SetScale(4.0, 10.0, 4.0);
 		pBulletObject->SetActive(true);
 
 	}

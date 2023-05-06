@@ -17,7 +17,21 @@ float RandomBillboard()
 {
 	return(rand() / float(RAND_MAX));
 }
+inline float RandFm(float fMin, float fMax)
+{
+	return(fMin + ((float)rand() / (float)RAND_MAX) * (fMax - fMin));
+}
+XMVECTOR RandomUnitVectorOnSphereBillboard()
+{
+	XMVECTOR xmvOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
+	XMVECTOR xmvZero = XMVectorZero();
 
+	while (true)
+	{
+		XMVECTOR v = XMVectorSet(RandFm(-1.0f, 1.0f), RandFm(-1.0f, 1.0f), RandFm(-1.0f, 1.0f), 0.0f);
+		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
+	}
+}
 XMFLOAT3 RandomBillboardPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn, int nColumnSpace)
 {
 	float fAngle = RandomBillboard() * 360.0f * (2.0f * 3.14159f / 360.0f);
@@ -124,16 +138,16 @@ void CrossHairShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
 	XMFLOAT3 xmf3Position = Vector3::Add(xmf3CameraPosition, Vector3::ScalarProduct(xmf3CameraLook, 120.0f, false));
-	xmf3Position.y += 5.0f;
-	xmf3Position.z += 30.0f;
+	xmf3Position.y += 25.0f;
 	m_ppObjects[0]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
 	m_ppObjects[0]->SetPosition(xmf3Position);
-	BillboardShader::Render(pd3dCommandList, pCamera,0);
+
+	BillboardShader::Render(pd3dCommandList, pCamera, nPipelineState);
 }
 
 void CrossHairShader::AnimateObjects(float fTimeElapsed)
 {
-	BillboardShader::AnimateObjects(fTimeElapsed);
+	//BillboardShader::AnimateObjects(fTimeElapsed);
 }
 
 void CrossHairShader::ReleaseUploadBuffers()
@@ -215,8 +229,8 @@ void BillboardParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	pSpriteMaterial2->SetTexture(ppSpriteTextures2, 0);
 	pSpriteMaterial3->SetTexture(ppSpriteTextures3, 0);
 
-	m_fWidth = 100.0f;
-	m_fHeight = 100.0f;
+	m_fWidth = 30.0f;
+	m_fHeight = 30.0f;
 	CTexturedRectMesh* pSpriteMesh;
 	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, m_fWidth, m_fHeight, 0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -276,7 +290,7 @@ void BillboardParticleShader::Render(ID3D12GraphicsCommandList* pd3dCommandList,
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		
-		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3Position, XMFLOAT3(0.0f, 0.5, 0.0f));
+		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3Position, XMFLOAT3(0.0f, 1.0, 0.0f));
 		
 	}
 	BillboardShader::Render(pd3dCommandList, pCamera,0);
@@ -350,21 +364,6 @@ void BillboardParticleShader::ReleaseUploadBuffers()
 }
 
 
-D3D12_INPUT_LAYOUT_DESC ResponeEffectShader::CreateInputLayout(int nPipelineState)
-{
-	UINT nInputElementDescs = 2;
-	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
-
-	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-
-	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
-	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
-	d3dInputLayoutDesc.NumElements = nInputElementDescs;
-
-	return(d3dInputLayoutDesc);
-}
-
 D3D12_BLEND_DESC ResponeEffectShader::CreateBlendState(int nPipelineState)
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
@@ -395,10 +394,6 @@ void ResponeEffectShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, 
 
 }
 
-D3D12_SHADER_BYTECODE ResponeEffectShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
-{
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
-}
 
 D3D12_SHADER_BYTECODE ResponeEffectShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
@@ -465,6 +460,145 @@ void ResponeEffectShader::AnimateObjects(float fTimeElapsed)
 }
 
 void ResponeEffectShader::ReleaseUploadBuffers()
+{
+	BillboardShader::ReleaseUploadBuffers();
+}
+
+///////////////////
+
+
+D3D12_BLEND_DESC HelicopterSparkBillboard::CreateBlendState(int nPipelineState)
+{
+	D3D12_BLEND_DESC d3dBlendDesc;
+	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
+	d3dBlendDesc.AlphaToCoverageEnable = TRUE;
+	d3dBlendDesc.IndependentBlendEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	return(d3dBlendDesc);
+}
+
+void HelicopterSparkBillboard::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
+{
+	m_nPipelineStates = 1;
+	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, d3dPrimitiveTopology, nRenderTargets,
+		pdxgiRtvFormats, dxgiDsvFormat, nPipelineState);
+
+}
+
+
+D3D12_SHADER_BYTECODE HelicopterSparkBillboard::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSmokeBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
+}
+
+D3D12_SHADER_BYTECODE HelicopterSparkBillboard::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
+}
+
+void HelicopterSparkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Overheat.dds", RESOURCE_TEXTURE2D, 0);
+
+
+	CMaterial* pSpriteMaterial = new CMaterial(1);
+
+	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
+
+	CTexturedRectMesh* pSpriteMesh;
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+
+	m_nObjects = EXPLOSION_SPARK;
+	m_ppObjects = new CGameObject * [m_nObjects];
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures, 0, 15);
+
+	CBillboardObject** pResponObject = new CBillboardObject * [m_nObjects];
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		pResponObject[j] = new CBillboardObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		pResponObject[j]->SetMesh(pSpriteMesh);
+		pResponObject[j]->SetMaterial(0, pSpriteMaterial);
+		pResponObject[j]->SetPosition(XMFLOAT3(330.0, 40.0, -230.0));
+		m_ppObjects[j] = pResponObject[j];
+		ParticlePosition = m_ppObjects[j]->GetPosition();;
+	}
+
+	for (int i = 0; i < EXPLOSION_SPARK; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomUnitVectorOnSphereBillboard());
+}
+
+void HelicopterSparkBillboard::ReleaseObjects()
+{
+	BillboardShader::ReleaseObjects();
+}
+
+void HelicopterSparkBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+{
+	CPlayer* pPlayer = pCamera->GetPlayer();
+	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
+	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
+	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 0.0f, false));
+
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		
+		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3Position, XMFLOAT3(0.0f, 1.0, 0.0f));
+
+	}
+	BillboardShader::Render(pd3dCommandList, pCamera, 0);
+}
+
+void HelicopterSparkBillboard::AnimateObjects(float fTimeElapsed)
+{
+
+	if (m_bActive == true)
+	{
+		XMFLOAT3 gravity = XMFLOAT3(0, -9.8f, 0);
+		m_fElapsedTimes += fTimeElapsed * 12.0f;
+		if (m_fElapsedTimes <= m_fDuration)
+		{
+			for (int i = 0; i < EXPLOSION_SPARK; i++)
+			{
+				gravity = XMFLOAT3(0, -RandomBillboard(6.0f, 9.8f), 0);
+				m_fExplosionSpeed = RandomBillboard(1.0f, 4.0f);
+				//m_fExplosionSpeed = 6.0f;
+
+				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
+				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + gravity.x;
+				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;
+				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes + gravity.z;
+				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
+
+				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
+				m_ppObjects[i]->m_xmf4x4ToParent._42 = m_pxmf4x4Transforms[i]._42;
+				m_ppObjects[i]->m_xmf4x4ToParent._43 = m_pxmf4x4Transforms[i]._43;
+				m_ppObjects[i]->Rotate(0, 0, 5);
+			}
+		}
+		else
+		{
+
+			m_fElapsedTimes = 0.0f;
+		}
+
+	}
+	BillboardShader::AnimateObjects(fTimeElapsed);
+}
+
+void HelicopterSparkBillboard::ReleaseUploadBuffers()
 {
 	BillboardShader::ReleaseUploadBuffers();
 }

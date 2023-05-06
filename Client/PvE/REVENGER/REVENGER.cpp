@@ -263,6 +263,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							gGameFramework.setVectors_Npc(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
 							gGameFramework.m_pScene->SmokePosition = npcs_info[i].m_pos;
 							((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(npcs_info[i].m_pos);
+							//((Stage1*)gGameFramework.m_pScene)->m_pBillboardShader[3]->ParticlePosition=npcs_info[i].m_pos;
 						}
 						//cout << "====================" << endl;
 					}
@@ -293,8 +294,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					//==================================================
 					//					충돌 이펙트 관련
 					//==================================================
-					/*
-					// 1. 자기 자신
+				
+					//1. 자기 자신
 					if (my_info.m_damaged_effect_on) {
 						// 여기에 이펙트 넣어줘.
 					}
@@ -302,17 +303,18 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					// 2. 다른 플레이어
 					for (auto& other_pl : other_players) {
 						if (other_pl.m_damaged_effect_on) {
-							//((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(other_pl.m_pos);
+							((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->ParticlePosition = other_pl.m_pos;
+							other_pl.m_damaged_effect_on = false;
 						}
 					}
 
-					// 3. NPC
-					for (auto& npc : npcs_info) {
-						if (npc.m_damaged_effect_on) {
-							// 여기에 이펙트 넣어줘.
-						}
-					}
-					*/
+					//// 3. NPC
+					//for (auto& npc : npcs_info) {
+					//	if (npc.m_damaged_effect_on) {
+					//		// 여기에 이펙트 넣어줘.
+					//	}
+					//}
+					
 
 					//==================================================
 					//				객체 사망 후처리 관련

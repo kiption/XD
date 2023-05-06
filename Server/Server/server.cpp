@@ -810,7 +810,7 @@ void process_packet(int client_id, char* packet)
 						death_pack.type = SC_OBJECT_STATE;
 						death_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
 						death_pack.target = TARGET_PLAYER;
-						death_pack.id = client_id;
+						death_pack.id = cl.id;
 						death_pack.state = PL_ST_DEAD;
 						cl.do_send(&death_pack);
 					}

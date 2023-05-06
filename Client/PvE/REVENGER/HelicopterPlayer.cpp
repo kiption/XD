@@ -19,7 +19,7 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	pBCBulletEffectShader = new CBulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
-	
+
 	for (int i = 0; i < BULLETS; i++)
 	{
 
@@ -66,17 +66,27 @@ void HeliPlayer::Firevalkan(CGameObject* pLockedObject)
 	{
 		XMFLOAT3 PlayerLook = GetLookVector();
 		XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
+		XMFLOAT3 CaemraPosition = m_pCamera->GetPosition();
 		XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
 		XMFLOAT3 xmf3Position = GetPosition();
-		XMFLOAT3 xmf3Direction = PlayerLook;
-		xmf3Direction.y += 0.1;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 5.0f, false));
+		XMFLOAT3 xmf3Direction = TotalLookVector;
 
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+		if (m_pCamera->m_nMode == SPACESHIP_CAMERA)
+		{
+			xmf3Direction.y += 0.1f;
+			XMFLOAT3 xmf3FirePosition = Vector3::Add(CaemraPosition, Vector3::ScalarProduct(xmf3Direction, 60.0f, false));
+			pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+		}
+		else
+		{
+
+			XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
+			pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+		}
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->Rotate(90.0, 0.0, 0.0);
-		pBulletObject->SetScale(4.0, 20.0, 4.0);
+		pBulletObject->SetScale(4.0, 10.0, 4.0);
 		pBulletObject->SetActive(true);
 
 	}
@@ -108,7 +118,7 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 1.5, 2.6f));
-		m_pCamera->GenerateProjectionMatrix(1.01f,4000.0f, ASPECT_RATIO, 60.0f);
+		m_pCamera->GenerateProjectionMatrix(1.01f, 4000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
@@ -119,7 +129,7 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 7.0f, -20.0f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 10.0f, -20.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 8000.0f, ASPECT_RATIO, 80.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
