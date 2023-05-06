@@ -177,7 +177,7 @@ void ST1_NPC::SetFrustum()
 }
 
 void ST1_NPC::SetBuildingInfo(XMFLOAT3 bPos, XMFLOAT3 bScale)
-{	
+{
 	BoundingOrientedBox temp = BoundingOrientedBox(bPos, XMFLOAT3(bScale.x / 2.5f, bScale.y / 2.0f, bScale.z / 2.5f), XMFLOAT4(0, 0, 0, 1));
 	m_mapxmoobb.emplace_back(temp);
 }
@@ -671,10 +671,16 @@ void ST1_NPC::PlayerChasing()
 {
 	// Look
 	XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&m_User_Pos[m_chaseID]), XMLoadFloat3(&m_Pos)));
-	XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
-
-	// Right
 	Coordinate base_coordinate;
+	base_coordinate.look = { 0,1,0 };
+	float x = XMVectorGetX(XMVector3AngleBetweenVectors(Looktemp, XMLoadFloat3(&base_coordinate.look)));
+	m_yaw += x;
+	if (m_yaw < 1.0f && m_yaw > -1.0f) {
+		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&base_coordinate.look), XMConvertToRadians(m_yaw));
+		XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+	}
+	
+	// Right
 	base_coordinate.up = { 0,1,0 };
 
 	XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
@@ -732,35 +738,11 @@ bool ST1_NPC::PlayerDetact()
 void ST1_NPC::PlayerAttack()
 {
 	// Look
-	XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&m_User_Pos[m_chaseID]), XMLoadFloat3(&m_Pos)));
-	XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
-
-	// Right
-	Coordinate base_coordinate;
-	base_coordinate.up = { 0,1,0 };
-
-	XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-	XMStoreFloat3(&m_curr_coordinate.right, righttemp);
-
-	// up
-	XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-	XMStoreFloat3(&m_curr_coordinate.up, uptemp);
-	
-	if (m_Distance[m_chaseID] < 30) {
-		m_Speed = 0;
-	}
-	else {
-		m_Speed = 1.5f;
-	}
-
-	// 위치 변환
-	m_Pos.x += m_Speed * m_curr_coordinate.look.x;
-	m_Pos.y += m_Speed * m_curr_coordinate.look.y;
-	m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+	PlayerChasing();
 
 	// Attack
-	NPCCube ChasePlayer{ {m_User_Pos[m_chaseID].x, m_User_Pos[m_chaseID].y, m_User_Pos[m_chaseID].z }, 
-		HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z	};
+	NPCCube ChasePlayer{ {m_User_Pos[m_chaseID].x, m_User_Pos[m_chaseID].y, m_User_Pos[m_chaseID].z },
+		HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
 	Npc_Vector3 NPC_bullet_Pos = { m_Pos.x, m_Pos.y , m_Pos.z };
 	Npc_Vector3 NPC_Look_Vec = { m_curr_coordinate.look.x, m_curr_coordinate.look.y , m_curr_coordinate.look.z };
 	Npc_Vector3 NPC_result;
@@ -778,7 +760,7 @@ void ST1_NPC::PlayerAttack()
 void ST1_NPC::BuildingToNPC_Distance()
 {
 	int array_size = m_mapxmoobb.size();
-	
+
 	for (int i{}; i < m_mapxmoobb.size(); ++i) {
 		float d = Building_Caculation_Distance(m_mapxmoobb[i].Center);
 		NPCtoBuilding_Dis[i] = d;

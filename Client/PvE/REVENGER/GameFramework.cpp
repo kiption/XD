@@ -891,17 +891,47 @@ void CGameFramework::FrameAdvance()
 	if (UI_Switch) {
 		if (m_nMode = SCENE1STAGE) {
 			// 내구도 관련 UI 
+			int target_id_x, target_id_y;
+			if (m_currHp > 80) {
+				target_id_x = 0;
+				target_id_y = 0;
+			}
+			else if (m_currHp > 60) {
+				target_id_x = 0;
+				target_id_y = 2;
+			}
+			else if (m_currHp > 40) {
+				target_id_x = 0;
+				target_id_y = 3;
+			}
+			else if (m_currHp > 20) {
+				target_id_x = 2;
+				target_id_y = 3;
+			}
+			else if (m_currHp > -40) {
+				target_id_x = 3;
+				target_id_y = 3;
+			}
+
 			D2D_POINT_2F d2_HPPoint = { FRAME_BUFFER_WIDTH / 16, (FRAME_BUFFER_HEIGHT / 4) * 3 };
-			D2D_RECT_F d2_HPRect = { 0.0f, 0.0f, 240.0f, 160.0f };
+			D2D_RECT_F d2_HPRect = { 240.0f * target_id_x, 160.0f * target_id_y, 240.0f * (target_id_x + 1), 160.0f * (target_id_y + 1) };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[0] : m_pd2dfxGaussianBlur[0], &d2_HPPoint, &d2_HPRect);
-			
+
 			// 남아있는 NPC 수 관련 UI
 			D2D_POINT_2F d2_NPCremainOne = { (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 8) };
-			D2D_RECT_F d2_remainRectOne = { 26.0f * (m_remainNPC - 1) , 0.0f, 26.0f * m_remainNPC, 36.0f };
+			int remainof1 = m_remainNPC % 10;
+			if (remainof1 == 0) {
+				remainof1 = 10;
+			}
+			D2D_RECT_F d2_remainRectOne = { 26.0f * (remainof1 - 1) , 0.0f, 26.0f * remainof1, 36.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &d2_NPCremainOne, &d2_remainRectOne);
 
 			D2D_POINT_2F d2_NPCremainTen = { (FRAME_BUFFER_WIDTH / 16) * 15 - 26.0f, (FRAME_BUFFER_HEIGHT / 8) };
-			D2D_RECT_F d2_remainRectTen = { 26.0f * (m_remainNPC - 1) , 0.0f, 26.0f * m_remainNPC, 36.0f };
+			int remainof10 = m_remainNPC / 10;
+			if (remainof10 == 0) {
+				remainof10 = 10;
+			}
+			D2D_RECT_F d2_remainRectTen = { 26.0f * (remainof10 - 1) , 0.0f, 26.0f * remainof10, 36.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[14] : m_pd2dfxGaussianBlur[14], &d2_NPCremainTen, &d2_remainRectTen);
 
 			// Timer 관련 UI 
@@ -947,24 +977,33 @@ void CGameFramework::FrameAdvance()
 			//CreateTexture2DResource(,)
 
 			// 점령율 관련 UI
-			D2D_POINT_2F d2_OccupationPoint = { (FRAME_BUFFER_WIDTH / 32) * 11, (FRAME_BUFFER_HEIGHT / 10) };
-			D2D_RECT_F d2_OccupationRect = { 0.0f , 0.0f, 92.0f, 49.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[11] : m_pd2dfxGaussianBlur[11], &d2_OccupationPoint, &d2_OccupationRect);
+			if (m_remainNPC < 10) {
+				D2D_POINT_2F d2_OccupationPoint = { (FRAME_BUFFER_WIDTH / 32) * 11, (FRAME_BUFFER_HEIGHT / 10) };
+				D2D_RECT_F d2_OccupationRect = { 0.0f , 0.0f, 92.0f, 49.0f };
+				m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[11] : m_pd2dfxGaussianBlur[11], &d2_OccupationPoint, &d2_OccupationRect);
 
-			D2D_POINT_2F d2_BackBarPoint = { (FRAME_BUFFER_WIDTH / 2) - (375 / 2), (FRAME_BUFFER_HEIGHT / 10) + 11.5f };
-			D2D_RECT_F d2_BackBarRect = { 0.0f , 0.0f, 375.0f, 26.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[12] : m_pd2dfxGaussianBlur[12], &d2_BackBarPoint, &d2_BackBarRect);
+				D2D_POINT_2F d2_BackBarPoint = { (FRAME_BUFFER_WIDTH / 2) - (375 / 2), (FRAME_BUFFER_HEIGHT / 10) + 11.5f };
+				D2D_RECT_F d2_BackBarRect = { 0.0f , 0.0f, 375.0f, 26.0f };
+				m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[12] : m_pd2dfxGaussianBlur[12], &d2_BackBarPoint, &d2_BackBarRect);
 
-			D2D_POINT_2F d2_ProcessBarPoint = { (FRAME_BUFFER_WIDTH / 2) - (375 / 2), (FRAME_BUFFER_HEIGHT / 10) + 11.5f + 4.5f };
-			D2D_RECT_F d2T_ProcessBarRect = { 0.0f , 0.0f, (350.0f / 100 * m_occupationnum), 17.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[13] : m_pd2dfxGaussianBlur[13], &d2_ProcessBarPoint, &d2T_ProcessBarRect);
+				D2D_POINT_2F d2_ProcessBarPoint = { (FRAME_BUFFER_WIDTH / 2) - (375 / 2), (FRAME_BUFFER_HEIGHT / 10) + 11.5f + 4.5f };
+				D2D_RECT_F d2T_ProcessBarRect = { 0.0f , 0.0f, (350.0f / 100 * m_occupationnum), 17.0f };
+				m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[13] : m_pd2dfxGaussianBlur[13], &d2_ProcessBarPoint, &d2T_ProcessBarRect);
 
+			}
 		}
 	}
 
 #endif
 	if (UI_Switch) {
 		if (m_nMode == SCENE1STAGE) {
+			D2D1_RECT_F rcHPText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 5, (FRAME_BUFFER_HEIGHT / 4) * 3, (FRAME_BUFFER_WIDTH / 32) * 7, (FRAME_BUFFER_HEIGHT));
+			m_pd2dDeviceContext->DrawTextW(m_myhp, (UINT32)wcslen(m_myhp), m_pdwFont, &rcHPText, m_pd2dbrText);
+
+			D2D1_RECT_F rcHPBoxText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 6, (FRAME_BUFFER_HEIGHT / 4) * 3, (FRAME_BUFFER_WIDTH / 32) * 8, (FRAME_BUFFER_HEIGHT));
+			m_pd2dDeviceContext->DrawTextW(L"/100", (UINT32)wcslen(L"/100"), m_pdwFont, &rcHPBoxText, m_pd2dbrText);
+
+
 			D2D1_RECT_F rcBulletText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 28, (FRAME_BUFFER_HEIGHT / 4) * 3, (FRAME_BUFFER_WIDTH / 32) * 30, (FRAME_BUFFER_HEIGHT));
 			m_pd2dDeviceContext->DrawTextW(m_myBullet, (UINT32)wcslen(m_myBullet), m_pdwFont, &rcBulletText, m_pd2dbrText);
 
@@ -1080,7 +1119,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-	}
+}
 	pd3dInfoQueue->Release();
 #endif
 
