@@ -172,9 +172,6 @@
     <ClInclude Include="Terrain.h">
       <Filter>Client\Object\Header</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Server\RelayServer\Protocol.h">
-      <Filter>Server</Filter>
-    </ClInclude>
     <ClInclude Include="mfplay.h">
       <Filter>Asset</Filter>
     </ClInclude>
@@ -183,6 +180,9 @@
     </ClInclude>
     <ClInclude Include="SpriteAnimationBillboard.h">
       <Filter>Client\Shader\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Server\Server\Protocol.h">
+      <Filter>Server</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

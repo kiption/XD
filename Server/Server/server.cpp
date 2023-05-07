@@ -222,7 +222,7 @@ SOCKET right_ex_server_sock;							// 다음 번호의 서버
 
 int my_server_id;										// 내 서버 식별번호
 bool b_active_server;									// Active 서버인가?
-array<HA_SERVER, MAX_SERVER> extended_servers;			// HA구현을 위해 수평확장된 서버들
+array<HA_SERVER, MAX_LOGIC_SERVER> extended_servers;	// HA구현을 위해 수평확장된 서버들
 HA_SERVER relayserver;	// 릴레이서버
 
 
@@ -377,7 +377,7 @@ void disconnect(int target_id, int target)
 		}
 
 		// 만약 자신의 오른쪽 서버가 다운되었는데, 그 서버가 서버군의 마지막 서버인 경우 재실행된 서버에게 ConnectEx 요청을 보냅니다.
-		if (target_id == MAX_SERVER - 1) {
+		if (target_id == MAX_LOGIC_SERVER - 1) {
 			if (my_server_id < target_id) {
 				// ConnectEx
 				SOCKET temp_s = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -400,7 +400,7 @@ void disconnect(int target_id, int target)
 
 				OVER_EX* con_over = new OVER_EX;
 				con_over->process_type = OP_CONNECT;
-				int key = CP_KEY_LOGIC2EXLOGIC + MAX_SERVER - 1;
+				int key = CP_KEY_LOGIC2EXLOGIC + MAX_LOGIC_SERVER - 1;
 				HANDLE hret = CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_iocp, key, 0);
 				if (NULL == hret) {
 					cout << "CreateIoCompletoinPort Error - " << ret << endl;
@@ -1316,7 +1316,7 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 		// ================================
 		// 1. Heartbeat 전송
 		// : 오른쪽 서버로 Heartbeat를 보냅니다. (왼쪽 서버가 오른쪽 서버로 전송하기 때문에 가장 마지막 서버는 보내지 않습니다.)
-		if (my_server_id != MAX_SERVER - 1) {
+		if (my_server_id != MAX_LOGIC_SERVER - 1) {
 			if (extended_servers[my_server_id].s_state != ST_ACCEPTED)	continue;
 			if (extended_servers[my_server_id + 1].s_state != ST_ACCEPTED) continue;
 
@@ -1342,7 +1342,7 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 			}
 		}
 		//   2) 왼쪽 서버 검사 (가장 오른쪽에 있는 서버 구성원은 검사를 하지 않습니다.)
-		if (my_server_id != MAX_SERVER - 1) {
+		if (my_server_id != MAX_LOGIC_SERVER - 1) {
 			if (extended_servers[my_server_id + 1].s_state == ST_ACCEPTED) {
 				if (chrono::system_clock::now() > extended_servers[my_server_id + 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
 					cout << "Server[" << my_server_id + 1 << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
@@ -1620,13 +1620,13 @@ int main(int argc, char* argv[])
 	}
 
 	// 서버번호에 따라 포트번호를 지정해줍니다.
-	switch (my_server_id) {
+	switch (my_server_id%10) {
 	case 0:	// 0번 서버
-		sc_portnum = PORT_NUM_S0;
+		sc_portnum = PORTNUM_LOGIC_0;
 		ss_portnum = HA_PORTNUM_S0;
 		break;
 	case 1:	// 1번 서버
-		sc_portnum = PORT_NUM_S1;
+		sc_portnum = PORTNUM_LOGIC_1;
 		ss_portnum = HA_PORTNUM_S1;
 		break;
 	default:
@@ -1637,58 +1637,6 @@ int main(int argc, char* argv[])
 	if (b_active_server) cout << "Acitve";
 	else cout << "Stand-By";
 	cout << " / S - C PORT : " << sc_portnum << " / S - S PORT : " << ss_portnum << " ]" << endl;
-
-	//======================================================================
-	// [ HA - Relay서버 연결 ]
-	int active_relay_serverid = 0;							// [[[추후에 현재 Active 상태에 있는 릴레이서버의 id와 포트번호로 바꿀 예정임!]]]
-	int active_relay_portnum = PORTNUM_RELAY2LOGIC_0;		//
-
-	// Relay Connect
-	// Relay서버가 Logic서버를 실행시켜주기 때문에, 비동기Connect를 할 필요가 없음.
-	// ConnectEx test
-	SOCKET temp_relays = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-	GUID guid_relay = WSAID_CONNECTEX;
-	DWORD bytes_relay = 0;
-	LPFN_CONNECTEX connectExFP_relay;
-	::WSAIoctl(temp_relays, SIO_GET_EXTENSION_FUNCTION_POINTER, &guid_relay, sizeof(guid_relay), &connectExFP_relay, sizeof(connectExFP_relay), &bytes_relay, nullptr, nullptr);
-	closesocket(temp_relays);
-
-	SOCKADDR_IN relaysvr_addr;
-	ZeroMemory(&relaysvr_addr, sizeof(relaysvr_addr));
-	relaysvr_addr.sin_family = AF_INET;
-	g_relay_sock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);     // 실제 연결할 소켓
-	int ret = ::bind(g_relay_sock, reinterpret_cast<LPSOCKADDR>(&relaysvr_addr), sizeof(relaysvr_addr));
-	if (ret != 0) {
-		cout << "Bind Error - " << ret << endl;
-		cout << WSAGetLastError() << endl;
-		exit(-1);
-	}
-
-	OVER_EX* con_over_relay = new OVER_EX;
-	con_over_relay->process_type = OP_CONNECT;
-	HANDLE hret_relay = CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_relay_sock), h_iocp, CP_KEY_LOGIC2RELAY, 0);
-	if (NULL == hret_relay) {
-		cout << "CreateIoCompletoinPort Error - " << ret << endl;
-		cout << WSAGetLastError() << endl;
-		exit(-1);
-	}
-
-	ZeroMemory(&relaysvr_addr, sizeof(relaysvr_addr));
-	relaysvr_addr.sin_family = AF_INET;
-	relaysvr_addr.sin_port = htons(PORTNUM_RELAY2LOGIC_0);
-	inet_pton(AF_INET, IPADDR_LOOPBACK, &relaysvr_addr.sin_addr);
-
-	BOOL bret_relay = connectExFP_relay(g_relay_sock, reinterpret_cast<sockaddr*>(&relaysvr_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over_relay->overlapped);
-	if (FALSE == bret_relay) {
-		int err_no = GetLastError();
-		if (ERROR_IO_PENDING == err_no)
-			cout << "Connect 시도 중...\n" << endl;
-		else {
-			cout << "ConnectEX Error - " << err_no << endl;
-			cout << WSAGetLastError() << endl;
-		}
-	}
-	//test end
 
 
 	//======================================================================
@@ -1714,7 +1662,7 @@ int main(int argc, char* argv[])
 	AcceptEx(g_ss_listensock, right_ex_server_sock, ha_over.send_buf, 0, ha_addr_size + 16, ha_addr_size + 16, 0, &ha_over.overlapped);
 
 	// 수평확장된 서버의 마지막 구성원이 아니라면, 오른쪽에 있는 서버에 비동기connect 요청을 보냅니다.
-	if (my_server_id < MAX_SERVER - 1) {
+	if (my_server_id < MAX_LOGIC_SERVER - 1) {
 		int right_servernum = my_server_id + 1;
 		int right_portnum = ss_portnum + 1;
 		cout << "다른 이중화 서버(Server[" << right_servernum << "] (S-S PORT: " << right_portnum << ")에 비동기Connect를 요청합니다." << endl;

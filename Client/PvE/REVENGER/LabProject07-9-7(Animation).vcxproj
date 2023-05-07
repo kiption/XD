@@ -152,7 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Server\RelayServer\Protocol.h" />
+    <ClInclude Include="..\..\..\Server\Server\Protocol.h" />
     <ClInclude Include="BillboardObjects.h" />
     <ClInclude Include="BillboardObjectsShader.h" />
     <ClInclude Include="Camera.h" />

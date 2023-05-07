@@ -31,7 +31,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 
-	active_servernum = MAX_SERVER - 1;
+	active_servernum = MAX_LOGIC_SERVER - 1;
 
 	CS_LOGIN_PACKET login_pack;
 	login_pack.size = sizeof(CS_LOGIN_PACKET);
@@ -43,13 +43,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	SOCKADDR_IN server0_addr;
 	ZeroMemory(&server0_addr, sizeof(server0_addr));
 	server0_addr.sin_family = AF_INET;
-	// 이건 로직서버에 바로 연결
-	int new_portnum = PORT_NUM_S0 + active_servernum;
+	int new_portnum = PORTNUM_LOGIC_0 + active_servernum;
 	server0_addr.sin_port = htons(new_portnum);
-	inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);
-	// 이건 릴레이서버에 연결
-	//server0_addr.sin_port = htons(PORTNUM_RELAY2CLIENT_0);
-	//inet_pton(AF_INET, RELAY1_ADDR, &server0_addr.sin_addr);
+	//inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);	// 루프백
+	inet_pton(AF_INET, LOGIC1_ADDR, &server0_addr.sin_addr);
 	connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
 
 	sendPacket(&login_pack, active_servernum);

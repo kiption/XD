@@ -12,12 +12,12 @@ GameSound gamesound;
 #pragma comment(lib, "MSWSock.lib")
 
 const char* SERVER_ADDR = IPADDR_LOOPBACK;	// 루프백 용
-const char* RELAY1_ADDR = IPADDR_RELAY1;	// 리모트 용
-const char* RELAY2_ADDR = IPADDR_RELAY2;	// 리모트 용
+const char* LOGIC0_ADDR = IPADDR_LOGIC0;	// 리모트 용
+const char* LOGIC1_ADDR = IPADDR_LOGIC1;	// 리모트 용
 
 SOCKET s_socket;
 short active_servernum = 1;
-array<SOCKET, MAX_SERVER> sockets;
+array<SOCKET, MAX_LOGIC_SERVER> sockets;
 int my_id;
 
 int servertime_ms;
@@ -82,11 +82,11 @@ void sendPacket(void* packet, short servernum)
 			switch (servernum) {
 			case 0:	// Active: 0 -> 1
 				active_servernum = 1;
-				new_portnum = PORT_NUM_S1;
+				new_portnum = PORTNUM_LOGIC_1;
 				break;
 			case 1:	// Active: 1 -> 0
 				active_servernum = 0;
-				new_portnum = PORT_NUM_S0;
+				new_portnum = PORTNUM_LOGIC_0;
 				break;
 			}
 
