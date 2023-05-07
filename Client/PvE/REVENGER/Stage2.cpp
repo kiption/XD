@@ -123,22 +123,7 @@ void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/Stage2.raw"), 257, 257, xmf3Scale, xmf3Normal);
 	m_pTerrain->SetCurScene(SCENE2STAGE);
 
-	/*m_nStageMapShaders = 0;
-	m_ppStageMapShaders = new CStage2MapObjectShader * [m_nStageMapShaders];
-	CStage2MapObjectShader* pMapObjectShader = new CStage2MapObjectShader();
-	pMapObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
-	pMapObjectShader->SetCurScene(SCENE2STAGE);
-	pMapObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
-	m_ppStageMapShaders[0] = pMapObjectShader;
 
-	m_nShaders = 0;
-	m_ppShaders = new CSkinnedAnimationObjectsShader * [m_nShaders];
-
-	CHumanObjectsShader* pOtherPlayerShader = new CHumanObjectsShader();
-	pOtherPlayerShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
-	pOtherPlayerShader->SetCurScene(SCENE2STAGE);
-	pOtherPlayerShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, m_pTerrain);
-	m_ppShaders[0] = pOtherPlayerShader;*/
 
 
 	m_nShadowShaders = 1;

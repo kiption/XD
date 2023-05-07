@@ -2,7 +2,7 @@
 #include "Player.h"
 #include "MissileObject.h"
 
-
+class SceneManager;
 class CHumanPlayer : public CPlayer
 {
 public:

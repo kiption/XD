@@ -321,9 +321,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							
 							gGameFramework.setEqLook_Npc(npcs_info[i].m_id, npcs_info[i].m_pos, npcs_info[i].m_look_vec);
 							((Stage1*)gGameFramework.m_pScene)->SmokePosition = npcs_info[i].m_pos;
-							((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(npcs_info[i].m_pos);
+							
 							((Stage1*)gGameFramework.m_pScene)->m_pBillboardShader[3]->ParticlePosition=npcs_info[i].m_pos;
-
+						
 							
 							
 						}
@@ -368,13 +368,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						if (other_pl.m_damaged_effect_on) {
 							((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->m_bActive=true;
 							((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->ParticlePosition = other_pl.m_pos;
+							((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->SetActive(true);
+							((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(other_pl.m_pos);
+
+
 							other_pl.m_damaged_effect_on = false;
 						}
-						else if ( (((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->m_fElapsedTimes) > 
-							(((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->m_fDuration))
-						{ 
-							((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->m_bActive = false;
-						}
+						
 					}
 
 					//// 3. NPC

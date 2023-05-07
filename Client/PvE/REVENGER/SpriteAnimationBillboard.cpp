@@ -179,8 +179,8 @@ void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	CTexture* ppSpriteTextures[2];
 	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
 	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
-	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
-	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 6, 6);
+	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explosion_6x6.dds", RESOURCE_TEXTURE2D, 0);
 
 	CMaterial* pTerrainMaterial[2];
 	pTerrainMaterial[0] = new CMaterial(1);
@@ -189,7 +189,7 @@ void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	pTerrainMaterial[1]->SetTexture(ppSpriteTextures[1], 0);
 
 
-	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 60.0, 60.0, 0.0f, 0.0f, 0.0f, 0.0f);
+	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 30.0, 30.0, 0.0f, 0.0f, 0.0f, 0.0f);
 
 
 	SceneManager* pScene = NULL;
@@ -213,7 +213,7 @@ void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 		pSpriteObject->SetMaterial(0, pTerrainMaterial[0]);
 		pSpriteObject->SetPosition(XMFLOAT3(xmf3Position.x, xmf3Position.y, xmf3Position.z));
 		pSpriteObject->SetCbvGPUDescriptorHandlePtr(((Stage1*)pScene)->m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
-		pSpriteObject->m_fSpeed = 6.0f / (ppSpriteTextures[0]->m_nRows * ppSpriteTextures[0]->m_nCols);
+		pSpriteObject->m_fSpeed = 12.0f / (ppSpriteTextures[0]->m_nRows * ppSpriteTextures[0]->m_nCols);
 		m_ppObjects[i] = pSpriteObject;
 	}
 }
@@ -232,9 +232,9 @@ void SpriteAnimationBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList
 		for (int j = 0; j < m_nObjects; j++)
 		{
 			
-				m_ppObjects[j]->SetPosition(XMFLOAT3(xmf3Position.x + j * 2.5, xmf3Position.y, xmf3Position.z + j * 2.5));
+				//m_ppObjects[j]->SetPosition(XMFLOAT3(xmf3Position.x + j * 2.5, xmf3Position.y, xmf3Position.z + j * 2.5));
 			
-				m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));			
+				m_ppObjects[j]->SetLookAt(xmf3PlayerPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
 		}
 		CSpriteObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState);
 	}

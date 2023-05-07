@@ -8,6 +8,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL);
 	SetChild(pAngrybotModel->m_pModelRootObject, true);
 	SetScale(XMFLOAT3(12.0, 12.0, 12.0));
+
 	Rotate(0.0, 90.0, 0.0);
 	pAngrybotModel->m_pModelRootObject->SetCurScene(SCENE2STAGE);
 	m_pBulletFindFrame = pAngrybotModel->m_pModelRootObject->FindFrame("Bip001_R_Finger0Nub");

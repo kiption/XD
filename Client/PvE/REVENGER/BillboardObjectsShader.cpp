@@ -437,7 +437,7 @@ D3D12_SHADER_BYTECODE ResponeEffectShader::CreatePixelShader(ID3DBlob** ppd3dSha
 void ResponeEffectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Effect.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Respown.dds", RESOURCE_TEXTURE2D, 0);
 
 
 	CMaterial* pSpriteMaterial = new CMaterial(1);
@@ -445,7 +445,7 @@ void ResponeEffectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 6.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.0f, 3.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	m_nObjects = 30;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -458,8 +458,8 @@ void ResponeEffectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		pResponObject[j] = new CResponeObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		pResponObject[j]->SetMesh(pSpriteMesh);
 		pResponObject[j]->SetMaterial(0, pSpriteMaterial);
-		pResponObject[j]->SetPosition(XMFLOAT3(RandomBillboardPositionInSphere(XMFLOAT3(140.0, 20.0, -270.0), 60, 8, 8)));
-		//pResponObject[j]->SetPosition(XMFLOAT3(50.0,60.0,350.0));
+		pResponObject[j]->SetPosition(XMFLOAT3(RandomBillboardPositionInSphere(XMFLOAT3(180.0, -1.0, -240.0), 20, 2.5, 2.5)));
+
 		m_ppObjects[j] = pResponObject[j];
 	}
 
@@ -481,7 +481,7 @@ void ResponeEffectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 	for (int j = 0; j < m_nObjects; j++)
 	{
 
-		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3Position, XMFLOAT3(0.0f, 1.0, 0.0f));
+		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3Position, XMFLOAT3(1.0f, 1.0, 1.0f));
 
 	}
 	BillboardShader::Render(pd3dCommandList, pCamera, 0);
@@ -489,7 +489,6 @@ void ResponeEffectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 
 void ResponeEffectShader::AnimateObjects(float fTimeElapsed)
 {
-
 	BillboardShader::AnimateObjects(fTimeElapsed);
 }
 

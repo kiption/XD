@@ -586,18 +586,23 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[KEY_W] & 0xF0) {
 			dwDirection |= DIR_FORWARD;
 			q_keyboardInput.push(SEND_KEY_W);//S
-
-			if (((HeliPlayer*)m_pPlayer)->m_fPitch < 15.0f) {
-				((HeliPlayer*)m_pPlayer)->Rotate(0.5f, 0.0f, 0.0f);
-				//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+			if (m_nMode != SCENE2STAGE)
+			{
+				if (((HeliPlayer*)m_pPlayer)->m_fPitch < 15.0f) {
+					((HeliPlayer*)m_pPlayer)->Rotate(0.15f, 0.0f, 0.0f);
+					//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+				}
 			}
 		}
 		if (pKeysBuffer[KEY_S] & 0xF0) {
 			dwDirection |= DIR_BACKWARD;
 			q_keyboardInput.push(SEND_KEY_S);//S
-			if (((HeliPlayer*)m_pPlayer)->m_fPitch > -15.0f) {
-				((HeliPlayer*)m_pPlayer)->Rotate(-0.5f, 0.0f, 0.0f);
-				//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+			if (m_nMode != SCENE2STAGE)
+			{
+				if (((HeliPlayer*)m_pPlayer)->m_fPitch > -15.0f) {
+					((HeliPlayer*)m_pPlayer)->Rotate(-0.15f, 0.0f, 0.0f);
+					//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+				}
 			}
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
@@ -723,7 +728,7 @@ void CGameFramework::AnimateObjects()
 	}
 	if (m_fResponCount > 7.0)
 	{
-		m_pPlayer->SetPosition(XMFLOAT3(140.0, 20.0, -270.0));
+		m_pPlayer->SetPosition(XMFLOAT3(180.0, 10.0, -240.0));
 		m_fResponCount = 0.0f;
 
 		m_pPlayer->SetMyRight(XMFLOAT3(1.0f, 0.0f, 0.0f));
@@ -1118,7 +1123,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-	}
+}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -1594,7 +1599,7 @@ void CGameFramework::setEqLook_Npc(int id, XMFLOAT3 NlookPos, XMFLOAT3 NlookVec)
 	{
 		if ((PlayerPos.z - NlookPos.z) < 20.0f)
 		{
-			if (NlookVec.x == PlayerLook.x&& NlookVec.y == PlayerLook.y&& NlookVec.z == PlayerLook.z)
+			if (NlookVec.x == PlayerLook.x && NlookVec.y == PlayerLook.y && NlookVec.z == PlayerLook.z)
 			{
 				((CrossHairShader*)((Stage1*)m_pScene)->m_pBillboardShader[1])->m_bActiveLook = true;
 			}

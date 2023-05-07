@@ -12,8 +12,9 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 
 	SetChild(pGameObject, false);
-	pGameObject->SetScale(1.0, 1.0, 1.2);
+	pGameObject->SetScale(1.1, 1.0, 1.2);
 	pGameObject->SetCurScene(SCENE1STAGE);
+	Rotate(0,90,0);
 
 
 	pBCBulletEffectShader = new CBulletEffectShader();
@@ -39,7 +40,7 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-	SetPosition(XMFLOAT3(140.f, 60.f, -270.f));
+	SetPosition(XMFLOAT3(180.0, 10.0, -240.0));
 	m_xoobb = BoundingOrientedBox(XMFLOAT3(this->GetPosition()), XMFLOAT3(15.0, 13.0, 20.0), XMFLOAT4(0, 0, 0, 1));
 }
 

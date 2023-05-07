@@ -3,7 +3,7 @@
 #include "Shader.h"
 #include "Scene.h"
 #include "Stage1.h"
-CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(2)
+CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
 {
 }
 
@@ -175,12 +175,12 @@ void CResponeObject::Animate(float fTimeElapsed)
 	}
 	if (m_bResponeAnimation == true)
 	{
-		m_xmf4x4ToParent._42 = 120.0f;
+		m_xmf4x4ToParent._42 = 10.0f;
 		m_bResponeAnimation = false;
 	}
 	if (m_bResponeAnimation == false)
 	{
-		m_xmf4x4ToParent._42 -= 20.0f;
+		m_xmf4x4ToParent._42 -= 20.0f* fTimeElapsed;
 	}
 	CGameObject::Animate(fTimeElapsed);
 }
