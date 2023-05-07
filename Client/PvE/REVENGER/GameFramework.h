@@ -235,7 +235,8 @@ public:
 	void setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void remove_Npcs(int id);
 
-	// 다른 클라이언트 객체의 상태 최신화 함수
+	// 클라이언트 객체의 상태 최신화 함수
+	void selfShootingMotion();
 	void otherPlayerReturnToIdle(int p_id);
 	void otherPlayerMovingMotion(int p_id);
 	void otherPlayerShootingMotion(int p_id);

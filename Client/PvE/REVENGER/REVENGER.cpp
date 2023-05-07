@@ -196,16 +196,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						break;
 					case PACKET_KEY_SPACEBAR:
 						if (gGameFramework.m_nMode == SCENE1STAGE) {
-							if (my_info.m_bullet > 0) {
-								my_info.m_bullet--;
-								CS_ATTACK_PACKET attack_pack;
-								attack_pack.size = sizeof(CS_ATTACK_PACKET);
-								attack_pack.type = CS_ATTACK;
-								sendPacket(&attack_pack, active_servernum);
-							}
-							else {
-								my_info.m_bullet = MAX_BULLET;
-							}
+							CS_ATTACK_PACKET attack_pack;
+							attack_pack.size = sizeof(CS_ATTACK_PACKET);
+							attack_pack.type = CS_ATTACK;
+							sendPacket(&attack_pack, active_servernum);
 						}
 						break;
 
@@ -278,21 +272,37 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				}
 
 				// 2) 객체 인게임 상태 업데이트
-				for (int i = 0; i < MAX_USER; ++i) {
-					if (i == my_info.m_id) continue;
+				switch (my_info.m_ingame_state) {
+				case PL_ST_IDLE:
+					break;
+				case PL_ST_MOVE:
+					break;
+				case PL_ST_ATTACK:
+					if (my_info.m_bullet > 0) {
+						gGameFramework.selfShootingMotion();
+					}
+					my_info.m_ingame_state = PL_ST_IDLE;	// 한번쏘고 바로 제자리.
+					break;
+				case PL_ST_DEAD:
+					break;
+				}
 
-					if (other_players[i].m_ingame_state == PL_ST_IDLE) {
+				for (int i = 0; i < MAX_USER; ++i) {
+					if (i == my_id) break;
+
+					switch (other_players[i].m_ingame_state) {
+					case PL_ST_IDLE:
 						gGameFramework.otherPlayerReturnToIdle(i);
-					}
-					else if (other_players[i].m_ingame_state == PL_ST_MOVE) {
+						break;
+					case PL_ST_MOVE:
 						gGameFramework.otherPlayerMovingMotion(i);
-					}
-					else if (other_players[i].m_ingame_state == PL_ST_ATTACK) {
+						break;
+					case PL_ST_ATTACK:
 						gGameFramework.otherPlayerShootingMotion(i);
 						other_players[i].m_ingame_state = PL_ST_IDLE;	// 한번쏘고 바로 제자리.
-					}
-					else if (other_players[i].m_ingame_state == PL_ST_DEAD) {
-						// 상대방이 죽으면 해야하는 처리
+						break;
+					case PL_ST_DEAD:
+						break;
 					}
 				}
 

@@ -224,7 +224,6 @@ struct SC_OBJECT_STATE_PACKET {
 struct SC_BULLET_COUNT_PACKET {
 	unsigned char size;
 	char type;
-	short id;
 	int bullet_cnt;
 };
 

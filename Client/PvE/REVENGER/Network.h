@@ -324,15 +324,11 @@ void processPacket(char* ptr)
 				my_info.m_damaged_effect_on = true;
 				my_info.m_hp -= recv_packet->damage;
 				if (my_info.m_hp < 0) my_info.m_hp = 0;
-				//cout << "내Player[]가 피해를 받았다. (HP: " << my_info.m_hp + recv_packet->damage
-				//	<< " -> " << my_info.m_hp << ")\n" << endl;
 			}
 			else {
 				other_players[recv_packet->id].m_damaged_effect_on = true;
 				other_players[recv_packet->id].m_hp -= recv_packet->damage;
 				if (other_players[recv_packet->id].m_hp < 0) other_players[recv_packet->id].m_hp = 0;
-				//cout << "OtherPlayer[" << recv_packet->id << "]가 피해를 받았다. (HP: " << other_players[recv_packet->id].m_hp + recv_packet->damage
-				//	<< " -> " << other_players[recv_packet->id].m_hp << ")\n" << endl;
 			}
 		}
 		// NPC Damaged
@@ -341,8 +337,6 @@ void processPacket(char* ptr)
 			npcs_info[recv_packet->id].m_damaged_effect_on = true;
 			npcs_info[recv_packet->id].m_hp -= recv_packet->damage;
 			if (npcs_info[recv_packet->id].m_hp < 0) npcs_info[recv_packet->id].m_hp = 0;
-			//cout << "NPC[" << recv_packet->id << "]가 피해를 받았다. (HP: " << npcs_info[recv_packet->id].m_hp + recv_packet->damage
-			//	<< " -> " << npcs_info[recv_packet->id].m_hp << ")\n" << endl;
 		}
 
 		break;
@@ -376,60 +370,68 @@ void processPacket(char* ptr)
 		short recvd_state = recv_packet->state;
 
 		if (recvd_target == TARGET_PLAYER) {
-			if (recvd_state == PL_ST_IDLE) {
-				if (recvd_id == my_id) {
+			if (recvd_id == my_id) {
+				switch (recvd_state) {
+				case PL_ST_IDLE:
 					my_info.m_ingame_state = PL_ST_IDLE;
-				}
-				else {
-					other_players[recvd_id].m_ingame_state = PL_ST_IDLE;
-				}
-			}
-			else if (recvd_state == PL_ST_ATTACK) {
-				if (recvd_id == my_id) break;	// 자기자신은 공격상태로 바꿀 필요도 없고 바뀔 일도 없다.
+					break;
+				case PL_ST_ATTACK:
+					my_info.m_ingame_state = PL_ST_ATTACK;
+					break;
+				case PL_ST_DEAD:
+					my_info.m_ingame_state = PL_ST_DEAD;
+					gamesound.collisionSound();
 
-				other_players[recvd_id].m_ingame_state = PL_ST_ATTACK;
-			}
-			else if (recvd_state == PL_ST_DEAD) {
-				gamesound.collisionSound();
-				if (recvd_id == my_id) {
 					my_info.m_damaged_effect_on = true;
 					my_info.m_hp = 0;
-					my_info.m_ingame_state = PL_ST_DEAD;
 
 					DeathInfo deadobj{ D_OBJ_PLAYER, recvd_id };
 					new_death_objs.push(deadobj);
+					break;
 				}
-				else {
+			}
+			else {
+				switch (recvd_state) {
+				case PL_ST_IDLE:
+					other_players[recvd_id].m_ingame_state = PL_ST_IDLE;
+					break;
+				case PL_ST_MOVE:
+					other_players[recvd_id].m_ingame_state = PL_ST_MOVE;
+					break;
+				case PL_ST_ATTACK:
+					other_players[recvd_id].m_ingame_state = PL_ST_ATTACK;
+					break;
+				case PL_ST_DEAD:
+					other_players[recvd_id].m_ingame_state = PL_ST_DEAD;
+					gamesound.collisionSound();
+
 					other_players[recvd_id].m_damaged_effect_on = true;
 					other_players[recvd_id].m_hp = 0;
-					other_players[recvd_id].m_ingame_state = PL_ST_DEAD;
 
 					DeathInfo deadobj{ D_OBJ_PLAYER, recvd_id };
 					new_death_objs.push(deadobj);
+					break;
 				}
 			}
 		}
 		else if (recvd_target == TARGET_NPC) {
-			if (recvd_state == PL_ST_IDLE) {
-
-			}
-			else if (recvd_state == PL_ST_ATTACK) {
-
-			}
-			else if (recvd_state == PL_ST_IDLE) {
-
-			}
-			else if (recvd_state == PL_ST_CHASE) {
-
-			}
-			else if (recvd_state == PL_ST_DEAD) {
+			switch (recvd_state) {
+			case PL_ST_IDLE:
+				break;
+			case PL_ST_CHASE:
+				break;
+			case PL_ST_ATTACK:
+				break;
+			case PL_ST_DEAD:
+				npcs_info[recvd_id].m_ingame_state = PL_ST_DEAD;
 				gamesound.collisionSound();
+
 				npcs_info[recvd_id].m_damaged_effect_on = true;
 				npcs_info[recvd_id].m_hp = 0;
-				npcs_info[recvd_id].m_ingame_state = PL_ST_DEAD;
 
 				DeathInfo deadobj{ D_OBJ_NPC, recvd_id };
 				new_death_objs.push(deadobj);
+				break;
 			}
 		}
 
@@ -438,8 +440,7 @@ void processPacket(char* ptr)
 	case SC_BULLET_COUNT:
 	{
 		SC_BULLET_COUNT_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COUNT_PACKET*>(ptr);
-		int cnt = recv_packet->bullet_cnt;
-		my_info.m_bullet = cnt;
+		my_info.m_bullet = recv_packet->bullet_cnt;
 
 		break;
 	}//SC_BULLET_COUNT case end

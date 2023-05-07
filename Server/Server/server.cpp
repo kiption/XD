@@ -96,7 +96,9 @@ public:
 	float pitch, yaw, roll;							// Rotated Degree
 	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;		// 현재 Look, Right, Up Vectors
 	chrono::system_clock::time_point death_time;
-	chrono::system_clock::time_point shoot_time;	// 총 발사 시간
+
+	chrono::system_clock::time_point shoot_time;	// 총을 발사한 시간
+	chrono::system_clock::time_point reload_time;	// 총알 장전 시작시간
 
 	short curr_stage;
 
@@ -113,7 +115,7 @@ public:
 
 		pl_state = PL_ST_IDLE;
 		hp = 100;
-		remain_bullet = 100;
+		remain_bullet = MAX_BULLET;
 		pos = { 0.0f, 0.0f, 0.0f };
 		pitch = yaw = roll = 0.0f;
 		m_rightvec = { 1.0f, 0.0f, 0.0f };
@@ -738,14 +740,60 @@ void process_packet(int client_id, char* packet)
 		if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) break;	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
 
 		// Bullet 개수 체크
-		if (clients[client_id].remain_bullet <= 0) break;	// 총알이 0개보다 작거나 같으면 발사하지 않습니다. (애초에 정상적인 클라에서는 0이하일때에는 패킷을 보내지않음)
+		bool enough_bullet = true;
+		if (clients[client_id].remain_bullet <= 0) {
+			// Bullet 장전 중 여부 체크
+			milliseconds reload_term = duration_cast<milliseconds>(chrono::system_clock::now() - clients[client_id].reload_time);
+			if (reload_term < milliseconds(RELOAD_TIME)) {
+				enough_bullet = false;
+			}
+			else {
+				clients[client_id].s_lock.lock();
+				clients[client_id].remain_bullet = MAX_BULLET;
+				clients[client_id].s_lock.unlock();
+
+				SC_BULLET_COUNT_PACKET reload_done_pack;
+				reload_done_pack.type = SC_BULLET_COUNT;
+				reload_done_pack.size = sizeof(SC_BULLET_COUNT_PACKET);
+				reload_done_pack.bullet_cnt = MAX_BULLET;
+
+				lock_guard<mutex> lg{ clients[client_id].s_lock };
+				clients[client_id].do_send(&reload_done_pack);
+			}
+		}
+		if (!enough_bullet) break;
 
 		// 세션정보 업데이트
 		clients[client_id].s_lock.lock();
-		clients[client_id].shoot_time = chrono::system_clock::now();	// 발사 시간 업데이트
+		clients[client_id].shoot_time = chrono::system_clock::now(); // 발사 시간 업데이트
 		clients[client_id].remain_bullet -= 1;
-		if (clients[client_id].remain_bullet == 0) clients[client_id].remain_bullet = MAX_BULLET;
+		if (clients[client_id].remain_bullet <= 0) { // 장전 시작
+			clients[client_id].remain_bullet = 0;
+			clients[client_id].reload_time = chrono::system_clock::now();
+		}
 		clients[client_id].s_lock.unlock();
+
+		SC_BULLET_COUNT_PACKET bullet_update_pack;
+		bullet_update_pack.type = SC_BULLET_COUNT;
+		bullet_update_pack.size = sizeof(SC_BULLET_COUNT_PACKET);
+		bullet_update_pack.bullet_cnt = clients[client_id].remain_bullet;
+
+		lock_guard<mutex> lg{ clients[client_id].s_lock };
+		clients[client_id].do_send(&bullet_update_pack);
+
+		// 우선 이 플레이어가 총알을 발사했다는 정보를 "게임에 접속 중인 모든" 클라이언트에게 알려줍니다. (총알 나가는 모션 동기화를 위함)
+		for (auto& cl : clients) {
+			if (cl.s_state != ST_INGAME) continue;
+			if (cl.curr_stage == 0) continue;
+
+			SC_OBJECT_STATE_PACKET atk_pack;
+			atk_pack.type = SC_OBJECT_STATE;
+			atk_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
+			atk_pack.target = TARGET_PLAYER;
+			atk_pack.id = client_id;
+			atk_pack.state = PL_ST_ATTACK;
+			cl.do_send(&atk_pack);
+		}
 
 		// 1. 스테이지 1 로직
 		if (clients[client_id].curr_stage == 1) {
@@ -755,19 +803,11 @@ void process_packet(int client_id, char* packet)
 			MyVector3 intersect_result;
 			int intersect_id = -1;
 			float min_dist = FLT_MAX;
+
 			for (auto& cl : clients) {
 				if (cl.s_state != ST_INGAME) continue;	// 게임중이 아닌 세션은 검사할 필요X
 				if (cl.curr_stage == 0) continue;		// 아직 게임 진입 중인 세션도 검사 X
 				if (cl.id == client_id) continue;		// 자기자신은 검사하면 안됨.
-
-				// 우선 이 플레이어가 총알을 발사했다는 정보를 "자기자신을 제외한" 클라이언트에게 알려줍니다. (총알 나가는 모션 동기화를 위함)
-				SC_OBJECT_STATE_PACKET atk_pack;
-				atk_pack.type = SC_OBJECT_STATE;
-				atk_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
-				atk_pack.target = TARGET_PLAYER;
-				atk_pack.id = client_id;
-				atk_pack.state = PL_ST_ATTACK;
-				cl.do_send(&atk_pack);
 
 				// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
 				Cube pl_obj{ exc_XMFtoMyVec(cl.pos), HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
@@ -779,11 +819,9 @@ void process_packet(int client_id, char* packet)
 
 					// 쏜 사람과의 충돌점과의 거리를 잽니다.
 					float cur_dist = calcDistance(exc_XMFtoMyVec(clients[client_id].pos), tmp_intersect);
-					cout << "[TEST] Dist: cur_dist" << endl;//test
 
 					// 그 거리가 최소거리보다 작다면 업데이트해줍니다.
 					if (cur_dist < min_dist) {
-						cout << "[TEST] Intersection Update" << endl;//test
 						min_dist = cur_dist;
 						intersect_id = cl.id;
 						intersect_result = tmp_intersect;
@@ -794,12 +832,16 @@ void process_packet(int client_id, char* packet)
 			// 레이캐스트에서 충돌으로 판단되었다면
 			if (intersect_result != defaultVec) {
 				if (intersect_id == -1) break;	//err
-				cout << "Bullet(Owner: Player[" << client_id << "]) Collide at Player[" << intersect_id << "] ("
-					<< intersect_result.x << ", " << intersect_result.y << ", " << intersect_result.z << ").\n" << endl;
+				cout << "Player[" << client_id << "]의 총알이 Player[" << intersect_id << "] (POS: "
+					<< intersect_result.x << ", " << intersect_result.y << ", " << intersect_result.z << ") 에 명중했습니다." << endl;
 
 				// 우선 충돌한 플레이어의 HP를 감소시킵니다.
 				clients[intersect_id].s_lock.lock();
 				clients[intersect_id].hp -= BULLET_DAMAGE;
+				if (clients[intersect_id].hp > 0)
+					cout << "Player[" << clients[intersect_id].id << "]의 HP가 " << BULLET_DAMAGE << "만큼 감소하였습니다. \n" << endl;
+				else
+					cout << "Player[" << clients[intersect_id].id << "]가 사망하였습니다.\n" << endl;
 				clients[intersect_id].s_lock.unlock();
 
 				// 충돌한 정보는 "게임에 접속한 모든" 클라이언트들에게 보냅니다. (피격 및 사망 연출 동기화를 위함)
@@ -808,7 +850,6 @@ void process_packet(int client_id, char* packet)
 					if (cl.curr_stage == 0) continue;
 
 					if (clients[intersect_id].hp > 0) {
-						cout << "Send Damage Packet to Player[" << clients[intersect_id].id << "].\n" << endl;
 						SC_DAMAGED_PACKET dmg_bullet_packet;
 						dmg_bullet_packet.type = SC_DAMAGED;
 						dmg_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
@@ -819,7 +860,6 @@ void process_packet(int client_id, char* packet)
 						cl.do_send(&dmg_bullet_packet);
 					}
 					else {
-						cout << "Send Death Packet to Player[" << clients[intersect_id].id << "].\n" << endl;
 						SC_OBJECT_STATE_PACKET death_pack;
 						death_pack.type = SC_OBJECT_STATE;
 						death_pack.size = sizeof(SC_OBJECT_STATE_PACKET);

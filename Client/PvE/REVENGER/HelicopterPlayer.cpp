@@ -81,7 +81,6 @@ void HeliPlayer::Firevalkan(CGameObject* pLockedObject)
 		}
 		else
 		{
-			xmf3Position.y += 2.0f;
 			XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
 			pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
 			pBulletObject->Rotate(90.0, 0.0, 0.0);

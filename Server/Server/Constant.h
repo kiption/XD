@@ -38,21 +38,11 @@
 //============================================================
 //						공격 관련 상수
 //============================================================
-#define SHOOT_COOLDOWN_BULLET 200		// 총알 발사 쿨타임(ms)
+#define SHOOT_COOLDOWN_BULLET 150		// 총알 발사 쿨타임(ms)
+#define RELOAD_TIME 1500				// 장전완료까지 걸리는 시간(ms)
 
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
-#define BULLET_DAMAGE 10				// 총알 피격데미지
-
-#define BULLET_MOVE_SCALAR 2.0f		// 총알 이동 힘
-#define BULLET_RANGE 100.f				// 총알 사정거리
-
-#define VULCAN_BULLET_BBSIZE_X 10.0f		// 공중전(기관총) 탄 BB크기
-#define VULCAN_BULLET_BBSIZE_Y 10.0f
-#define VULCAN_BULLET_BBSIZE_Z 10.0f
-
-#define RIFFLE_BULLET_BBSIZE_X 10.0f		// 지상전(소총) 탄 BB크기
-#define RIFFLE_BULLET_BBSIZE_Y 10.0f
-#define RIFFLE_BULLET_BBSIZE_Z 10.0f
+#define BULLET_DAMAGE 1					// 총알 피격데미지
 
 
 //============================================================
@@ -64,9 +54,9 @@
 #define HELI_BBSIZE_Y 2.7f
 #define HELI_BBSIZE_Z 2.7f
 
-#define HELI_BOXSIZE_X 6.0f			// 헬기 Box크기 (Raycast)
-#define HELI_BOXSIZE_Y 5.0f
-#define HELI_BOXSIZE_Z 24.5f
+#define HELI_BOXSIZE_X 10.0f			// 헬기 Box크기 (Raycast)
+#define HELI_BOXSIZE_Y 9.5f
+#define HELI_BOXSIZE_Z 30.0f
 
 #define AUTO_LEVELOFF_TIME 3000			// 몇 초(ms)동안 키입력이 없어야 자동 수평비행 전환이 되는가
 #define RESPAWN_TIME 5000				// 리스폰 시간 (ms)

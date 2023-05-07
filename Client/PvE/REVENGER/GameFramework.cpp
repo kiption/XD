@@ -400,7 +400,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			q_keyboardInput.push(SEND_KEYUP_MOVEKEY);//S
 			break;
 		case VK_SPACE:
-			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
+			//if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
 			break;
 		default:
 			break;
@@ -413,7 +413,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
 			break;
 		case VK_SPACE:
-			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
+			//if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
 			break;
 		default:
 			break;
@@ -1676,6 +1676,15 @@ void CGameFramework::CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents
 }
 
 
+void CGameFramework::selfShootingMotion()
+{
+	if (m_nMode == SCENE1STAGE) {
+		((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
+	}
+	else if (m_nMode == SCENE2STAGE) {
+
+	}
+}
 void CGameFramework::otherPlayerReturnToIdle(int p_id)
 {
 	if (m_nMode == SCENE1STAGE) {
