@@ -675,11 +675,14 @@ void ST1_NPC::PlayerChasing()
 	base_coordinate.look = { 0,1,0 };
 	float x = XMVectorGetX(XMVector3AngleBetweenVectors(Looktemp, XMLoadFloat3(&base_coordinate.look)));
 	m_yaw += x;
-	if (m_yaw < 1.0f && m_yaw > -1.0f) {
+	if (x < 1.0f && x > -1.0f) {
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&base_coordinate.look), XMConvertToRadians(m_yaw));
 		XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
 	}
-	
+	else {
+		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&base_coordinate.look), XMConvertToRadians(0.0f));
+		XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+	}
 	// Right
 	base_coordinate.up = { 0,1,0 };
 
