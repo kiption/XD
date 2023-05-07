@@ -820,9 +820,9 @@ void CGameFramework::FrameAdvance()
 	if (m_nMode == SCENE1STAGE)
 	{
 	}
-		m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
-		m_pScene->OnPreRender(m_pd3dCommandList, m_pCamera);
-		//UpdateShaderVariables();
+	m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
+	m_pScene->OnPreRender(m_pd3dCommandList, m_pCamera);
+	//UpdateShaderVariables();
 
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
 	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
@@ -1063,7 +1063,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 			m_pCamera = m_pPlayer->GetCamera();
 			m_pScene->SetCurScene(SCENE1STAGE);
-			if(m_nMode==SCENE1STAGE)gamesound.SpeakMusic();
+			if (m_nMode == SCENE1STAGE)gamesound.SpeakMusic();
 			break;
 		}
 		case SCENE2STAGE:
@@ -1119,7 +1119,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-}
+	}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -1509,14 +1509,14 @@ void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 
 {
 	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE) {
-		
+
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(1.0, 1.0, 1.2);
 	}
 	else if (m_nMode == SCENE2STAGE) {
-	
+
 		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetUp(upVec);
 		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetRight(rightVec);
 		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetLook(lookVec);
@@ -1527,13 +1527,13 @@ void CGameFramework::remove_OtherPlayer(int id)
 {
 	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE) {
-	
+
 		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
 			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
 		}
 	}
 	if (m_nMode == SCENE2STAGE) {
-	
+
 		if (((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]) {
 			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetScale(0.0, 0.0, 0.0);
 		}
@@ -1564,8 +1564,8 @@ void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, X
 }
 void CGameFramework::remove_Npcs(int id)
 {
-	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
-	
+//	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
+
 }
 
 
@@ -1587,13 +1587,26 @@ void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos, XMFLOAT3 mapextents
 	m_mapxmoobb = BoundingOrientedBox(mappos, mapextents, XMFLOAT4(0, 0, 0, 1));
 
 	CValkanObject** ppBullets = ((HeliPlayer*)m_pPlayer)->m_ppBullets;
+
 	for (int i = 0; i < BULLETS; i++)
 	{
 		ppBullets[i]->m_xmOOBoundingBox = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
+
 		if (ppBullets[i]->m_xmOOBoundingBox.Intersects(m_mapxmoobb))
 		{
 			// 충돌 모션 
 			ppBullets[i]->Reset();
+		}
+	}
+
+
+	for (int k = 5; k < 10; k++)
+	{
+		CValkanObject** ppOtherBullets = ((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[k])->m_ppBullets;
+		for (int i = 0; i < BULLETS2; i++)
+		{
+			ppOtherBullets[i]->m_xmOOBoundingBox = BoundingOrientedBox(ppOtherBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
+
 		}
 	}
 }

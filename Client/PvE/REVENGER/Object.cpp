@@ -1045,7 +1045,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 			}
 		}
 	}
-	
+
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 }
@@ -1070,7 +1070,7 @@ void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandLis
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
 
-	
+
 	for (int i = 0; i < m_nMaterials; i++)
 		if (m_ppMaterials[i]) pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_ppMaterials[i]->m_nReflection, 16);
 
@@ -1716,7 +1716,7 @@ CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 {
 	CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 	SetChild(pOtherPlayerModel, false);
-	SetScale(0.5,0.5,0.5);
+	SetScale(0.5, 0.5, 0.5);
 	pOtherPlayerModel->AddRef();
 	pBCBulletEffectShader = new CBulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
@@ -1760,25 +1760,15 @@ void CHelicopterObjects::Firevalkan(CGameObject* pLockedObject)
 	if (pBulletObject)
 	{
 		XMFLOAT3 PlayerLook = GetLook();
-		XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
-		XMFLOAT3 CaemraPosition = m_pCamera->GetPosition();
-		XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
+
 		XMFLOAT3 xmf3Position = GetPosition();
-		XMFLOAT3 xmf3Direction = TotalLookVector;
+		XMFLOAT3 xmf3Direction = PlayerLook;
 
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
-		if (m_pCamera->m_nMode == SPACESHIP_CAMERA)
-		{
-			xmf3Direction.y += 0.3f;
-			XMFLOAT3 xmf3FirePosition = Vector3::Add(CaemraPosition, Vector3::ScalarProduct(xmf3Direction, 60.0f, false));
-			pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
-		}
-		else
-		{
-			xmf3Position.y += 2.0f;
-			XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
-			pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
-		}
+	
+		xmf3Position.y += 2.0f;
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
+		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->Rotate(90.0, 0.0, 0.0);
 		pBulletObject->SetScale(4.0, 10.0, 4.0);
