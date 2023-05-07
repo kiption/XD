@@ -588,18 +588,18 @@ void CGameFramework::ProcessInput()
 			dwDirection |= DIR_FORWARD;
 			q_keyboardInput.push(SEND_KEY_W);//S
 
-			//if (((HeliPlayer*)m_pPlayer)->m_fPitch < 15.0f) {
-			//	((HeliPlayer*)m_pPlayer)->Rotate(0.5f, 0.0f, 0.0f);
-			//	//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
-			//}
+			if (((HeliPlayer*)m_pPlayer)->m_fPitch < 15.0f) {
+				((HeliPlayer*)m_pPlayer)->Rotate(0.5f, 0.0f, 0.0f);
+				//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+			}
 		}
 		if (pKeysBuffer[KEY_S] & 0xF0) {
 			dwDirection |= DIR_BACKWARD;
 			q_keyboardInput.push(SEND_KEY_S);//S
-			//if (((HeliPlayer*)m_pPlayer)->m_fPitch > -15.0f) {
-			//	((HeliPlayer*)m_pPlayer)->Rotate(-0.5f, 0.0f, 0.0f);
-			//	//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
-			//}
+			if (((HeliPlayer*)m_pPlayer)->m_fPitch > -15.0f) {
+				((HeliPlayer*)m_pPlayer)->Rotate(-0.5f, 0.0f, 0.0f);
+				//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+			}
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
 			dwDirection |= DIR_LEFT;
