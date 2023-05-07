@@ -510,7 +510,7 @@ void process_packet(int client_id, char* packet)
 			auto& pl = clients[i];
 
 			if (pl.id == client_id) continue;
-			if (pl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
+			if (pl.curr_stage != 1) continue;// 로그인을 하면 1스테이지로 넘어가지기 때문
 
 			pl.s_lock.lock();
 			if (pl.s_state != ST_INGAME) {
@@ -547,7 +547,7 @@ void process_packet(int client_id, char* packet)
 		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 클라이언트의 정보를 전송합니다.
 		for (auto& pl : clients) {
 			if (pl.id == client_id) continue;
-			if (pl.curr_stage == 2) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
+			if (pl.curr_stage != 1) continue;// 로그인을 하면 1스테이지로 넘어가지기 때문.
 
 			pl.s_lock.lock();
 			if (pl.s_state != ST_INGAME) {
@@ -607,7 +607,7 @@ void process_packet(int client_id, char* packet)
 			add_npc_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
 
 			for (int j = 0; j < MAX_USER; j++) {
-				if (clients[j].curr_stage == 2) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
+				if (clients[j].curr_stage != 1) continue;// NPC는 스테이지1에만 있다.
 				if (clients[j].s_state == ST_INGAME) {
 					clients[j].do_send(&add_npc_packet);
 				}
@@ -654,23 +654,7 @@ void process_packet(int client_id, char* packet)
 			}
 		}
 		// 2) 다른 플레이어
-		for (auto& other_cl : clients) {
-			if (other_cl.id == client_id) continue;
-			if (clients[client_id].m_xoobb.Intersects(other_cl.m_xoobb)) {
-				// 다른 플레이어와 충돌하면 자기자신과 상대 플레이어 둘다 사망하게 됩니다.
-				//clients[client_id].s_lock.lock();
-				//clients[client_id].hp = 0;
-				//clients[client_id].pl_state = PL_ST_DEAD;
-				//clients[client_id].s_lock.unlock();
-
-				//other_cl.s_lock.lock();
-				//other_cl.hp = 0;
-				//other_cl.pl_state = PL_ST_DEAD;
-				//other_cl.s_lock.unlock();
-
-				b_isCollide = true;
-			}
-		}
+		
 		// 3) NPC
 		for (auto& npc : npcs) {
 			if (npc.GetHp() <= 0) continue;
@@ -693,6 +677,7 @@ void process_packet(int client_id, char* packet)
 					cout << "NPC[" << npc_death_pack.id << "] DEATH" << endl;
 					for (auto& cl : clients) {
 						if (cl.s_state != ST_INGAME) continue;
+						if (cl.curr_stage != 1) continue;	// 아직 NPC는 1스테이지에만 있다.
 
 						lock_guard<mutex> lg{ cl.s_lock };
 						cl.do_send(&npc_death_pack);
@@ -713,6 +698,7 @@ void process_packet(int client_id, char* packet)
 		// 3. 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
 		for (auto& other_pl : clients) {
 			if (other_pl.id == client_id) continue;
+			if (other_pl.curr_stage == 0) continue;
 			if (other_pl.s_state != ST_INGAME) continue;
 
 			lock_guard<mutex> lg{ other_pl.s_lock };
@@ -736,6 +722,7 @@ void process_packet(int client_id, char* packet)
 		// 2. 다른 클라이언트에게 플레이어가 회전한 방향을 알려준다.
 		for (auto& other_pl : clients) {
 			if (other_pl.id == client_id) continue;
+			if (other_pl.curr_stage == 0) continue;
 			if (other_pl.s_state != ST_INGAME) continue;
 
 			lock_guard<mutex> lg{ other_pl.s_lock };
@@ -772,6 +759,7 @@ void process_packet(int client_id, char* packet)
 			float min_dist = FLT_MAX;
 			for (auto& cl : clients) {
 				if (cl.s_state != ST_INGAME) continue;	// 게임중이 아닌 세션은 검사할 필요X
+				if (cl.curr_stage == 0) continue;		// 아직 게임 진입 중인 세션도 검사 X
 				if (cl.id == client_id) continue;		// 자기자신은 검사하면 안됨.
 
 				// 우선 이 플레이어가 총알을 발사했다는 정보를 "자기자신을 제외한" 클라이언트에게 알려줍니다. (총알 나가는 모션 동기화를 위함)
@@ -816,9 +804,10 @@ void process_packet(int client_id, char* packet)
 				clients[intersect_id].hp -= BULLET_DAMAGE;
 				clients[intersect_id].s_lock.unlock();
 
-				// 충돌한 정보는 "접속 중인 모든" 클라이언트들에게 보냅니다. (피격 및 사망 연출 동기화를 위함)
+				// 충돌한 정보는 "게임에 접속한 모든" 클라이언트들에게 보냅니다. (피격 및 사망 연출 동기화를 위함)
 				for (auto& cl : clients) {
 					if (cl.s_state != ST_INGAME) continue;
+					if (cl.curr_stage == 0) continue;
 
 					if (clients[intersect_id].hp > 0) {
 						cout << "Send Damage Packet to Player[" << clients[intersect_id].id << "].\n" << endl;
@@ -905,6 +894,7 @@ void process_packet(int client_id, char* packet)
 
 				for (auto& cl : clients) {
 					if (cl.s_state != ST_INGAME) continue;
+					if (cl.curr_stage == 0) continue;
 					if (cl.id == client_id) continue;
 
 					lock_guard<mutex> lg{ cl.s_lock };
