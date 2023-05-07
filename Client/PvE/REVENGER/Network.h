@@ -2,6 +2,7 @@
 #include <iostream>
 #include <WS2tcpip.h>
 #include <MSWSock.h>
+#include <chrono>
 #include "ObjectsInfo.h"
 #include "GameSound.h"
 
@@ -21,6 +22,9 @@ int my_id;
 
 int servertime_ms;
 int servertime_sec;
+
+chrono::system_clock::time_point last_ping;	// ping을 서버로 보낸 시간
+chrono::system_clock::time_point last_pong;	// 서버의 ping에 대한 응답을 받은 시간
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
@@ -153,7 +157,7 @@ void processPacket(char* ptr)
 		if (recv_packet->target == TARGET_PLAYER) {
 			if (recv_id == my_info.m_id) break;
 
-			if (recv_id < MAX_USER) {		// Player 추가
+			if (0 <= recv_id && recv_id < MAX_USER) {		// Player 추가
 				other_players[recv_id].m_id = recv_id;
 				strcpy_s(other_players[recv_id].m_name, recv_packet->name);
 				other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
@@ -163,7 +167,7 @@ void processPacket(char* ptr)
 				other_players[recv_id].m_state = OBJ_ST_RUNNING;
 			}
 			else {
-				cout << "Exceed Max User." << endl;
+				cout << "[SC_ADD Error] Unknown ID." << endl;
 			}
 		}
 		// 2. Add NPC (Helicopter)
@@ -427,6 +431,15 @@ void processPacket(char* ptr)
 		stage1_mapobj_info.push_back(temp);
 		break;
 	}//SC_MAP_OBJINFO case end
+	case SC_PING_RETURN:
+	{
+		SC_PING_RETURN_PACKET* recv_packet = reinterpret_cast<SC_PING_RETURN_PACKET*>(ptr);
+
+		if (recv_packet->ping_sender_id == my_id) {
+			last_pong = chrono::system_clock::now();
+		}
+		break;
+	}//SC_PING_RETURN case end
 	case SC_ACTIVE_DOWN:
 	{
 		SC_ACTIVE_DOWN_PACKET* recv_packet = reinterpret_cast<SC_ACTIVE_DOWN_PACKET*>(ptr);

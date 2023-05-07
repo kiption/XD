@@ -52,6 +52,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 	sendPacket(&login_pack, active_servernum);
 	recvPacket(active_servernum);
+
+	last_ping = last_pong = chrono::system_clock::now();
 	//==================================================
 
 	UNREFERENCED_PARAMETER(hPrevInstance);
@@ -86,6 +88,19 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		{
 			if (gGameFramework.m_nMode != OPENINGSCENE)
 			{
+				//==================================================
+				//					서버 연결 확인
+				//==================================================
+				// 1초마다 서버로 핑을 던져서 살아있는지 확인합니다.
+				if (chrono::system_clock::now() > last_ping + chrono::seconds(1)) {
+					CS_PING_PACKET ping_packet;
+					ping_packet.type = CS_PING;
+					ping_packet.size = sizeof(CS_PING_PACKET);
+					sendPacket(&ping_packet, active_servernum);
+					last_ping = chrono::system_clock::now();
+					cout << "ping" << endl;
+				}
+
 				//==================================================
 				//		새로운 키 입력을 서버에게 전달합니다.
 				//==================================================

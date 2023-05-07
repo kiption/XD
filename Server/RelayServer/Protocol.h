@@ -38,7 +38,7 @@ constexpr int HA_REPLICA_CYCLE = 333;	// 서버간 데이터복제 주기 (단위: millisec)
 constexpr int BUF_SIZE = 200;
 constexpr int NAME_SIZE = 20;
 
-constexpr int MAX_USER = 5;
+constexpr int MAX_USER = 3;
 constexpr int MAX_NPCS = 5;
 constexpr int MAX_BULLET = 50;
 
@@ -56,9 +56,9 @@ constexpr char INPUT_KEY_E = 0b000001;
 
 // Packet ID
 enum PacketID {
-	CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_RELOGIN
+	CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_PING, CS_RELOGIN
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
-	, SC_DAMAGED, SC_OBJECT_STATE, SC_BULLET_COUNT, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_ACTIVE_DOWN
+	, SC_DAMAGED, SC_OBJECT_STATE, SC_BULLET_COUNT, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
 };
 
@@ -72,12 +72,14 @@ enum TargetType { TARGET_PLAYER, TARGET_BULLET, TARGET_NPC };
 // ================================
 //			1. CS Packet
 // ================================
+// 1) 로그인 관련 패킷
 struct CS_LOGIN_PACKET {
 	unsigned char size;
 	char type;
 	char name[NAME_SIZE];
 };
 
+// 2) 조작 관련 패킷
 struct CS_MOVE_PACKET {
 	unsigned char size;
 	char type;
@@ -97,7 +99,8 @@ struct CS_ATTACK_PACKET {
 	char type;
 };
 
-enum PACKET_KEY_TYPE { PACKET_KEY_NUM1, PACKET_KEY_NUM2,
+enum PACKET_KEY_TYPE {
+	PACKET_KEY_NUM1, PACKET_KEY_NUM2,
 	PACKET_KEY_W, PACKET_KEY_A, PACKET_KEY_S, PACKET_KEY_D,
 	PACKET_KEY_UP, PACKET_KEY_LEFT, PACKET_KEY_DOWN, PACKET_KEY_RIGHT,
 	PACKET_KEY_SPACEBAR,
@@ -116,6 +119,12 @@ struct CS_INPUT_MOUSE_PACKET {
 	char buttontype;
 	float delta_x, delta_y;
 	//float roll, pitch, yaw;
+};
+
+// 3) 이중화 관련 패킷
+struct CS_PING_PACKET {
+	unsigned char size;
+	char type;
 };
 
 struct CS_RELOGIN_PACKET {
@@ -235,6 +244,11 @@ struct SC_MAP_OBJINFO_PACKET {
 
 // ================================
 // 5) 이중화 관련 패킷
+struct SC_PING_RETURN_PACKET {	// 현재는 클라-서버 -> 추후에 클라-릴레이서버 로 바꿀 예정.
+	unsigned char size;
+	char type;
+	short ping_sender_id;
+};
 struct SC_ACTIVE_DOWN_PACKET {	// 현재는 클라-서버 -> 추후에 클라-릴레이서버 로 바꿀 예정.
 	unsigned char size;
 	char type;
@@ -265,10 +279,10 @@ struct SS_DATA_REPLICA_PACKET {
 	short id;
 	char name[NAME_SIZE];
 	float x, y, z;
-	float roll, yaw, pitch;
 	float right_x, right_y, right_z;
 	float up_x, up_y, up_z;
 	float look_x, look_y, look_z;
+	short state;
 	short hp;
 	short bullet_cnt;
 };

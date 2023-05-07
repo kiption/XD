@@ -89,7 +89,7 @@ public:
 	int remain_size;
 	char name[NAME_SIZE];
 
-	PLAYER_STATE pl_state;
+	short pl_state;
 	int hp;
 	int remain_bullet;
 	XMFLOAT3 pos;									// Position (x, y, z)
@@ -209,7 +209,6 @@ public:
 	}
 };
 
-int user_count = 0;
 array<SESSION, MAX_USER> clients;
 array<ST1_NPC, MAX_NPCS> npcs;
 
@@ -331,7 +330,6 @@ void disconnect(int target_id, int target)
 		clients[target_id].s_state = ST_FREE;
 		clients[target_id].s_lock.unlock();
 
-		user_count--;
 		cout << "Player[ID: " << clients[target_id].id << ", name: " << clients[target_id].name << " is log out\n" << endl;	// server message
 
 		for (int i = 0; i < MAX_USER; i++) {
@@ -369,7 +367,7 @@ void disconnect(int target_id, int target)
 
 		// 서버 재실행
 		wchar_t wchar_buf[10];
-		wsprintfW(wchar_buf, L"%d", 10 + target_id);	// 십의자리: Actvie여부(S: 1, A: 0), 일의자리: 서버ID
+		wsprintfW(wchar_buf, L"%d", 10 + target_id);	// 십의자리: Actvie여부(S: 1, A: 2), 일의자리: 서버ID
 		ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L"../x64/Release", SW_SHOW);
 
 		// 클라이언트에게 Active서버가 다운되었다고 알려줌.
@@ -503,7 +501,7 @@ void process_packet(int client_id, char* packet)
 		}
 
 		cout << "새로운 오브젝트가 생성되었습니다! - POS:(" << clients[client_id].pos.x
-			<< "," << clients[client_id].pos.y << "," << clients[client_id].pos.z << ")." << endl;
+			<< "," << clients[client_id].pos.y << "," << clients[client_id].pos.z << ").\n" << endl;
 
 		//====================
 		// 1. Player 객체 정보
@@ -951,6 +949,18 @@ void process_packet(int client_id, char* packet)
 
 		break;
 	}// CS_INPUT_MOUSE end
+	case CS_PING:
+	{
+		CS_PING_PACKET* re_login_pack = reinterpret_cast<CS_PING_PACKET*>(packet);
+
+		SC_PING_RETURN_PACKET ping_ret_pack;
+		ping_ret_pack.type = SC_PING_RETURN;
+		ping_ret_pack.size = sizeof(SC_PING_RETURN_PACKET);
+		ping_ret_pack.ping_sender_id = client_id;
+		clients[client_id].do_send(&ping_ret_pack);
+
+		break;
+	}// CS_PING end
 	case CS_RELOGIN:
 	{
 		CS_RELOGIN_PACKET* re_login_pack = reinterpret_cast<CS_RELOGIN_PACKET*>(packet);
@@ -993,20 +1003,19 @@ void process_packet(int client_id, char* packet)
 		int replica_id = replica_pack->id;
 		clients[replica_id].s_lock.lock();
 		clients[replica_id].id = replica_id;
-		clients[replica_id].hp = replica_pack->hp;
-		clients[replica_id].remain_bullet = replica_pack->bullet_cnt;
 
 		strcpy_s(clients[replica_id].name, replica_pack->name);
 
 		clients[replica_id].pos = { replica_pack->x, replica_pack->y, replica_pack->z };
 
-		clients[replica_id].pitch = replica_pack->pitch;
-		clients[replica_id].yaw = replica_pack->yaw;
-		clients[replica_id].roll = replica_pack->roll;
-
 		clients[replica_id].m_rightvec = { replica_pack->right_x, replica_pack->right_y, replica_pack->right_z };
 		clients[replica_id].m_upvec = { replica_pack->up_x, replica_pack->up_y, replica_pack->up_z };
 		clients[replica_id].m_lookvec = { replica_pack->look_x, replica_pack->look_y, replica_pack->look_z };
+
+		clients[replica_id].pl_state = replica_pack->state;
+		clients[replica_id].hp = replica_pack->hp;
+		clients[replica_id].remain_bullet = replica_pack->bullet_cnt;
+
 		clients[replica_id].s_lock.unlock();
 
 		//cout << "Client[" << replica_id << "]의 데이터가 복제되었습니다." << endl;
@@ -1029,7 +1038,6 @@ int get_new_client_id()	// clients의 비어있는 칸을 찾아서 새로운 client의 아이디
 		if (clients[i].s_state == ST_FREE) {
 			clients[i].s_state = ST_ACCEPTED;
 			clients[i].s_lock.unlock();
-			user_count++;
 			return i;
 		}
 		clients[i].s_lock.unlock();
@@ -1152,7 +1160,7 @@ void do_worker()
 					c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 				}
 				else {
-					cout << "Sever is Full" << endl;
+					cout << "어떤 Client의 연결요청을 받았으나, 현재 서버가 꽉 찼습니다.\n" << endl;
 				}
 
 				ZeroMemory(&ex_over->overlapped, sizeof(ex_over->overlapped));
@@ -1306,7 +1314,6 @@ void timerFunc() {
 		// --- 업데이트
 
 
-
 		auto curr_t = system_clock::now();
 		if (curr_t - start_t < 33ms) {
 			this_thread::sleep_for(33ms - (curr_t - start_t));
@@ -1317,7 +1324,10 @@ void timerFunc() {
 void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 	while (true) {
 		auto start_t = system_clock::now();
-		// 오른쪽 서버로 Heartbeat를 보냅니다. (왼쪽 서버가 오른쪽 서버로 전송하기 때문에 가장 마지막 서버는 보내지 않습니다.)
+
+		// ================================
+		// 1. Heartbeat 전송
+		// : 오른쪽 서버로 Heartbeat를 보냅니다. (왼쪽 서버가 오른쪽 서버로 전송하기 때문에 가장 마지막 서버는 보내지 않습니다.)
 		if (my_server_id != MAX_SERVER - 1) {
 			if (extended_servers[my_server_id].s_state != ST_ACCEPTED)	continue;
 			if (extended_servers[my_server_id + 1].s_state != ST_ACCEPTED) continue;
@@ -1331,8 +1341,10 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 			extended_servers[my_server_id].heartbeat_send_time = chrono::system_clock::now();	// 전송한 시간을 업데이트
 		}
 
+		// ================================
+		// 2. Heartbeat 수신검사
 		// 오랫동안 Heartbeat를 받지 못한 서버구성원이 있는지 확인합니다.
-		// 1. 오른쪽 서버 검사	(가장 왼쪽에 있는 서버 구성원은 검사하지 않습니다.)
+		//   1) 오른쪽 서버 검사 (가장 왼쪽에 있는 서버 구성원은 검사를 하지 않습니다.)
 		if (my_server_id != 0) {
 			if (extended_servers[my_server_id - 1].s_state == ST_ACCEPTED) {
 				if (chrono::system_clock::now() > extended_servers[my_server_id - 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
@@ -1341,7 +1353,7 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 				}
 			}
 		}
-		// 2. 왼쪽 서버 검사 (가장 오른쪽에 있는 서버 구성원은 검사하지 않습니다.)
+		//   2) 왼쪽 서버 검사 (가장 오른쪽에 있는 서버 구성원은 검사를 하지 않습니다.)
 		if (my_server_id != MAX_SERVER - 1) {
 			if (extended_servers[my_server_id + 1].s_state == ST_ACCEPTED) {
 				if (chrono::system_clock::now() > extended_servers[my_server_id + 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
@@ -1351,66 +1363,65 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 			}
 		}
 
-		// 스레드 대기
-		auto curr_t = system_clock::now();
-		if (curr_t - start_t < static_cast<milliseconds>(HB_SEND_CYCLE)) {
-			this_thread::sleep_for(static_cast<milliseconds>(HB_SEND_CYCLE) - (curr_t - start_t));
-		}
-	}
-}
-void replicaSessions() {	// 서버간 세션데이터를 복제하는 함수
-	while (true) {
-		if (!b_active_server) continue;
+		// ================================
+		// 3. Data Replica 전송 (자신이 Active서버 일때에만)
+		if (b_active_server) {
+			// 데이터복제 패킷을 받게될 Standby서버의 id를 알아냅니다.
+			int standby_id = -1;
+			if (my_server_id == 0)
+				standby_id = 1;
+			else
+				standby_id = 0;
 
-		auto start_t = system_clock::now();
+			if (extended_servers[standby_id].s_state == ST_ACCEPTED) {
+				for (auto& cl : clients) {
+					if (cl.s_state != ST_INGAME) continue;
+					if (cl.curr_stage == 0) continue;
 
-		int standby_id = -1;
-		if (my_server_id == 0)		standby_id = 1;
-		else if (my_server_id == 1) standby_id = 0;
+					SS_DATA_REPLICA_PACKET replica_pack;
+					replica_pack.type = SS_DATA_REPLICA;
+					replica_pack.size = sizeof(SS_DATA_REPLICA_PACKET);
 
-		if (extended_servers[standby_id].s_state == ST_ACCEPTED) {
-			for (auto& cl : clients) {
-				if (cl.s_state != ST_INGAME) continue;
+					replica_pack.target = TARGET_PLAYER;
+					replica_pack.id = cl.id;
+					strcpy_s(replica_pack.name, cl.name);
 
-				SS_DATA_REPLICA_PACKET replica_pack;
-				replica_pack.type = SS_DATA_REPLICA;
-				replica_pack.size = sizeof(SS_DATA_REPLICA_PACKET);
+					replica_pack.x = cl.pos.x;
+					replica_pack.y = cl.pos.y;
+					replica_pack.z = cl.pos.z;
 
-				replica_pack.target = TARGET_PLAYER;
-				replica_pack.id = cl.id;
-				strcpy_s(replica_pack.name, cl.name);
-				replica_pack.hp = cl.hp;
-				replica_pack.bullet_cnt = cl.remain_bullet;
+					replica_pack.right_x = cl.m_rightvec.x;
+					replica_pack.right_y = cl.m_rightvec.y;
+					replica_pack.right_z = cl.m_rightvec.z;
 
-				replica_pack.x = cl.pos.x;
-				replica_pack.y = cl.pos.y;
-				replica_pack.z = cl.pos.z;
+					replica_pack.up_x = cl.m_upvec.x;
+					replica_pack.up_y = cl.m_upvec.y;
+					replica_pack.up_z = cl.m_upvec.z;
 
-				replica_pack.roll = cl.roll;
-				replica_pack.yaw = cl.yaw;
-				replica_pack.pitch = cl.pitch;
+					replica_pack.look_x = cl.m_lookvec.x;
+					replica_pack.look_y = cl.m_lookvec.y;
+					replica_pack.look_z = cl.m_lookvec.z;
 
-				replica_pack.right_x = cl.m_rightvec.x;
-				replica_pack.right_y = cl.m_rightvec.y;
-				replica_pack.right_z = cl.m_rightvec.z;
+					replica_pack.state = cl.pl_state;
+					replica_pack.hp = cl.hp;
+					replica_pack.bullet_cnt = cl.remain_bullet;
 
-				replica_pack.up_x = cl.m_upvec.x;
-				replica_pack.up_y = cl.m_upvec.y;
-				replica_pack.up_z = cl.m_upvec.z;
+					extended_servers[standby_id].do_send(&replica_pack);
 
-				replica_pack.look_x = cl.m_lookvec.x;
-				replica_pack.look_y = cl.m_lookvec.y;
-				replica_pack.look_z = cl.m_lookvec.z;
-
-				extended_servers[standby_id].do_send(&replica_pack);
-
-				//cout << "TEST: Client[" << cl.id << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다." << endl;
+					/*
+					cout << "[REPLICA TEST] Client[" << cl.id << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다. - line: 1413" << endl;
+					cout << "State: " << replica_pack.state << " , Pos: " << replica_pack.x << ", " << replica_pack.y << ", " << replica_pack.z
+						<< " , Look: " << replica_pack.look_x << ", " << replica_pack.look_y << ", " << replica_pack.look_z << "\n" << endl;
+						*/
+				}
 			}
 		}
 
+		// ================================
+		// 4. 스레드 대기 (과부하 방지)
 		auto curr_t = system_clock::now();
-		if (curr_t - start_t < static_cast<milliseconds>(HA_REPLICA_CYCLE)) {
-			this_thread::sleep_for(static_cast<milliseconds>(HA_REPLICA_CYCLE) - (curr_t - start_t));
+		if (curr_t - start_t < static_cast<milliseconds>(HB_SEND_CYCLE)) {
+			this_thread::sleep_for(static_cast<milliseconds>(HB_SEND_CYCLE) - (curr_t - start_t));
 		}
 	}
 }
@@ -1574,11 +1585,24 @@ int main(int argc, char* argv[])
 		my_server_id = atoi(argv[1]) % 10;
 
 		// Active 여부 결정
-		if (my_server_id == MAX_SERVER - 1) {
+		int is_active = atoi(argv[1]) / 10;	// 십의자리가 1: Standby, 2: Active
+		if (is_active == 0) {	// 서버의 첫 실행은 ID에 따라 구분
+			if (my_server_id == 0) {
+				b_active_server = false;
+			}
+			else if (my_server_id == 1) {
+				b_active_server = true;
+			}
+		}
+		else if (is_active == 1) {	// 강제 Standby모드 실행
+			b_active_server = false;
+		}
+		else if (is_active == 2) {	// 강제 Active모드 실행
 			b_active_server = true;
 		}
 		else {
-			b_active_server = false;
+			cout << "[Server ID Error] Unknown ID.\n" << endl;
+			return -1;
 		}
 	}
 	else {				// 만약 입력된 명령행 인수가 없다면 입력을 받습니다.
@@ -1591,6 +1615,14 @@ int main(int argc, char* argv[])
 			b_active_server = false;
 			break;
 		case 1:	// 1번 서버
+			b_active_server = true;
+			break;
+		case 10:	// 0번 서버 (강제 Standby)
+		case 11:	// 1번 서버 (강제 Standby)
+			b_active_server = false;
+			break;
+		case 20:	// 0번 서버 (강제 Active)
+		case 21:	// 1번 서버 (강제 Active)
 			b_active_server = true;
 			break;
 		default:
@@ -1753,7 +1785,6 @@ int main(int argc, char* argv[])
 	//======================================================================
 	// [ Main ]
 	
-
 	// [ Main - 맵 정보 로드 ]
 	// 1. 디렉토리 검색
 	string filename;
@@ -1874,14 +1905,13 @@ int main(int argc, char* argv[])
 	AcceptEx(g_sc_listensock, c_socket, a_over.send_buf, 0, addr_size + 16, addr_size + 16, 0, &a_over.overlapped);
 
 	vector <thread> worker_threads;
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 5; ++i)
 		worker_threads.emplace_back(do_worker);			// 클라이언트-서버 통신용 Worker스레드
 
 	vector<thread> timer_threads;
 	timer_threads.emplace_back(timerFunc);				// 클라이언트 로직 타이머스레드
 	timer_threads.emplace_back(heartBeatFunc);			// 서버 간 Heartbeat교환 스레드
 	timer_threads.emplace_back(MoveNPC);				// NPC 로직 스레드
-	timer_threads.emplace_back(replicaSessions);	// 서버 간 세션데이터 복제 스레드
 
 	for (auto& th : worker_threads)
 		th.join();
