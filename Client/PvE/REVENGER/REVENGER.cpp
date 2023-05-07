@@ -312,6 +312,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						for (int i{}; i < MAX_NPCS; ++i) 
 						{
 							//cout << npcs_info[i].m_id << "번째 Pos:" << npcs_info[i].m_pos.x << ',' << npcs_info[i].m_pos.y << ',' << npcs_info[i].m_pos.z << endl;
+							if (npcs_info[i].m_id == -1) {
+								continue;
+							}
+							
 							gGameFramework.setPosition_Npc(npcs_info[i].m_id, npcs_info[i].m_pos);
 							gGameFramework.setVectors_Npc(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
 							

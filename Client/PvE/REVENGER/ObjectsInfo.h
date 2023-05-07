@@ -52,8 +52,7 @@ struct ObjectsInfo
 ObjectsInfo my_info;
 std::array<ObjectsInfo, MAX_USER> other_players;
 std::array<ObjectsInfo, MAX_NPCS> npcs_info;
-int left_npc;
-
+int left_npc = MAX_NPCS;
 
 struct MapObjectsInfo
 {

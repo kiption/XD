@@ -114,7 +114,7 @@ private:
 	float NPCtoBuilding_Dis[600];
 public:
 	bool PrintRayCast = false;
-
+	bool m_DeathCheck = false;
 	BoundingOrientedBox m_xoobb_Pro;
 	BoundingOrientedBox m_xoobb_Body;
 	vector<BoundingOrientedBox>m_mapxmoobb;

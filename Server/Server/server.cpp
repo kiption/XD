@@ -44,8 +44,8 @@ public:
 public:
 	void setBB() {
 		m_xoobb = BoundingOrientedBox(XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()),
-									  XMFLOAT3(this->getScaleX(), this->getScaleY(), this->getScaleZ()),
-									  XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+			XMFLOAT3(this->getScaleX(), this->getScaleY(), this->getScaleZ()),
+			XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	}
 	XMFLOAT3 getPos() { return XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()); }
 };
@@ -656,13 +656,13 @@ void process_packet(int client_id, char* packet)
 			}
 		}
 		// 2) 다른 플레이어
-		
+
 		// 3) NPC
 		for (auto& npc : npcs) {
 			if (npc.GetHp() <= 0) continue;
 			BoundingOrientedBox tmp_xoobb;
 			tmp_xoobb = BoundingOrientedBox(XMFLOAT3(npc.GetPosition().x, npc.GetPosition().y, npc.GetPosition().z),
-											XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+				XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
 			if (clients[client_id].m_xoobb.Intersects(tmp_xoobb)) {
 				npc.SetHp(npc.GetHp() - COLLIDE_PLAYER_DAMAGE);
@@ -1504,11 +1504,11 @@ void init_npc()
 		npcs[i].SetNpcType(NPC_Helicopter);
 		npcs[i].SetRotate(0.0f, 0.0f, 0.0f);
 		//npcs[i].SetActive(false);
-		
+
 		random_device rd;
 		default_random_engine dre(rd());
 		uniform_real_distribution<float>AirHigh(50, 270);
-		
+
 		uniform_int_distribution<int>Ci_num(0, 2);
 		uniform_int_distribution<int>Sec_num(0, 5);
 
@@ -1553,65 +1553,86 @@ void MoveNPC()
 
 		for (int i = 0; i < MAX_NPCS; ++i) {
 			// 클라이언트들과 NPC 사이의 거리 계산
-			
-			for (auto& cl : clients) {
-				if (cl.id != -1) {
-					npcs[i].Caculation_Distance(cl.pos, cl.id);
+			if (npcs[i].GetState() == NPC_DEATH && npcs[i].GetPosition().y < 0 && !npcs[i].m_DeathCheck) {
+				SC_REMOVE_OBJECT_PACKET npc_remove_packet;
+
+				npc_remove_packet.size = sizeof(SC_MOVE_ROTATE_OBJECT_PACKET);
+				npc_remove_packet.type = SC_REMOVE_OBJECT;
+
+				npc_remove_packet.target = TARGET_NPC;
+				npc_remove_packet.id = npcs[i].GetID();
+
+				npcs[i].m_DeathCheck = true;
+
+				for (auto& send_target : clients) {
+					if (send_target.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
+					if (send_target.s_state != ST_INGAME) continue;
+
+					lock_guard<mutex> lg{ send_target.s_lock };
+					send_target.do_send(&npc_remove_packet);
 				}
 			}
-			//cout << i << "번째 Status - " << npcs[i].GetState() << endl;
+			if (npcs[i].GetPosition().y > 0 && !npcs[i].m_DeathCheck)
+			{
+				for (auto& cl : clients) {
+					if (cl.id != -1) {
+						npcs[i].Caculation_Distance(cl.pos, cl.id);
+					}
+				}
+				//cout << i << "번째 Status - " << npcs[i].GetState() << endl;
 
-			// NPC가 추적하려는 아이디가 있는지부터 확인, 있으면 추적 대상 플레이어 좌표를 임시 저장
-			if (npcs[i].GetChaseID() != -1) {
-				npcs[i].SetUser_Pos(clients[npcs[i].GetChaseID()].pos, npcs[i].GetChaseID());
-			}
+				// NPC가 추적하려는 아이디가 있는지부터 확인, 있으면 추적 대상 플레이어 좌표를 임시 저장
+				if (npcs[i].GetChaseID() != -1) {
+					npcs[i].SetUser_Pos(clients[npcs[i].GetChaseID()].pos, npcs[i].GetChaseID());
+				}
 
-			// npc pos 확인
-			//cout << i << "번째 NPC의 도시 ID: " << npcs[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcs[i].GetIdleSection() << endl;
-			/*cout << i << "번째 NPC의 Pos: " << npcs[i].GetPosition().x << ',' << npcs[i].GetPosition().y << ',' << npcs[i].GetPosition().z << endl;
-			cout << i << "번째 NPC의 상태: " << npcs[i].GetState() << endl;*/
+				// npc pos 확인
+				//cout << i << "번째 NPC의 도시 ID: " << npcs[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcs[i].GetIdleSection() << endl;
+			/*	cout << i << "번째 NPC의 Pos: " << npcs[i].GetPosition().x << ',' << npcs[i].GetPosition().y << ',' << npcs[i].GetPosition().z << endl;
+				cout << i << "번째 NPC의 상태: " << npcs[i].GetState() << endl;*/
 
-			/*if (npcs[i].PrintRayCast) {
-				cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
-			}*/
+				/*if (npcs[i].PrintRayCast) {
+					cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
+				}*/
 
-			// 상태마다 다른 움직임을 하는 매니지먼트
-			npcs[i].ST1_State_Manegement(npcs[i].GetState());
+				// 상태마다 다른 움직임을 하는 매니지먼트
+				npcs[i].ST1_State_Manegement(npcs[i].GetState());
 
-			// Send Move&Rotate Packet
-			SC_MOVE_ROTATE_OBJECT_PACKET npc_update_packet;
-			npc_update_packet.size = sizeof(SC_MOVE_ROTATE_OBJECT_PACKET);
-			npc_update_packet.type = SC_MOVE_ROTATE_OBJECT;
+				// Send Move&Rotate Packet
+				SC_MOVE_ROTATE_OBJECT_PACKET npc_update_packet;
+				npc_update_packet.size = sizeof(SC_MOVE_ROTATE_OBJECT_PACKET);
+				npc_update_packet.type = SC_MOVE_ROTATE_OBJECT;
 
-			npc_update_packet.target = TARGET_NPC;
-			npc_update_packet.id = npcs[i].GetID();
+				npc_update_packet.target = TARGET_NPC;
+				npc_update_packet.id = npcs[i].GetID();
 
-			npc_update_packet.x = npcs[i].GetPosition().x;
-			npc_update_packet.y = npcs[i].GetPosition().y;
-			npc_update_packet.z = npcs[i].GetPosition().z;
+				npc_update_packet.x = npcs[i].GetPosition().x;
+				npc_update_packet.y = npcs[i].GetPosition().y;
+				npc_update_packet.z = npcs[i].GetPosition().z;
 
-			npc_update_packet.right_x = npcs[i].GetCurr_coordinate().right.x;
-			npc_update_packet.right_y = npcs[i].GetCurr_coordinate().right.y;
-			npc_update_packet.right_z = npcs[i].GetCurr_coordinate().right.z;
+				npc_update_packet.right_x = npcs[i].GetCurr_coordinate().right.x;
+				npc_update_packet.right_y = npcs[i].GetCurr_coordinate().right.y;
+				npc_update_packet.right_z = npcs[i].GetCurr_coordinate().right.z;
 
-			npc_update_packet.up_x = npcs[i].GetCurr_coordinate().up.x;
-			npc_update_packet.up_y = npcs[i].GetCurr_coordinate().up.y;
-			npc_update_packet.up_z = npcs[i].GetCurr_coordinate().up.z;
+				npc_update_packet.up_x = npcs[i].GetCurr_coordinate().up.x;
+				npc_update_packet.up_y = npcs[i].GetCurr_coordinate().up.y;
+				npc_update_packet.up_z = npcs[i].GetCurr_coordinate().up.z;
 
-			npc_update_packet.look_x = npcs[i].GetCurr_coordinate().look.x;
-			npc_update_packet.look_y = npcs[i].GetCurr_coordinate().look.y;
-			npc_update_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
+				npc_update_packet.look_x = npcs[i].GetCurr_coordinate().look.x;
+				npc_update_packet.look_y = npcs[i].GetCurr_coordinate().look.y;
+				npc_update_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
 
-			for (auto& send_target : clients) {
-				if (send_target.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
-				if (send_target.s_state != ST_INGAME) continue;
+				for (auto& send_target : clients) {
+					if (send_target.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
+					if (send_target.s_state != ST_INGAME) continue;
 
-				lock_guard<mutex> lg{ send_target.s_lock };
-				send_target.do_send(&npc_update_packet);
+					lock_guard<mutex> lg{ send_target.s_lock };
+					send_target.do_send(&npc_update_packet);
+				}
 			}
 		}
 
-		//cout << "=============" << endl;
+	//	cout << "=============" << endl;
 	}
 }
 
@@ -1682,7 +1703,7 @@ int main(int argc, char* argv[])
 	}
 
 	// 서버번호에 따라 포트번호를 지정해줍니다.
-	switch (my_server_id%10) {
+	switch (my_server_id % 10) {
 	case 0:	// 0번 서버
 		sc_portnum = PORTNUM_LOGIC_0;
 		ss_portnum = HA_PORTNUM_S0;
@@ -1764,7 +1785,7 @@ int main(int argc, char* argv[])
 
 		// 루프백
 		//inet_pton(AF_INET, IPADDR_LOOPBACK, &ha_server_addr.sin_addr);
-		
+
 		// 원격
 		if (my_server_id == 0) {
 			inet_pton(AF_INET, IPADDR_LOGIC1, &ha_server_addr.sin_addr);
@@ -1792,7 +1813,7 @@ int main(int argc, char* argv[])
 
 	//======================================================================
 	// [ Main ]
-	
+
 	// [ Main - 맵 정보 로드 ]
 	// 1. 디렉토리 검색
 	string filename;
