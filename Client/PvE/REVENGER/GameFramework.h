@@ -233,6 +233,7 @@ public:
 
 	void setPosition_Npc(int id, XMFLOAT3 pos);
 	void setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+	void setEqLook_Npc(int id, XMFLOAT3 NlookPos, XMFLOAT3 NlookVec);
 	void remove_Npcs(int id);
 
 	// 클라이언트 객체의 상태 최신화 함수

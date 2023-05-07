@@ -709,7 +709,7 @@ bool Stage1::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			m_ppSpriteBillboard[0]->SetActive(!m_ppSpriteBillboard[0]->GetActive());
 			break;
 		case 'D':
-
+			((CrossHairShader*)m_pBillboardShader[1])->m_bActiveLook = true;
 			break;
 		default:
 			break;
@@ -734,6 +734,8 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 
+	
+	
 	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();
 	if (m_pPlayer->m_bCollisionTerrain == true)
 	{

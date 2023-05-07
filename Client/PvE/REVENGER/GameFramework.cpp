@@ -1586,11 +1586,29 @@ void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, X
 	if (m_nMode == SCENE2STAGE) {
 	}
 }
+void CGameFramework::setEqLook_Npc(int id, XMFLOAT3 NlookPos, XMFLOAT3 NlookVec)
+{
+	NlookVec = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->GetLook();
+	XMFLOAT3 PlayerLook = ((HeliPlayer*)m_pPlayer)->GetLookVector();
+	XMFLOAT3 PlayerPos = ((HeliPlayer*)m_pPlayer)->GetPosition();
+	if (m_nMode == SCENE1STAGE)
+	{
+		if ((PlayerPos.z - NlookPos.z) < 20.0f)
+		{
+			if (NlookVec.x == PlayerLook.x&& NlookVec.y == PlayerLook.y&& NlookVec.z == PlayerLook.z)
+			{
+				((CrossHairShader*)((Stage1*)m_pScene)->m_pBillboardShader[1])->m_bActiveLook = true;
+			}
+		}
+	}
+}
 void CGameFramework::remove_Npcs(int id)
 {
-//	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
+	//	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
 
 }
+
+
 
 
 void CGameFramework::CollisionMap_by_PLAYER(XMFLOAT3 pos, XMFLOAT3 extents)
@@ -1692,7 +1710,7 @@ void CGameFramework::otherPlayerReturnToIdle(int p_id)
 	}
 	else if (m_nMode == SCENE2STAGE) {
 		for (int i = 1; i < 10; i++)
-		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	}
 }
 void CGameFramework::otherPlayerMovingMotion(int p_id)
@@ -1702,7 +1720,7 @@ void CGameFramework::otherPlayerMovingMotion(int p_id)
 	}
 	else if (m_nMode == SCENE2STAGE) {
 		for (int i = 1; i < 10; i++)
-		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
 	}
 }
 void CGameFramework::otherPlayerShootingMotion(int p_id)
@@ -1711,8 +1729,8 @@ void CGameFramework::otherPlayerShootingMotion(int p_id)
 		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->Firevalkan(NULL);
 	}
 	else if (m_nMode == SCENE2STAGE) {
-		for(int i=1;i<10;i++)
-		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+		for (int i = 1; i < 10; i++)
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	}
 }
 

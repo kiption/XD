@@ -382,7 +382,7 @@ void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 		{
 			for (int i = 0; i < EXPLOSION_DEBRISES; i++)
 			{
-				m_fExplosionSpeed = Random(1.0f, 20.0f);
+				m_fExplosionSpeed = Random(1.0f, 13.0f);
 				
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
 				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + gravity.x;
@@ -398,7 +398,7 @@ void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 		}
 		else
 		{
-
+			m_bActive = false;
 			m_fElapsedTimes = 0.0f;
 		}
 

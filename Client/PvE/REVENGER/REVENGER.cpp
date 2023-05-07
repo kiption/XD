@@ -317,9 +317,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							//cout << npcs_info[i].m_id << "번째 Pos:" << npcs_info[i].m_pos.x << ',' << npcs_info[i].m_pos.y << ',' << npcs_info[i].m_pos.z << endl;
 							gGameFramework.setPosition_Npc(npcs_info[i].m_id, npcs_info[i].m_pos);
 							gGameFramework.setVectors_Npc(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
+							
+							gGameFramework.setEqLook_Npc(npcs_info[i].m_id, npcs_info[i].m_pos, npcs_info[i].m_look_vec);
 							((Stage1*)gGameFramework.m_pScene)->SmokePosition = npcs_info[i].m_pos;
 							((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(npcs_info[i].m_pos);
 							((Stage1*)gGameFramework.m_pScene)->m_pBillboardShader[3]->ParticlePosition=npcs_info[i].m_pos;
+
+							
+							
 						}
 
 						//cout << "====================" << endl;
@@ -360,8 +365,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					// 2. 다른 플레이어
 					for (auto& other_pl : other_players) {
 						if (other_pl.m_damaged_effect_on) {
+							((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->m_bActive=true;
 							((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->ParticlePosition = other_pl.m_pos;
 							other_pl.m_damaged_effect_on = false;
+						}
+						else if ( (((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->m_fElapsedTimes) > 
+							(((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->m_fDuration))
+						{ 
+							((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->m_bActive = false;
 						}
 					}
 

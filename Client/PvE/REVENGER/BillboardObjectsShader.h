@@ -23,11 +23,14 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void ReleaseUploadBuffers();
-
+	XMFLOAT3 xmf3Position{};
+	XMFLOAT3 xmf3CameraPosition{};
 #ifdef _WITH_BATCH_MATERIAL
 	CMaterial* m_ppGrassMaterials[2] = { NULL, NULL };
 	CMaterial* m_ppFlowerMaterials[2] = { NULL, NULL };
 #endif
+
+	bool m_bActiveLook = false;
 };
 
 class BillboardParticleShader : public BillboardShader
