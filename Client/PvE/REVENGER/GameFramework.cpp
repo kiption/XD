@@ -587,18 +587,18 @@ void CGameFramework::ProcessInput()
 			dwDirection |= DIR_FORWARD;
 			q_keyboardInput.push(SEND_KEY_W);//S
 
-			//if (((HeliPlayer*)m_pPlayer)->m_fPitch < 15.0f) {
-			//	((HeliPlayer*)m_pPlayer)->Rotate(0.5f, 0.0f, 0.0f);
-			//	//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
-			//}
+			if (((HeliPlayer*)m_pPlayer)->m_fPitch < 15.0f) {
+				((HeliPlayer*)m_pPlayer)->Rotate(0.5f, 0.0f, 0.0f);
+				//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+			}
 		}
 		if (pKeysBuffer[KEY_S] & 0xF0) {
 			dwDirection |= DIR_BACKWARD;
 			q_keyboardInput.push(SEND_KEY_S);//S
-			//if (((HeliPlayer*)m_pPlayer)->m_fPitch > -15.0f) {
-			//	((HeliPlayer*)m_pPlayer)->Rotate(-0.5f, 0.0f, 0.0f);
-			//	//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
-			//}
+			if (((HeliPlayer*)m_pPlayer)->m_fPitch > -15.0f) {
+				((HeliPlayer*)m_pPlayer)->Rotate(-0.5f, 0.0f, 0.0f);
+				//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
+			}
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
 			dwDirection |= DIR_LEFT;
@@ -891,23 +891,23 @@ void CGameFramework::FrameAdvance()
 		if (m_nMode = SCENE1STAGE) {
 			// 내구도 관련 UI 
 			int target_id_x, target_id_y;
-			if (m_currHp > 80) {
+			if (m_currHp > 800) {
 				target_id_x = 0;
 				target_id_y = 0;
 			}
-			else if (m_currHp > 60) {
+			else if (m_currHp > 600) {
 				target_id_x = 0;
 				target_id_y = 2;
 			}
-			else if (m_currHp > 40) {
+			else if (m_currHp > 400) {
 				target_id_x = 0;
 				target_id_y = 3;
 			}
-			else if (m_currHp > 20) {
+			else if (m_currHp > 200) {
 				target_id_x = 2;
 				target_id_y = 3;
 			}
-			else if (m_currHp > -40) {
+			else if (m_currHp > -400) {
 				target_id_x = 3;
 				target_id_y = 3;
 			}
@@ -996,11 +996,11 @@ void CGameFramework::FrameAdvance()
 #endif
 	if (UI_Switch) {
 		if (m_nMode == SCENE1STAGE) {
-			D2D1_RECT_F rcHPText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 5, (FRAME_BUFFER_HEIGHT / 4) * 3, (FRAME_BUFFER_WIDTH / 32) * 7, (FRAME_BUFFER_HEIGHT));
+			D2D1_RECT_F rcHPText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 9, (FRAME_BUFFER_HEIGHT / 4) * 3, (FRAME_BUFFER_WIDTH / 64) * 13, (FRAME_BUFFER_HEIGHT));
 			m_pd2dDeviceContext->DrawTextW(m_myhp, (UINT32)wcslen(m_myhp), m_pdwFont, &rcHPText, m_pd2dbrText);
 
 			D2D1_RECT_F rcHPBoxText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 6, (FRAME_BUFFER_HEIGHT / 4) * 3, (FRAME_BUFFER_WIDTH / 32) * 8, (FRAME_BUFFER_HEIGHT));
-			m_pd2dDeviceContext->DrawTextW(L"/100", (UINT32)wcslen(L"/100"), m_pdwFont, &rcHPBoxText, m_pd2dbrText);
+			m_pd2dDeviceContext->DrawTextW(L"/1000", (UINT32)wcslen(L"/1000"), m_pdwFont, &rcHPBoxText, m_pd2dbrText);
 
 
 			D2D1_RECT_F rcBulletText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 28, (FRAME_BUFFER_HEIGHT / 4) * 3, (FRAME_BUFFER_WIDTH / 32) * 30, (FRAME_BUFFER_HEIGHT));
