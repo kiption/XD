@@ -191,7 +191,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		for (int x = 1; x < m_nObjects; x++)
 		{
 			CLoadedModelInfo* pSoldierModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL);
-			m_ppObjects[x] = new CHumanoidObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSoldierModel, 1);
+			m_ppObjects[x] = new CHumanoidObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSoldierModel, 3);
 			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.85f);
 			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackPosition(0, 0);

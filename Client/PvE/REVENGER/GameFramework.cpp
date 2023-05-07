@@ -1059,7 +1059,8 @@ void CGameFramework::ChangeScene(DWORD nMode)
 		{
 		case SCENE1STAGE:
 		{
-
+			gamesound.m_bStopSound = false;
+			gamesound.SpeakMusic(gamesound.m_bStopSound);
 			m_nMode = nMode;
 			m_pScene = new Stage1();
 			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
@@ -1067,13 +1068,15 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 			m_pCamera = m_pPlayer->GetCamera();
 			m_pScene->SetCurScene(SCENE1STAGE);
-			if (m_nMode == SCENE1STAGE)gamesound.SpeakMusic();
+		
 			break;
 		}
 		case SCENE2STAGE:
 		{
-			m_nMode = nMode;
 			gamesound.m_bStopSound = true;
+			gamesound.SpeakMusic(gamesound.m_bStopSound);
+			gamesound.speakChannel->setVolume(0.0f);
+			m_nMode = nMode;
 			m_pScene = new Stage2();
 			if (m_pScene) ((Stage2*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
 			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((Stage2*)m_pScene)->m_pTerrain);
@@ -1703,6 +1706,9 @@ void CGameFramework::otherPlayerReturnToIdle(int p_id)
 	}
 	else if (m_nMode == SCENE2STAGE) {
 			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1+p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, true);
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1+p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1+p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	}
 }
 void CGameFramework::otherPlayerMovingMotion(int p_id)
@@ -1712,6 +1718,9 @@ void CGameFramework::otherPlayerMovingMotion(int p_id)
 	}
 	else if (m_nMode == SCENE2STAGE) {
 			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1+p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, true);
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	}
 }
 void CGameFramework::otherPlayerShootingMotion(int p_id)
@@ -1721,6 +1730,10 @@ void CGameFramework::otherPlayerShootingMotion(int p_id)
 	}
 	else if (m_nMode == SCENE2STAGE) {
 			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, true);
+
 	}
 }
 

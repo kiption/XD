@@ -8,7 +8,7 @@
 
 class GameSound
 {
-private:	
+public:	
 	FMOD::System* soundSystem;
 	FMOD::Sound* shootSound;
 	FMOD::Channel* shootChannel;
@@ -40,7 +40,7 @@ public:
 public:
 
 	bool m_bStopSound = false;
-	void SpeakMusic();
+	void SpeakMusic(bool stop);
 	void shootingSound();
 	void backGroundMusic();
 	void walkingSound();

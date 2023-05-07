@@ -71,9 +71,10 @@ void GameSound::backGroundMusic()
 	result = soundSystem->playSound(bgmSound, 0, false, &bgmChannel);
 	bgmChannel->setVolume(0.05f);
 }
-void GameSound::SpeakMusic()
+void GameSound::SpeakMusic(bool stop)
 {
-	result = soundSystem->playSound(speakSound, 0, false, &speakChannel);
+	stop = m_bStopSound;
+	result = soundSystem->playSound(speakSound, 0, stop, &speakChannel);
 	speakChannel->setVolume(0.06f);
 }
 void GameSound::walkingSound()
