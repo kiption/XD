@@ -356,6 +356,7 @@ void disconnect(int target_id, int target)
 		break;
 
 	case SESSION_EXTENDED_SERVER:
+	{
 		extended_servers[target_id].s_lock.lock();
 		if (extended_servers[target_id].s_state == ST_FREE) {
 			extended_servers[target_id].s_lock.unlock();
@@ -370,7 +371,18 @@ void disconnect(int target_id, int target)
 		// 서버 재실행
 		wchar_t wchar_buf[10];
 		wsprintfW(wchar_buf, L"%d", 10 + target_id);	// 십의자리: Actvie여부(S: 1, A: 2), 일의자리: 서버ID
-		ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L"../x64/Release", SW_SHOW);
+
+		// XD폴더 내에서 동작할 때(내부 테스트)와 외부에서 실행할 때를 구분해줍니다.
+		string XDFolderKeyword = "XD";
+		if (filesystem::current_path().string().find(XDFolderKeyword) != string::npos) {
+			ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L"../../Execute/Execute_S", SW_SHOW);	// 내부 테스트용
+		}
+		else {
+			ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L".", SW_SHOW);					// 외부 수출용
+		}
+
+		// 원격 이중화를 위해선 실행되는 PC의 "외부 IP"를 알아야 한다.
+
 
 		// 클라이언트에게 Active서버가 다운되었다고 알려줌.
 		if (!b_active_server) {	// 내가 Active가 아니면 상대가 Active임. (서버가 2개밖에 없기 때문)
@@ -429,7 +441,7 @@ void disconnect(int target_id, int target)
 			}
 		}
 		break;
-
+	}
 	case SESSION_RELAY:
 		relayserver.s_lock.lock();
 		if (relayserver.s_state == ST_FREE) {
@@ -478,7 +490,7 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].hp = 100;
 
 		clients[client_id].pos.x = RESPAWN_POS_X;
-		clients[client_id].pos.y = RESPAWN_POS_Y + client_id * 50;//임시
+		clients[client_id].pos.y = RESPAWN_POS_Y + client_id * 30;//임시
 		clients[client_id].pos.z = RESPAWN_POS_Z;
 
 		clients[client_id].pitch = clients[client_id].yaw = clients[client_id].roll = 0.0f;
@@ -1074,6 +1086,7 @@ void process_packet(int client_id, char* packet)
 		//cout << "State: " << clients[replica_id].pl_state << endl;
 		//cout << "Pos: " << clients[replica_id].pos.x << ", " << clients[replica_id].pos.y << ", " << clients[replica_id].pos.z << endl;
 		//cout << "LookVec: " << clients[replica_id].m_lookvec.x << ", " << clients[replica_id].m_lookvec.y << ", " << clients[replica_id].m_lookvec.z << endl;
+		//cout << "STime: " << replica_pack->curr_stage << "ms." << endl;
 		//cout << "===================================\n" << endl;
 
 	}// SS_DATA_REPLICA end
