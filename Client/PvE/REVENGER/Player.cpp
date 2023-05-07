@@ -111,31 +111,20 @@ void CPlayer::Rotate(float x, float y, float z)
 		}
 		m_pCamera->Rotate(x, y, z);
 		if (x != 0.0f) {
-			//x = x * (pow(sin(m_fYaw * 3.14f / 180.0f), 2) + pow(cos(m_fYaw * 3.14f / 180.0f), 2));
-			//x *= cos(m_fYaw * 3.14 / 180.0f);
-			
-			//XMFLOAT3 DefalutRight = { 1.0f, 0.0f, 0.0f };
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(x));
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
-			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-
-
 		}
 		if (y != 0.0f)
 		{
-			XMFLOAT3 DefalutUp = { 0.0f, 1.0f, 0.0f };
-			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&DefalutUp), XMConvertToRadians(y));
+			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
 		}
 		if (z != 0.0f) {
-			XMFLOAT3 DefalutLook = { 0.0f, 0.0f, 1.0f };
-			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&DefalutLook), XMConvertToRadians(z));
+			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(z));
 			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
 			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 		}
 
 	}
