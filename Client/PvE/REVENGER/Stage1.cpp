@@ -780,9 +780,10 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
-	if (m_pBulletEffect) m_pBulletEffect->Render(pd3dCommandList, pCamera, 0);
+
+	if (m_ppShaders[0])m_ppShaders[0]->Render(pd3dCommandList, pCamera,0);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->Render(pd3dCommandList, pCamera, 0);
-	for (int i = 5; i < 10; i++) if (m_ppShaders[0])m_ppShaders[0]->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
+
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);

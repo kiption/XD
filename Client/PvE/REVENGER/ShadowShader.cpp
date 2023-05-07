@@ -77,15 +77,24 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 			m_ppHierarchicalGameObjects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			m_ppHierarchicalGameObjects[i]->SetMaterial(0, pOtherPlayerMaterial);
-			m_ppHierarchicalGameObjects[i]->SetPosition(0.0, 0.0, 0.0);
+			//m_ppHierarchicalGameObjects[i]->SetPosition(0.0, 0.0, 0.0);
 			m_ppHierarchicalGameObjects[i]->OnPrepareAnimate();
 
 		}
 		m_ppObjects[5] = m_ppHierarchicalGameObjects[0];
+		m_ppObjects[5]->SetPosition(100.0, 50.0, 150.0);
+
 		m_ppObjects[6] = m_ppHierarchicalGameObjects[1];
+		m_ppObjects[6]->SetPosition(50.0, 50.0, 250.0);
+
 		m_ppObjects[7] = m_ppHierarchicalGameObjects[2];
+		m_ppObjects[7]->SetPosition(200.0, 50.0, 350.0);
+
 		m_ppObjects[8] = m_ppHierarchicalGameObjects[3];
+		m_ppObjects[8]->SetPosition(-50.0, 50.0, 250.0);
+
 		m_ppObjects[9] = m_ppHierarchicalGameObjects[4];
+		m_ppObjects[9]->SetPosition(300.0, 50.0, 450.0);
 
 		m_nNpcObjects = 5;
 		m_ppNpcObjects = new CGameObject * [m_nNpcObjects];

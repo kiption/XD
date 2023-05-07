@@ -1719,7 +1719,8 @@ CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 {
 	CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 	SetChild(pOtherPlayerModel, false);
-	SetScale(0.5, 0.5, 0.5);
+	SetScale(0.5,0.5,0.5);
+
 	pOtherPlayerModel->AddRef();
 	pBCBulletEffectShader = new CBulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
@@ -1769,7 +1770,7 @@ void CHelicopterObjects::Firevalkan(CGameObject* pLockedObject)
 
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 	
-		xmf3Position.y += 2.0f;
+		//xmf3Position.y += .0f;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->SetMovingDirection(xmf3Direction);
