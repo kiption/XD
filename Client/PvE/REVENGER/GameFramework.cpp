@@ -1526,9 +1526,7 @@ void CGameFramework::setPosition_OtherPlayer(int id, XMFLOAT3 pos)
 	else if (m_nMode == SCENE2STAGE) {
 		if (((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id])
 		{
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->m_xmf4x4ToParent._41 = pos.x;
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->m_xmf4x4ToParent._42 = pos.y;
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->m_xmf4x4ToParent._43 = pos.z;
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetPosition(pos);
 		}
 	}
 }
@@ -1704,8 +1702,7 @@ void CGameFramework::otherPlayerReturnToIdle(int p_id)
 
 	}
 	else if (m_nMode == SCENE2STAGE) {
-		for (int i = 1; i < 10; i++)
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	}
 }
 void CGameFramework::otherPlayerMovingMotion(int p_id)
@@ -1714,8 +1711,7 @@ void CGameFramework::otherPlayerMovingMotion(int p_id)
 
 	}
 	else if (m_nMode == SCENE2STAGE) {
-		for (int i = 1; i < 10; i++)
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1+p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
 	}
 }
 void CGameFramework::otherPlayerShootingMotion(int p_id)
@@ -1724,8 +1720,7 @@ void CGameFramework::otherPlayerShootingMotion(int p_id)
 		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->Firevalkan(NULL);
 	}
 	else if (m_nMode == SCENE2STAGE) {
-		for (int i = 1; i < 10; i++)
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[i]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	}
 }
 

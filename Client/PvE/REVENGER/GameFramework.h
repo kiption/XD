@@ -240,7 +240,7 @@ public:
 	void otherPlayerReturnToIdle(int p_id);
 	void otherPlayerMovingMotion(int p_id);
 	void otherPlayerShootingMotion(int p_id);
-
+	bool m_bDamageOn = false;
 	float m_pPlayerRotate_z = 0.0f;
 	float m_pPlayerRotate_x = 0.0f;
 //==================================================
@@ -254,6 +254,11 @@ public:
 	void CollisionNPC_by_MAP(XMFLOAT3 npcpos, XMFLOAT3 npcextents, XMFLOAT3 mapcenter, XMFLOAT3 mapextents);
 	void CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents);
 	void CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents);
+
+//=================================================
+	// 충돌 모션과 이펙트 처리 함수입니다.
+
+	//void Motion_BulletbyPlayer(int id, XMFLOAT3 mappos, XMFLOAT3 mapextents);
 	BoundingOrientedBox m_mapxmoobb;
 	BoundingOrientedBox m_npcoobb;
 	BoundingOrientedBox m_worldmoobb;

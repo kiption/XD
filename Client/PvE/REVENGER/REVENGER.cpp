@@ -370,7 +370,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->ParticlePosition = other_pl.m_pos;
 							((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->SetActive(true);
 							((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(other_pl.m_pos);
-
+							gGameFramework.m_bDamageOn = true;
 
 							other_pl.m_damaged_effect_on = false;
 						}
