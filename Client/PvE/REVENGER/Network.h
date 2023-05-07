@@ -95,7 +95,15 @@ void sendPacket(void* packet, short servernum)
 			ZeroMemory(&newserver_addr, sizeof(newserver_addr));
 			newserver_addr.sin_family = AF_INET;
 			newserver_addr.sin_port = htons(new_portnum);
-			inet_pton(AF_INET, SERVER_ADDR, &newserver_addr.sin_addr);
+			//inet_pton(AF_INET, SERVER_ADDR, &newserver_addr.sin_addr);//∑Á«¡πÈ
+
+			// REMOTE
+			if (active_servernum == 0) {
+				inet_pton(AF_INET, IPADDR_LOGIC0, &newserver_addr.sin_addr);
+			}
+			else if (active_servernum == 1) {
+				inet_pton(AF_INET, IPADDR_LOGIC1, &newserver_addr.sin_addr);
+			}
 			connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&newserver_addr), sizeof(newserver_addr));
 
 			CS_RELOGIN_PACKET re_login_pack;
