@@ -285,5 +285,6 @@ struct SS_DATA_REPLICA_PACKET {
 	short state;
 	short hp;
 	short bullet_cnt;
+	short curr_stage;
 };
 #pragma pack (pop)

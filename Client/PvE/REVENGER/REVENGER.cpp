@@ -43,11 +43,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	SOCKADDR_IN server0_addr;
 	ZeroMemory(&server0_addr, sizeof(server0_addr));
 	server0_addr.sin_family = AF_INET;
+	// 이건 로직서버에 바로 연결
 	int new_portnum = PORT_NUM_S0 + active_servernum;
 	server0_addr.sin_port = htons(new_portnum);
-	//server0_addr.sin_port = htons(PORTNUM_RELAY2CLIENT_0);		// 릴레이서버로 연결하려면 123,124를 지우고 여기를 주석해제하면됨.
-	//inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);
-	inet_pton(AF_INET, RELAY1_ADDR, &server0_addr.sin_addr);
+	inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);
+	// 이건 릴레이서버에 연결
+	//server0_addr.sin_port = htons(PORTNUM_RELAY2CLIENT_0);
+	//inet_pton(AF_INET, RELAY1_ADDR, &server0_addr.sin_addr);
 	connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
 
 	sendPacket(&login_pack, active_servernum);
@@ -98,7 +100,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					ping_packet.size = sizeof(CS_PING_PACKET);
 					sendPacket(&ping_packet, active_servernum);
 					last_ping = chrono::system_clock::now();
-					cout << "ping" << endl;
+					//cout << "ping" << endl;
 				}
 
 				//==================================================

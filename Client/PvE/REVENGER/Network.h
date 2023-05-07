@@ -437,6 +437,7 @@ void processPacket(char* ptr)
 
 		if (recv_packet->ping_sender_id == my_id) {
 			last_pong = chrono::system_clock::now();
+			//cout << "pong\n" << endl;
 		}
 		break;
 	}//SC_PING_RETURN case end

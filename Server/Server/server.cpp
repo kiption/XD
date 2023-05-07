@@ -119,7 +119,7 @@ public:
 		m_rightvec = { 1.0f, 0.0f, 0.0f };
 		m_upvec = { 0.0f, 1.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 1.0f };
-		curr_stage = 1;
+		curr_stage = 0;
 
 		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	}
@@ -228,7 +228,7 @@ HA_SERVER relayserver;	// 릴레이서버
 
 void SESSION::send_login_info_packet()
 {
-	if (curr_stage != 1) return;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
+	if (curr_stage == 2) return;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 	SC_LOGIN_INFO_PACKET login_info_packet;
 	login_info_packet.id = id;
 	strcpy_s(login_info_packet.name, name);
@@ -471,7 +471,7 @@ void process_packet(int client_id, char* packet)
 
 		// 새로 접속한 플레이어의 초기 정보를 설정합니다.
 		clients[client_id].pl_state = PL_ST_IDLE;
-		clients[client_id].curr_stage = 1;
+		clients[client_id].curr_stage = 0;
 
 		clients[client_id].hp = 100;
 
@@ -547,7 +547,7 @@ void process_packet(int client_id, char* packet)
 		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 클라이언트의 정보를 전송합니다.
 		for (auto& pl : clients) {
 			if (pl.id == client_id) continue;
-			if (pl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
+			if (pl.curr_stage == 2) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 
 			pl.s_lock.lock();
 			if (pl.s_state != ST_INGAME) {
@@ -607,7 +607,7 @@ void process_packet(int client_id, char* packet)
 			add_npc_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
 
 			for (int j = 0; j < MAX_USER; j++) {
-				if (clients[j].curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
+				if (clients[j].curr_stage == 2) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
 				if (clients[j].s_state == ST_INGAME) {
 					clients[j].do_send(&add_npc_packet);
 				}
@@ -881,14 +881,14 @@ void process_packet(int client_id, char* packet)
 		case PACKET_KEY_NUM1:
 			clients[client_id].s_lock.lock();
 			clients[client_id].curr_stage = 1;
+			cout << "Client[" << client_id << "] Stage1로 전환." << endl;
 			clients[client_id].s_lock.unlock();
-			cout << "Client[" << client_id << "] Stage1로 전환." << endl;//test
 			break;
 		case PACKET_KEY_NUM2:
 			clients[client_id].s_lock.lock();
 			clients[client_id].curr_stage = 2;
+			cout << "Client[" << client_id << "] Stage2로 전환." << endl;
 			clients[client_id].s_lock.unlock();
-			cout << "Client[" << client_id << "] Stage2로 전환." << endl;//test
 			break;
 		case PACKET_KEYUP_MOVEKEY:
 			if (clients[client_id].pl_state == PL_ST_MOVE) {
@@ -970,12 +970,8 @@ void process_packet(int client_id, char* packet)
 		clients[re_login_id].s_state = ST_INGAME;
 		clients[re_login_id].setBB();
 		clients[re_login_id].s_lock.unlock();
-		//cout << "TEST: clients[" << re_login_id << "] is log-in again." << endl;
-		//cout << "===================================" << endl;
-		//cout << "Pos: " << clients[re_login_id].pos.x << ", " << clients[re_login_id].pos.y << ", " << clients[re_login_id].pos.z << endl;
-		//cout << "LookVec: " << clients[re_login_id].m_lookvec.x << ", " << clients[re_login_id].m_lookvec.y << ", " << clients[re_login_id].m_lookvec.z << endl;
-		//cout << "Pitch: " << clients[re_login_id].pitch << "/ Yaw: " << clients[re_login_id].yaw << "/ Roll: " << clients[re_login_id].roll << endl;
-		//cout << "===================================" << endl;
+
+		cout << "[HA] Clients[" << re_login_id << "]와 다시 연결되었습니다.\n" << endl;
 
 		break;
 	}// CS_RELOGIN end
@@ -1003,7 +999,7 @@ void process_packet(int client_id, char* packet)
 		int replica_id = replica_pack->id;
 		clients[replica_id].s_lock.lock();
 		clients[replica_id].id = replica_id;
-
+		clients[replica_id].s_state = ST_FREE;
 		strcpy_s(clients[replica_id].name, replica_pack->name);
 
 		clients[replica_id].pos = { replica_pack->x, replica_pack->y, replica_pack->z };
@@ -1015,15 +1011,17 @@ void process_packet(int client_id, char* packet)
 		clients[replica_id].pl_state = replica_pack->state;
 		clients[replica_id].hp = replica_pack->hp;
 		clients[replica_id].remain_bullet = replica_pack->bullet_cnt;
+		clients[replica_id].curr_stage = replica_pack->curr_stage;
 
 		clients[replica_id].s_lock.unlock();
 
 		//cout << "Client[" << replica_id << "]의 데이터가 복제되었습니다." << endl;
 		//cout << "===================================" << endl;
 		//cout << "Name: " << clients[replica_id].name << endl;
+		//cout << "Stage: " << clients[replica_id].curr_stage << endl;
+		//cout << "State: " << clients[replica_id].pl_state << endl;
 		//cout << "Pos: " << clients[replica_id].pos.x << ", " << clients[replica_id].pos.y << ", " << clients[replica_id].pos.z << endl;
 		//cout << "LookVec: " << clients[replica_id].m_lookvec.x << ", " << clients[replica_id].m_lookvec.y << ", " << clients[replica_id].m_lookvec.z << endl;
-		//cout << "Pitch: " << clients[replica_id].pitch << "/ Yaw: " << clients[replica_id].yaw << "/ Roll: " << clients[replica_id].roll << endl;
 		//cout << "===================================\n" << endl;
 
 	}// SS_DATA_REPLICA end
@@ -1405,14 +1403,14 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 					replica_pack.state = cl.pl_state;
 					replica_pack.hp = cl.hp;
 					replica_pack.bullet_cnt = cl.remain_bullet;
+					replica_pack.curr_stage = cl.curr_stage;
 
 					extended_servers[standby_id].do_send(&replica_pack);
 
-					/*
-					cout << "[REPLICA TEST] Client[" << cl.id << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다. - line: 1413" << endl;
-					cout << "State: " << replica_pack.state << " , Pos: " << replica_pack.x << ", " << replica_pack.y << ", " << replica_pack.z
-						<< " , Look: " << replica_pack.look_x << ", " << replica_pack.look_y << ", " << replica_pack.look_z << "\n" << endl;
-						*/
+					//cout << "[REPLICA TEST] Client[" << cl.id << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다. - line: 1413" << endl;
+					//cout << "Stage: " << replica_pack.curr_stage << ", State: " << replica_pack.state
+					//	<< ", Pos: " << replica_pack.x << ", " << replica_pack.y << ", " << replica_pack.z
+					//	<< ", Look: " << replica_pack.look_x << ", " << replica_pack.look_y << ", " << replica_pack.look_z << "\n" << endl;
 				}
 			}
 		}

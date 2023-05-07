@@ -19,10 +19,11 @@ enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_CONNECT };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_RUNNING_SERVER, ST_DOWN_SERVER };
 enum SESSION_TYPE { SESSION_CLIENT, SESSION_LOGIN, SESSION_LOGIC };
 
-int online_user_cnt = 0;				// 접속중인 유저 수
 HANDLE h_iocp;							// IOCP 핸들
 SOCKET g_listensock_relay2client;		// 클라이언트-릴레이서버 통신 listen소켓
 SOCKET g_listensock_relay2logic;		// 릴레이서버-로직서버 통신 listen소켓
+
+int active_svrid_logic;					// 현재 Active상태인 로직서버 ID
 
 class OVER_EXP {
 public:
@@ -115,7 +116,6 @@ void disconnect(int target_id, int target)
 		}
 		closesocket(clients[target_id].socket);
 		clients[target_id].s_state = ST_FREE;
-		online_user_cnt--;
 		clients[target_id].s_lock.unlock();
 
 		cout << "Client[" << clients[target_id].id << "]가 나갔습니다.\n" << endl;	// server message
@@ -147,7 +147,6 @@ int get_new_client_id()
 		if (clients[i].s_state == ST_FREE) {
 			clients[i].s_state = ST_ACCEPTED;
 			clients[i].s_lock.unlock();
-			online_user_cnt++;
 			return i;
 		}
 		clients[i].s_lock.unlock();
@@ -177,7 +176,7 @@ void process_packet(int client_id, char* packet)
 		cout << "Client[" << client_id << "]가 연결되었습니다.\n" << endl;
 
 		// 로직서버로 패킷 전달 (나중에는 여기서 보내는게 아니라, 매칭을 돌리고 매칭이 잡혔을때 로직서버로 전달하도록 수정해야함)
-		logic_servers[1].do_send(login_packet);
+		logic_servers[active_svrid_logic].do_send(login_packet);
 
 
 		break;
@@ -386,6 +385,7 @@ int main(int argc, char* argv[])
 	// 2. 로비 서버
 
 	// 3. 로직 서버
+	active_svrid_logic = MAX_SERVER - 1;
 	for (int i = 0; i < MAX_SERVER; i++) {
 		wchar_t wchar_buf[10];
 		wsprintfW(wchar_buf, L"%d", i);
