@@ -36,7 +36,7 @@ constexpr int NAME_SIZE = 20;
 
 constexpr int MAX_USER = 3;
 constexpr int MAX_NPCS = 5;
-constexpr int MAX_BULLET = 50;
+constexpr int MAX_BULLET = 10;
 
 constexpr int WORLD_X_POS = 2000;
 constexpr int WORLD_Y_POS = 2000;
