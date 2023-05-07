@@ -23,6 +23,9 @@ int my_id;
 int servertime_ms;
 int servertime_sec;
 
+bool stage1_enter_ok;
+bool stage2_enter_ok;
+
 chrono::system_clock::time_point last_ping;	// ping을 서버로 보낸 시간
 chrono::system_clock::time_point last_pong;	// 서버의 ping에 대한 응답을 받은 시간
 
@@ -152,7 +155,6 @@ void processPacket(char* ptr)
 		my_info.m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 		my_info.m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 		my_info.m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-
 		my_info.m_state = OBJ_ST_RUNNING;
 		break;
 	}// SC_LOGIN_INFO case end
@@ -345,6 +347,26 @@ void processPacket(char* ptr)
 
 		break;
 	}//SC_DAMAGED case end
+	case SC_CHANGE_SCENE:
+	{
+		SC_CHANGE_SCENE_PACKET* recv_packet = reinterpret_cast<SC_CHANGE_SCENE_PACKET*>(ptr);
+
+		short recvd_id = recv_packet->id;
+		if (recvd_id == my_id) {
+			my_info.curr_scene = recv_packet->scene_num;
+			if (recv_packet->scene_num == 1) {
+				stage1_enter_ok = true;
+			}
+			else if (recv_packet->scene_num == 2) {
+				stage2_enter_ok = true;
+			}
+		}
+		else {
+			other_players[recvd_id].curr_scene = recv_packet->scene_num;
+		}
+
+		break;
+	}//SC_CHANGE_SCENE case end
 	case SC_OBJECT_STATE:
 	{
 		SC_OBJECT_STATE_PACKET* recv_packet = reinterpret_cast<SC_OBJECT_STATE_PACKET*>(ptr);

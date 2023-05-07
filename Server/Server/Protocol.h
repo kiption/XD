@@ -54,7 +54,7 @@ constexpr char INPUT_KEY_E = 0b000001;
 enum PacketID {
 	CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_PING, CS_RELOGIN
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
-	, SC_DAMAGED, SC_OBJECT_STATE, SC_BULLET_COUNT, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN
+	, SC_DAMAGED, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_BULLET_COUNT, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
 };
 
@@ -196,6 +196,8 @@ struct SC_MOVE_ROTATE_OBJECT_PACKET {
 	float look_x, look_y, look_z;
 };
 
+// ================================
+// 3) ÄÁÅÙÃ÷ °ü·Ã ÆÐÅ¶
 struct SC_DAMAGED_PACKET {
 	unsigned char size;
 	char type;
@@ -204,8 +206,13 @@ struct SC_DAMAGED_PACKET {
 	int damage;
 };
 
-// ================================
-// 3) ÄÁÅÙÃ÷ °ü·Ã ÆÐÅ¶
+struct SC_CHANGE_SCENE_PACKET {
+	unsigned char size;
+	char type;
+	short id;
+	short scene_num;
+};
+
 struct SC_OBJECT_STATE_PACKET {
 	unsigned char size;
 	char type;

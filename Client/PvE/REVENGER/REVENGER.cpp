@@ -52,6 +52,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	sendPacket(&login_pack, active_servernum);
 	recvPacket(active_servernum);
 
+	stage1_enter_ok = false;
+	stage2_enter_ok = false;
 	last_ping = last_pong = chrono::system_clock::now();
 	//==================================================
 
@@ -85,8 +87,34 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		}
 		else
 		{
-			if (gGameFramework.m_nMode != OPENINGSCENE)
+			if (gGameFramework.m_nMode == OPENINGSCENE)
 			{
+				if (!stage1_enter_ok) {
+					// 키 입력을 서버로 전달.
+					if (gGameFramework.checkNewInput_Keyboard()) {
+						short keyValue = gGameFramework.popInputVal_Keyboard();
+						if (keyValue == PACKET_KEY_NUM1) {
+							CS_INPUT_KEYBOARD_PACKET keyinput_pack;
+							keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+							keyinput_pack.type = CS_INPUT_KEYBOARD;
+							keyinput_pack.keytype = keyValue;
+							sendPacket(&keyinput_pack, active_servernum);
+						}
+					}
+				}
+				else {
+					gGameFramework.ChangeScene(SCENE1STAGE);
+					gGameFramework.setPosition_Self(my_info.m_pos);
+					gGameFramework.setVectors_Self(my_info.m_right_vec, my_info.m_up_vec, my_info.m_look_vec);
+				}
+			}
+			else
+			{
+				if (gGameFramework.m_nMode == SCENE1STAGE) {
+					if (stage2_enter_ok) {
+						gGameFramework.ChangeScene(SCENE2STAGE);
+					}
+				}
 				//==================================================
 				//					서버 연결 확인
 				//==================================================

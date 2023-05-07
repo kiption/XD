@@ -475,9 +475,9 @@ void process_packet(int client_id, char* packet)
 
 		clients[client_id].hp = 100;
 
-		clients[client_id].pos.x = RESPAWN_POS_X + client_id * 50;
-		clients[client_id].pos.y = RESPAWN_POS_Y;
-		clients[client_id].pos.z = RESPAWN_POS_Z - client_id * 50;
+		clients[client_id].pos.x = RESPAWN_POS_X;
+		clients[client_id].pos.y = RESPAWN_POS_Y + client_id * 50;//임시
+		clients[client_id].pos.z = RESPAWN_POS_Z;
 
 		clients[client_id].pitch = clients[client_id].yaw = clients[client_id].roll = 0.0f;
 		clients[client_id].m_rightvec = basic_coordinate.right;
@@ -698,7 +698,6 @@ void process_packet(int client_id, char* packet)
 		// 3. 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
 		for (auto& other_pl : clients) {
 			if (other_pl.id == client_id) continue;
-			if (other_pl.curr_stage == 0) continue;
 			if (other_pl.s_state != ST_INGAME) continue;
 
 			lock_guard<mutex> lg{ other_pl.s_lock };
@@ -722,7 +721,6 @@ void process_packet(int client_id, char* packet)
 		// 2. 다른 클라이언트에게 플레이어가 회전한 방향을 알려준다.
 		for (auto& other_pl : clients) {
 			if (other_pl.id == client_id) continue;
-			if (other_pl.curr_stage == 0) continue;
 			if (other_pl.s_state != ST_INGAME) continue;
 
 			lock_guard<mutex> lg{ other_pl.s_lock };
@@ -872,12 +870,36 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].curr_stage = 1;
 			cout << "Client[" << client_id << "] Stage1로 전환." << endl;
 			clients[client_id].s_lock.unlock();
+
+			SC_CHANGE_SCENE_PACKET chg_scene1_pack;
+			chg_scene1_pack.type = SC_CHANGE_SCENE;
+			chg_scene1_pack.size = sizeof(SC_CHANGE_SCENE_PACKET);
+			chg_scene1_pack.id = client_id;
+			chg_scene1_pack.scene_num = 1;
+			for (auto& cl : clients) {
+				if (cl.s_state != ST_INGAME) continue;
+
+				lock_guard<mutex> lg{ cl.s_lock };
+				cl.do_send(&chg_scene1_pack);
+			}
 			break;
 		case PACKET_KEY_NUM2:
 			clients[client_id].s_lock.lock();
 			clients[client_id].curr_stage = 2;
 			cout << "Client[" << client_id << "] Stage2로 전환." << endl;
 			clients[client_id].s_lock.unlock();
+
+			SC_CHANGE_SCENE_PACKET chg_scene2_pack;
+			chg_scene2_pack.type = SC_CHANGE_SCENE;
+			chg_scene2_pack.size = sizeof(SC_CHANGE_SCENE_PACKET);
+			chg_scene2_pack.id = client_id;
+			chg_scene2_pack.scene_num = 2;
+			for (auto& cl : clients) {
+				if (cl.s_state != ST_INGAME) continue;
+
+				lock_guard<mutex> lg{ cl.s_lock };
+				cl.do_send(&chg_scene2_pack);
+			}
 			break;
 		case PACKET_KEYUP_MOVEKEY:
 			if (clients[client_id].pl_state == PL_ST_MOVE) {

@@ -381,13 +381,13 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 
 			m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
 			q_keyboardInput.push(SEND_KEY_NUM1);//S
-			ChangeScene(SCENE1STAGE);
+			//ChangeScene(SCENE1STAGE);
 			break;
 		}
 		case '2':
 		{
 			q_keyboardInput.push(SEND_KEY_NUM2);//S
-			ChangeScene(SCENE2STAGE);
+			//ChangeScene(SCENE2STAGE);
 			break;
 		}
 		case '3':
@@ -1484,6 +1484,30 @@ XMFLOAT3 CGameFramework::getMyLookVec()
 	}
 }
 
+void CGameFramework::setPosition_Self(XMFLOAT3 pos)
+{
+	if (m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE) {
+		((HeliPlayer*)m_pPlayer)->SetPosition(pos);
+	}
+	else if (m_nMode == SCENE2STAGE) {
+		((CHumanPlayer*)m_pPlayer)->SetPosition(pos);
+	}
+}
+void CGameFramework::setVectors_Self(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
+{
+	if (m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE) {
+		((HeliPlayer*)m_pPlayer)->SetUp(upVec);
+		((HeliPlayer*)m_pPlayer)->SetRight(rightVec);
+		((HeliPlayer*)m_pPlayer)->SetLook(lookVec);
+		((HeliPlayer*)m_pPlayer)->SetScale(XMFLOAT3{ 1.0, 1.0, 1.2 });
+	}
+	else if (m_nMode == SCENE2STAGE) {
+		((CHumanPlayer*)m_pPlayer)->SetUp(upVec);
+		((CHumanPlayer*)m_pPlayer)->SetRight(rightVec);
+		((CHumanPlayer*)m_pPlayer)->SetLook(lookVec);
+		((CHumanPlayer*)m_pPlayer)->SetScale(XMFLOAT3{ 14.0, 14.0, 14.0 });
+	}
+}
 
 void CGameFramework::setPosition_OtherPlayer(int id, XMFLOAT3 pos)
 {
