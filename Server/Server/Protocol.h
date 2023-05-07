@@ -1,7 +1,7 @@
 #pragma once
 // IP 주소
 const char* IPADDR_LOOPBACK = "127.0.0.1";		// 루프백
-const char* IPADDR_LOGIC0 = "127.0.0.1";		// 원격 접속
+const char* IPADDR_LOGIC0 = "112.152.39.13";		// 원격 접속
 const char* IPADDR_LOGIC1 = "218.101.227.89";	// 원격 접속
 
 // 클라이언트-인증서버 통신
