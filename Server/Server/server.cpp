@@ -10,7 +10,7 @@
 #include "MapObjects.h"
 #include "Constant.h"
 #include "MathFuncs.h"
-#include "../RelayServer/Protocol.h"
+#include "Protocol.h"
 #include "NPC.h"
 #include "Timer.h"
 #include "CP_KEYS.h"

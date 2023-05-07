@@ -53,5 +53,8 @@
     <ClInclude Include="NPC.h">
       <Filter>소스 파일\Npc</Filter>
     </ClInclude>
+    <ClInclude Include="Protocol.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
