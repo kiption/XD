@@ -278,9 +278,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				case PL_ST_MOVE:
 					break;
 				case PL_ST_ATTACK:
-					if (my_info.m_bullet > 0) {
-						gGameFramework.selfShootingMotion();
-					}
 					my_info.m_ingame_state = PL_ST_IDLE;	// 한번쏘고 바로 제자리.
 					break;
 				case PL_ST_DEAD:

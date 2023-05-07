@@ -23,7 +23,7 @@ struct ObjectsInfo
 	ObjectsInfo() {
 		m_id = -1;
 		m_name[0] = '\n';
-		m_hp = 100;
+		m_hp = 1000;
 		m_bullet = MAX_BULLET;
 		m_pos = { 0.0f, 0.0f, 0.0f };
 		m_right_vec = { 1.0f, 0.0f, 0.0f };
@@ -37,7 +37,7 @@ struct ObjectsInfo
 	void InfoClear() {
 		m_id = -1;
 		m_name[0] = '\n';
-		m_hp = 100;
+		m_hp = 1000;
 		m_bullet = MAX_BULLET;
 		m_pos = { 0.0f, 0.0f, 0.0f };
 		m_right_vec = { 1.0f, 0.0f, 0.0f };

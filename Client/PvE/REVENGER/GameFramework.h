@@ -237,7 +237,6 @@ public:
 	void remove_Npcs(int id);
 
 	// 클라이언트 객체의 상태 최신화 함수
-	void selfShootingMotion();
 	void otherPlayerReturnToIdle(int p_id);
 	void otherPlayerMovingMotion(int p_id);
 	void otherPlayerShootingMotion(int p_id);

@@ -114,7 +114,7 @@ public:
 		name[0] = 0;
 
 		pl_state = PL_ST_IDLE;
-		hp = 100;
+		hp = 1000;
 		remain_bullet = MAX_BULLET;
 		pos = { 0.0f, 0.0f, 0.0f };
 		pitch = yaw = roll = 0.0f;
