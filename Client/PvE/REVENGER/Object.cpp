@@ -1775,7 +1775,7 @@ void CHelicopterObjects::Firevalkan(CGameObject* pLockedObject)
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->Rotate(90.0, 0.0, 0.0);
-		pBulletObject->SetScale(4.0, 10.0, 4.0);
+		pBulletObject->SetScale(4.0, 7.0, 4.0);
 		pBulletObject->SetActive(true);
 
 	}

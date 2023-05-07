@@ -75,7 +75,7 @@ void GameSound::SpeakMusic(bool stop)
 {
 	stop = m_bStopSound;
 	result = soundSystem->playSound(speakSound, 0, stop, &speakChannel);
-	speakChannel->setVolume(0.06f);
+	speakChannel->setVolume(0.005f);
 }
 void GameSound::walkingSound()
 {

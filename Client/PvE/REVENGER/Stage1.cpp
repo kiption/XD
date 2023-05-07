@@ -214,8 +214,9 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
 
-
-	//gamesound.backGroundMusic();
+	gamesound.m_bStopSound = false;
+	gamesound.SpeakMusic(gamesound.m_bStopSound);
+	gamesound.backGroundMusic();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }

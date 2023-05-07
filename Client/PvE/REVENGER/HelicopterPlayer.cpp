@@ -89,7 +89,7 @@ void HeliPlayer::Firevalkan(CGameObject* pLockedObject)
 			pBulletObject->Rotate(90.0, 0.0, 0.0);
 		}
 		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->SetScale(4.0, 10.0, 4.0);
+		pBulletObject->SetScale(4.0, 7.0, 4.0);
 		pBulletObject->SetActive(true);
 
 	}
@@ -134,7 +134,7 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f,10.5f, -30.0f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f,10.5f, -27.0f));
 		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y-15.0f, m_xmf3Position.z), m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 8000.0f, ASPECT_RATIO, 80.0f);
 		m_pCamera->SetViewport(10, 10, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
