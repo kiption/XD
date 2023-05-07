@@ -247,7 +247,7 @@ void processPacket(char* ptr)
 		if (recv_packet->target == TARGET_PLAYER) {
 			if (recv_id == my_info.m_id) break;				// 자기자신은 클라에서 움직여주고 있음.
 			if (recv_id < 0 || recv_id > MAX_USER) break;	// 잘못된 ID값
-
+			other_players[recv_id].m_id = recv_id;
 			// 상대 Object 이동
 			other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 			other_players[recv_id].m_ingame_state = PL_ST_MOVE;
@@ -258,6 +258,7 @@ void processPacket(char* ptr)
 		}
 		// 2. Rotate Npc
 		else if (recv_packet->target == TARGET_NPC) {
+			npcs_info[recv_id].m_id = recv_id;
 			npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 
 			npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };

@@ -1543,7 +1543,7 @@ void CGameFramework::remove_OtherPlayer(int id)
 
 void CGameFramework::setPosition_Npc(int id, XMFLOAT3 pos)
 {
-	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
+	//if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE)
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetPosition(pos);
 	if (m_nMode == SCENE2STAGE) {
@@ -1551,7 +1551,7 @@ void CGameFramework::setPosition_Npc(int id, XMFLOAT3 pos)
 }
 void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
-	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
+	//if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE)
 	{
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetRight(rightVec);
