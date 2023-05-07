@@ -18,8 +18,6 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 {
 	if (m_nCurScene == SCENE1STAGE)
 	{
-
-
 		m_nObjects = 21;
 		m_ppObjects = new CGameObject * [m_nObjects];
 
@@ -97,13 +95,9 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		{
 
 			m_ppNpcObjects[i] = new CNpcHelicopterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			CGameObject* pNpcModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Apache.bin", NULL);
-			m_ppNpcObjects[i]->SetChild(pNpcModel, false);
-			m_ppNpcObjects[i]->SetMaterial(pNpcMaterial);
+			m_ppNpcObjects[i]->SetMaterial(0,pNpcMaterial);
 			m_ppNpcObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-			m_ppNpcObjects[i]->SetScale(0.0, 0.0, 0.0);
 			m_ppNpcObjects[i]->OnPrepareAnimate();
-			pNpcModel->AddRef();
 		}
 
 

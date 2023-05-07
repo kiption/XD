@@ -1675,7 +1675,10 @@ void CSuperCobraObject::Animate(float fTimeElapsed)
 //
 CNpcHelicopterObject::CNpcHelicopterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(5)
 {
+	CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Apache.bin", NULL);
+	SetChild(pOtherPlayerModel, false);
 	SetScale(1.5, 1.0, 1.0);
+	pOtherPlayerModel->AddRef();
 }
 
 CNpcHelicopterObject::~CNpcHelicopterObject()

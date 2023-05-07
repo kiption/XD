@@ -672,15 +672,15 @@ void ST1_NPC::PlayerChasing()
 	// Look
 	XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&m_User_Pos[m_chaseID]), XMLoadFloat3(&m_Pos)));
 	Coordinate base_coordinate;
-	base_coordinate.look = { 0,1,0 };
-	float x = XMVectorGetX(XMVector3AngleBetweenVectors(Looktemp, XMLoadFloat3(&base_coordinate.look)));
-	m_yaw += x;
+	base_coordinate.right = { 1,0,0 };
+	float x = XMVectorGetX(XMVector3AngleBetweenVectors(Looktemp, XMLoadFloat3(&base_coordinate.right)));
+	m_yaw = x;
 	if (x < 1.0f && x > -1.0f) {
-		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&base_coordinate.look), XMConvertToRadians(m_yaw));
+		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&base_coordinate.right), XMConvertToRadians(m_yaw));
 		XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
 	}
 	else {
-		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&base_coordinate.look), XMConvertToRadians(0.0f));
+		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&base_coordinate.right), XMConvertToRadians(0.0f));
 		XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
 	}
 	// Right
