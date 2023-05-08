@@ -387,6 +387,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case '2':
 		{
 			q_keyboardInput.push(SEND_KEY_NUM2);//S
+			UI_Switch = false;
 			//ChangeScene(SCENE2STAGE);
 			break;
 		}
