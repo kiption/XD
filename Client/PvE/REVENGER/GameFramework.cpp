@@ -391,7 +391,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		}
 		case '3':
-			UI_Switch = !UI_Switch;
+			if (m_nMode == SCENE1STAGE) {
+				UI_Switch = !UI_Switch;
+			}
 			break;
 		case KEY_W:
 		case KEY_A:
@@ -1067,7 +1069,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 			m_pCamera = m_pPlayer->GetCamera();
 			m_pScene->SetCurScene(SCENE1STAGE);
-		
+
 			break;
 		}
 		case SCENE2STAGE:
@@ -1704,10 +1706,10 @@ void CGameFramework::otherPlayerReturnToIdle(int p_id)
 
 	}
 	else if (m_nMode == SCENE2STAGE) {
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1+p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, true);
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1+p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1+p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, true);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	}
 }
 void CGameFramework::otherPlayerMovingMotion(int p_id)
@@ -1716,10 +1718,10 @@ void CGameFramework::otherPlayerMovingMotion(int p_id)
 
 	}
 	else if (m_nMode == SCENE2STAGE) {
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1+p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, false);
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, true);
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, true);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	}
 }
 void CGameFramework::otherPlayerShootingMotion(int p_id)
@@ -1728,10 +1730,10 @@ void CGameFramework::otherPlayerShootingMotion(int p_id)
 		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->Firevalkan(NULL);
 	}
 	else if (m_nMode == SCENE2STAGE) {
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, false);
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, true);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, true);
 
 	}
 }
