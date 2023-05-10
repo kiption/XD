@@ -237,12 +237,12 @@ void CShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12Graphi
 	m_d3dPipelineStateDesc.SampleMask = UINT_MAX;
 	m_d3dPipelineStateDesc.PrimitiveTopologyType = GetPrimitiveTopologyType(nPipelineState);
 	m_d3dPipelineStateDesc.NumRenderTargets = GetNumRenderTargets(nPipelineState);
-	m_d3dPipelineStateDesc.RTVFormats[0] = GetRTVFormat(nPipelineState, 0);
+	//m_d3dPipelineStateDesc.RTVFormats[0] = GetRTVFormat(nPipelineState, 0);
 	for (UINT i = 0; i < nRenderTargets; i++)
 	{
-		m_d3dPipelineStateDesc.RTVFormats[i] = (pdxgiRtvFormats) ? pdxgiRtvFormats[i] : DXGI_FORMAT_R8G8B8A8_UNORM;
+		m_d3dPipelineStateDesc.RTVFormats[i] = (pdxgiRtvFormats) ? pdxgiRtvFormats[i] :  GetRTVFormat(nRenderTargets, 0);
 	}
-	m_d3dPipelineStateDesc.DSVFormat = GetDSVFormat(nPipelineState,0);
+	m_d3dPipelineStateDesc.DSVFormat = GetDSVFormat(nRenderTargets,0);
 	m_d3dPipelineStateDesc.SampleDesc.Count = 1;
 	m_d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	HRESULT hResult = pd3dDevice->CreateGraphicsPipelineState(&m_d3dPipelineStateDesc, __uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[nPipelineState]);
@@ -267,6 +267,46 @@ void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 }
 
 
+
+
+
+
+void CIlluminateTexturedShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
+{
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, d3dPrimitiveTopology,
+		nRenderTargets, pdxgiRtvFormats, dxgiDsvFormat, nPipelineState);
+
+}
+
+D3D12_INPUT_LAYOUT_DESC CIlluminateTexturedShader::CreateInputLayout(int nPipelineState)
+{
+	UINT nInputElementDescs = 2;
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+
+	return(d3dInputLayoutDesc);
+}
+
+D3D12_SHADER_BYTECODE CIlluminateTexturedShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSTextured", "vs_5_1", ppd3dShaderBlob));
+
+}
+D3D12_SHADER_BYTECODE CIlluminateTexturedShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSIllumiTextured", "ps_5_1", ppd3dShaderBlob));
+
+}
+
+
+
+
 CIlluminatedShader::CIlluminatedShader()
 {
 }
@@ -282,7 +322,7 @@ D3D12_INPUT_LAYOUT_DESC CIlluminatedShader::CreateInputLayout(int nPipelineState
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[2] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[2] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
@@ -296,7 +336,11 @@ D3D12_SHADER_BYTECODE CIlluminatedShader::CreateVertexShader(ID3DBlob** ppd3dSha
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSLighting", "vs_5_1", ppd3dShaderBlob));
 
 }
+D3D12_SHADER_BYTECODE CIlluminatedShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSLighting", "ps_5_1", ppd3dShaderBlob));
 
+}
 void CIlluminatedShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
 {
 	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, d3dPrimitiveTopology, 

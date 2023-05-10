@@ -44,6 +44,7 @@ cbuffer cbGameObjectInfo : register(b2)
 	MATERIAL				gMaterial : packoffset(c4);
 	uint					gnTexturesMask : packoffset(c8);
 	uint					gnMaterial : packoffset(c12);
+	uint					gnObjectID : packoffset(c16);
 };
 cbuffer cbFrameworkInfo : register(b11)
 {
@@ -104,6 +105,9 @@ Texture2D gtxtMetallicTexture : register(t9);
 Texture2D gtxtEmissionTexture : register(t10);
 Texture2D gtxtDetailAlbedoTexture : register(t11);
 Texture2D gtxtDetailNormalTexture : register(t12);
+
+Texture2DArray gtxtTextureArray : register(t27);
+
 
 SamplerState gssWrap : register(s0);
 
@@ -481,7 +485,13 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input, uint primitiveID : SV_PrimitiveID) :
 
 	return(cColor);
 }
+float4 PSIllumiTextured(VS_TEXTURED_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float3 uvw = float3(input.uv, nPrimitiveID / 2);
+	float4 cColor = gtxtTextureArray.Sample(gssWrap, uvw);
 
+	return(cColor);
+}
 VS_TEXTURED_OUTPUT VSSpriteAnimation(VS_TEXTURED_INPUT input)
 {
 	VS_TEXTURED_OUTPUT output;
@@ -513,6 +523,7 @@ float4 PSBillBoardTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 	float4 cColor = gtxtBillboardTexture.Sample(gssWrap, input.uv);
 	return (cColor);
 }
+
 
 
 float4 PSSmokeBillBoardTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
@@ -822,6 +833,16 @@ VS_LIGHTING_OUTPUT VSLighting(VS_LIGHTING_INPUT input)
 	output.uv = input.uv;
 
 	return(output);
+}
+
+float4 PSLighting(VS_LIGHTING_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float3 uvw = float3(input.uv, nPrimitiveID / 2);
+	float4 cColor = gtxtTextureArray.Sample(gssWrap, uvw);
+	input.normalW = normalize(input.normalW);
+	float4 cIllumination = Lighting(input.positionW, input.normalW);
+
+	return(cColor);
 }
 
 VS_CIRCULAR_SHADOW_INPUT VSCircularShadow(VS_CIRCULAR_SHADOW_INPUT input)

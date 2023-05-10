@@ -165,6 +165,7 @@
     <ClInclude Include="ParticleMesh.h" />
     <ClInclude Include="ParticleObject.h" />
     <ClInclude Include="ParticleShader.h" />
+    <ClInclude Include="PostProcessShader.h" />
     <ClInclude Include="ShadowShader.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SpriteAnimationBillboard.h" />
@@ -203,6 +204,7 @@
     <ClCompile Include="ParticleMesh.cpp" />
     <ClCompile Include="ParticleObject.cpp" />
     <ClCompile Include="ParticleShader.cpp" />
+    <ClCompile Include="PostProcessShader.cpp" />
     <ClCompile Include="ShadowShader.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="SpriteAnimationBillboard.cpp" />
@@ -254,6 +256,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Post.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders.hlsl">

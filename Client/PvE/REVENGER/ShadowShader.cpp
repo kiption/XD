@@ -162,12 +162,12 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[19] = m_ppCityGameObjects[4];
 		m_ppObjects[20] = m_ppCityGameObjects[5];
 
-		m_ppObjects[15]->SetPosition(0.0f, 0.0f, 0.0f);
-		m_ppObjects[16]->SetPosition(0.0f, 0.0f, 0.0f);
-		m_ppObjects[17]->SetPosition(0.0f, 0.0f, 0.0f);
-		m_ppObjects[18]->SetPosition(0.0f, 0.0f, 0.0f);
-		m_ppObjects[19]->SetPosition(0.0f, 0.0f, 0.0f);
-		m_ppObjects[20]->SetPosition(0.0f, 0.0f, 0.0f);
+		m_ppObjects[15]->SetPosition(0.0f, 1.0f, 0.0f);
+		m_ppObjects[16]->SetPosition(0.0f, 1.0f, 0.0f);
+		m_ppObjects[17]->SetPosition(0.0f, 1.0f, 0.0f);
+		m_ppObjects[18]->SetPosition(0.0f, 1.0f, 0.0f);
+		m_ppObjects[19]->SetPosition(0.0f, 1.0f, 0.0f);
+		m_ppObjects[20]->SetPosition(0.0f, 1.0f, 0.0f);
 	}
 	if (m_nCurScene == SCENE2STAGE)
 	{
@@ -267,9 +267,17 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 void CObjectsShader::OnPostRender(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
-
+#define _WITH_SCENE_ROOT_SIGNATURE
 void CObjectsShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
 {
+
+#ifdef _WITH_SCENE_ROOT_SIGNATURE
+	m_pd3dGraphicsRootSignature = pd3dGraphicsRootSignature;
+	m_pd3dGraphicsRootSignature->AddRef();
+#else
+	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+#endif
+
 	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, d3dPrimitiveTopology,
 		nRenderTargets, pdxgiRtvFormats, dxgiDsvFormat, nPipelineState);
 
@@ -289,6 +297,48 @@ BoundingBox CObjectsShader::CalculateBoundingBox()
 		}
 	}
 	return(xmBoundingBox);
+}
+
+D3D12_SHADER_BYTECODE CObjectsShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+
+	return(CShader::CompileShaderFromFile(L"Post.hlsl", "PSTexturedLightingToMultipleRTs", "ps_5_1", ppd3dShaderBlob));
+}
+
+void CObjectsShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
+	m_pd3dcbGameObjects = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes * m_nObjects, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbGameObjects->Map(0, NULL, (void**)&m_pcbMappedGameObjects);
+}
+
+void CObjectsShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
+{
+	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		for (int k = 0; k < m_ppObjects[j]->m_nMaterials; k++)
+		{
+
+		CB_GAMEOBJECT_INFO* pbMappedcbGameObject = (CB_GAMEOBJECT_INFO*)((UINT8*)m_pcbMappedGameObjects + (j * ncbElementBytes));
+		XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->m_xmf4x4World)));
+#ifdef _WITH_BATCH_MATERIAL
+		if (m_ppMaterials[k]) pbMappedcbGameObject->m_nMaterialID = m_ppMaterials[k]->m_nReflection;
+		if (m_ppMaterials[k]) pbMappedcbGameObject->m_nObjectID = j;
+#endif
+		}
+	}
+}
+
+void CObjectsShader::ReleaseShaderVariables()
+{
+	if (m_pd3dcbGameObjects)
+	{
+		m_pd3dcbGameObjects->Unmap(0, NULL);
+		m_pd3dcbGameObjects->Release();
+	}
+
+	CIlluminatedShader::ReleaseShaderVariables();
 }
 
 CShadowMapShader::CShadowMapShader(CObjectsShader* pObjectsShader)

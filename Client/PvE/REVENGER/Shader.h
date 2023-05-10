@@ -8,7 +8,7 @@
 #include "Camera.h"
 
 struct LIGHT;
-
+#define _WITH_SCENE_ROOT_SIGNATURE
 class CShader
 {
 public:
@@ -54,13 +54,17 @@ public:
 
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList) { }
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList) { }
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext) {};
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMFLOAT4X4 *pxmf4x4World) { }
 	virtual void ReleaseShaderVariables() { }
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList, int nPipelineState);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState);
+	//virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, void* pContext, int nPipelineState);
 
 	virtual void ReleaseUploadBuffers() { }
+	virtual ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice) { return(NULL); }
+	ID3D12RootSignature* GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 
 	virtual void BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, void *pContext = NULL) { }
 	virtual void AnimateObjects(float fTimeElapsed) { }
@@ -69,7 +73,7 @@ public:
 
 public:
 
-
+	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 	int									m_nPipelineStates = 0;
 	ID3D12PipelineState**				m_ppd3dPipelineStates = NULL;
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC	m_d3dPipelineStateDesc;
@@ -84,7 +88,21 @@ public:
 
 
 
-class CIlluminatedShader : public CShader
+class CIlluminateTexturedShader : public CShader
+{
+public:
+	CIlluminateTexturedShader() {};
+	virtual ~CIlluminateTexturedShader() {} ;
+	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState);
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
+};
+
+class CIlluminatedShader : public CIlluminateTexturedShader
 {
 public:
 	CIlluminatedShader();
@@ -93,7 +111,7 @@ public:
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
-	//virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState);
 	CTexture* m_pDepthTexture = NULL;

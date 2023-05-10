@@ -184,6 +184,9 @@
     <ClInclude Include="..\..\..\Server\Server\Protocol.h">
       <Filter>Server</Filter>
     </ClInclude>
+    <ClInclude Include="PostProcessShader.h">
+      <Filter>Client\Shader\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSound.cpp">
@@ -294,6 +297,9 @@
     <ClCompile Include="SpriteAnimationBillboard.cpp">
       <Filter>Client\Shader\Source</Filter>
     </ClCompile>
+    <ClCompile Include="PostProcessShader.cpp">
+      <Filter>Client\Shader\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="REVENGER.rc">
@@ -316,6 +322,9 @@
       <Filter>Asset</Filter>
     </FxCompile>
     <FxCompile Include="LightShader.hlsl">
+      <Filter>Asset</Filter>
+    </FxCompile>
+    <FxCompile Include="Post.hlsl">
       <Filter>Asset</Filter>
     </FxCompile>
   </ItemGroup>

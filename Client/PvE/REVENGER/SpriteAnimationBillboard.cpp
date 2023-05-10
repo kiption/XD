@@ -56,7 +56,7 @@ void CSpriteObjectsShader::ReleaseObjects()
 	}
 
 #ifdef _WITH_BATCH_MATERIAL
-	if (m_pMaterial) delete m_pMaterial;
+	if (m_ppMaterials) delete[] m_ppMaterials;
 #endif
 }
 

@@ -196,7 +196,9 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_ppShaders = new CObjectsShader * [m_nShaders];
 
 	CObjectsShader* pObjectShader = new CObjectsShader();
-	pObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	DXGI_FORMAT pdxgiMultiRtvFormats[5] = { DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R32_FLOAT };
+
+	pObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 5, pdxgiMultiRtvFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pObjectShader->SetCurScene(SCENE1STAGE);
 	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 	m_xmBoundingBox = pObjectShader->CalculateBoundingBox();
@@ -286,7 +288,7 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 {
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[16];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[18];
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 1;
@@ -384,7 +386,19 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dDescriptorRanges[15].RegisterSpace = 0;
 	pd3dDescriptorRanges[15].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[24];
+	pd3dDescriptorRanges[16].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[16].NumDescriptors = 1;
+	pd3dDescriptorRanges[16].BaseShaderRegister = 27; //t27: Texture2DArray
+	pd3dDescriptorRanges[16].RegisterSpace = 0;
+	pd3dDescriptorRanges[16].OffsetInDescriptorsFromTableStart = 0;
+
+	pd3dDescriptorRanges[17].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[17].NumDescriptors = 1;
+	pd3dDescriptorRanges[17].BaseShaderRegister = 28; //t28: Texture2D<float4>
+	pd3dDescriptorRanges[17].RegisterSpace = 0;
+	pd3dDescriptorRanges[17].OffsetInDescriptorsFromTableStart = 0;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[25];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; //Camera
@@ -506,6 +520,17 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dRootParameters[23].Descriptor.ShaderRegister = 12; //toshadow
 	pd3dRootParameters[23].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[23].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[24].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[24].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[24].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[16]; //Depth Buffer
+	pd3dRootParameters[24].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+
+	//pd3dRootParameters[25].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	//pd3dRootParameters[25].DescriptorTable.NumDescriptorRanges = 1;
+	//pd3dRootParameters[25].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[16]; //Texture2D
+	//pd3dRootParameters[25].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[4];
 

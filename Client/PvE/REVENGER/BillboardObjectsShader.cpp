@@ -169,19 +169,7 @@ void CrossHairShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 void CrossHairShader::AnimateObjects(float fTimeElapsed)
 {
 
-	if (m_bActiveLook == true)
-	{
-		m_ppObjects[0]->SetPosition(0,0,0);
-		m_ppObjects[1]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
-		m_ppObjects[1]->SetPosition(xmf3Position);
-	}
-	if (m_bActiveLook == false)
-	{
-		m_ppObjects[1]->SetPosition(0,0,0);
-		m_ppObjects[0]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
-		m_ppObjects[0]->SetPosition(xmf3Position);
-	}
-	//BillboardShader::AnimateObjects(fTimeElapsed);
+	BillboardShader::AnimateObjects(fTimeElapsed);
 }
 
 void CrossHairShader::ReleaseUploadBuffers()
@@ -434,6 +422,11 @@ D3D12_SHADER_BYTECODE ResponeEffectShader::CreatePixelShader(ID3DBlob** ppd3dSha
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSmokeBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
 }
 
+D3D12_SHADER_BYTECODE ResponeEffectShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
+}
+
 void ResponeEffectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
@@ -497,7 +490,6 @@ void ResponeEffectShader::ReleaseUploadBuffers()
 	BillboardShader::ReleaseUploadBuffers();
 }
 
-///////////////////
 
 
 D3D12_BLEND_DESC HelicopterSparkBillboard::CreateBlendState(int nPipelineState)

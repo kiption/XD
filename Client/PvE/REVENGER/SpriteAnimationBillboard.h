@@ -15,7 +15,7 @@ public:
 		virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 		virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 };
-
+#define _WITH_BATCH_MATERIAL
 class CSpriteObjectsShader : public CSpriteTexturedShader
 {
 public:
@@ -41,6 +41,9 @@ public:
 	ID3D12Resource* m_pd3dcbGameObjects = NULL;
 	CB_GAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
 
+#ifdef _WITH_BATCH_MATERIAL
+	CMaterial** m_ppMaterials = NULL;
+#endif
 };
 class SpriteAnimationBillboard : public CSpriteObjectsShader
 {

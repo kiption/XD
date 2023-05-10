@@ -47,6 +47,9 @@ struct CB_GAMEOBJECT_INFO
 	XMFLOAT4X4						m_xmf4x4Texture;
 	XMINT2							m_xmi2TextureTiling;
 	XMFLOAT2						m_xmf2TextureOffset;
+
+	UINT							m_nObjectID;
+	UINT							m_nMaterialID;
 };
 
 class CShader;

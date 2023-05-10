@@ -13,6 +13,7 @@
 #include "TerrainShader.h"
 #include "MapObjectShaders.h"
 #include "ShadowShader.h"
+#include "PostProcessShader.h"
 #include "Player.h"
 #include "HumanPlayer.h"
 #include "HelicopterPlayer.h"

@@ -9,7 +9,7 @@
 #include "Stage1.h"
 #include "Stage2.h"
 #include "GameSound.h"
-
+#include "PostProcessShader.h"
 // Server
 #include <queue>
 enum SEND_MOUSE_BUTTON { SEND_NONCLICK, SEND_BUTTON_L, SEND_BUTTON_R };
@@ -98,7 +98,8 @@ public:
 protected:
 	ID3D12Resource* m_pd3dcbFrameworkInfo = NULL;
 	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;
-
+public:
+	PostProcessShader* m_pPostProcessingShader = NULL;
 #ifdef _WITH_DIRECT2D
 	void CreateDirect2DDevice();
 #endif
@@ -150,7 +151,7 @@ private:
 	ID3D12Resource				*m_ppd3dSwapChainBackBuffers[m_nSwapChainBuffers];
 	D3D12_CPU_DESCRIPTOR_HANDLE		m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBuffers];
 	ID3D12DescriptorHeap		*m_pd3dRtvDescriptorHeap = NULL;
-
+	D3D12_CPU_DESCRIPTOR_HANDLE		m_d3dDsvDescriptorCPUHandle;
 	ID3D12Resource				*m_pd3dDepthStencilBuffer = NULL;
 	ID3D12DescriptorHeap		*m_pd3dDsvDescriptorHeap = NULL;
 

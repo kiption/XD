@@ -5,7 +5,7 @@
 #include "MissileObject.h"
 #include "Terrain.h"
 #include "Skybox.h"
-
+#define _WITH_BATCH_MATERIAL
 class CObjectsShader : public CIlluminatedShader
 {
 public:
@@ -22,6 +22,11 @@ public:
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState);
 	BoundingBox CalculateBoundingBox();
 
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
+
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
+	virtual void ReleaseShaderVariables();
 public:
 	CSkyBox* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;
@@ -38,6 +43,14 @@ public:
 	//////////////////////////////////////////
 	int m_nSkinnShaders = 1;
 	CSkinnedAnimationStandardShader* m_ppSkinnShaders = NULL;
+
+	////////////////////////////////////////////
+
+	ID3D12Resource* m_pd3dcbGameObjects = NULL;
+	CB_GAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
+#ifdef _WITH_BATCH_MATERIAL
+	CMaterial** m_ppMaterials = NULL;
+#endif
 };
 
 
