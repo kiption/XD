@@ -390,163 +390,937 @@ bool ST1_NPC::SetTrackingPrevStatebyDistance(float setDistance, int curState, in
 void ST1_NPC::MoveInSection()
 {
 	if (m_SectionMoveDir) {
-		switch (m_IdleSection)
+		switch (m_IdleCity)
 		{
 		case 0:
-		{
-			if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sx - m_Pos.x)) {
-				m_IdleSection++;
+			switch (m_IdleSection)
+			{
+			case 0:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lz - m_Pos.z)) {
+					m_IdleSection++;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].lz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
 			}
-			else {
-				XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].sx, m_Pos.y, m_Pos.z };
-				XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
-				XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+			break;
+			case 1:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lx - m_Pos.x)) {
+					m_IdleSection++;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].lx, m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
 
-				// Right
-				Coordinate base_coordinate;
-				base_coordinate.up = { 0,1,0 };
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
 
-				XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-				XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
 
-				// up
-				XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-				XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
 
-				m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
 			}
-		}
-		break;
+			break;
+			case 2:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sz - m_Pos.z)) {
+					m_IdleSection++;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].sz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
+			}
+			break;
+			case 3:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lx - m_Pos.x)) {
+					m_IdleSection++;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].lx, m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
+			}
+			break;
+			case 4:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lz - m_Pos.z)) {
+					m_IdleSection++;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].lz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
+			}
+			break;
+			case 5:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lx - m_Pos.x)) {
+					m_SectionMoveDir = false;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].lx , m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
+			}
+			break;
+			}
 		case 1:
-		{
-			if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lz - m_Pos.z)) {
-				m_IdleSection++;
+			switch (m_IdleSection)
+			{
+			case 0:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sx - m_Pos.x)) {
+					m_IdleSection++;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].sx, m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
 			}
-			else {
-				XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].lz };
-				XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
-				XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+			break;
+			case 1:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lz - m_Pos.z)) {
+					m_IdleSection++;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].lz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
 
-				// Right
-				Coordinate base_coordinate;
-				base_coordinate.up = { 0,1,0 };
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
 
-				XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-				XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
 
-				// up
-				XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-				XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
 
-				m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
 			}
-		}
-		break;
+			break;
+			case 2:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lx - m_Pos.x)) {
+					m_IdleSection++;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].lx, m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
+			}
+			break;
+			case 3:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lz - m_Pos.z)) {
+					m_IdleSection++;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].lz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
+			}
+			break;
+			case 4:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sx - m_Pos.x)) {
+					m_IdleSection++;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].sx, m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
+			}
+			break;
+			case 5:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lz - m_Pos.z)) {
+					m_SectionMoveDir = false;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x , m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].lz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
+			}
+			break;
+			}
 		case 2:
-		{
-			if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lx - m_Pos.x)) {
-				m_SectionMoveDir = false;
+			switch (m_IdleSection)
+			{
+			case 0:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sz - m_Pos.z)) {
+					m_IdleSection++;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].sz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
 			}
-			else {
-				XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].lx, m_Pos.y, m_Pos.z };
-				XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
-				XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+			break;
+			case 1:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sx - m_Pos.x)) {
+					m_IdleSection++;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].sx, m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
 
-				// Right
-				Coordinate base_coordinate;
-				base_coordinate.up = { 0,1,0 };
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
 
-				XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-				XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
 
-				// up
-				XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-				XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
 
-				m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
 			}
-		}
-		break;
+			break;
+			case 2:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lz - m_Pos.z)) {
+					m_IdleSection++;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].lz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
+			}
+			break;
+			case 3:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sx - m_Pos.x)) {
+					m_IdleSection++;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].sx, m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
+			}
+			break;
+			case 4:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sz - m_Pos.z)) {
+					m_IdleSection++;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].sz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
+			}
+			break;
+			case 5:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sx - m_Pos.x)) {
+					m_SectionMoveDir = false;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].sx , m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
+			}
+			break;
+			}
 		}
 	}
 	else {
-		switch (m_IdleSection)
+		switch (m_IdleCity)
 		{
 		case 0:
-		{
-			if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lx - m_Pos.x)) {
-				m_SectionMoveDir = true;
+			switch (m_IdleSection)
+			{
+			case 0:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sz - m_Pos.z)) {
+					m_SectionMoveDir = true;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].sz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
 			}
-			else {
-				XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].lx, m_Pos.y, m_Pos.z };
-				XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
-				XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+			break;
+			case 1:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sx - m_Pos.x)) {
+					m_IdleSection--;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].sx, m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
 
-				// Right
-				Coordinate base_coordinate;
-				base_coordinate.up = { 0,1,0 };
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
 
-				XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-				XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
 
-				// up
-				XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-				XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
 
-				m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
 			}
-		}
-		break;
+			break;
+			case 2:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lz - m_Pos.z)) {
+					m_IdleSection--;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].lz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
+			}
+			break;
+			case 3:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sx - m_Pos.x)) {
+					m_IdleSection--;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].sx, m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
+			}
+			break;
+			case 4:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sz - m_Pos.z)) {
+					m_IdleSection--;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].sz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
+			}
+			break;
+			case 5:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sx - m_Pos.x)) {
+					m_IdleSection--;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].sx , m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
+			}
+			break;
+			}
 		case 1:
-		{
-			if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sz - m_Pos.z)) {
-				m_IdleSection--;
+			switch (m_IdleSection)
+			{
+			case 0:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lx - m_Pos.x)) {
+					m_SectionMoveDir = true;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].lx, m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
 			}
-			else {
-				XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].sz };
-				XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
-				XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+			break;
+			case 1:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sz - m_Pos.z)) {
+					m_IdleSection--;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].sz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
 
-				// Right
-				Coordinate base_coordinate;
-				base_coordinate.up = { 0,1,0 };
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
 
-				XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-				XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
 
-				// up
-				XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-				XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
 
-				m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
 			}
-		}
-		break;
+			break;
+			case 2:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sx - m_Pos.x)) {
+					m_IdleSection--;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].sx, m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
+			}
+			break;
+			case 3:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sz - m_Pos.z)) {
+					m_IdleSection--;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].sz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
+			}
+			break;
+			case 4:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lx - m_Pos.x)) {
+					m_IdleSection--;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].lx, m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
+			}
+			break;
+			case 5:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sz - m_Pos.z)) {
+					m_IdleSection--;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x , m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].sz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
+			}
+			break;
+			}
 		case 2:
-		{
-			if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sx - m_Pos.x)) {
-				m_IdleSection--;
+			switch (m_IdleSection)
+			{
+			case 0:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lz - m_Pos.z)) {
+					m_SectionMoveDir = true;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].lz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
 			}
-			else {
-				XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].sx, m_Pos.y, m_Pos.z };
-				XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
-				XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+			break;
+			case 1:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lx - m_Pos.x)) {
+					m_IdleSection--;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].lx, m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
 
-				// Right
-				Coordinate base_coordinate;
-				base_coordinate.up = { 0,1,0 };
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
 
-				XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-				XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
 
-				// up
-				XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-				XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
 
-				m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
 			}
-		}
-		break;
+			break;
+			case 2:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].sz - m_Pos.z)) {
+					m_IdleSection--;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].sz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
+			}
+			break;
+			case 3:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lx - m_Pos.x)) {
+					m_IdleSection--;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].lx, m_Pos.y, m_Pos.z };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
+			}
+			break;
+			case 4:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lz - m_Pos.z)) {
+					m_IdleSection--;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Pos.x, m_Pos.y, m_Section[m_IdleCity].SectionNum[m_IdleSection].lz };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.z += m_Speed * m_curr_coordinate.look.z;
+				}
+			}
+			break;
+			case 5:
+			{
+				if (25.0f > abs(m_Section[m_IdleCity].SectionNum[m_IdleSection].lx - m_Pos.x)) {
+					m_IdleSection--;
+				}
+				else {
+					XMFLOAT3 sec_look = { m_Section[m_IdleCity].SectionNum[m_IdleSection].lx , m_Pos.y, m_Pos.x };
+					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&m_Pos)));
+					XMStoreFloat3(&m_curr_coordinate.look, Looktemp);
+
+					// Right
+					Coordinate base_coordinate;
+					base_coordinate.up = { 0,1,0 };
+
+					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
+					XMStoreFloat3(&m_curr_coordinate.right, righttemp);
+
+					// up
+					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
+					XMStoreFloat3(&m_curr_coordinate.up, uptemp);
+
+					m_Pos.x += m_Speed * m_curr_coordinate.look.x;
+				}
+			}
+			break;
+			}
 		}
 	}
 	NPCtoBuilding_collide();
