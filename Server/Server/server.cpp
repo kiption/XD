@@ -823,7 +823,8 @@ void process_packet(int client_id, char* packet)
 
 				// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
 				Cube pl_obj{ exc_XMFtoMyVec(cl.pos), HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
-				MyVector3 tmp_intersect = GetInterSection_Line2Cube(exc_XMFtoMyVec(clients[client_id].pos), exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj);
+				MyVector3 tmp_intersect = MyRaycast_LimitDistance(MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y - HELI_BOXSIZE_Y/2.0f, clients[client_id].pos.z }
+																, exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj, BULLET_RANGE);
 
 				// 충돌했다면
 				if (tmp_intersect != defaultVec) {
@@ -896,7 +897,8 @@ void process_packet(int client_id, char* packet)
 			// 3. 건물과 충돌검사
 			for (auto& building : buildings_info) {
 				Cube bd_obj{ exc_XMFtoMyVec(building.getPos()), building.getScaleX(), building.getScaleY(), building.getScaleZ() };
-				MyVector3 bd_intersect = GetInterSection_Line2Cube(exc_XMFtoMyVec(clients[client_id].pos), exc_XMFtoMyVec(clients[client_id].m_lookvec), bd_obj);
+				MyVector3 bd_intersect = MyRaycast_LimitDistance(MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y - HELI_BOXSIZE_Y / 2.0f, clients[client_id].pos.z }
+																, exc_XMFtoMyVec(clients[client_id].m_lookvec), bd_obj, BULLET_RANGE);
 				if (bd_intersect != defaultVec) {
 					cout << "Bullet Collide with Building.\n" << endl;
 					break;
