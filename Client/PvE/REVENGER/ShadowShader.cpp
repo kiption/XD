@@ -18,7 +18,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 {
 	if (m_nCurScene == SCENE1STAGE)
 	{
-		m_nObjects = 21;
+		m_nObjects = 19;
 		m_ppObjects = new CGameObject * [m_nObjects];
 
 		CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
@@ -132,7 +132,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		pCityMaterial[4]->SetReflection(1);
 		pCityMaterial[5]->SetReflection(1);
 
-		int Cities = 6;
+		int Cities = 4;
 		m_ppCityGameObjects = new CGameObject * [Cities];
 		CStandardMesh* pMesh = new CStandardMesh(pd3dDevice, pd3dCommandList);
 		for (int i = 0; i < Cities; i++)
@@ -159,15 +159,15 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[16] = m_ppCityGameObjects[1];
 		m_ppObjects[17] = m_ppCityGameObjects[2];
 		m_ppObjects[18] = m_ppCityGameObjects[3];
-		m_ppObjects[19] = m_ppCityGameObjects[4];
-		m_ppObjects[20] = m_ppCityGameObjects[5];
+		/*m_ppObjects[19] = m_ppCityGameObjects[4];
+		m_ppObjects[20] = m_ppCityGameObjects[5];*/
 
-		m_ppObjects[15]->SetPosition(0.0f, 1.0f, 0.0f);
-		m_ppObjects[16]->SetPosition(0.0f, 1.0f, 0.0f);
-		m_ppObjects[17]->SetPosition(0.0f, 1.0f, 0.0f);
-		m_ppObjects[18]->SetPosition(0.0f, 1.0f, 0.0f);
-		m_ppObjects[19]->SetPosition(0.0f, 1.0f, 0.0f);
-		m_ppObjects[20]->SetPosition(0.0f, 1.0f, 0.0f);
+		m_ppObjects[15]->SetPosition(0.0f, 0.0f, 0.0f);
+		m_ppObjects[16]->SetPosition(0.0f, 0.0f, 0.0f);
+		m_ppObjects[17]->SetPosition(0.0f, 0.0f, 0.0f);
+		m_ppObjects[18]->SetPosition(0.0f, 0.0f, 0.0f);
+		//m_ppObjects[19]->SetPosition(0.0f, 1.0f, 0.0f);
+		//m_ppObjects[20]->SetPosition(0.0f, 1.0f, 0.0f);
 	}
 	if (m_nCurScene == SCENE2STAGE)
 	{
