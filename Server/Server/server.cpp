@@ -487,11 +487,11 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].pl_state = PL_ST_IDLE;
 		clients[client_id].curr_stage = 0;
 
-		clients[client_id].hp = 100;
+		clients[client_id].hp = HELI_MAXHP;
 
 		clients[client_id].pos.x = RESPAWN_POS_X;
-		clients[client_id].pos.y = RESPAWN_POS_Y + client_id * 30;//юс╫ц
-		clients[client_id].pos.z = RESPAWN_POS_Z;
+		clients[client_id].pos.y = RESPAWN_POS_Y;
+		clients[client_id].pos.z = RESPAWN_POS_Z - 100 * client_id;
 
 		clients[client_id].pitch = clients[client_id].yaw = clients[client_id].roll = 0.0f;
 		clients[client_id].m_rightvec = basic_coordinate.right;

@@ -63,9 +63,9 @@
 #define AUTO_LEVELOFF_TIME 3000			// 몇 초(ms)동안 키입력이 없어야 자동 수평비행 전환이 되는가
 #define RESPAWN_TIME 5000				// 리스폰 시간 (ms)
 
-#define RESPAWN_POS_X 108
-#define RESPAWN_POS_Y 7
-#define RESPAWN_POS_Z -240
+#define RESPAWN_POS_X 850.0f
+#define RESPAWN_POS_Y 13.0f
+#define RESPAWN_POS_Z 150.0f
 
 //============================================================
 //					  스테이지 관련 상수
