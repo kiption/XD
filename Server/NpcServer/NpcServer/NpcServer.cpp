@@ -32,11 +32,11 @@
 //============================================================
 //			메인서버에서 사용한 것들을 그대로 사용
 //============================================================
-#include "../../../MainServer/Server/MapObjects.h"
-#include "../../../MainServer/Server/Constant.h"
-#include "../../../MainServer/Server/MathFuncs.h"
-#include "../../../MainServer/Server/Protocol.h"
-#include "../../../MainServer/Server/CP_KEYS.h"
+#include "../../MainServer/Server/MapObjects.h"
+#include "../../MainServer/Server/Constant.h"
+#include "../../MainServer/Server/MathFuncs.h"
+#include "../../MainServer/Server/Protocol.h"
+#include "../../MainServer/Server/CP_KEYS.h"
 
 using namespace std;
 using namespace chrono;
