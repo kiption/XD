@@ -375,10 +375,10 @@ void disconnect(int target_id, int target)
 		// XD폴더 내에서 동작할 때(내부 테스트)와 외부에서 실행할 때를 구분해줍니다.
 		string XDFolderKeyword = "XD";
 		if (filesystem::current_path().string().find(XDFolderKeyword) != string::npos) {
-			ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L"../../Execute/Execute_S", SW_SHOW);	// 내부 테스트용
+			ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L"../../../Execute/Execute_S", SW_SHOW);	// 내부 테스트용
 		}
 		else {
-			ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L".", SW_SHOW);					// 외부 수출용
+			ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L".", SW_SHOW);					// 외부 수출용 (exe로 실행될때)
 		}
 
 		// 원격 이중화를 위해선 실행되는 PC의 "외부 IP"를 알아야 한다.
