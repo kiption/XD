@@ -1552,8 +1552,9 @@ void init_npc()
 		for (int j{}; j < buildings_info.size(); ++j) {
 			XMFLOAT3 Build_pos = { buildings_info[j].getPos() };
 			XMFLOAT3 Build_scale = { buildings_info[j].getScaleX(),buildings_info[j].getScaleY() ,buildings_info[j].getScaleZ() };
-			npcs[i].SetBuildingInfo(Build_pos, Build_scale);
+			npcs[i].SetBuildingInfo(j, Build_pos, Build_scale);
 		}
+		npcs[i].SetBuildingNode();
 	}
 }
 

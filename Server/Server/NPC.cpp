@@ -1,5 +1,4 @@
 #include "NPC.h"
-
 XMFLOAT3 NPCNormalize(XMFLOAT3 vec)
 {
 	float dist = sqrtf(powf(vec.x, 2) + powf(vec.y, 2) + powf(vec.z, 2));
@@ -27,6 +26,27 @@ float Calculation_Distance(XMFLOAT3 vec, vector<City_Info>const& v, int c_id, in
 	float dist = sqrtf(powf(vec.x - cx, 2) + powf(vec.z - cz, 2));
 	return dist;
 }
+
+void visualizeGraph(const Graph& graph) {
+	//std::cout << "Graph Visualization:" << std::endl;
+	for (const auto& node : graph.getNodes()) {
+		//std::cout << "Node " << node.id << " connected to: ";
+		printf("%d, : ", node.id);
+		for (int neighbor : node.neighbors) {
+			// 이웃 노드의 좌표와 크기 정보 출력
+			NPC_Building neighborBuilding = graph.getNodes()[neighbor].allow_Building_info;
+			printf("%d ", neighbor);
+			/*std::cout << "Neighbor " << neighbor << ": Position(" << neighborBuilding.getPosX() << ", "
+				<< neighborBuilding.getPosY() << ", " << neighborBuilding.getPosZ() << "), "
+				<< "Size(" << neighborBuilding.getScaleX() << ", "
+				<< neighborBuilding.getScaleY() << ", " << neighborBuilding.getScaleZ() << ") ";*/
+		}
+		printf("\n");
+		//std::cout << std::endl;
+	}
+}
+
+
 // ===========================================
 // =============      BASE      ==============
 // ===========================================
@@ -176,10 +196,36 @@ void ST1_NPC::SetFrustum()
 	m_frustum = frustum;
 }
 
-void ST1_NPC::SetBuildingInfo(XMFLOAT3 bPos, XMFLOAT3 bScale)
+void ST1_NPC::SetBuildingInfo(int id, XMFLOAT3 bPos, XMFLOAT3 bScale)
 {
 	BoundingOrientedBox temp = BoundingOrientedBox(bPos, XMFLOAT3(bScale.x / 2.5f, bScale.y / 2.0f, bScale.z / 2.5f), XMFLOAT4(0, 0, 0, 1));
 	m_mapxmoobb.emplace_back(temp);
+
+	NPC_Building btemp(bPos.x, bPos.y, bPos.z, bScale.x, bScale.y, bScale.z);
+	btemp.setBB();
+	npc_buildings_info.emplace_back(btemp);
+	//memset()
+}
+
+void ST1_NPC::SetBuildingNode()
+{
+	Graph graph;
+	for (int i = 0; i < npc_buildings_info.size(); i++) {
+		Node node;
+		node.id = i;
+		graph.addNode(node, npc_buildings_info[i]); // 건물 정보 추가
+	}
+
+	// 노드 간의 연결 정보 설정
+	for (int i = 0; i < npc_buildings_info.size(); i++) {
+		for (int j = i + 1; j < npc_buildings_info.size(); j++) {
+			// 노드 i와 노드 j 사이의 경로가 가능한 경우에만 간선을 추가
+			if (isPathPossible(npc_buildings_info[i], npc_buildings_info[j])) {
+				graph.addEdge(i, j);
+			}
+		}
+	}
+	//visualizeGraph(graph);
 }
 
 // ===========================================
@@ -1556,6 +1602,21 @@ void ST1_NPC::NPCtoBuilding_collide()
 			m_BodyHP -= 10.0f;
 		}
 	}
+}
+
+bool ST1_NPC::isPathPossible(const NPC_Building& building1, const NPC_Building& building2) 
+{
+	BoundingOrientedBox box1 = building1.m_xoobb;
+	BoundingOrientedBox box2 = building2.m_xoobb;
+
+	// 바운딩 박스 간의 충돌 여부를 확인
+	if (box1.Intersects(box2)) {
+		// 충돌이 발생하면 경로가 불가능하다고 판단
+		return false;
+	}
+
+	// 충돌이 없으면 경로가 가능하다고 판단
+	return true;
 }
 
 // Ray Casting

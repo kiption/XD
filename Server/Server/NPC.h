@@ -1,9 +1,9 @@
 #pragma once
 #include <math.h>
-#include "Constant.h"
-#include "MyVectors.h"
 #include <vector>
 #include <DirectXCollision.h>
+#include "Constant.h"
+#include "MyVectors.h"
 
 enum NpcType { NPC_Helicopter, NPC_Bunker, NPC_Terret };
 enum St1_NPCState { NPC_IDLE, NPC_FLY, NPC_CHASE, NPC_ATTACK, NPC_DEATH };
@@ -41,7 +41,84 @@ const float LZ_range[18] = {
 	720.0f, 200.0f, 410.0f, 410.0f, 410.0f, 0.0f };
 const float C_cx[3] = { -396.0f, 651.0f, -393.0f };
 const float C_cz[3] = { -888.0f, -128.0f, 233.0f };
-//
+
+class NPC_MapObject
+{
+private:
+	float pos_x, pos_y, pos_z;
+	float scale_x, scale_y, scale_z;
+
+public:
+	NPC_MapObject() {
+		pos_x = pos_y = pos_z = 0;
+		scale_x = scale_y = scale_z = 0;
+	}
+	NPC_MapObject(float px, float py, float pz, float sx, float sy, float sz) {
+		pos_x = px, pos_y = py, pos_z = pz;
+		scale_x = sx, scale_y = sy, scale_z = sz;
+	}
+
+public:
+	void setPos(float px, float py, float pz) {
+		pos_x = px, pos_y = py, pos_z = pz;
+	}
+	void setScale(float sx, float sy, float sz) {
+		scale_x = sx, scale_y = sy, scale_z = sz;
+	}
+
+public:
+	float getPosX() { return pos_x; }
+	float getPosY() { return pos_y; }
+	float getPosZ() { return pos_z; }
+	float getScaleX() { return scale_x; }
+	float getScaleY() { return scale_y; }
+	float getScaleZ() { return scale_z; }
+};
+
+class NPC_Building : public NPC_MapObject
+{
+public:
+	NPC_Building() : NPC_MapObject() {}
+	NPC_Building(float px, float py, float pz, float sx, float sy, float sz) : NPC_MapObject(px, py, pz, sx, sy, sz) {}
+
+public:
+	BoundingOrientedBox m_xoobb;
+
+public:
+	void setBB() {
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()),
+			XMFLOAT3(this->getScaleX(), this->getScaleY(), this->getScaleZ()),
+			XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
+	XMFLOAT3 getPos() { return XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()); }
+};
+
+struct Node {
+	int id;
+	vector<int> neighbors;
+	NPC_Building allow_Building_info; // 건물 정보를 저장할 멤버 변수
+};
+
+class Graph {
+private:
+	vector<Node> nodes;
+
+public:
+	void addNode(Node node, NPC_Building Building_info) {
+		node.allow_Building_info = Building_info; // 건물 정보 설정
+		nodes.push_back(node);
+	}
+
+	void addEdge(int node1, int node2) {
+		nodes[node1].neighbors.push_back(node2);
+		nodes[node2].neighbors.push_back(node1);
+	}
+
+	vector<Node> getNodes() const {
+		return nodes;
+	}
+};
+
 struct Npc_Vector3
 {
 	float x, y, z;
@@ -121,6 +198,8 @@ public:
 	BoundingFrustum m_frustum;
 
 	Npc_Vector3 Npc_defaultVec{ -9999.f, -9999.f, -9999.f };
+	vector<NPC_Building> npc_buildings_info;
+
 public:
 	// ===========================================
 	// =============      BASE      ==============
@@ -147,7 +226,8 @@ public:
 	void SetDistance(float dis);
 	void SetSpeed(float spd);
 	void SetFrustum();
-	void SetBuildingInfo(XMFLOAT3 bPos, XMFLOAT3 bScale);
+	void SetBuildingInfo(int id, XMFLOAT3 bPos, XMFLOAT3 bScale);
+	void SetBuildingNode();
 	// ===========================================
 	// =============       GET      ==============
 	// ===========================================
@@ -169,7 +249,6 @@ public:
 	vector<City_Info>GetCityInfo();
 	XMFLOAT3 GetBuildingInfo(int id);
 public:
-
 	// ===========================================
 	// =============     NORMAL     ==============
 	// ===========================================
@@ -214,7 +293,7 @@ public:
 	// Building Collide
 	void BuildingToNPC_Distance();
 	void NPCtoBuilding_collide();
-
+	bool isPathPossible(const NPC_Building& building1, const NPC_Building& building2);
 
 	// Ray Cast
 	Npc_Vector3 NPC_calcCrossProduct(Npc_Vector3 lval, Npc_Vector3 rval);
