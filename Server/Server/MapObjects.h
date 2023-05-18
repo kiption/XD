@@ -18,7 +18,7 @@ public:
 	}
 	MapObject(float px, float py, float pz, float sx, float sy, float sz) {
 		pos_x = px, pos_y = py, pos_z = pz;
-		scale_x = sz, scale_y = sy, scale_z = sz;
+		scale_x = sx, scale_y = sy, scale_z = sz;
 	}
 
 public:
@@ -26,7 +26,7 @@ public:
 		pos_x = px, pos_y = py, pos_z = pz;
 	}
 	void setScale(float sx, float sy, float sz) {
-		scale_x = sz, scale_y = sy, scale_z = sz;
+		scale_x = sx, scale_y = sy, scale_z = sz;
 	}
 
 public:
