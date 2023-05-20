@@ -21,7 +21,7 @@ using namespace std;
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_CONNECT };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_RUNNING_SERVER, ST_DOWN_SERVER };
-enum SESSION_TYPE { SESSION_CLIENT, SESSION_EXTENDED_SERVER, SESSION_RELAY };
+enum SESSION_TYPE { SESSION_CLIENT, SESSION_EXTENDED_SERVER, SESSION_NPC };
 
 Coordinate basic_coordinate;	// 기본(초기) 좌표계
 
@@ -212,10 +212,12 @@ public:
 };
 
 array<SESSION, MAX_USER> clients;
+SESSION npc_server;
 array<ST1_NPC, MAX_NPCS> npcs;
 
 HANDLE h_iocp;				// IOCP 핸들
 SOCKET g_sc_listensock;		// 클라이언트 통신 listen소켓
+SOCKET g_npc_listensock;	// NPC서버 통신 listen소켓
 SOCKET g_ss_listensock;		// 수평확장 서버 간 통신 listen 소켓
 SOCKET g_relay_sock;		// 릴레이서버 간 통신 listen 소켓
 
@@ -225,7 +227,6 @@ SOCKET right_ex_server_sock;							// 다음 번호의 서버
 int my_server_id;										// 내 서버 식별번호
 bool b_active_server;									// Active 서버인가?
 array<HA_SERVER, MAX_LOGIC_SERVER> extended_servers;	// HA구현을 위해 수평확장된 서버들
-HA_SERVER relayserver;	// 릴레이서버
 
 
 void SESSION::send_login_info_packet()
@@ -355,6 +356,12 @@ void disconnect(int target_id, int target)
 		}
 		break;
 
+	case SESSION_NPC:
+		cout << "NPC 서버가 다운되었습니다." << endl;
+		closesocket(npc_server.socket);
+		npc_server.socket = 0;
+		break;
+
 	case SESSION_EXTENDED_SERVER:
 	{
 		extended_servers[target_id].s_lock.lock();
@@ -442,20 +449,7 @@ void disconnect(int target_id, int target)
 		}
 		break;
 	}
-	case SESSION_RELAY:
-		relayserver.s_lock.lock();
-		if (relayserver.s_state == ST_FREE) {
-			relayserver.s_lock.unlock();
-			return;
-		}
-		closesocket(relayserver.socket);
-		relayserver.s_state = ST_FREE;
-		relayserver.s_lock.unlock();
-
-		cout << "릴레이서버[" << relayserver.id << "]와의 연결이 끊겼습니다." << endl;	// server message
-		break;
 	}
-
 }
 
 void process_packet(int client_id, char* packet)
@@ -823,8 +817,8 @@ void process_packet(int client_id, char* packet)
 
 				// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
 				Cube pl_obj{ exc_XMFtoMyVec(cl.pos), HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
-				MyVector3 tmp_intersect = MyRaycast_LimitDistance(MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y - HELI_BOXSIZE_Y/2.0f, clients[client_id].pos.z }
-																, exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj, BULLET_RANGE);
+				MyVector3 tmp_intersect = MyRaycast_LimitDistance(MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y - HELI_BOXSIZE_Y / 2.0f, clients[client_id].pos.z }
+				, exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj, BULLET_RANGE);
 
 				// 충돌했다면
 				if (tmp_intersect != defaultVec) {
@@ -898,7 +892,7 @@ void process_packet(int client_id, char* packet)
 			for (auto& building : buildings_info) {
 				Cube bd_obj{ exc_XMFtoMyVec(building.getPos()), building.getScaleX(), building.getScaleY(), building.getScaleZ() };
 				MyVector3 bd_intersect = MyRaycast_LimitDistance(MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y - HELI_BOXSIZE_Y / 2.0f, clients[client_id].pos.z }
-																, exc_XMFtoMyVec(clients[client_id].m_lookvec), bd_obj, BULLET_RANGE);
+				, exc_XMFtoMyVec(clients[client_id].m_lookvec), bd_obj, BULLET_RANGE);
 				if (bd_intersect != defaultVec) {
 					cout << "Bullet Collide with Building.\n" << endl;
 					break;
@@ -1092,6 +1086,36 @@ void process_packet(int client_id, char* packet)
 		//cout << "===================================\n" << endl;
 
 	}// SS_DATA_REPLICA end
+	case NPC_FULL_INFO:
+	{
+		NPC_FULL_INFO_PACKET* npc_info_pack = reinterpret_cast<NPC_FULL_INFO_PACKET*>(packet);
+
+	}// NPC_FULL_INFO end
+	case NPC_MOVE:
+	{
+		NPC_MOVE_PACKET* npc_move_pack = reinterpret_cast<NPC_MOVE_PACKET*>(packet);
+
+	}// NPC_MOVE end
+	case NPC_ROTATE:
+	{
+		NPC_ROTATE_PACKET* npc_rotate_pack = reinterpret_cast<NPC_ROTATE_PACKET*>(packet);
+
+	}// NPC_ROTATE end
+	case NPC_MOVE_ROTATE:
+	{
+		NPC_MOVE_ROTATE_PACKET* npc_mvrt_pack = reinterpret_cast<NPC_MOVE_ROTATE_PACKET*>(packet);
+
+	}// NPC_MOVE_ROTATE end
+	case NPC_REMOVE:
+	{
+		NPC_REMOVE_PACKET* npc_remove_pack = reinterpret_cast<NPC_REMOVE_PACKET*>(packet);
+
+	}// NPC_REMOVE end
+	case NPC_CHANGE_STATE:
+	{
+		NPC_CHANGE_STATE_PACKET* npc_chgstate_pack = reinterpret_cast<NPC_CHANGE_STATE_PACKET*>(packet);
+
+	}// NPC_CHANGE_STATE_PACKET end
 	}
 }
 
@@ -1192,9 +1216,11 @@ void do_worker()
 					if (ex_over->process_type == OP_SEND) delete ex_over;
 					continue;
 				}
-				// 2. RelayServer Error
-				else if (key >= CP_KEY_LOGIC2RELAY && key < CP_KEY_LOGIC2EXLOGIC) {
-
+				// 2. NPC Server Error
+				else if (key >= CP_KEY_LOGIC2NPC && key <= CP_KEY_LISTEN_NPC) {
+					disconnect(0, SESSION_NPC);
+					if (ex_over->process_type == OP_SEND) delete ex_over;
+					continue;
 				}
 				// 3. Ex_Server Error
 				else if (key >= CP_KEY_LOGIC2EXLOGIC && key <= CP_KEY_LISTEN_EXLOGIC) {
@@ -1233,7 +1259,22 @@ void do_worker()
 				int addr_size = sizeof(SOCKADDR_IN);
 				AcceptEx(g_sc_listensock, c_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
 			}
-			// 2. Ex_Server Accept
+			// 2. Npc Server Accept
+			else if (key == CP_KEY_LISTEN_NPC) {
+				SOCKET npc_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
+				npc_server.socket = npc_socket;
+				cout << "NPC 서버의 연결요청을 받았습니다.\n" << endl;
+				int new_key = CP_KEY_LOGIC2NPC;
+				CreateIoCompletionPort(reinterpret_cast<HANDLE>(npc_socket), h_iocp, new_key, 0);
+				npc_server.do_recv();
+				npc_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+
+				ZeroMemory(&ex_over->overlapped, sizeof(ex_over->overlapped));
+				ex_over->wsabuf.buf = reinterpret_cast<CHAR*>(npc_socket);
+				int addr_size = sizeof(SOCKADDR_IN);
+				AcceptEx(g_npc_listensock, npc_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
+			}
+			// 3. Ex_Server Accept
 			else if (key == CP_KEY_LISTEN_EXLOGIC) {
 				SOCKET extended_server_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
 				left_ex_server_sock = extended_server_socket;
@@ -1283,9 +1324,26 @@ void do_worker()
 				}
 				clients[recved_id].do_recv();
 			}
-			// 2. RelayServer Recv
-			else if (key >= CP_KEY_LOGIC2RELAY && key < CP_KEY_LOGIC2EXLOGIC) {
+			// 2. NPC Server Recv
+			else if (key >= CP_KEY_LOGIC2NPC && key < CP_KEY_LISTEN_NPC) {
+				if (0 == num_bytes) disconnect(key, SESSION_NPC);
 
+				int remain_data = num_bytes + npc_server.remain_size;
+				char* p = ex_over->send_buf;
+				while (remain_data > 0) {
+					int packet_size = p[0];
+					if (packet_size <= remain_data) {
+						process_packet(0, p);
+						p = p + packet_size;
+						remain_data = remain_data - packet_size;
+					}
+					else break;
+				}
+				npc_server.remain_size = remain_data;
+				if (remain_data > 0) {
+					memcpy(ex_over->send_buf, p, remain_data);
+				}
+				npc_server.do_recv();
 			}
 			// 3. Ex_Server Recv
 			else if (key >= CP_KEY_LOGIC2EXLOGIC && key <= CP_KEY_LISTEN_EXLOGIC) {
@@ -1319,9 +1377,10 @@ void do_worker()
 				if (0 == num_bytes) disconnect(key - CP_KEY_LOGIC2CLIENT, SESSION_CLIENT);
 				delete ex_over;
 			}
-			// 2. RelayServer Send
-			else if (key >= CP_KEY_LOGIC2RELAY && key < CP_KEY_LOGIC2EXLOGIC) {
-
+			// 2. NPC Server Send
+			else if (key >= CP_KEY_LOGIC2NPC && key <= CP_KEY_LISTEN_NPC) {
+				if (0 == num_bytes) disconnect(0, SESSION_NPC);
+				delete ex_over;
 			}
 			// 3. Ex_Server Send
 			else if (key >= CP_KEY_LOGIC2EXLOGIC && key <= CP_KEY_LISTEN_EXLOGIC) {
@@ -1667,6 +1726,7 @@ int main(int argc, char* argv[])
 	my_server_id = 0;		// 서버 구분을 위한 지정번호
 	int sc_portnum = -1;	// 클라이언트 통신용 포트번호
 	int ss_portnum = -1;	// 서버 간 통신용 포트번호
+	int snpc_portnum = -1;	// npc서버 통신용 포트번호
 	if (argc > 1) {			// 입력된 명령행 인수가 있을 때 (주로 서버다운으로 인한 서버 재실행때 사용됨)
 		// Serve ID지정
 		my_server_id = atoi(argv[1]) % 10;
@@ -1723,10 +1783,12 @@ int main(int argc, char* argv[])
 	case 0:	// 0번 서버
 		sc_portnum = PORTNUM_LOGIC_0;
 		ss_portnum = HA_PORTNUM_S0;
+		snpc_portnum = PORTNUM_LGCNPC_0;
 		break;
 	case 1:	// 1번 서버
 		sc_portnum = PORTNUM_LOGIC_1;
 		ss_portnum = HA_PORTNUM_S1;
+		snpc_portnum = PORTNUM_LGCNPC_1;
 		break;
 	default:
 		cout << "잘못된 값이 입력되었습니다. 프로그램을 종료합니다." << endl;
@@ -1735,7 +1797,7 @@ int main(int argc, char* argv[])
 	cout << "Server[" << my_server_id << "] 가 가동되었습니다. [ MODE: ";
 	if (b_active_server) cout << "Acitve";
 	else cout << "Stand-By";
-	cout << " / S - C PORT : " << sc_portnum << " / S - S PORT : " << ss_portnum << " ]" << endl;
+	cout << " / S - C PORT : " << sc_portnum << " / S - S PORT : " << ss_portnum << " / S - NPC PORT : " << snpc_portnum << " ]" << endl;
 
 
 	//======================================================================
@@ -1949,6 +2011,31 @@ int main(int argc, char* argv[])
 	a_over.wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
 	AcceptEx(g_sc_listensock, c_socket, a_over.send_buf, 0, addr_size + 16, addr_size + 16, 0, &a_over.overlapped);
 
+	//======================================================================
+	// [ Main - NPC서버 연결 ]
+	// NPC Listen Socket (로직서버-NPC서버 통신을 위한 Listen소켓)
+	g_npc_listensock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	SOCKADDR_IN server_addr2;
+	memset(&server_addr, 0, sizeof(server_addr2));
+	server_addr2.sin_family = AF_INET;
+	server_addr2.sin_port = htons(snpc_portnum);
+	server_addr2.sin_addr.S_un.S_addr = INADDR_ANY;
+	bind(g_npc_listensock, reinterpret_cast<sockaddr*>(&server_addr2), sizeof(server_addr2));
+	listen(g_npc_listensock, SOMAXCONN);
+	SOCKADDR_IN npc_addr;
+	int addr_size2 = sizeof(npc_addr);
+	int npc_id = 0;
+
+	// NPC Accept
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_npc_listensock), h_iocp, CP_KEY_LISTEN_NPC, 0);
+	SOCKET npc_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	OVER_EX a_over2;
+	a_over2.process_type = OP_ACCEPT;
+	a_over2.wsabuf.buf = reinterpret_cast<CHAR*>(npc_socket);
+	AcceptEx(g_npc_listensock, npc_socket, a_over2.send_buf, 0, addr_size2 + 16, addr_size2 + 16, 0, &a_over2.overlapped);
+
+	//======================================================================
+	// [ Main - 스레드 생성 ]
 	vector <thread> worker_threads;
 	for (int i = 0; i < 5; ++i)
 		worker_threads.emplace_back(do_worker);			// 클라이언트-서버 통신용 Worker스레드

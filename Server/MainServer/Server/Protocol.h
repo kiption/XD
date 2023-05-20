@@ -19,6 +19,11 @@ constexpr int MAX_LOGIC_SERVER = 2;
 constexpr int PORTNUM_LOGIC_0 = 9920;
 constexpr int PORTNUM_LOGIC_1 = 9921;
 
+// [NPC서버분리] 로직서버-NPC서버 통신
+constexpr int MAX_NPC_SERVER = 2;
+constexpr int PORTNUM_LGCNPC_0 = 9930;
+constexpr int PORTNUM_LGCNPC_1 = 9931;
+
 // [수평확장] 로직서버-로직서버 통신
 constexpr int HA_PORTNUM_S0 = 10020;
 constexpr int HA_PORTNUM_S1 = 10021;
@@ -38,6 +43,9 @@ constexpr int MAX_USER = 3;
 constexpr int MAX_NPCS = 5;
 constexpr int MAX_BULLET = 10;
 
+constexpr int ID_VALUE_PLAYER = 100;	// Player의 고유 ID값. (ID_VALUE_PLAYER + client_id)
+constexpr int ID_VALUE_NPC = 200;		// Npc의 고유 ID값. (ID_VALUE_NPC + npc_id)
+
 constexpr int WORLD_X_POS = 2000;
 constexpr int WORLD_Y_POS = 2000;
 constexpr int WORLD_Z_POS = 2000;
@@ -56,6 +64,7 @@ enum PacketID {
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
 	, SC_DAMAGED, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_BULLET_COUNT, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
+	, NPC_FULL_INFO, NPC_MOVE, NPC_ROTATE, NPC_MOVE_ROTATE, NPC_REMOVE, NPC_CHANGE_STATE
 };
 
 enum PLAYER_STATE { PL_ST_IDLE, PL_ST_MOVE, PL_ST_FLY, PL_ST_CHASE, PL_ST_ATTACK, PL_ST_DEAD };
@@ -66,7 +75,7 @@ enum TargetType { TARGET_PLAYER, TARGET_BULLET, TARGET_NPC };
 // Packets ( CS: Client->Server, SC: Server->Client, SS: Server->Other Server )
 #pragma pack (push, 1)
 // ================================
-//			1. CS Packet
+//			1. C-S Packet
 // ================================
 // 1) 로그인 관련 패킷
 struct CS_LOGIN_PACKET {
@@ -130,7 +139,7 @@ struct CS_RELOGIN_PACKET {
 };
 
 // ================================
-//			2. SC Packet
+//			2. S-C Packet
 // ================================
 // 1) 객체 생성 및 제거 관련 패킷
 struct SC_LOGIN_INFO_PACKET {
@@ -259,7 +268,7 @@ struct SC_ACTIVE_DOWN_PACKET {	// 현재는 클라-서버 -> 추후에 클라-릴레이서버 로 
 };
 
 // ================================
-//			3. SS Packet
+//			3. S-S Packet
 // ================================
 struct SS_CONNECT_PACKET {
 	unsigned char size;
@@ -288,5 +297,59 @@ struct SS_DATA_REPLICA_PACKET {
 	short hp;
 	short bullet_cnt;
 	short curr_stage;
+};
+
+// ================================
+//			4. NPC Packet
+// ================================
+struct NPC_FULL_INFO_PACKET {
+	unsigned char size;
+	char type;
+	short n_id;
+	char name[20];
+	int hp;
+	float x, y, z;
+	float right_x, right_y, right_z;
+	float up_x, up_y, up_z;
+	float look_x, look_y, look_z;
+};
+
+struct NPC_MOVE_PACKET {
+	unsigned char size;
+	char type;
+	short n_id;
+	float x, y, z;
+};
+
+struct NPC_ROTATE_PACKET {
+	unsigned char size;
+	char type;
+	short n_id;
+	float right_x, right_y, right_z;
+	float up_x, up_y, up_z;
+	float look_x, look_y, look_z;
+};
+
+struct NPC_MOVE_ROTATE_PACKET {
+	unsigned char size;
+	char type;
+	short n_id;
+	float x, y, z;
+	float right_x, right_y, right_z;
+	float up_x, up_y, up_z;
+	float look_x, look_y, look_z;
+};
+
+struct NPC_REMOVE_PACKET {
+	unsigned char size;
+	char type;
+	short n_id;
+};
+
+struct NPC_CHANGE_STATE_PACKET {
+	unsigned char size;
+	char type;
+	short n_id;
+	short state;
 };
 #pragma pack (pop)
