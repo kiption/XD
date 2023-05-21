@@ -5,17 +5,17 @@
 #include <WS2tcpip.h>
 #include <MSWSock.h>
 #include <thread>
+#include <mutex>
 #include <array>
 #include <vector>
 #include <chrono>
 #include <random>
 #include <queue>
-#include <mutex>
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
 
 //============================================================
-//						다이렉트X API
+//						 DirectX API
 //============================================================
 #include <d3d12.h>
 #include <dxgi1_4.h>
@@ -29,6 +29,9 @@
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "dxguid.lib")
 
+using namespace DirectX;
+using namespace DirectX::PackedVector;
+
 //============================================================
 //			메인서버에서 사용한 것들을 그대로 사용
 //============================================================
@@ -40,12 +43,6 @@
 
 using namespace std;
 using namespace chrono;
-
-using namespace DirectX;
-using namespace DirectX::PackedVector;
-
-enum PACKET_PROCESS_TYPE { OP_RECV, OP_SEND, OP_CONNECT };
-enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_RUNNING_SERVER, ST_DOWN_SERVER };
 
 system_clock::time_point g_s_start_time;	// 서버 시작시간  (단위: ms)
 milliseconds g_curr_servertime;
@@ -65,6 +62,86 @@ struct Coordinate {
 Coordinate basic_coordinate;	// 기본(초기) 좌표계
 
 //======================================================================
+class OBJECT {
+public:
+	mutex obj_lock;
+
+	int id;
+	char name[NAME_SIZE];
+
+	short state;	// PLAYER_STATE
+	int hp;
+	int remain_bullet;
+
+	XMFLOAT3 pos;									// Position (x, y, z)
+	float pitch, yaw, roll;							// Rotated Degree
+	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;		// 현재 Look, Right, Up Vectors
+
+	BoundingOrientedBox m_xoobb;	// Bounding Box
+
+public:
+	OBJECT()
+	{
+		id = -1;
+		name[0] = 0;
+
+		state = PL_ST_IDLE;
+		hp = 1000;
+		remain_bullet = MAX_BULLET;
+
+		pos = { 0.0f, 0.0f, 0.0f };
+		pitch = yaw = roll = 0.0f;
+		m_rightvec = { 1.0f, 0.0f, 0.0f };
+		m_upvec = { 0.0f, 1.0f, 0.0f };
+		m_lookvec = { 0.0f, 0.0f, 1.0f };
+
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
+
+	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
+	void memberClear()
+	{
+		id = -1;
+		name[0] = 0;
+
+		state = PL_ST_IDLE;
+		hp = 1000;
+		remain_bullet = MAX_BULLET;
+
+		pos = { 0.0f, 0.0f, 0.0f };
+		pitch = yaw = roll = 0.0f;
+		m_rightvec = { 1.0f, 0.0f, 0.0f };
+		m_upvec = { 0.0f, 1.0f, 0.0f };
+		m_lookvec = { 0.0f, 0.0f, 1.0f };
+
+		setBB();
+	}
+};
+
+//======================================================================
+class PLAYER : public OBJECT {
+public:
+	PLAYER() : OBJECT()
+	{
+		hp = HELI_MAXHP;
+	}
+};
+
+array<PLAYER, MAX_USER> playersInfo;
+
+//======================================================================
+class NPC : public OBJECT {
+public:
+	NPC() : OBJECT() {
+		hp = HELI_MAXHP;
+	}
+};
+
+array<NPC, MAX_NPCS> npcsInfo;
+
+//======================================================================
+enum PACKET_PROCESS_TYPE { OP_RECV, OP_SEND, OP_CONNECT };
+
 class OVER_EX {
 public:
 	WSAOVERLAPPED overlapped;
@@ -91,75 +168,7 @@ public:
 };
 
 //======================================================================
-class SESSION {
-	OVER_EX recv_over;
-
-public:
-	mutex s_lock;
-
-	SESSION_STATE s_state;
-	int id;
-	char name[NAME_SIZE];
-
-	short pl_state;	// PLAYER_STATE
-	int hp;
-	int remain_bullet;
-
-	XMFLOAT3 pos;									// Position (x, y, z)
-	float pitch, yaw, roll;							// Rotated Degree
-	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;		// 현재 Look, Right, Up Vectors
-
-	chrono::system_clock::time_point shoot_time;	// 총을 발사한 시간
-	chrono::system_clock::time_point reload_time;	// 총알 장전 시작시간
-
-	BoundingOrientedBox m_xoobb;	// Bounding Box
-
-public:
-	SESSION()
-	{
-		s_state = ST_FREE;
-		id = -1;
-		name[0] = 0;
-
-		pl_state = PL_ST_IDLE;
-		hp = 1000;
-		remain_bullet = MAX_BULLET;
-
-		pos = { 0.0f, 0.0f, 0.0f };
-		pitch = yaw = roll = 0.0f;
-		m_rightvec = { 1.0f, 0.0f, 0.0f };
-		m_upvec = { 0.0f, 1.0f, 0.0f };
-		m_lookvec = { 0.0f, 0.0f, 1.0f };
-
-		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
-	}
-
-	~SESSION() {}
-
-	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
-	void sessionClear() {
-		s_state = ST_FREE;
-		id = -1;
-		name[0] = 0;
-
-		pl_state = PL_ST_IDLE;
-		hp = 1000;
-		remain_bullet = MAX_BULLET;
-
-		pos = { 0.0f, 0.0f, 0.0f };
-		pitch = yaw = roll = 0.0f;
-		m_rightvec = { 1.0f, 0.0f, 0.0f };
-		m_upvec = { 0.0f, 1.0f, 0.0f };
-		m_lookvec = { 0.0f, 0.0f, 1.0f };
-
-		setBB();
-	}
-};
-array<SESSION, MAX_USER> playersInfo;
-array<SESSION, MAX_NPCS> npcsInfo;
-
-//======================================================================
-class LogicServer {
+class SERVER {
 public:
 	OVER_EX recv_over;
 	int remain_size;
@@ -167,7 +176,7 @@ public:
 	SOCKET sock;
 
 public:
-	LogicServer() {	remain_size = 0; id = -1; sock = 0; }
+	SERVER() { remain_size = 0; id = -1; sock = 0; }
 
 public:
 	void do_recv()
@@ -201,11 +210,12 @@ public:
 	void send_npc_rotate_packet(int npc_id);
 	void send_npc_move_rotate_packet(int npc_id);
 };
+
 HANDLE h_iocp;											// IOCP 핸들
 int a_lgcsvr_num;										// Active상태인 메인서버
-array<LogicServer, MAX_LOGIC_SERVER> g_logicservers;	// 로직서버 정보
+array<SERVER, MAX_LOGIC_SERVER> g_logicservers;			// 로직서버 정보
 
-void LogicServer::send_npc_init_packet(int npc_id) {
+void SERVER::send_npc_init_packet(int npc_id) {
 	NPC_FULL_INFO_PACKET npc_init_packet;
 	npc_init_packet.size = sizeof(NPC_MOVE_PACKET);
 	npc_init_packet.type = NPC_ROTATE;
@@ -224,7 +234,7 @@ void LogicServer::send_npc_init_packet(int npc_id) {
 	npc_init_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
 	g_logicservers[a_lgcsvr_num].do_send(&npc_init_packet);
 }
-void LogicServer::send_npc_move_packet(int npc_id) {
+void SERVER::send_npc_move_packet(int npc_id) {
 	NPC_MOVE_PACKET npc_move_packet;
 	npc_move_packet.size = sizeof(NPC_MOVE_PACKET);
 	npc_move_packet.type = NPC_MOVE;
@@ -233,7 +243,7 @@ void LogicServer::send_npc_move_packet(int npc_id) {
 	npc_move_packet.z = npcsInfo[npc_id].pos.z;
 	g_logicservers[a_lgcsvr_num].do_send(&npc_move_packet);
 }
-void LogicServer::send_npc_rotate_packet(int npc_id) {
+void SERVER::send_npc_rotate_packet(int npc_id) {
 	NPC_ROTATE_PACKET npc_rotate_packet;
 	npc_rotate_packet.size = sizeof(NPC_MOVE_PACKET);
 	npc_rotate_packet.type = NPC_ROTATE;
@@ -248,7 +258,7 @@ void LogicServer::send_npc_rotate_packet(int npc_id) {
 	npc_rotate_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
 	g_logicservers[a_lgcsvr_num].do_send(&npc_rotate_packet);
 }
-void LogicServer::send_npc_move_rotate_packet(int npc_id) {
+void SERVER::send_npc_move_rotate_packet(int npc_id) {
 	NPC_MOVE_PACKET npc_mv_packet;
 	npc_mv_packet.size = sizeof(NPC_MOVE_PACKET);
 	npc_mv_packet.type = NPC_MOVE;
@@ -271,6 +281,7 @@ void LogicServer::send_npc_move_rotate_packet(int npc_id) {
 	npc_rt_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
 	g_logicservers[a_lgcsvr_num].do_send(&npc_rt_packet);
 }
+
 
 //======================================================================
 void process_packet(char* packet)
@@ -301,6 +312,10 @@ void process_packet(char* packet)
 		playersInfo[client_id].m_lookvec.y = login_packet->look_y;
 		playersInfo[client_id].m_lookvec.z = login_packet->look_z;
 
+		cout << "[Add New Player] Player[ID:" << client_id << ", Name:" << playersInfo[client_id].name << "]의 정보를 받았습니다." << endl;
+		cout << "POS: (" << playersInfo[client_id].pos.x << ", " << playersInfo[client_id].pos.y << ", " << playersInfo[client_id].pos.z << "), ";
+		cout << "Look: (" << playersInfo[client_id].m_lookvec.x << ", " << playersInfo[client_id].m_lookvec.y << ", " << playersInfo[client_id].m_lookvec.z << ")\n" << endl;
+
 		break;
 	}// SC_ADD_OBJECT end
 	case SC_MOVE_OBJECT:
@@ -312,6 +327,9 @@ void process_packet(char* packet)
 		playersInfo[client_id].pos.x = move_packet->x;
 		playersInfo[client_id].pos.y = move_packet->y;
 		playersInfo[client_id].pos.z = move_packet->z;
+
+		cout << "[Move Player] Player[ID:" << client_id << "]가 이동하였습니다." << endl;
+		cout << "New POS: (" << playersInfo[client_id].pos.x << ", " << playersInfo[client_id].pos.y << ", " << playersInfo[client_id].pos.z << ")\n" << endl;
 
 		break;
 	}// SC_MOVE_OBJECT end
@@ -332,6 +350,9 @@ void process_packet(char* packet)
 		playersInfo[client_id].m_lookvec.x = rotate_packet->look_x;
 		playersInfo[client_id].m_lookvec.y = rotate_packet->look_y;
 		playersInfo[client_id].m_lookvec.z = rotate_packet->look_z;
+
+		cout << "[Rotate Player] Player[ID:" << client_id << "]가 회전하였습니다." << endl;
+		cout << "New Look: (" << playersInfo[client_id].m_lookvec.x << ", " << playersInfo[client_id].m_lookvec.y << ", " << playersInfo[client_id].m_lookvec.z << ")\n" << endl;
 
 		break;
 	}// SC_ROTATE_OBJECT end
@@ -363,15 +384,22 @@ void process_packet(char* packet)
 	{
 		SC_REMOVE_OBJECT_PACKET* remove_packet = reinterpret_cast<SC_REMOVE_OBJECT_PACKET*>(packet);
 		int client_id = remove_packet->id;
-		playersInfo[client_id].sessionClear();
+		playersInfo[client_id].memberClear();
+
+		cout << "[Remove Player] Player[ID:" << client_id << "]가 접속을 종료하였습니다.\n" << endl;
 
 		break;
 	}// SC_REMOVE_OBJECT end
 	case SC_DAMAGED:
 	{
 		SC_DAMAGED_PACKET* damaged_packet = reinterpret_cast<SC_DAMAGED_PACKET*>(packet);
-		int client_id = damaged_packet->id;
-		playersInfo[client_id].hp -= damaged_packet->damage;
+		int obj_id = damaged_packet->id;
+		if (damaged_packet->target == TARGET_PLAYER) {
+			playersInfo[obj_id].hp -= damaged_packet->damage;
+		}
+		else if (damaged_packet->target == TARGET_NPC) {
+
+		}
 
 		break;
 	}// SC_DAMAGED end
@@ -379,13 +407,14 @@ void process_packet(char* packet)
 	{
 		SC_OBJECT_STATE_PACKET* chgstate_packet = reinterpret_cast<SC_OBJECT_STATE_PACKET*>(packet);
 		int client_id = chgstate_packet->id;
-		playersInfo[client_id].pl_state = chgstate_packet->state;
+		playersInfo[client_id].state = chgstate_packet->state;
 
 		break;
 	}// SC_OBJECT_STATE end
 	}
 }
 
+//======================================================================
 void do_worker()
 {
 	while (true) {
@@ -509,12 +538,23 @@ void do_worker()
 	}
 }
 
+//======================================================================
+void initNpc() {
+	cout << "NPC Initialize... ";
 
+
+	cout << " --- OK.\n" << endl;
+}
+
+//======================================================================
 void timerFunc() {
 	while (true) {
 		auto start_t = system_clock::now();
+		//======================================================================
 
 
+
+		//======================================================================
 		auto curr_t = system_clock::now();
 		if (curr_t - start_t < 33ms) {
 			this_thread::sleep_for(33ms - (curr_t - start_t));
@@ -522,7 +562,7 @@ void timerFunc() {
 	}
 }
 
-
+//======================================================================
 int main(int argc, char* argv[])
 {
 	WSADATA WSAData;
@@ -593,7 +633,7 @@ int main(int argc, char* argv[])
 	//======================================================================
 	//							NPC Initialize
 	//======================================================================
-	//init_npc();
+	initNpc();
 
 
 	//======================================================================

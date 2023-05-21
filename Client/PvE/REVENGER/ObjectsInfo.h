@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
 #include <vector>
-#include "../../../Server/Server/Protocol.h"
+#include "../../../Server/MainServer/Server/Protocol.h"
 
 enum OBJECT_STATE { OBJ_ST_EMPTY, OBJ_ST_STANDBY, OBJ_ST_LOGOUT, OBJ_ST_RUNNING };
 struct ObjectsInfo

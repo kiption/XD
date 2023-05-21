@@ -226,6 +226,7 @@ SOCKET right_ex_server_sock;							// 다음 번호의 서버
 
 int my_server_id;										// 내 서버 식별번호
 bool b_active_server;									// Active 서버인가?
+bool b_npcsvr_conn;										// NPC서버가 연결되었는가?
 array<HA_SERVER, MAX_LOGIC_SERVER> extended_servers;	// HA구현을 위해 수평확장된 서버들
 
 
@@ -335,6 +336,7 @@ void disconnect(int target_id, int target)
 
 		cout << "Player[ID: " << clients[target_id].id << ", name: " << clients[target_id].name << " is log out\n" << endl;	// server message
 
+		// 남아있는 모든 클라이언트들에게 target_id번 클라이언트가 접속 종료한 사실을 알립니다.
 		for (int i = 0; i < MAX_USER; i++) {
 			auto& pl = clients[i];
 
@@ -354,12 +356,26 @@ void disconnect(int target_id, int target)
 			pl.do_send(&remove_pl_packet);
 			pl.s_lock.unlock();
 		}
+
+		// NPC 서버에게도 target_id번 클라이언트가 접속 종료한 사실을 알립니다.
+		if (b_npcsvr_conn) {
+			SC_REMOVE_OBJECT_PACKET remove_pl_packet;
+			remove_pl_packet.target = TARGET_PLAYER;
+			remove_pl_packet.id = target_id;
+			remove_pl_packet.size = sizeof(remove_pl_packet);
+			remove_pl_packet.type = SC_REMOVE_OBJECT;
+
+			lock_guard<mutex> lg{ npc_server.s_lock };
+			npc_server.do_send(&remove_pl_packet);
+		}
+
 		break;
 
 	case SESSION_NPC:
 		cout << "NPC 서버가 다운되었습니다." << endl;
 		closesocket(npc_server.socket);
 		npc_server.socket = 0;
+		b_npcsvr_conn = false;
 		break;
 
 	case SESSION_EXTENDED_SERVER:
@@ -513,6 +529,7 @@ void process_packet(int client_id, char* packet)
 
 		//====================
 		// 1. Player 객체 정보
+		//  1) Clients
 		// 현재 접속해 있는 모든 클라이언트에게 새로운 클라이언트(client_id)의 정보를 전송합니다.
 		for (int i = 0; i < MAX_USER; ++i) {
 			auto& pl = clients[i];
@@ -590,6 +607,7 @@ void process_packet(int client_id, char* packet)
 			pl.s_lock.unlock();
 		}
 
+		//  2) NPCs
 		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 NPC의 정보를 전송합니다.
 		for (int i = 0; i < MAX_NPCS; i++) {
 			SC_ADD_OBJECT_PACKET add_npc_packet;
@@ -620,6 +638,34 @@ void process_packet(int client_id, char* packet)
 					clients[j].do_send(&add_npc_packet);
 				}
 			}
+		}
+
+		// NPC서버에 새로 접속한 클라이언트의 정보를 전달합니다.
+		if (b_npcsvr_conn) {
+			SC_ADD_OBJECT_PACKET add_pl_packet;
+			add_pl_packet.target = TARGET_PLAYER;
+			add_pl_packet.id = client_id;
+			strcpy_s(add_pl_packet.name, login_packet->name);
+			add_pl_packet.size = sizeof(add_pl_packet);
+			add_pl_packet.type = SC_ADD_OBJECT;
+
+			add_pl_packet.x = clients[client_id].pos.x;
+			add_pl_packet.y = clients[client_id].pos.y;
+			add_pl_packet.z = clients[client_id].pos.z;
+
+			add_pl_packet.right_x = clients[client_id].m_rightvec.x;
+			add_pl_packet.right_y = clients[client_id].m_rightvec.y;
+			add_pl_packet.right_z = clients[client_id].m_rightvec.z;
+
+			add_pl_packet.up_x = clients[client_id].m_upvec.x;
+			add_pl_packet.up_y = clients[client_id].m_upvec.y;
+			add_pl_packet.up_z = clients[client_id].m_upvec.z;
+
+			add_pl_packet.look_x = clients[client_id].m_lookvec.x;
+			add_pl_packet.look_y = clients[client_id].m_lookvec.y;
+			add_pl_packet.look_z = clients[client_id].m_lookvec.z;
+
+			npc_server.do_send(&add_pl_packet);
 		}
 
 		//====================
@@ -711,6 +757,11 @@ void process_packet(int client_id, char* packet)
 			lock_guard<mutex> lg{ other_pl.s_lock };
 			other_pl.send_move_packet(client_id, TARGET_PLAYER);
 		}
+
+		// 4. NPC 서버에게도 플레이어가 이동한 위치를 알려준다.
+		lock_guard<mutex> lg{ npc_server.s_lock };
+		npc_server.send_move_packet(client_id, TARGET_PLAYER);
+
 		break;
 	}// CS_MOVE end
 	case CS_ROTATE:
@@ -734,6 +785,11 @@ void process_packet(int client_id, char* packet)
 			lock_guard<mutex> lg{ other_pl.s_lock };
 			other_pl.send_rotate_packet(client_id, TARGET_PLAYER);
 		}
+
+		// 4. NPC 서버에게도 플레이어가 회전한 방향를 알려준다.
+		lock_guard<mutex> lg{ npc_server.s_lock };
+		npc_server.send_rotate_packet(client_id, TARGET_PLAYER);
+
 		break;
 	}// CS_ROTATE end
 	case CS_ATTACK:
@@ -1264,6 +1320,7 @@ void do_worker()
 				SOCKET npc_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
 				npc_server.socket = npc_socket;
 				cout << "NPC 서버의 연결요청을 받았습니다.\n" << endl;
+				b_npcsvr_conn = true;
 				int new_key = CP_KEY_LOGIC2NPC;
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(npc_socket), h_iocp, new_key, 0);
 				npc_server.do_recv();
