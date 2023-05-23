@@ -2107,12 +2107,9 @@ void timerFunc() {
 //======================================================================
 void MoveNPC()
 {
-	auto start_t = system_clock::now();
 	while (true) {
-		auto curr_t = system_clock::now();
-		if (curr_t - start_t < 500ms)
-			this_thread::sleep_for(500ms - (curr_t - start_t));
-		start_t = curr_t;
+		auto start_t = system_clock::now();
+		//======================================================================
 
 		for (int i = 0; i < MAX_NPCS; ++i) {
 			// 클라이언트들과 NPC 사이의 거리 계산
@@ -2148,6 +2145,7 @@ void MoveNPC()
 					npcsInfo[i].SetUser_Pos(playersInfo[npcsInfo[i].GetChaseID()].pos, npcsInfo[i].GetChaseID());
 
 					// npc pos 확인
+					cout << "=============" << endl;
 					cout << i << "번째 NPC의 도시 ID: " << npcsInfo[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcsInfo[i].GetIdleSection() << endl;
 					cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
 					cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
@@ -2165,7 +2163,10 @@ void MoveNPC()
 			}
 		}
 
-		cout << "=============" << endl;
+		//======================================================================
+		auto curr_t = system_clock::now();
+		if (curr_t - start_t < 500ms)
+			this_thread::sleep_for(500ms - (curr_t - start_t));
 	}
 }
 
@@ -2252,7 +2253,7 @@ int main(int argc, char* argv[])
 		worker_threads.emplace_back(do_worker);			// 메인서버-npc서버 통신용 Worker스레드
 
 	vector<thread> timer_threads;
-	timer_threads.emplace_back(timerFunc);				// npc 로직 타이머스레드
+	//timer_threads.emplace_back(timerFunc);				// npc 로직 타이머스레드
 	timer_threads.emplace_back(MoveNPC);
 
 	for (auto& th : worker_threads)

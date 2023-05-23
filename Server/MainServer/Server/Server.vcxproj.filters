@@ -16,25 +16,16 @@
     <Filter Include="소스 파일\Map">
       <UniqueIdentifier>{2e8114fa-b11d-4b02-adb4-f6cb49bac482}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Npc">
-      <UniqueIdentifier>{28bda250-22f6-4bae-bb41-7e203182ae37}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="server.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="MapObjects.cpp">
       <Filter>소스 파일\Map</Filter>
     </ClCompile>
-    <ClCompile Include="NPC.cpp">
-      <Filter>소스 파일\Npc</Filter>
+    <ClCompile Include="server.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MyVectors.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Constant.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -49,9 +40,6 @@
     </ClInclude>
     <ClInclude Include="MapObjects.h">
       <Filter>소스 파일\Map</Filter>
-    </ClInclude>
-    <ClInclude Include="NPC.h">
-      <Filter>소스 파일\Npc</Filter>
     </ClInclude>
     <ClInclude Include="Protocol.h">
       <Filter>헤더 파일</Filter>

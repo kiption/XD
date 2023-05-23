@@ -7,31 +7,61 @@
 #include <chrono>
 #include <random>
 
-#include "MapObjects.h"
-#include "Constant.h"
-#include "MathFuncs.h"
-#include "Protocol.h"
-#include "NPC.h"
-#include "Timer.h"
-#include "CP_KEYS.h"
-
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
 using namespace std;
 
+//======================================================================
+#include <d3d12.h>
+#include <dxgi1_4.h>
+#include <D3Dcompiler.h>
+#include <DirectXMath.h>
+#include <DirectXPackedVector.h>
+#include <DirectXCollision.h>
+#include <DirectXCollision.inl>
+#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "dxguid.lib")
+
+using namespace std;
+using namespace DirectX;
+using namespace DirectX::PackedVector;
+
+//======================================================================
+#include "MapObjects.h"
+#include "Constant.h"
+#include "MathFuncs.h"
+#include "Protocol.h"
+#include "Timer.h"
+#include "CP_KEYS.h"
+
+//======================================================================
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_CONNECT };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_RUNNING_SERVER, ST_DOWN_SERVER };
 enum SESSION_TYPE { SESSION_CLIENT, SESSION_EXTENDED_SERVER, SESSION_NPC };
 
+//======================================================================
+struct Coordinate {
+	XMFLOAT3 right;
+	XMFLOAT3 up;
+	XMFLOAT3 look;
+
+	Coordinate() {
+		right = { 1.0f, 0.0f, 0.0f };
+		up = { 0.0f, 1.0f, 0.0f };
+		look = { 0.0f, 0.0f, 1.0f };
+	}
+};
 Coordinate basic_coordinate;	// 기본(초기) 좌표계
 
+//======================================================================
 chrono::system_clock::time_point g_s_start_time;	// 서버 시작시간  (단위: ms)
 milliseconds g_curr_servertime;
 bool b_isfirstplayer;	// 첫 player입장인지. (첫 클라 접속부터 서버시간이 흐르도록 하기 위함)
 mutex servertime_lock;	// 서버시간 lock
 
-vector<City_Info>Cities;
-
+//======================================================================
 class Building : public MapObject
 {
 public:
@@ -53,6 +83,7 @@ vector<Building> buildings_info;	// Map Buildings CollideBox
 MyVector3 exc_XMFtoMyVec(XMFLOAT3 xmf3) { return MyVector3{ xmf3.x, xmf3.y, xmf3.z }; }
 XMFLOAT3 exc_MyVectoXMF(MyVector3 mv3) { return XMFLOAT3{ mv3.x, mv3.y, mv3.z }; }
 
+//======================================================================
 class OVER_EX {
 public:
 	WSAOVERLAPPED overlapped;
@@ -78,6 +109,7 @@ public:
 	}
 };
 
+//======================================================================
 class SESSION {
 	OVER_EX recv_over;
 
@@ -163,72 +195,9 @@ public:
 	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 };
 
-class HA_SERVER {
-	OVER_EX recv_over;
-
-public:
-	mutex s_lock;
-	SESSION_STATE s_state;
-	int id;
-	SOCKET socket;
-	int remain_size;
-	chrono::system_clock::time_point heartbeat_recv_time;
-	chrono::system_clock::time_point heartbeat_send_time;
-
-public:
-	HA_SERVER() {
-		s_state = ST_FREE;
-		id = -1;
-		socket = 0;
-		remain_size = 0;
-		heartbeat_recv_time = chrono::system_clock::now();
-		heartbeat_send_time = chrono::system_clock::now();
-	}
-	~HA_SERVER() {}
-
-	void do_recv() {
-		DWORD recv_flag = 0;
-		memset(&recv_over.overlapped, 0, sizeof(recv_over.overlapped));
-		recv_over.wsabuf.len = BUF_SIZE - remain_size;
-		recv_over.wsabuf.buf = recv_over.send_buf + remain_size;
-
-		int ret = WSARecv(socket, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.overlapped, 0);
-		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "WSARecv Error - " << ret << endl;
-			cout << GetLastError() << endl;
-		}
-	}
-	void do_send(void* packet) {
-		OVER_EX* s_data = new OVER_EX{ reinterpret_cast<char*>(packet) };
-		ZeroMemory(&s_data->overlapped, sizeof(s_data->overlapped));
-
-		//cout << "[do_send] Target ID: " << id << "\n" << endl;
-		int ret = WSASend(socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, 0);
-		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "WSASend Error - " << ret << endl;
-			cout << GetLastError() << endl;
-		}
-	}
-};
-
 array<SESSION, MAX_USER> clients;
 SESSION npc_server;
-array<ST1_NPC, MAX_NPCS> npcs;
-
-HANDLE h_iocp;				// IOCP 핸들
-SOCKET g_sc_listensock;		// 클라이언트 통신 listen소켓
-SOCKET g_npc_listensock;	// NPC서버 통신 listen소켓
-SOCKET g_ss_listensock;		// 수평확장 서버 간 통신 listen 소켓
-SOCKET g_relay_sock;		// 릴레이서버 간 통신 listen 소켓
-
-SOCKET left_ex_server_sock;								// 이전 번호의 서버
-SOCKET right_ex_server_sock;							// 다음 번호의 서버
-
-int my_server_id;										// 내 서버 식별번호
-bool b_active_server;									// Active 서버인가?
-bool b_npcsvr_conn;										// NPC서버가 연결되었는가?
-array<HA_SERVER, MAX_LOGIC_SERVER> extended_servers;	// HA구현을 위해 수평확장된 서버들
-
+array<SESSION, MAX_NPCS> npcs;
 
 void SESSION::send_login_info_packet()
 {
@@ -321,6 +290,71 @@ void SESSION::send_move_rotate_packet(int client_id, short update_target)
 	do_send(&update_pl_packet);
 }
 
+//======================================================================
+class HA_SERVER {
+	OVER_EX recv_over;
+
+public:
+	mutex s_lock;
+	SESSION_STATE s_state;
+	int id;
+	SOCKET socket;
+	int remain_size;
+	chrono::system_clock::time_point heartbeat_recv_time;
+	chrono::system_clock::time_point heartbeat_send_time;
+
+public:
+	HA_SERVER() {
+		s_state = ST_FREE;
+		id = -1;
+		socket = 0;
+		remain_size = 0;
+		heartbeat_recv_time = chrono::system_clock::now();
+		heartbeat_send_time = chrono::system_clock::now();
+	}
+	~HA_SERVER() {}
+
+	void do_recv() {
+		DWORD recv_flag = 0;
+		memset(&recv_over.overlapped, 0, sizeof(recv_over.overlapped));
+		recv_over.wsabuf.len = BUF_SIZE - remain_size;
+		recv_over.wsabuf.buf = recv_over.send_buf + remain_size;
+
+		int ret = WSARecv(socket, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.overlapped, 0);
+		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
+			cout << "WSARecv Error - " << ret << endl;
+			cout << GetLastError() << endl;
+		}
+	}
+	void do_send(void* packet) {
+		OVER_EX* s_data = new OVER_EX{ reinterpret_cast<char*>(packet) };
+		ZeroMemory(&s_data->overlapped, sizeof(s_data->overlapped));
+
+		//cout << "[do_send] Target ID: " << id << "\n" << endl;
+		int ret = WSASend(socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, 0);
+		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
+			cout << "WSASend Error - " << ret << endl;
+			cout << GetLastError() << endl;
+		}
+	}
+};
+array<HA_SERVER, MAX_LOGIC_SERVER> extended_servers;	// HA구현을 위해 수평확장된 서버들
+
+//======================================================================
+HANDLE h_iocp;				// IOCP 핸들
+SOCKET g_sc_listensock;		// 클라이언트 통신 listen소켓
+SOCKET g_npc_listensock;	// NPC서버 통신 listen소켓
+SOCKET g_ss_listensock;		// 수평확장 서버 간 통신 listen 소켓
+SOCKET g_relay_sock;		// 릴레이서버 간 통신 listen 소켓
+
+SOCKET left_ex_server_sock;								// 이전 번호의 서버
+SOCKET right_ex_server_sock;							// 다음 번호의 서버
+
+int my_server_id;										// 내 서버 식별번호
+bool b_active_server;									// Active 서버인가?
+bool b_npcsvr_conn;										// NPC서버가 연결되었는가?
+
+//======================================================================
 void disconnect(int target_id, int target)
 {
 	switch (target) {
@@ -468,6 +502,7 @@ void disconnect(int target_id, int target)
 	}
 }
 
+//======================================================================
 void process_packet(int client_id, char* packet)
 {
 	switch (packet[1]) {
@@ -609,36 +644,7 @@ void process_packet(int client_id, char* packet)
 
 		//  2) NPCs
 		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 NPC의 정보를 전송합니다.
-		for (int i = 0; i < MAX_NPCS; i++) {
-			SC_ADD_OBJECT_PACKET add_npc_packet;
-			add_npc_packet.type = SC_ADD_OBJECT;
-			add_npc_packet.size = sizeof(SC_ADD_OBJECT_PACKET);
-
-			add_npc_packet.id = i;
-			add_npc_packet.target = TARGET_NPC;
-			add_npc_packet.x = npcs[i].GetPosition().x;
-			add_npc_packet.y = npcs[i].GetPosition().y;
-			add_npc_packet.z = npcs[i].GetPosition().z;
-
-			add_npc_packet.right_x = npcs[i].GetCurr_coordinate().right.x;
-			add_npc_packet.right_y = npcs[i].GetCurr_coordinate().right.y;
-			add_npc_packet.right_z = npcs[i].GetCurr_coordinate().right.z;
-
-			add_npc_packet.up_x = npcs[i].GetCurr_coordinate().up.x;
-			add_npc_packet.up_y = npcs[i].GetCurr_coordinate().up.y;
-			add_npc_packet.up_z = npcs[i].GetCurr_coordinate().up.z;
-
-			add_npc_packet.look_x = npcs[i].GetCurr_coordinate().look.x;
-			add_npc_packet.look_y = npcs[i].GetCurr_coordinate().look.y;
-			add_npc_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
-
-			for (int j = 0; j < MAX_USER; j++) {
-				if (clients[j].curr_stage != 1) continue;// NPC는 스테이지1에만 있다.
-				if (clients[j].s_state == ST_INGAME) {
-					clients[j].do_send(&add_npc_packet);
-				}
-			}
-		}
+		
 
 		// NPC서버에 새로 접속한 클라이언트의 정보를 전달합니다.
 		if (b_npcsvr_conn) {
@@ -710,36 +716,7 @@ void process_packet(int client_id, char* packet)
 		// 2) 다른 플레이어
 
 		// 3) NPC
-		for (auto& npc : npcs) {
-			if (npc.GetHp() <= 0) continue;
-			BoundingOrientedBox tmp_xoobb;
-			tmp_xoobb = BoundingOrientedBox(XMFLOAT3(npc.GetPosition().x, npc.GetPosition().y, npc.GetPosition().z),
-				XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
-
-			if (clients[client_id].m_xoobb.Intersects(tmp_xoobb)) {
-				npc.SetHp(npc.GetHp() - COLLIDE_PLAYER_DAMAGE);
-				cout << "NPC[" << npc.GetID() << "] HP: " << npc.GetHp() << endl;
-				// NPC 사망
-				if (npc.GetHp() <= 0) {
-					npc.SetHp(0);
-					SC_OBJECT_STATE_PACKET npc_death_pack;
-					npc_death_pack.type = SC_OBJECT_STATE;
-					npc_death_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
-					npc_death_pack.target = TARGET_NPC;
-					npc_death_pack.id = npc.GetID();
-					npc_death_pack.state = PL_ST_DEAD;
-					cout << "NPC[" << npc_death_pack.id << "] DEATH" << endl;
-					for (auto& cl : clients) {
-						if (cl.s_state != ST_INGAME) continue;
-						if (cl.curr_stage != 1) continue;	// 아직 NPC는 1스테이지에만 있다.
-
-						lock_guard<mutex> lg{ cl.s_lock };
-						cl.do_send(&npc_death_pack);
-					}
-				}
-				// NPC 피해는 클라로 보내줄 필요가 없음. 기획이 바껴서 npc hp도 UI연동을 해야한다면 여기에 else로 이어가면 됨.
-			}
-		}
+		
 		//if (b_isCollide) break;
 
 		// 2. 충돌이 아니라면 세션 정보를 업데이트 한다.
@@ -1175,7 +1152,7 @@ void process_packet(int client_id, char* packet)
 	}
 }
 
-
+//======================================================================
 int get_new_client_id()	// clients의 비어있는 칸을 찾아서 새로운 client의 아이디를 할당해주는 함수
 {
 	for (int i = 0; i < MAX_USER; ++i) {
@@ -1189,6 +1166,8 @@ int get_new_client_id()	// clients의 비어있는 칸을 찾아서 새로운 client의 아이디
 	}
 	return -1;
 }
+
+//======================================================================
 int find_empty_extended_server() {	// ex_servers의 비어있는 칸을 찾아서 새로운 Server_ex의 아이디를 할당해주는 함수
 	for (int i = 0; i < MAX_USER; ++i) {
 		extended_servers[i].s_lock.lock();
@@ -1203,6 +1182,8 @@ int find_empty_extended_server() {	// ex_servers의 비어있는 칸을 찾아서 새로운 S
 	}
 	return -1;
 }
+
+//======================================================================
 void do_worker()
 {
 	while (true) {
@@ -1468,7 +1449,7 @@ void do_worker()
 	}
 }
 
-
+//======================================================================
 void timerFunc() {
 	while (true) {
 		auto start_t = system_clock::now();
@@ -1502,6 +1483,7 @@ void timerFunc() {
 	}
 }
 
+//======================================================================
 void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 	while (true) {
 		auto start_t = system_clock::now();
@@ -1607,168 +1589,7 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 	}
 }
 
-void init_npc()
-{
-	for (int i{}; i < 3; ++i) {
-		City_Info temp;
-		temp.id = i;
-		temp.Centerx = C_cx[i];
-		temp.Centerz = C_cz[i];
-
-		for (int j{}; j < 6; ++j) {
-			temp.SectionNum[j].ID = j;
-			temp.SectionNum[j].lx = LX_range[6 * i + j];
-			temp.SectionNum[j].lz = LZ_range[6 * i + j];
-			temp.SectionNum[j].sx = SX_range[6 * i + j];
-			temp.SectionNum[j].sz = SZ_range[6 * i + j];
-		}
-		Cities.emplace_back(temp);
-	}
-
-	/*for (int i{}; i < Cities.size(); ++i) {
-		Cities[i].print();
-	}*/
-
-	for (int i{}; i < MAX_NPCS; i++) {
-		int npc_id = i;
-		npcs[i].SetID(npc_id);
-		npcs[i].SetNpcType(NPC_Helicopter);
-		npcs[i].SetRotate(0.0f, 0.0f, 0.0f);
-		//npcs[i].SetActive(false);
-
-		random_device rd;
-		default_random_engine dre(rd());
-		uniform_real_distribution<float>AirHigh(50, 270);
-
-		uniform_int_distribution<int>Ci_num(0, 2);
-		uniform_int_distribution<int>Sec_num(0, 5);
-
-		int city_num = Ci_num(dre);
-		int section_num = Sec_num(dre);
-
-		float lx, lz, sx, sz = 0;
-
-		sx = Cities[city_num].SectionNum[section_num].sx;
-		lx = Cities[city_num].SectionNum[section_num].lx;
-		sz = Cities[city_num].SectionNum[section_num].sz;
-		lz = Cities[city_num].SectionNum[section_num].lz;
-
-		npcs[i].SetIdleCity(city_num);
-		npcs[i].SetIdleSection(section_num);
-
-		uniform_real_distribution<float>AirXPos(sx, lx);
-		uniform_real_distribution<float>AirZPos(sz, lz);
-		npcs[i].SetPosition(AirXPos(dre), AirHigh(dre), AirZPos(dre));
-
-		uniform_real_distribution<float>SpdSet(3.5f, 5.2f);
-		float speed = SpdSet(dre);
-		npcs[i].SetSpeed(speed);
-		npcs[i].SetInitSection(Cities);
-
-		for (int j{}; j < buildings_info.size(); ++j) {
-			XMFLOAT3 Build_pos = { buildings_info[j].getPos() };
-			XMFLOAT3 Build_scale = { buildings_info[j].getScaleX(),buildings_info[j].getScaleY() ,buildings_info[j].getScaleZ() };
-			npcs[i].SetBuildingInfo(j, Build_pos, Build_scale);
-		}
-		npcs[i].SetBuildingNode();
-	}
-}
-
-void MoveNPC()
-{
-	auto start_t = system_clock::now();
-	while (true) {
-		auto curr_t = system_clock::now();
-		if (curr_t - start_t < 500ms)
-			this_thread::sleep_for(500ms - (curr_t - start_t));
-		start_t = curr_t;
-
-		for (int i = 0; i < MAX_NPCS; ++i) {
-			// 클라이언트들과 NPC 사이의 거리 계산
-			if (npcs[i].GetState() == NPC_DEATH && npcs[i].GetPosition().y < 0 && !npcs[i].m_DeathCheck) {
-				SC_REMOVE_OBJECT_PACKET npc_remove_packet;
-
-				npc_remove_packet.size = sizeof(SC_MOVE_ROTATE_OBJECT_PACKET);
-				npc_remove_packet.type = SC_REMOVE_OBJECT;
-
-				npc_remove_packet.target = TARGET_NPC;
-				npc_remove_packet.id = npcs[i].GetID();
-
-				npcs[i].m_DeathCheck = true;
-
-				for (auto& send_target : clients) {
-					if (send_target.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
-					if (send_target.s_state != ST_INGAME) continue;
-
-					lock_guard<mutex> lg{ send_target.s_lock };
-					send_target.do_send(&npc_remove_packet);
-				}
-			}
-			if (npcs[i].GetPosition().y > 0 && !npcs[i].m_DeathCheck)
-			{
-				for (auto& cl : clients) {
-					if (cl.id != -1) {
-						npcs[i].Caculation_Distance(cl.pos, cl.id);
-					}
-				}
-				//cout << i << "번째 Status - " << npcs[i].GetState() << endl;
-
-				// NPC가 추적하려는 아이디가 있는지부터 확인, 있으면 추적 대상 플레이어 좌표를 임시 저장
-				if (npcs[i].GetChaseID() != -1) {
-					npcs[i].SetUser_Pos(clients[npcs[i].GetChaseID()].pos, npcs[i].GetChaseID());
-				}
-
-				// npc pos 확인
-				//cout << i << "번째 NPC의 도시 ID: " << npcs[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcs[i].GetIdleSection() << endl;
-			/*	cout << i << "번째 NPC의 Pos: " << npcs[i].GetPosition().x << ',' << npcs[i].GetPosition().y << ',' << npcs[i].GetPosition().z << endl;
-				cout << i << "번째 NPC의 상태: " << npcs[i].GetState() << endl;*/
-
-				/*if (npcs[i].PrintRayCast) {
-					cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
-				}*/
-
-				// 상태마다 다른 움직임을 하는 매니지먼트
-				npcs[i].ST1_State_Manegement(npcs[i].GetState());
-
-				// Send Move&Rotate Packet
-				SC_MOVE_ROTATE_OBJECT_PACKET npc_update_packet;
-				npc_update_packet.size = sizeof(SC_MOVE_ROTATE_OBJECT_PACKET);
-				npc_update_packet.type = SC_MOVE_ROTATE_OBJECT;
-
-				npc_update_packet.target = TARGET_NPC;
-				npc_update_packet.id = npcs[i].GetID();
-
-				npc_update_packet.x = npcs[i].GetPosition().x;
-				npc_update_packet.y = npcs[i].GetPosition().y;
-				npc_update_packet.z = npcs[i].GetPosition().z;
-
-				npc_update_packet.right_x = npcs[i].GetCurr_coordinate().right.x;
-				npc_update_packet.right_y = npcs[i].GetCurr_coordinate().right.y;
-				npc_update_packet.right_z = npcs[i].GetCurr_coordinate().right.z;
-
-				npc_update_packet.up_x = npcs[i].GetCurr_coordinate().up.x;
-				npc_update_packet.up_y = npcs[i].GetCurr_coordinate().up.y;
-				npc_update_packet.up_z = npcs[i].GetCurr_coordinate().up.z;
-
-				npc_update_packet.look_x = npcs[i].GetCurr_coordinate().look.x;
-				npc_update_packet.look_y = npcs[i].GetCurr_coordinate().look.y;
-				npc_update_packet.look_z = npcs[i].GetCurr_coordinate().look.z;
-
-				for (auto& send_target : clients) {
-					if (send_target.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
-					if (send_target.s_state != ST_INGAME) continue;
-
-					lock_guard<mutex> lg{ send_target.s_lock };
-					send_target.do_send(&npc_update_packet);
-				}
-			}
-		}
-
-	//	cout << "=============" << endl;
-	}
-}
-
-
+//======================================================================
 int main(int argc, char* argv[])
 {
 	b_isfirstplayer = true;
@@ -2043,8 +1864,6 @@ int main(int argc, char* argv[])
 	}
 	cout << "\n";
 
-	init_npc();
-
 	//======================================================================
 	// [ Main - 클라이언트 연결 ]
 	// Client Listen Socket (클라이언트-서버 통신을 위한 Listen소켓)
@@ -2094,13 +1913,12 @@ int main(int argc, char* argv[])
 	//======================================================================
 	// [ Main - 스레드 생성 ]
 	vector <thread> worker_threads;
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 4; ++i)
 		worker_threads.emplace_back(do_worker);			// 클라이언트-서버 통신용 Worker스레드
 
 	vector<thread> timer_threads;
 	timer_threads.emplace_back(timerFunc);				// 클라이언트 로직 타이머스레드
 	timer_threads.emplace_back(heartBeatFunc);			// 서버 간 Heartbeat교환 스레드
-	timer_threads.emplace_back(MoveNPC);				// NPC 로직 스레드
 
 	for (auto& th : worker_threads)
 		th.join();
