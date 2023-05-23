@@ -181,11 +181,11 @@
     <ClInclude Include="SpriteAnimationBillboard.h">
       <Filter>Client\Shader\Header</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Server\Server\Protocol.h">
-      <Filter>Server</Filter>
-    </ClInclude>
     <ClInclude Include="PostProcessShader.h">
       <Filter>Client\Shader\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Server\MainServer\Server\Protocol.h">
+      <Filter>Server</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

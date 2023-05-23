@@ -64,6 +64,7 @@ enum PacketID {
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
 	, SC_DAMAGED, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_BULLET_COUNT, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
+	, CLGN_LOGIN_REQUEST, LGNC_LOGIN_RESULT, LGNC_USER_MATCH_PACKET
 	, NPC_FULL_INFO, NPC_MOVE, NPC_ROTATE, NPC_MOVE_ROTATE, NPC_REMOVE, NPC_CHANGE_STATE
 };
 
@@ -300,7 +301,33 @@ struct SS_DATA_REPLICA_PACKET {
 };
 
 // ================================
-//			4. NPC Packet
+//		  4. CL-LGNS Pakcet
+// ================================
+struct CLGN_LOGIN_REQUEST_PACKET {
+	unsigned char size;
+	char type;
+	char login_id[20];
+	char login_pw[20];
+};
+
+// ================================
+//		  5. LGNS-CL Packet
+// ================================
+struct LGNC_LOGIN_RESULT_PACKET {
+	unsigned char size;
+	char type;
+	char login_accept;	// 0: Deny, 1: Accept
+};
+
+struct LGNC_USER_MATCH_PACKET {
+	unsigned char size;
+	char type;
+	char match_ok;	// 1: OK, else: error
+};
+
+
+// ================================
+//			6. NPC Packet
 // ================================
 struct NPC_FULL_INFO_PACKET {
 	unsigned char size;
