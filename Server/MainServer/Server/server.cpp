@@ -188,11 +188,31 @@ public:
 	}
 
 	void send_login_info_packet();
-	void send_move_packet(int client_id, short move_target);
-	void send_rotate_packet(int client_id, short rotate_target);
-	void send_move_rotate_packet(int client_id, short update_target);
+	void send_move_packet(int obj_id, short move_target);
+	void send_rotate_packet(int obj_id, short rotate_target);
+	void send_move_rotate_packet(int obj_id, short update_target);
 
 	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
+
+	void sessionClear() {
+		s_state = ST_FREE;
+		id = -1;
+		socket = 0;
+		remain_size = 0;
+		name[0] = 0;
+
+		pl_state = PL_ST_IDLE;
+		hp = 1000;
+		remain_bullet = MAX_BULLET;
+		pos = { 0.0f, 0.0f, 0.0f };
+		pitch = yaw = roll = 0.0f;
+		m_rightvec = { 1.0f, 0.0f, 0.0f };
+		m_upvec = { 0.0f, 1.0f, 0.0f };
+		m_lookvec = { 0.0f, 0.0f, 1.0f };
+		curr_stage = 0;
+
+		setBB();
+	}
 };
 
 array<SESSION, MAX_USER> clients;
@@ -228,65 +248,114 @@ void SESSION::send_login_info_packet()
 
 	do_send(&login_info_packet);
 }
-void SESSION::send_move_packet(int client_id, short move_target)
+void SESSION::send_move_packet(int obj_id, short move_target)
 {
 	SC_MOVE_OBJECT_PACKET move_pl_packet;
-	move_pl_packet.target = move_target;
-	move_pl_packet.id = client_id;
 	move_pl_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
 	move_pl_packet.type = SC_MOVE_OBJECT;
-	move_pl_packet.x = clients[client_id].pos.x;
-	move_pl_packet.y = clients[client_id].pos.y;
-	move_pl_packet.z = clients[client_id].pos.z;
+	move_pl_packet.target = move_target;
+	move_pl_packet.id = obj_id;
+
+	switch (move_target) {
+	case TARGET_PLAYER:
+		move_pl_packet.x = clients[obj_id].pos.x;
+		move_pl_packet.y = clients[obj_id].pos.y;
+		move_pl_packet.z = clients[obj_id].pos.z;
+		break;
+
+	case TARGET_NPC:
+		move_pl_packet.x = npcs[obj_id].pos.x;
+		move_pl_packet.y = npcs[obj_id].pos.y;
+		move_pl_packet.z = npcs[obj_id].pos.z;
+		break;
+	}
 
 	do_send(&move_pl_packet);
 }
-void SESSION::send_rotate_packet(int client_id, short rotate_target)
+void SESSION::send_rotate_packet(int obj_id, short rotate_target)
 {
 	SC_ROTATE_OBJECT_PACKET rotate_pl_packet;
-	rotate_pl_packet.target = rotate_target;
-	rotate_pl_packet.id = client_id;
 	rotate_pl_packet.size = sizeof(SC_ROTATE_OBJECT_PACKET);
 	rotate_pl_packet.type = SC_ROTATE_OBJECT;
+	rotate_pl_packet.target = rotate_target;
+	rotate_pl_packet.id = obj_id;
 
-	rotate_pl_packet.right_x = clients[client_id].m_rightvec.x;
-	rotate_pl_packet.right_y = clients[client_id].m_rightvec.y;
-	rotate_pl_packet.right_z = clients[client_id].m_rightvec.z;
+	switch (rotate_target) {
+	case TARGET_PLAYER:
+		rotate_pl_packet.right_x = clients[obj_id].m_rightvec.x;
+		rotate_pl_packet.right_y = clients[obj_id].m_rightvec.y;
+		rotate_pl_packet.right_z = clients[obj_id].m_rightvec.z;
 
-	rotate_pl_packet.up_x = clients[client_id].m_upvec.x;
-	rotate_pl_packet.up_y = clients[client_id].m_upvec.y;
-	rotate_pl_packet.up_z = clients[client_id].m_upvec.z;
+		rotate_pl_packet.up_x = clients[obj_id].m_upvec.x;
+		rotate_pl_packet.up_y = clients[obj_id].m_upvec.y;
+		rotate_pl_packet.up_z = clients[obj_id].m_upvec.z;
 
-	rotate_pl_packet.look_x = clients[client_id].m_lookvec.x;
-	rotate_pl_packet.look_y = clients[client_id].m_lookvec.y;
-	rotate_pl_packet.look_z = clients[client_id].m_lookvec.z;
+		rotate_pl_packet.look_x = clients[obj_id].m_lookvec.x;
+		rotate_pl_packet.look_y = clients[obj_id].m_lookvec.y;
+		rotate_pl_packet.look_z = clients[obj_id].m_lookvec.z;
+		break;
 
+	case TARGET_NPC:
+		rotate_pl_packet.right_x = npcs[obj_id].m_rightvec.x;
+		rotate_pl_packet.right_y = npcs[obj_id].m_rightvec.y;
+		rotate_pl_packet.right_z = npcs[obj_id].m_rightvec.z;
+
+		rotate_pl_packet.up_x = npcs[obj_id].m_upvec.x;
+		rotate_pl_packet.up_y = npcs[obj_id].m_upvec.y;
+		rotate_pl_packet.up_z = npcs[obj_id].m_upvec.z;
+
+		rotate_pl_packet.look_x = npcs[obj_id].m_lookvec.x;
+		rotate_pl_packet.look_y = npcs[obj_id].m_lookvec.y;
+		rotate_pl_packet.look_z = npcs[obj_id].m_lookvec.z;
+		break;
+	}
 	do_send(&rotate_pl_packet);
 }
-void SESSION::send_move_rotate_packet(int client_id, short update_target)
+void SESSION::send_move_rotate_packet(int obj_id, short update_target)
 {
 	SC_MOVE_ROTATE_OBJECT_PACKET update_pl_packet;
-	update_pl_packet.target = update_target;
-	update_pl_packet.id = client_id;
 	update_pl_packet.size = sizeof(SC_MOVE_ROTATE_OBJECT_PACKET);
 	update_pl_packet.type = SC_MOVE_ROTATE_OBJECT;
+	update_pl_packet.target = update_target;
+	update_pl_packet.id = obj_id;
 
-	update_pl_packet.x = clients[client_id].pos.x;
-	update_pl_packet.y = clients[client_id].pos.y;
-	update_pl_packet.z = clients[client_id].pos.z;
+	switch (update_target) {
+	case TARGET_PLAYER:
+		update_pl_packet.x = clients[obj_id].pos.x;
+		update_pl_packet.y = clients[obj_id].pos.y;
+		update_pl_packet.z = clients[obj_id].pos.z;
 
-	update_pl_packet.right_x = clients[client_id].m_rightvec.x;
-	update_pl_packet.right_y = clients[client_id].m_rightvec.y;
-	update_pl_packet.right_z = clients[client_id].m_rightvec.z;
+		update_pl_packet.right_x = clients[obj_id].m_rightvec.x;
+		update_pl_packet.right_y = clients[obj_id].m_rightvec.y;
+		update_pl_packet.right_z = clients[obj_id].m_rightvec.z;
 
-	update_pl_packet.up_x = clients[client_id].m_upvec.x;
-	update_pl_packet.up_y = clients[client_id].m_upvec.y;
-	update_pl_packet.up_z = clients[client_id].m_upvec.z;
+		update_pl_packet.up_x = clients[obj_id].m_upvec.x;
+		update_pl_packet.up_y = clients[obj_id].m_upvec.y;
+		update_pl_packet.up_z = clients[obj_id].m_upvec.z;
 
-	update_pl_packet.look_x = clients[client_id].m_lookvec.x;
-	update_pl_packet.look_y = clients[client_id].m_lookvec.y;
-	update_pl_packet.look_z = clients[client_id].m_lookvec.z;
+		update_pl_packet.look_x = clients[obj_id].m_lookvec.x;
+		update_pl_packet.look_y = clients[obj_id].m_lookvec.y;
+		update_pl_packet.look_z = clients[obj_id].m_lookvec.z;
+		break;
 
+	case TARGET_NPC:
+		update_pl_packet.x = npcs[obj_id].pos.x;
+		update_pl_packet.y = npcs[obj_id].pos.y;
+		update_pl_packet.z = npcs[obj_id].pos.z;
+
+		update_pl_packet.right_x = npcs[obj_id].m_rightvec.x;
+		update_pl_packet.right_y = npcs[obj_id].m_rightvec.y;
+		update_pl_packet.right_z = npcs[obj_id].m_rightvec.z;
+		
+		update_pl_packet.up_x = npcs[obj_id].m_upvec.x;
+		update_pl_packet.up_y = npcs[obj_id].m_upvec.y;
+		update_pl_packet.up_z = npcs[obj_id].m_upvec.z;
+		
+		update_pl_packet.look_x = npcs[obj_id].m_lookvec.x;
+		update_pl_packet.look_y = npcs[obj_id].m_lookvec.y;
+		update_pl_packet.look_z = npcs[obj_id].m_lookvec.z;
+		break;
+	}
 	do_send(&update_pl_packet);
 }
 
@@ -1117,37 +1186,135 @@ void process_packet(int client_id, char* packet)
 		//cout << "LookVec: " << clients[replica_id].m_lookvec.x << ", " << clients[replica_id].m_lookvec.y << ", " << clients[replica_id].m_lookvec.z << endl;
 		//cout << "STime: " << replica_pack->curr_stage << "ms." << endl;
 		//cout << "===================================\n" << endl;
-
+		break;
 	}// SS_DATA_REPLICA end
 	case NPC_FULL_INFO:
 	{
 		NPC_FULL_INFO_PACKET* npc_info_pack = reinterpret_cast<NPC_FULL_INFO_PACKET*>(packet);
 
+		short npc_id = npc_info_pack->n_id;
+		
+		npcs[npc_id].s_lock.lock();
+		npcs[npc_id].hp = npc_info_pack->hp;
+		strcpy_s(npcs[npc_id].name, npc_info_pack->name);
+		npcs[npc_id].id = npc_info_pack->n_id;
+		npcs[npc_id].pos = { npc_info_pack->x, npc_info_pack->y, npc_info_pack->z };
+		npcs[npc_id].m_rightvec = { npc_info_pack->right_x, npc_info_pack->right_y, npc_info_pack->right_z };
+		npcs[npc_id].m_upvec = { npc_info_pack->up_x, npc_info_pack->up_y, npc_info_pack->up_z };
+		npcs[npc_id].m_lookvec = { npc_info_pack->look_x, npc_info_pack->look_y, npc_info_pack->look_z };
+		npcs[npc_id].s_lock.unlock();
+
+		break;
 	}// NPC_FULL_INFO end
 	case NPC_MOVE:
 	{
 		NPC_MOVE_PACKET* npc_move_pack = reinterpret_cast<NPC_MOVE_PACKET*>(packet);
 
+		short npc_id = npc_move_pack->n_id;
+
+		npcs[npc_id].s_lock.lock();
+		npcs[npc_id].pos = { npc_move_pack->x, npc_move_pack->y, npc_move_pack->z };
+		npcs[npc_id].s_lock.unlock();
+
+		cout << "NPC[" << npc_id << "]가 POS(" << npcs[npc_id].pos.x << ", " << npcs[npc_id].pos.y << ", " << npcs[npc_id].pos.z << ")로 이동하였습니다.\n" << endl;
+
+		for (auto& cl : clients) {
+			if (cl.curr_stage != 1) continue;	// Stage2 NPC 제작 전까지 사용되는 임시코드
+			if (cl.s_state != ST_INGAME) continue;
+
+			lock_guard<mutex> lg{ cl.s_lock };
+			cl.send_move_packet(npc_id, TARGET_NPC);
+		}
+
+		break;
 	}// NPC_MOVE end
 	case NPC_ROTATE:
 	{
 		NPC_ROTATE_PACKET* npc_rotate_pack = reinterpret_cast<NPC_ROTATE_PACKET*>(packet);
 
+		short npc_id = npc_rotate_pack->n_id;
+
+		npcs[npc_id].s_lock.lock();
+		npcs[npc_id].m_rightvec = { npc_rotate_pack->right_x, npc_rotate_pack->right_y, npc_rotate_pack->right_z };
+		npcs[npc_id].m_upvec = { npc_rotate_pack->up_x, npc_rotate_pack->up_y, npc_rotate_pack->up_z };
+		npcs[npc_id].m_lookvec = { npc_rotate_pack->look_x, npc_rotate_pack->look_y, npc_rotate_pack->look_z };
+		npcs[npc_id].s_lock.unlock();
+
+		cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
+			<< ") 방향으로 회전하였습니다.\n" << endl;
+
+		for (auto& cl : clients) {
+			if (cl.curr_stage != 1) continue;	// Stage2 NPC 제작 전까지 사용되는 임시코드
+			if (cl.s_state != ST_INGAME) continue;
+
+			lock_guard<mutex> lg{ cl.s_lock };
+			cl.send_rotate_packet(npc_id, TARGET_NPC);
+		}
+
+		break;
 	}// NPC_ROTATE end
 	case NPC_MOVE_ROTATE:
 	{
 		NPC_MOVE_ROTATE_PACKET* npc_mvrt_pack = reinterpret_cast<NPC_MOVE_ROTATE_PACKET*>(packet);
 
+		short npc_id = npc_mvrt_pack->n_id;
+
+		npcs[npc_id].s_lock.lock();
+		npcs[npc_id].pos = { npc_mvrt_pack->x, npc_mvrt_pack->y, npc_mvrt_pack->z };
+		npcs[npc_id].m_rightvec = { npc_mvrt_pack->right_x, npc_mvrt_pack->right_y, npc_mvrt_pack->right_z };
+		npcs[npc_id].m_upvec = { npc_mvrt_pack->up_x, npc_mvrt_pack->up_y, npc_mvrt_pack->up_z };
+		npcs[npc_id].m_lookvec = { npc_mvrt_pack->look_x, npc_mvrt_pack->look_y, npc_mvrt_pack->look_z };
+		npcs[npc_id].s_lock.unlock();
+
+		cout << "NPC[" << npc_id << "]가 POS(" << npcs[npc_id].pos.x << ", " << npcs[npc_id].pos.y << ", " << npcs[npc_id].pos.z << ")로 이동하였습니다.\n" << endl;
+		cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
+			<< ") 방향으로 회전하였습니다.\n" << endl;
+
+		for (auto& cl : clients) {
+			if (cl.curr_stage != 1) continue;	// Stage2 NPC 제작 전까지 사용되는 임시코드
+			if (cl.s_state != ST_INGAME) continue;
+
+			lock_guard<mutex> lg{ cl.s_lock };
+			cl.send_move_rotate_packet(npc_id, TARGET_NPC);
+		}
+
+		break;
 	}// NPC_MOVE_ROTATE end
 	case NPC_REMOVE:
 	{
 		NPC_REMOVE_PACKET* npc_remove_pack = reinterpret_cast<NPC_REMOVE_PACKET*>(packet);
 
+		short npc_id = npc_remove_pack->n_id;
+
+		npcs[npc_id].s_lock.lock();
+		npcs[npc_id].sessionClear();
+		npcs[npc_id].s_lock.unlock();
+
+		cout << "NPC[" << npc_id << "]가 삭제되었습니다.\n" << endl;
+
+		for (auto& cl : clients) {
+			if (cl.curr_stage != 1) continue;	// Stage2 NPC 제작 전까지 사용되는 임시코드
+			if (cl.s_state != ST_INGAME) continue;
+
+			cl.s_lock.lock();
+			SC_REMOVE_OBJECT_PACKET rm_npc_pack;
+			rm_npc_pack.size = sizeof(SC_REMOVE_OBJECT_PACKET);
+			rm_npc_pack.type = SC_REMOVE_OBJECT;
+			rm_npc_pack.target = TARGET_NPC;
+			rm_npc_pack.id = npc_id;
+
+			lock_guard<mutex> lg{ cl.s_lock };
+			cl.do_send(&rm_npc_pack);
+			cl.s_lock.unlock();
+		}
+
+		break;
 	}// NPC_REMOVE end
 	case NPC_CHANGE_STATE:
 	{
 		NPC_CHANGE_STATE_PACKET* npc_chgstate_pack = reinterpret_cast<NPC_CHANGE_STATE_PACKET*>(packet);
 
+		break;
 	}// NPC_CHANGE_STATE_PACKET end
 	}
 }
