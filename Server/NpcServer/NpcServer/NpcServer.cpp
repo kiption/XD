@@ -38,8 +38,9 @@ using namespace DirectX::PackedVector;
 #include "../../MainServer/Server/Protocol.h"
 #include "../../MainServer/Server/Constant.h"
 #include "../../MainServer/Server/MathFuncs.h"
-#include "../../MainServer/Server/MapObjects.h"
+//#include "../../MainServer/Server/MapObjects.h"
 #include "../../MainServer/Server/CP_KEYS.h"
+#include "CheckPoint.h"
 
 using namespace std;
 using namespace chrono;
@@ -70,31 +71,16 @@ struct Section_Info {
 	int ID;
 };
 struct City_Info {
-	Section_Info SectionNum[6];
+	Section_Info SectionNum[4];
 	float Centerx, Centerz;
 	int id;
 };
 
 vector<City_Info>Cities;
 //======================================================================
-const float SX_range[18] = {
-	-780.0f, -780.0f, -380.0f, -380.0f, -75.0f, -75.0f,
-	110.0f, 110.0f, 110.0f, 1090.0f, 660.0f, 660.0f,
-	150.0f, -400.0f, -400.0f, -600.0f, -600.0f, -1550.0f };
-const float LX_range[18] = {
-	-710.0f, -300.0f, -300.0f, 10.0f, 10.0f, 950.0f,
-	690.0f, 200.0f, 1150.0f, 1150.0f, 1150.0f, 740.0f,
-	230.0f, 230.0f, -370.0f, -370.0f, -520.0f, -520.0f };
-const float SZ_range[18] = {
-	-900.0f, -430.0f, -1390.0f, -1390.0f, -1390.0f, -980.0f,
-	-690.0f, -690.0f, -260.0f, -260.0f, 30.0f, 30.0f,
-	140.0f, 140.0f, 140.0f , 350.0f, -60.0f, -60.0f };
-const float LZ_range[18] = {
-	-350.0f, -350.0f, -350.0f, -1330.0f, -900.0f, -900.0f,
-	-600.0f, -190.0f, -190.0f, 110.0f, 110.0f, 1060.0f,
-	720.0f, 200.0f, 410.0f, 410.0f, 410.0f, 0.0f };
-const float C_cx[3] = { -396.0f, 651.0f, -393.0f };
-const float C_cz[3] = { -888.0f, -128.0f, 233.0f };
+
+float C_cx[4];
+float C_cz[4];
 
 float Calculation_Distance(XMFLOAT3 vec, int c_id) // vec-> Player's pos, v -> city's center pos 
 {
@@ -102,7 +88,7 @@ float Calculation_Distance(XMFLOAT3 vec, int c_id) // vec-> Player's pos, v -> c
 	return dist;
 }
 
-float Calculation_Distance(XMFLOAT3 vec,  int c_id, int s_id)
+float Calculation_Distance(XMFLOAT3 vec, int c_id, int s_id)
 {
 	float cx = (Cities[c_id].SectionNum[s_id].lx + Cities[c_id].SectionNum[s_id].sx) / 2;
 	float cz = (Cities[c_id].SectionNum[s_id].lz + Cities[c_id].SectionNum[s_id].sz) / 2;
@@ -353,7 +339,6 @@ void NPC::SetFrustum()
 
 	m_frustum = frustum;
 }
-
 XMFLOAT3 NPC::NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll)
 {
 	float curr_pitch = XMConvertToRadians(pitch);
@@ -380,12 +365,10 @@ XMFLOAT3 NPC::NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll)
 
 	return NPCNormalize(vec);
 }
-
 void NPC::Caculation_Distance(XMFLOAT3 vec, int id) // 서버에서 따로 부를 것.
 {
 	m_Distance[id] = sqrtf(pow((vec.x - pos.x), 2) + pow((vec.y - pos.y), 2) + pow((vec.z - pos.z), 2));
 }
-
 void NPC::NPC_State_Manegement(int state)
 {
 	switch (m_state)
@@ -454,7 +437,6 @@ void NPC::NPC_State_Manegement(int state)
 	//setBB_Body();
 	SetFrustum();
 }
-
 void NPC::NPC_Death_motion()
 {
 	pos.y -= 6.0f;
@@ -467,9 +449,8 @@ void NPC::NPC_Death_motion()
 	m_coordinate.up = NPCcalcRotate(base_coordinate.up, pitch, yaw, roll);
 	m_coordinate.look = NPCcalcRotate(base_coordinate.look, pitch, yaw, roll);
 }
-
 void NPC::SetTrackingIDbyDistance(float setDistance, int curState, int nextState)
-{	
+{
 	bool State_check = false;
 	float MinDis = 50000;
 	for (int i{}; i < MAX_USER; ++i) {
@@ -486,7 +467,6 @@ void NPC::SetTrackingIDbyDistance(float setDistance, int curState, int nextState
 		}
 	}
 }
-
 bool NPC::SetTrackingPrevStatebyDistance(float setDistance, int curState, int prevState)
 {
 	int change_cnt = 0;
@@ -509,7 +489,6 @@ bool NPC::SetTrackingPrevStatebyDistance(float setDistance, int curState, int pr
 		return false;
 	}
 }
-
 void NPC::MoveInSection()
 {
 	if (m_SectionMoveDir) {
@@ -1448,7 +1427,6 @@ void NPC::MoveInSection()
 	}
 	//NPCtoBuilding_collide();
 }
-
 void NPC::MoveChangeIdle()
 {
 	float City_dis{};
@@ -1479,7 +1457,6 @@ void NPC::MoveChangeIdle()
 		m_IdleSection = s_id;
 	}
 }
-
 void NPC::NPC_Damege_Calc(int id)
 {
 	if (m_Hit == g_body) {
@@ -1507,14 +1484,12 @@ void NPC::NPC_Damege_Calc(int id)
 		m_Hit = g_none;
 	}
 }
-
 void NPC::NPC_Check_HP()
 {
 	if ((m_BodyHP <= 0) || (m_ProfellerHP <= 0)) {
 		m_state = NPC_DEATH;
 	}
 }
-
 void NPC::FlyOnNpc(XMFLOAT3 vec, int id) // 추적대상 플레이어와 높이 맞추기
 {
 	if (pos.y < vec.y) {
@@ -1524,7 +1499,6 @@ void NPC::FlyOnNpc(XMFLOAT3 vec, int id) // 추적대상 플레이어와 높이 맞추기
 		pos.y -= 1.5f;
 	}
 }
-
 void NPC::PlayerChasing()
 {
 	// Look
@@ -1564,7 +1538,6 @@ void NPC::PlayerChasing()
 	pos.z += m_Speed * m_coordinate.look.z;
 	//NPCtoBuilding_collide();
 }
-
 bool NPC::PlayerDetact()
 {
 	XMVECTOR PlayerPos = XMLoadFloat3(&m_User_Pos[m_chaseID]);
@@ -1595,7 +1568,6 @@ bool NPC::PlayerDetact()
 
 	return false;
 }
-
 void NPC::PlayerAttack()
 {
 	// Look
@@ -1700,25 +1672,27 @@ void SERVER::send_npc_init_packet(int npc_id) {
 	NPC_FULL_INFO_PACKET npc_init_packet;
 	npc_init_packet.size = sizeof(NPC_MOVE_PACKET);
 	npc_init_packet.type = NPC_ROTATE;
+	npc_init_packet.n_id = npc_id;
 	npc_init_packet.hp = npcsInfo[npc_id].hp;
 	npc_init_packet.x = npcsInfo[npc_id].pos.x;
 	npc_init_packet.y = npcsInfo[npc_id].pos.y;
 	npc_init_packet.z = npcsInfo[npc_id].pos.z;
-	npc_init_packet.right_x = npcsInfo[npc_id].m_rightvec.x;
-	npc_init_packet.right_y = npcsInfo[npc_id].m_rightvec.y;
-	npc_init_packet.right_z = npcsInfo[npc_id].m_rightvec.z;
-	npc_init_packet.up_x = npcsInfo[npc_id].m_upvec.x;
-	npc_init_packet.up_y = npcsInfo[npc_id].m_upvec.y;
-	npc_init_packet.up_z = npcsInfo[npc_id].m_upvec.z;
-	npc_init_packet.look_x = npcsInfo[npc_id].m_lookvec.x;
-	npc_init_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
-	npc_init_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
+	npc_init_packet.right_x = npcsInfo[npc_id].GetCurr_coordinate().right.x;
+	npc_init_packet.right_y = npcsInfo[npc_id].GetCurr_coordinate().right.y;
+	npc_init_packet.right_z = npcsInfo[npc_id].GetCurr_coordinate().right.z;
+	npc_init_packet.up_x = npcsInfo[npc_id].GetCurr_coordinate().up.x;
+	npc_init_packet.up_y = npcsInfo[npc_id].GetCurr_coordinate().up.y;
+	npc_init_packet.up_z = npcsInfo[npc_id].GetCurr_coordinate().up.z;
+	npc_init_packet.look_x = npcsInfo[npc_id].GetCurr_coordinate().look.x;
+	npc_init_packet.look_y = npcsInfo[npc_id].GetCurr_coordinate().look.y;
+	npc_init_packet.look_z = npcsInfo[npc_id].GetCurr_coordinate().look.z;
 	g_logicservers[a_lgcsvr_num].do_send(&npc_init_packet);
 }
 void SERVER::send_npc_move_packet(int npc_id) {
 	NPC_MOVE_PACKET npc_move_packet;
 	npc_move_packet.size = sizeof(NPC_MOVE_PACKET);
 	npc_move_packet.type = NPC_MOVE;
+	npc_move_packet.n_id = npc_id;
 	npc_move_packet.x = npcsInfo[npc_id].pos.x;
 	npc_move_packet.y = npcsInfo[npc_id].pos.y;
 	npc_move_packet.z = npcsInfo[npc_id].pos.z;
@@ -1728,21 +1702,23 @@ void SERVER::send_npc_rotate_packet(int npc_id) {
 	NPC_ROTATE_PACKET npc_rotate_packet;
 	npc_rotate_packet.size = sizeof(NPC_MOVE_PACKET);
 	npc_rotate_packet.type = NPC_ROTATE;
-	npc_rotate_packet.right_x = npcsInfo[npc_id].m_rightvec.x;
-	npc_rotate_packet.right_y = npcsInfo[npc_id].m_rightvec.y;
-	npc_rotate_packet.right_z = npcsInfo[npc_id].m_rightvec.z;
-	npc_rotate_packet.up_x = npcsInfo[npc_id].m_upvec.x;
-	npc_rotate_packet.up_y = npcsInfo[npc_id].m_upvec.y;
-	npc_rotate_packet.up_z = npcsInfo[npc_id].m_upvec.z;
-	npc_rotate_packet.look_x = npcsInfo[npc_id].m_lookvec.x;
-	npc_rotate_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
-	npc_rotate_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
+	npc_rotate_packet.n_id = npc_id;
+	npc_rotate_packet.right_x = npcsInfo[npc_id].GetCurr_coordinate().right.x;
+	npc_rotate_packet.right_y = npcsInfo[npc_id].GetCurr_coordinate().right.y;
+	npc_rotate_packet.right_z = npcsInfo[npc_id].GetCurr_coordinate().right.z;
+	npc_rotate_packet.up_x = npcsInfo[npc_id].GetCurr_coordinate().up.x;
+	npc_rotate_packet.up_y = npcsInfo[npc_id].GetCurr_coordinate().up.y;
+	npc_rotate_packet.up_z = npcsInfo[npc_id].GetCurr_coordinate().up.z;
+	npc_rotate_packet.look_x = npcsInfo[npc_id].GetCurr_coordinate().look.x;
+	npc_rotate_packet.look_y = npcsInfo[npc_id].GetCurr_coordinate().look.y;
+	npc_rotate_packet.look_z = npcsInfo[npc_id].GetCurr_coordinate().look.z;
 	g_logicservers[a_lgcsvr_num].do_send(&npc_rotate_packet);
 }
 void SERVER::send_npc_move_rotate_packet(int npc_id) {
 	NPC_MOVE_PACKET npc_mv_packet;
 	npc_mv_packet.size = sizeof(NPC_MOVE_PACKET);
 	npc_mv_packet.type = NPC_MOVE;
+	npc_mv_packet.n_id = npc_id;
 	npc_mv_packet.x = npcsInfo[npc_id].pos.x;
 	npc_mv_packet.y = npcsInfo[npc_id].pos.y;
 	npc_mv_packet.z = npcsInfo[npc_id].pos.z;
@@ -1751,18 +1727,40 @@ void SERVER::send_npc_move_rotate_packet(int npc_id) {
 	NPC_ROTATE_PACKET npc_rt_packet;
 	npc_rt_packet.size = sizeof(NPC_MOVE_PACKET);
 	npc_rt_packet.type = NPC_ROTATE;
-	npc_rt_packet.right_x = npcsInfo[npc_id].m_rightvec.x;
-	npc_rt_packet.right_y = npcsInfo[npc_id].m_rightvec.y;
-	npc_rt_packet.right_z = npcsInfo[npc_id].m_rightvec.z;
-	npc_rt_packet.up_x = npcsInfo[npc_id].m_upvec.x;
-	npc_rt_packet.up_y = npcsInfo[npc_id].m_upvec.y;
-	npc_rt_packet.up_z = npcsInfo[npc_id].m_upvec.z;
-	npc_rt_packet.look_x = npcsInfo[npc_id].m_lookvec.x;
-	npc_rt_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
-	npc_rt_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
+	npc_rt_packet.n_id = npc_id;
+	npc_rt_packet.right_x = npcsInfo[npc_id].GetCurr_coordinate().right.x;
+	npc_rt_packet.right_y = npcsInfo[npc_id].GetCurr_coordinate().right.y;
+	npc_rt_packet.right_z = npcsInfo[npc_id].GetCurr_coordinate().right.z;
+	npc_rt_packet.up_x = npcsInfo[npc_id].GetCurr_coordinate().up.x;
+	npc_rt_packet.up_y = npcsInfo[npc_id].GetCurr_coordinate().up.y;
+	npc_rt_packet.up_z = npcsInfo[npc_id].GetCurr_coordinate().up.z;
+	npc_rt_packet.look_x = npcsInfo[npc_id].GetCurr_coordinate().look.x;
+	npc_rt_packet.look_y = npcsInfo[npc_id].GetCurr_coordinate().look.y;
+	npc_rt_packet.look_z = npcsInfo[npc_id].GetCurr_coordinate().look.z;
+	cout << npcsInfo[npc_id].GetCurr_coordinate().look.x << ', ' << npcsInfo[npc_id].GetCurr_coordinate().look.y << ', ' << npcsInfo[npc_id].GetCurr_coordinate().look.z << endl;
 	g_logicservers[a_lgcsvr_num].do_send(&npc_rt_packet);
 }
 
+
+//======================================================================
+class CheckPoint : public MapObject
+{
+public:
+	CheckPoint() : MapObject() {}
+	CheckPoint(float px, float py, float pz, float sx, float sy, float sz) : MapObject(px, py, pz, sx, sy, sz) {}
+
+public:
+	BoundingOrientedBox m_xoobb;
+
+public:
+	void setBB() {
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()),
+			XMFLOAT3(this->getScaleX(), this->getScaleY(), this->getScaleZ()),
+			XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
+	XMFLOAT3 getPos() { return XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()); }
+};
+vector<CheckPoint> CP;
 
 //======================================================================
 void process_packet(char* packet)
@@ -2021,18 +2019,24 @@ void do_worker()
 
 //======================================================================
 void initNpc() {
-	for (int i{}; i < 3; ++i) {
+	for (int i{}; i < 4; ++i) {
+		C_cx[i] = (CP[i * 4 + 2].getPosX() + CP[i * 4 + 3].getPosX() + CP[i * 4 + 4].getPosX() + CP[i * 4 + 5].getPosX()) / 4;
+		C_cz[i] = (CP[i * 4 + 2].getPosZ() + CP[i * 4 + 3].getPosZ() + CP[i * 4 + 4].getPosZ() + CP[i * 4 + 5].getPosZ()) / 4;
+	}
+
+
+	for (int i{}; i < 4; ++i) {
 		City_Info temp;
 		temp.id = i;
 		temp.Centerx = C_cx[i];
 		temp.Centerz = C_cz[i];
 
-		for (int j{}; j < 6; ++j) {
+		for (int j{}; j < 4; ++j) {
 			temp.SectionNum[j].ID = j;
-			temp.SectionNum[j].lx = LX_range[6 * i + j];
-			temp.SectionNum[j].lz = LZ_range[6 * i + j];
-			temp.SectionNum[j].sx = SX_range[6 * i + j];
-			temp.SectionNum[j].sz = SZ_range[6 * i + j];
+			temp.SectionNum[j].lx = CP[4 * i + 2 + j].getPosX() + (CP[4 * i + 2 + j].getScaleX()) / 2;
+			temp.SectionNum[j].lz = CP[4 * i + 2 + j].getPosZ() + (CP[4 * i + 2 + j].getScaleZ()) / 2;
+			temp.SectionNum[j].sx = CP[4 * i + 2 + j].getPosX() - (CP[4 * i + 2 + j].getScaleX()) / 2;
+			temp.SectionNum[j].sz = CP[4 * i + 2 + j].getPosZ() - (CP[4 * i + 2 + j].getScaleZ()) / 2;
 		}
 		Cities.emplace_back(temp);
 	}
@@ -2113,7 +2117,7 @@ void MoveNPC()
 
 		for (int i = 0; i < MAX_NPCS; ++i) {
 			// 클라이언트들과 NPC 사이의 거리 계산
-			
+
 			if (npcsInfo[i].GetState() == NPC_DEATH && npcsInfo[i].GetPosition().y < 0) {
 				NPC_REMOVE_PACKET npc_remove_packet;
 
@@ -2143,23 +2147,23 @@ void MoveNPC()
 				// NPC가 추적하려는 아이디가 있는지부터 확인, 있으면 추적 대상 플레이어 좌표를 임시 저장
 				if (npcsInfo[i].GetChaseID() != -1) {
 					npcsInfo[i].SetUser_Pos(playersInfo[npcsInfo[i].GetChaseID()].pos, npcsInfo[i].GetChaseID());
-
-					// npc pos 확인
-					cout << "=============" << endl;
-					cout << i << "번째 NPC의 도시 ID: " << npcsInfo[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcsInfo[i].GetIdleSection() << endl;
-					cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
-					cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
-
-					/*if (npcs[i].PrintRayCast) {
-						cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
-					}*/
-
-					// 상태마다 다른 움직임을 하는 매니지먼트
-					
-					//SERVER temp;
-					g_logicservers[a_lgcsvr_num].send_npc_move_rotate_packet(npcsInfo[i].GetID());
-
 				}
+
+				// npc pos 확인
+				cout << "=============" << endl;
+				cout << i << "번째 NPC의 도시 ID: " << npcsInfo[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcsInfo[i].GetIdleSection() << endl;
+				cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
+				cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
+
+				/*if (npcs[i].PrintRayCast) {
+					cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
+				}*/
+
+				// 상태마다 다른 움직임을 하는 매니지먼트
+
+				//SERVER temp;
+				g_logicservers[a_lgcsvr_num].send_npc_move_rotate_packet(npcsInfo[i].GetID());
+
 			}
 		}
 
@@ -2242,6 +2246,104 @@ int main(int argc, char* argv[])
 	//======================================================================
 	//							NPC Initialize
 	//======================================================================
+	string filename;
+	vector<string> readTargets;
+
+	filesystem::path CP_path(".\\checkpoint");
+	if (filesystem::exists(CP_path)) {
+		filesystem::recursive_directory_iterator itr(CP_path);
+		while (itr != filesystem::end(itr)) {
+			const filesystem::directory_entry& entry = *itr;
+			//cout << entry.path().string() << endl;
+			string path_name = entry.path().string();
+			if (path_name.find(".txt") != string::npos) {	// .txt 가 들어간 파일만 저장합니다. (디렉토리 이름만 있는 path 배제)
+				readTargets.push_back(path_name);
+			}
+			itr++;
+		}
+	}
+	else {
+		cout << "[Directory Search Error] Unknown Directory." << endl;
+	}
+
+	// 2. 파일 읽기
+	for (auto& fname : readTargets) {
+		cout << "[Map Loading...] " << fname;
+		//string fname = readTargets[0];
+		ifstream txtfile(fname);
+
+		string line;
+
+		int line_cnt = 0;
+
+		char b_pos = 0;
+		int pos_count = 0;
+
+		char b_scale = 0;
+		int scale_count = 0;
+
+		float tmp_pos[3] = { 0.f, 0.f, 0.f }; // 뽑은 좌표정보를 임시 저장할 공간, 3개 꽉차면 벡터에 넣어주고 비워두자.
+		float tmp_scale[3] = { 0.f, 0.f, 0.f }; // 뽑은 크기정보를 임시 저장할 공간, 3개 꽉차면 벡터에 넣어주고 비워두자.
+		if (txtfile.is_open()) {
+			while (txtfile >> line) {
+				if (line == "Position:") {
+					b_pos = 1;
+					pos_count = 0;
+				}
+				else if (line == "Size:") {
+					b_scale = 1;
+					scale_count = 0;
+				}
+				else {
+					if (b_pos == 1) {
+						tmp_pos[pos_count] = string2data(line);
+
+						if (pos_count == 2) {
+							tmp_pos[pos_count] = string2data(line);
+
+							b_pos = 0;
+							pos_count = 0;
+						}
+						else {
+							pos_count += 1;
+						}
+					}
+					else if (b_scale == 1) {
+						tmp_scale[scale_count] = string2data(line);
+
+						if (scale_count == 2) {
+							tmp_scale[scale_count] = string2data(line);
+							b_scale = 0;
+							scale_count = 0;
+
+							CheckPoint tmp_mapobj(tmp_pos[0], tmp_pos[1], tmp_pos[2], tmp_scale[0], tmp_scale[1], tmp_scale[2]);
+							tmp_mapobj.setBB();
+							CP.push_back(tmp_mapobj);
+							memset(tmp_pos, 0, sizeof(tmp_pos));
+							memset(tmp_scale, 0, sizeof(tmp_scale));
+						}
+						else {
+							scale_count += 1;
+						}
+					}
+				}
+				line_cnt++;
+			}
+			cout << " ---- OK." << endl;
+		}
+		else {
+			cout << "[Error] Unknown File." << endl;
+		}
+		txtfile.close();
+	}
+	cout << "\n";
+
+	for (int i{}; i < CP.size(); ++i) {
+		cout << i << " Pos --> x: " << CP[i].getPosX() << ", y: " << CP[i].getPosY() << ", z: " << CP[i].getPosZ() << endl;
+		cout << i << " Scale --> x: " << CP[i].getScaleX() << ", y: " << CP[i].getScaleY() << ", z: " << CP[i].getScaleZ() << endl;
+		cout << "=============================" << endl;
+	}
+
 	initNpc();
 
 

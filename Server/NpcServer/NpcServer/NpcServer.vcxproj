@@ -129,10 +129,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CheckPoint.cpp" />
     <ClCompile Include="NpcServer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\MainServer\Server\Protocol.h" />
+    <ClInclude Include="CheckPoint.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
