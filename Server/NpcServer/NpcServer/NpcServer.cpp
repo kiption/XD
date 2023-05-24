@@ -11,6 +11,8 @@
 #include <chrono>
 #include <random>
 #include <queue>
+#include <limits>
+#include <algorithm>
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
 
@@ -121,37 +123,6 @@ struct Coordinate {
 Coordinate basic_coordinate;	// 기본(초기) 좌표계
 
 //======================================================================
-struct Section_Info {
-	float sx, sz, lx, lz;
-	int ID;
-};
-struct City_Info {
-	Section_Info SectionNum[4];
-	float Centerx, Centerz;
-	int id;
-};
-
-vector<City_Info>Cities;
-//======================================================================
-
-float C_cx[4];
-float C_cz[4];
-
-float Calculation_Distance(XMFLOAT3 vec, int c_id) // vec-> Player's pos, v -> city's center pos 
-{
-	float dist = sqrtf(powf(vec.x - Cities[c_id].Centerx, 2) + powf(vec.z - Cities[c_id].Centerz, 2));
-	return dist;
-}
-
-float Calculation_Distance(XMFLOAT3 vec, int c_id, int s_id)
-{
-	float cx = (Cities[c_id].SectionNum[s_id].lx + Cities[c_id].SectionNum[s_id].sx) / 2;
-	float cz = (Cities[c_id].SectionNum[s_id].lz + Cities[c_id].SectionNum[s_id].sz) / 2;
-
-	float dist = sqrtf(powf(vec.x - cx, 2) + powf(vec.z - cz, 2));
-	return dist;
-}
-
 XMFLOAT3 NPCNormalize(XMFLOAT3 vec)
 {
 	float dist = sqrtf(powf(vec.x, 2) + powf(vec.y, 2) + powf(vec.z, 2));
@@ -163,6 +134,14 @@ XMFLOAT3 NPCNormalize(XMFLOAT3 vec)
 	}
 
 	return vec;
+}
+
+float DistanceNPCtoCP(XMFLOAT3 cppos, XMFLOAT3 npc_pos)
+{
+	XMFLOAT3 temp{ cppos.x - npc_pos.x, cppos.y - npc_pos.y , cppos.z - npc_pos.z };
+
+	float dist = sqrtf(powf(temp.x, 2) + powf(temp.y, 2) + powf(temp.z, 2));
+	return dist;
 }
 
 //======================================================================
@@ -260,7 +239,6 @@ public:
 	bool PrintRayCast = false;
 	vector<CheckPoint> graph;
 	vector<int>path;
-	vector<City_Info>m_Section;
 	BoundingFrustum m_frustum;
 	MyVector3 m_VectorMAX = { -9999.f, -9999.f, -9999.f };
 public:
@@ -300,7 +278,7 @@ public:
 	void SetCurr_coordinate(Coordinate cor) { m_coordinate = cor; }
 	void SetUser_Pos(XMFLOAT3 pos, int cid) { m_User_Pos[cid] = pos; }
 	void SetSpeed(float spd) { m_Speed = spd; }
-	
+	void SetIdleNodeIndex(int index) { m_currentNodeIndex = index; }
 public:
 // Normal
 	// Rotate
@@ -314,7 +292,6 @@ public:
 	// State
 	void NPC_State_Manegement(int state); // 상태 관리
 	void Caculation_Distance(XMFLOAT3 vec, int id); // 범위 내 플레이어 탐색
-	void MoveInSection();
 	void MoveChangeIdle();
 	void MoveToNode();
 	void FlyOnNpc(XMFLOAT3 vec, int id);
@@ -471,7 +448,6 @@ void NPC::NPC_State_Manegement(int state)
 	{
 	case NPC_IDLE: // 매복 혹은 특정 운동을 하는 중.
 	{
-		//MoveInSection();
 		MoveToNode();
 		SetTrackingIDbyDistance(500.0f, NPC_IDLE, NPC_FLY);
 	}
@@ -537,973 +513,30 @@ void NPC::Caculation_Distance(XMFLOAT3 vec, int id) // 서버에서 따로 부를 것.
 {
 	m_Distance[id] = sqrtf(pow((vec.x - pos.x), 2) + pow((vec.y - pos.y), 2) + pow((vec.z - pos.z), 2));
 }
-void NPC::MoveInSection()
-{
-	if (m_SectionMoveDir) {
-		switch (m_IdleCity)
-		{
-		case 0:
-			switch (m_IdleSection)
-			{
-			case 0:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lz - pos.z)) {
-					m_IdleSection++;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].lz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 1:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lx - pos.x)) {
-					m_IdleSection++;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].lx, pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			case 2:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sz - pos.z)) {
-					m_IdleSection++;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].sz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 3:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lx - pos.x)) {
-					m_IdleSection++;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].lx, pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			case 4:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lz - pos.z)) {
-					m_IdleSection++;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].lz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 5:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lx - pos.x)) {
-					m_SectionMoveDir = false;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].lx , pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			}
-		case 1:
-			switch (m_IdleSection)
-			{
-			case 0:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sx - pos.x)) {
-					m_IdleSection++;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].sx, pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			case 1:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lz - pos.z)) {
-					m_IdleSection++;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].lz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 2:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lx - pos.x)) {
-					m_IdleSection++;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].lx, pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			case 3:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lz - pos.z)) {
-					m_IdleSection++;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].lz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 4:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sx - pos.x)) {
-					m_IdleSection++;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].sx, pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			case 5:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lz - pos.z)) {
-					m_SectionMoveDir = false;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x , pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].lz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			}
-		case 2:
-			switch (m_IdleSection)
-			{
-			case 0:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sz - pos.z)) {
-					m_IdleSection++;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].sz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 1:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sx - pos.x)) {
-					m_IdleSection++;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].sx, pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			case 2:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lz - pos.z)) {
-					m_IdleSection++;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].lz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 3:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sx - pos.x)) {
-					m_IdleSection++;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].sx, pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			case 4:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sz - pos.z)) {
-					m_IdleSection++;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].sz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 5:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sx - pos.x)) {
-					m_SectionMoveDir = false;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].sx , pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			}
-		}
-	}
-	else {
-		switch (m_IdleCity)
-		{
-		case 0:
-			switch (m_IdleSection)
-			{
-			case 0:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sz - pos.z)) {
-					m_SectionMoveDir = true;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].sz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 1:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sx - pos.x)) {
-					m_IdleSection--;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].sx, pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			case 2:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lz - pos.z)) {
-					m_IdleSection--;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].lz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 3:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sx - pos.x)) {
-					m_IdleSection--;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].sx, pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			case 4:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sz - pos.z)) {
-					m_IdleSection--;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].sz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 5:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sx - pos.x)) {
-					m_IdleSection--;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].sx , pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			}
-		case 1:
-			switch (m_IdleSection)
-			{
-			case 0:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lx - pos.x)) {
-					m_SectionMoveDir = true;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].lx, pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			case 1:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sz - pos.z)) {
-					m_IdleSection--;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].sz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 2:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sx - pos.x)) {
-					m_IdleSection--;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].sx, pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			case 3:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sz - pos.z)) {
-					m_IdleSection--;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].sz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 4:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lx - pos.x)) {
-					m_IdleSection--;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].lx, pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			case 5:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sz - pos.z)) {
-					m_IdleSection--;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x , pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].sz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			}
-		case 2:
-			switch (m_IdleSection)
-			{
-			case 0:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lz - pos.z)) {
-					m_SectionMoveDir = true;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].lz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 1:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lx - pos.x)) {
-					m_IdleSection--;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].lx, pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			case 2:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].sz - pos.z)) {
-					m_IdleSection--;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].sz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 3:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lx - pos.x)) {
-					m_IdleSection--;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].lx, pos.y, pos.z };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			case 4:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lz - pos.z)) {
-					m_IdleSection--;
-				}
-				else {
-					XMFLOAT3 sec_look = { pos.x, pos.y, Cities[m_IdleCity].SectionNum[m_IdleSection].lz };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.z += m_Speed * m_coordinate.look.z;
-				}
-			}
-			break;
-			case 5:
-			{
-				if (25.0f > abs(Cities[m_IdleCity].SectionNum[m_IdleSection].lx - pos.x)) {
-					m_IdleSection--;
-				}
-				else {
-					XMFLOAT3 sec_look = { Cities[m_IdleCity].SectionNum[m_IdleSection].lx , pos.y, pos.x };
-					XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&sec_look), XMLoadFloat3(&pos)));
-					XMStoreFloat3(&m_coordinate.look, Looktemp);
-
-					// Right
-					Coordinate base_coordinate;
-					base_coordinate.up = { 0,1,0 };
-
-					XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-					XMStoreFloat3(&m_coordinate.right, righttemp);
-
-					// up
-					XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-					XMStoreFloat3(&m_coordinate.up, uptemp);
-
-					pos.x += m_Speed * m_coordinate.look.x;
-				}
-			}
-			break;
-			}
-		}
-	}
-	//NPCtoBuilding_collide();
-}
 void NPC::MoveChangeIdle()
 {
-	float City_dis{};
-	float Min_DisofCity = 100000;
-	int id{};
-	for (int i{}; i < 3; ++i) {
-		City_dis = Calculation_Distance(pos, i);
-		if (Min_DisofCity > City_dis) {
-			Min_DisofCity = City_dis;
-			id = i;
+	XMFLOAT3 currentPosition = GetPosition();
+
+	// 가장 가까운 Checkpoint를 찾기 위한 변수 초기화
+	int closestCheckpointIndex = -1;
+	float closestDistance = (std::numeric_limits<float>::max)();
+
+	// NPC의 위치와 모든 Checkpoint의 거리를 비교하여 가장 가까운 Checkpoint를 찾습니다.
+	int numCP = graph.size();
+	for (int i = 0; i < numCP; ++i) {
+		float distance = DistanceNPCtoCP(graph[i].getPos(), pos);
+
+		if (distance < closestDistance) {
+			closestCheckpointIndex = i;
+			closestDistance = distance;
 		}
 	}
 
-	if (Min_DisofCity > 600.0f) {
-		// 계산한 값이 거리가 일정 구간 안이 아닐 경우	
-		float dis{};
-		int s_id{};
-		float Min_DisofSec = 100000;
-		for (int i{}; i < 3; ++i) {
-			dis = Calculation_Distance(pos, id, i);
-			if (Min_DisofSec > dis) {
-				Min_DisofSec = dis;
-				s_id = i;
-			}
-		}
-		// 구역 지정
-		m_IdleCity = id;
-		m_IdleSection = s_id;
-	}
+	// 가장 가까운 Checkpoint의 인덱스를 Idle 상태로 설정합니다.
+	SetIdleNodeIndex(closestCheckpointIndex);
+
+	// NPC를 해당 Checkpoint로 이동시킵니다.
+	MoveToNode();
 }
 void NPC::MoveToNode()
 {
@@ -1521,11 +554,11 @@ void NPC::MoveToNode()
 	float moveSpeed = m_Speed * 0.0016f; // deltaTime은 프레임 간의 시간 간격입니다.
 
 	// NPC의 위치를 목표 위치로 보간하여 이동시킵니다.
-	pos.x += temp.x * moveSpeed;
-	pos.y += temp.y * moveSpeed;
-	pos.z += temp.z * moveSpeed;
+	pos.x += temp.x * m_Speed;
+	pos.y += temp.y * m_Speed;
+	pos.z += temp.z * m_Speed;
 
-	float distanceToTarget = std::sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+	float distanceToTarget = sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
 
 	// 거리가 50 이하일 경우 다음 노드로 설정합니다.
 	if (distanceToTarget <= 50.0f)
@@ -1800,6 +833,7 @@ public:
 	int remain_size;
 	int id;
 	SOCKET sock;
+	mutex s_lock;
 
 public:
 	SERVER() { remain_size = 0; id = -1; sock = 0; }
@@ -1840,12 +874,14 @@ public:
 HANDLE h_iocp;											// IOCP 핸들
 int a_lgcsvr_num;										// Active상태인 메인서버
 array<SERVER, MAX_LOGIC_SERVER> g_logicservers;			// 로직서버 정보
+bool b_lgcserver_conn;
 
 void SERVER::send_npc_init_packet(int npc_id) {
 	NPC_FULL_INFO_PACKET npc_init_packet;
-	npc_init_packet.size = sizeof(NPC_MOVE_PACKET);
-	npc_init_packet.type = NPC_ROTATE;
+	npc_init_packet.size = sizeof(NPC_FULL_INFO);
+	npc_init_packet.type = NPC_FULL_INFO;
 	npc_init_packet.n_id = npc_id;
+	strcpy_s(npc_init_packet.name, npcsInfo[npc_id].name);
 	npc_init_packet.hp = npcsInfo[npc_id].hp;
 	npc_init_packet.x = npcsInfo[npc_id].pos.x;
 	npc_init_packet.y = npcsInfo[npc_id].pos.y;
@@ -1859,6 +895,8 @@ void SERVER::send_npc_init_packet(int npc_id) {
 	npc_init_packet.look_x = npcsInfo[npc_id].m_lookvec.x;
 	npc_init_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
 	npc_init_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
+
+	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
 	g_logicservers[a_lgcsvr_num].do_send(&npc_init_packet);
 }
 void SERVER::send_npc_move_packet(int npc_id) {
@@ -1869,11 +907,13 @@ void SERVER::send_npc_move_packet(int npc_id) {
 	npc_move_packet.x = npcsInfo[npc_id].pos.x;
 	npc_move_packet.y = npcsInfo[npc_id].pos.y;
 	npc_move_packet.z = npcsInfo[npc_id].pos.z;
+
+	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
 	g_logicservers[a_lgcsvr_num].do_send(&npc_move_packet);
 }
 void SERVER::send_npc_rotate_packet(int npc_id) {
 	NPC_ROTATE_PACKET npc_rotate_packet;
-	npc_rotate_packet.size = sizeof(NPC_MOVE_PACKET);
+	npc_rotate_packet.size = sizeof(NPC_ROTATE_PACKET);
 	npc_rotate_packet.type = NPC_ROTATE;
 	npc_rotate_packet.n_id = npc_id;
 	npc_rotate_packet.right_x = npcsInfo[npc_id].m_rightvec.x;
@@ -1885,33 +925,13 @@ void SERVER::send_npc_rotate_packet(int npc_id) {
 	npc_rotate_packet.look_x = npcsInfo[npc_id].m_lookvec.x;
 	npc_rotate_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
 	npc_rotate_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
+
+	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
 	g_logicservers[a_lgcsvr_num].do_send(&npc_rotate_packet);
 }
 void SERVER::send_npc_move_rotate_packet(int npc_id) {
-	NPC_MOVE_PACKET npc_mv_packet;
-	npc_mv_packet.size = sizeof(NPC_MOVE_PACKET);
-	npc_mv_packet.type = NPC_MOVE;
-	npc_mv_packet.n_id = npc_id;
-	npc_mv_packet.x = npcsInfo[npc_id].pos.x;
-	npc_mv_packet.y = npcsInfo[npc_id].pos.y;
-	npc_mv_packet.z = npcsInfo[npc_id].pos.z;
-	g_logicservers[a_lgcsvr_num].do_send(&npc_mv_packet);
-
-	NPC_ROTATE_PACKET npc_rt_packet;
-	npc_rt_packet.size = sizeof(NPC_MOVE_PACKET);
-	npc_rt_packet.type = NPC_ROTATE;
-	npc_rt_packet.n_id = npc_id;
-	npc_rt_packet.right_x = npcsInfo[npc_id].m_rightvec.x;
-	npc_rt_packet.right_y = npcsInfo[npc_id].m_rightvec.y;
-	npc_rt_packet.right_z = npcsInfo[npc_id].m_rightvec.z;
-	npc_rt_packet.up_x = npcsInfo[npc_id].m_upvec.x;
-	npc_rt_packet.up_y = npcsInfo[npc_id].m_upvec.y;
-	npc_rt_packet.up_z = npcsInfo[npc_id].m_upvec.z;
-	npc_rt_packet.look_x = npcsInfo[npc_id].m_lookvec.x;
-	npc_rt_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
-	npc_rt_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
-	cout << npcsInfo[npc_id].m_lookvec.x << ", " << npcsInfo[npc_id].m_lookvec.y << ", " << npcsInfo[npc_id].m_lookvec.z << endl;
-	g_logicservers[a_lgcsvr_num].do_send(&npc_rt_packet);
+	send_npc_move_packet(npc_id);
+	send_npc_rotate_packet(npc_id);
 }
 
 //======================================================================
@@ -2046,6 +1066,7 @@ void process_packet(char* packet)
 }
 
 //======================================================================
+void initNpc();
 void do_worker()
 {
 	while (true) {
@@ -2163,6 +1184,7 @@ void do_worker()
 				delete ex_over;
 				g_logicservers[a_lgcsvr_num].do_recv();
 				ConnectingServer = true;
+				initNpc();
 			}
 
 		}//OP_CONN end
@@ -2172,27 +1194,6 @@ void do_worker()
 
 //======================================================================
 void initNpc() {
-	for (int i{}; i < 4; ++i) {
-		C_cx[i] = (CP[i * 4 + 2].getPosX() + CP[i * 4 + 3].getPosX() + CP[i * 4 + 4].getPosX() + CP[i * 4 + 5].getPosX()) / 4;
-		C_cz[i] = (CP[i * 4 + 2].getPosZ() + CP[i * 4 + 3].getPosZ() + CP[i * 4 + 4].getPosZ() + CP[i * 4 + 5].getPosZ()) / 4;
-	}
-
-	for (int i{}; i < 4; ++i) {
-		City_Info temp;
-		temp.id = i;
-		temp.Centerx = C_cx[i];
-		temp.Centerz = C_cz[i];
-
-		for (int j{}; j < 4; ++j) {
-			temp.SectionNum[j].ID = j;
-			temp.SectionNum[j].lx = CP[4 * i + 2 + j].getPosX() + (CP[4 * i + 2 + j].getScaleX()) / 2;
-			temp.SectionNum[j].lz = CP[4 * i + 2 + j].getPosZ() + (CP[4 * i + 2 + j].getScaleZ()) / 2;
-			temp.SectionNum[j].sx = CP[4 * i + 2 + j].getPosX() - (CP[4 * i + 2 + j].getScaleX()) / 2;
-			temp.SectionNum[j].sz = CP[4 * i + 2 + j].getPosZ() - (CP[4 * i + 2 + j].getScaleZ()) / 2;
-		}
-		Cities.emplace_back(temp);
-	}
-
 	for (int i{}; i < MAX_NPCS; i++) {
 		int npc_id = i;
 		npcsInfo[i].SetID(npc_id);
@@ -2218,6 +1219,8 @@ void initNpc() {
 		float speed = SpdSet(dre);
 		npcsInfo[i].SetSpeed(speed);
 		npcsInfo[i].SetChaseID(-1);
+
+		g_logicservers[a_lgcsvr_num].send_npc_init_packet(npc_id);
 	}
 }
 
@@ -2281,11 +1284,11 @@ void MoveNPC()
 					}
 
 					// npc pos 확인
-					cout << "=============" << endl;
-					cout << i << "번째 NPC의 도시 ID: " << npcsInfo[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcsInfo[i].GetIdleSection() << endl;
-					cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
-					cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
-					cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
+					//cout << "=============" << endl;
+					//cout << i << "번째 NPC의 도시 ID: " << npcsInfo[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcsInfo[i].GetIdleSection() << endl;
+					//cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
+					//cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
+					//cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
 
 					/*if (npcs[i].PrintRayCast) {
 						cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
@@ -2318,6 +1321,7 @@ int main(int argc, char* argv[])
 	//======================================================================
 	//					로직서버로 비동기 Connect 요청
 	//======================================================================
+	ConnectingServer = false;
 	int lgvsvr_port = PORTNUM_LGCNPC_0 + a_lgcsvr_num;
 
 	cout << "로직 서버(Server[" << a_lgcsvr_num << "] (PORT: " << lgvsvr_port << ")에 비동기Connect를 요청합니다." << endl;
@@ -2511,8 +1515,6 @@ int main(int argc, char* argv[])
 	/*for (const auto& edge : edges) {
 		std::cout << "From: " << edge.from << ", To: " << edge.to << ", Value: " << edge.value << std::endl;
 	}*/
-
-	initNpc();
 
 
 	//======================================================================
