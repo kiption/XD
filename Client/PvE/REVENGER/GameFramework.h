@@ -179,7 +179,7 @@ private:
 	POINT						m_ptOldCursorPos;
 
 	_TCHAR						m_pszFrameRate[70];
-
+	float ShootCnt = 0.0;
 	void AnimationLoop(float EleapsedTime);
 //==================================================
 //			  서버 통신을 위한 것들...
@@ -207,7 +207,7 @@ public:
 	int m_occupationnum = 50;
 	queue<BulletPos> m_shoot_info;
 
-	bool W_KEY, A_KEY, S_KEY, D_KEY, SPACE_KEY = false;
+	bool W_KEY, A_KEY, S_KEY, D_KEY, SPACE_KEY,SHOOT_KEY = false;
 //==================================================
 
 //==================================================

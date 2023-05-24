@@ -328,21 +328,22 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	{
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
-	
-		if (m_nMode == SCENE1STAGE)gamesound.shootingSound();
-		if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
 
+		((CHumanPlayer*)m_pPlayer)->m_bBulletAnimationActive = true;
+		if (m_nMode == SCENE1STAGE) gamesound.shootingSound();
+		if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
 		MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
 		q_mouseInput.push(lclick);//s
+		break;
 	}
 	case WM_RBUTTONDOWN:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
 
-		
-	
+
+
 	case WM_LBUTTONUP:
-		
+
 	case WM_RBUTTONUP:
 		::ReleaseCapture();
 		break;
@@ -416,7 +417,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
 			break;
 		case 'M':
-			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackEnable(2,true);
+			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackEnable(2, true);
 			if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 		default:
 			break;
@@ -510,21 +511,7 @@ void CGameFramework::BuildObjects()
 	m_pCamera = m_pPlayer->GetCamera();
 	m_pCamera->SetMode(FIRST_PERSON_CAMERA);
 	m_pScene->m_pPlayer->SetPosition(XMFLOAT3(500.0, 100.0, 500.0));
-	if (m_nMode == SCENE1STAGE)
-	{
 
-		m_pPostProcessingShader = new CTextureToFullScreenShader();
-		m_pPostProcessingShader->CreateGraphicsPipelineState(m_pd3dDevice, m_pd3dCommandList,
-			m_pScene->GetGraphicsRootSignature(), D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D32_FLOAT, 0);
-
-		m_pPostProcessingShader->BuildObjects(m_pd3dDevice, m_pd3dCommandList, NULL, NULL);
-
-		DXGI_FORMAT pdxgiResourceFormats[4] = { DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_FORMAT_R32_FLOAT };
-		m_pPostProcessingShader->CreateResourcesAndRtvsSrvs(m_pd3dDevice, m_pd3dCommandList, 4, pdxgiResourceFormats, d3dRtvCPUDescriptorHandle, 4 + 1); //SRV to (Render Targets)+ (Depth Buffer)
-
-		DXGI_FORMAT pdxgiSrvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
-		m_pScene->CreateShaderResourceViews(m_pd3dDevice, 1, &m_pd3dDepthStencilBuffer, pdxgiSrvFormats);
-	}
 
 	m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
@@ -1409,14 +1396,36 @@ void CGameFramework::CreateDirect2DDevice()
 
 void CGameFramework::AnimationLoop(float EleapsedTime)
 {
-	if(A_KEY==true || D_KEY== true)
+	if (A_KEY == true || D_KEY == true)
 	{
-		((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
+		((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	}
 	else
 	{
 		((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	}
+
+	if (((CHumanPlayer*)m_pPlayer)->m_bBulletAnimationActive == true)
+	{
+		((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
+		ShootCnt += 0.1;
+
+	}
+	if (ShootCnt > 2.5f)
+	{
+
+		((CHumanPlayer*)m_pPlayer)->m_bBulletAnimationActive = false;
+		ShootCnt = 0.0f;
+	}
+
+	if (
+		((CHumanPlayer*)m_pPlayer)->m_bBulletAnimationActive == false && ShootCnt==0.0)
+	{
+
+		m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	}
+
+
 }
 
 //==================================================
@@ -1626,7 +1635,7 @@ void CGameFramework::CollisionMap_by_PLAYER(XMFLOAT3 pos, XMFLOAT3 extents)
 	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(2.5, 2.0, 4.0), XMFLOAT4(0, 0, 0, 1));
 	m_mapxmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents.x / 2.1f, extents.y / 2.1f, extents.z / 2.1f), XMFLOAT4(0, 0, 0, 1));
 	m_mapStorexmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents.x / 1.8f, extents.y / 1.8f, extents.z / 1.8), XMFLOAT4(0, 0, 0, 1));
-	
+
 	if (m_mapStorexmoobb.Intersects(m_pPlayer->m_xoobb) && m_bFirstCollision == true)
 	{
 		PrevPosition = m_pPlayer->m_xmf3Position;

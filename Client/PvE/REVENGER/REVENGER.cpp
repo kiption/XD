@@ -322,7 +322,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							gGameFramework.setEqLook_Npc(npcs_info[i].m_id, npcs_info[i].m_pos, npcs_info[i].m_look_vec);
 							((Stage1*)gGameFramework.m_pScene)->SmokePosition = npcs_info[i].m_pos;
 							
-							((Stage1*)gGameFramework.m_pScene)->m_pBillboardShader[3]->ParticlePosition=npcs_info[i].m_pos;
+							
 						
 							
 							

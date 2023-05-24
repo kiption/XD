@@ -118,7 +118,7 @@ void CrossHairShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	CTexturedRectMesh* pSpriteMesh;
 	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 40.0, 40.0, 0.0f, 0.0f, 0.0f, 0.0f);
 
-	m_nObjects = 2;
+	m_nObjects = 1;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures, 0, 15);
 	SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures2, 0, 15);
@@ -137,14 +137,7 @@ void CrossHairShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		ppParticleObject[j]->SetPosition(0.0, 0.0, 0.0);
 		m_ppObjects[j] = ppParticleObject[j];
 	}
-	for (int k = 1; k < 2; k++)
-	{
-		ppParticleObject[k] = new CBillboardObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		ppParticleObject[k]->SetMesh(pSpriteMesh);
-		ppParticleObject[k]->SetMaterial(0, pSpriteMaterial2);
-		ppParticleObject[k]->SetPosition(0.0, 0.0, 0.0);
-		m_ppObjects[k] = ppParticleObject[k];
-	}
+
 }
 
 void CrossHairShader::ReleaseObjects()
@@ -159,8 +152,8 @@ void CrossHairShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	CPlayer* pPlayer = pCamera->GetPlayer();
 	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
-	xmf3Position = Vector3::Add(xmf3CameraPosition, Vector3::ScalarProduct(xmf3CameraLook, 120.0f, false));
-	xmf3Position.y += 20.0f;
+	xmf3Position = Vector3::Add(xmf3CameraPosition, Vector3::ScalarProduct(xmf3CameraLook, 0.0f, false));
+	m_ppObjects[0]->SetPosition(xmf3Position);
 
 	
 	BillboardShader::Render(pd3dCommandList, pCamera, nPipelineState);
@@ -580,7 +573,7 @@ void HelicopterSparkBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		ParticlePosition = pPlayer->GetPosition();
+		/*ParticlePosition = pPlayer->GetPosition();*/
 		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0, 0.0f));
 
 	}

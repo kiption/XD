@@ -44,6 +44,7 @@ public:
 	float           			m_fPitch = 0.0f;
 	float           			m_fYaw = 0.0f;
 	float           			m_fRoll = 0.0f;
+
 	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
 	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
@@ -93,7 +94,7 @@ public:
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 	bool m_bCollisionTerrain = false;
-
+	bool m_bBulletAnimationActive = false;
 
 	//Server
 	void SetVectorsByServer(const XMFLOAT3& xmf3right, const XMFLOAT3& xmf3up, const XMFLOAT3& xmf3look) { m_xmf3Right = xmf3right; m_xmf3Up = xmf3up; m_xmf3Look = xmf3look; }

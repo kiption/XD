@@ -318,8 +318,8 @@ void CFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	{
 		m_ppObjects[i] = new CExplosiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pFragmentModel, false);
-		m_ppObjects[i]->SetScale(500.0, 500.0, 500.0);
-		m_ppObjects[i]->SetPosition(530.0, 40.0, -230.0);
+		m_ppObjects[i]->SetScale(50.0, 50.0, 50.0);
+		m_ppObjects[i]->SetPosition(530.0, 500.0, -230.0);
 		pFragmentModel->AddRef();
 		ParticlePosition = m_ppObjects[i]->GetPosition();
 	}
@@ -373,7 +373,6 @@ D3D12_INPUT_LAYOUT_DESC CFragmentsShader::CreateInputLayout(int nPipelineState)
 
 void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 {
-	
 	if (m_bActive == true)
 	{
 		XMFLOAT3 gravity = XMFLOAT3(0, -5.8f, 0);
@@ -398,7 +397,7 @@ void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 		}
 		else
 		{
-			m_bActive = false;
+			//m_bActive = false;
 			m_fElapsedTimes = 0.0f;
 		}
 
