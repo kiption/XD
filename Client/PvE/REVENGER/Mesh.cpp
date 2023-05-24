@@ -330,7 +330,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
 				m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 			}
-			CalculateBoundingBox((XMFLOAT3*)m_pxmf3Positions, sizeof(XMFLOAT3));
+			
 		}
 		else if (!strcmp(pstrToken, "<Colors>:"))
 		{
@@ -356,11 +356,6 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				m_d3dTextureCoord0BufferView.BufferLocation = m_pd3dTextureCoord0Buffer->GetGPUVirtualAddress();
 				m_d3dTextureCoord0BufferView.StrideInBytes = sizeof(XMFLOAT2);
 				m_d3dTextureCoord0BufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
-				//TextureCoor0->x = m_pxmf2TextureCoords0->x;
-				//TextureCoor0->y = m_pxmf2TextureCoords0->y;
-				//TextureCoor0->z = 0.0;
-				//CalculateBoundingBox((XMFLOAT3*)TextureCoor0, sizeof(XMFLOAT3));
-
 			}
 		}
 		else if (!strcmp(pstrToken, "<TextureCoords1>:"))
@@ -377,10 +372,6 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				m_d3dTextureCoord1BufferView.BufferLocation = m_pd3dTextureCoord1Buffer->GetGPUVirtualAddress();
 				m_d3dTextureCoord1BufferView.StrideInBytes = sizeof(XMFLOAT2);
 				m_d3dTextureCoord1BufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
-				//TextureCoor1->x = m_pxmf2TextureCoords1->x;
-				//TextureCoor1->y = m_pxmf2TextureCoords1->y;
-				////TextureCoor1->z = 0.0;
-				//CalculateBoundingBox((XMFLOAT3*)TextureCoor1, sizeof(XMFLOAT3));
 			}
 
 		}
@@ -466,7 +457,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 						}
 					}
-					//CalculateVertexNormals(m_pxmf3Normals, m_pxmf3Positions, m_nVertices, m_ppnSubSetIndices[i], m_nSubMeshes);
+					
 				}
 			}
 		}

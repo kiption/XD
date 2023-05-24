@@ -5,19 +5,26 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
-	pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL);
-	SetChild(pAngrybotModel->m_pModelRootObject, true);
+	pSoldiarModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MODEL_(1).bin", NULL);
+	SetChild(pSoldiarModel->m_pModelRootObject, true);
 	SetScale(XMFLOAT3(12.0, 12.0, 12.0));
-
 	Rotate(0.0, 90.0, 0.0);
-	pAngrybotModel->m_pModelRootObject->SetCurScene(SCENE2STAGE);
-	m_pBulletFindFrame = pAngrybotModel->m_pModelRootObject->FindFrame("Bip001_R_Finger0Nub");
+	pSoldiarModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
 
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 3, pAngrybotModel);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+
+
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 3, pSoldiarModel);
+	//m_pSkinnedAnimationController->m_bRootMotion = true;
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0,0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
-	
+	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4);
+
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
@@ -34,18 +41,23 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	CAnimationCallbackHandler* pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
 	
-	CLoadedModelInfo* pBulletMesh = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", NULL);
+
+	pBCBulletEffectShader = new CBulletEffectShader();
+	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
 	for (int i = 0; i < BULLETS; i++)
 	{
+
+		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
 		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
-		pBulletObject->SetChild(pBulletMesh->m_pModelRootObject, true);
-		pBulletObject->SetScale(1.0,1.0,1.0);
-		pBulletObject->SetMovingSpeed(800.0f);
+		pBulletObject->SetChild(pBulletMesh, false);
+		pBulletObject->SetMovingSpeed(300.0f);
 		pBulletObject->SetActive(false);
-		pBulletObject->m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 0, pBulletMesh);
+		pBulletObject->SetCurScene(SCENE1STAGE);
 		m_ppBullets[i] = pBulletObject;
-		m_ppBullets[i]->SetCurScene(SCENE2STAGE);
+		pBulletMesh->AddRef();
 	}
+
 	SetPlayerUpdatedContext(pContext);
 	SetCameraUpdatedContext(pContext);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -56,12 +68,13 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	m_xoobb = BoundingOrientedBox(XMFLOAT3(this->GetPosition()), XMFLOAT3(15.0, 18.0, 13.0), XMFLOAT4(0, 0, 0, 1));
 
-	if (pAngrybotModel) delete pAngrybotModel;
-	if (pBulletMesh) delete pBulletMesh;
+	if (pSoldiarModel) delete pSoldiarModel;
+
 }
 
 CHumanPlayer::~CHumanPlayer()
 {
+	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
 }
 
 CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
@@ -96,13 +109,12 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		break;
 	case THIRD_PERSON_CAMERA:
 		SetFriction(250.0f);
-		SetGravity(XMFLOAT3(0.0f, -255.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, -0.0, 0.0f));
 		SetMaxVelocityXZ(300.0f);
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(20.0f, 20.0f, -70.0f));
-		//m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y+10.0, m_xmf3Position.z), m_pCamera->GetOffset()));
+		m_pCamera->SetOffset(XMFLOAT3(20.0f, 14.0f, -45.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -201,6 +213,7 @@ void CHumanPlayer::Update(float fTimeElapsed)
 void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	CPlayer::Render(pd3dCommandList, pCamera);
+	if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < BULLETS; i++) 
 		if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
 }
@@ -228,15 +241,21 @@ void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 	if (pBulletObject)
 	{
 
-		XMFLOAT3 xmf3Position = m_pBulletFindFrame->GetPosition();
-		XMFLOAT3 xmf3Direction = PlayerLook;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.5, false));
+		XMFLOAT3 PlayerLook = GetLookVector();
+		XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
+		XMFLOAT3 CaemraPosition = m_pCamera->GetPosition();
+		XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
+		XMFLOAT3 xmf3Position = GetPosition();
+		XMFLOAT3 xmf3Direction = TotalLookVector;
 
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
-		pBulletObject->SetMovingDirection(xmf3Direction);
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 60.0f, false));
+		xmf3Direction.y += 0.07f;
+		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+		pBulletObject->Rotate(90.0, 0.0, 0.0);
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-		pBulletObject->Rotate(130.0, 0.0, 0.0);
-		pBulletObject->SetScale(5.0, 5.0, 10.5);
+		pBulletObject->SetMovingDirection(xmf3Direction);
+		pBulletObject->SetScale(1.0, 1.0, 1.5);
 		pBulletObject->SetActive(true);
 	
 	}

@@ -1,19 +1,19 @@
 #pragma once
 #include "Player.h"
 #include "MissileObject.h"
-
+#include "ObjcetsShaderList.h"
 class SceneManager;
 class CHumanPlayer : public CPlayer
 {
 public:
 	CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual ~CHumanPlayer();
-	CLoadedModelInfo* pAngrybotModel = NULL;
+	CLoadedModelInfo* pSoldiarModel = NULL;
 	CAngrybotObject* pSoldiarObject = NULL;
 	CGameObject* m_pBulletFindFrame{ NULL };
 public:
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
-
+	CBulletEffectShader* pBCBulletEffectShader = NULL;
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
 	virtual void OnCameraUpdateCallback(float fTimeElapsed);
 

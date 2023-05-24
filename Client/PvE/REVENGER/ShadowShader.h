@@ -126,7 +126,7 @@ public:
 class CShadowMapShader : public CIlluminatedShader
 {
 public:
-	CShadowMapShader(CObjectsShader* pObjectsShader);
+	m_nObjects(CObjectsShader* pObjectsShader);
 	virtual ~CShadowMapShader();
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState);

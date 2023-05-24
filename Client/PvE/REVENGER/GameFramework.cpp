@@ -329,9 +329,9 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
 
-		if (m_nMode == SCENE2STAGE)((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
-		if (m_nMode == SCENE2STAGE)gamesound.shootingSound();
-		if (m_nMode == SCENE2STAGE)((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
+		if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+		if (m_nMode == SCENE1STAGE)gamesound.shootingSound();
+		if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
 
 		MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
 		q_mouseInput.push(lclick);//s
@@ -342,7 +342,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 
 		break;
 	case WM_LBUTTONUP:
-		if (m_nMode == SCENE2STAGE)
+		if (m_nMode == SCENE1STAGE)
 		{
 			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 		}
@@ -416,7 +416,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
 			break;
 		case VK_SPACE:
-			if (m_nMode == SCENE1STAGE)((HeliPlayer*)m_pPlayer)->Firevalkan(NULL);
+			if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
 			break;
 		default:
 			break;
@@ -503,7 +503,7 @@ void CGameFramework::BuildObjects()
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
 
 
-	HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
+	CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
 
 	CreateShaderVariables();
 	m_pScene->m_pPlayer = m_pPlayer = pPlayer;
@@ -564,98 +564,46 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[VK_UP] & 0xF0) {
 			dwDirection |= DIR_UP;
 			q_keyboardInput.push(SEND_KEY_UP);//S
-
-			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
-			{
-			}
-			if (m_nMode != SCENE2STAGE)
-			{
-			}
 		}
 		if (pKeysBuffer[VK_DOWN] & 0xF0) {
 			dwDirection |= DIR_DOWN;
 			q_keyboardInput.push(SEND_KEY_DOWN);//S
-
-			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
-			{
-			}
-			if (m_nMode != SCENE2STAGE)
-			{
-			}
 		}
 		if (pKeysBuffer[VK_LEFT] & 0xF0) {
 			m_pPlayer->Rotate(0.0f, -0.5f, 0.0f);
 			q_keyboardInput.push(SEND_KEY_LEFT);//S
-
-			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
-			{
-			}
-			if (m_nMode != SCENE2STAGE)
-			{
-			}
 		}
 		if (pKeysBuffer[VK_RIGHT] & 0xF0) {
 			(m_pPlayer)->Rotate(0.0f, 0.5f, 0.0f);
 			q_keyboardInput.push(SEND_KEY_RIGHT);//S
-
-			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE)
-			{
-			}
-			if (m_nMode != SCENE2STAGE)
-			{
-			}
 		}
 
 		if (pKeysBuffer[KEY_W] & 0xF0) {
 			dwDirection |= DIR_FORWARD;
 			q_keyboardInput.push(SEND_KEY_W);//S
-			if (m_nMode != SCENE2STAGE)
-			{
-				if (((HeliPlayer*)m_pPlayer)->m_fPitch < 15.0f) {
-					((HeliPlayer*)m_pPlayer)->Rotate(0.15f, 0.0f, 0.0f);
-					//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
-				}
-			}
+
 		}
 		if (pKeysBuffer[KEY_S] & 0xF0) {
 			dwDirection |= DIR_BACKWARD;
 			q_keyboardInput.push(SEND_KEY_S);//S
-			if (m_nMode != SCENE2STAGE)
-			{
-				if (((HeliPlayer*)m_pPlayer)->m_fPitch > -15.0f) {
-					((HeliPlayer*)m_pPlayer)->Rotate(-0.15f, 0.0f, 0.0f);
-					//cout << "누르기 후 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
-				}
-			}
+
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
 			dwDirection |= DIR_LEFT;
+			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
+		/*	((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackEnable(0, false);
+			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackEnable(2, true);
+			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackEnable(4, false);*/
 			q_keyboardInput.push(SEND_KEY_A);//S
 
-			/*if (m_pPlayerRotate_z < 1.5 && m_pPlayerRotate_z >= 0.0)
-			{
-				m_pPlayerRotate_z += 0.02f;
-				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, m_pPlayerRotate_z);
-			}*/
 
-			//if (((HeliPlayer*)m_pPlayer)->m_fRoll < 25.0f) {
-			//	((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, 0.7f);
-			//	//cout << "누르기 후 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
-			//}
 		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
 			dwDirection |= DIR_RIGHT;
 			q_keyboardInput.push(SEND_KEY_D);//S
-			/*if (m_pPlayerRotate_z > -1.5 && m_pPlayerRotate_z <= 0.0)
-			{
-				m_pPlayerRotate_z -= 0.02f;
-				((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, m_pPlayerRotate_z);
-			}
-			*/
-			//if (((HeliPlayer*)m_pPlayer)->m_fRoll > -25.0f) {
-			//	((HeliPlayer*)m_pPlayer)->Rotate(0.0, 0.0, -0.7f);
-			//	//cout << "누르기 후 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;
-			//}
+			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 		}
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
@@ -718,13 +666,13 @@ void CGameFramework::ProcessInput()
 						if (dwDirection) m_pPlayer->Move(dwDirection, 4.5f, true);
 					}
 				}
-				if (m_bCollisionCheck == true)
+				/*if (m_bCollisionCheck == true)
 				{
 					if (dwDirection) m_pPlayer->Move(dwDirection, 0.0f, true);
-				}
-				if (m_nMode == SCENE2STAGE)
+				}*/
+				if (m_nMode == SCENE1STAGE)
 				{
-					if (dwDirection) m_pPlayer->Move(dwDirection, 6.0f, true);
+					if (dwDirection) m_pPlayer->Move(dwDirection, 5.0f, true);
 				}
 			}
 		}
@@ -740,7 +688,7 @@ void CGameFramework::AnimateObjects()
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed());
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 	//DWORD CameraMode = m_pCamera->GetMode();
-	if (m_bCollisionCheck == true)
+	/*if (m_bCollisionCheck == true)
 	{
 		m_pPlayer->m_xmf3Position.y -= 2.0f;
 		m_pCamera->GetPosition().y -= 2.0f;
@@ -764,7 +712,7 @@ void CGameFramework::AnimateObjects()
 
 		m_bCollisionCheck = false;
 		m_pCamera = m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
-	}
+	}*/
 
 }
 
@@ -1100,7 +1048,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_nMode = nMode;
 			m_pScene = new Stage1();
 			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
-			HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((Stage1*)m_pScene)->m_pTerrain);
+			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((Stage1*)m_pScene)->m_pTerrain);
 			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 			m_pCamera = m_pPlayer->GetCamera();
 
@@ -1528,7 +1476,7 @@ MouseInputVal CGameFramework::popInputVal_Mouse()
 XMFLOAT3 CGameFramework::getMyPosition()
 {
 	if (m_nMode == SCENE1STAGE) {
-		return ((HeliPlayer*)m_pPlayer)->GetPosition();
+		return ((CHumanPlayer*)m_pPlayer)->GetPosition();
 	}
 	else if (m_nMode == SCENE2STAGE) {
 		return ((CHumanPlayer*)m_pPlayer)->GetPosition();
@@ -1537,7 +1485,7 @@ XMFLOAT3 CGameFramework::getMyPosition()
 XMFLOAT3 CGameFramework::getMyRightVec()
 {
 	if (m_nMode == SCENE1STAGE) {
-		return ((HeliPlayer*)m_pPlayer)->GetRightVector();
+		return ((CHumanPlayer*)m_pPlayer)->GetRightVector();
 	}
 	else if (m_nMode == SCENE2STAGE) {
 		return ((CHumanPlayer*)m_pPlayer)->GetRightVector();
@@ -1546,7 +1494,7 @@ XMFLOAT3 CGameFramework::getMyRightVec()
 XMFLOAT3 CGameFramework::getMyUpVec()
 {
 	if (m_nMode == SCENE1STAGE) {
-		return ((HeliPlayer*)m_pPlayer)->GetUpVector();
+		return ((CHumanPlayer*)m_pPlayer)->GetUpVector();
 	}
 	else if (m_nMode == SCENE2STAGE) {
 		return ((CHumanPlayer*)m_pPlayer)->GetUpVector();
@@ -1555,7 +1503,7 @@ XMFLOAT3 CGameFramework::getMyUpVec()
 XMFLOAT3 CGameFramework::getMyLookVec()
 {
 	if (m_nMode == SCENE1STAGE) {
-		return ((HeliPlayer*)m_pPlayer)->GetLookVector();
+		return ((CHumanPlayer*)m_pPlayer)->GetLookVector();
 	}
 	else if (m_nMode == SCENE2STAGE) {
 		return ((CHumanPlayer*)m_pPlayer)->GetLookVector();
@@ -1565,7 +1513,7 @@ XMFLOAT3 CGameFramework::getMyLookVec()
 void CGameFramework::setPosition_Self(XMFLOAT3 pos)
 {
 	if (m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE) {
-		((HeliPlayer*)m_pPlayer)->SetPosition(pos);
+		((CHumanPlayer*)m_pPlayer)->SetPosition(pos);
 	}
 	else if (m_nMode == SCENE2STAGE) {
 		((CHumanPlayer*)m_pPlayer)->SetPosition(pos);
@@ -1574,10 +1522,10 @@ void CGameFramework::setPosition_Self(XMFLOAT3 pos)
 void CGameFramework::setVectors_Self(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
 	if (m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE) {
-		((HeliPlayer*)m_pPlayer)->SetUp(upVec);
-		((HeliPlayer*)m_pPlayer)->SetRight(rightVec);
-		((HeliPlayer*)m_pPlayer)->SetLook(lookVec);
-		((HeliPlayer*)m_pPlayer)->SetScale(XMFLOAT3{ 1.0, 1.0, 1.2 });
+		((CHumanPlayer*)m_pPlayer)->SetUp(upVec);
+		((CHumanPlayer*)m_pPlayer)->SetRight(rightVec);
+		((CHumanPlayer*)m_pPlayer)->SetLook(lookVec);
+		((CHumanPlayer*)m_pPlayer)->SetScale(XMFLOAT3{ 7.0, 7.0, 7.0 });
 	}
 	else if (m_nMode == SCENE2STAGE) {
 		((CHumanPlayer*)m_pPlayer)->SetUp(upVec);
@@ -1704,7 +1652,7 @@ void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos, XMFLOAT3 mapextents
 {
 	m_mapxmoobb = BoundingOrientedBox(mappos, mapextents, XMFLOAT4(0, 0, 0, 1));
 
-	CValkanObject** ppBullets = ((HeliPlayer*)m_pPlayer)->m_ppBullets;
+	CValkanObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
 
 	for (int i = 0; i < BULLETS; i++)
 	{
@@ -1757,7 +1705,7 @@ void CGameFramework::CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents
 {
 	m_npcoobb = BoundingOrientedBox(npcpos, npcextents, XMFLOAT4(0, 0, 0, 1));
 
-	CValkanObject** ppBullets = ((HeliPlayer*)m_pPlayer)->m_ppBullets;
+	CValkanObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
 	for (int i = 0; i < BULLETS; i++)
 	{
 		ppBullets[i]->m_xmOOBoundingBox = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
