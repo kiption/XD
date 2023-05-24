@@ -1841,12 +1841,14 @@ public:
 HANDLE h_iocp;											// IOCP 핸들
 int a_lgcsvr_num;										// Active상태인 메인서버
 array<SERVER, MAX_LOGIC_SERVER> g_logicservers;			// 로직서버 정보
+bool b_lgcserver_conn;
 
 void SERVER::send_npc_init_packet(int npc_id) {
 	NPC_FULL_INFO_PACKET npc_init_packet;
-	npc_init_packet.size = sizeof(NPC_MOVE_PACKET);
-	npc_init_packet.type = NPC_ROTATE;
+	npc_init_packet.size = sizeof(NPC_FULL_INFO);
+	npc_init_packet.type = NPC_FULL_INFO;
 	npc_init_packet.n_id = npc_id;
+	strcpy_s(npc_init_packet.name, npcsInfo[npc_id].name);
 	npc_init_packet.hp = npcsInfo[npc_id].hp;
 	npc_init_packet.x = npcsInfo[npc_id].pos.x;
 	npc_init_packet.y = npcsInfo[npc_id].pos.y;
@@ -1891,7 +1893,6 @@ void SERVER::send_npc_rotate_packet(int npc_id) {
 	npc_rotate_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
 	npc_rotate_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
 
-	cout << "MVRT Look: " << npc_rotate_packet.look_x << ", " << npc_rotate_packet.look_y << ", " << npc_rotate_packet.look_z << "\n" << endl;
 	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
 	g_logicservers[a_lgcsvr_num].do_send(&npc_rotate_packet);
 }
@@ -2032,6 +2033,7 @@ void process_packet(char* packet)
 }
 
 //======================================================================
+void initNpc();
 void do_worker()
 {
 	while (true) {
@@ -2149,6 +2151,7 @@ void do_worker()
 				delete ex_over;
 				g_logicservers[a_lgcsvr_num].do_recv();
 				ConnectingServer = true;
+				initNpc();
 			}
 
 		}//OP_CONN end
@@ -2204,6 +2207,8 @@ void initNpc() {
 		float speed = SpdSet(dre);
 		npcsInfo[i].SetSpeed(speed);
 		npcsInfo[i].SetChaseID(-1);
+
+		g_logicservers[a_lgcsvr_num].send_npc_init_packet(npc_id);
 	}
 }
 
@@ -2267,11 +2272,11 @@ void MoveNPC()
 					}
 
 					// npc pos 확인
-					cout << "=============" << endl;
-					cout << i << "번째 NPC의 도시 ID: " << npcsInfo[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcsInfo[i].GetIdleSection() << endl;
-					cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
-					cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
-					cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
+					//cout << "=============" << endl;
+					//cout << i << "번째 NPC의 도시 ID: " << npcsInfo[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcsInfo[i].GetIdleSection() << endl;
+					//cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
+					//cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
+					//cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
 
 					/*if (npcs[i].PrintRayCast) {
 						cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
@@ -2304,6 +2309,7 @@ int main(int argc, char* argv[])
 	//======================================================================
 	//					로직서버로 비동기 Connect 요청
 	//======================================================================
+	ConnectingServer = false;
 	int lgvsvr_port = PORTNUM_LGCNPC_0 + a_lgcsvr_num;
 
 	cout << "로직 서버(Server[" << a_lgcsvr_num << "] (PORT: " << lgvsvr_port << ")에 비동기Connect를 요청합니다." << endl;
@@ -2497,8 +2503,6 @@ int main(int argc, char* argv[])
 	/*for (const auto& edge : edges) {
 		std::cout << "From: " << edge.from << ", To: " << edge.to << ", Value: " << edge.value << std::endl;
 	}*/
-
-	initNpc();
 
 
 	//======================================================================

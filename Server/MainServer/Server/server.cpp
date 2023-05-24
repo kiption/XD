@@ -1000,6 +1000,8 @@ void process_packet(int client_id, char* packet)
 		float sign = 1.0f;					// right/up/look벡터 방향으로 움직이는지, 반대 방향으로 움직이는지
 		switch (inputkey_p->keytype) {
 		case PACKET_KEY_NUM1:
+			if (clients[client_id].curr_stage == 1) break;
+
 			clients[client_id].s_lock.lock();
 			clients[client_id].curr_stage = 1;
 			cout << "Client[" << client_id << "] Stage1로 전환." << endl;
@@ -1018,6 +1020,8 @@ void process_packet(int client_id, char* packet)
 			}
 			break;
 		case PACKET_KEY_NUM2:
+			if (clients[client_id].curr_stage == 2) break;
+
 			clients[client_id].s_lock.lock();
 			clients[client_id].curr_stage = 2;
 			cout << "Client[" << client_id << "] Stage2로 전환." << endl;
@@ -1188,6 +1192,8 @@ void process_packet(int client_id, char* packet)
 		npcs[npc_id].m_lookvec = { npc_info_pack->look_x, npc_info_pack->look_y, npc_info_pack->look_z };
 		npcs[npc_id].s_lock.unlock();
 
+		cout << "NPC[" << npc_id << "]의 모든 정보를 받았습니다.\n" << endl;
+
 		break;
 	}// NPC_FULL_INFO end
 	case NPC_MOVE:
@@ -1199,7 +1205,7 @@ void process_packet(int client_id, char* packet)
 		npcs[npc_id].s_lock.lock();
 		npcs[npc_id].pos = { npc_move_pack->x, npc_move_pack->y, npc_move_pack->z };
 		npcs[npc_id].s_lock.unlock();
-		cout << "NPC[" << npc_id << "]가 POS(" << npcs[npc_id].pos.x << ", " << npcs[npc_id].pos.y << ", " << npcs[npc_id].pos.z << ")로 이동하였습니다.\n" << endl;
+		//cout << "NPC[" << npc_id << "]가 POS(" << npcs[npc_id].pos.x << ", " << npcs[npc_id].pos.y << ", " << npcs[npc_id].pos.z << ")로 이동하였습니다.\n" << endl;
 
 		for (auto& cl : clients) {
 			if (cl.curr_stage != 1) continue;	// Stage2 NPC 제작 전까지 사용되는 임시코드
@@ -1222,8 +1228,8 @@ void process_packet(int client_id, char* packet)
 		npcs[npc_id].m_upvec = { npc_rotate_pack->up_x, npc_rotate_pack->up_y, npc_rotate_pack->up_z };
 		npcs[npc_id].m_lookvec = { npc_rotate_pack->look_x, npc_rotate_pack->look_y, npc_rotate_pack->look_z };
 		npcs[npc_id].s_lock.unlock();
-		cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
-			<< ") 방향으로 회전하였습니다.\n" << endl;
+		/*cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
+			<< ") 방향으로 회전하였습니다.\n" << endl;*/
 
 		for (auto& cl : clients) {
 			if (cl.curr_stage != 1) continue;	// Stage2 NPC 제작 전까지 사용되는 임시코드
@@ -1247,9 +1253,9 @@ void process_packet(int client_id, char* packet)
 		npcs[npc_id].m_upvec = { npc_mvrt_pack->up_x, npc_mvrt_pack->up_y, npc_mvrt_pack->up_z };
 		npcs[npc_id].m_lookvec = { npc_mvrt_pack->look_x, npc_mvrt_pack->look_y, npc_mvrt_pack->look_z };
 		npcs[npc_id].s_lock.unlock();
-		cout << "NPC[" << npc_id << "]가 POS(" << npcs[npc_id].pos.x << ", " << npcs[npc_id].pos.y << ", " << npcs[npc_id].pos.z << ")로 이동하였습니다.\n" << endl;
+		/*cout << "NPC[" << npc_id << "]가 POS(" << npcs[npc_id].pos.x << ", " << npcs[npc_id].pos.y << ", " << npcs[npc_id].pos.z << ")로 이동하였습니다.\n" << endl;
 		cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
-			<< ") 방향으로 회전하였습니다.\n" << endl;
+			<< ") 방향으로 회전하였습니다.\n" << endl;*/
 
 		for (auto& cl : clients) {
 			if (cl.curr_stage != 1) continue;	// Stage2 NPC 제작 전까지 사용되는 임시코드
