@@ -148,7 +148,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="MapObjects.cpp" />
-    <ClCompile Include="NPC.cpp" />
     <ClCompile Include="server.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -156,8 +155,6 @@
     <ClInclude Include="CP_KEYS.h" />
     <ClInclude Include="MapObjects.h" />
     <ClInclude Include="MathFuncs.h" />
-    <ClInclude Include="MyVectors.h" />
-    <ClInclude Include="NPC.h" />
     <ClInclude Include="Protocol.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
