@@ -187,10 +187,10 @@ public:
 		}
 	}
 
-	void send_login_info_packet();
-	void send_move_packet(int obj_id, short move_target);
-	void send_rotate_packet(int obj_id, short rotate_target);
-	void send_move_rotate_packet(int obj_id, short update_target);
+	void send_full_info_packet(int obj_id, short obj_type);
+	void send_move_packet(int obj_id, short obj_type);
+	void send_rotate_packet(int obj_id, short obj_type);
+	void send_move_rotate_packet(int obj_id, short obj_type);
 
 	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 
@@ -219,44 +219,107 @@ array<SESSION, MAX_USER> clients;
 SESSION npc_server;
 array<SESSION, MAX_NPCS> npcs;
 
-void SESSION::send_login_info_packet()
+void SESSION::send_full_info_packet(int obj_id, short obj_type)
 {
 	if (curr_stage == 2) return;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
-	SC_LOGIN_INFO_PACKET login_info_packet;
-	login_info_packet.id = id;
-	strcpy_s(login_info_packet.name, name);
-	login_info_packet.size = sizeof(SC_LOGIN_INFO_PACKET);
-	login_info_packet.type = SC_LOGIN_INFO;
-	login_info_packet.x = pos.x;
-	login_info_packet.y = pos.y;
-	login_info_packet.z = pos.z;
 
-	login_info_packet.right_x = basic_coordinate.right.x;
-	login_info_packet.right_y = basic_coordinate.right.y;
-	login_info_packet.right_z = basic_coordinate.right.z;
+	switch (obj_type) {
+	case TARGET_PLAYER:
+		if (obj_id == id) {
+			SC_LOGIN_INFO_PACKET login_info_packet;
+			login_info_packet.size = sizeof(SC_LOGIN_INFO_PACKET);
+			login_info_packet.type = SC_LOGIN_INFO;
 
-	login_info_packet.up_x = basic_coordinate.up.x;
-	login_info_packet.up_y = basic_coordinate.up.y;
-	login_info_packet.up_z = basic_coordinate.up.z;
+			login_info_packet.id = id;
+			strcpy_s(login_info_packet.name, name);
+			login_info_packet.x = pos.x;
+			login_info_packet.y = pos.y;
+			login_info_packet.z = pos.z;
 
-	login_info_packet.look_x = basic_coordinate.look.x;
-	login_info_packet.look_y = basic_coordinate.look.y;
-	login_info_packet.look_z = basic_coordinate.look.z;
+			login_info_packet.right_x = basic_coordinate.right.x;
+			login_info_packet.right_y = basic_coordinate.right.y;
+			login_info_packet.right_z = basic_coordinate.right.z;
 
-	login_info_packet.hp = hp;
-	login_info_packet.remain_bullet = remain_bullet;
+			login_info_packet.up_x = basic_coordinate.up.x;
+			login_info_packet.up_y = basic_coordinate.up.y;
+			login_info_packet.up_z = basic_coordinate.up.z;
 
-	do_send(&login_info_packet);
+			login_info_packet.look_x = basic_coordinate.look.x;
+			login_info_packet.look_y = basic_coordinate.look.y;
+			login_info_packet.look_z = basic_coordinate.look.z;
+
+			login_info_packet.hp = hp;
+			login_info_packet.remain_bullet = remain_bullet;
+
+			do_send(&login_info_packet);
+		}
+		else {
+			SC_ADD_OBJECT_PACKET add_player_packet;
+			add_player_packet.size = sizeof(SC_ADD_OBJECT_PACKET);
+			add_player_packet.type = SC_LOGIN_INFO;
+
+			add_player_packet.target = TARGET_PLAYER;
+			add_player_packet.id = obj_id;
+			strcpy_s(add_player_packet.name, name);
+
+			add_player_packet.x = clients[obj_id].pos.x;
+			add_player_packet.y = clients[obj_id].pos.y;
+			add_player_packet.z = clients[obj_id].pos.z;
+
+			add_player_packet.right_x = clients[obj_id].m_rightvec.x;
+			add_player_packet.right_y = clients[obj_id].m_rightvec.y;
+			add_player_packet.right_z = clients[obj_id].m_rightvec.z;
+
+			add_player_packet.up_x = clients[obj_id].m_upvec.x;
+			add_player_packet.up_y = clients[obj_id].m_upvec.y;
+			add_player_packet.up_z = clients[obj_id].m_upvec.z;
+
+			add_player_packet.look_x = clients[obj_id].m_lookvec.x;
+			add_player_packet.look_y = clients[obj_id].m_lookvec.y;
+			add_player_packet.look_z = clients[obj_id].m_lookvec.z;
+
+			do_send(&add_player_packet);
+		}
+		break;
+
+	case TARGET_NPC:
+		SC_ADD_OBJECT_PACKET add_npc_packet;
+		add_npc_packet.size = sizeof(SC_ADD_OBJECT_PACKET);
+		add_npc_packet.type = SC_LOGIN_INFO;
+
+		add_npc_packet.target = TARGET_NPC;
+		add_npc_packet.id = obj_id;
+		strcpy_s(add_npc_packet.name, name);
+
+		add_npc_packet.x = npcs[obj_id].pos.x;
+		add_npc_packet.y = npcs[obj_id].pos.y;
+		add_npc_packet.z = npcs[obj_id].pos.z;
+
+		add_npc_packet.right_x = npcs[obj_id].m_rightvec.x;
+		add_npc_packet.right_y = npcs[obj_id].m_rightvec.y;
+		add_npc_packet.right_z = npcs[obj_id].m_rightvec.z;
+
+		add_npc_packet.up_x = npcs[obj_id].m_upvec.x;
+		add_npc_packet.up_y = npcs[obj_id].m_upvec.y;
+		add_npc_packet.up_z = npcs[obj_id].m_upvec.z;
+
+		add_npc_packet.look_x = npcs[obj_id].m_lookvec.x;
+		add_npc_packet.look_y = npcs[obj_id].m_lookvec.y;
+		add_npc_packet.look_z = npcs[obj_id].m_lookvec.z;
+
+		do_send(&add_npc_packet);
+		break;
+	}
 }
-void SESSION::send_move_packet(int obj_id, short move_target)
+void SESSION::send_move_packet(int obj_id, short obj_type)
 {
 	SC_MOVE_OBJECT_PACKET move_pl_packet;
 	move_pl_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
 	move_pl_packet.type = SC_MOVE_OBJECT;
-	move_pl_packet.target = move_target;
+	move_pl_packet.target = obj_type;
 	move_pl_packet.id = obj_id;
 
-	switch (move_target) {
+	switch (obj_type) {
 	case TARGET_PLAYER:
 		move_pl_packet.x = clients[obj_id].pos.x;
 		move_pl_packet.y = clients[obj_id].pos.y;
@@ -272,15 +335,15 @@ void SESSION::send_move_packet(int obj_id, short move_target)
 
 	do_send(&move_pl_packet);
 }
-void SESSION::send_rotate_packet(int obj_id, short rotate_target)
+void SESSION::send_rotate_packet(int obj_id, short obj_type)
 {
 	SC_ROTATE_OBJECT_PACKET rotate_pl_packet;
 	rotate_pl_packet.size = sizeof(SC_ROTATE_OBJECT_PACKET);
 	rotate_pl_packet.type = SC_ROTATE_OBJECT;
-	rotate_pl_packet.target = rotate_target;
+	rotate_pl_packet.target = obj_type;
 	rotate_pl_packet.id = obj_id;
 
-	switch (rotate_target) {
+	switch (obj_type) {
 	case TARGET_PLAYER:
 		rotate_pl_packet.right_x = clients[obj_id].m_rightvec.x;
 		rotate_pl_packet.right_y = clients[obj_id].m_rightvec.y;
@@ -311,15 +374,15 @@ void SESSION::send_rotate_packet(int obj_id, short rotate_target)
 	}
 	do_send(&rotate_pl_packet);
 }
-void SESSION::send_move_rotate_packet(int obj_id, short update_target)
+void SESSION::send_move_rotate_packet(int obj_id, short obj_type)
 {
 	SC_MOVE_ROTATE_OBJECT_PACKET update_pl_packet;
 	update_pl_packet.size = sizeof(SC_MOVE_ROTATE_OBJECT_PACKET);
 	update_pl_packet.type = SC_MOVE_ROTATE_OBJECT;
-	update_pl_packet.target = update_target;
+	update_pl_packet.target = obj_type;
 	update_pl_packet.id = obj_id;
 
-	switch (update_target) {
+	switch (obj_type) {
 	case TARGET_PLAYER:
 		update_pl_packet.x = clients[obj_id].pos.x;
 		update_pl_packet.y = clients[obj_id].pos.y;
@@ -598,27 +661,23 @@ void process_packet(int client_id, char* packet)
 		}
 
 		// 새로 접속한 플레이어의 초기 정보를 설정합니다.
+		clients[client_id].s_state = ST_INGAME;
 		clients[client_id].pl_state = PL_ST_IDLE;
 		clients[client_id].curr_stage = 0;
-
 		clients[client_id].hp = HELI_MAXHP;
+		strcpy_s(clients[client_id].name, login_packet->name);
 
 		clients[client_id].pos.x = RESPAWN_POS_X;
 		clients[client_id].pos.y = RESPAWN_POS_Y;
 		clients[client_id].pos.z = RESPAWN_POS_Z - 100 * client_id;
 
-		clients[client_id].pitch = clients[client_id].yaw = clients[client_id].roll = 0.0f;
 		clients[client_id].m_rightvec = basic_coordinate.right;
 		clients[client_id].m_upvec = basic_coordinate.up;
 		clients[client_id].m_lookvec = basic_coordinate.look;
 
 		clients[client_id].setBB();
 
-		strcpy_s(clients[client_id].name, login_packet->name);
-
-		clients[client_id].send_login_info_packet();
-		clients[client_id].s_state = ST_INGAME;
-
+		clients[client_id].send_full_info_packet(client_id, TARGET_PLAYER);
 		clients[client_id].s_lock.unlock();
 
 		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "]이(가) 접속하였습니다." << endl;	// server message
@@ -635,112 +694,37 @@ void process_packet(int client_id, char* packet)
 		// 1. Player 객체 정보
 		//  1) Clients
 		// 현재 접속해 있는 모든 클라이언트에게 새로운 클라이언트(client_id)의 정보를 전송합니다.
-		for (int i = 0; i < MAX_USER; ++i) {
-			auto& pl = clients[i];
-
+		for (auto& pl : clients) {
+			if (pl.s_state != ST_INGAME) continue;
 			if (pl.id == client_id) continue;
 			if (pl.curr_stage != 1) continue;// 로그인을 하면 1스테이지로 넘어가지기 때문
 
-			pl.s_lock.lock();
-			if (pl.s_state != ST_INGAME) {
-				pl.s_lock.unlock();
-				continue;
-			}
-			SC_ADD_OBJECT_PACKET add_pl_packet;
-			add_pl_packet.target = TARGET_PLAYER;
-			add_pl_packet.id = client_id;
-			strcpy_s(add_pl_packet.name, login_packet->name);
-			add_pl_packet.size = sizeof(add_pl_packet);
-			add_pl_packet.type = SC_ADD_OBJECT;
-
-			add_pl_packet.x = clients[client_id].pos.x;
-			add_pl_packet.y = clients[client_id].pos.y;
-			add_pl_packet.z = clients[client_id].pos.z;
-
-			add_pl_packet.right_x = clients[client_id].m_rightvec.x;
-			add_pl_packet.right_y = clients[client_id].m_rightvec.y;
-			add_pl_packet.right_z = clients[client_id].m_rightvec.z;
-
-			add_pl_packet.up_x = clients[client_id].m_upvec.x;
-			add_pl_packet.up_y = clients[client_id].m_upvec.y;
-			add_pl_packet.up_z = clients[client_id].m_upvec.z;
-
-			add_pl_packet.look_x = clients[client_id].m_lookvec.x;
-			add_pl_packet.look_y = clients[client_id].m_lookvec.y;
-			add_pl_packet.look_z = clients[client_id].m_lookvec.z;
-
-			pl.do_send(&add_pl_packet);
-			pl.s_lock.unlock();
+			lock_guard<mutex> lg{ pl.s_lock };
+			pl.send_full_info_packet(client_id, TARGET_PLAYER);
 		}
 
 		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 클라이언트의 정보를 전송합니다.
 		for (auto& pl : clients) {
+			if (pl.s_state != ST_INGAME) continue;
 			if (pl.id == client_id) continue;
 			if (pl.curr_stage != 1) continue;// 로그인을 하면 1스테이지로 넘어가지기 때문.
 
-			pl.s_lock.lock();
-			if (pl.s_state != ST_INGAME) {
-				pl.s_lock.unlock();
-				continue;
-			}
-
-			SC_ADD_OBJECT_PACKET add_pl_packet;
-			add_pl_packet.target = TARGET_PLAYER;
-			add_pl_packet.id = pl.id;
-			strcpy_s(add_pl_packet.name, pl.name);
-			add_pl_packet.size = sizeof(add_pl_packet);
-			add_pl_packet.type = SC_ADD_OBJECT;
-
-			add_pl_packet.x = pl.pos.x;
-			add_pl_packet.y = pl.pos.y;
-			add_pl_packet.z = pl.pos.z;
-
-			add_pl_packet.right_x = pl.m_rightvec.x;
-			add_pl_packet.right_y = pl.m_rightvec.y;
-			add_pl_packet.right_z = pl.m_rightvec.z;
-
-			add_pl_packet.up_x = pl.m_upvec.x;
-			add_pl_packet.up_y = pl.m_upvec.y;
-			add_pl_packet.up_z = pl.m_upvec.z;
-
-			add_pl_packet.look_x = pl.m_lookvec.x;
-			add_pl_packet.look_y = pl.m_lookvec.y;
-			add_pl_packet.look_z = pl.m_lookvec.z;
-
-			clients[client_id].do_send(&add_pl_packet);
-			pl.s_lock.unlock();
+			lock_guard<mutex> lg{ pl.s_lock };
+			clients[client_id].send_full_info_packet(pl.id, TARGET_PLAYER);
 		}
 
 		//  2) NPCs
 		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 NPC의 정보를 전송합니다.
+		for (auto& npc : npcs) {
+			if (npc.id == -1) continue;
+
+			lock_guard<mutex> lg{ clients[client_id].s_lock};
+			clients[client_id].send_full_info_packet(npc.id, TARGET_NPC);
+		}
 		
-
-		// NPC서버에 새로 접속한 클라이언트의 정보를 전달합니다.
+		//  3) NPC서버로 새로 접속한 클라이언트의 정보를 전송합니다.
 		if (b_npcsvr_conn) {
-			SC_ADD_OBJECT_PACKET add_pl_packet;
-			add_pl_packet.target = TARGET_PLAYER;
-			add_pl_packet.id = client_id;
-			strcpy_s(add_pl_packet.name, login_packet->name);
-			add_pl_packet.size = sizeof(add_pl_packet);
-			add_pl_packet.type = SC_ADD_OBJECT;
-
-			add_pl_packet.x = clients[client_id].pos.x;
-			add_pl_packet.y = clients[client_id].pos.y;
-			add_pl_packet.z = clients[client_id].pos.z;
-
-			add_pl_packet.right_x = clients[client_id].m_rightvec.x;
-			add_pl_packet.right_y = clients[client_id].m_rightvec.y;
-			add_pl_packet.right_z = clients[client_id].m_rightvec.z;
-
-			add_pl_packet.up_x = clients[client_id].m_upvec.x;
-			add_pl_packet.up_y = clients[client_id].m_upvec.y;
-			add_pl_packet.up_z = clients[client_id].m_upvec.z;
-
-			add_pl_packet.look_x = clients[client_id].m_lookvec.x;
-			add_pl_packet.look_y = clients[client_id].m_lookvec.y;
-			add_pl_packet.look_z = clients[client_id].m_lookvec.z;
-
-			npc_server.do_send(&add_pl_packet);
+			npc_server.send_full_info_packet(client_id, TARGET_PLAYER);
 		}
 
 		//====================
@@ -1215,7 +1199,6 @@ void process_packet(int client_id, char* packet)
 		npcs[npc_id].s_lock.lock();
 		npcs[npc_id].pos = { npc_move_pack->x, npc_move_pack->y, npc_move_pack->z };
 		npcs[npc_id].s_lock.unlock();
-
 		cout << "NPC[" << npc_id << "]가 POS(" << npcs[npc_id].pos.x << ", " << npcs[npc_id].pos.y << ", " << npcs[npc_id].pos.z << ")로 이동하였습니다.\n" << endl;
 
 		for (auto& cl : clients) {
@@ -1239,7 +1222,6 @@ void process_packet(int client_id, char* packet)
 		npcs[npc_id].m_upvec = { npc_rotate_pack->up_x, npc_rotate_pack->up_y, npc_rotate_pack->up_z };
 		npcs[npc_id].m_lookvec = { npc_rotate_pack->look_x, npc_rotate_pack->look_y, npc_rotate_pack->look_z };
 		npcs[npc_id].s_lock.unlock();
-
 		cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
 			<< ") 방향으로 회전하였습니다.\n" << endl;
 
@@ -1265,7 +1247,6 @@ void process_packet(int client_id, char* packet)
 		npcs[npc_id].m_upvec = { npc_mvrt_pack->up_x, npc_mvrt_pack->up_y, npc_mvrt_pack->up_z };
 		npcs[npc_id].m_lookvec = { npc_mvrt_pack->look_x, npc_mvrt_pack->look_y, npc_mvrt_pack->look_z };
 		npcs[npc_id].s_lock.unlock();
-
 		cout << "NPC[" << npc_id << "]가 POS(" << npcs[npc_id].pos.x << ", " << npcs[npc_id].pos.y << ", " << npcs[npc_id].pos.z << ")로 이동하였습니다.\n" << endl;
 		cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
 			<< ") 방향으로 회전하였습니다.\n" << endl;
@@ -1289,14 +1270,12 @@ void process_packet(int client_id, char* packet)
 		npcs[npc_id].s_lock.lock();
 		npcs[npc_id].sessionClear();
 		npcs[npc_id].s_lock.unlock();
-
-		cout << "NPC[" << npc_id << "]가 삭제되었습니다.\n" << endl;
+		//cout << "NPC[" << npc_id << "]가 삭제되었습니다.\n" << endl;
 
 		for (auto& cl : clients) {
 			if (cl.curr_stage != 1) continue;	// Stage2 NPC 제작 전까지 사용되는 임시코드
 			if (cl.s_state != ST_INGAME) continue;
 
-			cl.s_lock.lock();
 			SC_REMOVE_OBJECT_PACKET rm_npc_pack;
 			rm_npc_pack.size = sizeof(SC_REMOVE_OBJECT_PACKET);
 			rm_npc_pack.type = SC_REMOVE_OBJECT;
@@ -1305,7 +1284,6 @@ void process_packet(int client_id, char* packet)
 
 			lock_guard<mutex> lg{ cl.s_lock };
 			cl.do_send(&rm_npc_pack);
-			cl.s_lock.unlock();
 		}
 
 		break;

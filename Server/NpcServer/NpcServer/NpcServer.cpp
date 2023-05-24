@@ -1800,6 +1800,7 @@ public:
 	int remain_size;
 	int id;
 	SOCKET sock;
+	mutex s_lock;
 
 public:
 	SERVER() { remain_size = 0; id = -1; sock = 0; }
@@ -1859,6 +1860,8 @@ void SERVER::send_npc_init_packet(int npc_id) {
 	npc_init_packet.look_x = npcsInfo[npc_id].m_lookvec.x;
 	npc_init_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
 	npc_init_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
+
+	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
 	g_logicservers[a_lgcsvr_num].do_send(&npc_init_packet);
 }
 void SERVER::send_npc_move_packet(int npc_id) {
@@ -1869,11 +1872,13 @@ void SERVER::send_npc_move_packet(int npc_id) {
 	npc_move_packet.x = npcsInfo[npc_id].pos.x;
 	npc_move_packet.y = npcsInfo[npc_id].pos.y;
 	npc_move_packet.z = npcsInfo[npc_id].pos.z;
+
+	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
 	g_logicservers[a_lgcsvr_num].do_send(&npc_move_packet);
 }
 void SERVER::send_npc_rotate_packet(int npc_id) {
 	NPC_ROTATE_PACKET npc_rotate_packet;
-	npc_rotate_packet.size = sizeof(NPC_MOVE_PACKET);
+	npc_rotate_packet.size = sizeof(NPC_ROTATE_PACKET);
 	npc_rotate_packet.type = NPC_ROTATE;
 	npc_rotate_packet.n_id = npc_id;
 	npc_rotate_packet.right_x = npcsInfo[npc_id].m_rightvec.x;
@@ -1885,33 +1890,14 @@ void SERVER::send_npc_rotate_packet(int npc_id) {
 	npc_rotate_packet.look_x = npcsInfo[npc_id].m_lookvec.x;
 	npc_rotate_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
 	npc_rotate_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
+
+	cout << "MVRT Look: " << npc_rotate_packet.look_x << ", " << npc_rotate_packet.look_y << ", " << npc_rotate_packet.look_z << "\n" << endl;
+	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
 	g_logicservers[a_lgcsvr_num].do_send(&npc_rotate_packet);
 }
 void SERVER::send_npc_move_rotate_packet(int npc_id) {
-	NPC_MOVE_PACKET npc_mv_packet;
-	npc_mv_packet.size = sizeof(NPC_MOVE_PACKET);
-	npc_mv_packet.type = NPC_MOVE;
-	npc_mv_packet.n_id = npc_id;
-	npc_mv_packet.x = npcsInfo[npc_id].pos.x;
-	npc_mv_packet.y = npcsInfo[npc_id].pos.y;
-	npc_mv_packet.z = npcsInfo[npc_id].pos.z;
-	g_logicservers[a_lgcsvr_num].do_send(&npc_mv_packet);
-
-	NPC_ROTATE_PACKET npc_rt_packet;
-	npc_rt_packet.size = sizeof(NPC_MOVE_PACKET);
-	npc_rt_packet.type = NPC_ROTATE;
-	npc_rt_packet.n_id = npc_id;
-	npc_rt_packet.right_x = npcsInfo[npc_id].m_rightvec.x;
-	npc_rt_packet.right_y = npcsInfo[npc_id].m_rightvec.y;
-	npc_rt_packet.right_z = npcsInfo[npc_id].m_rightvec.z;
-	npc_rt_packet.up_x = npcsInfo[npc_id].m_upvec.x;
-	npc_rt_packet.up_y = npcsInfo[npc_id].m_upvec.y;
-	npc_rt_packet.up_z = npcsInfo[npc_id].m_upvec.z;
-	npc_rt_packet.look_x = npcsInfo[npc_id].m_lookvec.x;
-	npc_rt_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
-	npc_rt_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
-	cout << npcsInfo[npc_id].m_lookvec.x << ", " << npcsInfo[npc_id].m_lookvec.y << ", " << npcsInfo[npc_id].m_lookvec.z << endl;
-	g_logicservers[a_lgcsvr_num].do_send(&npc_rt_packet);
+	send_npc_move_packet(npc_id);
+	send_npc_rotate_packet(npc_id);
 }
 
 //======================================================================
