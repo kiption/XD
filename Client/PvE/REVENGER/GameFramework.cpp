@@ -328,8 +328,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	{
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
-
-		if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	
 		if (m_nMode == SCENE1STAGE)gamesound.shootingSound();
 		if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
 
@@ -340,12 +339,10 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
 
-		break;
+		
+	
 	case WM_LBUTTONUP:
-		if (m_nMode == SCENE1STAGE)
-		{
-			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-		}
+		
 	case WM_RBUTTONUP:
 		::ReleaseCapture();
 		break;
@@ -418,6 +415,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case VK_SPACE:
 			if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
 			break;
+		case 'M':
+			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackEnable(2,true);
+			if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 		default:
 			break;
 		}
@@ -559,7 +559,7 @@ void CGameFramework::ProcessInput()
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
 	if (!bProcessedByScene)
 	{
-		DWORD dwDirection = 0;
+		dwDirection = 0;
 
 		if (pKeysBuffer[VK_UP] & 0xF0) {
 			dwDirection |= DIR_UP;
@@ -590,20 +590,22 @@ void CGameFramework::ProcessInput()
 		}
 		if (pKeysBuffer[KEY_A] & 0xF0) {
 			dwDirection |= DIR_LEFT;
-			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
-		/*	((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackEnable(0, false);
-			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackEnable(1, false);
-			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackEnable(2, true);
-			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackEnable(3, false);
-			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackEnable(4, false);*/
+			A_KEY = true;
 			q_keyboardInput.push(SEND_KEY_A);//S
-
-
+		}
+		else
+		{
+			A_KEY = false;
 		}
 		if (pKeysBuffer[KEY_D] & 0xF0) {
 			dwDirection |= DIR_RIGHT;
+			D_KEY = true;
 			q_keyboardInput.push(SEND_KEY_D);//S
-			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
+
+		}
+		else
+		{
+			D_KEY = false;
 		}
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
@@ -654,65 +656,37 @@ void CGameFramework::ProcessInput()
 			}
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE)
 			{
+				XMFLOAT3 PlayerPosition = m_pPlayer->GetPosition();
+				float PrevPositionx = PlayerPosition.x;
+				float PrevPositionz = PlayerPosition.z;
+				XMFLOAT3 CameraPosition = m_pCamera->GetLookVector();
+				XMFLOAT3 xmf3PlayerPosition = m_pPlayer->GetPosition();
+				XMFLOAT3 xmf3PlayerVelocity = m_pPlayer->GetVelocity();
 
-				if (m_bCollisionCheck == false)
-				{
-					if (m_pCamera->m_nMode == SPACESHIP_CAMERA)
-					{
-						if (dwDirection) m_pPlayer->Move(dwDirection, 2.5f, true);
-					}
-					else
-					{
-						if (dwDirection) m_pPlayer->Move(dwDirection, 4.5f, true);
-					}
-				}
-				/*if (m_bCollisionCheck == true)
-				{
-					if (dwDirection) m_pPlayer->Move(dwDirection, 0.0f, true);
-				}*/
-				if (m_nMode == SCENE1STAGE)
-				{
-					if (dwDirection) m_pPlayer->Move(dwDirection, 5.0f, true);
-				}
+				if (dwDirection) m_pPlayer->Move(dwDirection, 5.0f, true);
+
+
 			}
 		}
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
 
+
 void CGameFramework::AnimateObjects()
 {
 	if (m_pScene) m_pScene->AnimateObjects(m_pCamera, m_GameTimer.GetTimeElapsed());
 	if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
-
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed());
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed(), NULL);
-	//DWORD CameraMode = m_pCamera->GetMode();
-	/*if (m_bCollisionCheck == true)
-	{
-		m_pPlayer->m_xmf3Position.y -= 2.0f;
-		m_pCamera->GetPosition().y -= 2.0f;
-		m_pPlayer->Rotate(0.0, 1.5, 1.5);
-		m_pCamera = m_pPlayer->ChangeCamera(SPACESHIP_CAMERA, m_GameTimer.GetTimeElapsed());
-		m_fResponCount += 0.2f;
-		m_pPlayerRotate_z = 0.0;
-	}
-	if (m_fResponCount > 7.0)
-	{
-		m_pPlayer->SetPosition(XMFLOAT3(180.0, 10.0, -240.0));
-		m_fResponCount = 0.0f;
+	AnimationLoop(m_GameTimer.GetTimeElapsed());
+	//
+	//if (m_bCollisionCheck == true && m_bFirstCollision==false)
+	//{
+	//	m_pPlayer->SetPosition(XMFLOAT3(PrevPosition));
+	//	m_bFirstCollision = true;
 
-		m_pPlayer->SetMyRight(XMFLOAT3(1.0f, 0.0f, 0.0f));
-		m_pPlayer->SetMyUp(XMFLOAT3(0.0f, 1.0f, 0.0f));
-		m_pPlayer->SetMyLook(XMFLOAT3(0.0f, 0.0f, 1.0f));
-
-		m_pPlayer->m_fPitch = 0.0f;
-		m_pPlayer->m_fYaw = 0.0f;
-		m_pPlayer->m_fRoll = 0.0f;
-
-		m_bCollisionCheck = false;
-		m_pCamera = m_pPlayer->ChangeCamera(THIRD_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
-	}*/
+	//}
 
 }
 
@@ -1433,6 +1407,18 @@ void CGameFramework::CreateDirect2DDevice()
 #endif
 
 
+void CGameFramework::AnimationLoop(float EleapsedTime)
+{
+	if(A_KEY==true || D_KEY== true)
+	{
+		((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
+	}
+	else
+	{
+		((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	}
+}
+
 //==================================================
 //			  서버 통신에 필요한 함수들
 //==================================================
@@ -1632,17 +1618,26 @@ void CGameFramework::remove_Npcs(int id)
 
 }
 
-
-
+bool m_bFirstCollision = true;
+bool m_bPrevCollisionCheck;
 
 void CGameFramework::CollisionMap_by_PLAYER(XMFLOAT3 pos, XMFLOAT3 extents)
 {
 	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(2.5, 2.0, 4.0), XMFLOAT4(0, 0, 0, 1));
-	m_mapxmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents.x / 2.5f, extents.y / 2.0f, extents.z / 2.5f), XMFLOAT4(0, 0, 0, 1));
+	m_mapxmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents.x / 2.1f, extents.y / 2.1f, extents.z / 2.1f), XMFLOAT4(0, 0, 0, 1));
+	m_mapStorexmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents.x / 1.8f, extents.y / 1.8f, extents.z / 1.8), XMFLOAT4(0, 0, 0, 1));
+	
+	if (m_mapStorexmoobb.Intersects(m_pPlayer->m_xoobb) && m_bFirstCollision == true)
+	{
+		PrevPosition = m_pPlayer->m_xmf3Position;
+		m_bFirstCollision = false;
+	}
+
 	if (m_mapxmoobb.Intersects(m_pPlayer->m_xoobb))
 	{
-		m_bCollisionCheck = true;
-		//cout << "CollisionCheck!" << m_xmoobb.Center.x << m_xmoobb.Center.z << endl;
+		m_pPlayer->SetPosition(PrevPosition);
+		m_bFirstCollision = true;
+
 	}
 
 

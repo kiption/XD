@@ -437,7 +437,7 @@ public:
 	float m_fMovingSpeed = 0.0f;
 	float m_fMovingRange = 0.0f;
 	float m_fRotationSpeed = 0.0f;
-	bool m_bActive = true;
+	bool m_bActive = false;
 	void SetMovingDirection(const XMFLOAT3& xmf3MovingDirection);
 	void SetRotationSpeed(float fSpeed) { m_fRotationSpeed = fSpeed; }
 	void SetMovingSpeed(float fSpeed) { m_fMovingSpeed = fSpeed; }

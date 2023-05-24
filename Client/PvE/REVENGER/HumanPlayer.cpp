@@ -58,8 +58,8 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		pBulletMesh->AddRef();
 	}
 
-	SetPlayerUpdatedContext(pContext);
-	SetCameraUpdatedContext(pContext);
+	//SetPlayerUpdatedContext(pContext);
+	//SetCameraUpdatedContext(pContext);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	
@@ -79,6 +79,7 @@ CHumanPlayer::~CHumanPlayer()
 
 CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 {
+
 	DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00;
 	if (nCurrentCameraMode == nNewCameraMode) return(m_pCamera);
 	switch (nNewCameraMode)
@@ -114,7 +115,8 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(20.0f, 14.0f, -45.0f));
+	
+		m_pCamera->SetOffset(XMFLOAT3(8.0f, 14.0f, -30.0f));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -122,7 +124,7 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	default:
 		break;
 	}
-	m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y+10.0, m_xmf3Position.z), m_pCamera->GetOffset()));
+	m_pCamera->SetPosition(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y+20.0f, m_xmf3Position.z));//, m_pCamera->GetOffset()));
 	Update(fTimeElapsed);
 
 	return(m_pCamera);
@@ -168,7 +170,7 @@ void CHumanPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
-	if (dwDirection)
+	if (dwDirection& DIR_FORWARD || dwDirection & DIR_BACKWARD)
 	{
 		m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		m_pSkinnedAnimationController->SetTrackEnable(1, true);
@@ -208,6 +210,7 @@ void CHumanPlayer::Update(float fTimeElapsed)
 			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
 		}
 	}
+	
 }
 
 void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)

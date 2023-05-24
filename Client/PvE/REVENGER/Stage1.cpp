@@ -27,7 +27,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 {
 	m_nLights = 7;
 	m_pLights = new LIGHTS[m_nLights];
-	::ZeroMemory(m_pLights, sizeof(LIGHT) * m_nLights);
+	::ZeroMemory(m_pLights, sizeof(LIGHTS) * m_nLights);
 
 
 	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
@@ -36,7 +36,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[0].m_fRange = 10000.0f;
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.63f, 0.63f, 0.63f, 0.9f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.43f, 0.43f, 0.43f, 0.9f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.1f, 0.1, 0.1f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-150, 900.0f, 150.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+0.2f, -0.9f, 0.0f);
@@ -46,7 +46,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 3000.0f;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.f, 0.f, 0.f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.43f, 0.43f, 0.43f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.33f, 0.33f, 0.33f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.13f, 0.13f, 0.13f, 0.0f);
 	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(800, 400.0f, 800.0f);
 	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.1, -1.0f, 0.3f);
@@ -66,12 +66,12 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[3].m_nType = SPOT_LIGHT;
 	m_pLights->m_pLights[3].m_fRange = 500.0f;
 	m_pLights->m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
-	m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+	m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
 	m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
 	m_pLights->m_pLights[3].m_xmf3Direction = XMFLOAT3(0.0f, -0.2f, 1.0f);
 	m_pLights->m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights->m_pLights[3].m_fFalloff = 4.0f;
+	m_pLights->m_pLights[3].m_fFalloff = 5.0f;
 	m_pLights->m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights->m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
@@ -760,7 +760,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 
-	if(m_ppFragShaders[0]->m_bActive==false)
+	if(m_ppFragShaders[0]->m_bActive==true)
 	m_ppSpriteBillboard[0]->SetActive(false);
 	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();
 	if (m_pPlayer->m_bCollisionTerrain == true)
@@ -782,18 +782,20 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		XMMATRIX xmmtxRotation = XMMatrixRotationY(fTimeElapsed * 0.2f);
 		//XMStoreFloat3(&m_pLights->m_pLights[0].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction), xmmtxRotation));
 	}
-
+	CValkanObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
 	if (m_pLights)
 	{
 		m_pLights->m_pLights[3].m_xmf3Position = xmfPosition;
 		m_pLights->m_pLights[3].m_xmf3Direction = m_pPlayer->GetLook();
-		if (((CValkanObject*)m_pPlayer)->m_bActive == true)
+		if ((m_pPlayer)->m_bActive == true)
+		{
 			m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.5, 0.0, 1.0);
+		}
 		else
 		{
 			m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.4, 0.4, 0.4, 1.0);
 		}
-			m_pLights->m_pLights[5].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[0]->GetPosition();
+		m_pLights->m_pLights[5].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[0]->GetPosition();
 	}
 
 	ParticleAnimation();

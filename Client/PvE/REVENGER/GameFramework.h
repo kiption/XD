@@ -92,6 +92,7 @@ public:
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void ChangeScene(DWORD nMode);
 	DWORD						m_nMode = OPENINGSCENE;
+	DWORD dwDirection = 0;
 	GameSound gamesound;
 	int m_NumOfUI = 15;
 	bool UI_Switch = false;
@@ -171,7 +172,7 @@ private:
 
 	CGameTimer					m_GameTimer;
 
-
+	XMFLOAT3	PrevPosition;
 	CPlayer						*m_pPlayer = NULL;
 	CCamera						*m_pCamera = NULL;
 	CGameObject* m_pGameObject = NULL;
@@ -179,7 +180,7 @@ private:
 
 	_TCHAR						m_pszFrameRate[70];
 
-
+	void AnimationLoop(float EleapsedTime);
 //==================================================
 //			  서버 통신을 위한 것들...
 //==================================================
@@ -205,6 +206,8 @@ public:
 
 	int m_occupationnum = 50;
 	queue<BulletPos> m_shoot_info;
+
+	bool W_KEY, A_KEY, S_KEY, D_KEY, SPACE_KEY = false;
 //==================================================
 
 //==================================================
@@ -261,9 +264,11 @@ public:
 
 	//void Motion_BulletbyPlayer(int id, XMFLOAT3 mappos, XMFLOAT3 mapextents);
 	BoundingOrientedBox m_mapxmoobb;
+	BoundingOrientedBox m_mapStorexmoobb;
 	BoundingOrientedBox m_npcoobb;
 	BoundingOrientedBox m_worldmoobb;
 	bool m_bCollisionCheck = false;
+
 	float m_fResponCount = 0.0;
 };
 
