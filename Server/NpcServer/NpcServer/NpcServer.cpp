@@ -755,11 +755,11 @@ void NPC::PlayerChasing()
 	float targetPitch = atan2(XMVectorGetY(lookVector), sqrt(XMVectorGetX(lookVector) * XMVectorGetX(lookVector) + XMVectorGetZ(lookVector) * XMVectorGetZ(lookVector)));
 
 	// 현재 회전값을 가져옵니다.
-	float currentYaw, currentPitch, currentRoll;
+	float currentYaw{}, currentPitch{}, currentRoll{};
 	GetRotation(currentYaw, currentPitch, currentRoll);
 
 	// 현재 회전값과 목표 회전값 사이를 보간합니다.
-	float interpolationFactor = 0.1f; // 보간 계수 조정 가능
+	float interpolationFactor = 0.1f; 
 	float interpolatedYaw = LerpAngle(currentYaw, targetYaw, interpolationFactor);
 	float interpolatedPitch = LerpAngle(currentPitch, targetPitch, interpolationFactor);
 
@@ -775,14 +775,12 @@ void NPC::PlayerChasing()
 	// 경로가 존재하는 경우
 	if (!path.empty())
 	{
-		// 다음 이동할 노드의 위치를 가져옵니다.
 		XMFLOAT3 targetPosition = graph[path[0]].getPos();
 
 		// 이동 속도 및 거리 계산
-		float moveSpeed = 0.1f;  // 이동 속도 조정 가능
+		float moveSpeed = 0.1f;  
 		float distanceToTarget = MultiDistanceCalc(npcPosition, targetPosition);
 
-		// 플레이어에 가까워질수록 이동 속도를 줄입니다.
 		float adjustedMoveSpeed = moveSpeed * distanceToTarget;
 
 		// 이동 방향 계산
@@ -793,18 +791,16 @@ void NPC::PlayerChasing()
 		// 이동 거리 계산
 		XMVECTOR moveDistance = XMVectorScale(moveVector, adjustedMoveSpeed);
 
-		// 이동한 거리를 계산합니다.
+		// 이동한 거리를 계산
 		XMVECTOR newPosition = XMVectorAdd(XMLoadFloat3(&npcPosition), moveDistance);
 		XMFLOAT3 newNpcPosition;
 		XMStoreFloat3(&newNpcPosition, newPosition);
 
-		// NPC의 위치를 새로운 위치로 업데이트합니다.
 		SetPosition(newNpcPosition);
 	}
 	else
 	{
 		// 이미 같은 구역에 있음.
-		// 플레이어를 바라보는 방향 벡터를 계산합니다.
 		XMFLOAT3 lookDirection = VectorSubtract(playerPosition, npcPosition);
 		XMVECTOR lookVector = XMLoadFloat3(&lookDirection);
 		lookVector = XMVector3Normalize(lookVector);
@@ -814,22 +810,20 @@ void NPC::PlayerChasing()
 		float targetPitch = atan2(XMVectorGetY(lookVector), sqrt(XMVectorGetX(lookVector) * XMVectorGetX(lookVector) + XMVectorGetZ(lookVector) * XMVectorGetZ(lookVector)));
 
 		// 현재 회전값을 가져옵니다.
-		float currentYaw, currentPitch, currentRoll;
+		float currentYaw{}, currentPitch{}, currentRoll{};
 		GetRotation(currentYaw, currentPitch, currentRoll);
 
-		// 현재 회전값과 목표 회전값 사이를 보간합니다.
-		float interpolationFactor = 0.1f; // 보간 계수 조정 가능
+		float interpolationFactor = 0.1f; 
 		float interpolatedYaw = LerpAngle(currentYaw, targetYaw, interpolationFactor);
 		float interpolatedPitch = LerpAngle(currentPitch, targetPitch, interpolationFactor);
 
 		// 회전값을 적용합니다.
 		SetRotation(interpolatedYaw, interpolatedPitch, currentRoll);
 
-		// 플레이어를 따라 이동합니다.
 		XMFLOAT3 targetPosition = playerPosition;
 
 		// 이동 속도 및 거리 계산
-		float moveSpeed = 0.1f;  // 이동 속도 조정 가능
+		float moveSpeed = 0.1f; 
 		float distanceToTarget = MultiDistanceCalc(npcPosition, targetPosition);
 
 		// 플레이어에 가까워질수록 이동 속도를 줄입니다.
@@ -848,14 +842,10 @@ void NPC::PlayerChasing()
 		XMFLOAT3 newNpcPosition;
 		XMStoreFloat3(&newNpcPosition, newPosition);
 
-		// NPC의 위치를 새로운 위치로 업데이트합니다.
 		SetPosition(newNpcPosition);
 	}
 
 }
-
-
-
 
 void NPC::PlayerAttack()
 {
