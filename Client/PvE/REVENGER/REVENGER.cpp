@@ -195,12 +195,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 						break;
 					case PACKET_KEY_SPACEBAR:
-						if (gGameFramework.m_nMode == SCENE1STAGE) {
-							CS_ATTACK_PACKET attack_pack;
-							attack_pack.size = sizeof(CS_ATTACK_PACKET);
-							attack_pack.type = CS_ATTACK;
-							sendPacket(&attack_pack, active_servernum);
-						}
+						// 점프
 						break;
 
 					case PACKET_KEYUP_MOVEKEY:
@@ -224,12 +219,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					case SEND_NONCLICK:
 						break;
 					case SEND_BUTTON_L:
-						if (gGameFramework.m_nMode == SCENE2STAGE) {
-							CS_ATTACK_PACKET st2_atk_pack;
-							st2_atk_pack.type = CS_ATTACK;
-							st2_atk_pack.size = sizeof(CS_ATTACK_PACKET);
-							sendPacket(&st2_atk_pack, active_servernum);
-						}
+						CS_ATTACK_PACKET attack_pack;
+						attack_pack.size = sizeof(CS_ATTACK_PACKET);
+						attack_pack.type = CS_ATTACK;
+						sendPacket(&attack_pack, active_servernum);
 						break;
 					case SEND_BUTTON_R:
 						/*미구현

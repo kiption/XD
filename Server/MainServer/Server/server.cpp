@@ -19,6 +19,7 @@ using namespace std;
 #include <DirectXPackedVector.h>
 #include <DirectXCollision.h>
 #include <DirectXCollision.inl>
+
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -29,12 +30,12 @@ using namespace DirectX;
 using namespace DirectX::PackedVector;
 
 //======================================================================
-#include "MapObjects.h"
-#include "Constant.h"
-#include "MathFuncs.h"
 #include "Protocol.h"
 #include "Timer.h"
+#include "Constant.h"
 #include "CP_KEYS.h"
+#include "MapObjects.h"
+#include "MathFuncs.h"
 
 //======================================================================
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_CONNECT };
@@ -829,6 +830,8 @@ void process_packet(int client_id, char* packet)
 		if (!b_active_server) break;
 		CS_ATTACK_PACKET* cl_attack_packet = reinterpret_cast<CS_ATTACK_PACKET*>(packet);
 
+		//==============================
+		// 1. 총알
 		// Bullet 쿨타임 체크
 		milliseconds shoot_term = duration_cast<milliseconds>(chrono::system_clock::now() - clients[client_id].shoot_time);
 		if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) break;	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
@@ -889,103 +892,161 @@ void process_packet(int client_id, char* packet)
 			cl.do_send(&atk_pack);
 		}
 
-		// 1. 스테이지 1 로직
+		//==============================
+		// 2. 충돌검사
 		if (clients[client_id].curr_stage == 1) {
+			MyVector3 intersection_result;
+
 			bool b_collide = false;
 
-			// 1. 클라이언트와 충돌검사
-			MyVector3 intersect_result;
-			int intersect_id = -1;
+			enum CollideTarget {CT_PLAYER, CT_NPC, CT_BUILDING};
+			int collide_target = -1;
+
+			int collide_id = -1;
+
 			float min_dist = FLT_MAX;
 
+			// 1) 클라이언트와 충돌검사
 			for (auto& cl : clients) {
+				if (cl.id == client_id) continue;		// 자기자신은 검사하면 안됨.
 				if (cl.s_state != ST_INGAME) continue;	// 게임중이 아닌 세션은 검사할 필요X
 				if (cl.curr_stage == 0) continue;		// 아직 게임 진입 중인 세션도 검사 X
-				if (cl.id == client_id) continue;		// 자기자신은 검사하면 안됨.
 
 				// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
 				Cube pl_obj{ exc_XMFtoMyVec(cl.pos), HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
-				MyVector3 tmp_intersect = MyRaycast_LimitDistance(MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y - HELI_BOXSIZE_Y / 2.0f, clients[client_id].pos.z }
-				, exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj, BULLET_RANGE);
+				MyVector3 tmp_intersection = MyRaycast_LimitDistance(
+					MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y, clients[client_id].pos.z }
+					, exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj, BULLET_RANGE);
 
 				// 충돌했다면
-				if (tmp_intersect != defaultVec) {
+				if (tmp_intersection != defaultVec) {
 					b_collide = true;
 
 					// 쏜 사람과의 충돌점과의 거리를 잽니다.
-					float cur_dist = calcDistance(exc_XMFtoMyVec(clients[client_id].pos), tmp_intersect);
+					float cur_dist = calcDistance(exc_XMFtoMyVec(clients[client_id].pos), tmp_intersection);
 
 					// 그 거리가 최소거리보다 작다면 업데이트해줍니다.
 					if (cur_dist < min_dist) {
+						intersection_result = tmp_intersection;
+						collide_target = CT_PLAYER;
+						collide_id = cl.id;
 						min_dist = cur_dist;
-						intersect_id = cl.id;
-						intersect_result = tmp_intersect;
 					}
 				}
 			}
 
-			// 레이캐스트에서 충돌으로 판단되었다면
-			if (intersect_result != defaultVec) {
-				if (intersect_id == -1) break;	//err
-				cout << "Player[" << client_id << "]의 총알이 Player[" << intersect_id << "] (POS: "
-					<< intersect_result.x << ", " << intersect_result.y << ", " << intersect_result.z << ") 에 명중했습니다." << endl;
-
-				// 우선 충돌한 플레이어의 HP를 감소시킵니다.
-				clients[intersect_id].s_lock.lock();
-				clients[intersect_id].hp -= BULLET_DAMAGE;
-				if (clients[intersect_id].hp > 0)
-					cout << "Player[" << clients[intersect_id].id << "]의 HP가 " << BULLET_DAMAGE << "만큼 감소하였습니다. \n" << endl;
-				else
-					cout << "Player[" << clients[intersect_id].id << "]가 사망하였습니다.\n" << endl;
-				clients[intersect_id].s_lock.unlock();
-
-				// 충돌한 정보는 "게임에 접속한 모든" 클라이언트들에게 보냅니다. (피격 및 사망 연출 동기화를 위함)
-				for (auto& cl : clients) {
-					if (cl.s_state != ST_INGAME) continue;
-					if (cl.curr_stage == 0) continue;
-
-					if (clients[intersect_id].hp > 0) {
-						SC_DAMAGED_PACKET dmg_bullet_packet;
-						dmg_bullet_packet.type = SC_DAMAGED;
-						dmg_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
-						dmg_bullet_packet.target = TARGET_PLAYER;
-						dmg_bullet_packet.id = clients[intersect_id].id;
-						dmg_bullet_packet.damage = BULLET_DAMAGE;
-						lock_guard<mutex> lg{ clients[intersect_id].s_lock };
-						cl.do_send(&dmg_bullet_packet);
-					}
-					else {
-						SC_OBJECT_STATE_PACKET death_pack;
-						death_pack.type = SC_OBJECT_STATE;
-						death_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
-						death_pack.target = TARGET_PLAYER;
-						death_pack.id = clients[intersect_id].id;
-						death_pack.state = PL_ST_DEAD;
-						cl.do_send(&death_pack);
-					}
-				}
-				break;
-			}
-			if (b_collide) break;	// 플레이어와 충돌했으면 더이상 충돌처리를 할 필요X
-
-			/*미구현
-			// 2. NPC와 충돌검사
+			// 2) NPC와 충돌검사
 			for (auto& npc : npcs) {
+				// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
+				Cube npc_obj{ exc_XMFtoMyVec(npc.pos), HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
+				MyVector3 tmp_intersection = MyRaycast_LimitDistance(
+					MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y, clients[client_id].pos.z }
+					, exc_XMFtoMyVec(clients[client_id].m_lookvec), npc_obj, BULLET_RANGE);
 
+				// 충돌했다면
+				if (tmp_intersection != defaultVec) {
+					b_collide = true;
+
+					// 쏜 사람과의 충돌점과의 거리를 잽니다.
+					float cur_dist = calcDistance(exc_XMFtoMyVec(clients[client_id].pos), tmp_intersection);
+
+					// 그 거리가 최소거리보다 작다면 업데이트해줍니다.
+					if (cur_dist < min_dist) {
+						intersection_result = tmp_intersection;
+						collide_target = CT_NPC;
+						collide_id = npc.id;
+						min_dist = cur_dist;
+					}
+				}
 			}
-			if (b_collide) break;	// NPC와 충돌했으면 더이상 충돌처리를 할 필요X
-			*/
 
-			// 3. 건물과 충돌검사
+			// 3) 건물과 충돌검사
 			for (auto& building : buildings_info) {
 				Cube bd_obj{ exc_XMFtoMyVec(building.getPos()), building.getScaleX(), building.getScaleY(), building.getScaleZ() };
-				MyVector3 bd_intersect = MyRaycast_LimitDistance(MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y - HELI_BOXSIZE_Y / 2.0f, clients[client_id].pos.z }
-				, exc_XMFtoMyVec(clients[client_id].m_lookvec), bd_obj, BULLET_RANGE);
-				if (bd_intersect != defaultVec) {
-					cout << "Bullet Collide with Building.\n" << endl;
-					break;
+				MyVector3 bd_intersection = MyRaycast_LimitDistance(
+					MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y, clients[client_id].pos.z }
+					, exc_XMFtoMyVec(clients[client_id].m_lookvec), bd_obj, BULLET_RANGE);
+
+				// 충돌했다면
+				if (bd_intersection != defaultVec) {
+					b_collide = true;
+
+					// 쏜 사람과의 충돌점과의 거리를 잽니다.
+					float cur_dist = calcDistance(exc_XMFtoMyVec(clients[client_id].pos), bd_intersection);
+
+					// 그 거리가 최소거리보다 작다면 업데이트해줍니다.
+					if (cur_dist < min_dist) {
+						intersection_result = bd_intersection;
+						collide_target = CT_BUILDING;
+						collide_id = 0;
+						min_dist = cur_dist;
+					}
 				}
 			}
+
+			// 4) 최종: 
+			// 레이캐스트에서 충돌으로 판단되었다면
+			if (b_collide) {
+				switch (collide_target) {
+				case CT_PLAYER:
+					cout << "Player[" << collide_id << "]가 피격당했습니다. (공격자: Player[" << client_id << "])" << endl;
+
+					// 피격된 플레이어의 HP를 감소시킵니다.
+					clients[collide_id].s_lock.lock();
+					clients[collide_id].hp -= BULLET_DAMAGE;
+					clients[collide_id].s_lock.unlock();
+
+					if (clients[collide_id].hp <= 0) {
+						cout << "Player[" << collide_id << "]가 사망하였습니다.\n" << endl;
+
+						// 사망 정보를 게임에 접속한 모든 클라이언트들에게 보냅니다. (자신 포함)
+						for (auto& cl : clients) {
+							if (cl.s_state != ST_INGAME) continue;
+							if (cl.curr_stage == 0) continue;
+
+							SC_OBJECT_STATE_PACKET death_pack;
+							death_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
+							death_pack.type = SC_OBJECT_STATE;
+							death_pack.target = TARGET_PLAYER;
+							death_pack.id = clients[collide_id].id;
+							death_pack.state = PL_ST_DEAD;
+							cl.do_send(&death_pack);
+						}
+					}
+					else {
+						cout << "Player[" << clients[collide_id].id << "]의 HP가 " << BULLET_DAMAGE << "만큼 감소하였습니다. \n" << endl;
+
+						// 피격 정보를 게임에 접속한 모든 클라이언트들에게 보냅니다. (자신 포함)
+						for (auto& cl : clients) {
+							if (cl.s_state != ST_INGAME) continue;
+							if (cl.curr_stage == 0) continue;
+
+							SC_DAMAGED_PACKET dmg_bullet_packet;
+							dmg_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
+							dmg_bullet_packet.type = SC_DAMAGED;
+							dmg_bullet_packet.target = TARGET_PLAYER;
+							dmg_bullet_packet.id = clients[collide_id].id;
+							dmg_bullet_packet.damage = BULLET_DAMAGE;
+							cl.do_send(&dmg_bullet_packet);
+						}
+					}
+					break;
+
+				case CT_NPC:
+					cout << "NPC[" << collide_id << "]가 피격당했습니다. (공격자: Player[" << client_id << "])\n" << endl;
+					break;
+
+				case CT_BUILDING:
+					cout << "총알이 건물에 막혔다. (공격자: Player[" << client_id << "])\n" << endl;
+					break;
+
+				default:
+					cout << "[MyRayCast Error] Unknown Interserction Type.\n" << endl;
+				}
+
+
+			}
+
 		}
 		// 2. 스테이지 2 로직
 		else if (clients[client_id].curr_stage == 2) {
