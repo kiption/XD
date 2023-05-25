@@ -1034,10 +1034,71 @@ void process_packet(int client_id, char* packet)
 
 				case CT_NPC:
 					cout << "NPC[" << collide_id << "]가 피격당했습니다. (공격자: Player[" << client_id << "])\n" << endl;
+
+					// 피격된 npc의 HP를 감소시킵니다.
+					npcs[collide_id].s_lock.lock();
+					npcs[collide_id].hp -= BULLET_DAMAGE;
+					npcs[collide_id].s_lock.unlock();
+
+					if (npcs[collide_id].hp <= 0) {
+						cout << "Npc[" << collide_id << "]가 사망하였습니다.\n" << endl;
+
+						// 사망 정보를 게임에 접속한 모든 클라이언트들에게 보냅니다. (자신 포함)
+						for (auto& cl : clients) {
+							if (cl.s_state != ST_INGAME) continue;
+							if (cl.curr_stage == 0) continue;
+
+							SC_OBJECT_STATE_PACKET death_pack;
+							death_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
+							death_pack.type = SC_OBJECT_STATE;
+							death_pack.target = TARGET_NPC;
+							death_pack.id = npcs[collide_id].id;
+							death_pack.state = PL_ST_DEAD;
+							cl.do_send(&death_pack);
+						}
+
+						// 사망 정보를 npc서버에도 보냅니다.
+						SC_OBJECT_STATE_PACKET npc_death_pack;
+						npc_death_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
+						npc_death_pack.type = SC_OBJECT_STATE;
+						npc_death_pack.target = TARGET_NPC;
+						npc_death_pack.id = npcs[collide_id].id;
+						npc_death_pack.state = PL_ST_DEAD;
+						npc_server.do_send(&npc_death_pack);
+					}
+					else {
+						cout << "Npc[" << npcs[collide_id].id << "]의 HP가 " << BULLET_DAMAGE << "만큼 감소하였습니다. \n" << endl;
+
+						// 피격 정보를 게임에 접속한 모든 클라이언트들에게 보냅니다. (자신 포함)
+						for (auto& cl : clients) {
+							if (cl.s_state != ST_INGAME) continue;
+							if (cl.curr_stage == 0) continue;
+
+							SC_DAMAGED_PACKET dmg_bullet_packet;
+							dmg_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
+							dmg_bullet_packet.type = SC_DAMAGED;
+							dmg_bullet_packet.target = TARGET_NPC;
+							dmg_bullet_packet.id = npcs[collide_id].id;
+							dmg_bullet_packet.damage = BULLET_DAMAGE;
+							cl.do_send(&dmg_bullet_packet);
+						}
+
+						// 피격 정보를 npc서버에도 보냅니다.
+						SC_DAMAGED_PACKET npc_damaged_packet;
+						npc_damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
+						npc_damaged_packet.type = SC_DAMAGED;
+						npc_damaged_packet.target = TARGET_NPC;
+						npc_damaged_packet.id = npcs[collide_id].id;
+						npc_damaged_packet.damage = BULLET_DAMAGE;
+						npc_server.do_send(&npc_damaged_packet);
+					}
 					break;
 
 				case CT_BUILDING:
 					cout << "총알이 건물에 막혔다. (공격자: Player[" << client_id << "])\n" << endl;
+					// 지금은 딱히 할 기능이 없다.
+					// 나중에 건물에 파편이 튀기는 연출을 하고싶으면
+					// 클라한테 충돌한 지점(좌표)를 보내주면 된다.
 					break;
 
 				default:

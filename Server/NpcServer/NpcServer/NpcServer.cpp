@@ -1046,10 +1046,14 @@ void process_packet(char* packet)
 		SC_DAMAGED_PACKET* damaged_packet = reinterpret_cast<SC_DAMAGED_PACKET*>(packet);
 		int obj_id = damaged_packet->id;
 		if (damaged_packet->target == TARGET_PLAYER) {
+			playersInfo[obj_id].obj_lock.lock();
 			playersInfo[obj_id].hp -= damaged_packet->damage;
+			playersInfo[obj_id].obj_lock.unlock();
 		}
 		else if (damaged_packet->target == TARGET_NPC) {
-
+			npcsInfo[obj_id].obj_lock.lock();
+			npcsInfo[obj_id].hp -= damaged_packet->damage;
+			npcsInfo[obj_id].obj_lock.unlock();
 		}
 
 		break;
@@ -1057,8 +1061,86 @@ void process_packet(char* packet)
 	case SC_OBJECT_STATE:
 	{
 		SC_OBJECT_STATE_PACKET* chgstate_packet = reinterpret_cast<SC_OBJECT_STATE_PACKET*>(packet);
-		int client_id = chgstate_packet->id;
-		playersInfo[client_id].state = chgstate_packet->state;
+		int obj_id = chgstate_packet->id;
+		short changed_state = chgstate_packet->state;
+
+		// 1. 우선 상태를 바꿔준다.
+		if (chgstate_packet->target == TARGET_PLAYER) {
+			playersInfo[obj_id].obj_lock.lock();
+			playersInfo[obj_id].state = chgstate_packet->state;
+			playersInfo[obj_id].obj_lock.unlock();
+		}
+		else if (chgstate_packet->target == TARGET_NPC) {
+			npcsInfo[obj_id].obj_lock.lock();
+			npcsInfo[obj_id].state = chgstate_packet->state;
+			npcsInfo[obj_id].obj_lock.unlock();
+		}
+
+		// 2. 상태별 추가 작업이 필요하면 여기서 처리한다.
+		switch (changed_state) {
+		case PL_ST_IDLE:
+			if (chgstate_packet->target == TARGET_PLAYER) {
+
+			}
+			else if (chgstate_packet->target == TARGET_NPC) {
+
+			}
+
+			break;
+
+		case PL_ST_MOVE:
+			if (chgstate_packet->target == TARGET_PLAYER) {
+
+			}
+			else if (chgstate_packet->target == TARGET_NPC) {
+
+			}
+
+			break;
+			
+		case PL_ST_FLY:
+			if (chgstate_packet->target == TARGET_PLAYER) {
+
+			}
+			else if (chgstate_packet->target == TARGET_NPC) {
+
+			}
+
+			break;
+			
+		case PL_ST_CHASE:
+			if (chgstate_packet->target == TARGET_PLAYER) {
+
+			}
+			else if (chgstate_packet->target == TARGET_NPC) {
+
+			}
+
+			break;
+			
+		case PL_ST_ATTACK:
+			if (chgstate_packet->target == TARGET_PLAYER) {
+
+			}
+			else if (chgstate_packet->target == TARGET_NPC) {
+
+			}
+
+			break;
+			
+		case PL_ST_DEAD:
+			if (chgstate_packet->target == TARGET_PLAYER) {
+
+			}
+			else if (chgstate_packet->target == TARGET_NPC) {
+
+			}
+
+			break;
+
+		default:
+			cout << "[OBJECT_STATE Error] Unknown State Type.\n" << endl;
+		}
 
 		break;
 	}// SC_OBJECT_STATE end
