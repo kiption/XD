@@ -343,7 +343,9 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 
 
 	case WM_LBUTTONUP:
-
+		::SetCapture(hWnd);
+		::GetCursorPos(&m_ptOldCursorPos);
+		break;
 	case WM_RBUTTONUP:
 		::ReleaseCapture();
 		break;
@@ -611,7 +613,7 @@ void CGameFramework::ProcessInput()
 
 		float cxDelta = 0.0f, cyDelta = 0.0f, czDelta = 0.0f;
 		POINT ptCursorPos;
-		/*if (GetCapture() == m_hWnd)
+		if (GetCapture() == m_hWnd)
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
@@ -619,7 +621,7 @@ void CGameFramework::ProcessInput()
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 2.0f;
 			czDelta = ((float)(ptCursorPos.y - m_ptOldCursorPos.y) + (float)(ptCursorPos.x - m_ptOldCursorPos.x)) / 3.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-		}*/
+		}
 
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
@@ -635,20 +637,15 @@ void CGameFramework::ProcessInput()
 
 				if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE)
 				{
-					if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+					/*if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 						m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-					else
-						m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+					else*/
+						m_pPlayer->Rotate(0.0f, cxDelta, 0.0f);
 				}
 			}
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE)
 			{
-				XMFLOAT3 PlayerPosition = m_pPlayer->GetPosition();
-				float PrevPositionx = PlayerPosition.x;
-				float PrevPositionz = PlayerPosition.z;
-				XMFLOAT3 CameraPosition = m_pCamera->GetLookVector();
-				XMFLOAT3 xmf3PlayerPosition = m_pPlayer->GetPosition();
-				XMFLOAT3 xmf3PlayerVelocity = m_pPlayer->GetVelocity();
+
 
 				if (dwDirection) m_pPlayer->Move(dwDirection, 5.0f, true);
 
@@ -1411,15 +1408,14 @@ void CGameFramework::AnimationLoop(float EleapsedTime)
 		ShootCnt += 0.1;
 
 	}
-	if (ShootCnt > 2.5f)
+	if (ShootCnt > 2.0f)
 	{
 
 		((CHumanPlayer*)m_pPlayer)->m_bBulletAnimationActive = false;
 		ShootCnt = 0.0f;
 	}
 
-	if (
-		((CHumanPlayer*)m_pPlayer)->m_bBulletAnimationActive == false && ShootCnt==0.0)
+	if (((CHumanPlayer*)m_pPlayer)->m_bBulletAnimationActive == false && ShootCnt==0.0)
 	{
 
 		m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);

@@ -11,7 +11,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	Rotate(0.0, 90.0, 0.0);
 	pSoldiarModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
 	//Weapon_R
-	m_pBulletFindFrame = pSoldiarModel->m_pModelRootObject->FindFrame("Bip001_R_Finger1");
+	m_pBulletFindFrame = pSoldiarModel->m_pModelRootObject->FindFrame("Bip001_L_Finger21");
 
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 3, pSoldiarModel);
