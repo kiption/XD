@@ -13,6 +13,7 @@
 #include <queue>
 #include <limits>
 #include <algorithm>
+#include <unordered_set>
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
 
@@ -55,6 +56,19 @@ enum NPCState { NPC_IDLE, NPC_FLY, NPC_CHASE, NPC_ATTACK, NPC_DEATH };
 enum Hit_target { g_none, g_body, g_profeller };
 
 bool ConnectingServer = false;
+
+struct Node
+{
+	int index;  // 노드 인덱스
+	float g;    // 시작 노드부터의 거리
+	float h;    // 목표 노드까지의 예상 거리
+	float f;    // g + h
+
+	bool operator<(const Node& other) const
+	{
+		return f > other.f;  // f 값이 작은 순서대로 우선순위 큐에 정렬
+	}
+};
 
 class CheckPoint : public MapObject
 {
@@ -136,12 +150,55 @@ XMFLOAT3 NPCNormalize(XMFLOAT3 vec)
 	return vec;
 }
 
-float DistanceNPCtoCP(XMFLOAT3 cppos, XMFLOAT3 npc_pos)
+float MultiDistanceCalc(XMFLOAT3 v1, XMFLOAT3 v2)
 {
-	XMFLOAT3 temp{ cppos.x - npc_pos.x, cppos.y - npc_pos.y , cppos.z - npc_pos.z };
+	XMFLOAT3 temp{ v1.x - v2.x, v1.y - v2.y , v1.z - v2.z };
 
 	float dist = sqrtf(powf(temp.x, 2) + powf(temp.y, 2) + powf(temp.z, 2));
 	return dist;
+}
+
+float LerpAngle(float currentAngle, float targetAngle, float t)
+{
+	float delta = fmodf(targetAngle - currentAngle, XM_2PI);
+
+	// 회전 거리를 -PI ~ PI 범위로 조정합니다.
+	if (delta > XM_PI)
+		delta -= XM_2PI;
+	else if (delta < -XM_PI)
+		delta += XM_2PI;
+
+	// 보간된 각도를 계산합니다.
+	float interpolatedAngle = currentAngle + delta * t;
+
+	return interpolatedAngle;
+}
+
+XMFLOAT3 VectorSubtract(const XMFLOAT3& vector1, const XMFLOAT3& vector2)
+{
+	XMFLOAT3 result;
+	result.x = vector1.x - vector2.x;
+	result.y = vector1.y - vector2.y;
+	result.z = vector1.z - vector2.z;
+	return result;
+}
+
+XMFLOAT3 Add(const XMFLOAT3& vector1, const XMFLOAT3& vector2)
+{
+	XMFLOAT3 result;
+	result.x = vector1.x + vector2.x;
+	result.y = vector1.y + vector2.y;
+	result.z = vector1.z + vector2.z;
+	return result;
+}
+
+XMFLOAT3 ScalarMultiply(const XMFLOAT3& vector, float scalar)
+{
+	XMFLOAT3 result;
+	result.x = vector.x * scalar;
+	result.y = vector.y * scalar;
+	result.z = vector.z * scalar;
+	return result;
 }
 
 //======================================================================
@@ -265,6 +322,7 @@ public:
 	Coordinate GetCurr_coordinate() { return m_coordinate; }
 	float GetDistance(int id) { return m_Distance[id]; }
 	float GetSpeed() { return m_Speed; }
+	void GetRotation(float y, float p, float r) { y = yaw, p = pitch, r = roll; }
 
 public:
 	// Set
@@ -280,20 +338,23 @@ public:
 	void SetSpeed(float spd) { m_Speed = spd; }
 	void SetIdleNodeIndex(int index) { m_currentNodeIndex = index; }
 public:
-// Normal
-	// Rotate
+	// Normal
+		// Rotate
 	XMFLOAT3 NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll);
 
 	bool SetTrackingPrevStatebyDistance(float setDistance, int curState, int prevState);
 	bool PlayerDetact();
-
+	int FindClosestNode(const XMFLOAT3& position);
+	int GetNextNodeInPath(const vector<int>& path);
 	void SetFrustum();
 	void SetIndexNode(int idx);
+	void SetRotation(float yaw, float pitch, float roll);
 	// State
 	void NPC_State_Manegement(int state); // 상태 관리
 	void Caculation_Distance(XMFLOAT3 vec, int id); // 범위 내 플레이어 탐색
 	void MoveChangeIdle();
 	void MoveToNode();
+	void MoveToNode(int nodeIndex);
 	void FlyOnNpc(XMFLOAT3 vec, int id);
 	void PlayerChasing();
 	void PlayerAttack();
@@ -302,10 +363,12 @@ public:
 	void NPC_Check_HP();
 	void SetTrackingIDbyDistance(float setDistance, int curState, int nextState);
 
-	float getRandomOffset();
+	float getRandomOffset(float min, float max);
 	float CalculateYawToTarget(const XMFLOAT3& targetPosition) const;
 	float CalculatePitchToTarget(const XMFLOAT3& targetPosition) const;
 	float CalculateRollToTarget(const XMFLOAT3& targetPosition) const;
+
+	vector<int> AStarSearch(XMFLOAT3 target);
 };
 
 XMFLOAT3 NPC::NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll)
@@ -386,6 +449,45 @@ bool NPC::PlayerDetact()
 
 	return false;
 }
+int NPC::FindClosestNode(const XMFLOAT3& position)
+{
+	int closestNodeIndex = -1;
+	float closestDistanceSq = (numeric_limits<float>::max)();
+
+	for (int i = 0; i < graph.size(); ++i)
+	{
+		float distanceSq = MultiDistanceCalc(position, graph[i].getPos());
+		if (distanceSq < closestDistanceSq)
+		{
+			closestNodeIndex = i;
+			closestDistanceSq = distanceSq;
+		}
+	}
+	return closestNodeIndex;
+}
+int NPC::GetNextNodeInPath(const vector<int>& path)
+{
+	// 현재 노드의 인덱스를 찾습니다.
+	int currentNodeIndex = m_currentNodeIndex;
+
+	// 경로에서 현재 노드의 인덱스를 찾습니다.
+	auto it = find(path.begin(), path.end(), currentNodeIndex);
+	if (it != path.end())
+	{
+		// 현재 노드가 경로에 존재하는 경우
+		// 다음 노드의 인덱스를 찾습니다.
+		auto nextIt = next(it);
+		if (nextIt != path.end())
+		{
+			return *nextIt;
+		}
+	}
+
+	// 경로가 잘못된 경우 또는 마지막 노드인 경우
+	// 현재 노드의 인덱스를 반환합니다.
+	return currentNodeIndex;
+}
+
 void NPC::SetFrustum()
 {
 	// NPC의 위치와 Look 벡터를 가져온다.
@@ -425,7 +527,7 @@ void NPC::SetFrustum()
 
 	m_frustum = frustum;
 }
-void NPC::SetIndexNode(int idx) 
+void NPC::SetIndexNode(int idx)
 {
 	m_currentNodeIndex = idx;
 	CheckPoint cp = graph[idx]; // CP에서 해당 인덱스의 CheckPoint 가져오기
@@ -434,12 +536,25 @@ void NPC::SetIndexNode(int idx)
 	// NPC의 포지션을 CP의 위치 주변으로 설정
 	// 여기에서 필요에 따라 좀더 세밀한 위치 설정을 할 수 있습니다.
 	XMFLOAT3 setPos = {
-		cpPos.x + getRandomOffset(), // X 좌표에 랜덤한 오프셋을 더해 위치 설정
-		cpPos.y + getRandomOffset(), // Y 좌표에 랜덤한 오프셋을 더해 위치 설정
-		cpPos.z + getRandomOffset()  // Z 좌표에 랜덤한 오프셋을 더해 위치 설정
+		cpPos.x + getRandomOffset(-20.0f, 20.0f), // X 좌표에 랜덤한 오프셋을 더해 위치 설정
+		cpPos.y + getRandomOffset(-160.0f, -130.0f), // Y 좌표에 랜덤한 오프셋을 더해 위치 설정
+		cpPos.z + getRandomOffset(-20.0f, 20.0f)  // Z 좌표에 랜덤한 오프셋을 더해 위치 설정
 	};
 
 	SetPosition(setPos);
+}
+void NPC::SetRotation(float yaw, float pitch, float roll)
+{
+	// Yaw, pitch, roll 값을 기반으로 회전 행렬을 생성합니다.
+	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
+
+	// 현재 Look, Right, Up Vectors를 업데이트합니다.
+	m_lookvec = XMFLOAT3(rotationMatrix.r[2].m128_f32[0], rotationMatrix.r[2].m128_f32[1], rotationMatrix.r[2].m128_f32[2]);
+	m_rightvec = XMFLOAT3(rotationMatrix.r[0].m128_f32[0], rotationMatrix.r[0].m128_f32[1], rotationMatrix.r[0].m128_f32[2]);
+	m_upvec = XMFLOAT3(rotationMatrix.r[1].m128_f32[0], rotationMatrix.r[1].m128_f32[1], rotationMatrix.r[1].m128_f32[2]);
+
+	// 회전 값을 NPC에 설정합니다.
+	//m_rotation = rotationMatrix;
 }
 
 void NPC::NPC_State_Manegement(int state)
@@ -511,7 +626,7 @@ void NPC::NPC_State_Manegement(int state)
 }
 void NPC::Caculation_Distance(XMFLOAT3 vec, int id) // 서버에서 따로 부를 것.
 {
-	m_Distance[id] = sqrtf(pow((vec.x - pos.x), 2) + pow((vec.y - pos.y), 2) + pow((vec.z - pos.z), 2));
+	m_Distance[id] = sqrtf(pow((vec.x - pos.x), 2) + pow((vec.z - pos.z), 2));
 }
 void NPC::MoveChangeIdle()
 {
@@ -524,7 +639,7 @@ void NPC::MoveChangeIdle()
 	// NPC의 위치와 모든 Checkpoint의 거리를 비교하여 가장 가까운 Checkpoint를 찾습니다.
 	int numCP = graph.size();
 	for (int i = 0; i < numCP; ++i) {
-		float distance = DistanceNPCtoCP(graph[i].getPos(), pos);
+		float distance = MultiDistanceCalc(graph[i].getPos(), pos);
 
 		if (distance < closestDistance) {
 			closestCheckpointIndex = i;
@@ -579,36 +694,42 @@ void NPC::MoveToNode()
 	}
 
 	// NPC의 회전을 설정합니다.
-	// 예시로 yaw, pitch, roll 값을 사용하여 회전을 적용합니다.
-	// 이 부분은 NPC의 이동 로직에 맞게 구현해야 합니다.
-	yaw = CalculateYawToTarget(targetPosition);
-	pitch = CalculatePitchToTarget(targetPosition);
-	roll = CalculateRollToTarget(targetPosition);
+	XMVECTOR targetDirection = XMLoadFloat3(&direction);
+	targetDirection = XMVector3Normalize(targetDirection);
 
-	// yaw, pitch, roll 값을 사용하여 Look, Right, Up 벡터를 계산합니다.
-	XMVECTOR forwardVector = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+	// Yaw 회전을 계산합니다.
 	XMVECTOR upVector = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMVECTOR rightVector = XMVector3Cross(upVector, targetDirection);
+	rightVector = XMVector3Normalize(rightVector);
+	upVector = XMVector3Cross(targetDirection, rightVector);
+	upVector = XMVector3Normalize(upVector);
 
-	// Yaw 회전
-	XMMATRIX yawRotationMatrix = XMMatrixRotationAxis(upVector, yaw);
-	forwardVector = XMVector3TransformCoord(forwardVector, yawRotationMatrix);
-
-	// Pitch 회전
-	XMMATRIX pitchRotationMatrix = XMMatrixRotationAxis(XMLoadFloat3(&m_lookvec), pitch);
-	forwardVector = XMVector3TransformCoord(forwardVector, pitchRotationMatrix);
-	upVector = XMVector3TransformCoord(upVector, pitchRotationMatrix);
-
-	// Roll 회전
-	XMMATRIX rollRotationMatrix = XMMatrixRotationAxis(forwardVector, roll);
-	//m_rightvec = XMVector3TransformCoord(XMLoadFloat3(&m_rightvec), rollRotationMatrix);
-
-	XMStoreFloat3(&m_rightvec, XMVector3TransformCoord(XMLoadFloat3(&m_rightvec), rollRotationMatrix));
-	upVector = XMVector3TransformCoord(upVector, rollRotationMatrix);
-
-	// XMVECTOR를 XMFLOAT3로 변환하여 저장합니다.
-	XMStoreFloat3(&m_lookvec, forwardVector);
+	// XMFLOAT3로 변환하여 저장합니다.
+	XMStoreFloat3(&m_lookvec, targetDirection);
+	XMStoreFloat3(&m_rightvec, rightVector);
 	XMStoreFloat3(&m_upvec, upVector);
 
+	// 회전값을 계산합니다.
+	float m_yaw = atan2(-XMVectorGetZ(targetDirection), XMVectorGetX(targetDirection));
+	float m_pitch = atan2(XMVectorGetY(targetDirection), sqrt(XMVectorGetX(targetDirection) * XMVectorGetX(targetDirection) + XMVectorGetZ(targetDirection) * XMVectorGetZ(targetDirection)));
+	float m_roll = 0.0f;
+
+	// 회전값을 NPC의 멤버 변수에 저장합니다.
+	yaw = m_yaw;
+	pitch = m_pitch;
+	roll = m_roll;
+}
+
+void NPC::MoveToNode(int nodeIndex)
+{
+	if (nodeIndex < 0 || nodeIndex >= graph.size()) {
+		return;
+	}
+
+	CheckPoint targetCheckpoint = graph[nodeIndex];
+	XMFLOAT3 targetPosition = targetCheckpoint.getPos();
+
+	SetPosition(targetPosition);
 }
 void NPC::FlyOnNpc(XMFLOAT3 vec, int id) // 추적대상 플레이어와 높이 맞추기
 {
@@ -621,43 +742,121 @@ void NPC::FlyOnNpc(XMFLOAT3 vec, int id) // 추적대상 플레이어와 높이 맞추기
 }
 void NPC::PlayerChasing()
 {
-	// Look
-	XMVECTOR Looktemp = XMVector3Normalize(XMVectorSubtract(XMLoadFloat3(&m_User_Pos[m_chaseID]), XMLoadFloat3(&pos)));
-	Coordinate base_coordinate;
-	base_coordinate.right = { 1,0,0 };
-	float x = XMVectorGetX(XMVector3AngleBetweenVectors(Looktemp, XMLoadFloat3(&base_coordinate.right)));
-	yaw = x;
-	if (x < 1.0f && x > -1.0f) {
-		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&base_coordinate.right), XMConvertToRadians(yaw));
-		XMStoreFloat3(&m_coordinate.look, Looktemp);
-	}
-	else {
-		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&base_coordinate.right), XMConvertToRadians(0.0f));
-		XMStoreFloat3(&m_coordinate.look, Looktemp);
-	}
-	// Right
-	base_coordinate.up = { 0,1,0 };
+	XMFLOAT3 npcPosition = GetPosition();
+	XMFLOAT3 playerPosition = m_User_Pos[m_chaseID];
 
-	XMVECTOR righttemp = XMVector3Normalize(XMVector3Cross(XMLoadFloat3(&base_coordinate.up), Looktemp));
-	XMStoreFloat3(&m_coordinate.right, righttemp);
+	// 플레이어를 바라보는 방향 벡터를 계산합니다.
+	XMFLOAT3 lookDirection = VectorSubtract(playerPosition, npcPosition);
+	XMVECTOR lookVector = XMLoadFloat3(&lookDirection);
+	lookVector = XMVector3Normalize(lookVector);
 
-	// up
-	XMVECTOR uptemp = XMVector3Normalize(XMVector3Cross(Looktemp, righttemp));
-	XMStoreFloat3(&m_coordinate.up, uptemp);
+	// 플레이어를 바라보는 방향으로 회전합니다.
+	float targetYaw = atan2(-XMVectorGetZ(lookVector), XMVectorGetX(lookVector));
+	float targetPitch = atan2(XMVectorGetY(lookVector), sqrt(XMVectorGetX(lookVector) * XMVectorGetX(lookVector) + XMVectorGetZ(lookVector) * XMVectorGetZ(lookVector)));
 
-	if (m_Distance[m_chaseID] < 50) {
-		m_Speed = 0;
+	// 현재 회전값을 가져옵니다.
+	float currentYaw, currentPitch, currentRoll;
+	GetRotation(currentYaw, currentPitch, currentRoll);
+
+	// 현재 회전값과 목표 회전값 사이를 보간합니다.
+	float interpolationFactor = 0.1f; // 보간 계수 조정 가능
+	float interpolatedYaw = LerpAngle(currentYaw, targetYaw, interpolationFactor);
+	float interpolatedPitch = LerpAngle(currentPitch, targetPitch, interpolationFactor);
+
+	// 회전값을 적용합니다.
+	SetRotation(interpolatedYaw, interpolatedPitch, currentRoll);
+
+	// 플레이어와 가장 가까운 노드를 찾습니다.
+	int closestNodeIndex = FindClosestNode(playerPosition);
+
+	// A* 알고리즘을 사용하여 경로를 탐색합니다.
+	vector<int> path = AStarSearch(graph[closestNodeIndex].getPos());
+
+	// 경로가 존재하는 경우
+	if (!path.empty())
+	{
+		// 다음 이동할 노드의 위치를 가져옵니다.
+		XMFLOAT3 targetPosition = graph[path[0]].getPos();
+
+		// 이동 속도 및 거리 계산
+		float moveSpeed = 0.1f;  // 이동 속도 조정 가능
+		float distanceToTarget = MultiDistanceCalc(npcPosition, targetPosition);
+
+		// 플레이어에 가까워질수록 이동 속도를 줄입니다.
+		float adjustedMoveSpeed = moveSpeed * distanceToTarget;
+
+		// 이동 방향 계산
+		XMFLOAT3 moveDirection = VectorSubtract(targetPosition, npcPosition);
+		XMVECTOR moveVector = XMLoadFloat3(&moveDirection);
+		moveVector = XMVector3Normalize(moveVector);
+
+		// 이동 거리 계산
+		XMVECTOR moveDistance = XMVectorScale(moveVector, adjustedMoveSpeed);
+
+		// 이동한 거리를 계산합니다.
+		XMVECTOR newPosition = XMVectorAdd(XMLoadFloat3(&npcPosition), moveDistance);
+		XMFLOAT3 newNpcPosition;
+		XMStoreFloat3(&newNpcPosition, newPosition);
+
+		// NPC의 위치를 새로운 위치로 업데이트합니다.
+		SetPosition(newNpcPosition);
 	}
-	else {
-		m_Speed = 1.5f;
+	else
+	{
+		// 이미 같은 구역에 있음.
+		// 플레이어를 바라보는 방향 벡터를 계산합니다.
+		XMFLOAT3 lookDirection = VectorSubtract(playerPosition, npcPosition);
+		XMVECTOR lookVector = XMLoadFloat3(&lookDirection);
+		lookVector = XMVector3Normalize(lookVector);
+
+		// 플레이어를 바라보는 방향으로 회전합니다.
+		float targetYaw = atan2(-XMVectorGetZ(lookVector), XMVectorGetX(lookVector));
+		float targetPitch = atan2(XMVectorGetY(lookVector), sqrt(XMVectorGetX(lookVector) * XMVectorGetX(lookVector) + XMVectorGetZ(lookVector) * XMVectorGetZ(lookVector)));
+
+		// 현재 회전값을 가져옵니다.
+		float currentYaw, currentPitch, currentRoll;
+		GetRotation(currentYaw, currentPitch, currentRoll);
+
+		// 현재 회전값과 목표 회전값 사이를 보간합니다.
+		float interpolationFactor = 0.1f; // 보간 계수 조정 가능
+		float interpolatedYaw = LerpAngle(currentYaw, targetYaw, interpolationFactor);
+		float interpolatedPitch = LerpAngle(currentPitch, targetPitch, interpolationFactor);
+
+		// 회전값을 적용합니다.
+		SetRotation(interpolatedYaw, interpolatedPitch, currentRoll);
+
+		// 플레이어를 따라 이동합니다.
+		XMFLOAT3 targetPosition = playerPosition;
+
+		// 이동 속도 및 거리 계산
+		float moveSpeed = 0.1f;  // 이동 속도 조정 가능
+		float distanceToTarget = MultiDistanceCalc(npcPosition, targetPosition);
+
+		// 플레이어에 가까워질수록 이동 속도를 줄입니다.
+		float adjustedMoveSpeed = moveSpeed * distanceToTarget;
+
+		// 이동 방향 계산
+		XMFLOAT3 moveDirection = VectorSubtract(targetPosition, npcPosition);
+		XMVECTOR moveVector = XMLoadFloat3(&moveDirection);
+		moveVector = XMVector3Normalize(moveVector);
+
+		// 이동 거리 계산
+		XMVECTOR moveDistance = XMVectorScale(moveVector, adjustedMoveSpeed);
+
+		// 이동한 거리를 계산합니다.
+		XMVECTOR newPosition = XMVectorAdd(XMLoadFloat3(&npcPosition), moveDistance);
+		XMFLOAT3 newNpcPosition;
+		XMStoreFloat3(&newNpcPosition, newPosition);
+
+		// NPC의 위치를 새로운 위치로 업데이트합니다.
+		SetPosition(newNpcPosition);
 	}
 
-	// 위치 변환
-	pos.x += m_Speed * m_coordinate.look.x;
-	pos.y += m_Speed * m_coordinate.look.y;
-	pos.z += m_Speed * m_coordinate.look.z;
-	//NPCtoBuilding_collide();
 }
+
+
+
+
 void NPC::PlayerAttack()
 {
 	// Look
@@ -742,11 +941,12 @@ void NPC::SetTrackingIDbyDistance(float setDistance, int curState, int nextState
 		}
 	}
 }
-float NPC::getRandomOffset()
+
+float NPC::getRandomOffset(float min, float max)
 {
 	random_device rd;
 	default_random_engine dre(rd());
-	uniform_real_distribution<float> offset(-10.0f, 10.0f); // 원하는 오프셋 범위 설정
+	uniform_real_distribution<float> offset(min, max); // 원하는 오프셋 범위 설정
 
 	return offset(dre);
 }
@@ -796,6 +996,115 @@ float NPC::CalculateRollToTarget(const XMFLOAT3& targetPosition) const {
 	// 이 예시에서는 NPC의 Roll 값 계산을 생략하고 0을 반환합니다.
 	return 0.0f;
 }
+
+vector<int> NPC::AStarSearch(XMFLOAT3 target)
+{
+	const int numNodes = graph.size();
+
+	// 시작 노드와 목표 노드의 인덱스를 찾습니다.
+	int startIndex = -1;
+	int targetIndex = -1;
+
+	for (int i = 0; i < numNodes; ++i)
+	{
+		if ((graph[i].getPos().x == graph[m_currentNodeIndex].getPosX()) && (graph[i].getPos().y == graph[m_currentNodeIndex].getPosY()) && (graph[i].getPos().z == graph[m_currentNodeIndex].getPosZ()))
+		{
+			startIndex = i;
+		}
+		else if ((graph[i].getPos().x == target.x) && (graph[i].getPos().y == target.y) && (graph[i].getPos().z == target.z))
+		{
+			targetIndex = i;
+		}
+
+		/*if (startIndex != -1 && targetIndex != -1)
+		{
+			break;
+		}*/
+	}
+
+	// 시작 노드나 목표 노드가 없으면 빈 경로를 반환합니다.
+	if (startIndex == -1 || targetIndex == -1)
+	{
+		return std::vector<int>();
+	}
+
+	std::vector<int> path;
+
+	// 시작 노드와 목표 노드가 동일한 경우, 경로가 없이 시작 노드 하나만 포함된 경로를 반환합니다.
+	if (startIndex == targetIndex)
+	{
+		path.push_back(startIndex);
+		return path;
+	}
+
+	// 각 노드까지의 예상 거리 값을 저장하는 배열을 초기화합니다.
+	std::vector<float> hValues(numNodes, (std::numeric_limits<float>::max)());
+
+	// 시작 노드까지의 예상 거리를 0으로 설정합니다.
+	hValues[startIndex] = 0.0f;
+
+	// 방문한 노드를 저장하는 집합입니다.
+	std::unordered_set<int> visitedNodes;
+
+	// 시작 노드를 우선순위 큐에 추가합니다.
+	std::priority_queue<Node> pq;
+	pq.push({ startIndex, 0.0f, hValues[startIndex], hValues[startIndex] });
+
+	// 노드들의 이전 노드 인덱스를 저장하는 배열입니다.
+	std::vector<int> prevNodes(numNodes, -1);
+
+	while (!pq.empty())
+	{
+		// 우선순위 큐에서 가장 작은 f 값을 갖는 노드를 선택합니다.
+		int currentNodeIndex = pq.top().index;
+		pq.pop();
+
+		// 목표 노드에 도달한 경우, 경로를 추적하고 반환합니다.
+		if (currentNodeIndex == targetIndex)
+		{
+			int nodeIndex = targetIndex;
+			while (nodeIndex != -1)
+			{
+				path.insert(path.begin(), nodeIndex);
+				nodeIndex = prevNodes[nodeIndex];
+			}
+			break;
+		}
+
+		// 현재 노드를 방문한 것으로 표시합니다.
+		visitedNodes.insert(currentNodeIndex);
+
+		// 현재 노드와 연결된 모든 이웃 노드를 탐색합니다.
+		const std::vector<int>& neighbors = graph[currentNodeIndex].getNeighbors();
+		for (int neighborIndex : neighbors)
+		{
+			// 이미 방문한 노드는 건너뜁니다.
+			if (visitedNodes.find(neighborIndex) != visitedNodes.end())
+			{
+				continue;
+			}
+
+			// 현재 노드에서 이웃 노드까지의 예상 거리를 계산합니다.
+			float distance = MultiDistanceCalc(graph[currentNodeIndex].getPos(), graph[neighborIndex].getPos());
+			float gValue = hValues[currentNodeIndex] + distance;
+
+			// 이웃 노드까지의 예상 거리가 현재 저장된 거리보다 작으면 값을 갱신하고 이전 노드 인덱스를 업데이트합니다.
+			if (gValue < hValues[neighborIndex])
+			{
+				hValues[neighborIndex] = gValue;
+				prevNodes[neighborIndex] = currentNodeIndex;
+
+				// 이웃 노드를 우선순위 큐에 추가합니다.
+				float hValue = MultiDistanceCalc(graph[neighborIndex].getPos(), target);
+				float fValue = gValue + hValue;
+				pq.push({ neighborIndex, gValue, hValue, fValue });
+			}
+		}
+	}
+
+	return path;
+}
+
 array<NPC, MAX_NPCS> npcsInfo;
 
 //======================================================================
@@ -1205,17 +1514,8 @@ void initNpc() {
 		npcsInfo[i].SetIndexNode(idx(dre));
 
 		npcsInfo[i].SetRotate(0.0f, 0.0f, 0.0f);
-		
-		uniform_int_distribution<int>Ci_num(0, 3);
-		uniform_int_distribution<int>Sec_num(0, 3);
 
-		int city_num = Ci_num(dre);
-		int section_num = Sec_num(dre);
-
-		npcsInfo[i].SetIdleCity(city_num);
-		npcsInfo[i].SetIdleSection(section_num);
-
-		uniform_real_distribution<float>SpdSet(3.5f, 5.2f);
+		uniform_real_distribution<float>SpdSet(10.0f, 20.0f);
 		float speed = SpdSet(dre);
 		npcsInfo[i].SetSpeed(speed);
 		npcsInfo[i].SetChaseID(-1);
@@ -1284,12 +1584,12 @@ void MoveNPC()
 					}
 
 					// npc pos 확인
-					//cout << "=============" << endl;
+					cout << "=============" << endl;
 					//cout << i << "번째 NPC의 도시 ID: " << npcsInfo[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcsInfo[i].GetIdleSection() << endl;
-					//cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
-					//cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
-					//cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
-
+					cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
+					cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
+					cout << i << "번째 NPC의 Look: " << npcsInfo[i].m_lookvec.x << ", " << npcsInfo[i].m_lookvec.y << ", " << npcsInfo[i].m_lookvec.z << endl;
+					cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
 					/*if (npcs[i].PrintRayCast) {
 						cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
 					}*/
