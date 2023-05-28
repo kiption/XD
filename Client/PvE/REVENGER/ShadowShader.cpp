@@ -32,16 +32,6 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[0]->SetMaterial(0, pPlaneMaterial);
 		m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 1.0, 100.0f));
 
-		//XMFLOAT3 xmf3Scale(10.0f, 0.2, 10.0f);
-		//XMFLOAT3 xmf3Normal(0.0f, 0.0f, 0.0f);
-		//CMaterial* pTerrianMeterial = new CMaterial(1);
-		//pTerrianMeterial->SetReflection(1);
-		//m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, _T("Terrain/terrain033.raw"), 512, 512, xmf3Scale, xmf3Normal);
-		//pTerrianMeterial->SetTexture(m_pDepthTexture, 0);
-		//m_pTerrain->SetMaterial(0, pTerrianMeterial);
-		//m_pTerrain->SetPosition(-1000.0, -30.0, -1000.0);
-		//m_ppObjects[2] = m_pTerrain;
-
 		m_ppObjects[2] = new CGameObject(1);
 		m_ppObjects[2]->SetMesh(NULL);
 		m_ppObjects[2]->SetMaterial(0, pPlaneMaterial);
@@ -67,34 +57,37 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[4]->Rotate(0, 90, 0);
 		m_ppObjects[4]->SetPosition(-400.0f, 50.0, 1300.0f);
 
-		m_nHierarchicalGameObjects = 5;
-		m_ppHierarchicalGameObjects = new CGameObject * [m_nHierarchicalGameObjects];
+		int OtherPlayers = 5;
 		CMaterial* pOtherPlayerMaterial = new CMaterial(5);
 		pOtherPlayerMaterial->SetReflection(5);
 
-		for (int i = 0; i < m_nHierarchicalGameObjects; i++)
+		for (int x = 5; x < OtherPlayers + 5; x++)
 		{
+			CLoadedModelInfo* pSoldierModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MODEL.bin", NULL);
+			m_ppObjects[x] = new CHumanoidObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSoldierModel, 7);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6);
 
-			m_ppHierarchicalGameObjects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			m_ppHierarchicalGameObjects[i]->SetMaterial(0, pOtherPlayerMaterial);
-			//m_ppHierarchicalGameObjects[i]->SetPosition(0.0, 0.0, 0.0);
-			m_ppHierarchicalGameObjects[i]->OnPrepareAnimate();
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(0, true);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(3, false);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(4, false);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(5, false);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(6, false);
 
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.15f);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(1, 0.25f);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(2, 0.35f);
+			m_ppObjects[x]->SetMaterial(0, pMaterial);
+			m_ppObjects[x]->SetPosition(XMFLOAT3(0.0 * x + 5, 10.0, 0.0 * x + 5));
+			if (pSoldierModel) delete pSoldierModel;
 		}
-		m_ppObjects[5] = m_ppHierarchicalGameObjects[0];
-		m_ppObjects[5]->SetPosition(100.0, 50.0, 150.0);
-
-		m_ppObjects[6] = m_ppHierarchicalGameObjects[1];
-		m_ppObjects[6]->SetPosition(50.0, 50.0, 250.0);
-
-		m_ppObjects[7] = m_ppHierarchicalGameObjects[2];
-		m_ppObjects[7]->SetPosition(200.0, 50.0, 350.0);
-
-		m_ppObjects[8] = m_ppHierarchicalGameObjects[3];
-		m_ppObjects[8]->SetPosition(-50.0, 50.0, 250.0);
-
-		m_ppObjects[9] = m_ppHierarchicalGameObjects[4];
-		m_ppObjects[9]->SetPosition(300.0, 50.0, 450.0);
 
 		m_nNpcObjects = 5;
 		m_ppNpcObjects = new CGameObject * [m_nNpcObjects];
@@ -104,7 +97,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		{
 
 			m_ppNpcObjects[i] = new CNpcHelicopterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			m_ppNpcObjects[i]->SetMaterial(0,pNpcMaterial);
+			m_ppNpcObjects[i]->SetMaterial(0, pNpcMaterial);
 			m_ppNpcObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
 			m_ppNpcObjects[i]->OnPrepareAnimate();
 		}
@@ -213,7 +206,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[11]->SetMaterial(0, pMapMaterial);
 		m_ppObjects[11]->Rotate(0.0f, 0.0f, 0.0f);
 		m_ppObjects[11]->SetScale(20.0, 20.0, 20.0);
-		m_ppObjects[11]->SetPosition(1500.0,-3.5,1500.0);
+		m_ppObjects[11]->SetPosition(1500.0, -3.5, 1500.0);
 		pSceneModel->AddRef();
 
 	}
@@ -320,11 +313,11 @@ void CObjectsShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComman
 		for (int k = 0; k < m_ppObjects[j]->m_nMaterials; k++)
 		{
 
-		CB_GAMEOBJECT_INFO* pbMappedcbGameObject = (CB_GAMEOBJECT_INFO*)((UINT8*)m_pcbMappedGameObjects + (j * ncbElementBytes));
-		XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->m_xmf4x4World)));
+			CB_GAMEOBJECT_INFO* pbMappedcbGameObject = (CB_GAMEOBJECT_INFO*)((UINT8*)m_pcbMappedGameObjects + (j * ncbElementBytes));
+			XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->m_xmf4x4World)));
 #ifdef _WITH_BATCH_MATERIAL
-		if (m_ppMaterials[k]) pbMappedcbGameObject->m_nMaterialID = m_ppMaterials[k]->m_nReflection;
-		if (m_ppMaterials[k]) pbMappedcbGameObject->m_nObjectID = j;
+			if (m_ppMaterials[k]) pbMappedcbGameObject->m_nMaterialID = m_ppMaterials[k]->m_nReflection;
+			if (m_ppMaterials[k]) pbMappedcbGameObject->m_nObjectID = j;
 #endif
 		}
 	}

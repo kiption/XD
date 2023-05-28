@@ -18,6 +18,8 @@ public:
 	virtual void OnCameraUpdateCallback(float fTimeElapsed);
 
 	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
+	virtual void Jump();
+	virtual void Roll();
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	virtual void Update(float fTimeElapsed);

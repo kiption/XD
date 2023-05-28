@@ -87,7 +87,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		}
 		else
 		{
-			if (gGameFramework.m_nMode == OPENINGSCENE)
+			if (gGameFramework.m_nMode == OPENINGSCENE )
 			{
 				if (!stage1_enter_ok) {
 					// 키 입력을 서버로 전달.

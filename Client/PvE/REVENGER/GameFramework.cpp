@@ -401,6 +401,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case KEY_A:
 		case KEY_S:
 		case KEY_D:
+			m_pPlayer->m_xmf3Velocity = XMFLOAT3(0, 0, 0);
 			q_keyboardInput.push(SEND_KEYUP_MOVEKEY);//S
 			break;
 		case VK_SPACE:
@@ -506,7 +507,7 @@ void CGameFramework::BuildObjects()
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
 
 
-	CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->m_pTerrain);
+	HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL);
 
 	CreateShaderVariables();
 	m_pScene->m_pPlayer = m_pPlayer = pPlayer;
@@ -552,7 +553,7 @@ void CGameFramework::ProcessInput()
 
 		if (pKeysBuffer[VK_UP] & 0xF0) {
 			dwDirection |= DIR_UP;
-			q_keyboardInput.push(SEND_KEY_UP);//S
+			
 		}
 		if (pKeysBuffer[VK_DOWN] & 0xF0) {
 			dwDirection |= DIR_DOWN;
@@ -599,10 +600,14 @@ void CGameFramework::ProcessInput()
 
 		if (pKeysBuffer[KEY_Q] & 0xF0) {
 			dwDirection |= DIR_UP;
+			//m_pPlayer->Jump();
+			q_keyboardInput.push(SEND_KEY_UP);//S
 			m_pCamera->SetTimeLag(0.05);
 		}
 		if (pKeysBuffer[KEY_E] & 0xF0) {
 			dwDirection |= DIR_DOWN;
+			//m_pPlayer->Roll();
+			q_keyboardInput.push(SEND_KEY_DOWN);//S
 			m_pCamera->SetTimeLag(0.05);
 		}
 
@@ -640,16 +645,15 @@ void CGameFramework::ProcessInput()
 					/*if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 						m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
 					else*/
-						m_pPlayer->Rotate(0.0f, cxDelta, 0.0f);
+
+					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 				}
 			}
 			if (m_nMode == SCENE2STAGE || m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE)
 			{
-
-
-				if (dwDirection) m_pPlayer->Move(dwDirection, 5.0f, true);
-
-
+				if (dwDirection) m_pPlayer->Move(dwDirection, 6.0f, true);
+		
+				
 			}
 		}
 	}
@@ -790,27 +794,17 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], TRUE, &d3dDsvCPUDescriptorHandle);
 	//if (m_nMode != SCENE2STAGE) UpdateShaderVariables();
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
-	//if (m_nMode == SCENE2STAGE)m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+	//m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
 	if (m_nMode == SCENE1STAGE || m_nMode == SCENE2STAGE)if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
-	/*if (m_nMode == SCENE1STAGE)
-	{
 
-		m_pPostProcessingShader->OnPostRenderTarget(m_pd3dCommandList);
-
-		m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], TRUE, NULL);
-
-		m_pPostProcessingShader->Render(m_pd3dCommandList, m_pCamera, NULL, 0);
-	}*/
 	// Stage2
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
-
-
 	hResult = m_pd3dCommandList->Close();
 	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
@@ -1393,34 +1387,37 @@ void CGameFramework::CreateDirect2DDevice()
 
 void CGameFramework::AnimationLoop(float EleapsedTime)
 {
-	if (A_KEY == true || D_KEY == true)
-	{
-		((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	}
-	else
-	{
-		((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	}
-
-	if (((CHumanPlayer*)m_pPlayer)->m_bBulletAnimationActive == true)
-	{
-		((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
-		ShootCnt += 0.1;
-
-	}
-	if (ShootCnt > 2.0f)
+	if (m_nMode == SCENE1STAGE)
 	{
 
-		((CHumanPlayer*)m_pPlayer)->m_bBulletAnimationActive = false;
-		ShootCnt = 0.0f;
+		if (A_KEY == true || D_KEY == true)
+		{
+			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+		}
+		else
+		{
+			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+		}
+
+		if (((CHumanPlayer*)m_pPlayer)->m_bBulletAnimationActive == true)
+		{
+			((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
+			ShootCnt += 0.1;
+
+		}
+		if (ShootCnt > 2.0f)
+		{
+
+			((CHumanPlayer*)m_pPlayer)->m_bBulletAnimationActive = false;
+			ShootCnt = 0.0f;
+		}
+
+		if (((CHumanPlayer*)m_pPlayer)->m_bBulletAnimationActive == false && ShootCnt == 0.0)
+		{
+
+			m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+		}
 	}
-
-	if (((CHumanPlayer*)m_pPlayer)->m_bBulletAnimationActive == false && ShootCnt==0.0)
-	{
-
-		m_pPlayer->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	}
-
 
 }
 
@@ -1503,7 +1500,7 @@ XMFLOAT3 CGameFramework::getMyLookVec()
 
 void CGameFramework::setPosition_Self(XMFLOAT3 pos)
 {
-	if (m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE) {
+	if (m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE || m_nMode == SCENE2STAGE) {
 		((CHumanPlayer*)m_pPlayer)->SetPosition(pos);
 	}
 	else if (m_nMode == SCENE2STAGE) {
@@ -1512,11 +1509,11 @@ void CGameFramework::setPosition_Self(XMFLOAT3 pos)
 }
 void CGameFramework::setVectors_Self(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
-	if (m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE) {
+	if (m_nMode == OPENINGSCENE || m_nMode == SCENE1STAGE || m_nMode == SCENE2STAGE) {
 		((CHumanPlayer*)m_pPlayer)->SetUp(upVec);
 		((CHumanPlayer*)m_pPlayer)->SetRight(rightVec);
 		((CHumanPlayer*)m_pPlayer)->SetLook(lookVec);
-		((CHumanPlayer*)m_pPlayer)->SetScale(XMFLOAT3{ 7.0, 7.0, 7.0 });
+		((CHumanPlayer*)m_pPlayer)->SetScale(XMFLOAT3(7.0, 7.0, 7.0));
 	}
 	else if (m_nMode == SCENE2STAGE) {
 		((CHumanPlayer*)m_pPlayer)->SetUp(upVec);
@@ -1552,7 +1549,7 @@ void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(1.0, 1.0, 1.2);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(7.0, 7.0, 7.0);
 	}
 	else if (m_nMode == SCENE2STAGE) {
 
@@ -1634,14 +1631,14 @@ void CGameFramework::CollisionMap_by_PLAYER(XMFLOAT3 pos, XMFLOAT3 extents)
 
 	if (m_mapStorexmoobb.Intersects(m_pPlayer->m_xoobb) && m_bFirstCollision == true)
 	{
-		PrevPosition = m_pPlayer->m_xmf3Position;
-		m_bFirstCollision = false;
+		//PrevPosition = m_pPlayer->m_xmf3Position;
+		//m_bFirstCollision = false;
 	}
 
 	if (m_mapxmoobb.Intersects(m_pPlayer->m_xoobb))
 	{
-		m_pPlayer->SetPosition(PrevPosition);
-		m_bFirstCollision = true;
+		//m_pPlayer->SetPosition(PrevPosition);
+		//m_bFirstCollision = true;
 
 	}
 
@@ -1666,7 +1663,7 @@ void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos, XMFLOAT3 mapextents
 	}
 
 
-	for (int k = 5; k < 10; k++)
+	/*for (int k = 5; k < 10; k++)
 	{
 		CValkanObject** ppOtherBullets = ((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[k])->m_ppBullets;
 		for (int i = 0; i < BULLETS2; i++)
@@ -1674,7 +1671,7 @@ void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos, XMFLOAT3 mapextents
 			ppOtherBullets[i]->m_xmOOBoundingBox = BoundingOrientedBox(ppOtherBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
 
 		}
-	}
+	}*/
 }
 
 void CGameFramework::CollisionNPC_by_PLAYER(XMFLOAT3 npcpos, XMFLOAT3 npcextents)
@@ -1721,7 +1718,14 @@ void CGameFramework::CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents
 void CGameFramework::otherPlayerReturnToIdle(int p_id)
 {
 	if (m_nMode == SCENE1STAGE) {
-
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, true);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(5, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(6, false);
 	}
 	else if (m_nMode == SCENE2STAGE) {
 		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
@@ -1732,7 +1736,11 @@ void CGameFramework::otherPlayerReturnToIdle(int p_id)
 }
 void CGameFramework::otherPlayerMovingMotion(int p_id)
 {
-	if (m_nMode == SCENE1STAGE) {
+	/*if (m_nMode == SCENE1STAGE) {
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, true);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
 
 	}
 	else if (m_nMode == SCENE2STAGE) {
@@ -1740,20 +1748,72 @@ void CGameFramework::otherPlayerMovingMotion(int p_id)
 		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, true);
 		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	}*/
+
+	if (dwDirection & DIR_FORWARD || dwDirection & DIR_BACKWARD)
+	{
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->MoveForward(0.25f);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, true);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(5, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	}
+	if (dwDirection & DIR_LEFT || dwDirection & DIR_RIGHT)
+	{
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->MoveStrafe(0.25f);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, true);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(5, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	}
+	if (dwDirection & DIR_UP)
+	{
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(5, true);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	}
+	if (dwDirection & DIR_DOWN)
+	{
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 6);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(5, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(6, true);
 	}
 }
 void CGameFramework::otherPlayerShootingMotion(int p_id)
 {
 	if (m_nMode == SCENE1STAGE) {
-		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->Firevalkan(NULL);
+		//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->Firevalkan(NULL);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, true);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	}
-	else if (m_nMode == SCENE2STAGE) {
-		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
-		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, false);
-		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
-		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, true);
+	//else if (m_nMode == SCENE2STAGE) {
+	//	((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	//	((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	//	((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	//	((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + p_id]->m_pSkinnedAnimationController->SetTrackEnable(2, true);
 
-	}
+	//}
+	
 }
 
 void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
@@ -1765,9 +1825,7 @@ void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
 	ContainmentType result = m_worldmoobb.Contains(m_pPlayer->m_xoobb);
 
 	if (result == DISJOINT) {
-
 		m_bCollisionCheck = true;
-
 	}
 
 

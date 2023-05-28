@@ -17,6 +17,7 @@
 #define DIR_UP						0x10
 #define DIR_DOWN					0x20
 
+
 #define RESOURCE_TEXTURE1D			0x01
 #define RESOURCE_TEXTURE2D			0x02
 #define RESOURCE_TEXTURE2D_ARRAY	0x03	//[]
@@ -638,6 +639,10 @@ class CHumanoidObject : public CGameObject
 public:
 	CHumanoidObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks);
 	virtual ~CHumanoidObject();
+	void Move(float EleasedTime);
+	virtual void OnPrepareAnimate();
+	virtual void Animate(float fTimeElapsed);
+	virtual void OnRootMotion(CGameObject* pRootGameObject);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

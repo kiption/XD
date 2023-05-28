@@ -152,9 +152,9 @@ void CrossHairShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	CPlayer* pPlayer = pCamera->GetPlayer();
 	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
-	xmf3Position = Vector3::Add(xmf3CameraPosition, Vector3::ScalarProduct(xmf3CameraLook, 0.0f, false));
+	xmf3Position = Vector3::Add(xmf3CameraPosition, Vector3::ScalarProduct(xmf3CameraLook, 40.0f, false));
 	m_ppObjects[0]->SetPosition(xmf3Position);
-
+	m_ppObjects[0]->SetLookAt(xmf3Position,XMFLOAT3(0,1,0));
 	
 	BillboardShader::Render(pd3dCommandList, pCamera, nPipelineState);
 }

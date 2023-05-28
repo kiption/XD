@@ -273,9 +273,6 @@
     <ClCompile Include="Terrain.cpp">
       <Filter>Client\Object\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Client\Object\Header</Filter>
-    </ClCompile>
     <ClCompile Include="Mesh.cpp">
       <Filter>Client\Mesh\Source</Filter>
     </ClCompile>
@@ -299,6 +296,9 @@
     </ClCompile>
     <ClCompile Include="PostProcessShader.cpp">
       <Filter>Client\Shader\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Client\Object\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

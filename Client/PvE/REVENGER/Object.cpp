@@ -810,13 +810,13 @@ CGameObject::~CGameObject()
 		}
 		delete[] m_ppMeshes;
 	}
-	//if (m_nMaterials > 0)
-	//{
-	//	for (int i = 0; i < m_nMaterials; i++)
-	//	{
-	//		if (m_ppMaterials[i]) m_ppMaterials[i]->Release();
-	//	}
-	//}
+	if (m_nMaterials > 0)
+	{
+		for (int i = 0; i < m_nMaterials; i++)
+		{
+			if (m_ppMaterials[i]) m_ppMaterials[i]->Release();
+		}
+	}
 	if (m_ppMaterials) delete[] m_ppMaterials;
 	if (m_pMaterials) m_pMaterials->Release();
 	if (m_pSkinnedAnimationController) delete m_pSkinnedAnimationController;
@@ -1873,6 +1873,65 @@ CHumanoidObject::~CHumanoidObject()
 {
 }
 
+void CHumanoidObject::Move(float EleasedTime)
+{
+	if (DIR_FORWARD ||  DIR_BACKWARD)
+	{
+		m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		m_pSkinnedAnimationController->SetTrackEnable(1, true);
+		m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		m_pSkinnedAnimationController->SetTrackEnable(5, false);
+		m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	}
+	if (DIR_LEFT ||  DIR_RIGHT)
+	{
+		m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		m_pSkinnedAnimationController->SetTrackEnable(2, true);
+		m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		m_pSkinnedAnimationController->SetTrackEnable(5, false);
+		m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	}
+	if (DIR_UP)
+	{
+		m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		m_pSkinnedAnimationController->SetTrackEnable(5, true);
+		m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	}
+	if (DIR_DOWN)
+	{
+		m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		m_pSkinnedAnimationController->SetTrackEnable(5, false);
+		m_pSkinnedAnimationController->SetTrackEnable(6, true);
+	}
+
+	CGameObject::Animate(EleasedTime);
+}
+
+void CHumanoidObject::OnPrepareAnimate()
+{
+}
+
+void CHumanoidObject::Animate(float fTimeElapsed)
+{
+	CGameObject::Animate(fTimeElapsed);
+}
+
+void CHumanoidObject::OnRootMotion(CGameObject* pRootGameObject)
+{
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CEthanAnimationController::CEthanAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel) : CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pModel)
@@ -1905,22 +1964,22 @@ void CEthanAnimationController::OnRootMotion(CGameObject* pRootGameObject)
 		{
 			XMFLOAT3 xmf3Position = m_pRootMotionObject->GetPosition();
 
-			//		XMFLOAT3 xmf3RootPosition = m_pModelRootObject->GetPosition();
-			//		pRootGameObject->m_xmf4x4ToParent = m_pModelRootObject->m_xmf4x4World;
-			//		pRootGameObject->SetPosition(xmf3RootPosition);
+				XMFLOAT3 xmf3RootPosition = m_pModelRootObject->GetPosition();
+				pRootGameObject->m_xmf4x4ToParent = m_pModelRootObject->m_xmf4x4World;
+			pRootGameObject->SetPosition(xmf3RootPosition);
 			XMFLOAT3 xmf3Offset = Vector3::Subtract(xmf3Position, m_xmf3FirstRootMotionPosition);
 
-			//			xmf3Position = pRootGameObject->GetPosition();
-			//			XMFLOAT3 xmf3Look = pRootGameObject->GetLook();
-			//			xmf3Position = Vector3::Add(xmf3Position, xmf3Look, fabs(xmf3Offset.x));
+					xmf3Position = pRootGameObject->GetPosition();
+					XMFLOAT3 xmf3Look = pRootGameObject->GetLook();
+				xmf3Position = Vector3::Add(xmf3Position, xmf3Look, fabs(xmf3Offset.x));
 
 			pRootGameObject->m_xmf4x4ToParent._41 += xmf3Offset.x;
 			pRootGameObject->m_xmf4x4ToParent._42 += xmf3Offset.y;
 			pRootGameObject->m_xmf4x4ToParent._43 += xmf3Offset.z;
 
-			//			pRootGameObject->MoveForward(fabs(xmf3Offset.x));
-			//			pRootGameObject->SetPosition(xmf3Position);
-			//			m_xmf3PreviousPosition = xmf3Position;
+						pRootGameObject->MoveForward(fabs(xmf3Offset.x));
+					pRootGameObject->SetPosition(xmf3Position);
+		//			m_xmf3PreviousPosition = xmf3Position;
 #ifdef _WITH_DEBUG_ROOT_MOTION
 			TCHAR pstrDebug[256] = { 0 };
 			_stprintf_s(pstrDebug, 256, _T("Offset: (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f)\n"), xmf3Offset.x, xmf3Offset.y, xmf3Offset.z, pRootGameObject->m_xmf4x4ToParent._41, pRootGameObject->m_xmf4x4ToParent._42, pRootGameObject->m_xmf4x4ToParent._43);
