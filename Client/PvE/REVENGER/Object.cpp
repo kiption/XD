@@ -1860,67 +1860,145 @@ CAngrybotObject::~CAngrybotObject()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CHumanoidObject::CHumanoidObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(10)
+CHumanoidObject::CHumanoidObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(5)
 {
-	CLoadedModelInfo* pHumanoidModel = pModel;
-	if (!pHumanoidModel) pHumanoidModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Humanoid.bin", NULL);
+	//CLoadedModelInfo* pHumanoidModel = pModel;
+	pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MODEL.bin", NULL);
+	SetChild(pModel->m_pModelRootObject, true);
+	pModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pModel);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6);
 
-	SetChild(pHumanoidModel->m_pModelRootObject, true);
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pHumanoidModel);
+	m_pSkinnedAnimationController->SetTrackEnable(0, true);
+	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	m_pSkinnedAnimationController->SetTrackEnable(5, false);
+	m_pSkinnedAnimationController->SetTrackEnable(6, false);
+
+	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
+	m_pSkinnedAnimationController->SetCallbackKeys(2, 1);
+	m_pSkinnedAnimationController->SetCallbackKeys(1, 5);
+	m_pSkinnedAnimationController->SetCallbackKeys(5, 1);
+	m_pSkinnedAnimationController->SetCallbackKeys(1, 6);
+	m_pSkinnedAnimationController->SetCallbackKeys(6, 1);
+
+	m_pSkinnedAnimationController->SetTrackSpeed(1,0.5);
+	m_pSkinnedAnimationController->SetTrackSpeed(2,0.5);
+
+	if (pModel) delete pModel;
+	OnPrepareAnimate();
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 CHumanoidObject::~CHumanoidObject()
 {
 }
 
-void CHumanoidObject::Move(float EleasedTime)
+void CHumanoidObject::MoveForward(float EleapsedTime)
 {
-	if (DIR_FORWARD ||  DIR_BACKWARD)
-	{
-		m_pSkinnedAnimationController->SetTrackEnable(0, false);
-		m_pSkinnedAnimationController->SetTrackEnable(1, true);
-		m_pSkinnedAnimationController->SetTrackEnable(2, false);
-		m_pSkinnedAnimationController->SetTrackEnable(3, false);
-		m_pSkinnedAnimationController->SetTrackEnable(4, false);
-		m_pSkinnedAnimationController->SetTrackEnable(5, false);
-		m_pSkinnedAnimationController->SetTrackEnable(6, false);
-	}
-	if (DIR_LEFT ||  DIR_RIGHT)
-	{
-		m_pSkinnedAnimationController->SetTrackEnable(0, false);
-		m_pSkinnedAnimationController->SetTrackEnable(1, false);
-		m_pSkinnedAnimationController->SetTrackEnable(2, true);
-		m_pSkinnedAnimationController->SetTrackEnable(3, false);
-		m_pSkinnedAnimationController->SetTrackEnable(4, false);
-		m_pSkinnedAnimationController->SetTrackEnable(5, false);
-		m_pSkinnedAnimationController->SetTrackEnable(6, false);
-	}
-	if (DIR_UP)
-	{
-		m_pSkinnedAnimationController->SetTrackEnable(0, false);
-		m_pSkinnedAnimationController->SetTrackEnable(1, false);
-		m_pSkinnedAnimationController->SetTrackEnable(2, false);
-		m_pSkinnedAnimationController->SetTrackEnable(3, false);
-		m_pSkinnedAnimationController->SetTrackEnable(4, false);
-		m_pSkinnedAnimationController->SetTrackEnable(5, true);
-		m_pSkinnedAnimationController->SetTrackEnable(6, false);
-	}
-	if (DIR_DOWN)
-	{
-		m_pSkinnedAnimationController->SetTrackEnable(0, false);
-		m_pSkinnedAnimationController->SetTrackEnable(1, false);
-		m_pSkinnedAnimationController->SetTrackEnable(2, false);
-		m_pSkinnedAnimationController->SetTrackEnable(3, false);
-		m_pSkinnedAnimationController->SetTrackEnable(4, false);
-		m_pSkinnedAnimationController->SetTrackEnable(5, false);
-		m_pSkinnedAnimationController->SetTrackEnable(6, true);
-	}
+	
+	m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	m_pSkinnedAnimationController->SetTrackEnable(1, true);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	m_pSkinnedAnimationController->SetTrackEnable(5, false);
+	m_pSkinnedAnimationController->SetTrackEnable(6, false);
 
-	CGameObject::Animate(EleasedTime);
+	CGameObject::Animate(EleapsedTime);
+}
+
+void CHumanoidObject::MoveSide(float EleapsedTime)
+{
+	
+	m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_pSkinnedAnimationController->SetTrackEnable(2, true);
+	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	m_pSkinnedAnimationController->SetTrackEnable(5, false);
+	m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	
+	CGameObject::Animate(EleapsedTime);
+}
+
+void CHumanoidObject::RollState(float EleapsedTime)
+{
+	
+	m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	m_pSkinnedAnimationController->SetTrackEnable(5, true);
+	m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	
+	CGameObject::Animate(EleapsedTime);
+}
+
+void CHumanoidObject::JumpState(float EleapsedTime)
+{
+	m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	m_pSkinnedAnimationController->SetTrackEnable(5, false);
+	m_pSkinnedAnimationController->SetTrackEnable(6, true);
+
+	CGameObject::Animate(EleapsedTime);
+}
+
+void CHumanoidObject::DieState(float EleapsedTime)
+{
+	m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_pSkinnedAnimationController->SetTrackEnable(4, true);
+	m_pSkinnedAnimationController->SetTrackEnable(5, false);
+	m_pSkinnedAnimationController->SetTrackEnable(6, false);
+
+	CGameObject::Animate(EleapsedTime);
+}
+
+void CHumanoidObject::ShootState(float EleapsedTime)
+{
+	m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_pSkinnedAnimationController->SetTrackEnable(3, true);
+	m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	m_pSkinnedAnimationController->SetTrackEnable(5, false);
+	m_pSkinnedAnimationController->SetTrackEnable(6, false);
+
+	CGameObject::Animate(EleapsedTime);
+}
+
+void CHumanoidObject::IdleState(float EleapsedTime)
+{
+	m_pSkinnedAnimationController->SetTrackEnable(0, true);
+	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	m_pSkinnedAnimationController->SetTrackEnable(5, false);
+	m_pSkinnedAnimationController->SetTrackEnable(6, false);
+
+	CGameObject::Animate(EleapsedTime);
 }
 
 void CHumanoidObject::OnPrepareAnimate()
 {
+	CGameObject::OnPrepareAnimate();
 }
 
 void CHumanoidObject::Animate(float fTimeElapsed)
@@ -1928,8 +2006,46 @@ void CHumanoidObject::Animate(float fTimeElapsed)
 	CGameObject::Animate(fTimeElapsed);
 }
 
+void CHumanoidObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CGameObject::Render(pd3dCommandList,pCamera);
+}
+
 void CHumanoidObject::OnRootMotion(CGameObject* pRootGameObject)
 {
+//	if (m_bRootMotion)
+//	{
+//		if (m_pAnimationTracks[0].m_fPosition == 0.0f)
+//		{
+//			m_xmf3FirstRootMotionPosition = m_pRootMotionObject->GetPosition();
+//		}
+//		else if (m_pAnimationTracks[0].m_fPosition < 0.0f)
+//		{
+//			XMFLOAT3 xmf3Position = m_pRootMotionObject->GetPosition();
+//
+//				XMFLOAT3 xmf3RootPosition = m_pModelRootObject->GetPosition();
+//				pRootGameObject->m_xmf4x4ToParent = m_pModelRootObject->m_xmf4x4World;
+//			pRootGameObject->SetPosition(xmf3RootPosition);
+//			XMFLOAT3 xmf3Offset = Vector3::Subtract(xmf3Position, m_xmf3FirstRootMotionPosition);
+//
+//					xmf3Position = pRootGameObject->GetPosition();
+//					XMFLOAT3 xmf3Look = pRootGameObject->GetLook();
+//				xmf3Position = Vector3::Add(xmf3Position, xmf3Look, fabs(xmf3Offset.x));
+//
+//			pRootGameObject->m_xmf4x4ToParent._41 += xmf3Offset.x;
+//			pRootGameObject->m_xmf4x4ToParent._42 += xmf3Offset.y;
+//			pRootGameObject->m_xmf4x4ToParent._43 += xmf3Offset.z;
+//
+//						pRootGameObject->MoveForward(fabs(xmf3Offset.x));
+//					pRootGameObject->SetPosition(xmf3Position);
+//		//			m_xmf3PreviousPosition = xmf3Position;
+//#ifdef _WITH_DEBUG_ROOT_MOTION
+//			TCHAR pstrDebug[256] = { 0 };
+//			_stprintf_s(pstrDebug, 256, _T("Offset: (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f)\n"), xmf3Offset.x, xmf3Offset.y, xmf3Offset.z, pRootGameObject->m_xmf4x4ToParent._41, pRootGameObject->m_xmf4x4ToParent._42, pRootGameObject->m_xmf4x4ToParent._43);
+//			OutputDebugString(pstrDebug);
+//#endif
+//		}
+//	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1989,7 +2105,7 @@ void CEthanAnimationController::OnRootMotion(CGameObject* pRootGameObject)
 	}
 }
 
-CEthanObject::CEthanObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks)
+CEthanObject::CEthanObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks):CGameObject(5)
 {
 	CLoadedModelInfo* pEthanModel = pModel;
 	if (!pEthanModel) pEthanModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Ethan.bin", NULL);

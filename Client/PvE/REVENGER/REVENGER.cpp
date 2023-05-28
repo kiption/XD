@@ -279,18 +279,20 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 				for (int i = 0; i < MAX_USER; ++i) {
 					if (i == my_id) break;
-
+					
 					switch (other_players[i].m_ingame_state) {
-					case PL_ST_IDLE:
+					case PL_ST_IDLE: // 아무키도 누르고 있지않을때
 						gGameFramework.otherPlayerReturnToIdle(i);
 						break;
-					case PL_ST_MOVE:
+					case PL_ST_MOVE: // 이동키만 누르고 있을때
 						gGameFramework.otherPlayerMovingMotion(i);
 						break;
-					case PL_ST_ATTACK:
+						// 옆으로 이동할때 
+					case PL_ST_ATTACK: // 이동키만 누르고 있을때
 						gGameFramework.otherPlayerShootingMotion(i);
-						other_players[i].m_ingame_state = PL_ST_IDLE;	// 한번쏘고 바로 제자리.
+						//other_players[i].m_ingame_state = PL_ST_IDLE;	// 한번쏘고 바로 제자리.
 						break;
+						 // + 구르기 및 점프
 					case PL_ST_DEAD:
 						break;
 					}

@@ -639,10 +639,17 @@ class CHumanoidObject : public CGameObject
 public:
 	CHumanoidObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks);
 	virtual ~CHumanoidObject();
-	void Move(float EleasedTime);
+	void MoveForward(float EleapsedTime);
+	void MoveSide(float EleapsedTime);
+	void RollState(float EleapsedTime);
+	void JumpState(float EleapsedTime);
+	void DieState(float EleapsedTime);
+	void ShootState(float EleapsedTime);
+	void IdleState(float EleapsedTime);
+	virtual void OnRootMotion(CGameObject* pRootGameObject);
 	virtual void OnPrepareAnimate();
 	virtual void Animate(float fTimeElapsed);
-	virtual void OnRootMotion(CGameObject* pRootGameObject);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

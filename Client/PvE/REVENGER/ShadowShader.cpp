@@ -81,11 +81,12 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(5, false);
 			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(6, false);
 
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.15f);
+		/*	m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.15f);
 			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(1, 0.25f);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(2, 0.35f);
+			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(2, 0.35f);*/
 			m_ppObjects[x]->SetMaterial(0, pMaterial);
-			m_ppObjects[x]->SetPosition(XMFLOAT3(0.0 * x + 5, 10.0, 0.0 * x + 5));
+			m_ppObjects[x]->SetScale(7.0,7.0,7.0);
+			m_ppObjects[x]->SetPosition(XMFLOAT3(0.0 + x * 10, 5.0, 0.0 + x * 10));
 			if (pSoldierModel) delete pSoldierModel;
 		}
 
