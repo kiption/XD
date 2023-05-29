@@ -84,16 +84,23 @@ void CValkanObject::Animate(float fElapsedTime)
 {
 	m_fElapsedTimeAfterFire += fElapsedTime;
 
-	float fDistance = m_fMovingSpeed * fElapsedTime;
-	XMFLOAT4X4 mtxRotate = Matrix4x4::RotationYawPitchRoll(0.0f, m_fRotationSpeed * fElapsedTime, 0.0f);
-	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
-	XMFLOAT3 xmf3Movement = Vector3::ScalarProduct(m_xmf3MovingDirection, fDistance, false);
-	XMFLOAT3 xmf3Position = GetPosition();
-	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
-	SetPosition(xmf3Position);
-	m_fMovingDistance += fDistance;
-	CGameObject::Animate(fElapsedTime);
-	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)) Reset();
+
+
+		float fDistance = m_fMovingSpeed * fElapsedTime;
+		XMFLOAT4X4 mtxRotate = Matrix4x4::RotationYawPitchRoll(0.0f, m_fRotationSpeed * fElapsedTime, 0.0f);
+		m_xmf4x4ToParent = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+		XMFLOAT3 xmf3Movement = Vector3::ScalarProduct(m_xmf3MovingDirection, fDistance, false);
+		XMFLOAT3 xmf3Position = GetPosition();
+		xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
+		SetPosition(xmf3Position);
+		m_fMovingDistance += fDistance;
+		CGameObject::Animate(fElapsedTime);
+	
+
+	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime))
+	{
+		Reset(); 
+	}
 }
 
 void CValkanObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)

@@ -96,6 +96,7 @@ public:
 	GameSound gamesound;
 	int m_NumOfUI = 23;
 	bool UI_Switch = false;
+	bool m_bRollState = false;
 protected:
 	ID3D12Resource* m_pd3dcbFrameworkInfo = NULL;
 	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;
@@ -180,6 +181,7 @@ private:
 
 	_TCHAR						m_pszFrameRate[70];
 	float ShootCnt = 0.0;
+
 	void AnimationLoop(float EleapsedTime);
 //==================================================
 //			  서버 통신을 위한 것들...

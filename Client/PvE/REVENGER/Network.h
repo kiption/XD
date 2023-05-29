@@ -376,6 +376,7 @@ void processPacket(char* ptr)
 					my_info.m_ingame_state = PL_ST_IDLE;
 					break;
 				case PL_ST_ATTACK:
+					gamesound.shootingSound();
 					my_info.m_ingame_state = PL_ST_ATTACK;
 					break;
 				case PL_ST_DEAD:

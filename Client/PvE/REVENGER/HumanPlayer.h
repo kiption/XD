@@ -18,8 +18,9 @@ public:
 	virtual void OnCameraUpdateCallback(float fTimeElapsed);
 
 	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
-	virtual void Jump();
-	virtual void Roll();
+	virtual void JumpState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void RollState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void ShootState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	virtual void Update(float fTimeElapsed);
@@ -31,4 +32,5 @@ public:
 	CValkanObject* pBulletObject = NULL;
 	CValkanObject* m_ppBullets[BULLETS];
 	void FireBullet(CGameObject* pLockedObject);
+	float m_fShootDelay = 0.0f;
 };
