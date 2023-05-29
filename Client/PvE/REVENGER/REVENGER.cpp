@@ -320,14 +320,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//					  UI 동기화
 				//==================================================
 				// 1. 총알 업데이트
-				wchar_t MyBullet[20];
-				_itow_s(my_info.m_bullet, MyBullet, sizeof(MyBullet), 10);
-				wcscpy_s(gGameFramework.m_myBullet, MyBullet);
+				gGameFramework.m_currbullet = my_info.m_bullet;
 
 				// 2. HP 업데이트
-				wchar_t MyHp[20];
-				_itow_s(my_info.m_hp, MyHp, sizeof(MyHp), 10);
-				wcscpy_s(gGameFramework.m_myhp, MyHp);
 				gGameFramework.m_currHp = my_info.m_hp;
 
 				// 3. 시간 동기화
@@ -338,6 +333,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 				// 4. NPC 객체 수 동기화
 				gGameFramework.m_remainNPC = left_npc;
+
+				wchar_t lateNPC[20];
+				_itow_s(gGameFramework.m_remainNPC, lateNPC, sizeof(lateNPC), 10);
+				wcscpy_s(gGameFramework.m_remainNPCPrint, lateNPC);
 
 				//==================================================
 				//					충돌 이펙트 관련

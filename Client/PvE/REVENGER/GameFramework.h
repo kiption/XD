@@ -94,7 +94,7 @@ public:
 	DWORD						m_nMode = OPENINGSCENE;
 	DWORD dwDirection = 0;
 	GameSound gamesound;
-	int m_NumOfUI = 15;
+	int m_NumOfUI = 23;
 	bool UI_Switch = false;
 protected:
 	ID3D12Resource* m_pd3dcbFrameworkInfo = NULL;
@@ -125,9 +125,9 @@ public:
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
-	ID2D1Effect* m_pd2dfxBitmapSource[15];
-	ID2D1Effect* m_pd2dfxGaussianBlur[15];
-	ID2D1Effect* m_pd2dfxEdgeDetection[15];
+	ID2D1Effect* m_pd2dfxBitmapSource[23];
+	ID2D1Effect* m_pd2dfxGaussianBlur[23];
+	ID2D1Effect* m_pd2dfxEdgeDetection[23];
 	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState = NULL;
 	IWICFormatConverter* m_pwicFormatConverter = NULL;
 	int							m_nDrawEffectImage = 0;
@@ -193,10 +193,14 @@ public:
 	queue<MouseInputVal> q_mouseInput;
 
 	// 서버에서 받은 총알 개수
-	WCHAR m_myBullet[20];
-	WCHAR m_myhp[20];
+	WCHAR m_remainNPCPrint[20];
+	
+	int m_mainmissionnum = 0;
+	int m_submissionnum = 0;
 
 	int m_currHp;
+	int m_currbullet;
+	
 	int m_10MinOfTime;
 	int m_1MinOfTime;
 	int m_10SecOftime;
