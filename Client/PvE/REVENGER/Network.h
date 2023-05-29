@@ -209,7 +209,20 @@ void processPacket(char* ptr)
 			if (recv_id < 0 || recv_id > MAX_USER) break;	// 잘못된 ID값
 
 			other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };		// 상대방Players Object 이동
-			other_players[recv_id].m_ingame_state = PL_ST_MOVE;
+			switch (recv_packet->direction) {
+			case MV_FRONT:
+				other_players[recv_id].m_ingame_state = PL_ST_MOVE_FRONT;
+				//cout << "Player[" << recv_id << "]의 상태가 \'MOVE_FRONT\' 로 변경되었습니다.\n" << endl;//TEST
+				break;
+			case MV_BACK:
+				other_players[recv_id].m_ingame_state = PL_ST_MOVE_BACK;
+				//cout << "Player[" << recv_id << "]의 상태가 \'MOVE_BACK\' 로 변경되었습니다.\n" << endl;//TEST
+				break;
+			case MV_SIDE:
+				other_players[recv_id].m_ingame_state = PL_ST_MOVE_SIDE;
+				//cout << "Player[" << recv_id << "]의 상태가 \'MOVE_SIDE\' 로 변경되었습니다.\n" << endl;//TEST
+				break;
+			}
 		}
 		// 2. Move Npc
 		else if (recv_packet->target == TARGET_NPC) {
@@ -260,7 +273,17 @@ void processPacket(char* ptr)
 			other_players[recv_id].m_id = recv_id;
 			// 상대 Object 이동
 			other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-			other_players[recv_id].m_ingame_state = PL_ST_MOVE;
+			switch (recv_packet->direction) {
+			case MV_FRONT:
+				other_players[recv_id].m_ingame_state = PL_ST_MOVE_FRONT;
+				break;
+			case MV_BACK:
+				other_players[recv_id].m_ingame_state = PL_ST_MOVE_BACK;
+				break;
+			case MV_SIDE:
+				other_players[recv_id].m_ingame_state = PL_ST_MOVE_SIDE;
+				break;
+			}
 			// 상대 Object 회전
 			other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 			other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
@@ -371,15 +394,13 @@ void processPacket(char* ptr)
 
 		if (recvd_target == TARGET_PLAYER) {
 			if (recvd_id == my_id) {
+				my_info.m_ingame_state = recvd_state;
 				switch (recvd_state) {
 				case PL_ST_IDLE:
-					my_info.m_ingame_state = PL_ST_IDLE;
 					break;
 				case PL_ST_ATTACK:
-					my_info.m_ingame_state = PL_ST_ATTACK;
 					break;
 				case PL_ST_DEAD:
-					my_info.m_ingame_state = PL_ST_DEAD;
 					gamesound.collisionSound();
 
 					my_info.m_damaged_effect_on = true;
@@ -391,18 +412,15 @@ void processPacket(char* ptr)
 				}
 			}
 			else {
+				other_players[recvd_id].m_ingame_state = recvd_state;
 				switch (recvd_state) {
 				case PL_ST_IDLE:
-					other_players[recvd_id].m_ingame_state = PL_ST_IDLE;
 					break;
-				case PL_ST_MOVE:
-					other_players[recvd_id].m_ingame_state = PL_ST_MOVE;
+				case PL_ST_MOVE_FRONT:
 					break;
 				case PL_ST_ATTACK:
-					other_players[recvd_id].m_ingame_state = PL_ST_ATTACK;
 					break;
 				case PL_ST_DEAD:
-					other_players[recvd_id].m_ingame_state = PL_ST_DEAD;
 					gamesound.collisionSound();
 
 					other_players[recvd_id].m_damaged_effect_on = true;

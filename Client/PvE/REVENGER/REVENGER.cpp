@@ -154,50 +154,42 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							break;
 						}
 					case PACKET_KEY_W:
+						CS_MOVE_PACKET move_front_pack;
+						move_front_pack.size = sizeof(CS_MOVE_PACKET);
+						move_front_pack.type = CS_MOVE;
+						move_front_pack.x = gGameFramework.getMyPosition().x;
+						move_front_pack.y = gGameFramework.getMyPosition().y;
+						move_front_pack.z = gGameFramework.getMyPosition().z;
+						move_front_pack.direction = MV_FRONT;
+						sendPacket(&move_front_pack, active_servernum);
+						break;
+
 					case PACKET_KEY_S:
+						CS_MOVE_PACKET move_back_pack;
+						move_back_pack.size = sizeof(CS_MOVE_PACKET);
+						move_back_pack.type = CS_MOVE;
+						move_back_pack.x = gGameFramework.getMyPosition().x;
+						move_back_pack.y = gGameFramework.getMyPosition().y;
+						move_back_pack.z = gGameFramework.getMyPosition().z;
+						move_back_pack.direction = MV_BACK;
+						sendPacket(&move_back_pack, active_servernum);
+						break;
+
 					case PACKET_KEY_A:
 					case PACKET_KEY_D:
-						CS_MOVE_PACKET move_pack;
-						move_pack.size = sizeof(CS_MOVE_PACKET);
-						move_pack.type = CS_MOVE;
-						move_pack.x = gGameFramework.getMyPosition().x;
-						move_pack.y = gGameFramework.getMyPosition().y;
-						move_pack.z = gGameFramework.getMyPosition().z;
-						sendPacket(&move_pack, active_servernum);
+						CS_MOVE_PACKET move_side_pack;
+						move_side_pack.size = sizeof(CS_MOVE_PACKET);
+						move_side_pack.type = CS_MOVE;
+						move_side_pack.x = gGameFramework.getMyPosition().x;
+						move_side_pack.y = gGameFramework.getMyPosition().y;
+						move_side_pack.z = gGameFramework.getMyPosition().z;
+						move_side_pack.direction = MV_SIDE;
+						sendPacket(&move_side_pack, active_servernum);
 						break;
-					/*
-					case PACKET_KEY_UP:
-					case PACKET_KEY_DOWN:
-						if (gGameFramework.m_nMode == SCENE1STAGE) {
-							CS_MOVE_PACKET updown_move_pack;
-							updown_move_pack.size = sizeof(CS_MOVE_PACKET);
-							updown_move_pack.type = CS_MOVE;
-							updown_move_pack.x = gGameFramework.getMyPosition().x;
-							updown_move_pack.y = gGameFramework.getMyPosition().y;
-							updown_move_pack.z = gGameFramework.getMyPosition().z;
-							sendPacket(&updown_move_pack, active_servernum);
-						}
-						break;
-					case PACKET_KEY_LEFT:
-					case PACKET_KEY_RIGHT:
-						CS_ROTATE_PACKET yaw_rotate_pack;
-						yaw_rotate_pack.size = sizeof(CS_ROTATE_PACKET);
-						yaw_rotate_pack.type = CS_ROTATE;
-						yaw_rotate_pack.right_x = gGameFramework.getMyRightVec().x;
-						yaw_rotate_pack.right_y = gGameFramework.getMyRightVec().y;
-						yaw_rotate_pack.right_z = gGameFramework.getMyRightVec().z;
-						yaw_rotate_pack.up_x = gGameFramework.getMyUpVec().x;
-						yaw_rotate_pack.up_y = gGameFramework.getMyUpVec().y;
-						yaw_rotate_pack.up_z = gGameFramework.getMyUpVec().z;
-						yaw_rotate_pack.look_x = gGameFramework.getMyLookVec().x;
-						yaw_rotate_pack.look_y = gGameFramework.getMyLookVec().y;
-						yaw_rotate_pack.look_z = gGameFramework.getMyLookVec().z;
-						sendPacket(&yaw_rotate_pack, active_servernum);
 
-						break;
-					*/
 					case PACKET_KEY_SPACEBAR:
 						// 점프
+						cout << "메인에 있는 스페이스바 \n" << endl;
 						break;
 
 					case PACKET_KEYUP_MOVEKEY:
@@ -283,7 +275,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				switch (my_info.m_ingame_state) {
 				case PL_ST_IDLE:
 					break;
-				case PL_ST_MOVE:
+				case PL_ST_MOVE_FRONT:
+				case PL_ST_MOVE_BACK:
+				case PL_ST_MOVE_SIDE:
 					break;
 				case PL_ST_ATTACK:
 					my_info.m_ingame_state = PL_ST_IDLE;	// 한번쏘고 바로 제자리.
@@ -299,11 +293,16 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					case PL_ST_IDLE: // 아무키도 누르고 있지않을때
 						gGameFramework.otherPlayerReturnToIdle(i);
 						break;
-					case PL_ST_MOVE: // 이동키만 누르고 있을때
+					case PL_ST_MOVE_FRONT: // 앞으로 이동
 						gGameFramework.otherPlayerMovingMotion(i);
 						break;
-						// 옆으로 이동할때 
-					case PL_ST_ATTACK: // 이동키만 누르고 있을때
+					case PL_ST_MOVE_BACK: // 뒤로 이동
+						gGameFramework.otherPlayerMovingMotion(i);
+						break;
+					case PL_ST_MOVE_SIDE: // 옆으로 이동
+						gGameFramework.otherPlayerMovingMotion(i);
+						break;
+					case PL_ST_ATTACK:
 						gGameFramework.otherPlayerShootingMotion(i);
 						//other_players[i].m_ingame_state = PL_ST_IDLE;	// 한번쏘고 바로 제자리.
 						break;

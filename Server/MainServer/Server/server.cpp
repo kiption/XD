@@ -190,9 +190,9 @@ public:
 
 	void send_login_packet();
 	void send_add_obj_packet(int obj_id, short obj_type);
-	void send_move_packet(int obj_id, short obj_type);
+	void send_move_packet(int obj_id, short obj_type, short dir);
 	void send_rotate_packet(int obj_id, short obj_type);
-	void send_move_rotate_packet(int obj_id, short obj_type);
+	void send_move_rotate_packet(int obj_id, short obj_type, short dir);
 
 	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 
@@ -314,13 +314,14 @@ void SESSION::send_add_obj_packet(int obj_id, short obj_type)
 		break;
 	}
 }
-void SESSION::send_move_packet(int obj_id, short obj_type)
+void SESSION::send_move_packet(int obj_id, short obj_type, short dir)
 {
 	SC_MOVE_OBJECT_PACKET move_pl_packet;
 	move_pl_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
 	move_pl_packet.type = SC_MOVE_OBJECT;
 	move_pl_packet.target = obj_type;
 	move_pl_packet.id = obj_id;
+	move_pl_packet.direction = dir;
 
 	switch (obj_type) {
 	case TARGET_PLAYER:
@@ -377,13 +378,14 @@ void SESSION::send_rotate_packet(int obj_id, short obj_type)
 	}
 	do_send(&rotate_pl_packet);
 }
-void SESSION::send_move_rotate_packet(int obj_id, short obj_type)
+void SESSION::send_move_rotate_packet(int obj_id, short obj_type, short dir)
 {
 	SC_MOVE_ROTATE_OBJECT_PACKET update_pl_packet;
 	update_pl_packet.size = sizeof(SC_MOVE_ROTATE_OBJECT_PACKET);
 	update_pl_packet.type = SC_MOVE_ROTATE_OBJECT;
 	update_pl_packet.target = obj_type;
 	update_pl_packet.id = obj_id;
+	update_pl_packet.direction = dir;
 
 	switch (obj_type) {
 	case TARGET_PLAYER:
@@ -757,21 +759,11 @@ void process_packet(int client_id, char* packet)
 
 		// 1. 충돌체크를 한다. -> 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
 		bool b_isCollide = false;
-		// 1) 맵 오브젝트
-		for (auto& building : buildings_info) {
-			if (clients[client_id].m_xoobb.Intersects(building.m_xoobb)) {
-				// 맵과 충돌하면 플레이어가 사망하게 됩니다.
-				//clients[client_id].s_lock.lock();
-				//clients[client_id].hp = 0;
-				//clients[client_id].pl_state = PL_ST_DEAD;
-				//clients[client_id].s_lock.unlock();
+		//  1) 맵 오브젝트
 
-				b_isCollide = true;
-			}
-		}
-		// 2) 다른 플레이어
+		//  2) 다른 플레이어
 
-		// 3) NPC
+		//  3) NPC
 		
 		//if (b_isCollide) break;
 
@@ -779,8 +771,11 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].s_lock.lock();
 		clients[client_id].pos = { cl_move_packet->x, cl_move_packet->y, cl_move_packet->z };
 		clients[client_id].setBB();
-		clients[client_id].pl_state = PL_ST_MOVE;
+		clients[client_id].pl_state = cl_move_packet->direction + 1;	// MV_FRONT = 0, MV_BACK = 1, MV_SIDE = 2; PL_ST_MOVE_FRONT = 1, PL_ST_MOVE_BACK = 2, PL_ST_MOVE_SIDE = 3;
 		clients[client_id].s_lock.unlock();
+
+		cout << "[Move TEST] Player[" << client_id << "]가 " << cl_move_packet->direction << " 방향으로 이동하여 POS가 ("
+			<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.x << ")가 되었음.\n" << endl;
 
 		// 3. 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
 		for (auto& other_pl : clients) {
@@ -788,12 +783,12 @@ void process_packet(int client_id, char* packet)
 			if (other_pl.s_state != ST_INGAME) continue;
 
 			lock_guard<mutex> lg{ other_pl.s_lock };
-			other_pl.send_move_packet(client_id, TARGET_PLAYER);
+			other_pl.send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
 		}
 
 		// 4. NPC 서버에게도 플레이어가 이동한 위치를 알려준다.
 		lock_guard<mutex> lg{ npc_server.s_lock };
-		npc_server.send_move_packet(client_id, TARGET_PLAYER);
+		npc_server.send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
 
 		break;
 	}// CS_MOVE end
@@ -849,13 +844,15 @@ void process_packet(int client_id, char* packet)
 				clients[client_id].remain_bullet = MAX_BULLET;
 				clients[client_id].s_lock.unlock();
 
-				SC_BULLET_COUNT_PACKET reload_done_pack;
-				reload_done_pack.type = SC_BULLET_COUNT;
-				reload_done_pack.size = sizeof(SC_BULLET_COUNT_PACKET);
-				reload_done_pack.bullet_cnt = MAX_BULLET;
+				if (clients[client_id].s_state == ST_INGAME) {
+					SC_BULLET_COUNT_PACKET reload_done_pack;
+					reload_done_pack.type = SC_BULLET_COUNT;
+					reload_done_pack.size = sizeof(SC_BULLET_COUNT_PACKET);
+					reload_done_pack.bullet_cnt = MAX_BULLET;
 
-				lock_guard<mutex> lg{ clients[client_id].s_lock };
-				clients[client_id].do_send(&reload_done_pack);
+					lock_guard<mutex> lg{ clients[client_id].s_lock };
+					clients[client_id].do_send(&reload_done_pack);
+				}
 			}
 		}
 		if (!enough_bullet) break;
@@ -870,13 +867,15 @@ void process_packet(int client_id, char* packet)
 		}
 		clients[client_id].s_lock.unlock();
 
-		SC_BULLET_COUNT_PACKET bullet_update_pack;
-		bullet_update_pack.type = SC_BULLET_COUNT;
-		bullet_update_pack.size = sizeof(SC_BULLET_COUNT_PACKET);
-		bullet_update_pack.bullet_cnt = clients[client_id].remain_bullet;
+		if (clients[client_id].s_state == ST_INGAME) {
+			SC_BULLET_COUNT_PACKET bullet_update_pack;
+			bullet_update_pack.type = SC_BULLET_COUNT;
+			bullet_update_pack.size = sizeof(SC_BULLET_COUNT_PACKET);
+			bullet_update_pack.bullet_cnt = clients[client_id].remain_bullet;
 
-		lock_guard<mutex> lg{ clients[client_id].s_lock };
-		clients[client_id].do_send(&bullet_update_pack);
+			lock_guard<mutex> lg{ clients[client_id].s_lock };
+			clients[client_id].do_send(&bullet_update_pack);
+		}
 
 		// 우선 이 플레이어가 총알을 발사했다는 정보를 "게임에 접속 중인 모든" 클라이언트에게 알려줍니다. (총알 나가는 모션 동기화를 위함)
 		for (auto& cl : clients) {
@@ -913,7 +912,7 @@ void process_packet(int client_id, char* packet)
 				if (cl.curr_stage == 0) continue;		// 아직 게임 진입 중인 세션도 검사 X
 
 				// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
-				Cube pl_obj{ exc_XMFtoMyVec(cl.pos), HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
+				Cube pl_obj{ exc_XMFtoMyVec(cl.pos), HUMAN_BOXSIZE_X, HUMAN_BOXSIZE_Y, HUMAN_BOXSIZE_Z };
 				MyVector3 tmp_intersection = MyRaycast_LimitDistance(
 					MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y, clients[client_id].pos.z }
 					, exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj, BULLET_RANGE);
@@ -984,7 +983,7 @@ void process_packet(int client_id, char* packet)
 				}
 			}
 
-			// 4) 최종: 
+			// 4) 최종
 			// 레이캐스트에서 충돌으로 판단되었다면
 			if (b_collide) {
 				switch (collide_target) {
@@ -1164,7 +1163,7 @@ void process_packet(int client_id, char* packet)
 			}
 			break;
 		case PACKET_KEYUP_MOVEKEY:
-			if (clients[client_id].pl_state == PL_ST_MOVE) {
+			if (PL_ST_MOVE_FRONT <= clients[client_id].pl_state && clients[client_id].pl_state <= PL_ST_MOVE_SIDE) {
 				clients[client_id].s_lock.lock();
 				clients[client_id].pl_state = PL_ST_IDLE;
 				clients[client_id].s_lock.unlock();
@@ -1179,7 +1178,7 @@ void process_packet(int client_id, char* packet)
 				for (auto& cl : clients) {
 					if (cl.s_state != ST_INGAME) continue;
 					if (cl.curr_stage == 0) continue;
-					if (cl.id == client_id) continue;
+					//if (cl.id == client_id) continue;
 
 					lock_guard<mutex> lg{ cl.s_lock };
 					cl.do_send(&change2idle_pack);
@@ -1336,7 +1335,7 @@ void process_packet(int client_id, char* packet)
 			if (cl.s_state != ST_INGAME) continue;
 
 			lock_guard<mutex> lg{ cl.s_lock };
-			cl.send_move_packet(npc_id, TARGET_NPC);
+			cl.send_move_packet(npc_id, TARGET_NPC, MV_FRONT);//[임시코드] 나중에 npc도 이동방향을 받도록 해줘야함
 		}
 
 		break;
@@ -1386,7 +1385,7 @@ void process_packet(int client_id, char* packet)
 			if (cl.s_state != ST_INGAME) continue;
 
 			lock_guard<mutex> lg{ cl.s_lock };
-			cl.send_move_rotate_packet(npc_id, TARGET_NPC);
+			cl.send_move_rotate_packet(npc_id, TARGET_NPC, MV_FRONT);//[임시코드] 나중에 npc 방향을 넣어줘야함.
 		}
 
 		break;
