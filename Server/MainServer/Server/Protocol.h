@@ -68,7 +68,7 @@ enum PacketID {
 	, NPC_FULL_INFO, NPC_MOVE, NPC_ROTATE, NPC_MOVE_ROTATE, NPC_REMOVE, NPC_CHANGE_STATE
 };
 
-enum PLAYER_STATE { PL_ST_IDLE, PL_ST_MOVE, PL_ST_FLY, PL_ST_CHASE, PL_ST_ATTACK, PL_ST_DEAD };
+enum PLAYER_STATE { PL_ST_IDLE, PL_ST_MOVE_FRONT, PL_ST_MOVE_BACK, PL_ST_MOVE_SIDE, PL_ST_FLY, PL_ST_CHASE, PL_ST_ATTACK, PL_ST_DEAD };
 
 // Target Type
 enum TargetType { TARGET_PLAYER, TARGET_BULLET, TARGET_NPC };
@@ -86,10 +86,12 @@ struct CS_LOGIN_PACKET {
 };
 
 // 2) 조작 관련 패킷
+enum MoveDirection { MV_FRONT, MV_BACK, MV_SIDE };
 struct CS_MOVE_PACKET {
 	unsigned char size;
 	char type;
 	float x, y, z;
+	short direction;
 };
 
 struct CS_ROTATE_PACKET {
@@ -183,6 +185,7 @@ struct SC_MOVE_OBJECT_PACKET {
 	short target;
 	short id;
 	float x, y, z;
+	short direction;
 };
 
 struct SC_ROTATE_OBJECT_PACKET {
@@ -204,6 +207,7 @@ struct SC_MOVE_ROTATE_OBJECT_PACKET {
 	float right_x, right_y, right_z;
 	float up_x, up_y, up_z;
 	float look_x, look_y, look_z;
+	short direction;
 };
 
 // ================================

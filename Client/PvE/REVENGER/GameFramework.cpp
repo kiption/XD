@@ -837,24 +837,24 @@ void CGameFramework::FrameAdvance()
 			D2D_RECT_F D2_RemainTimeRect = { 0.0f, 0.0f, 182.0f, 47.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[0] : m_pd2dfxGaussianBlur[0], &D2_RemainTime, &D2_RemainTimeRect);
 
-			D2D_POINT_2F D2_RemainTimeDot = { D2_RemainTime.x + 101.4f ,D2_RemainTime.y + 88.0f };
+			D2D_POINT_2F D2_RemainTimeDot = { D2_RemainTime.x + 70.0f ,D2_RemainTime.y + 52.5f };
 			D2D_RECT_F D2_RemainTimeDotRect = { 56.0f, 64.0f, 63.0f, 108.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &D2_RemainTimeDot, &D2_RemainTimeDotRect);
 
-			D2D_POINT_2F D2_RemainTime10Min = { D2_RemainTime.x, D2_RemainTime.y + 88.0f };
-			D2D_RECT_F D2_RemainTime10MinRect = { m_10MinOfTime * 39.9f, 0.0f, 39.9f + m_10MinOfTime * 39.9f, 53.0f };
+			D2D_POINT_2F D2_RemainTime10Min = { D2_RemainTime.x, D2_RemainTime.y + 50.0f };
+			D2D_RECT_F D2_RemainTime10MinRect = { m_10MinOfTime * 31.3f, 0.0f, 31.3f + m_10MinOfTime * 31.3f, 50.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[2] : m_pd2dfxGaussianBlur[2], &D2_RemainTime10Min, &D2_RemainTime10MinRect);
 
-			D2D_POINT_2F D2_RemainTime1Min = { D2_RemainTime10Min.x + 39.9f, D2_RemainTime.y + 88.0f };
-			D2D_RECT_F D2_RemainTime1MinRect = { m_1MinOfTime * 39.9f, 0.0f, 39.9f + m_1MinOfTime * 39.9f, 53.0f };
+			D2D_POINT_2F D2_RemainTime1Min = { D2_RemainTime10Min.x + 31.3f, D2_RemainTime.y + 50.0f };
+			D2D_RECT_F D2_RemainTime1MinRect = { m_1MinOfTime * 31.3f, 0.0f, 31.3f + m_1MinOfTime * 31.3f, 50.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[3] : m_pd2dfxGaussianBlur[3], &D2_RemainTime1Min, &D2_RemainTime1MinRect);
 
-			D2D_POINT_2F D2_RemainTime10Sec = { D2_RemainTimeDot.x + 7.0f, D2_RemainTime.y + 88.0f };
-			D2D_RECT_F D2_RemainTime10SecRect = { m_10SecOftime * 39.9f, 0.0f, 39.9f + m_10SecOftime * 39.9f, 53.0f };
+			D2D_POINT_2F D2_RemainTime10Sec = { D2_RemainTimeDot.x + 14.4f, D2_RemainTime.y + 50.0f };
+			D2D_RECT_F D2_RemainTime10SecRect = { m_10SecOftime * 31.3f, 0.0f, 31.3f + m_10SecOftime * 31.3f, 50.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[4] : m_pd2dfxGaussianBlur[4], &D2_RemainTime10Sec, &D2_RemainTime10SecRect);
 
-			D2D_POINT_2F D2_RemainTime1Sec = { D2_RemainTime10Sec.x + 39.9f, D2_RemainTime.y + 88.0f };
-			D2D_RECT_F D2_RemainTime1SecRect = { m_1SecOfTime * 39.9f, 0.0f, 39.9f + m_1SecOfTime * 39.9f, 53.0f };
+			D2D_POINT_2F D2_RemainTime1Sec = { D2_RemainTime10Sec.x + 31.3f, D2_RemainTime.y + 50.0f };
+			D2D_RECT_F D2_RemainTime1SecRect = { m_1SecOfTime * 31.3f, 0.0f, 31.3f + m_1SecOfTime * 31.3f, 50.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[5] : m_pd2dfxGaussianBlur[5], &D2_RemainTime1Sec, &D2_RemainTime1SecRect);
 
 			// Progress

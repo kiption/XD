@@ -1387,7 +1387,9 @@ void process_packet(char* packet)
 
 			break;
 
-		case PL_ST_MOVE:
+		case PL_ST_MOVE_FRONT:
+		case PL_ST_MOVE_BACK:
+		case PL_ST_MOVE_SIDE:
 			if (chgstate_packet->target == TARGET_PLAYER) {
 
 			}
@@ -1656,6 +1658,7 @@ void MoveNPC()
 					}
 
 					// npc pos 확인
+					/*
 					cout << "=============" << endl;
 					//cout << i << "번째 NPC의 도시 ID: " << npcsInfo[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcsInfo[i].GetIdleSection() << endl;
 					cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
@@ -1664,7 +1667,8 @@ void MoveNPC()
 					cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
 					/*if (npcs[i].PrintRayCast) {
 						cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
-					}*/
+					}
+					*/
 
 					// 상태마다 다른 움직임을 하는 매니지먼트
 
