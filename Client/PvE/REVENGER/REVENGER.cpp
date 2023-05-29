@@ -45,7 +45,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	server0_addr.sin_family = AF_INET;
 	int new_portnum = PORTNUM_LOGIC_0 + active_servernum;
 	server0_addr.sin_port = htons(new_portnum);
-	//inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);	// 루프백
+	//inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);// 루프백
 	inet_pton(AF_INET, LOGIC1_ADDR, &server0_addr.sin_addr);
 	connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
 
