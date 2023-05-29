@@ -165,6 +165,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						move_pack.z = gGameFramework.getMyPosition().z;
 						sendPacket(&move_pack, active_servernum);
 						break;
+					/*
 					case PACKET_KEY_UP:
 					case PACKET_KEY_DOWN:
 						if (gGameFramework.m_nMode == SCENE1STAGE) {
@@ -194,6 +195,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						sendPacket(&yaw_rotate_pack, active_servernum);
 
 						break;
+					*/
 					case PACKET_KEY_SPACEBAR:
 						// 점프
 						break;
@@ -217,6 +219,19 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 					switch (mouseValue.button) {
 					case SEND_NONCLICK:
+						CS_ROTATE_PACKET yaw_rotate_pack;
+						yaw_rotate_pack.size = sizeof(CS_ROTATE_PACKET);
+						yaw_rotate_pack.type = CS_ROTATE;
+						yaw_rotate_pack.right_x = gGameFramework.getMyRightVec().x;
+						yaw_rotate_pack.right_y = gGameFramework.getMyRightVec().y;
+						yaw_rotate_pack.right_z = gGameFramework.getMyRightVec().z;
+						yaw_rotate_pack.up_x = gGameFramework.getMyUpVec().x;
+						yaw_rotate_pack.up_y = gGameFramework.getMyUpVec().y;
+						yaw_rotate_pack.up_z = gGameFramework.getMyUpVec().z;
+						yaw_rotate_pack.look_x = gGameFramework.getMyLookVec().x;
+						yaw_rotate_pack.look_y = gGameFramework.getMyLookVec().y;
+						yaw_rotate_pack.look_z = gGameFramework.getMyLookVec().z;
+						sendPacket(&yaw_rotate_pack, active_servernum);
 						break;
 					case SEND_BUTTON_L:
 						CS_ATTACK_PACKET attack_pack;
