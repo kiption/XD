@@ -377,6 +377,12 @@ struct NPC_REMOVE_PACKET {
 	short n_id;
 };
 
+struct NPC_ATTACK_PACKET {
+	unsigned char size;
+	char type;
+	short n_id;
+};
+
 struct NPC_CHANGE_STATE_PACKET {
 	unsigned char size;
 	char type;
