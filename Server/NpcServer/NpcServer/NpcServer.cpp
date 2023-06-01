@@ -52,7 +52,7 @@ system_clock::time_point g_s_start_time;	// 서버 시작시간  (단위: ms)
 milliseconds g_curr_servertime;
 mutex servertime_lock;	// 서버시간 lock
 
-enum NPCState { NPC_IDLE, NPC_FLY, NPC_CHASE, NPC_ATTACK, NPC_DEATH };
+enum NPCState { NPC_IDLE, NPC_FLY, NPC_CHASE, NPC_ST_ATK, NPC_DEATH };
 enum Hit_target { g_none, g_body, g_profeller };
 
 bool ConnectingServer = false;
@@ -585,19 +585,19 @@ void NPC::NPC_State_Manegement(int state)
 	{
 		// chase -> chase or chase -> attack or chase -> fly	
 		PlayerChasing();
-		SetTrackingIDbyDistance(300.0f, NPC_CHASE, NPC_ATTACK); // ID 탐색
+		SetTrackingIDbyDistance(300.0f, NPC_CHASE, NPC_ST_ATK); // ID 탐색
 		if (PlayerDetact()) { // Id 탐색은 이미 가장 가까운 대상으로 지정하기에 따로 탐색은 하지 않음.
-			m_state = NPC_ATTACK; // 다음 상태
+			m_state = NPC_ST_ATK; // 다음 상태
 		}
 		else {
 			SetTrackingPrevStatebyDistance(300.0f, NPC_CHASE, NPC_FLY);
 		}
 	}
 	break;
-	case NPC_ATTACK:
+	case NPC_ST_ATK:
 	{
 		// bullet 관리
-		SetTrackingIDbyDistance(200.0f, NPC_ATTACK, NPC_ATTACK); // ID 탐색
+		SetTrackingIDbyDistance(200.0f, NPC_ST_ATK, NPC_ST_ATK); // ID 탐색
 		if (!PlayerDetact()) { // Id 탐색은 이미 가장 가까운 대상으로 지정하기에 따로 탐색은 하지 않음.
 			m_state = NPC_CHASE; // 이전 상태
 			PrintRayCast = false;

@@ -4,6 +4,7 @@
 #include <thread>
 #include <array>
 #include <vector>
+#include <unordered_set>
 #include <chrono>
 #include <random>
 
@@ -12,49 +13,18 @@
 using namespace std;
 
 //======================================================================
-#include <d3d12.h>
-#include <dxgi1_4.h>
-#include <D3Dcompiler.h>
-#include <DirectXMath.h>
-#include <DirectXPackedVector.h>
-#include <DirectXCollision.h>
-#include <DirectXCollision.inl>
-
-#pragma comment(lib, "d3dcompiler.lib")
-#pragma comment(lib, "d3d12.lib")
-#pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "dxguid.lib")
-
-using namespace std;
-using namespace DirectX;
-using namespace DirectX::PackedVector;
-
-//======================================================================
+#include "RayCast.h"
 #include "Protocol.h"
 #include "Timer.h"
 #include "Constant.h"
 #include "CP_KEYS.h"
 #include "MapObjects.h"
-#include "MathFuncs.h"
 
 //======================================================================
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_CONNECT };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_RUNNING_SERVER, ST_DOWN_SERVER };
 enum SESSION_TYPE { SESSION_CLIENT, SESSION_EXTENDED_SERVER, SESSION_NPC };
 
-//======================================================================
-struct Coordinate {
-	XMFLOAT3 right;
-	XMFLOAT3 up;
-	XMFLOAT3 look;
-
-	Coordinate() {
-		right = { 1.0f, 0.0f, 0.0f };
-		up = { 0.0f, 1.0f, 0.0f };
-		look = { 0.0f, 0.0f, 1.0f };
-	}
-};
-Coordinate basic_coordinate;	// 기본(초기) 좌표계
 
 //======================================================================
 chrono::system_clock::time_point g_s_start_time;	// 서버 시작시간  (단위: ms)
@@ -81,8 +51,6 @@ public:
 	XMFLOAT3 getPos() { return XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()); }
 };
 vector<Building> buildings_info;	// Map Buildings CollideBox
-MyVector3 exc_XMFtoMyVec(XMFLOAT3 xmf3) { return MyVector3{ xmf3.x, xmf3.y, xmf3.z }; }
-XMFLOAT3 exc_MyVectoXMF(MyVector3 mv3) { return XMFLOAT3{ mv3.x, mv3.y, mv3.z }; }
 
 //======================================================================
 class OVER_EX {
@@ -136,6 +104,8 @@ public:
 	short curr_stage;
 
 	BoundingOrientedBox m_xoobb;	// Bounding Box
+
+	unordered_set<int> view_list;	// 시야처리 (id값을 넣어주게 된다.) => 그럼 무엇을 해야하냐: 플레이어, npc들의 ID를 완전 다른값으로 설정해줘야한다.
 
 public:
 	SESSION()
@@ -729,6 +699,7 @@ void process_packet(int client_id, char* packet)
 		
 		//  3) NPC서버로 새로 접속한 클라이언트의 정보를 전송합니다.
 		if (b_npcsvr_conn) {
+			lock_guard<mutex> lg{ npc_server.s_lock };
 			npc_server.send_add_obj_packet(client_id, TARGET_PLAYER);
 		}
 
@@ -757,6 +728,8 @@ void process_packet(int client_id, char* packet)
 		if (!b_active_server) break;
 		CS_MOVE_PACKET* cl_move_packet = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 
+		cout << "Player[" << client_id << "]에게서 이동패킷 받음";
+		cout << " - [" << chrono::system_clock::now() << "]\n" << endl;
 		// 1. 충돌체크를 한다. -> 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
 		bool b_isCollide = false;
 		//  1) 맵 오브젝트
@@ -774,8 +747,8 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].pl_state = cl_move_packet->direction + 1;	// MV_FRONT = 0, MV_BACK = 1, MV_SIDE = 2; PL_ST_MOVE_FRONT = 1, PL_ST_MOVE_BACK = 2, PL_ST_MOVE_SIDE = 3;
 		clients[client_id].s_lock.unlock();
 
-		cout << "[Move TEST] Player[" << client_id << "]가 " << cl_move_packet->direction << " 방향으로 이동하여 POS가 ("
-			<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.x << ")가 되었음.\n" << endl;
+		//cout << "[Move TEST] Player[" << client_id << "]가 " << cl_move_packet->direction << " 방향으로 이동하여 POS가 ("
+		//	<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.x << ")가 되었음.\n" << endl;
 
 		// 3. 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
 		for (auto& other_pl : clients) {
@@ -784,11 +757,16 @@ void process_packet(int client_id, char* packet)
 
 			lock_guard<mutex> lg{ other_pl.s_lock };
 			other_pl.send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
+
+			cout << "다른 클라에 이동패킷 보냄";
+			cout << " - [" << chrono::system_clock::now() << "]\n" << endl;
 		}
 
 		// 4. NPC 서버에게도 플레이어가 이동한 위치를 알려준다.
-		lock_guard<mutex> lg{ npc_server.s_lock };
-		npc_server.send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
+		if (b_npcsvr_conn) {
+			lock_guard<mutex> lg{ npc_server.s_lock };
+			npc_server.send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
+		}
 
 		break;
 	}// CS_MOVE end
@@ -815,8 +793,10 @@ void process_packet(int client_id, char* packet)
 		}
 
 		// 4. NPC 서버에게도 플레이어가 회전한 방향를 알려준다.
-		lock_guard<mutex> lg{ npc_server.s_lock };
-		npc_server.send_rotate_packet(client_id, TARGET_PLAYER);
+		if (b_npcsvr_conn) {
+			lock_guard<mutex> lg{ npc_server.s_lock };
+			npc_server.send_rotate_packet(client_id, TARGET_PLAYER);
+		}
 
 		break;
 	}// CS_ROTATE end
@@ -894,8 +874,6 @@ void process_packet(int client_id, char* packet)
 		//==============================
 		// 2. 충돌검사
 		if (clients[client_id].curr_stage == 1) {
-			MyVector3 intersection_result;
-
 			bool b_collide = false;
 
 			enum CollideTarget {CT_PLAYER, CT_NPC, CT_BUILDING};
@@ -905,83 +883,25 @@ void process_packet(int client_id, char* packet)
 
 			float min_dist = FLT_MAX;
 
+			/*
 			// 1) 클라이언트와 충돌검사
 			for (auto& cl : clients) {
 				if (cl.id == client_id) continue;		// 자기자신은 검사하면 안됨.
 				if (cl.s_state != ST_INGAME) continue;	// 게임중이 아닌 세션은 검사할 필요X
 				if (cl.curr_stage == 0) continue;		// 아직 게임 진입 중인 세션도 검사 X
 
-				// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
-				Cube pl_obj{ exc_XMFtoMyVec(cl.pos), HUMAN_BOXSIZE_X, HUMAN_BOXSIZE_Y, HUMAN_BOXSIZE_Z };
-				MyVector3 tmp_intersection = MyRaycast_LimitDistance(
-					MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y, clients[client_id].pos.z }
-					, exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj, BULLET_RANGE);
-
-				// 충돌했다면
-				if (tmp_intersection != defaultVec) {
-					b_collide = true;
-
-					// 쏜 사람과의 충돌점과의 거리를 잽니다.
-					float cur_dist = calcDistance(exc_XMFtoMyVec(clients[client_id].pos), tmp_intersection);
-
-					// 그 거리가 최소거리보다 작다면 업데이트해줍니다.
-					if (cur_dist < min_dist) {
-						intersection_result = tmp_intersection;
-						collide_target = CT_PLAYER;
-						collide_id = cl.id;
-						min_dist = cur_dist;
-					}
-				}
 			}
 
 			// 2) NPC와 충돌검사
 			for (auto& npc : npcs) {
-				// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
-				Cube npc_obj{ exc_XMFtoMyVec(npc.pos), HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
-				MyVector3 tmp_intersection = MyRaycast_LimitDistance(
-					MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y, clients[client_id].pos.z }
-					, exc_XMFtoMyVec(clients[client_id].m_lookvec), npc_obj, BULLET_RANGE);
 
-				// 충돌했다면
-				if (tmp_intersection != defaultVec) {
-					b_collide = true;
-
-					// 쏜 사람과의 충돌점과의 거리를 잽니다.
-					float cur_dist = calcDistance(exc_XMFtoMyVec(clients[client_id].pos), tmp_intersection);
-
-					// 그 거리가 최소거리보다 작다면 업데이트해줍니다.
-					if (cur_dist < min_dist) {
-						intersection_result = tmp_intersection;
-						collide_target = CT_NPC;
-						collide_id = npc.id;
-						min_dist = cur_dist;
-					}
-				}
 			}
 
 			// 3) 건물과 충돌검사
 			for (auto& building : buildings_info) {
-				Cube bd_obj{ exc_XMFtoMyVec(building.getPos()), building.getScaleX(), building.getScaleY(), building.getScaleZ() };
-				MyVector3 bd_intersection = MyRaycast_LimitDistance(
-					MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y, clients[client_id].pos.z }
-					, exc_XMFtoMyVec(clients[client_id].m_lookvec), bd_obj, BULLET_RANGE);
 
-				// 충돌했다면
-				if (bd_intersection != defaultVec) {
-					b_collide = true;
-
-					// 쏜 사람과의 충돌점과의 거리를 잽니다.
-					float cur_dist = calcDistance(exc_XMFtoMyVec(clients[client_id].pos), bd_intersection);
-
-					// 그 거리가 최소거리보다 작다면 업데이트해줍니다.
-					if (cur_dist < min_dist) {
-						intersection_result = bd_intersection;
-						collide_target = CT_BUILDING;
-						collide_id = 0;
-						min_dist = cur_dist;
-					}
-				}
 			}
+			*/
 
 			// 4) 최종
 			// 레이캐스트에서 충돌으로 판단되었다면
@@ -1032,6 +952,7 @@ void process_packet(int client_id, char* packet)
 					break;
 
 				case CT_NPC:
+					if (!b_npcsvr_conn) break;
 					cout << "NPC[" << collide_id << "]가 피격당했습니다. (공격자: Player[" << client_id << "])\n" << endl;
 
 					// 피격된 npc의 HP를 감소시킵니다.
@@ -1101,9 +1022,8 @@ void process_packet(int client_id, char* packet)
 					break;
 
 				default:
-					cout << "[MyRayCast Error] Unknown Interserction Type.\n" << endl;
+					cout << "[RayCast Error] Unknown Interserction Type.\n" << endl;
 				}
-
 
 			}
 
