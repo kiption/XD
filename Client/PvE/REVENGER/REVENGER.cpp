@@ -326,7 +326,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 						gGameFramework.setEqLook_Npc(npcs_info[i].m_id, npcs_info[i].m_pos, npcs_info[i].m_look_vec);
 						((Stage1*)gGameFramework.m_pScene)->SmokePosition = npcs_info[i].m_pos;
-						((Stage1*)gGameFramework.m_pScene)->m_pBillboardShader[3]->ParticlePosition = npcs_info[i].m_pos;
+						//((Stage1*)gGameFramework.m_pScene)->m_pBillboardShader[3]->ParticlePosition = npcs_info[i].m_pos;
 					}
 				}
 
@@ -364,17 +364,17 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				// 2. 다른 플레이어
 				for (auto& other_pl : other_players) {
 					if (other_pl.m_damaged_effect_on) {
-						((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->m_bActive = true;
+						/*((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->m_bActive = true;
 						((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->ParticlePosition = other_pl.m_pos;
 						((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->SetActive(true);
-						((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(other_pl.m_pos);
+						((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(other_pl.m_pos);*/
 						gGameFramework.m_bDamageOn = true;
 
 						other_pl.m_damaged_effect_on = false;
 					}
 
 				}
-
+				gGameFramework.CollisionStaticObjects();
 				//// 3. NPC
 				//for (auto& npc : npcs_info) {
 				//	if (npc.m_damaged_effect_on) {

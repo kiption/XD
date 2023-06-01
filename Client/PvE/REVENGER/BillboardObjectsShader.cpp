@@ -106,7 +106,7 @@ void CrossHairShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	CTexture* ppSpriteTextures3 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 	ppSpriteTextures3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/SpaceCross.dds", RESOURCE_TEXTURE2D, 0);
 
-	CMaterial * pSpriteMaterial = new CMaterial(1);
+	CMaterial* pSpriteMaterial = new CMaterial(1);
 	CMaterial* pSpriteMaterial2 = new CMaterial(1);
 	CMaterial* pSpriteMaterial3 = new CMaterial(1);
 
@@ -114,7 +114,7 @@ void CrossHairShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	pSpriteMaterial2->SetTexture(ppSpriteTextures2, 0);
 	pSpriteMaterial3->SetTexture(ppSpriteTextures3, 0);
 
-	
+
 	CTexturedRectMesh* pSpriteMesh;
 	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.0, 5.0, 0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -153,9 +153,9 @@ void CrossHairShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
 	xmf3Position = Vector3::Add(xmf3CameraPosition, Vector3::ScalarProduct(xmf3CameraLook, 60.0f, false));
-	m_ppObjects[0]->SetPosition(xmf3Position);
-	m_ppObjects[0]->SetLookAt(xmf3CameraLook,XMFLOAT3(0,1,0));
-	
+	m_ppObjects[0]->SetPosition(xmf3CameraPosition.x, xmf3CameraPosition.x, xmf3CameraPosition.z + 30.0f);
+	m_ppObjects[0]->SetLookAt(xmf3CameraLook, XMFLOAT3(0, 1, 0));
+
 	BillboardShader::Render(pd3dCommandList, pCamera, nPipelineState);
 }
 
@@ -585,16 +585,15 @@ void HelicopterSparkBillboard::AnimateObjects(float fTimeElapsed)
 
 	if (m_bActive == true)
 	{
-		XMFLOAT3 gravity = XMFLOAT3(0, -9.8f, 0);
-		m_fElapsedTimes += fTimeElapsed * 15.0f;
+		XMFLOAT3 gravity = XMFLOAT3(0, -5.8f, 0);
+		m_fElapsedTimes += fTimeElapsed * 12.0f;
 		if (m_fElapsedTimes <= m_fDuration)
 		{
 			for (int i = 0; i < EXPLOSION_SPARK; i++)
 			{
-				gravity = XMFLOAT3(0, -RandomBillboard(2.0f, 6.0f), 0);
-				m_fExplosionSpeed = RandomBillboard(4.0f, 6.5f);
-				//m_fExplosionSpeed = 6.0f;
-
+				gravity = XMFLOAT3(0, -RandomBillboard(2.0f, 3.0f), 0);
+				m_fExplosionSpeed = RandomBillboard(2.0f, 6.5f);
+				
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
 				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + gravity.x;
 				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;
@@ -604,16 +603,17 @@ void HelicopterSparkBillboard::AnimateObjects(float fTimeElapsed)
 				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
 				m_ppObjects[i]->m_xmf4x4ToParent._42 = m_pxmf4x4Transforms[i]._42;
 				m_ppObjects[i]->m_xmf4x4ToParent._43 = m_pxmf4x4Transforms[i]._43;
-				m_ppObjects[i]->Rotate(0, 0, 5);
+			
 			}
 		}
 		else
 		{
-
+			m_bActive = false;
 			m_fElapsedTimes = 0.0f;
 		}
-
 	}
+	
+
 	BillboardShader::AnimateObjects(fTimeElapsed);
 }
 

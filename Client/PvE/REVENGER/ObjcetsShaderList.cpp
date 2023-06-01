@@ -376,7 +376,7 @@ void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 	if (m_bActive == true)
 	{
 		XMFLOAT3 gravity = XMFLOAT3(0, -5.8f, 0);
-		m_fElapsedTimes += fTimeElapsed * 6.0f;
+		m_fElapsedTimes += fTimeElapsed * 8.0f;
 		if (m_fElapsedTimes <= m_fDuration)
 		{
 			for (int i = 0; i < EXPLOSION_DEBRISES; i++)
@@ -397,7 +397,7 @@ void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 		}
 		else
 		{
-			//m_bActive = false;
+			m_bActive = false;
 			m_fElapsedTimes = 0.0f;
 		}
 

@@ -646,10 +646,10 @@ public:
 	void DieState(float EleapsedTime);
 	void ShootState(float EleapsedTime);
 	void IdleState(float EleapsedTime);
-	virtual void OnRootMotion(CGameObject* pRootGameObject);
-	virtual void OnPrepareAnimate();
+	//virtual void OnRootMotion(CGameObject* pRootGameObject);
+	//virtual void OnPrepareAnimate();
 	virtual void Animate(float fTimeElapsed);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

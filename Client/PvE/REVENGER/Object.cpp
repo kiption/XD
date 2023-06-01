@@ -710,7 +710,7 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject *pRootGam
 	}
 }
 //*/
-//*
+
 void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGameObject)
 {
 	m_fTime += fTimeElapsed;
@@ -741,7 +741,7 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 		OnAnimationIK(pRootGameObject);
 	}
 }
-//*/
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CLoadedModelInfo::~CLoadedModelInfo()
@@ -1673,11 +1673,11 @@ void CSuperCobraObject::Animate(float fTimeElapsed)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CNpcHelicopterObject::CNpcHelicopterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(5)
+CNpcHelicopterObject::CNpcHelicopterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(10)
 {
-	CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Apache.bin", NULL);
+	CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 	SetChild(pOtherPlayerModel, false);
-	SetScale(1.5, 1.0, 1.0);
+	SetScale(1.0,1.0,1.0);
 	pOtherPlayerModel->AddRef();
 }
 
@@ -1687,9 +1687,8 @@ CNpcHelicopterObject::~CNpcHelicopterObject()
 
 void CNpcHelicopterObject::OnPrepareAnimate()
 {
-	m_pTailRotorFrame = FindFrame("black_m_6");
-	m_pTail2RotorFrame = FindFrame("black_m_7");
-	m_pMainRotorFrame = FindFrame("rotor");
+	m_pTailRotorFrame = FindFrame("rescue_2");
+	m_pMainRotorFrame = FindFrame("rescue_1");
 }
 
 void CNpcHelicopterObject::Animate(float fTimeElapsed)
@@ -1701,13 +1700,8 @@ void CNpcHelicopterObject::Animate(float fTimeElapsed)
 	}
 	if (m_pTailRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationZ(XMConvertToRadians(360.0f * 15.0f) * fTimeElapsed);
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 10.0f) * fTimeElapsed);
 		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
-	}
-	if (m_pTail2RotorFrame)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 15.0f) * fTimeElapsed);
-		m_pTail2RotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTail2RotorFrame->m_xmf4x4ToParent);
 	}
 
 	CGameObject::Animate(fTimeElapsed);
@@ -1890,11 +1884,8 @@ CHumanoidObject::CHumanoidObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 6);
 	m_pSkinnedAnimationController->SetCallbackKeys(6, 1);
 
-	m_pSkinnedAnimationController->SetTrackSpeed(1,0.5);
-	m_pSkinnedAnimationController->SetTrackSpeed(2,0.5);
-
 	if (pModel) delete pModel;
-	OnPrepareAnimate();
+	//OnPrepareAnimate();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -1912,6 +1903,8 @@ void CHumanoidObject::MoveForward(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	m_pSkinnedAnimationController->SetTrackEnable(5, false);
 	m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0,1);
+
 
 	CGameObject::Animate(EleapsedTime);
 }
@@ -1926,7 +1919,7 @@ void CHumanoidObject::MoveSide(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	m_pSkinnedAnimationController->SetTrackEnable(5, false);
 	m_pSkinnedAnimationController->SetTrackEnable(6, false);
-	
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	CGameObject::Animate(EleapsedTime);
 }
 
@@ -1940,7 +1933,7 @@ void CHumanoidObject::RollState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	m_pSkinnedAnimationController->SetTrackEnable(5, true);
 	m_pSkinnedAnimationController->SetTrackEnable(6, false);
-	
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	CGameObject::Animate(EleapsedTime);
 }
 
@@ -1953,7 +1946,7 @@ void CHumanoidObject::JumpState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	m_pSkinnedAnimationController->SetTrackEnable(5, false);
 	m_pSkinnedAnimationController->SetTrackEnable(6, true);
-
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 6);
 	CGameObject::Animate(EleapsedTime);
 }
 
@@ -1966,7 +1959,7 @@ void CHumanoidObject::DieState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(4, true);
 	m_pSkinnedAnimationController->SetTrackEnable(5, false);
 	m_pSkinnedAnimationController->SetTrackEnable(6, false);
-
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 	CGameObject::Animate(EleapsedTime);
 }
 
@@ -1979,7 +1972,7 @@ void CHumanoidObject::ShootState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	m_pSkinnedAnimationController->SetTrackEnable(5, false);
 	m_pSkinnedAnimationController->SetTrackEnable(6, false);
-
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0,3);
 	CGameObject::Animate(EleapsedTime);
 }
 
@@ -1992,61 +1985,62 @@ void CHumanoidObject::IdleState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	m_pSkinnedAnimationController->SetTrackEnable(5, false);
 	m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0,0);
 
 	CGameObject::Animate(EleapsedTime);
 }
 
-void CHumanoidObject::OnPrepareAnimate()
-{
-	CGameObject::OnPrepareAnimate();
-}
-
+//void CHumanoidObject::OnPrepareAnimate()
+//{
+//	CGameObject::OnPrepareAnimate();
+//}
+//
 void CHumanoidObject::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
 }
+//
+//void CHumanoidObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+//{
+//	CGameObject::Render(pd3dCommandList,pCamera);
+//}
 
-void CHumanoidObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-{
-	CGameObject::Render(pd3dCommandList,pCamera);
-}
-
-void CHumanoidObject::OnRootMotion(CGameObject* pRootGameObject)
-{
-//	if (m_bRootMotion)
-//	{
-//		if (m_pAnimationTracks[0].m_fPosition == 0.0f)
-//		{
-//			m_xmf3FirstRootMotionPosition = m_pRootMotionObject->GetPosition();
-//		}
-//		else if (m_pAnimationTracks[0].m_fPosition < 0.0f)
-//		{
-//			XMFLOAT3 xmf3Position = m_pRootMotionObject->GetPosition();
-//
-//				XMFLOAT3 xmf3RootPosition = m_pModelRootObject->GetPosition();
-//				pRootGameObject->m_xmf4x4ToParent = m_pModelRootObject->m_xmf4x4World;
-//			pRootGameObject->SetPosition(xmf3RootPosition);
-//			XMFLOAT3 xmf3Offset = Vector3::Subtract(xmf3Position, m_xmf3FirstRootMotionPosition);
-//
-//					xmf3Position = pRootGameObject->GetPosition();
-//					XMFLOAT3 xmf3Look = pRootGameObject->GetLook();
-//				xmf3Position = Vector3::Add(xmf3Position, xmf3Look, fabs(xmf3Offset.x));
-//
-//			pRootGameObject->m_xmf4x4ToParent._41 += xmf3Offset.x;
-//			pRootGameObject->m_xmf4x4ToParent._42 += xmf3Offset.y;
-//			pRootGameObject->m_xmf4x4ToParent._43 += xmf3Offset.z;
-//
-//						pRootGameObject->MoveForward(fabs(xmf3Offset.x));
-//					pRootGameObject->SetPosition(xmf3Position);
-//		//			m_xmf3PreviousPosition = xmf3Position;
-//#ifdef _WITH_DEBUG_ROOT_MOTION
-//			TCHAR pstrDebug[256] = { 0 };
-//			_stprintf_s(pstrDebug, 256, _T("Offset: (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f)\n"), xmf3Offset.x, xmf3Offset.y, xmf3Offset.z, pRootGameObject->m_xmf4x4ToParent._41, pRootGameObject->m_xmf4x4ToParent._42, pRootGameObject->m_xmf4x4ToParent._43);
-//			OutputDebugString(pstrDebug);
-//#endif
-//		}
-//	}
-}
+//void CHumanoidObject::OnRootMotion(CGameObject* pRootGameObject)
+//{
+////	if (m_bRootMotion)
+////	{
+////		if (m_pAnimationTracks[0].m_fPosition == 0.0f)
+////		{
+////			m_xmf3FirstRootMotionPosition = m_pRootMotionObject->GetPosition();
+////		}
+////		else if (m_pAnimationTracks[0].m_fPosition < 0.0f)
+////		{
+////			XMFLOAT3 xmf3Position = m_pRootMotionObject->GetPosition();
+////
+////				XMFLOAT3 xmf3RootPosition = m_pModelRootObject->GetPosition();
+////				pRootGameObject->m_xmf4x4ToParent = m_pModelRootObject->m_xmf4x4World;
+////			pRootGameObject->SetPosition(xmf3RootPosition);
+////			XMFLOAT3 xmf3Offset = Vector3::Subtract(xmf3Position, m_xmf3FirstRootMotionPosition);
+////
+////					xmf3Position = pRootGameObject->GetPosition();
+////					XMFLOAT3 xmf3Look = pRootGameObject->GetLook();
+////				xmf3Position = Vector3::Add(xmf3Position, xmf3Look, fabs(xmf3Offset.x));
+////
+////			pRootGameObject->m_xmf4x4ToParent._41 += xmf3Offset.x;
+////			pRootGameObject->m_xmf4x4ToParent._42 += xmf3Offset.y;
+////			pRootGameObject->m_xmf4x4ToParent._43 += xmf3Offset.z;
+////
+////						pRootGameObject->MoveForward(fabs(xmf3Offset.x));
+////					pRootGameObject->SetPosition(xmf3Position);
+////		//			m_xmf3PreviousPosition = xmf3Position;
+////#ifdef _WITH_DEBUG_ROOT_MOTION
+////			TCHAR pstrDebug[256] = { 0 };
+////			_stprintf_s(pstrDebug, 256, _T("Offset: (%.2f, %.2f, %.2f) (%.2f, %.2f, %.2f)\n"), xmf3Offset.x, xmf3Offset.y, xmf3Offset.z, pRootGameObject->m_xmf4x4ToParent._41, pRootGameObject->m_xmf4x4ToParent._42, pRootGameObject->m_xmf4x4ToParent._43);
+////			OutputDebugString(pstrDebug);
+////#endif
+////		}
+////	}
+//}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //

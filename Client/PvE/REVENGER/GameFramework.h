@@ -92,7 +92,7 @@ public:
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void ChangeScene(DWORD nMode);
 	DWORD						m_nMode = OPENINGSCENE;
-	DWORD dwDirection = 0;
+
 	GameSound gamesound;
 	int m_NumOfUI = 23;
 	bool UI_Switch = false;
@@ -247,6 +247,8 @@ public:
 	void remove_Npcs(int id);
 
 	// 클라이언트 객체의 상태 최신화 함수
+	int a_id;
+	bool active = false;
 	void otherPlayerReturnToIdle(int p_id);
 	void otherPlayerMovingMotion(int p_id);
 	void otherPlayerShootingMotion(int p_id);
@@ -264,6 +266,10 @@ public:
 	void CollisionNPC_by_MAP(XMFLOAT3 npcpos, XMFLOAT3 npcextents, XMFLOAT3 mapcenter, XMFLOAT3 mapextents);
 	void CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents);
 	void CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents);
+
+	bool HumanCollsiion = false;
+	bool HeliCollsiion = false;
+	void CollisionStaticObjects();
 
 //=================================================
 	// 충돌 모션과 이펙트 처리 함수입니다.

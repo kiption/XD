@@ -3,7 +3,7 @@
 #include "Object.h"
 
 
-class CStandardShader : public CShader
+class CStandardShader : public CIlluminatedShader
 {
 public:
 	CStandardShader();

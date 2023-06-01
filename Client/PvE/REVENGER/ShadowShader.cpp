@@ -30,7 +30,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[0] = new CGameObject(1);
 		m_ppObjects[0]->SetMesh(pPlaneMesh);
 		m_ppObjects[0]->SetMaterial(0, pPlaneMaterial);
-		m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 1.0, 100.0f));
+		m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 3.0, 100.0f));
 
 		m_ppObjects[2] = new CGameObject(1);
 		m_ppObjects[2]->SetMesh(NULL);
@@ -65,32 +65,18 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		{
 			CLoadedModelInfo* pSoldierModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MODEL.bin", NULL);
 			m_ppObjects[x] = new CHumanoidObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSoldierModel, 7);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6);
-
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(0, true);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(1, false);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(2, false);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(3, false);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(4, false);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(5, false);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackEnable(6, false);
-
-		/*	m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.15f);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(1, 0.25f);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(2, 0.35f);*/
 			m_ppObjects[x]->SetMaterial(0, pMaterial);
-			m_ppObjects[x]->SetScale(7.0,7.0,7.0);
-			m_ppObjects[x]->SetPosition(XMFLOAT3(0.0 + x * 10, 5.0, 0.0 + x * 10));
+			m_ppObjects[x]->SetScale(9.0, 9.0, 9.0);
+		
 			if (pSoldierModel) delete pSoldierModel;
 		}
+		m_ppObjects[5]->SetPosition(XMFLOAT3(800.0, 5.0, -50.0));
+		m_ppObjects[6]->SetPosition(XMFLOAT3(0.0 + 10, 5.0, 0.0 + 10));
+		m_ppObjects[7]->SetPosition(XMFLOAT3(0.0 + 10, 5.0, 0.0 + 10));
+		m_ppObjects[8]->SetPosition(XMFLOAT3(0.0 + 10, 5.0, 0.0 + 10));
+		m_ppObjects[9]->SetPosition(XMFLOAT3(0.0 + 10, 5.0, 0.0 + 10));
 
-		m_nNpcObjects = 5;
+		m_nNpcObjects = 10;
 		m_ppNpcObjects = new CGameObject * [m_nNpcObjects];
 		CMaterial* pNpcMaterial = new CMaterial(5);
 		pNpcMaterial->SetReflection(5);
@@ -100,16 +86,21 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppNpcObjects[i] = new CNpcHelicopterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			m_ppNpcObjects[i]->SetMaterial(0, pNpcMaterial);
 			m_ppNpcObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
+			m_ppNpcObjects[i]->SetScale(3.0f, 3.0, 3.0);
 			m_ppNpcObjects[i]->OnPrepareAnimate();
 		}
-
+	
 
 		m_ppObjects[10] = m_ppNpcObjects[0];
 		m_ppObjects[11] = m_ppNpcObjects[1];
 		m_ppObjects[12] = m_ppNpcObjects[2];
 		m_ppObjects[13] = m_ppNpcObjects[3];
 		m_ppObjects[14] = m_ppNpcObjects[4];
-
+		m_ppObjects[10]->SetPosition(XMFLOAT3(880.0, 30.0, -20.0));
+		m_ppObjects[11]->SetPosition(XMFLOAT3(0.0 + 20, 5.0, 0.0 + 10));
+		m_ppObjects[12]->SetPosition(XMFLOAT3(0.0 + 20, 5.0, 0.0 + 10));
+		m_ppObjects[13]->SetPosition(XMFLOAT3(0.0 + 20, 5.0, 0.0 + 10));
+		m_ppObjects[14]->SetPosition(XMFLOAT3(0.0 + 20, 5.0, 0.0 + 10));
 
 		CMaterial* pCityMaterial[6];
 		pCityMaterial[0] = new CMaterial(1);
@@ -429,6 +420,8 @@ void CShadowMapShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComm
 void CShadowMapShader::ReleaseShaderVariables()
 {
 }
+
+
 
 void CShadowMapShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {

@@ -11,7 +11,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pSoldiarModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
 	//Weapon_R
 	m_pBulletFindFrame = pSoldiarModel->m_pModelRootObject->FindFrame("Bip001_L_Finger21");
-
+	m_pHeadFindFrame = pSoldiarModel->m_pModelRootObject->FindFrame("SK_Soldier_Head_LOD1");
 
 	//7°³
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 7, pSoldiarModel); 
@@ -73,9 +73,6 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	//SetCameraUpdatedContext(pContext);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	
-	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-	SetPosition(XMFLOAT3(1653.0, 6.0, 1548.0));
 
 	m_xoobb = BoundingOrientedBox(XMFLOAT3(this->GetPosition()), XMFLOAT3(15.0, 18.0, 13.0), XMFLOAT4(0, 0, 0, 1));
 
@@ -96,37 +93,40 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	switch (nNewCameraMode)
 	{
 	case FIRST_PERSON_CAMERA:
-		SetFriction(250.0f);
+		SetFriction(400.0);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(300.0f);
-		SetMaxVelocityY(400.0f);
+		SetMaxVelocityXZ(20.0f);
+		SetMaxVelocityY(0.0f);
 		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, 0.0f));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.5f, -2.2f));
+		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_pHeadFindFrame->GetPosition().x, m_pHeadFindFrame->GetPosition().y+1.0f, m_pHeadFindFrame->GetPosition().z), m_pCamera->GetOffset()));
+		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
 	case SPACESHIP_CAMERA:
-		SetFriction(125.0f);
+		SetFriction(0.0f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(300.0f);
-		SetMaxVelocityY(400.0f);
+		SetMaxVelocityXZ(15.0f);
+		SetMaxVelocityY(5.0f);
 		m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 1.0f, 3.0f));
+		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_pHeadFindFrame->GetPosition()), m_pCamera->GetOffset()));
+		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
 	case THIRD_PERSON_CAMERA:
-		SetFriction(0);
+		SetFriction(500);
 		SetGravity(XMFLOAT3(0.0f, 0.0, 0.0f));
 		SetMaxVelocityXZ(15.0f);
 		SetMaxVelocityY(5.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(8.0f, 14.0f, -30.0f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 18.0f, -25.0f));
+		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z), m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -134,7 +134,6 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	default:
 		break;
 	}
-	m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z),m_pCamera->GetOffset()));
 	Update(fTimeElapsed);
 
 	return(m_pCamera);
@@ -174,6 +173,11 @@ void CHumanPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 		{
 			CThirdPersonCamera* p3rdPersonCamera = (CThirdPersonCamera*)m_pCamera;
 			p3rdPersonCamera->SetLookAt(GetPosition());
+		}
+		if (m_pCamera->GetMode() == SPACESHIP_CAMERA)
+		{
+			CSpaceShipCamera* p2rdPersonCamera = (CSpaceShipCamera*)m_pCamera;
+			p2rdPersonCamera->SetLookAt(GetPosition());
 		}
 	}
 }
@@ -235,7 +239,7 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 		m_pSkinnedAnimationController->SetTrackEnable(5, false);
 		m_pSkinnedAnimationController->SetTrackEnable(6, false);
 	}
-	else if (dwDirection & DIR_LEFT || dwDirection & DIR_RIGHT)
+	if (dwDirection & DIR_LEFT || dwDirection & DIR_RIGHT)
 	{
 		m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		m_pSkinnedAnimationController->SetTrackEnable(1, false);
@@ -245,37 +249,27 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 		m_pSkinnedAnimationController->SetTrackEnable(5, false);
 		m_pSkinnedAnimationController->SetTrackEnable(6, false);
 	}
-	else
+	
+	if (dwDirection & DIR_UP)
 	{
-		m_pSkinnedAnimationController->SetTrackEnable(0, true);
+		m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		m_pSkinnedAnimationController->SetTrackEnable(5, true);
+		m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	}
+	if (dwDirection & DIR_DOWN)
+	{
+		m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		m_pSkinnedAnimationController->SetTrackEnable(1, false);
 		m_pSkinnedAnimationController->SetTrackEnable(2, false);
 		m_pSkinnedAnimationController->SetTrackEnable(3, false);
 		m_pSkinnedAnimationController->SetTrackEnable(4, false);
 		m_pSkinnedAnimationController->SetTrackEnable(5, false);
-		m_pSkinnedAnimationController->SetTrackEnable(6, false);
-		m_pSkinnedAnimationController->SetTrackAnimationSet(1, 0.0);
+		m_pSkinnedAnimationController->SetTrackEnable(6, true);
 	}
-	//if (dwDirection & DIR_UP)
-	//{
-	//	m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	//	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	//	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	//	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	//	m_pSkinnedAnimationController->SetTrackEnable(4, false);
-	//	m_pSkinnedAnimationController->SetTrackEnable(5, true);
-	//	m_pSkinnedAnimationController->SetTrackEnable(6, false);
-	//}
-	//if (dwDirection & DIR_DOWN)
-	//{
-	//	m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	//	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	//	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	//	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	//	m_pSkinnedAnimationController->SetTrackEnable(4, false);
-	//	m_pSkinnedAnimationController->SetTrackEnable(5, false);
-	//	m_pSkinnedAnimationController->SetTrackEnable(6, true);
-	//}
 	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
 }
 
@@ -353,7 +347,7 @@ void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 		XMFLOAT3 CaemraPosition = m_pCamera->GetPosition();
 		XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
 		XMFLOAT3 xmf3Position = m_pBulletFindFrame->GetPosition();
-		XMFLOAT3 xmf3Direction = TotalLookVector;
+		XMFLOAT3 xmf3Direction = CameraLook;
 
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 10.0f, false));

@@ -11,6 +11,7 @@ public:
 	CLoadedModelInfo* pSoldiarModel = NULL;
 	CAngrybotObject* pSoldiarObject = NULL;
 	CGameObject* m_pBulletFindFrame{ NULL };
+	CGameObject* m_pHeadFindFrame{ NULL };
 public:
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	CBulletEffectShader* pBCBulletEffectShader = NULL;
