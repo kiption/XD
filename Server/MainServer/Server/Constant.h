@@ -60,9 +60,9 @@
 #define HUMAN_BOXSIZE_Y 20.0f
 #define HUMAN_BOXSIZE_Z 10.0f
 
-#define RESPAWN_POS_X 850.0f
+#define RESPAWN_POS_X 35.0f
 #define RESPAWN_POS_Y 13.0f
-#define RESPAWN_POS_Z 150.0f
+#define RESPAWN_POS_Z 935.0f
 
 //============================================================
 //						헬기정보 관련 상수
