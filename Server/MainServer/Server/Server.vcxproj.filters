@@ -35,13 +35,16 @@
     <ClInclude Include="CP_KEYS.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="MathFuncs.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="MapObjects.h">
       <Filter>소스 파일\Map</Filter>
     </ClInclude>
     <ClInclude Include="Protocol.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleMathWithDX.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="RayCast.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

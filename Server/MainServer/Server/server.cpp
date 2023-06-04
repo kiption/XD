@@ -4,6 +4,7 @@
 #include <thread>
 #include <array>
 #include <vector>
+#include <unordered_set>
 #include <chrono>
 #include <random>
 
@@ -12,49 +13,18 @@
 using namespace std;
 
 //======================================================================
-#include <d3d12.h>
-#include <dxgi1_4.h>
-#include <D3Dcompiler.h>
-#include <DirectXMath.h>
-#include <DirectXPackedVector.h>
-#include <DirectXCollision.h>
-#include <DirectXCollision.inl>
-
-#pragma comment(lib, "d3dcompiler.lib")
-#pragma comment(lib, "d3d12.lib")
-#pragma comment(lib, "dxgi.lib")
-#pragma comment(lib, "dxguid.lib")
-
-using namespace std;
-using namespace DirectX;
-using namespace DirectX::PackedVector;
-
-//======================================================================
+#include "RayCast.h"
 #include "Protocol.h"
 #include "Timer.h"
 #include "Constant.h"
 #include "CP_KEYS.h"
 #include "MapObjects.h"
-#include "MathFuncs.h"
 
 //======================================================================
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_CONNECT };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_RUNNING_SERVER, ST_DOWN_SERVER };
 enum SESSION_TYPE { SESSION_CLIENT, SESSION_EXTENDED_SERVER, SESSION_NPC };
 
-//======================================================================
-struct Coordinate {
-	XMFLOAT3 right;
-	XMFLOAT3 up;
-	XMFLOAT3 look;
-
-	Coordinate() {
-		right = { 1.0f, 0.0f, 0.0f };
-		up = { 0.0f, 1.0f, 0.0f };
-		look = { 0.0f, 0.0f, 1.0f };
-	}
-};
-Coordinate basic_coordinate;	// 기본(초기) 좌표계
 
 //======================================================================
 chrono::system_clock::time_point g_s_start_time;	// 서버 시작시간  (단위: ms)
@@ -81,8 +51,6 @@ public:
 	XMFLOAT3 getPos() { return XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()); }
 };
 vector<Building> buildings_info;	// Map Buildings CollideBox
-MyVector3 exc_XMFtoMyVec(XMFLOAT3 xmf3) { return MyVector3{ xmf3.x, xmf3.y, xmf3.z }; }
-XMFLOAT3 exc_MyVectoXMF(MyVector3 mv3) { return XMFLOAT3{ mv3.x, mv3.y, mv3.z }; }
 
 //======================================================================
 class OVER_EX {
@@ -137,6 +105,8 @@ public:
 
 	BoundingOrientedBox m_xoobb;	// Bounding Box
 
+	unordered_set<int> view_list;	// 시야처리 (id값을 넣어주게 된다.) => 그럼 무엇을 해야하냐: 플레이어, npc들의 ID를 완전 다른값으로 설정해줘야한다.
+
 public:
 	SESSION()
 	{
@@ -170,8 +140,7 @@ public:
 
 		int ret = WSARecv(socket, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.overlapped, 0);
 		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "WSARecv Error - " << ret << endl;
-			cout << GetLastError() << endl;
+			cout << "[Line: 143] WSARecv Error - " << GetLastError() << endl;
 		}
 	}
 
@@ -183,8 +152,7 @@ public:
 		//cout << "[do_send] Target ID: " << id << "\n" << endl;
 		int ret = WSASend(socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, 0);
 		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "WSASend Error - " << ret << endl;
-			cout << GetLastError() << endl;
+			cout << "[Line: 155] WSASend Error - " << GetLastError() << endl;
 		}
 	}
 
@@ -729,6 +697,7 @@ void process_packet(int client_id, char* packet)
 		
 		//  3) NPC서버로 새로 접속한 클라이언트의 정보를 전송합니다.
 		if (b_npcsvr_conn) {
+			lock_guard<mutex> lg{ npc_server.s_lock };
 			npc_server.send_add_obj_packet(client_id, TARGET_PLAYER);
 		}
 
@@ -774,8 +743,8 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].pl_state = cl_move_packet->direction + 1;	// MV_FRONT = 0, MV_BACK = 1, MV_SIDE = 2; PL_ST_MOVE_FRONT = 1, PL_ST_MOVE_BACK = 2, PL_ST_MOVE_SIDE = 3;
 		clients[client_id].s_lock.unlock();
 
-		cout << "[Move TEST] Player[" << client_id << "]가 " << cl_move_packet->direction << " 방향으로 이동하여 POS가 ("
-			<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.x << ")가 되었음.\n" << endl;
+		//cout << "[Move TEST] Player[" << client_id << "]가 " << cl_move_packet->direction << " 방향으로 이동하여 POS가 ("
+		//	<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.x << ")가 되었음.\n" << endl;
 
 		// 3. 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
 		for (auto& other_pl : clients) {
@@ -787,8 +756,10 @@ void process_packet(int client_id, char* packet)
 		}
 
 		// 4. NPC 서버에게도 플레이어가 이동한 위치를 알려준다.
-		lock_guard<mutex> lg{ npc_server.s_lock };
-		npc_server.send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
+		if (b_npcsvr_conn) {
+			lock_guard<mutex> lg{ npc_server.s_lock };
+			npc_server.send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
+		}
 
 		break;
 	}// CS_MOVE end
@@ -815,8 +786,10 @@ void process_packet(int client_id, char* packet)
 		}
 
 		// 4. NPC 서버에게도 플레이어가 회전한 방향를 알려준다.
-		lock_guard<mutex> lg{ npc_server.s_lock };
-		npc_server.send_rotate_packet(client_id, TARGET_PLAYER);
+		if (b_npcsvr_conn) {
+			lock_guard<mutex> lg{ npc_server.s_lock };
+			npc_server.send_rotate_packet(client_id, TARGET_PLAYER);
+		}
 
 		break;
 	}// CS_ROTATE end
@@ -894,8 +867,6 @@ void process_packet(int client_id, char* packet)
 		//==============================
 		// 2. 충돌검사
 		if (clients[client_id].curr_stage == 1) {
-			MyVector3 intersection_result;
-
 			bool b_collide = false;
 
 			enum CollideTarget {CT_PLAYER, CT_NPC, CT_BUILDING};
@@ -905,82 +876,39 @@ void process_packet(int client_id, char* packet)
 
 			float min_dist = FLT_MAX;
 
+			// [TEST] 테스트용 더미 충돌검사
+			XMFLOAT3 dummy_humanoid_pos{ 100.0f, 6.0f, 905.0f };
+			XMFLOAT3 dummy_helicopter_pos{ 100.0f, 30.0f, 1100.0f };
+
+			XMFLOAT3 human_intersection\
+				= Intersect_Ray_Box(clients[client_id].pos, clients[client_id].m_lookvec, BULLET_RANGE, dummy_humanoid_pos, HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z);
+			if (human_intersection != XMF_fault) {
+				cout << "[ATK TEST] 사람 더미와 충돌하였음.\n" << endl;
+			}
+
+			XMFLOAT3 heli_intersection\
+				= Intersect_Ray_Box(clients[client_id].pos, clients[client_id].m_lookvec, BULLET_RANGE, dummy_helicopter_pos, HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z);
+			if (heli_intersection != XMF_fault) {
+				cout << "[ATK TEST] 헬기 더미와 충돌하였음.\n" << endl;
+			}
+
+			/*
 			// 1) 클라이언트와 충돌검사
 			for (auto& cl : clients) {
 				if (cl.id == client_id) continue;		// 자기자신은 검사하면 안됨.
 				if (cl.s_state != ST_INGAME) continue;	// 게임중이 아닌 세션은 검사할 필요X
 				if (cl.curr_stage == 0) continue;		// 아직 게임 진입 중인 세션도 검사 X
 
-				// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
-				Cube pl_obj{ exc_XMFtoMyVec(cl.pos), HUMAN_BOXSIZE_X, HUMAN_BOXSIZE_Y, HUMAN_BOXSIZE_Z };
-				MyVector3 tmp_intersection = MyRaycast_LimitDistance(
-					MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y, clients[client_id].pos.z }
-					, exc_XMFtoMyVec(clients[client_id].m_lookvec), pl_obj, BULLET_RANGE);
-
-				// 충돌했다면
-				if (tmp_intersection != defaultVec) {
-					b_collide = true;
-
-					// 쏜 사람과의 충돌점과의 거리를 잽니다.
-					float cur_dist = calcDistance(exc_XMFtoMyVec(clients[client_id].pos), tmp_intersection);
-
-					// 그 거리가 최소거리보다 작다면 업데이트해줍니다.
-					if (cur_dist < min_dist) {
-						intersection_result = tmp_intersection;
-						collide_target = CT_PLAYER;
-						collide_id = cl.id;
-						min_dist = cur_dist;
-					}
-				}
 			}
 
 			// 2) NPC와 충돌검사
 			for (auto& npc : npcs) {
-				// 플레이어의 좌표와 룩벡터를 갖고 레이캐스트를 합니다.
-				Cube npc_obj{ exc_XMFtoMyVec(npc.pos), HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
-				MyVector3 tmp_intersection = MyRaycast_LimitDistance(
-					MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y, clients[client_id].pos.z }
-					, exc_XMFtoMyVec(clients[client_id].m_lookvec), npc_obj, BULLET_RANGE);
 
-				// 충돌했다면
-				if (tmp_intersection != defaultVec) {
-					b_collide = true;
-
-					// 쏜 사람과의 충돌점과의 거리를 잽니다.
-					float cur_dist = calcDistance(exc_XMFtoMyVec(clients[client_id].pos), tmp_intersection);
-
-					// 그 거리가 최소거리보다 작다면 업데이트해줍니다.
-					if (cur_dist < min_dist) {
-						intersection_result = tmp_intersection;
-						collide_target = CT_NPC;
-						collide_id = npc.id;
-						min_dist = cur_dist;
-					}
-				}
 			}
 
 			// 3) 건물과 충돌검사
 			for (auto& building : buildings_info) {
-				Cube bd_obj{ exc_XMFtoMyVec(building.getPos()), building.getScaleX(), building.getScaleY(), building.getScaleZ() };
-				MyVector3 bd_intersection = MyRaycast_LimitDistance(
-					MyVector3{ clients[client_id].pos.x, clients[client_id].pos.y, clients[client_id].pos.z }
-					, exc_XMFtoMyVec(clients[client_id].m_lookvec), bd_obj, BULLET_RANGE);
 
-				// 충돌했다면
-				if (bd_intersection != defaultVec) {
-					b_collide = true;
-
-					// 쏜 사람과의 충돌점과의 거리를 잽니다.
-					float cur_dist = calcDistance(exc_XMFtoMyVec(clients[client_id].pos), bd_intersection);
-
-					// 그 거리가 최소거리보다 작다면 업데이트해줍니다.
-					if (cur_dist < min_dist) {
-						intersection_result = bd_intersection;
-						collide_target = CT_BUILDING;
-						collide_id = 0;
-						min_dist = cur_dist;
-					}
-				}
 			}
 
 			// 4) 최종
@@ -1032,6 +960,7 @@ void process_packet(int client_id, char* packet)
 					break;
 
 				case CT_NPC:
+					if (!b_npcsvr_conn) break;
 					cout << "NPC[" << collide_id << "]가 피격당했습니다. (공격자: Player[" << client_id << "])\n" << endl;
 
 					// 피격된 npc의 HP를 감소시킵니다.
@@ -1101,18 +1030,17 @@ void process_packet(int client_id, char* packet)
 					break;
 
 				default:
-					cout << "[MyRayCast Error] Unknown Interserction Type.\n" << endl;
+					cout << "[RayCast Error] Unknown Interserction Type.\n" << endl;
 				}
-
 
 			}
 
+		*/
 		}
 		// 2. 스테이지 2 로직
 		else if (clients[client_id].curr_stage == 2) {
 
 		}
-
 		break;
 	}// CS_ATTACK end
 	case CS_INPUT_KEYBOARD:
@@ -1124,7 +1052,7 @@ void process_packet(int client_id, char* packet)
 		switch (inputkey_p->keytype) {
 		case PACKET_KEY_NUM1:
 			if (clients[client_id].curr_stage == 1) break;
-
+			
 			clients[client_id].s_lock.lock();
 			clients[client_id].curr_stage = 1;
 			cout << "Client[" << client_id << "] Stage1로 전환." << endl;
@@ -1568,6 +1496,9 @@ void do_worker()
 				ZeroMemory(&ex_over->overlapped, sizeof(ex_over->overlapped));
 				ex_over->wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
 				int addr_size = sizeof(SOCKADDR_IN);
+
+				int option = TRUE;//Nagle
+				setsockopt(g_sc_listensock, IPPROTO_TCP, TCP_NODELAY, (const char*)&option, sizeof(option));
 				AcceptEx(g_sc_listensock, c_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
 			}
 			// 2. Npc Server Accept
@@ -2159,6 +2090,9 @@ int main(int argc, char* argv[])
 	OVER_EX a_over;
 	a_over.process_type = OP_ACCEPT;
 	a_over.wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
+
+	int option = TRUE;//Nagle
+	setsockopt(g_sc_listensock, IPPROTO_TCP, TCP_NODELAY, (const char*)&option, sizeof(option));
 	AcceptEx(g_sc_listensock, c_socket, a_over.send_buf, 0, addr_size + 16, addr_size + 16, 0, &a_over.overlapped);
 
 	//======================================================================

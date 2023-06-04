@@ -154,8 +154,9 @@
     <ClInclude Include="Constant.h" />
     <ClInclude Include="CP_KEYS.h" />
     <ClInclude Include="MapObjects.h" />
-    <ClInclude Include="MathFuncs.h" />
     <ClInclude Include="Protocol.h" />
+    <ClInclude Include="RayCast.h" />
+    <ClInclude Include="SimpleMathWithDX.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -371,14 +371,12 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 
 			m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
 			q_keyboardInput.push(SEND_KEY_NUM1);//S
-			//ChangeScene(SCENE1STAGE);
 			break;
 		}
 		case '2':
 		{
 			q_keyboardInput.push(SEND_KEY_NUM2);//S
 			UI_Switch = false;
-			//ChangeScene(SCENE2STAGE);
 			break;
 		}
 		case '3':
@@ -722,7 +720,6 @@ float g_time = 0.0f;
 float g_reverse_time = 0.0f;
 void CGameFramework::FrameAdvance()
 {
-	SleepEx(1, TRUE);//Server
 	if (m_nMode == SCENE2STAGE)m_GameTimer.Tick(30.0f);
 	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick();
 

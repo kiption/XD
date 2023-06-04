@@ -70,7 +70,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		
 			if (pSoldierModel) delete pSoldierModel;
 		}
-		m_ppObjects[5]->SetPosition(XMFLOAT3(800.0, 5.0, -50.0));
+		m_ppObjects[5]->SetPosition(XMFLOAT3(100.0, 6.0, 905.0));
 		m_ppObjects[6]->SetPosition(XMFLOAT3(0.0 + 10, 5.0, 0.0 + 10));
 		m_ppObjects[7]->SetPosition(XMFLOAT3(0.0 + 10, 5.0, 0.0 + 10));
 		m_ppObjects[8]->SetPosition(XMFLOAT3(0.0 + 10, 5.0, 0.0 + 10));
@@ -96,7 +96,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[12] = m_ppNpcObjects[2];
 		m_ppObjects[13] = m_ppNpcObjects[3];
 		m_ppObjects[14] = m_ppNpcObjects[4];
-		m_ppObjects[10]->SetPosition(XMFLOAT3(880.0, 30.0, -20.0));
+		m_ppObjects[10]->SetPosition(XMFLOAT3(100.0, 30.0, 1100.0));
 		m_ppObjects[11]->SetPosition(XMFLOAT3(0.0 + 20, 5.0, 0.0 + 10));
 		m_ppObjects[12]->SetPosition(XMFLOAT3(0.0 + 20, 5.0, 0.0 + 10));
 		m_ppObjects[13]->SetPosition(XMFLOAT3(0.0 + 20, 5.0, 0.0 + 10));

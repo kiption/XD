@@ -4,8 +4,11 @@
 #include "stdafx.h"
 #include "REVENGER.h"
 #include "GameFramework.h"
-#include "Network.h"//Server
 #include "BillboardObjectsShader.h"
+#include "Network.h"//Server
+#include <thread>//Server
+#include <chrono>//Server
+using namespace chrono;
 #define MAX_LOADSTRING 100
 
 HINSTANCE						ghAppInstance;
@@ -21,40 +24,41 @@ BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
+void networkThreadFunc();
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
 	//==================================================
 	//					Server Code
 	//==================================================
-	wcout.imbue(locale("korean"));
-	WSADATA WSAData;
-	WSAStartup(MAKEWORD(2, 2), &WSAData);
+	//wcout.imbue(locale("korean"));
+	//WSADATA WSAData;
+	//WSAStartup(MAKEWORD(2, 2), &WSAData);
 
-	active_servernum = MAX_LOGIC_SERVER - 1;
+	//active_servernum = MAX_LOGIC_SERVER - 1;
 
-	CS_LOGIN_PACKET login_pack;
-	login_pack.size = sizeof(CS_LOGIN_PACKET);
-	login_pack.type = CS_LOGIN;
-	strcpy_s(login_pack.name, "COPTER");
+	//CS_LOGIN_PACKET login_pack;
+	//login_pack.size = sizeof(CS_LOGIN_PACKET);
+	//login_pack.type = CS_LOGIN;
+	//strcpy_s(login_pack.name, "COPTER");
 
-	// Active Server에 연결
-	sockets[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	SOCKADDR_IN server0_addr;
-	ZeroMemory(&server0_addr, sizeof(server0_addr));
-	server0_addr.sin_family = AF_INET;
-	int new_portnum = PORTNUM_LOGIC_0 + active_servernum;
-	server0_addr.sin_port = htons(new_portnum);
-	//inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);// 루프백
-	inet_pton(AF_INET, LOGIC1_ADDR, &server0_addr.sin_addr);
-	connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
+	//// Active Server에 연결
+	//sockets[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	//SOCKADDR_IN server0_addr;
+	//ZeroMemory(&server0_addr, sizeof(server0_addr));
+	//server0_addr.sin_family = AF_INET;
+	//int new_portnum = PORTNUM_LOGIC_0 + active_servernum;
+	//server0_addr.sin_port = htons(new_portnum);
+	////inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);// 루프백
+	//inet_pton(AF_INET, LOGIC1_ADDR, &server0_addr.sin_addr);
+	//connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
 
-	sendPacket(&login_pack, active_servernum);
-	recvPacket(active_servernum);
+	//sendPacket(&login_pack, active_servernum);
+	//recvPacket(active_servernum);
 
-	stage1_enter_ok = false;
-	stage2_enter_ok = false;
-	last_ping = last_pong = chrono::system_clock::now();
+	//stage1_enter_ok = false;
+	//stage2_enter_ok = false;
+	//last_ping = last_pong = chrono::system_clock::now();
 	//==================================================
 
 	UNREFERENCED_PARAMETER(hPrevInstance);
@@ -71,6 +75,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	if (!InitInstance(hInstance, nCmdShow)) return(FALSE);
 
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LABPROJECT0797ANIMATION));
+
+	// Server Code
+	thread networkThread(networkThreadFunc);
+	networkThread.detach();
+	//networkThread.join();
+	//==
 
 	while (1)
 	{
@@ -89,20 +99,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		{
 			if (gGameFramework.m_nMode == OPENINGSCENE )
 			{
-				if (!stage1_enter_ok) {
-					// 키 입력을 서버로 전달.
-					if (gGameFramework.checkNewInput_Keyboard()) {
-						short keyValue = gGameFramework.popInputVal_Keyboard();
-						if (keyValue == PACKET_KEY_NUM1) {
-							CS_INPUT_KEYBOARD_PACKET keyinput_pack;
-							keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
-							keyinput_pack.type = CS_INPUT_KEYBOARD;
-							keyinput_pack.keytype = keyValue;
-							sendPacket(&keyinput_pack, active_servernum);
-						}
-					}
-				}
-				else {
+				if (stage1_enter_ok) {
 					gGameFramework.ChangeScene(SCENE1STAGE);
 					gGameFramework.setPosition_Self(my_info.m_pos);
 					gGameFramework.setVectors_Self(my_info.m_right_vec, my_info.m_up_vec, my_info.m_look_vec);
@@ -115,6 +112,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						gGameFramework.ChangeScene(SCENE2STAGE);
 					}
 				}
+
 				//==================================================
 				//					서버 연결 확인
 				//==================================================
@@ -126,126 +124,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					sendPacket(&ping_packet, active_servernum);
 					last_ping = chrono::system_clock::now();
 					//cout << "ping" << endl;
-				}
-
-				//==================================================
-				//		새로운 키 입력을 서버에게 전달합니다.
-				//==================================================
-				if (gGameFramework.checkNewInput_Keyboard()) {
-					short keyValue = gGameFramework.popInputVal_Keyboard();
-
-					switch (keyValue) {
-					case PACKET_KEY_NUM1:
-						if (gGameFramework.m_nMode != SCENE1STAGE) {
-							CS_INPUT_KEYBOARD_PACKET keyinput_pack;
-							keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
-							keyinput_pack.type = CS_INPUT_KEYBOARD;
-							keyinput_pack.keytype = keyValue;
-							sendPacket(&keyinput_pack, active_servernum);
-							break;
-						}
-					case PACKET_KEY_NUM2:
-						if (gGameFramework.m_nMode != SCENE2STAGE) {
-							CS_INPUT_KEYBOARD_PACKET keyinput_pack;
-							keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
-							keyinput_pack.type = CS_INPUT_KEYBOARD;
-							keyinput_pack.keytype = keyValue;
-							sendPacket(&keyinput_pack, active_servernum);
-							break;
-						}
-					case PACKET_KEY_W:
-						CS_MOVE_PACKET move_front_pack;
-						move_front_pack.size = sizeof(CS_MOVE_PACKET);
-						move_front_pack.type = CS_MOVE;
-						move_front_pack.x = gGameFramework.getMyPosition().x;
-						move_front_pack.y = gGameFramework.getMyPosition().y;
-						move_front_pack.z = gGameFramework.getMyPosition().z;
-						move_front_pack.direction = MV_FRONT;
-						sendPacket(&move_front_pack, active_servernum);
-						break;
-
-					case PACKET_KEY_S:
-						CS_MOVE_PACKET move_back_pack;
-						move_back_pack.size = sizeof(CS_MOVE_PACKET);
-						move_back_pack.type = CS_MOVE;
-						move_back_pack.x = gGameFramework.getMyPosition().x;
-						move_back_pack.y = gGameFramework.getMyPosition().y;
-						move_back_pack.z = gGameFramework.getMyPosition().z;
-						move_back_pack.direction = MV_BACK;
-						sendPacket(&move_back_pack, active_servernum);
-						break;
-
-					case PACKET_KEY_A:
-					case PACKET_KEY_D:
-						CS_MOVE_PACKET move_side_pack;
-						move_side_pack.size = sizeof(CS_MOVE_PACKET);
-						move_side_pack.type = CS_MOVE;
-						move_side_pack.x = gGameFramework.getMyPosition().x;
-						move_side_pack.y = gGameFramework.getMyPosition().y;
-						move_side_pack.z = gGameFramework.getMyPosition().z;
-						move_side_pack.direction = MV_SIDE;
-						sendPacket(&move_side_pack, active_servernum);
-						break;
-
-					case PACKET_KEY_SPACEBAR:
-						// 점프
-						cout << "메인에 있는 스페이스바 \n" << endl;
-						break;
-
-					case PACKET_KEYUP_MOVEKEY:
-						CS_INPUT_KEYBOARD_PACKET mv_keyup_pack;
-						mv_keyup_pack.type = CS_INPUT_KEYBOARD;
-						mv_keyup_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
-						mv_keyup_pack.keytype = PACKET_KEYUP_MOVEKEY;
-						sendPacket(&mv_keyup_pack, active_servernum);
-						break;
-
-					default:
-						cout << "[KeyInput Error] Unknown Key Type." << endl;
-					}
-
-				}
-
-				if (gGameFramework.checkNewInput_Mouse()) {
-					MouseInputVal mouseValue = gGameFramework.popInputVal_Mouse();
-
-					switch (mouseValue.button) {
-					case SEND_NONCLICK:
-						CS_ROTATE_PACKET yaw_rotate_pack;
-						yaw_rotate_pack.size = sizeof(CS_ROTATE_PACKET);
-						yaw_rotate_pack.type = CS_ROTATE;
-						yaw_rotate_pack.right_x = gGameFramework.getMyRightVec().x;
-						yaw_rotate_pack.right_y = gGameFramework.getMyRightVec().y;
-						yaw_rotate_pack.right_z = gGameFramework.getMyRightVec().z;
-						yaw_rotate_pack.up_x = gGameFramework.getMyUpVec().x;
-						yaw_rotate_pack.up_y = gGameFramework.getMyUpVec().y;
-						yaw_rotate_pack.up_z = gGameFramework.getMyUpVec().z;
-						yaw_rotate_pack.look_x = gGameFramework.getMyLookVec().x;
-						yaw_rotate_pack.look_y = gGameFramework.getMyLookVec().y;
-						yaw_rotate_pack.look_z = gGameFramework.getMyLookVec().z;
-						sendPacket(&yaw_rotate_pack, active_servernum);
-						break;
-					case SEND_BUTTON_L:
-						CS_ATTACK_PACKET attack_pack;
-						attack_pack.size = sizeof(CS_ATTACK_PACKET);
-						attack_pack.type = CS_ATTACK;
-						sendPacket(&attack_pack, active_servernum);
-						break;
-					case SEND_BUTTON_R:
-						/*미구현
-						CS_INPUT_MOUSE_PACKET mouseinput_pack;
-						mouseinput_pack.size = sizeof(CS_INPUT_MOUSE_PACKET);
-						mouseinput_pack.type = CS_INPUT_MOUSE;
-						mouseinput_pack.buttontype = mouseValue.button;
-						mouseinput_pack.delta_x = mouseValue.delX;
-						mouseinput_pack.delta_y = mouseValue.delY;
-
-						sendPacket(&mouseinput_pack, active_servernum);
-						break;
-						*/
-						break;
-					}
-				}
+				}				
 
 				//==================================================
 				//				   플레이어 동기화
@@ -541,8 +420,169 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 
+void networkThreadFunc()
+{
+	wcout.imbue(locale("korean"));
+	WSADATA WSAData;
+	WSAStartup(MAKEWORD(2, 2), &WSAData);
 
+	active_servernum = MAX_LOGIC_SERVER - 1;
 
+	CS_LOGIN_PACKET login_pack;
+	login_pack.size = sizeof(CS_LOGIN_PACKET);
+	login_pack.type = CS_LOGIN;
+	strcpy_s(login_pack.name, "COPTER");
+
+	// Active Server에 연결
+	sockets[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	SOCKADDR_IN server0_addr;
+	ZeroMemory(&server0_addr, sizeof(server0_addr));
+	server0_addr.sin_family = AF_INET;
+	int new_portnum = PORTNUM_LOGIC_0 + active_servernum;
+	server0_addr.sin_port = htons(new_portnum);
+	//inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);// 루프백
+	inet_pton(AF_INET, LOGIC1_ADDR, &server0_addr.sin_addr);
+	connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
+
+	sendPacket(&login_pack, active_servernum);
+	recvPacket(active_servernum);
+
+	stage1_enter_ok = false;
+	stage2_enter_ok = false;
+	last_ping = last_pong = chrono::system_clock::now();
+
+	//==================================================
+	// thread loop
+	while (1) {
+		// Recv Callback호출을 위한 SleepEX
+		SleepEx(1, TRUE);
+
+		//==================================================
+		//		새로운 키 입력을 서버에게 전달합니다.
+		//==================================================
+		// 1. 키보드 입력
+		if (gGameFramework.checkNewInput_Keyboard()) {
+			short keyValue = gGameFramework.popInputVal_Keyboard();
+
+			switch (keyValue) {
+			case PACKET_KEY_NUM1:
+				if (gGameFramework.m_nMode == OPENINGSCENE) {
+					CS_INPUT_KEYBOARD_PACKET keyinput_pack;
+					keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+					keyinput_pack.type = CS_INPUT_KEYBOARD;
+					keyinput_pack.keytype = keyValue;
+					sendPacket(&keyinput_pack, active_servernum);
+					break;
+				}
+			case PACKET_KEY_NUM2:
+				if (gGameFramework.m_nMode == SCENE1STAGE) {
+					CS_INPUT_KEYBOARD_PACKET keyinput_pack;
+					keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+					keyinput_pack.type = CS_INPUT_KEYBOARD;
+					keyinput_pack.keytype = keyValue;
+					sendPacket(&keyinput_pack, active_servernum);
+					break;
+				}
+			case PACKET_KEY_W:
+				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+
+				CS_MOVE_PACKET move_front_pack;
+				move_front_pack.size = sizeof(CS_MOVE_PACKET);
+				move_front_pack.type = CS_MOVE;
+				move_front_pack.x = gGameFramework.getMyPosition().x;
+				move_front_pack.y = gGameFramework.getMyPosition().y;
+				move_front_pack.z = gGameFramework.getMyPosition().z;
+				move_front_pack.direction = MV_FRONT;
+				sendPacket(&move_front_pack, active_servernum);
+				break;
+
+			case PACKET_KEY_S:
+				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+
+				CS_MOVE_PACKET move_back_pack;
+				move_back_pack.size = sizeof(CS_MOVE_PACKET);
+				move_back_pack.type = CS_MOVE;
+				move_back_pack.x = gGameFramework.getMyPosition().x;
+				move_back_pack.y = gGameFramework.getMyPosition().y;
+				move_back_pack.z = gGameFramework.getMyPosition().z;
+				move_back_pack.direction = MV_BACK;
+				sendPacket(&move_back_pack, active_servernum);
+				break;
+
+			case PACKET_KEY_A:
+			case PACKET_KEY_D:
+				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+
+				CS_MOVE_PACKET move_side_pack;
+				move_side_pack.size = sizeof(CS_MOVE_PACKET);
+				move_side_pack.type = CS_MOVE;
+				move_side_pack.x = gGameFramework.getMyPosition().x;
+				move_side_pack.y = gGameFramework.getMyPosition().y;
+				move_side_pack.z = gGameFramework.getMyPosition().z;
+				move_side_pack.direction = MV_SIDE;
+				sendPacket(&move_side_pack, active_servernum);
+				break;
+
+			case PACKET_KEY_SPACEBAR:
+				// 점프
+				cout << "메인에 있는 스페이스바 \n" << endl;
+				break;
+
+			case PACKET_KEYUP_MOVEKEY:
+				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+
+				CS_INPUT_KEYBOARD_PACKET mv_keyup_pack;
+				mv_keyup_pack.type = CS_INPUT_KEYBOARD;
+				mv_keyup_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+				mv_keyup_pack.keytype = PACKET_KEYUP_MOVEKEY;
+				sendPacket(&mv_keyup_pack, active_servernum);
+				break;
+
+			default:
+				cout << "[KeyInput Error] Unknown Key Type." << endl;
+			}
+
+		}
+
+		// 2. 마우스 입력
+		if (gGameFramework.checkNewInput_Mouse()) {
+			MouseInputVal mouseValue = gGameFramework.popInputVal_Mouse();
+
+			switch (mouseValue.button) {
+			case SEND_NONCLICK:
+				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+
+				CS_ROTATE_PACKET yaw_rotate_pack;
+				yaw_rotate_pack.size = sizeof(CS_ROTATE_PACKET);
+				yaw_rotate_pack.type = CS_ROTATE;
+				yaw_rotate_pack.right_x = gGameFramework.getMyRightVec().x;
+				yaw_rotate_pack.right_y = gGameFramework.getMyRightVec().y;
+				yaw_rotate_pack.right_z = gGameFramework.getMyRightVec().z;
+				yaw_rotate_pack.up_x = gGameFramework.getMyUpVec().x;
+				yaw_rotate_pack.up_y = gGameFramework.getMyUpVec().y;
+				yaw_rotate_pack.up_z = gGameFramework.getMyUpVec().z;
+				yaw_rotate_pack.look_x = gGameFramework.getMyLookVec().x;
+				yaw_rotate_pack.look_y = gGameFramework.getMyLookVec().y;
+				yaw_rotate_pack.look_z = gGameFramework.getMyLookVec().z;
+				sendPacket(&yaw_rotate_pack, active_servernum);
+				break;
+			case SEND_BUTTON_L:
+				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+
+				CS_ATTACK_PACKET attack_pack;
+				attack_pack.size = sizeof(CS_ATTACK_PACKET);
+				attack_pack.type = CS_ATTACK;
+				sendPacket(&attack_pack, active_servernum);
+				break;
+			case SEND_BUTTON_R:
+				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+
+				// 기능 미구현
+				break;
+			}
+		}
+	}
+}
 
 
 
