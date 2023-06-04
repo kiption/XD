@@ -728,8 +728,10 @@ void process_packet(int client_id, char* packet)
 		if (!b_active_server) break;
 		CS_MOVE_PACKET* cl_move_packet = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 
+		// [TEST] 패킷 딜레이 테스트
 		cout << "Player[" << client_id << "]에게서 이동패킷 받음";
 		cout << " - [" << chrono::system_clock::now() << "]\n" << endl;
+
 		// 1. 충돌체크를 한다. -> 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
 		bool b_isCollide = false;
 		//  1) 맵 오브젝트
@@ -758,6 +760,7 @@ void process_packet(int client_id, char* packet)
 			lock_guard<mutex> lg{ other_pl.s_lock };
 			other_pl.send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
 
+			// [TEST] 패킷 딜레이 테스트
 			cout << "다른 클라에 이동패킷 보냄";
 			cout << " - [" << chrono::system_clock::now() << "]\n" << endl;
 		}
@@ -883,6 +886,22 @@ void process_packet(int client_id, char* packet)
 
 			float min_dist = FLT_MAX;
 
+			// [TEST] 테스트용 더미 충돌검사
+			XMFLOAT3 dummy_humanoid_pos{ 100.0f, 6.0f, 905.0f };
+			XMFLOAT3 dummy_helicopter_pos{ 100.0f, 30.0f, 1100.0f };
+
+			XMFLOAT3 human_intersection\
+				= Intersect_Ray_Box(clients[client_id].pos, clients[client_id].m_lookvec, BULLET_RANGE, dummy_humanoid_pos, HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z);
+			if (human_intersection != XMF_fault) {
+				cout << "[ATK TEST] 사람 더미와 충돌하였음.\n" << endl;
+			}
+
+			XMFLOAT3 heli_intersection\
+				= Intersect_Ray_Box(clients[client_id].pos, clients[client_id].m_lookvec, BULLET_RANGE, dummy_helicopter_pos, HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z);
+			if (heli_intersection != XMF_fault) {
+				cout << "[ATK TEST] 헬기 더미와 충돌하였음.\n" << endl;
+			}
+
 			/*
 			// 1) 클라이언트와 충돌검사
 			for (auto& cl : clients) {
@@ -901,7 +920,6 @@ void process_packet(int client_id, char* packet)
 			for (auto& building : buildings_info) {
 
 			}
-			*/
 
 			// 4) 최종
 			// 레이캐스트에서 충돌으로 판단되었다면
@@ -1027,12 +1045,12 @@ void process_packet(int client_id, char* packet)
 
 			}
 
+		*/
 		}
 		// 2. 스테이지 2 로직
 		else if (clients[client_id].curr_stage == 2) {
 
 		}
-
 		break;
 	}// CS_ATTACK end
 	case CS_INPUT_KEYBOARD:
@@ -1044,7 +1062,7 @@ void process_packet(int client_id, char* packet)
 		switch (inputkey_p->keytype) {
 		case PACKET_KEY_NUM1:
 			if (clients[client_id].curr_stage == 1) break;
-
+			
 			clients[client_id].s_lock.lock();
 			clients[client_id].curr_stage = 1;
 			cout << "Client[" << client_id << "] Stage1로 전환." << endl;
@@ -1488,6 +1506,9 @@ void do_worker()
 				ZeroMemory(&ex_over->overlapped, sizeof(ex_over->overlapped));
 				ex_over->wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
 				int addr_size = sizeof(SOCKADDR_IN);
+
+				int option = TRUE;//Nagle
+				setsockopt(g_sc_listensock, IPPROTO_TCP, TCP_NODELAY, (const char*)&option, sizeof(option));
 				AcceptEx(g_sc_listensock, c_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
 			}
 			// 2. Npc Server Accept
@@ -2079,6 +2100,9 @@ int main(int argc, char* argv[])
 	OVER_EX a_over;
 	a_over.process_type = OP_ACCEPT;
 	a_over.wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
+
+	int option = TRUE;//Nagle
+	setsockopt(g_sc_listensock, IPPROTO_TCP, TCP_NODELAY, (const char*)&option, sizeof(option));
 	AcceptEx(g_sc_listensock, c_socket, a_over.send_buf, 0, addr_size + 16, addr_size + 16, 0, &a_over.overlapped);
 
 	//======================================================================

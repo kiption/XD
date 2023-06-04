@@ -63,6 +63,40 @@ XMFLOAT3 RayCast(XMFLOAT3 start, XMFLOAT3 direction, float range_limit, XMFLOAT3
 	return XMF_Add(start, XMF_MultiplyScalar(v, t));
 }
 
+// 점이 범위(사각형) 안에 있는지 검사
+bool Check_PointInQuadrangle(XMFLOAT3 point, XMFLOAT3 quad_lefttop, XMFLOAT3 quad_rightbottom) {
+	XMFLOAT3 dist_vec = XMF_Substract(quad_lefttop, quad_rightbottom);
+	bool x_check = false;
+	bool y_check = false;
+	bool z_check = false;
+
+	if (dist_vec.x > 0.0f) {	// lefttop x가 더 큰 경우
+		if (quad_rightbottom.x <= point.x && point.x <= quad_lefttop.x) x_check = true;
+	}
+	else {						// righttbottom x가 더 큰 경우
+		if (quad_lefttop.x <= point.x && point.x <= quad_rightbottom.x) x_check = true;
+	}
+
+	if (dist_vec.y > 0.0f) {	// lefttop y가 더 큰 경우
+		if (quad_rightbottom.y <= point.y && point.y <= quad_lefttop.y) x_check = true;
+	}
+	else {						// righttbottom y가 더 큰 경우
+		if (quad_lefttop.y <= point.y && point.y <= quad_rightbottom.y) x_check = true;
+	}
+
+	if (dist_vec.z > 0.0f) {	// lefttop z가 더 큰 경우
+		if (quad_rightbottom.z <= point.z && point.z <= quad_lefttop.z) x_check = true;
+	}
+	else {						// righttbottom z가 더 큰 경우
+		if (quad_lefttop.z <= point.z && point.z <= quad_rightbottom.z) x_check = true;
+	}
+
+	if (x_check && y_check && z_check)
+		return true;
+	else
+		return false;
+}
+
 // 박스의 꼭지점 8개
 XMFLOAT3 Make_BBPoint(XMFLOAT3 box_center, float box_width, float box_height, float box_length, int point_num) {
 	// Point_num
@@ -91,6 +125,10 @@ XMFLOAT3 Make_BBPoint(XMFLOAT3 box_center, float box_width, float box_height, fl
 
 // 광선-박스 충돌검사
 XMFLOAT3 Intersect_Ray_Box(XMFLOAT3 start, XMFLOAT3 direction, float range_limit, XMFLOAT3 box_center, float box_width, float box_height, float box_length) {
+	// 충돌 대상이 최대 사거리보다 멀리 있는 경우
+	if (XMF_Distance(start, box_center) > range_limit) return XMF_fault;
+
+	// 충돌박스 만들기
 	XMFLOAT3 p[8];
 	for (int i = 0; i < 8; ++i) {
 		p[i] = Make_BBPoint(box_center, box_width, box_height, box_length, i);
@@ -99,16 +137,34 @@ XMFLOAT3 Intersect_Ray_Box(XMFLOAT3 start, XMFLOAT3 direction, float range_limit
 	XMFLOAT3 tmp_result[6];
 	// ㅁ0123: Center = 0, p1 = 1, p2 = 2
 	tmp_result[0] = RayCast(start, direction, range_limit, p[0], p[1], p[2]);
+	if (tmp_result[0] != XMF_fault) {
+		if (!Check_PointInQuadrangle(tmp_result[0], p[0], p[3])) tmp_result[0] = XMF_fault;
+	}
 	// ㅁ1054: Center = 1, p1 = 0, p2 = 5
 	tmp_result[1] = RayCast(start, direction, range_limit, p[1], p[0], p[5]);
+	if (tmp_result[1] != XMF_fault) {
+		if (!Check_PointInQuadrangle(tmp_result[1], p[1], p[4])) tmp_result[1] = XMF_fault;
+	}
 	// ㅁ2064: Center = 2, p1 = 6, p2 = 0
 	tmp_result[2] = RayCast(start, direction, range_limit, p[2], p[6], p[0]);
+	if (tmp_result[2] != XMF_fault) {
+		if (!Check_PointInQuadrangle(tmp_result[2], p[2], p[4])) tmp_result[2] = XMF_fault;
+	}
 	// ㅁ3276: Center = 3, p1 = 7, p2 = 2
 	tmp_result[3] = RayCast(start, direction, range_limit, p[3], p[7], p[2]);
+	if (tmp_result[3] != XMF_fault) {
+		if (!Check_PointInQuadrangle(tmp_result[3], p[3], p[6])) tmp_result[3] = XMF_fault;
+	}
 	// ㅁ5713: Center = 5, p1 = 7, p2 = 1
 	tmp_result[4] = RayCast(start, direction, range_limit, p[5], p[7], p[1]);
+	if (tmp_result[4] != XMF_fault) {
+		if (!Check_PointInQuadrangle(tmp_result[4], p[5], p[3])) tmp_result[4] = XMF_fault;
+	}
 	// ㅁ6745: Center = 6, p1 = 7, p2 = 4
-	tmp_result[5] = RayCast(start, direction, range_limit, p[5], p[7], p[1]);
+	tmp_result[5] = RayCast(start, direction, range_limit, p[6], p[7], p[4]);
+	if (tmp_result[5] != XMF_fault) {
+		if (!Check_PointInQuadrangle(tmp_result[5], p[6], p[5])) tmp_result[5] = XMF_fault;
+	}
 
 	XMFLOAT3 final_result = XMF_fault;
 	float min_dist = FLT_MAX;

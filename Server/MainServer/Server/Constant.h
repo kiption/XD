@@ -44,7 +44,7 @@
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
 #define BULLET_DAMAGE 1					// 총알 피격데미지
 
-#define BULLET_RANGE 200				// 총알 최대이동거리
+#define BULLET_RANGE 500				// 총알 최대이동거리
 
 
 //============================================================
