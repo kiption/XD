@@ -140,8 +140,7 @@ public:
 
 		int ret = WSARecv(socket, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.overlapped, 0);
 		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "WSARecv Error - " << ret << endl;
-			cout << GetLastError() << endl;
+			cout << "[Line: 143] WSARecv Error - " << GetLastError() << endl;
 		}
 	}
 
@@ -153,8 +152,7 @@ public:
 		//cout << "[do_send] Target ID: " << id << "\n" << endl;
 		int ret = WSASend(socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, 0);
 		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "WSASend Error - " << ret << endl;
-			cout << GetLastError() << endl;
+			cout << "[Line: 155] WSASend Error - " << GetLastError() << endl;
 		}
 	}
 
@@ -728,10 +726,6 @@ void process_packet(int client_id, char* packet)
 		if (!b_active_server) break;
 		CS_MOVE_PACKET* cl_move_packet = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 
-		// [TEST] 패킷 딜레이 테스트
-		cout << "Player[" << client_id << "]에게서 이동패킷 받음";
-		cout << " - [" << chrono::system_clock::now() << "]\n" << endl;
-
 		// 1. 충돌체크를 한다. -> 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
 		bool b_isCollide = false;
 		//  1) 맵 오브젝트
@@ -759,10 +753,6 @@ void process_packet(int client_id, char* packet)
 
 			lock_guard<mutex> lg{ other_pl.s_lock };
 			other_pl.send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
-
-			// [TEST] 패킷 딜레이 테스트
-			cout << "다른 클라에 이동패킷 보냄";
-			cout << " - [" << chrono::system_clock::now() << "]\n" << endl;
 		}
 
 		// 4. NPC 서버에게도 플레이어가 이동한 위치를 알려준다.
