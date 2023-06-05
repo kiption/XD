@@ -162,7 +162,7 @@ public:
 	void send_rotate_packet(int obj_id, short obj_type);
 	void send_move_rotate_packet(int obj_id, short obj_type, short dir);
 
-	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
+	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 
 	void sessionClear() {
 		s_state = ST_FREE;
@@ -801,6 +801,7 @@ void process_packet(int client_id, char* packet)
 		//==============================
 		// 1. 총알
 		// Bullet 쿨타임 체크
+		/*
 		milliseconds shoot_term = duration_cast<milliseconds>(chrono::system_clock::now() - clients[client_id].shoot_time);
 		if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) break;	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
 
@@ -839,7 +840,7 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].reload_time = chrono::system_clock::now();
 		}
 		clients[client_id].s_lock.unlock();
-
+		
 		if (clients[client_id].s_state == ST_INGAME) {
 			SC_BULLET_COUNT_PACKET bullet_update_pack;
 			bullet_update_pack.type = SC_BULLET_COUNT;
@@ -849,6 +850,7 @@ void process_packet(int client_id, char* packet)
 			lock_guard<mutex> lg{ clients[client_id].s_lock };
 			clients[client_id].do_send(&bullet_update_pack);
 		}
+		*/
 
 		// 우선 이 플레이어가 총알을 발사했다는 정보를 "게임에 접속 중인 모든" 클라이언트에게 알려줍니다. (총알 나가는 모션 동기화를 위함)
 		for (auto& cl : clients) {
@@ -866,7 +868,7 @@ void process_packet(int client_id, char* packet)
 
 		//==============================
 		// 2. 충돌검사
-		if (clients[client_id].curr_stage == 1) {
+		if (clients[client_id].curr_stage != 0) {
 			bool b_collide = false;
 
 			enum CollideTarget {CT_PLAYER, CT_NPC, CT_BUILDING};
@@ -877,165 +879,52 @@ void process_packet(int client_id, char* packet)
 			float min_dist = FLT_MAX;
 
 			// [TEST] 테스트용 더미 충돌검사
-			XMFLOAT3 dummy_humanoid_pos{ 100.0f, 6.0f, 905.0f };
-			XMFLOAT3 dummy_helicopter_pos{ 100.0f, 30.0f, 1100.0f };
+			SESSION dummy_humanoid;
+			dummy_humanoid.pos = XMFLOAT3{ 100.0f, 6.0f, 905.0f };
+			dummy_humanoid.setBB();
 
+			// 야매방법
+			SESSION bullet;
+			bullet.pos = clients[client_id].pos;
+			bullet.m_rightvec = clients[client_id].m_rightvec;
+			bullet.m_upvec = clients[client_id].m_upvec;
+			bullet.m_lookvec = clients[client_id].m_lookvec;
+			bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
+				, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+
+			XMFLOAT3 bullet_initpos = bullet.pos;
+			while (XMF_Distance(bullet.pos, bullet_initpos) <= BULLET_RANGE) {
+				if (bullet.m_xoobb.Intersects(dummy_humanoid.m_xoobb)) {
+					b_collide = true;
+					break;
+				}
+				bullet.pos = XMF_Add(bullet.pos, XMF_MultiplyScalar(bullet.m_lookvec, 1.f));
+				bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
+					, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+			}
+
+			/* My Raycast
 			XMFLOAT3 human_intersection\
-				= Intersect_Ray_Box(clients[client_id].pos, clients[client_id].m_lookvec, BULLET_RANGE, dummy_humanoid_pos, HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z);
+				= Intersect_Ray_Box(clients[client_id].pos, clients[client_id].m_lookvec, BULLET_RANGE, dummy_humanoid.pos, HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z);
 			if (human_intersection != XMF_fault) {
-				cout << "[ATK TEST] 사람 더미와 충돌하였음.\n" << endl;
+				cout << "[CS_ATTACK] 사람 더미와 충돌하였음." << endl;//test
+				b_collide = true;
 			}
 
 			XMFLOAT3 heli_intersection\
-				= Intersect_Ray_Box(clients[client_id].pos, clients[client_id].m_lookvec, BULLET_RANGE, dummy_helicopter_pos, HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z);
+				= Intersect_Ray_Box(clients[client_id].pos, clients[client_id].m_lookvec, BULLET_RANGE, dummy_helicopter.pos, HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z);
 			if (heli_intersection != XMF_fault) {
-				cout << "[ATK TEST] 헬기 더미와 충돌하였음.\n" << endl;
+				cout << "[CS_ATTACK] 헬기 더미와 충돌하였음." << endl;//test
+				b_collide = true;
 			}
+			*/
 
-			/*
-			// 1) 클라이언트와 충돌검사
-			for (auto& cl : clients) {
-				if (cl.id == client_id) continue;		// 자기자신은 검사하면 안됨.
-				if (cl.s_state != ST_INGAME) continue;	// 게임중이 아닌 세션은 검사할 필요X
-				if (cl.curr_stage == 0) continue;		// 아직 게임 진입 중인 세션도 검사 X
-
-			}
-
-			// 2) NPC와 충돌검사
-			for (auto& npc : npcs) {
-
-			}
-
-			// 3) 건물과 충돌검사
-			for (auto& building : buildings_info) {
-
-			}
-
-			// 4) 최종
-			// 레이캐스트에서 충돌으로 판단되었다면
 			if (b_collide) {
-				switch (collide_target) {
-				case CT_PLAYER:
-					cout << "Player[" << collide_id << "]가 피격당했습니다. (공격자: Player[" << client_id << "])" << endl;
-
-					// 피격된 플레이어의 HP를 감소시킵니다.
-					clients[collide_id].s_lock.lock();
-					clients[collide_id].hp -= BULLET_DAMAGE;
-					clients[collide_id].s_lock.unlock();
-
-					if (clients[collide_id].hp <= 0) {
-						cout << "Player[" << collide_id << "]가 사망하였습니다.\n" << endl;
-
-						// 사망 정보를 게임에 접속한 모든 클라이언트들에게 보냅니다. (자신 포함)
-						for (auto& cl : clients) {
-							if (cl.s_state != ST_INGAME) continue;
-							if (cl.curr_stage == 0) continue;
-
-							SC_OBJECT_STATE_PACKET death_pack;
-							death_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
-							death_pack.type = SC_OBJECT_STATE;
-							death_pack.target = TARGET_PLAYER;
-							death_pack.id = clients[collide_id].id;
-							death_pack.state = PL_ST_DEAD;
-							cl.do_send(&death_pack);
-						}
-					}
-					else {
-						cout << "Player[" << clients[collide_id].id << "]의 HP가 " << BULLET_DAMAGE << "만큼 감소하였습니다. \n" << endl;
-
-						// 피격 정보를 게임에 접속한 모든 클라이언트들에게 보냅니다. (자신 포함)
-						for (auto& cl : clients) {
-							if (cl.s_state != ST_INGAME) continue;
-							if (cl.curr_stage == 0) continue;
-
-							SC_DAMAGED_PACKET dmg_bullet_packet;
-							dmg_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
-							dmg_bullet_packet.type = SC_DAMAGED;
-							dmg_bullet_packet.target = TARGET_PLAYER;
-							dmg_bullet_packet.id = clients[collide_id].id;
-							dmg_bullet_packet.damage = BULLET_DAMAGE;
-							cl.do_send(&dmg_bullet_packet);
-						}
-					}
-					break;
-
-				case CT_NPC:
-					if (!b_npcsvr_conn) break;
-					cout << "NPC[" << collide_id << "]가 피격당했습니다. (공격자: Player[" << client_id << "])\n" << endl;
-
-					// 피격된 npc의 HP를 감소시킵니다.
-					npcs[collide_id].s_lock.lock();
-					npcs[collide_id].hp -= BULLET_DAMAGE;
-					npcs[collide_id].s_lock.unlock();
-
-					if (npcs[collide_id].hp <= 0) {
-						cout << "Npc[" << collide_id << "]가 사망하였습니다.\n" << endl;
-
-						// 사망 정보를 게임에 접속한 모든 클라이언트들에게 보냅니다. (자신 포함)
-						for (auto& cl : clients) {
-							if (cl.s_state != ST_INGAME) continue;
-							if (cl.curr_stage == 0) continue;
-
-							SC_OBJECT_STATE_PACKET death_pack;
-							death_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
-							death_pack.type = SC_OBJECT_STATE;
-							death_pack.target = TARGET_NPC;
-							death_pack.id = npcs[collide_id].id;
-							death_pack.state = PL_ST_DEAD;
-							cl.do_send(&death_pack);
-						}
-
-						// 사망 정보를 npc서버에도 보냅니다.
-						SC_OBJECT_STATE_PACKET npc_death_pack;
-						npc_death_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
-						npc_death_pack.type = SC_OBJECT_STATE;
-						npc_death_pack.target = TARGET_NPC;
-						npc_death_pack.id = npcs[collide_id].id;
-						npc_death_pack.state = PL_ST_DEAD;
-						npc_server.do_send(&npc_death_pack);
-					}
-					else {
-						cout << "Npc[" << npcs[collide_id].id << "]의 HP가 " << BULLET_DAMAGE << "만큼 감소하였습니다. \n" << endl;
-
-						// 피격 정보를 게임에 접속한 모든 클라이언트들에게 보냅니다. (자신 포함)
-						for (auto& cl : clients) {
-							if (cl.s_state != ST_INGAME) continue;
-							if (cl.curr_stage == 0) continue;
-
-							SC_DAMAGED_PACKET dmg_bullet_packet;
-							dmg_bullet_packet.size = sizeof(SC_DAMAGED_PACKET);
-							dmg_bullet_packet.type = SC_DAMAGED;
-							dmg_bullet_packet.target = TARGET_NPC;
-							dmg_bullet_packet.id = npcs[collide_id].id;
-							dmg_bullet_packet.damage = BULLET_DAMAGE;
-							cl.do_send(&dmg_bullet_packet);
-						}
-
-						// 피격 정보를 npc서버에도 보냅니다.
-						SC_DAMAGED_PACKET npc_damaged_packet;
-						npc_damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
-						npc_damaged_packet.type = SC_DAMAGED;
-						npc_damaged_packet.target = TARGET_NPC;
-						npc_damaged_packet.id = npcs[collide_id].id;
-						npc_damaged_packet.damage = BULLET_DAMAGE;
-						npc_server.do_send(&npc_damaged_packet);
-					}
-					break;
-
-				case CT_BUILDING:
-					cout << "총알이 건물에 막혔다. (공격자: Player[" << client_id << "])\n" << endl;
-					// 지금은 딱히 할 기능이 없다.
-					// 나중에 건물에 파편이 튀기는 연출을 하고싶으면
-					// 클라한테 충돌한 지점(좌표)를 보내주면 된다.
-					break;
-
-				default:
-					cout << "[RayCast Error] Unknown Interserction Type.\n" << endl;
-				}
-
+				cout << "[Collide Check] Player[" << client_id << "]의 공격 -> 충돌 O\n" << endl;//test
 			}
-
-		*/
+			else {
+				cout << "[Collide Check] Player[" << client_id << "]의 공격 -> 충돌 X\n" << endl;//test
+			}
 		}
 		// 2. 스테이지 2 로직
 		else if (clients[client_id].curr_stage == 2) {

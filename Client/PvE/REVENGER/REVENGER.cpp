@@ -573,6 +573,8 @@ void networkThreadFunc()
 				attack_pack.size = sizeof(CS_ATTACK_PACKET);
 				attack_pack.type = CS_ATTACK;
 				sendPacket(&attack_pack, active_servernum);
+
+				cout << "공격키 전송\n" << endl;
 				break;
 			case SEND_BUTTON_R:
 				if (gGameFramework.m_nMode == OPENINGSCENE) break;

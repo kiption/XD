@@ -608,11 +608,12 @@ void CGameFramework::ProcessInput()
 
 
 			if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->ShootState(m_GameTimer.GetTimeElapsed());
-			if (m_nMode == SCENE1STAGE)
+			if (m_nMode != OPENINGSCENE)
 			{
 				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay < 0.01)
 				{
 					((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
+
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
 					q_mouseInput.push(lclick);//s
 				}

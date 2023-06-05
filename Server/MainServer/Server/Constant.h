@@ -44,7 +44,7 @@
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
 #define BULLET_DAMAGE 1					// 총알 피격데미지
 
-#define BULLET_RANGE 500				// 총알 최대이동거리
+#define BULLET_RANGE 300				// 총알 최대이동거리
 
 
 //============================================================
@@ -52,13 +52,9 @@
 //============================================================
 #define HUMAN_MAXHP 100
 
-#define HUMAN_BBSIZE_X 2.5f				// 인간 BB크기 (CollideBox)
-#define HUMAN_BBSIZE_Y 2.7f
-#define HUMAN_BBSIZE_Z 2.7f
-		
-#define HUMAN_BOXSIZE_X 10.0f			// 인간 Box크기 (Raycast)
-#define HUMAN_BOXSIZE_Y 20.0f
-#define HUMAN_BOXSIZE_Z 10.0f
+#define HUMAN_BBSIZE_X 4.0f				// 인간 BB크기 (CollideBox)
+#define HUMAN_BBSIZE_Y 30.0f
+#define HUMAN_BBSIZE_Z 4.0f
 
 #define RESPAWN_POS_X 35.0f
 #define RESPAWN_POS_Y 13.0f
@@ -69,13 +65,9 @@
 //============================================================
 #define HELI_MAXHP 100
 
-#define HELI_BBSIZE_X 2.5f				// 헬기 BB크기 (CollideBox)
+#define HELI_BBSIZE_X 2.5f				// 헬기 BB크기
 #define HELI_BBSIZE_Y 2.7f
 #define HELI_BBSIZE_Z 2.7f
-
-#define HELI_BOXSIZE_X 10.0f			// 헬기 Box크기 (Raycast)
-#define HELI_BOXSIZE_Y 9.5f
-#define HELI_BOXSIZE_Z 30.0f
 
 #define AUTO_LEVELOFF_TIME 3000			// 몇 초(ms)동안 키입력이 없어야 자동 수평비행 전환이 되는가
 #define RESPAWN_TIME 5000				// 리스폰 시간 (ms)
