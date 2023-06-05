@@ -40,7 +40,6 @@ using namespace DirectX::PackedVector;
 //============================================================
 #include "../../MainServer/Server/Protocol.h"
 #include "../../MainServer/Server/Constant.h"
-//#include "../../MainServer/Server/MathFuncs.h"
 //#include "../../MainServer/Server/MapObjects.h"
 #include "../../MainServer/Server/CP_KEYS.h"
 #include "CheckPoint.h"
@@ -52,76 +51,99 @@ system_clock::time_point g_s_start_time;	// 서버 시작시간  (단위: ms)
 milliseconds g_curr_servertime;
 mutex servertime_lock;	// 서버시간 lock
 
-enum NPCState { NPC_IDLE, NPC_FLY, NPC_CHASE, NPC_ST_ATK, NPC_DEATH };
+enum NPCState { NPC_IDLE, NPC_CHASE, NPC_ST_ATK, NPC_DEATH };
 enum Hit_target { g_none, g_body, g_profeller };
 
 bool ConnectingServer = false;
 
 struct Node
 {
-	int index;  // 노드 인덱스
-	float g;    // 시작 노드부터의 거리
-	float h;    // 목표 노드까지의 예상 거리
-	float f;    // g + h
+	int index; // 노드의 인덱스
+	float heuristic; // 목표지점까지의 휴리스틱 값
+	float cost; // 출발지점부터 현재 노드까지의 비용
+	Node* parent; // 부모 노드
 
-	bool operator<(const Node& other) const
-	{
-		return f > other.f;  // f 값이 작은 순서대로 우선순위 큐에 정렬
+	Node(int idx, float h, float c, Node* p) : index(idx), heuristic(h), cost(c), parent(p) {}
+
+	// 비용과 휴리스틱 값을 합친 우선순위 큐를 위한 연산자 오버로딩
+	bool operator<(const Node& other) const {
+		return (cost + heuristic) > (other.cost + other.heuristic);
 	}
 };
 
-class CheckPoint : public MapObject
-{
+class NodeMesh {
 private:
-	vector<int> neighbors;
+	int index_num;
+	float Center_x;
+	float Center_z;
+	float Small_x;
+	float Small_z;
+	float Large_x;
+	float Large_z;
+	bool Move_x, Move_z;
+	bool User_check;
+public:
+	NodeMesh() {
+		index_num = -1;
+		Center_x = 0.0f;
+		Center_z = 0.0f;
+		Small_x = 0.0f;
+		Small_z = 0.0f;
+		Large_x = 0.0f;
+		Large_z = 0.0f;
+		Move_x = false;
+		Move_z = false;
+		User_check = false;
+	}
+	~NodeMesh() {
+
+	}
 
 public:
-	CheckPoint() : MapObject() {}
-	CheckPoint(float px, float py, float pz, float sx, float sy, float sz) : MapObject(px, py, pz, sx, sy, sz) {}
+	vector<int>neighbor_mesh;
+	void SetInit(int idx, float cx, float cz, float bx, float bz)
+	{
+		index_num = idx;
+		Center_x = cx;
+		Center_z = cz;
+
+		Small_x = cx - (bx / 2);
+		Small_z = cz - (bz / 2);
+		Large_x = cx + (bx / 2);
+		Large_z = cz + (bz / 2);
+	}
+	void SetMoveingSpace(bool x, bool z)
+	{
+		Move_x = x;
+		Move_z = z;
+	}
+
+	bool GetMoveingSpaceX() { return Move_x; }
+	bool GetMoveingSpaceZ() { return Move_z; }
+	int GetIndex() { return index_num; }
+	float GetCenterX() { return Center_x; }
+	float GetCenterZ() { return Center_z; }
+	float GetLargeX() { return Large_x; }
+	float GetLargeZ() { return Large_z; }
+	float GetSmallX() { return Small_x; }
+	float GetSmallZ() { return Small_z; }
 
 public:
-	BoundingOrientedBox m_xoobb;
-
-public:
-	void setBB() {
-		m_xoobb = BoundingOrientedBox(XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()),
-			XMFLOAT3(this->getScaleX(), this->getScaleY(), this->getScaleZ()),
-			XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	bool otherIndexIntersection(NodeMesh other)
+	{
+		if (Small_x > other.Large_x || Large_x < other.Small_x || Small_z > other.Large_z || Large_z < other.Small_z) {
+			// 겹치지 않음
+			return false;
+		}
+		else {
+			// 겹침
+			return true;
+		}
 	}
-
-	float distanceTo(CheckPoint& other) {
-		float dx = getPosX() - other.getPosX();
-		float dy = getPosY() - other.getPosY();
-		float dz = getPosZ() - other.getPosZ();
-
-		return sqrt(dx * dx + dy * dy + dz * dz);
-	}
-
-	void addNeighbors(const std::vector<int>& indices) {
-		neighbors.insert(neighbors.end(), indices.begin(), indices.end());
-	}
-
-	void addNeighbor(int index) {
-		neighbors.push_back(index);
-	}
-	const vector<int>& getNeighbors() const {
-		return neighbors;
-	}
-
-
-	XMFLOAT3 getPos() { return XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()); }
 };
-vector<CheckPoint> CP;
+vector<NodeMesh>MeshInfo;
 
 //======================================================================
-struct Edge {
-	int from;
-	int to;
-	float value;
-
-	Edge(int from, int to, float value) : from(from), to(to), value(value) {}
-};
-vector<Edge> edges;
 
 struct Coordinate {
 	XMFLOAT3 right;
@@ -150,55 +172,27 @@ XMFLOAT3 NPCNormalize(XMFLOAT3 vec)
 	return vec;
 }
 
-float MultiDistanceCalc(XMFLOAT3 v1, XMFLOAT3 v2)
+float HeuristicEstimate(int startNode, int targetNode)
 {
-	XMFLOAT3 temp{ v1.x - v2.x, v1.y - v2.y , v1.z - v2.z };
+	// 각 노드의 위치 정보를 활용하여 맨하탄 거리 계산
+	float startX = MeshInfo[startNode].GetCenterX();
+	float startZ = MeshInfo[startNode].GetCenterZ();
+	float targetX = MeshInfo[targetNode].GetCenterX();
+	float targetZ = MeshInfo[targetNode].GetCenterZ();
 
-	float dist = sqrtf(powf(temp.x, 2) + powf(temp.y, 2) + powf(temp.z, 2));
-	return dist;
+	float heuristic = abs(targetX - startX) + abs(targetZ - startZ);
+	return heuristic;
 }
 
-float LerpAngle(float currentAngle, float targetAngle, float t)
+float DistanceBetween(int nodeIndex1, int nodeIndex2)
 {
-	float delta = fmodf(targetAngle - currentAngle, XM_2PI);
+	float x1 = MeshInfo[nodeIndex1].GetCenterX();
+	float z1 = MeshInfo[nodeIndex1].GetCenterZ();
+	float x2 = MeshInfo[nodeIndex2].GetCenterX();
+	float z2 = MeshInfo[nodeIndex2].GetCenterZ();
 
-	// 회전 거리를 -PI ~ PI 범위로 조정합니다.
-	if (delta > XM_PI)
-		delta -= XM_2PI;
-	else if (delta < -XM_PI)
-		delta += XM_2PI;
-
-	// 보간된 각도를 계산합니다.
-	float interpolatedAngle = currentAngle + delta * t;
-
-	return interpolatedAngle;
-}
-
-XMFLOAT3 VectorSubtract(const XMFLOAT3& vector1, const XMFLOAT3& vector2)
-{
-	XMFLOAT3 result;
-	result.x = vector1.x - vector2.x;
-	result.y = vector1.y - vector2.y;
-	result.z = vector1.z - vector2.z;
-	return result;
-}
-
-XMFLOAT3 Add(const XMFLOAT3& vector1, const XMFLOAT3& vector2)
-{
-	XMFLOAT3 result;
-	result.x = vector1.x + vector2.x;
-	result.y = vector1.y + vector2.y;
-	result.z = vector1.z + vector2.z;
-	return result;
-}
-
-XMFLOAT3 ScalarMultiply(const XMFLOAT3& vector, float scalar)
-{
-	XMFLOAT3 result;
-	result.x = vector.x * scalar;
-	result.y = vector.y * scalar;
-	result.z = vector.z * scalar;
-	return result;
+	float distance = sqrt((x2 - x1) * (x2 - x1) + (z2 - z1) * (z2 - z1));
+	return distance;
 }
 
 //======================================================================
@@ -273,7 +267,6 @@ array<PLAYER, MAX_USER> playersInfo;
 class NPC : public OBJECT {
 private:
 	Coordinate m_coordinate;
-
 	XMFLOAT3 m_User_Pos[MAX_USER];
 
 	short m_Hit;
@@ -283,21 +276,19 @@ private:
 	int m_ProfellerHP;
 	int m_BodyHP;
 	int m_chaseID;
-	int m_IdleCity;
-	int m_IdleSection;
 	int m_currentNodeIndex;
+	int m_targetNodeIndex;
 	float m_Speed;
 	float m_Distance[MAX_USER];
-
-	bool m_SectionMoveDir;
+	float m_destinationRange;
 
 public:
 	bool m_DeathCheck = false;
 	bool PrintRayCast = false;
-	vector<CheckPoint> graph;
+
 	vector<int>path;
 	BoundingFrustum m_frustum;
-	MyVector3 m_VectorMAX = { -9999.f, -9999.f, -9999.f };
+	XMFLOAT3 m_VectorMAX = { -9999.f, -9999.f, -9999.f };
 public:
 	NPC() : OBJECT() {
 		m_ProfellerHP = HELI_MAXHP;
@@ -313,64 +304,141 @@ public:
 	// Get
 	int GetHp() { return hp; }
 	int GetID() { return id; }
-	int GetChaseID() { return m_chaseID; }
 	int GetState() { return m_state; }
-	int GetIdleCity() { return m_IdleCity; }
-	int GetIdleSection() { return m_IdleSection; }
+	int GetChaseID() { return m_chaseID; }
 	int GetNodeIndex() { return m_currentNodeIndex; }
-	XMFLOAT3 GetPosition() { return pos; }
-	Coordinate GetCurr_coordinate() { return m_coordinate; }
+	int GetTargetNodeIndex() { return m_targetNodeIndex; }
 	float GetDistance(int id) { return m_Distance[id]; }
 	float GetSpeed() { return m_Speed; }
-	void GetRotation(float y, float p, float r) { y = yaw, p = pitch, r = roll; }
+	XMFLOAT3 GetPosition() { return pos; }
+	Coordinate GetCurr_coordinate() { return m_coordinate; }
 
 public:
 	// Set
 	void SetHp(int thp) { hp = thp; }
 	void SetID(int tid) { id = tid; }
 	void SetChaseID(int cid) { m_chaseID = cid; }
-	void SetIdleCity(int num) { m_IdleCity = num; }
-	void SetIdleSection(int num) { m_IdleSection = num; }
+	void SetNodeIndex(int idx) { m_currentNodeIndex = idx; }
+	void SetTargetNodeIndex(int idx) { m_targetNodeIndex = idx; }
+	void SetSpeed(float spd) { m_Speed = spd; }
+	void SetDestinationRange(float range) { m_destinationRange = range; }
 	void SetRotate(float y, float p, float r) { yaw = y, pitch = p, roll = r; }
 	void SetPosition(XMFLOAT3 tpos) { pos = tpos; }
-	void SetCurr_coordinate(Coordinate cor) { m_coordinate = cor; }
 	void SetUser_Pos(XMFLOAT3 pos, int cid) { m_User_Pos[cid] = pos; }
-	void SetSpeed(float spd) { m_Speed = spd; }
-	void SetIdleNodeIndex(int index) { m_currentNodeIndex = index; }
+	void SetCurr_coordinate(Coordinate cor) { m_coordinate = cor; }
+
 public:
-	// Normal
+	// Base
 		// Rotate
-	XMFLOAT3 NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll);
+	float CalculateYawToTarget(const XMFLOAT3& targetPosition) const;						// yaw 각도에 따른 회전
+	float CalculatePitchToTarget(const XMFLOAT3& targetPosition) const;						// Pitch 각도에 따른 회전
+	float CalculateRollToTarget(const XMFLOAT3& targetPosition) const;						// Roll 각도에 따른 회전
+	void SetRotation(float yaw, float pitch, float roll);									// 회전 설정
+	XMFLOAT3 NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll);				// 전체 각에 따른 look 설정
 
-	bool SetTrackingPrevStatebyDistance(float setDistance, int curState, int prevState);
-	bool PlayerDetact();
-	int FindClosestNode(const XMFLOAT3& position);
-	int GetNextNodeInPath(const vector<int>& path);
-	void SetFrustum();
-	void SetIndexNode(int idx);
-	void SetRotation(float yaw, float pitch, float roll);
+	// Base
+		// Random
+	float getRandomOffset(float min, float max);											// random 내장 함수
+
 	// State
-	void NPC_State_Manegement(int state); // 상태 관리
-	void Caculation_Distance(XMFLOAT3 vec, int id); // 범위 내 플레이어 탐색
-	void MoveChangeIdle();
-	void MoveToNode();
-	void MoveToNode(int nodeIndex);
-	void FlyOnNpc(XMFLOAT3 vec, int id);
-	void PlayerChasing();
-	void PlayerAttack();
-	void NPC_Death_motion(); // HP 0
-	void NPC_Damege_Calc(int id);
-	void NPC_Check_HP();
-	void SetTrackingIDbyDistance(float setDistance, int curState, int nextState);
+		// base
+	bool CheckChaseState();																	// idle-chase 상태 변환 확인
+	void NPC_State_Manegement(int state);													// 상태 관리
+	void Caculation_Distance(XMFLOAT3 vec, int id);											// 범위 내 플레이어 탐색
 
-	float getRandomOffset(float min, float max);
-	float CalculateYawToTarget(const XMFLOAT3& targetPosition) const;
-	float CalculatePitchToTarget(const XMFLOAT3& targetPosition) const;
-	float CalculateRollToTarget(const XMFLOAT3& targetPosition) const;
+	// State
+		// Idle
+	void MoveToNode();																		// 지정된 노드를 찾아가며 이동 - Idle
+	void UpdateCurrentNodeIndex();															// 노드 변환 시 다음 노드 지정
+	void MoveChangeIdle();																	// Idle 상태로 전환하면서 세팅
 
-	vector<int> AStarSearch(XMFLOAT3 target);
+	// State
+		// Chase
+	bool IsUserOnSafeZone(int user_City);													// User가 안전지대에 존재하는 지 확인
+	int GetUserCity();																		// User가 속한 도시 확인
+	int FindUserNode(int user_City);														// User가 속한 도시의 노드 확인
+	void IsPathMove();																		// Path가 있다면 해당 Path대로 이동
+	void PlayerChasing();																	// Chase 상태에서 동작하는 함수
+	vector<int>AStarSearch(int startNode, int targetNode, int user_City);					// 길찾기 알고리즘
+
+	// State
+		// Attack
+	bool PlayerDetact();																	// 뷰 프러스텀 내의 플레이어 탐색
+	void SetFrustum();																		// 프러스텀 설정
+	void PlayerAttack();																	// Attack 상태에서 동작하는 함수
+
+	// State
+		// Death
+	void NPC_Damege_Calc(int id);															// 플레이어 ID 값 받아서 데미지 계산
+	void NPC_Check_HP();																	// HP 계산
+	void NPC_Death_motion();																// HP 0
+
+
+
 };
 
+float NPC::CalculateYawToTarget(const XMFLOAT3& targetPosition) const
+{
+	// NPC의 현재 위치와 목표 위치 간의 벡터를 계산합니다.
+	XMFLOAT3 direction = {
+		targetPosition.x - pos.x,
+		targetPosition.y - pos.y,
+		targetPosition.z - pos.z
+	};
+
+	// NPC의 Yaw 값을 계산합니다.
+	// atan2 함수를 사용하여 방향 벡터의 X, Z 성분을 이용합니다.
+	float yaw = atan2(direction.x, direction.z);
+
+	// 라디안 값을 각도로 변환합니다.
+	yaw = XMConvertToDegrees(yaw);
+
+	// 각도를 0~360 범위로 조정합니다.
+	if (yaw < 0)
+		yaw += 360.0f;
+
+	return yaw;
+}
+float NPC::CalculatePitchToTarget(const XMFLOAT3& targetPosition) const
+{
+	// NPC의 현재 위치와 목표 위치 간의 벡터를 계산합니다.
+	XMFLOAT3 direction = {
+		targetPosition.x - pos.x,
+		targetPosition.y - pos.y,
+		targetPosition.z - pos.z
+	};
+
+	// NPC의 Pitch 값을 계산합니다.
+	// atan2 함수를 사용하여 방향 벡터의 Y, XZ 평면에서의 길이를 이용합니다.
+	float pitch = atan2(direction.y, sqrt(direction.x * direction.x + direction.z * direction.z));
+
+	// 라디안 값을 각도로 변환합니다.
+	pitch = XMConvertToDegrees(pitch);
+
+	return pitch;
+}
+float NPC::CalculateRollToTarget(const XMFLOAT3& targetPosition) const
+{
+	// NPC의 Roll 값을 일반적으로 계산하는 로직을 구현해야 합니다.
+	// Roll은 일반적으로 NPC의 이동 경로와 관련이 있는 경우에 사용됩니다.
+	// NPC의 이동 경로와 목표 위치 간의 관계에 따라 적절한 Roll 값을 계산해야 합니다.
+	// 구체적인 NPC의 동작 및 이동 방식에 따라 Roll 값을 정의하고 계산해야 합니다.
+	// 이 예시에서는 NPC의 Roll 값 계산을 생략하고 0을 반환합니다.
+	return 0.0f;
+}
+void NPC::SetRotation(float yaw, float pitch, float roll)
+{
+	// Yaw, pitch, roll 값을 기반으로 회전 행렬을 생성합니다.
+	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
+
+	// 현재 Look, Right, Up Vectors를 업데이트합니다.
+	m_lookvec = XMFLOAT3(rotationMatrix.r[2].m128_f32[0], rotationMatrix.r[2].m128_f32[1], rotationMatrix.r[2].m128_f32[2]);
+	m_rightvec = XMFLOAT3(rotationMatrix.r[0].m128_f32[0], rotationMatrix.r[0].m128_f32[1], rotationMatrix.r[0].m128_f32[2]);
+	m_upvec = XMFLOAT3(rotationMatrix.r[1].m128_f32[0], rotationMatrix.r[1].m128_f32[1], rotationMatrix.r[1].m128_f32[2]);
+
+	// 회전 값을 NPC에 설정합니다.
+	//m_rotation = rotationMatrix;
+}
 XMFLOAT3 NPC::NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll)
 {
 	float curr_pitch = XMConvertToRadians(pitch);
@@ -397,28 +465,250 @@ XMFLOAT3 NPC::NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll)
 
 	return NPCNormalize(vec);
 }
-bool NPC::SetTrackingPrevStatebyDistance(float setDistance, int curState, int prevState)
-{
-	int change_cnt = 0;
 
-	for (int i{}; i < MAX_USER; ++i) {
-		if (m_Distance[i] >= setDistance) {  // 상태로 변환하기 위한 조건 및 추적 ID 갱신
-			change_cnt++;
+float NPC::getRandomOffset(float min, float max)
+{
+	random_device rd;
+	default_random_engine dre(rd());
+	uniform_real_distribution<float> offset(min, max); // 원하는 오프셋 범위 설정
+
+	return offset(dre);
+}
+
+bool NPC::CheckChaseState()
+{
+	if (m_chaseID != -1) {
+		int userCity = GetUserCity();
+		int npcCity = m_currentNodeIndex / 4;
+		if (npcCity == userCity)
+		{
+			return true;
 		}
 	}
+	if (m_state == NPC_IDLE) return false;
 
-	if (change_cnt != MAX_USER) {
-		m_state = curState;
-		return true;
+	m_chaseID = -1;
+	for (int i = 0; i < MAX_USER; ++i) {
+		m_Distance[i] = 20000;
+	}
+	return false;
+}
+
+void NPC::NPC_State_Manegement(int state)
+{
+	switch (m_state)
+	{
+	case NPC_IDLE:
+		MoveToNode();
+		if (CheckChaseState()) {
+			m_state = NPC_CHASE;
+		}
+		break;
+	case NPC_CHASE:
+		if (!CheckChaseState()) {
+			m_state = NPC_IDLE;
+			break;
+		}
+		PlayerChasing();
+		if (PlayerDetact())
+			m_state = NPC_ATTACK;
+		break;
+	case NPC_ATTACK:
+		if (!PlayerDetact()) {
+			m_state = NPC_CHASE;
+			PrintRayCast = false;
+		}
+		else {
+			PlayerAttack();
+		}
+		break;
+	case NPC_DEATH:
+		if (pos.y > 0.0f)
+			NPC_Death_motion();
+		break;
+	default:
+		break;
+	}
+
+	NPC_Check_HP();
+	SetFrustum();
+}
+
+void NPC::Caculation_Distance(XMFLOAT3 vec, int id) // 서버에서 따로 부를 것.
+{
+	m_Distance[id] = sqrtf(pow((vec.x - pos.x), 2) + pow((vec.z - pos.z), 2));
+}
+
+void NPC::MoveToNode()
+{
+	NodeMesh currentNode = MeshInfo[m_currentNodeIndex];
+	const bool isMovingInZ = currentNode.GetMoveingSpaceZ();
+	const bool isMovingForward = m_currentNodeIndex % 4 < 2;
+	const float speed = m_Speed;
+
+	if (isMovingInZ) {
+		const float destination = isMovingForward ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
+
+		if (isMovingForward) pos.z += speed;
+		else pos.z -= speed;
+
+		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) UpdateCurrentNodeIndex();
 	}
 	else {
-		for (int i{}; i < MAX_USER; ++i) {
-			m_Distance[i] = 10000;
-		}
-		m_state = prevState;
-		return false;
+		const float destination = isMovingForward ? currentNode.GetSmallX() + m_destinationRange : currentNode.GetLargeX() - m_destinationRange;
+
+		if (isMovingForward) pos.x -= speed;
+		else pos.x += speed;
+
+		if ((isMovingForward && pos.x <= destination) || (!isMovingForward && pos.x >= destination)) UpdateCurrentNodeIndex();
 	}
 }
+void NPC::UpdateCurrentNodeIndex()
+{
+	const int cityNum = m_currentNodeIndex / 4;
+	const int nextSection = m_currentNodeIndex + 1;
+	m_currentNodeIndex = (cityNum * 4) + (nextSection % 4);
+}
+void NPC::MoveChangeIdle()
+{
+
+}
+
+bool NPC::IsUserOnSafeZone(int user_City)
+{
+	return (-1 < user_City < 4) ? false : true;
+}
+int NPC::GetUserCity()
+{
+	for (int i = 0; i < 4; ++i) {
+		if (m_User_Pos[m_chaseID].z < MeshInfo[i * 4 + 1].GetLargeZ() &&
+			m_User_Pos[m_chaseID].z > MeshInfo[i * 4 + 3].GetSmallZ() &&
+			m_User_Pos[m_chaseID].x < MeshInfo[i * 4].GetLargeX() &&
+			m_User_Pos[m_chaseID].x > MeshInfo[i * 4 + 2].GetSmallX()) {
+			return i;
+		}
+	}
+	return -1;
+}
+int NPC::FindUserNode(int user_City)
+{
+	for (int i = 0; i < 4; ++i) {
+		if (m_User_Pos[m_chaseID].x > MeshInfo[4 * user_City + i].GetLargeX() ||
+			m_User_Pos[m_chaseID].x < MeshInfo[4 * user_City + i].GetSmallX() ||
+			m_User_Pos[m_chaseID].z > MeshInfo[4 * user_City + i].GetLargeZ() ||
+			m_User_Pos[m_chaseID].z < MeshInfo[4 * user_City + i].GetSmallZ()) {
+			continue;
+		}
+		else {
+			return 4 * user_City + i;
+		}
+	}
+	return -1;
+}
+void NPC::IsPathMove()
+{
+	if (path.empty() || path.size() < 2) return;
+
+	NodeMesh currentNode = MeshInfo[path[0]];
+	NodeMesh nextNode = MeshInfo[path[1]];
+
+	const bool isMovingInZ = currentNode.GetMoveingSpaceZ();
+	const bool isMovingForward = nextNode.GetIndex() % 4 < 2;
+	const float speed = m_Speed;
+
+	if (isMovingInZ) {
+		if (isMovingForward) pos.z += speed;
+		else pos.z -= speed;
+	}
+	else {
+		if (isMovingForward) pos.x -= speed;
+		else pos.x += speed;
+	}
+}
+void NPC::PlayerChasing()
+{
+	// 같은 도시에 있는 지 판별
+	int user_City = GetUserCity();
+	if (user_City == -1 || IsUserOnSafeZone(user_City)) return;
+
+	// 있다면 노드 검색
+	int user_node = FindUserNode(user_City);
+	if (user_node == -1) return;
+
+	// 노드 검색 후 같은 섹션에 있는 지 판별
+	if (user_node == m_currentNodeIndex) {
+
+		// 내 포지션과 유저의 포지션이 이루는 벡터와 내가 바라보는 벡터의 각도를 구함
+
+		// 이후 해당 각도를 통해 pitch 회전
+
+		// 회전한 look 벡터를 통해 이동 (look은 계산하기 전에 노멀라이즈)
+
+		pos.x += m_lookvec.x * m_Speed;
+		pos.z += m_lookvec.z * m_Speed;
+	}
+	else {
+		// path 데이터가 있다면 제거
+		path.clear();
+
+		path = AStarSearch(m_currentNodeIndex, user_node, user_City);
+		m_targetNodeIndex = path[path.size() - 1];
+		m_currentNodeIndex = path[0];
+		IsPathMove();
+	}
+}
+vector<int> NPC::AStarSearch(int startNode, int targetNode, int user_City)
+{
+	const int m_NumTotalNode = MeshInfo.size();
+	vector<bool> visited(m_NumTotalNode, false);
+	vector<float> gScore(m_NumTotalNode, numeric_limits<float>::infinity());
+	vector<float> fScore(m_NumTotalNode, numeric_limits<float>::infinity());
+	vector<Node*> cameFrom(m_NumTotalNode, nullptr);
+
+	gScore[startNode] = 0.0f;
+	fScore[startNode] = HeuristicEstimate(startNode, targetNode);
+
+	priority_queue<Node> openSet;
+	openSet.emplace(startNode, fScore[startNode], gScore[startNode], nullptr);
+	visited[startNode] = true;
+
+	vector<int> path;
+	while (!openSet.empty()) {
+		if (cameFrom[targetNode] != nullptr) {
+			Node* node = cameFrom[targetNode];
+			while (node != nullptr) {
+				path.push_back(node->index);
+				node = node->parent;
+			}
+			reverse(path.begin(), path.end());
+			break;
+		}
+
+		Node current = openSet.top();
+		openSet.pop();
+
+		visited[current.index] = true;
+
+		for (int neighborIndex : MeshInfo[current.index].neighbor_mesh) {
+			if (user_City != neighborIndex / 4)
+				continue;
+
+			if (!visited[neighborIndex]) {
+				float tentative_gScore = gScore[current.index] + DistanceBetween(current.index, neighborIndex);
+
+				if (tentative_gScore < gScore[neighborIndex]) {
+					cameFrom[neighborIndex] = &current;
+					gScore[neighborIndex] = tentative_gScore;
+					fScore[neighborIndex] = gScore[neighborIndex] + HeuristicEstimate(neighborIndex, targetNode);
+
+					openSet.emplace(neighborIndex, fScore[neighborIndex], gScore[neighborIndex], cameFrom[neighborIndex]);
+				}
+			}
+		}
+	}
+	return path;
+}
+
 bool NPC::PlayerDetact()
 {
 	XMVECTOR PlayerPos = XMLoadFloat3(&m_User_Pos[m_chaseID]);
@@ -449,45 +739,6 @@ bool NPC::PlayerDetact()
 
 	return false;
 }
-int NPC::FindClosestNode(const XMFLOAT3& position)
-{
-	int closestNodeIndex = -1;
-	float closestDistanceSq = (numeric_limits<float>::max)();
-
-	for (int i = 0; i < graph.size(); ++i)
-	{
-		float distanceSq = MultiDistanceCalc(position, graph[i].getPos());
-		if (distanceSq < closestDistanceSq)
-		{
-			closestNodeIndex = i;
-			closestDistanceSq = distanceSq;
-		}
-	}
-	return closestNodeIndex;
-}
-int NPC::GetNextNodeInPath(const vector<int>& path)
-{
-	// 현재 노드의 인덱스를 찾습니다.
-	int currentNodeIndex = m_currentNodeIndex;
-
-	// 경로에서 현재 노드의 인덱스를 찾습니다.
-	auto it = find(path.begin(), path.end(), currentNodeIndex);
-	if (it != path.end())
-	{
-		// 현재 노드가 경로에 존재하는 경우
-		// 다음 노드의 인덱스를 찾습니다.
-		auto nextIt = next(it);
-		if (nextIt != path.end())
-		{
-			return *nextIt;
-		}
-	}
-
-	// 경로가 잘못된 경우 또는 마지막 노드인 경우
-	// 현재 노드의 인덱스를 반환합니다.
-	return currentNodeIndex;
-}
-
 void NPC::SetFrustum()
 {
 	// NPC의 위치와 Look 벡터를 가져온다.
@@ -527,333 +778,13 @@ void NPC::SetFrustum()
 
 	m_frustum = frustum;
 }
-void NPC::SetIndexNode(int idx)
-{
-	m_currentNodeIndex = idx;
-	CheckPoint cp = graph[idx]; // CP에서 해당 인덱스의 CheckPoint 가져오기
-	XMFLOAT3 cpPos = cp.getPos(); // CheckPoint의 위치 정보 가져오기
-
-	// NPC의 포지션을 CP의 위치 주변으로 설정
-	// 여기에서 필요에 따라 좀더 세밀한 위치 설정을 할 수 있습니다.
-	XMFLOAT3 setPos = {
-		cpPos.x + getRandomOffset(-20.0f, 20.0f), // X 좌표에 랜덤한 오프셋을 더해 위치 설정
-		cpPos.y + getRandomOffset(-160.0f, -130.0f), // Y 좌표에 랜덤한 오프셋을 더해 위치 설정
-		cpPos.z + getRandomOffset(-20.0f, 20.0f)  // Z 좌표에 랜덤한 오프셋을 더해 위치 설정
-	};
-
-	SetPosition(setPos);
-}
-void NPC::SetRotation(float yaw, float pitch, float roll)
-{
-	// Yaw, pitch, roll 값을 기반으로 회전 행렬을 생성합니다.
-	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
-
-	// 현재 Look, Right, Up Vectors를 업데이트합니다.
-	m_lookvec = XMFLOAT3(rotationMatrix.r[2].m128_f32[0], rotationMatrix.r[2].m128_f32[1], rotationMatrix.r[2].m128_f32[2]);
-	m_rightvec = XMFLOAT3(rotationMatrix.r[0].m128_f32[0], rotationMatrix.r[0].m128_f32[1], rotationMatrix.r[0].m128_f32[2]);
-	m_upvec = XMFLOAT3(rotationMatrix.r[1].m128_f32[0], rotationMatrix.r[1].m128_f32[1], rotationMatrix.r[1].m128_f32[2]);
-
-	// 회전 값을 NPC에 설정합니다.
-	//m_rotation = rotationMatrix;
-}
-
-void NPC::NPC_State_Manegement(int state)
-{
-	switch (m_state)
-	{
-	case NPC_IDLE: // 매복 혹은 특정 운동을 하는 중.
-	{
-		MoveToNode();
-		SetTrackingIDbyDistance(500.0f, NPC_IDLE, NPC_FLY);
-	}
-	break;
-	case NPC_FLY:
-	{
-		// Fly 지속 or Fly -> chase or Fly -> Idle
-		FlyOnNpc(m_User_Pos[m_chaseID], m_chaseID); // 대상 플레이어와의 y 좌표를 비슷하게 맞춤.
-
-		SetTrackingIDbyDistance(350.0f, NPC_FLY, NPC_CHASE);
-		if (m_state == NPC_FLY) {
-			if (!SetTrackingPrevStatebyDistance(350.0f, NPC_FLY, NPC_IDLE)) {
-				MoveChangeIdle();
-				m_chaseID = -1;
-			}
-		}
-	}
-	break;
-	case NPC_CHASE:
-	{
-		// chase -> chase or chase -> attack or chase -> fly	
-		PlayerChasing();
-		SetTrackingIDbyDistance(300.0f, NPC_CHASE, NPC_ST_ATK); // ID 탐색
-		if (PlayerDetact()) { // Id 탐색은 이미 가장 가까운 대상으로 지정하기에 따로 탐색은 하지 않음.
-			m_state = NPC_ST_ATK; // 다음 상태
-		}
-		else {
-			SetTrackingPrevStatebyDistance(300.0f, NPC_CHASE, NPC_FLY);
-		}
-	}
-	break;
-	case NPC_ST_ATK:
-	{
-		// bullet 관리
-		SetTrackingIDbyDistance(200.0f, NPC_ST_ATK, NPC_ST_ATK); // ID 탐색
-		if (!PlayerDetact()) { // Id 탐색은 이미 가장 가까운 대상으로 지정하기에 따로 탐색은 하지 않음.
-			m_state = NPC_CHASE; // 이전 상태
-			PrintRayCast = false;
-		}
-		else {
-			PlayerAttack();
-		}
-	}
-	break;
-	case NPC_DEATH:
-	{
-		if (pos.y > 0.0f) {
-			NPC_Death_motion();
-		}
-	}
-	break;
-	default:
-		break;
-	}
-
-	//BuildingToNPC_Distance();
-	NPC_Check_HP();
-	//setBB_Pro();
-	//setBB_Body();
-	SetFrustum();
-}
-void NPC::Caculation_Distance(XMFLOAT3 vec, int id) // 서버에서 따로 부를 것.
-{
-	m_Distance[id] = sqrtf(pow((vec.x - pos.x), 2) + pow((vec.z - pos.z), 2));
-}
-void NPC::MoveChangeIdle()
-{
-	XMFLOAT3 currentPosition = GetPosition();
-
-	// 가장 가까운 Checkpoint를 찾기 위한 변수 초기화
-	int closestCheckpointIndex = -1;
-	float closestDistance = (std::numeric_limits<float>::max)();
-
-	// NPC의 위치와 모든 Checkpoint의 거리를 비교하여 가장 가까운 Checkpoint를 찾습니다.
-	int numCP = graph.size();
-	for (int i = 0; i < numCP; ++i) {
-		float distance = MultiDistanceCalc(graph[i].getPos(), pos);
-
-		if (distance < closestDistance) {
-			closestCheckpointIndex = i;
-			closestDistance = distance;
-		}
-	}
-
-	// 가장 가까운 Checkpoint의 인덱스를 Idle 상태로 설정합니다.
-	SetIdleNodeIndex(closestCheckpointIndex);
-
-	// NPC를 해당 Checkpoint로 이동시킵니다.
-	MoveToNode();
-}
-void NPC::MoveToNode()
-{
-	XMFLOAT3 targetPosition = graph[m_currentNodeIndex].getPos();
-
-	// NPC의 현재 위치와 목표 위치 간의 벡터를 계산합니다.
-	XMFLOAT3 direction = {
-		targetPosition.x - pos.x,
-		targetPosition.y - pos.y,
-		targetPosition.z - pos.z
-	};
-	XMFLOAT3 temp = NPCNormalize(direction);
-
-	// 이동 속도를 설정합니다.
-	float moveSpeed = m_Speed * 0.0016f; // deltaTime은 프레임 간의 시간 간격입니다.
-
-	// NPC의 위치를 목표 위치로 보간하여 이동시킵니다.
-	pos.x += temp.x * m_Speed;
-	pos.y += temp.y * m_Speed;
-	pos.z += temp.z * m_Speed;
-
-	float distanceToTarget = sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
-
-	// 거리가 50 이하일 경우 다음 노드로 설정합니다.
-	if (distanceToTarget <= 50.0f)
-	{
-		// 다음 노드로 이동하기 위해 currentNodeIndex를 업데이트합니다.
-		if (m_currentNodeIndex >= 2 && m_currentNodeIndex <= 5) {
-			m_currentNodeIndex = (m_currentNodeIndex + 1) % 6 + 2; // 2->3->4->5->2
-		}
-		else if (m_currentNodeIndex >= 6 && m_currentNodeIndex <= 9) {
-			m_currentNodeIndex = (m_currentNodeIndex + 1) % 4 + 6; // 6->7->8->9->6
-		}
-		else if (m_currentNodeIndex >= 10 && m_currentNodeIndex <= 13) {
-			m_currentNodeIndex = (m_currentNodeIndex + 1) % 4 + 10; // 10->11->12->13->10
-		}
-		else if (m_currentNodeIndex >= 14 && m_currentNodeIndex <= 17) {
-			m_currentNodeIndex = (m_currentNodeIndex + 1) % 4 + 14; // 14->15->16->17->14
-		}
-	}
-
-	// NPC의 회전을 설정합니다.
-	XMVECTOR targetDirection = XMLoadFloat3(&direction);
-	targetDirection = XMVector3Normalize(targetDirection);
-
-	// Yaw 회전을 계산합니다.
-	XMVECTOR upVector = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	XMVECTOR rightVector = XMVector3Cross(upVector, targetDirection);
-	rightVector = XMVector3Normalize(rightVector);
-	upVector = XMVector3Cross(targetDirection, rightVector);
-	upVector = XMVector3Normalize(upVector);
-
-	// XMFLOAT3로 변환하여 저장합니다.
-	XMStoreFloat3(&m_lookvec, targetDirection);
-	XMStoreFloat3(&m_rightvec, rightVector);
-	XMStoreFloat3(&m_upvec, upVector);
-
-	// 회전값을 계산합니다.
-	float m_yaw = atan2(-XMVectorGetZ(targetDirection), XMVectorGetX(targetDirection));
-	float m_pitch = atan2(XMVectorGetY(targetDirection), sqrt(XMVectorGetX(targetDirection) * XMVectorGetX(targetDirection) + XMVectorGetZ(targetDirection) * XMVectorGetZ(targetDirection)));
-	float m_roll = 0.0f;
-
-	// 회전값을 NPC의 멤버 변수에 저장합니다.
-	yaw = m_yaw;
-	pitch = m_pitch;
-	roll = m_roll;
-}
-
-void NPC::MoveToNode(int nodeIndex)
-{
-	if (nodeIndex < 0 || nodeIndex >= graph.size()) {
-		return;
-	}
-
-	CheckPoint targetCheckpoint = graph[nodeIndex];
-	XMFLOAT3 targetPosition = targetCheckpoint.getPos();
-
-	SetPosition(targetPosition);
-}
-void NPC::FlyOnNpc(XMFLOAT3 vec, int id) // 추적대상 플레이어와 높이 맞추기
-{
-	if (pos.y < vec.y) {
-		pos.y += 1.0f;
-	}
-	if (pos.y > vec.y) {
-		pos.y -= 1.5f;
-	}
-}
-void NPC::PlayerChasing()
-{
-	XMFLOAT3 npcPosition = GetPosition();
-	XMFLOAT3 playerPosition = m_User_Pos[m_chaseID];
-
-	// 플레이어를 바라보는 방향 벡터를 계산합니다.
-	XMFLOAT3 lookDirection = VectorSubtract(playerPosition, npcPosition);
-	XMVECTOR lookVector = XMLoadFloat3(&lookDirection);
-	lookVector = XMVector3Normalize(lookVector);
-
-	// 플레이어를 바라보는 방향으로 회전합니다.
-	float targetYaw = atan2(-XMVectorGetZ(lookVector), XMVectorGetX(lookVector));
-	float targetPitch = atan2(XMVectorGetY(lookVector), sqrt(XMVectorGetX(lookVector) * XMVectorGetX(lookVector) + XMVectorGetZ(lookVector) * XMVectorGetZ(lookVector)));
-
-	// 현재 회전값을 가져옵니다.
-	float currentYaw{}, currentPitch{}, currentRoll{};
-	GetRotation(currentYaw, currentPitch, currentRoll);
-
-	// 현재 회전값과 목표 회전값 사이를 보간합니다.
-	float interpolationFactor = 0.1f; 
-	float interpolatedYaw = LerpAngle(currentYaw, targetYaw, interpolationFactor);
-	float interpolatedPitch = LerpAngle(currentPitch, targetPitch, interpolationFactor);
-
-	// 회전값을 적용합니다.
-	SetRotation(interpolatedYaw, interpolatedPitch, currentRoll);
-
-	// 플레이어와 가장 가까운 노드를 찾습니다.
-	int closestNodeIndex = FindClosestNode(playerPosition);
-
-	// A* 알고리즘을 사용하여 경로를 탐색합니다.
-	vector<int> path = AStarSearch(graph[closestNodeIndex].getPos());
-
-	// 경로가 존재하는 경우
-	if (!path.empty())
-	{
-		XMFLOAT3 targetPosition = graph[path[0]].getPos();
-
-		// 이동 속도 및 거리 계산
-		float moveSpeed = 0.1f;  
-		float distanceToTarget = MultiDistanceCalc(npcPosition, targetPosition);
-
-		float adjustedMoveSpeed = moveSpeed * distanceToTarget;
-
-		// 이동 방향 계산
-		XMFLOAT3 moveDirection = VectorSubtract(targetPosition, npcPosition);
-		XMVECTOR moveVector = XMLoadFloat3(&moveDirection);
-		moveVector = XMVector3Normalize(moveVector);
-
-		// 이동 거리 계산
-		XMVECTOR moveDistance = XMVectorScale(moveVector, adjustedMoveSpeed);
-
-		// 이동한 거리를 계산
-		XMVECTOR newPosition = XMVectorAdd(XMLoadFloat3(&npcPosition), moveDistance);
-		XMFLOAT3 newNpcPosition;
-		XMStoreFloat3(&newNpcPosition, newPosition);
-
-		SetPosition(newNpcPosition);
-	}
-	else
-	{
-		// 이미 같은 구역에 있음.
-		XMFLOAT3 lookDirection = VectorSubtract(playerPosition, npcPosition);
-		XMVECTOR lookVector = XMLoadFloat3(&lookDirection);
-		lookVector = XMVector3Normalize(lookVector);
-
-		// 플레이어를 바라보는 방향으로 회전합니다.
-		float targetYaw = atan2(-XMVectorGetZ(lookVector), XMVectorGetX(lookVector));
-		float targetPitch = atan2(XMVectorGetY(lookVector), sqrt(XMVectorGetX(lookVector) * XMVectorGetX(lookVector) + XMVectorGetZ(lookVector) * XMVectorGetZ(lookVector)));
-
-		// 현재 회전값을 가져옵니다.
-		float currentYaw{}, currentPitch{}, currentRoll{};
-		GetRotation(currentYaw, currentPitch, currentRoll);
-
-		float interpolationFactor = 0.1f; 
-		float interpolatedYaw = LerpAngle(currentYaw, targetYaw, interpolationFactor);
-		float interpolatedPitch = LerpAngle(currentPitch, targetPitch, interpolationFactor);
-
-		// 회전값을 적용합니다.
-		SetRotation(interpolatedYaw, interpolatedPitch, currentRoll);
-
-		XMFLOAT3 targetPosition = playerPosition;
-
-		// 이동 속도 및 거리 계산
-		float moveSpeed = 0.1f; 
-		float distanceToTarget = MultiDistanceCalc(npcPosition, targetPosition);
-
-		// 플레이어에 가까워질수록 이동 속도를 줄입니다.
-		float adjustedMoveSpeed = moveSpeed * distanceToTarget;
-
-		// 이동 방향 계산
-		XMFLOAT3 moveDirection = VectorSubtract(targetPosition, npcPosition);
-		XMVECTOR moveVector = XMLoadFloat3(&moveDirection);
-		moveVector = XMVector3Normalize(moveVector);
-
-		// 이동 거리 계산
-		XMVECTOR moveDistance = XMVectorScale(moveVector, adjustedMoveSpeed);
-
-		// 이동한 거리를 계산합니다.
-		XMVECTOR newPosition = XMVectorAdd(XMLoadFloat3(&npcPosition), moveDistance);
-		XMFLOAT3 newNpcPosition;
-		XMStoreFloat3(&newNpcPosition, newPosition);
-
-		SetPosition(newNpcPosition);
-	}
-
-}
-
 void NPC::PlayerAttack()
 {
 	// Look
 	PlayerChasing();
 
 	// Attack
-	Cube ChasePlayer{ {m_User_Pos[m_chaseID].x, m_User_Pos[m_chaseID].y, m_User_Pos[m_chaseID].z },
+	/*Cube ChasePlayer{ {m_User_Pos[m_chaseID].x, m_User_Pos[m_chaseID].y, m_User_Pos[m_chaseID].z },
 		HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
 	MyVector3 NPC_bullet_Pos = { pos.x, pos.y , pos.z };
 	MyVector3 NPC_Look_Vec = { m_coordinate.look.x, m_coordinate.look.y , m_coordinate.look.z };
@@ -864,21 +795,9 @@ void NPC::PlayerAttack()
 	}
 	else {
 		PrintRayCast = true;
-	}
+	}*/
 
 	//NPCtoBuilding_collide();
-}
-void NPC::NPC_Death_motion()
-{
-	pos.y -= 6.0f;
-
-	// 빙글빙글 돌며 추락
-	yaw += 3.0f;
-
-	Coordinate base_coordinate;
-	m_coordinate.right = NPCcalcRotate(base_coordinate.right, pitch, yaw, roll);
-	m_coordinate.up = NPCcalcRotate(base_coordinate.up, pitch, yaw, roll);
-	m_coordinate.look = NPCcalcRotate(base_coordinate.look, pitch, yaw, roll);
 }
 void NPC::NPC_Damege_Calc(int id)
 {
@@ -913,186 +832,17 @@ void NPC::NPC_Check_HP()
 		m_state = NPC_DEATH;
 	}
 }
-void NPC::SetTrackingIDbyDistance(float setDistance, int curState, int nextState)
+void NPC::NPC_Death_motion()
 {
-	bool State_check = false;
-	float MinDis = 50000;
-	for (int i{}; i < MAX_USER; ++i) {
-		if (m_Distance[i] < setDistance) {  // 상태로 변환하기 위한 조건 및 추적 ID 갱신
-			State_check = true;
-			if (m_Distance[i] < MinDis) {
-				m_chaseID = i;
-				MinDis = m_Distance[i];
-			}
-			m_state = nextState; // 자신의 상태를 다음 상태로 변경
-		}
-		if (i == MAX_USER - 1 && !State_check) { // 자신의 상태 유지
-			m_state = curState;
-		}
-	}
-}
+	pos.y -= 6.0f;
 
-float NPC::getRandomOffset(float min, float max)
-{
-	random_device rd;
-	default_random_engine dre(rd());
-	uniform_real_distribution<float> offset(min, max); // 원하는 오프셋 범위 설정
+	// 빙글빙글 돌며 추락
+	yaw += 3.0f;
 
-	return offset(dre);
-}
-float NPC::CalculateYawToTarget(const XMFLOAT3& targetPosition) const {
-	// NPC의 현재 위치와 목표 위치 간의 벡터를 계산합니다.
-	XMFLOAT3 direction = {
-		targetPosition.x - pos.x,
-		targetPosition.y - pos.y,
-		targetPosition.z - pos.z
-	};
-
-	// NPC의 Yaw 값을 계산합니다.
-	// atan2 함수를 사용하여 방향 벡터의 X, Z 성분을 이용합니다.
-	float yaw = atan2(direction.x, direction.z);
-
-	// 라디안 값을 각도로 변환합니다.
-	yaw = XMConvertToDegrees(yaw);
-
-	// 각도를 0~360 범위로 조정합니다.
-	if (yaw < 0)
-		yaw += 360.0f;
-
-	return yaw;
-}
-float NPC::CalculatePitchToTarget(const XMFLOAT3& targetPosition) const {
-	// NPC의 현재 위치와 목표 위치 간의 벡터를 계산합니다.
-	XMFLOAT3 direction = {
-		targetPosition.x - pos.x,
-		targetPosition.y - pos.y,
-		targetPosition.z - pos.z
-	};
-
-	// NPC의 Pitch 값을 계산합니다.
-	// atan2 함수를 사용하여 방향 벡터의 Y, XZ 평면에서의 길이를 이용합니다.
-	float pitch = atan2(direction.y, sqrt(direction.x * direction.x + direction.z * direction.z));
-
-	// 라디안 값을 각도로 변환합니다.
-	pitch = XMConvertToDegrees(pitch);
-
-	return pitch;
-}
-float NPC::CalculateRollToTarget(const XMFLOAT3& targetPosition) const {
-	// NPC의 Roll 값을 일반적으로 계산하는 로직을 구현해야 합니다.
-	// Roll은 일반적으로 NPC의 이동 경로와 관련이 있는 경우에 사용됩니다.
-	// NPC의 이동 경로와 목표 위치 간의 관계에 따라 적절한 Roll 값을 계산해야 합니다.
-	// 구체적인 NPC의 동작 및 이동 방식에 따라 Roll 값을 정의하고 계산해야 합니다.
-	// 이 예시에서는 NPC의 Roll 값 계산을 생략하고 0을 반환합니다.
-	return 0.0f;
-}
-
-vector<int> NPC::AStarSearch(XMFLOAT3 target)
-{
-	const int numNodes = graph.size();
-
-	// 시작 노드와 목표 노드의 인덱스를 찾습니다.
-	int startIndex = -1;
-	int targetIndex = -1;
-
-	for (int i = 0; i < numNodes; ++i)
-	{
-		if ((graph[i].getPos().x == graph[m_currentNodeIndex].getPosX()) && (graph[i].getPos().y == graph[m_currentNodeIndex].getPosY()) && (graph[i].getPos().z == graph[m_currentNodeIndex].getPosZ()))
-		{
-			startIndex = i;
-		}
-		else if ((graph[i].getPos().x == target.x) && (graph[i].getPos().y == target.y) && (graph[i].getPos().z == target.z))
-		{
-			targetIndex = i;
-		}
-
-		/*if (startIndex != -1 && targetIndex != -1)
-		{
-			break;
-		}*/
-	}
-
-	// 시작 노드나 목표 노드가 없으면 빈 경로를 반환합니다.
-	if (startIndex == -1 || targetIndex == -1)
-	{
-		return std::vector<int>();
-	}
-
-	std::vector<int> path;
-
-	// 시작 노드와 목표 노드가 동일한 경우, 경로가 없이 시작 노드 하나만 포함된 경로를 반환합니다.
-	if (startIndex == targetIndex)
-	{
-		path.push_back(startIndex);
-		return path;
-	}
-
-	// 각 노드까지의 예상 거리 값을 저장하는 배열을 초기화합니다.
-	std::vector<float> hValues(numNodes, (std::numeric_limits<float>::max)());
-
-	// 시작 노드까지의 예상 거리를 0으로 설정합니다.
-	hValues[startIndex] = 0.0f;
-
-	// 방문한 노드를 저장하는 집합입니다.
-	std::unordered_set<int> visitedNodes;
-
-	// 시작 노드를 우선순위 큐에 추가합니다.
-	std::priority_queue<Node> pq;
-	pq.push({ startIndex, 0.0f, hValues[startIndex], hValues[startIndex] });
-
-	// 노드들의 이전 노드 인덱스를 저장하는 배열입니다.
-	std::vector<int> prevNodes(numNodes, -1);
-
-	while (!pq.empty())
-	{
-		// 우선순위 큐에서 가장 작은 f 값을 갖는 노드를 선택합니다.
-		int currentNodeIndex = pq.top().index;
-		pq.pop();
-
-		// 목표 노드에 도달한 경우, 경로를 추적하고 반환합니다.
-		if (currentNodeIndex == targetIndex)
-		{
-			int nodeIndex = targetIndex;
-			while (nodeIndex != -1)
-			{
-				path.insert(path.begin(), nodeIndex);
-				nodeIndex = prevNodes[nodeIndex];
-			}
-			break;
-		}
-
-		// 현재 노드를 방문한 것으로 표시합니다.
-		visitedNodes.insert(currentNodeIndex);
-
-		// 현재 노드와 연결된 모든 이웃 노드를 탐색합니다.
-		const std::vector<int>& neighbors = graph[currentNodeIndex].getNeighbors();
-		for (int neighborIndex : neighbors)
-		{
-			// 이미 방문한 노드는 건너뜁니다.
-			if (visitedNodes.find(neighborIndex) != visitedNodes.end())
-			{
-				continue;
-			}
-
-			// 현재 노드에서 이웃 노드까지의 예상 거리를 계산합니다.
-			float distance = MultiDistanceCalc(graph[currentNodeIndex].getPos(), graph[neighborIndex].getPos());
-			float gValue = hValues[currentNodeIndex] + distance;
-
-			// 이웃 노드까지의 예상 거리가 현재 저장된 거리보다 작으면 값을 갱신하고 이전 노드 인덱스를 업데이트합니다.
-			if (gValue < hValues[neighborIndex])
-			{
-				hValues[neighborIndex] = gValue;
-				prevNodes[neighborIndex] = currentNodeIndex;
-
-				// 이웃 노드를 우선순위 큐에 추가합니다.
-				float hValue = MultiDistanceCalc(graph[neighborIndex].getPos(), target);
-				float fValue = gValue + hValue;
-				pq.push({ neighborIndex, gValue, hValue, fValue });
-			}
-		}
-	}
-
-	return path;
+	Coordinate base_coordinate;
+	m_coordinate.right = NPCcalcRotate(base_coordinate.right, pitch, yaw, roll);
+	m_coordinate.up = NPCcalcRotate(base_coordinate.up, pitch, yaw, roll);
+	m_coordinate.look = NPCcalcRotate(base_coordinate.look, pitch, yaw, roll);
 }
 
 array<NPC, MAX_NPCS> npcsInfo;
@@ -1398,7 +1148,7 @@ void process_packet(char* packet)
 			}
 
 			break;
-			
+
 		case PL_ST_FLY:
 			if (chgstate_packet->target == TARGET_PLAYER) {
 
@@ -1408,7 +1158,7 @@ void process_packet(char* packet)
 			}
 
 			break;
-			
+
 		case PL_ST_CHASE:
 			if (chgstate_packet->target == TARGET_PLAYER) {
 
@@ -1418,7 +1168,7 @@ void process_packet(char* packet)
 			}
 
 			break;
-			
+
 		case PL_ST_ATTACK:
 			if (chgstate_packet->target == TARGET_PLAYER) {
 
@@ -1428,7 +1178,7 @@ void process_packet(char* packet)
 			}
 
 			break;
-			
+
 		case PL_ST_DEAD:
 			if (chgstate_packet->target == TARGET_PLAYER) {
 
@@ -1583,17 +1333,30 @@ void initNpc() {
 		random_device rd;
 		default_random_engine dre(rd());
 
-		uniform_int_distribution<int>idx(2, 17);
-		npcsInfo[i].graph = CP;
-		npcsInfo[i].SetIndexNode(idx(dre));
+		uniform_int_distribution<int>idx(0, 15);
+		//npcsInfo[i].graph = CP;
+		npcsInfo[i].SetNodeIndex(idx(dre));
+
+		float x = npcsInfo[i].getRandomOffset(MeshInfo[npcsInfo[i].GetNodeIndex()].GetSmallX(),
+			MeshInfo[npcsInfo[i].GetNodeIndex()].GetLargeX());
+		float y = npcsInfo[i].getRandomOffset(30.0f, 100.0f);
+		float z = npcsInfo[i].getRandomOffset(MeshInfo[npcsInfo[i].GetNodeIndex()].GetSmallZ(),
+			MeshInfo[npcsInfo[i].GetNodeIndex()].GetLargeZ());
+
+		XMFLOAT3 tpos = { x,y,z };
+		npcsInfo[i].SetPosition(tpos);
 
 		npcsInfo[i].SetRotate(0.0f, 0.0f, 0.0f);
+
+		uniform_int_distribution<int>drange(0.0f, 20.0f);
+		npcsInfo[i].SetDestinationRange(drange(dre));
 
 		uniform_real_distribution<float>SpdSet(10.0f, 20.0f);
 		float speed = SpdSet(dre);
 		npcsInfo[i].SetSpeed(speed);
 		npcsInfo[i].SetChaseID(-1);
-
+		npcsInfo[i].path.clear();
+		npcsInfo[i].SetTargetNodeIndex(-1);
 		g_logicservers[a_lgcsvr_num].send_npc_init_packet(npc_id);
 	}
 }
@@ -1621,8 +1384,6 @@ void MoveNPC()
 		auto start_t = system_clock::now();
 		//======================================================================
 		if (ConnectingServer) {
-
-
 			for (int i = 0; i < MAX_NPCS; ++i) {
 				// 클라이언트들과 NPC 사이의 거리 계산
 
@@ -1634,23 +1395,26 @@ void MoveNPC()
 					npc_remove_packet.n_id = npcsInfo[i].GetID();
 
 					npcsInfo[i].m_DeathCheck = true;
-
-					//for (auto& send_target : playersInfo) {
-					//	if (send_target.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
-					//	if (send_target.s_state != ST_INGAME) continue;
-
-					//	lock_guard<mutex> lg{ send_target.s_lock };
-					//	send_target.do_send(&npc_remove_packet);
-					//}
 				}
 				if (npcsInfo[i].GetPosition().y > 0)
 				{
+					float temp_min = numeric_limits<float>::infinity();
+					int temp_id = -1;
+
 					for (auto& cl : playersInfo) {
 						if (cl.id != -1) {
 							npcsInfo[i].Caculation_Distance(cl.pos, cl.id);
+							// 가장 가까운 거리를 갖고있는 아이를 chase_id로 지정
+							float distance =  npcsInfo[i].GetDistance(cl.id);
+							if (temp_min > distance) {
+								temp_min = distance;
+								temp_id = cl.id;
+							}
 						}
 					}
-					//cout << i << "번째 Status - " << npcs[i].GetState() << endl;				
+
+					npcsInfo[i].SetChaseID(temp_id);
+							
 					npcsInfo[i].NPC_State_Manegement(npcsInfo[i].GetState());
 					// NPC가 추적하려는 아이디가 있는지부터 확인, 있으면 추적 대상 플레이어 좌표를 임시 저장
 					if (npcsInfo[i].GetChaseID() != -1) {
@@ -1658,23 +1422,20 @@ void MoveNPC()
 					}
 
 					// npc pos 확인
-					/*
+
 					cout << "=============" << endl;
 					//cout << i << "번째 NPC의 도시 ID: " << npcsInfo[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcsInfo[i].GetIdleSection() << endl;
 					cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
 					cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
-					cout << i << "번째 NPC의 Look: " << npcsInfo[i].m_lookvec.x << ", " << npcsInfo[i].m_lookvec.y << ", " << npcsInfo[i].m_lookvec.z << endl;
+					//cout << i << "번째 NPC의 Look: " << npcsInfo[i].m_lookvec.x << ", " << npcsInfo[i].m_lookvec.y << ", " << npcsInfo[i].m_lookvec.z << endl;
 					cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
-					/*if (npcs[i].PrintRayCast) {
-						cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
-					}
-					*/
 
-					// 상태마다 다른 움직임을 하는 매니지먼트
 
-					//SERVER temp;
+					//if (npcs[i].PrintRayCast) {
+					//	cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
+					//}
+
 					g_logicservers[a_lgcsvr_num].send_npc_move_rotate_packet(npcsInfo[i].GetID());
-
 				}
 			}
 
@@ -1685,7 +1446,6 @@ void MoveNPC()
 		}
 	}
 }
-
 
 //======================================================================
 int main(int argc, char* argv[])
@@ -1829,9 +1589,13 @@ int main(int argc, char* argv[])
 							b_scale = 0;
 							scale_count = 0;
 
-							CheckPoint tmp_mapobj(tmp_pos[0], tmp_pos[1], tmp_pos[2], tmp_scale[0], tmp_scale[1], tmp_scale[2]);
-							tmp_mapobj.setBB();
-							CP.push_back(tmp_mapobj);
+							NodeMesh temp_mesh;
+							int idx = line_cnt / 10;
+							temp_mesh.SetInit(idx, tmp_pos[0], tmp_pos[2], tmp_scale[0], tmp_scale[2]);
+							cout << "index_num: " << idx << ", CPos: " << tmp_pos[0] << ", " << tmp_pos[2] << ", Bsize: " << tmp_scale[0] << ", " << tmp_scale[2] << endl;
+
+							MeshInfo.push_back(temp_mesh);
+
 							memset(tmp_pos, 0, sizeof(tmp_pos));
 							memset(tmp_scale, 0, sizeof(tmp_scale));
 						}
@@ -1851,47 +1615,26 @@ int main(int argc, char* argv[])
 	}
 	cout << "\n";
 
-	vector<vector<int>> neighborIndices = {
-		{8, 14},      // 0번째 인덱스의 이웃 노드
-		{3, 11},      // 1번째 인덱스의 이웃 노드
-		{3, 5},       // 2번째 인덱스의 이웃 노드
-		{1, 2, 4},    // 3번째 인덱스의 이웃 노드
-		{3, 5},       // 4번째 인덱스의 이웃 노드
-		{2, 4, 6},    // 5번째 인덱스의 이웃 노드
-		{5, 7, 9},    // 6번째 인덱스의 이웃 노드
-		{6, 8},       // 7번째 인덱스의 이웃 노드
-		{0, 7, 9},    // 8번째 인덱스의 이웃 노드
-		{6, 8},       // 9번째 인덱스의 이웃 노드
-		{11, 13},     // 10번째 인덱스의 이웃 노드
-		{1, 10, 12},  // 11번째 인덱스의 이웃 노드
-		{11, 13},     // 12번째 인덱스의 이웃 노드
-		{10, 12, 16}, // 13번째 인덱스의 이웃 노드
-		{0, 15, 17},  // 14번째 인덱스의 이웃 노드
-		{14, 16},     // 15번째 인덱스의 이웃 노드
-		{13, 15, 17}, // 16번째 인덱스의 이웃 노드
-		{14, 16},     // 17번째 인덱스의 이웃 노드
-	};
-	int numCP = CP.size();
+	for (int i{}; i < MeshInfo.size(); ++i) {
+		if (i < 16) {
+			if (i % 2 == 0) {
+				MeshInfo[i].SetMoveingSpace(false, true);
+			}
+			else {
+				MeshInfo[i].SetMoveingSpace(true, false);
+			}
+		}
 
-	for (int i = 0; i < numCP; ++i) {
-		vector<int> neighbors = neighborIndices[i];
-		CP[i].addNeighbors(neighbors);
-	}
-
-	for (int i = 0; i < numCP; ++i) {
-		CheckPoint tempCP = CP[i];
-		const std::vector<int>& neighbors = tempCP.getNeighbors();
-
-		for (int neighborIndex : neighbors) {
-			float distance = tempCP.distanceTo(CP[neighborIndex]);
-			edges.emplace_back(i, neighborIndex, distance);
+		for (int j{}; j < MeshInfo.size(); ++j) {
+			if (i == j) {
+				continue;
+			}
+			bool intersection = MeshInfo[i].otherIndexIntersection(MeshInfo[j]);
+			if (intersection) {
+				MeshInfo[i].neighbor_mesh.emplace_back(j);
+			}
 		}
 	}
-
-	/*for (const auto& edge : edges) {
-		std::cout << "From: " << edge.from << ", To: " << edge.to << ", Value: " << edge.value << std::endl;
-	}*/
-
 
 	//======================================================================
 	//						  Threads Initialize
