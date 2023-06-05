@@ -1814,7 +1814,7 @@ CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_pSkinnedAnimationController->SetCallbackKeys(6, 1);
 
 	if (pModel) delete pModel;
-
+	m_xmOOBoundingBox = BoundingOrientedBox(this->GetPosition(),XMFLOAT3(3.0,6.0,3.0),XMFLOAT4(0,0,0,1));
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -2006,10 +2006,10 @@ void CCityObject::Animate(float fTimeElapsed)
 
 CSoldiarOtherPlayerObjects::CSoldiarOtherPlayerObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(5)
 {
-	pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
-	SetChild(pModel->m_pModelRootObject, true);
-	pModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pModel);
+	CLoadedModelInfo* pSModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
+	SetChild(pSModel->m_pModelRootObject, true);
+	pSModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 12, pSModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
@@ -2037,7 +2037,7 @@ CSoldiarOtherPlayerObjects::CSoldiarOtherPlayerObjects(ID3D12Device* pd3dDevice,
 	m_pSkinnedAnimationController->SetTrackEnable(10, false);
 	m_pSkinnedAnimationController->SetTrackEnable(11, false);
 
-	if (pModel) delete pModel;
+	if (pSModel) delete pSModel;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

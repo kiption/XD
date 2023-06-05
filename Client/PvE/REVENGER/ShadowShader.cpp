@@ -18,7 +18,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 {
 	if (m_nCurScene == SCENE1STAGE)
 	{
-		m_nObjects = 22;
+		m_nObjects = 24;
 		m_ppObjects = new CGameObject * [m_nObjects];
 
 		CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
@@ -45,13 +45,13 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		CLoadedModelInfo* pSoldierModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MODEL.bin", NULL);
 		for (int x = 5; x < OtherPlayers + 5; x++)
 		{
-			m_ppObjects[x] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSoldierModel, 7);
+			m_ppObjects[x] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSoldierModel , 7);
 			m_ppObjects[x]->SetMaterial(0, pOtherPlayerMaterial);
 			m_ppObjects[x]->SetScale(9.0, 9.0, 9.0);
-
 		}
 		if (pSoldierModel) delete pSoldierModel;
-		m_ppObjects[5]->SetPosition(XMFLOAT3(100.0, 6.0, 905.0));
+
+		m_ppObjects[5]->SetPosition(XMFLOAT3(50.0, 6.0, 905.0));
 		m_ppObjects[6]->SetPosition(XMFLOAT3(150.0, 6.0, 905.0));
 		m_ppObjects[7]->SetPosition(XMFLOAT3(200.0, 6.0, 905.0));
 		m_ppObjects[8]->SetPosition(XMFLOAT3(250.0, 6.0, 905.0));
@@ -121,7 +121,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[17]->SetPosition(0.0f, 0.0f, 0.0f);
 		m_ppObjects[18]->SetPosition(0.0f, 0.0f, 0.0f);
 
-		m_nSoldiarNpcObjects = 22;
+		m_nSoldiarNpcObjects = 24;
 		CMaterial* pSoldiarNpcMaterial = new CMaterial(3);
 		pSoldiarNpcMaterial->SetReflection(3);
 		CLoadedModelInfo* pSoldierNpcModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MODEL.bin", NULL);
@@ -135,54 +135,54 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		if (pSoldierNpcModel) delete pSoldierNpcModel;
 
 	}
-	if (m_nCurScene == SCENE2STAGE)
-	{
-		m_nObjects = 12;
-		m_ppObjects = new CGameObject * [m_nObjects];
+	//if (m_nCurScene == SCENE2STAGE)
+	//{
+	//	m_nObjects = 12;
+	//	m_ppObjects = new CGameObject * [m_nObjects];
 
-		CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
-		CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 300.0f, 300.0f, 300.0f);
-		CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+	//	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
+	//	CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 300.0f, 300.0f, 300.0f);
+	//	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
-		CMaterial* pPlaneMaterial = new CMaterial(1);
-		pPlaneMaterial->SetReflection(1);
-		m_ppObjects[0] = new CGameObject(1);
-		m_ppObjects[0]->SetMesh(pPlaneMesh);
-		m_ppObjects[0]->SetMaterial(0, pPlaneMaterial);
-		m_ppObjects[0]->SetPosition(XMFLOAT3(1500.0f, 6.0, 2000.0f));
+	//	CMaterial* pPlaneMaterial = new CMaterial(1);
+	//	pPlaneMaterial->SetReflection(1);
+	//	m_ppObjects[0] = new CGameObject(1);
+	//	m_ppObjects[0]->SetMesh(pPlaneMesh);
+	//	m_ppObjects[0]->SetMaterial(0, pPlaneMaterial);
+	//	m_ppObjects[0]->SetPosition(XMFLOAT3(1500.0f, 6.0, 2000.0f));
 
 
-		CMaterial* pMaterial = new CMaterial(10);
-		pMaterial->SetReflection(10);
-		for (int x = 1; x < m_nObjects; x++)
-		{
-			CLoadedModelInfo* pSoldierModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL);
-			m_ppObjects[x] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSoldierModel, 3);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.85f);
-			m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackPosition(0, 0);
+	//	CMaterial* pMaterial = new CMaterial(10);
+	//	pMaterial->SetReflection(10);
+	//	for (int x = 1; x < m_nObjects; x++)
+	//	{
+	//		CLoadedModelInfo* pSoldierModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL);
+	//		m_ppObjects[x] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSoldierModel, 7);
+	//		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	//		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.85f);
+	//		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackPosition(0, 0);
 
-			XMFLOAT3 xmf3Position = XMFLOAT3(1610.0, 146.0f, 2250.0f);
-			xmf3Position.y = pTerrain->GetHeight(xmf3Position.x, xmf3Position.z);
-			m_ppObjects[x]->SetMaterial(0, pMaterial);
-			m_ppObjects[x]->SetScale(7.0, 7.0, 7.0);
-			m_ppObjects[x]->SetPosition(xmf3Position.x + x * 10.0f, xmf3Position.y, xmf3Position.z);
-			if (pSoldierModel) delete pSoldierModel;
-		}
+	//		XMFLOAT3 xmf3Position = XMFLOAT3(1610.0, 146.0f, 2250.0f);
+	//		xmf3Position.y = pTerrain->GetHeight(xmf3Position.x, xmf3Position.z);
+	//		m_ppObjects[x]->SetMaterial(0, pMaterial);
+	//		m_ppObjects[x]->SetScale(7.0, 7.0, 7.0);
+	//		m_ppObjects[x]->SetPosition(xmf3Position.x + x * 10.0f, xmf3Position.y, xmf3Position.z);
+	//		if (pSoldierModel) delete pSoldierModel;
+	//	}
 
-		CMaterial* pMapMaterial = new CMaterial(1);
-		pMapMaterial->SetReflection(1);
-		CGameObject* pSceneModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/GameObject.bin", NULL);
+	//	CMaterial* pMapMaterial = new CMaterial(1);
+	//	pMapMaterial->SetReflection(1);
+	//	CGameObject* pSceneModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/GameObject.bin", NULL);
 
-		m_ppObjects[11] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		m_ppObjects[11]->SetChild(pSceneModel, false);
-		m_ppObjects[11]->SetMaterial(0, pMapMaterial);
-		m_ppObjects[11]->Rotate(0.0f, 0.0f, 0.0f);
-		m_ppObjects[11]->SetScale(20.0, 20.0, 20.0);
-		m_ppObjects[11]->SetPosition(1500.0, -3.5, 1500.0);
-		pSceneModel->AddRef();
+	//	m_ppObjects[11] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	//	m_ppObjects[11]->SetChild(pSceneModel, false);
+	//	m_ppObjects[11]->SetMaterial(0, pMapMaterial);
+	//	m_ppObjects[11]->Rotate(0.0f, 0.0f, 0.0f);
+	//	m_ppObjects[11]->SetScale(20.0, 20.0, 20.0);
+	//	m_ppObjects[11]->SetPosition(1500.0, -3.5, 1500.0);
+	//	pSceneModel->AddRef();
 
-	}
+	//}
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 

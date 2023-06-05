@@ -253,7 +253,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 				}
 				
-
+				gGameFramework.CollisionStaticObjects();
 				//// 3. NPC
 				//for (auto& npc : npcs_info) {
 				//	if (npc.m_damaged_effect_on) {
