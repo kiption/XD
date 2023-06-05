@@ -117,7 +117,7 @@ public:
 		name[0] = 0;
 
 		pl_state = PL_ST_IDLE;
-		hp = 1000;
+		hp = HUMAN_MAXHP;
 		remain_bullet = MAX_BULLET;
 		pos = { 0.0f, 0.0f, 0.0f };
 		pitch = yaw = roll = 0.0f;
@@ -163,6 +163,8 @@ public:
 	void send_move_rotate_packet(int obj_id, short obj_type, short dir);
 
 	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
+	
+	void update_viewlist();
 
 	void sessionClear() {
 		s_state = ST_FREE;
@@ -172,7 +174,7 @@ public:
 		name[0] = 0;
 
 		pl_state = PL_ST_IDLE;
-		hp = 1000;
+		hp = HUMAN_MAXHP;
 		remain_bullet = MAX_BULLET;
 		pos = { 0.0f, 0.0f, 0.0f };
 		pitch = yaw = roll = 0.0f;
@@ -188,6 +190,21 @@ public:
 array<SESSION, MAX_USER> clients;
 SESSION npc_server;
 array<SESSION, MAX_NPCS> npcs;
+array<SESSION, 5> dummies;//[TEST] 충돌테스트용 더미
+void initDummies() {	  //[TEST] 충돌테스트용 더미 생성
+	dummies[0].pos = { 100.0f, 6.0f, 905.0f };
+	dummies[1].pos = { 0.0f, 0.0f, 0.0f };
+	dummies[2].pos = { 0.0f, 0.0f, 0.0f };
+	dummies[3].pos = { 0.0f, 0.0f, 0.0f };
+	dummies[4].pos = { 0.0f, 0.0f, 0.0f };
+	for (auto& dummy : dummies) {
+		dummy.hp = HUMAN_MAXHP;
+		dummy.m_rightvec = { 1.0f, 0.0f, 0.0f };
+		dummy.m_upvec = { 0.0f, 1.0f, 0.0f };
+		dummy.m_lookvec = { 0.0f, 0.0f, 1.0f };
+		dummy.setBB();
+	}
+}
 
 
 void SESSION::send_login_packet() {
@@ -201,17 +218,17 @@ void SESSION::send_login_packet() {
 	login_info_packet.y = pos.y;
 	login_info_packet.z = pos.z;
 
-	login_info_packet.right_x = basic_coordinate.right.x;
-	login_info_packet.right_y = basic_coordinate.right.y;
-	login_info_packet.right_z = basic_coordinate.right.z;
+	login_info_packet.right_x = m_rightvec.x;
+	login_info_packet.right_y = m_rightvec.y;
+	login_info_packet.right_z = m_rightvec.z;
 
-	login_info_packet.up_x = basic_coordinate.up.x;
-	login_info_packet.up_y = basic_coordinate.up.y;
-	login_info_packet.up_z = basic_coordinate.up.z;
+	login_info_packet.up_x = m_upvec.x;
+	login_info_packet.up_y = m_upvec.y;
+	login_info_packet.up_z = m_upvec.z;
 
-	login_info_packet.look_x = basic_coordinate.look.x;
-	login_info_packet.look_y = basic_coordinate.look.y;
-	login_info_packet.look_z = basic_coordinate.look.z;
+	login_info_packet.look_x = m_lookvec.x;
+	login_info_packet.look_y = m_lookvec.y;
+	login_info_packet.look_z = m_lookvec.z;
 
 	login_info_packet.hp = hp;
 	login_info_packet.remain_bullet = remain_bullet;
@@ -393,6 +410,60 @@ void SESSION::send_move_rotate_packet(int obj_id, short obj_type, short dir)
 		break;
 	}
 	do_send(&update_pl_packet);
+}
+void SESSION::update_viewlist()
+{
+	// 1. 플레이어 업데이트
+	for (auto& other_pl : clients) {
+		if (other_pl.id == id) continue;
+		if (other_pl.s_state != ST_INGAME) continue;
+		if (other_pl.curr_stage != curr_stage) continue;
+
+		int moved_pl_id = id + ID_STARTNUM_PLAYER;		// 이동한 객체 (자신)
+		int other_pl_id = other_pl.id + ID_STARTNUM_PLAYER;		// 다른 객체
+
+		// 1) 움직였더니 새로운 객체가 시야 안에 생긴 경우
+		if (XMF_Distance(pos, other_pl.pos) <= HUMAN_VIEW_RANGE) {
+			// 1-1) 자신의 ViewList에 시야에 새로 들어온 플레이어의 ID 추가
+			if (!view_list.count(other_pl_id)) {
+				s_lock.lock();
+				view_list.insert(other_pl_id);
+				s_lock.unlock();
+
+				cout << "Player[" << id << "]의 ViewList에 OtherPlayer[" << other_pl.id << "]를 추가합니다.\n" << endl;
+			}
+			// 1-2) 시야에 새로 들어온 플레이어의 ViewList에 자신의 ID추가
+			if (!other_pl.view_list.count(moved_pl_id)) {
+				other_pl.s_lock.lock();
+				other_pl.view_list.insert(moved_pl_id);
+				other_pl.s_lock.unlock();
+
+				cout << "OtherPlayer[" << other_pl.id << "]의 ViewList에 Player[" << id << "]를 추가합니다.\n" << endl;
+			}
+		}
+		// 2) 움직였더니 원래는 시야에 있었던 객체가 시야에서 사라진 경우
+		else {
+			// 1-1) 자신의 ViewList에 시야에 새로 들어온 플레이어의 ID 추가
+			if (view_list.count(other_pl_id)) {
+				s_lock.lock();
+				view_list.erase(other_pl_id);
+				s_lock.unlock();
+
+				cout << "Player[" << id << "]의 ViewList에서 OtherPlayer[" << other_pl.id << "]를 제거합니다.\n" << endl;
+			}
+			// 1-2) 시야에 새로 들어온 플레이어의 ViewList에 자신의 ID추가
+			if (other_pl.view_list.count(moved_pl_id)) {
+				other_pl.s_lock.lock();
+				other_pl.view_list.erase(moved_pl_id);
+				other_pl.s_lock.unlock();
+
+				cout << "OtherPlayer[" << other_pl.id << "]의 ViewList에서 Player[" << id << "]를 제거합니다.\n" << endl;
+			}
+		}
+	}
+
+	// 2.
+	// 3.
 }
 
 //======================================================================
@@ -644,9 +715,9 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].pos.y = RESPAWN_POS_Y;
 		clients[client_id].pos.z = RESPAWN_POS_Z - 100 * client_id;
 
-		clients[client_id].m_rightvec = basic_coordinate.right;
-		clients[client_id].m_upvec = basic_coordinate.up;
-		clients[client_id].m_lookvec = basic_coordinate.look;
+		clients[client_id].m_rightvec = XMFLOAT3{ 1.0f, 0.0f, 0.0f };
+		clients[client_id].m_upvec =    XMFLOAT3{ 0.0f, 1.0f, 0.0f };
+		clients[client_id].m_lookvec =  XMFLOAT3{ 0.0f, 0.0f, 1.0f };
 
 		clients[client_id].setBB();
 
@@ -736,7 +807,7 @@ void process_packet(int client_id, char* packet)
 		
 		//if (b_isCollide) break;
 
-		// 2. 충돌이 아니라면 세션 정보를 업데이트 한다.
+		// 2. 정상적인 이동이라면 세션 정보를 업데이트 한다.
 		clients[client_id].s_lock.lock();
 		clients[client_id].pos = { cl_move_packet->x, cl_move_packet->y, cl_move_packet->z };
 		clients[client_id].setBB();
@@ -746,7 +817,10 @@ void process_packet(int client_id, char* packet)
 		//cout << "[Move TEST] Player[" << client_id << "]가 " << cl_move_packet->direction << " 방향으로 이동하여 POS가 ("
 		//	<< clients[client_id].pos.x << ", " << clients[client_id].pos.y << ", " << clients[client_id].pos.x << ")가 되었음.\n" << endl;
 
-		// 3. 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
+		// 3. View List를 업데이트한다.
+		clients[client_id].update_viewlist();
+
+		// 4. 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
 		for (auto& other_pl : clients) {
 			if (other_pl.id == client_id) continue;
 			if (other_pl.s_state != ST_INGAME) continue;
@@ -796,6 +870,7 @@ void process_packet(int client_id, char* packet)
 	case CS_ATTACK:
 	{
 		if (!b_active_server) break;
+		if (clients[client_id].curr_stage == 0) break;
 		CS_ATTACK_PACKET* cl_attack_packet = reinterpret_cast<CS_ATTACK_PACKET*>(packet);
 
 		//==============================
@@ -840,7 +915,7 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].reload_time = chrono::system_clock::now();
 		}
 		clients[client_id].s_lock.unlock();
-		
+
 		if (clients[client_id].s_state == ST_INGAME) {
 			SC_BULLET_COUNT_PACKET bullet_update_pack;
 			bullet_update_pack.type = SC_BULLET_COUNT;
@@ -868,68 +943,61 @@ void process_packet(int client_id, char* packet)
 
 		//==============================
 		// 2. 충돌검사
-		if (clients[client_id].curr_stage != 0) {
-			bool b_collide = false;
+		bool b_collide = false;
 
-			enum CollideTarget {CT_PLAYER, CT_NPC, CT_BUILDING};
-			int collide_target = -1;
+		enum CollideTarget { CT_PLAYER, CT_NPC, CT_BUILDING };
+		int collide_target = -1;
 
-			int collide_id = -1;
+		int collide_id = -1;
 
-			float min_dist = FLT_MAX;
+		float min_dist = FLT_MAX;
 
-			// [TEST] 테스트용 더미 충돌검사
-			SESSION dummy_humanoid;
-			dummy_humanoid.pos = XMFLOAT3{ 100.0f, 6.0f, 905.0f };
-			dummy_humanoid.setBB();
+		// [TEST] 테스트용 더미 충돌검사
 
-			// 야매방법
-			SESSION bullet;
-			bullet.pos = clients[client_id].pos;
-			bullet.m_rightvec = clients[client_id].m_rightvec;
-			bullet.m_upvec = clients[client_id].m_upvec;
-			bullet.m_lookvec = clients[client_id].m_lookvec;
+		// 야매방법
+		SESSION bullet;
+		bullet.pos = clients[client_id].pos;
+		bullet.m_rightvec = clients[client_id].m_rightvec;
+		bullet.m_upvec = clients[client_id].m_upvec;
+		bullet.m_lookvec = clients[client_id].m_lookvec;
+		bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
+			, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+
+		XMFLOAT3 bullet_initpos = bullet.pos;
+		while (XMF_Distance(bullet.pos, bullet_initpos) <= BULLET_RANGE) {
+			if (bullet.m_xoobb.Intersects(dummies[0].m_xoobb)) {
+				b_collide = true;
+				break;
+			}
+			bullet.pos = XMF_Add(bullet.pos, XMF_MultiplyScalar(bullet.m_lookvec, 1.f));
 			bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
 				, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
-
-			XMFLOAT3 bullet_initpos = bullet.pos;
-			while (XMF_Distance(bullet.pos, bullet_initpos) <= BULLET_RANGE) {
-				if (bullet.m_xoobb.Intersects(dummy_humanoid.m_xoobb)) {
-					b_collide = true;
-					break;
-				}
-				bullet.pos = XMF_Add(bullet.pos, XMF_MultiplyScalar(bullet.m_lookvec, 1.f));
-				bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
-					, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
-			}
-
-			/* My Raycast
-			XMFLOAT3 human_intersection\
-				= Intersect_Ray_Box(clients[client_id].pos, clients[client_id].m_lookvec, BULLET_RANGE, dummy_humanoid.pos, HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z);
-			if (human_intersection != XMF_fault) {
-				cout << "[CS_ATTACK] 사람 더미와 충돌하였음." << endl;//test
-				b_collide = true;
-			}
-
-			XMFLOAT3 heli_intersection\
-				= Intersect_Ray_Box(clients[client_id].pos, clients[client_id].m_lookvec, BULLET_RANGE, dummy_helicopter.pos, HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z);
-			if (heli_intersection != XMF_fault) {
-				cout << "[CS_ATTACK] 헬기 더미와 충돌하였음." << endl;//test
-				b_collide = true;
-			}
-			*/
-
-			if (b_collide) {
-				cout << "[Collide Check] Player[" << client_id << "]의 공격 -> 충돌 O\n" << endl;//test
-			}
-			else {
-				cout << "[Collide Check] Player[" << client_id << "]의 공격 -> 충돌 X\n" << endl;//test
-			}
 		}
-		// 2. 스테이지 2 로직
-		else if (clients[client_id].curr_stage == 2) {
 
+		/* My Raycast
+		XMFLOAT3 human_intersection\
+			= Intersect_Ray_Box(clients[client_id].pos, clients[client_id].m_lookvec, BULLET_RANGE, dummy_humanoid.pos, HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z);
+		if (human_intersection != XMF_fault) {
+			cout << "[CS_ATTACK] 사람 더미와 충돌하였음." << endl;//test
+			b_collide = true;
 		}
+
+		XMFLOAT3 heli_intersection\
+			= Intersect_Ray_Box(clients[client_id].pos, clients[client_id].m_lookvec, BULLET_RANGE, dummy_helicopter.pos, HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z);
+		if (heli_intersection != XMF_fault) {
+			cout << "[CS_ATTACK] 헬기 더미와 충돌하였음." << endl;//test
+			b_collide = true;
+		}
+		*/
+
+		if (b_collide) {
+			cout << "[Collide Check] Player[" << client_id << "]의 공격 -> 충돌 O\n" << endl;//test
+		}
+		else {
+			cout << "[Collide Check] Player[" << client_id << "]의 공격 -> 충돌 X\n" << endl;//test
+		}
+
+
 		break;
 	}// CS_ATTACK end
 	case CS_INPUT_KEYBOARD:
@@ -1687,6 +1755,7 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 int main(int argc, char* argv[])
 {
 	b_isfirstplayer = true;
+	initDummies();//[TEST] 충돌테스트 더미
 
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);

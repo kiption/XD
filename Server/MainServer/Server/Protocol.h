@@ -1,33 +1,38 @@
 #pragma once
+//======================================================================
 // IP 주소
 const char* IPADDR_LOOPBACK = "127.0.0.1";		// 루프백
 const char* IPADDR_LOGIC0 = "127.0.0.1"; //"112.152.39.13";	// 원격 접속
 const char* IPADDR_LOGIC1 = "127.0.0.1";	// 원격 접속
 
-// 클라이언트-인증서버 통신
+//======================================================================
+// 포트 번호
+// 1. 클라이언트-인증서버 통신
 constexpr int MAX_LOGIN_SERVER = 2;
 constexpr int PORTNUM_LOGIN_0 = 9900;
 constexpr int PORTNUM_LOGIN_1 = 9901;
 
-// 클라이언트-로비서버 통신
+// 2. 클라이언트-로비서버 통신
 constexpr int MAX_LOBBY_SERVER = 2;
 constexpr int PORTNUM_LOBBY_0 = 9910;
 constexpr int PORTNUM_LOBBY_1 = 9911;
 
-// 클라이언트-로직서버 통신
+// 3. 클라이언트-로직서버 통신
 constexpr int MAX_LOGIC_SERVER = 2;
 constexpr int PORTNUM_LOGIC_0 = 9920;
 constexpr int PORTNUM_LOGIC_1 = 9921;
 
-// [NPC서버분리] 로직서버-NPC서버 통신
+// 4. 로직서버-NPC서버 통신 (NPC 서버분리)
 constexpr int MAX_NPC_SERVER = 2;
 constexpr int PORTNUM_LGCNPC_0 = 9930;
 constexpr int PORTNUM_LGCNPC_1 = 9931;
 
-// [수평확장] 로직서버-로직서버 통신
+// 5. 로직서버-로직서버 통신 (서버 수평확장)
 constexpr int HA_PORTNUM_S0 = 10020;
 constexpr int HA_PORTNUM_S1 = 10021;
 
+//======================================================================
+// HA 관련
 constexpr int SERIAL_NUM_CLIENT = 0;
 constexpr int SERIAL_NUM_EXSERVER = 1000;
 
@@ -35,7 +40,8 @@ constexpr int HB_SEND_CYCLE = 1000;		// Heartbeat를 보내는 주기 (단위: millisec)
 constexpr int HB_GRACE_PERIOD = 3000;	// Heartbeat가 몇 초 넘어도 오지 않으면 서버다운으로 간주함 (단위: millisec)
 
 constexpr int HA_REPLICA_CYCLE = 333;	// 서버간 데이터복제 주기 (단위: millisec)
-//
+
+//======================================================================
 constexpr int BUF_SIZE = 200;
 constexpr int NAME_SIZE = 20;
 
@@ -43,13 +49,14 @@ constexpr int MAX_USER = 3;
 constexpr int MAX_NPCS = 5;
 constexpr int MAX_BULLET = 10;
 
-constexpr int ID_VALUE_PLAYER = 100;	// Player의 고유 ID값. (ID_VALUE_PLAYER + client_id)
-constexpr int ID_VALUE_NPC = 200;		// Npc의 고유 ID값. (ID_VALUE_NPC + npc_id)
+constexpr int ID_STARTNUM_PLAYER = 1000;	// Player ID 시작값. (ID_VALUE_PLAYER + client_id)
+constexpr int ID_STARTNUM_NPC = 2000;		// Npc ID 시작값. (ID_VALUE_NPC + npc_id)
 
 constexpr int WORLD_X_POS = 2000;
 constexpr int WORLD_Y_POS = 2000;
 constexpr int WORLD_Z_POS = 2000;
 
+//======================================================================
 // key value
 constexpr char INPUT_KEY_W = 0b100000;
 constexpr char INPUT_KEY_S = 0b010000;
@@ -58,6 +65,7 @@ constexpr char INPUT_KEY_A = 0b000100;
 constexpr char INPUT_KEY_Q = 0b000010;
 constexpr char INPUT_KEY_E = 0b000001;
 
+//======================================================================
 // Packet ID
 enum PacketID {
 	CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_PING, CS_RELOGIN
@@ -68,11 +76,13 @@ enum PacketID {
 	, NPC_FULL_INFO, NPC_MOVE, NPC_ROTATE, NPC_MOVE_ROTATE, NPC_REMOVE, NPC_ATTACK, NPC_CHANGE_STATE
 };
 
+//======================================================================
 enum PLAYER_STATE { PL_ST_IDLE, PL_ST_MOVE_FRONT, PL_ST_MOVE_BACK, PL_ST_MOVE_SIDE, PL_ST_FLY, PL_ST_CHASE, PL_ST_ATTACK, PL_ST_DEAD };
 
-// Target Type
+//======================================================================
 enum TargetType { TARGET_PLAYER, TARGET_BULLET, TARGET_NPC };
 
+//======================================================================
 // Packets ( CS: Client->Server, SC: Server->Client, SS: Server->Other Server )
 #pragma pack (push, 1)
 // ================================
