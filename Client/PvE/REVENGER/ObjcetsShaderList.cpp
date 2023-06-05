@@ -141,7 +141,7 @@ void CAngrybotObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphi
 	{
 		for (int z = -zObjects; z <= zObjects; z++)
 		{
-			m_ppObjects[nObjects] = new CAngrybotObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pAngrybotModel, 1);
+			m_ppObjects[nObjects] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pAngrybotModel, 1);
 			m_ppObjects[nObjects]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (nObjects % 2));
 			m_ppObjects[nObjects]->m_pSkinnedAnimationController->SetTrackSpeed(0, (nObjects % 2) ? 0.25f : 1.0f);
 			m_ppObjects[nObjects]->m_pSkinnedAnimationController->SetTrackPosition(0, (nObjects % 3) ? 0.85f : 0.0f);
@@ -188,7 +188,7 @@ void CEthanObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	{
 		for (int z = -zObjects; z <= zObjects; z++)
 		{
-			m_ppObjects[nObjects] = new CEthanObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pEthanModel, 1);
+			m_ppObjects[nObjects] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pEthanModel, 1);
 			m_ppObjects[nObjects]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, (nObjects % 4));
 			m_ppObjects[nObjects]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.25f);
 			m_ppObjects[nObjects]->m_pSkinnedAnimationController->SetTrackPosition(0, (nObjects % 10) * 0.35f);
@@ -225,7 +225,7 @@ void CHumanObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 	for (int x = 0; x <= m_nObjects; x++)
 	{
-		m_ppObjects[x] = new CEthanObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pEthanModel, 1);
+		m_ppObjects[x] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pEthanModel, 1);
 		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.85f);
 		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackPosition(0, 0);

@@ -243,15 +243,17 @@ public:
 
 	void setPosition_Npc(int id, XMFLOAT3 pos);
 	void setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
-	void setEqLook_Npc(int id, XMFLOAT3 NlookPos, XMFLOAT3 NlookVec);
 	void remove_Npcs(int id);
 
 	// 클라이언트 객체의 상태 최신화 함수
 	int a_id;
 	bool active = false;
 	void otherPlayerReturnToIdle(int p_id);
-	void otherPlayerMovingMotion(int p_id);
+	void otherPlayerForwardMotion(int p_id);
+	void otherPlayerBackwardMotion(int p_id);
+	void otherPlayerSfrateMotion(int p_id);
 	void otherPlayerShootingMotion(int p_id);
+	void otherPlayerDyingMotion(int p_id);
 	bool m_bDamageOn = false;
 	float m_pPlayerRotate_z = 0.0f;
 	float m_pPlayerRotate_x = 0.0f;

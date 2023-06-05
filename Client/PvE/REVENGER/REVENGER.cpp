@@ -173,13 +173,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						gGameFramework.otherPlayerReturnToIdle(i);
 						break;
 					case PL_ST_MOVE_FRONT: // 앞으로 이동
-						gGameFramework.otherPlayerMovingMotion(i);
+						gGameFramework.otherPlayerBackwardMotion(i);
 						break;
 					case PL_ST_MOVE_BACK: // 뒤로 이동
-						gGameFramework.otherPlayerMovingMotion(i);
+						gGameFramework.otherPlayerForwardMotion(i);
 						break;
 					case PL_ST_MOVE_SIDE: // 옆으로 이동
-						gGameFramework.otherPlayerMovingMotion(i);
+						gGameFramework.otherPlayerSfrateMotion(i);
 						break;
 					case PL_ST_ATTACK:
 						gGameFramework.otherPlayerShootingMotion(i);
@@ -187,6 +187,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						break;
 						 // + 구르기 및 점프
 					case PL_ST_DEAD:
+						gGameFramework.otherPlayerDyingMotion(i);
 						break;
 					}
 				}
@@ -202,8 +203,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 						gGameFramework.setPosition_Npc(npcs_info[i].m_id, npcs_info[i].m_pos);
 						gGameFramework.setVectors_Npc(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
-
-						gGameFramework.setEqLook_Npc(npcs_info[i].m_id, npcs_info[i].m_pos, npcs_info[i].m_look_vec);
 						((Stage1*)gGameFramework.m_pScene)->SmokePosition = npcs_info[i].m_pos;
 						//((Stage1*)gGameFramework.m_pScene)->m_pBillboardShader[3]->ParticlePosition = npcs_info[i].m_pos;
 					}
@@ -253,7 +252,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 
 				}
-				gGameFramework.CollisionStaticObjects();
+				
+
 				//// 3. NPC
 				//for (auto& npc : npcs_info) {
 				//	if (npc.m_damaged_effect_on) {

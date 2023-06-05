@@ -34,8 +34,9 @@ public:
 	CGameObject** m_ppHierarchicalGameObjects = NULL;
 	CGameObject** m_ppCityGameObjects = NULL;
 
-	int	m_nNpcObjects = 0;
-	CGameObject** m_ppNpcObjects = NULL;
+	int	m_nHeliNpcObjects = 0;
+	int	m_nSoldiarNpcObjects = 0;
+	CGameObject** m_ppNpc_Heli_Objects = NULL;
 
 	CMapObjectShader** m_ppMapShader = NULL;
 

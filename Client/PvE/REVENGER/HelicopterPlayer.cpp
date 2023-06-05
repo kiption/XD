@@ -169,18 +169,12 @@ void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 	m_fShootDelay += 0.1f;
 	for (int i = 0; i < BULLETS; i++)
 	{
-		/*if (m_fShootDelay < 0.5)
-		{
-		}*/
 			if (m_ppBullets[i]->m_bActive)
 			{
 				m_ppBullets[i]->Animate(fTimeElapse);
 			}
 	}
-	/*if (m_fShootDelay > 2.5)
-	{
-		m_fShootDelay = 0.0f;
-	}*/
+
 	if (m_pMainRotorFrame)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 10.0f) * fTimeElapse);
@@ -191,25 +185,7 @@ void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 10.0f) * fTimeElapse);
 		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
 	}
-	//if (m_pTail2RotorFrame)
-	//{
-	//	XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 15.0f) * fTimeElapse);
-	//	m_pTail2RotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTail2RotorFrame->m_xmf4x4ToParent);
-	//}
-	if (m_xmf3Position.y > 200.0f)
-	{
-		//SetGravity(XMFLOAT3(0.0f, -20.0f, 0.0f));
-	}
-	if (m_xmf3Position.y < 10.0)
-	{
-		//SetGravity(XMFLOAT3(0.0f, -0.0f, 0.0f));
-		m_bCollisionTerrain = true;
-	}
-	else
-	{
-		m_bCollisionTerrain = false;
-	}
-
+	
 }
 
 void HeliPlayer::OnPlayerUpdateCallback(float fTimeElapsed)

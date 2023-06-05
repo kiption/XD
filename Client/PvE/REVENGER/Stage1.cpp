@@ -140,13 +140,6 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pSkyBox->SetCurScene(SCENE1STAGE);
-
-	XMFLOAT3 xmf3Scale(35.0f, 3.0f, 35.0);
-	XMFLOAT3 xmf3Normal(0.0f, 0.3f, 0.0f);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/waterterrain8bit.raw"), 257, 257, xmf3Scale, xmf3Normal);
-	m_pTerrain->SetCurScene(SCENE1STAGE);
-
-
 	m_nBillboardShaders = 4;
 	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
 

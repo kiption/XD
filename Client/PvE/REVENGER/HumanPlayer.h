@@ -9,7 +9,7 @@ public:
 	CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual ~CHumanPlayer();
 	CLoadedModelInfo* pSoldiarModel = NULL;
-	CAngrybotObject* pSoldiarObject = NULL;
+	CGameObject* pSoldiarObject = NULL;
 	CGameObject* m_pBulletFindFrame{ NULL };
 	CGameObject* m_pHeadFindFrame{ NULL };
 public:
@@ -20,7 +20,7 @@ public:
 
 	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
 	virtual void JumpState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL);
-	virtual void RollState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void ReloadState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void ShootState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 

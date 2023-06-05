@@ -40,7 +40,7 @@ using namespace DirectX::PackedVector;
 //============================================================
 #include "../../MainServer/Server/Protocol.h"
 #include "../../MainServer/Server/Constant.h"
-#include "../../MainServer/Server/MathFuncs.h"
+//#include "../../MainServer/Server/MathFuncs.h"
 //#include "../../MainServer/Server/MapObjects.h"
 #include "../../MainServer/Server/CP_KEYS.h"
 #include "CheckPoint.h"
