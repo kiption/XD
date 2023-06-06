@@ -33,6 +33,31 @@ bool b_isfirstplayer;	// 첫 player입장인지. (첫 클라 접속부터 서버시간이 흐르도�
 mutex servertime_lock;	// 서버시간 lock
 
 //======================================================================
+class Mission
+{
+public:
+	short type;
+	float goal;
+	float curr;
+
+public:
+	Mission() {
+		type = MISSION_KILL;
+		goal = 0.0f;
+		curr = 0.0f;
+	}
+};
+array<Mission, TOTAL_STAGE + 1> stage_missions;
+
+void setMissions() {
+	// 스테이지1 미션
+	stage_missions[1].type = MISSION_KILL;
+	stage_missions[1].goal = 3.0f;
+	stage_missions[1].curr = 0.0f;
+
+}
+
+//======================================================================
 class Building : public MapObject
 {
 public:
@@ -1016,14 +1041,13 @@ void process_packet(int client_id, char* packet)
 					b_collide = true;
 					
 					// Dummy 데미지 처리
-					
 					if (dummies[dummy_id].hp <= 10) {
 						dummies[dummy_id].s_lock.lock();
 						dummies[dummy_id].hp = 0;
 						dummies[dummy_id].pl_state = PL_ST_DEAD;
 						dummies[dummy_id].s_lock.unlock();
 
-						cout << "Player[" << client_id << "]의 공격에 Dummy[" << dummy_id << "]가 사망하였다.\n" << endl;
+						cout << "Player[" << client_id << "]의 공격에 Dummy[" << dummy_id << "]가 사망하였다." << endl;
 
 						SC_OBJECT_STATE_PACKET dummy_die_packet;
 						dummy_die_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
@@ -1037,6 +1061,27 @@ void process_packet(int client_id, char* packet)
 							lock_guard<mutex> lg{ cl.s_lock };
 							cl.do_send(&dummy_die_packet);
 						}
+
+						// 미션 업데이트
+						SC_MISSION_PACKET mission_update_pack;
+						mission_update_pack.type = SC_MISSION;
+						mission_update_pack.size = sizeof(SC_MISSION_PACKET);
+						mission_update_pack.stage_num = clients[client_id].curr_stage;
+						mission_update_pack.mission_type = stage_missions[clients[client_id].curr_stage].type;
+						mission_update_pack.mission_goal = stage_missions[clients[client_id].curr_stage].goal;
+						stage_missions[clients[client_id].curr_stage].curr++;
+						mission_update_pack.mission_curr = stage_missions[clients[client_id].curr_stage].curr;
+						{
+							lock_guard<mutex> lg{ clients[client_id].s_lock };
+							clients[client_id].do_send(&mission_update_pack);
+						}
+						cout << "스테이지[" << clients[client_id].curr_stage << "] 미션 업데이트: ";
+						switch (stage_missions[1].type) {
+						case MISSION_KILL:
+							cout << "[처치] ";
+							break;
+						}
+						cout << stage_missions[clients[client_id].curr_stage].curr << " / " << stage_missions[clients[client_id].curr_stage].goal << "\n" << endl;
 					}
 					else {
 						dummies[dummy_id].s_lock.lock();
@@ -1072,13 +1117,6 @@ void process_packet(int client_id, char* packet)
 		}
 		*/
 
-		if (b_collide) {
-
-		}
-		else {
-			cout << "[Collide Check] Player[" << client_id << "]의 공격 -> 충돌 X\n" << endl;//test
-		}
-
 
 		break;
 	}// CS_ATTACK end
@@ -1108,6 +1146,26 @@ void process_packet(int client_id, char* packet)
 				lock_guard<mutex> lg{ cl.s_lock };
 				cl.do_send(&chg_scene1_pack);
 			}
+
+			// 스테이지1 미션 전달
+			SC_MISSION_PACKET st1_mission_pack;
+			st1_mission_pack.type = SC_MISSION;
+			st1_mission_pack.size = sizeof(SC_MISSION_PACKET);
+			st1_mission_pack.stage_num = 1;
+			st1_mission_pack.mission_type = stage_missions[1].type;
+			st1_mission_pack.mission_goal = stage_missions[1].goal;
+			st1_mission_pack.mission_curr = stage_missions[1].curr;
+			{
+				lock_guard<mutex> lg{ clients[client_id].s_lock };
+				clients[client_id].do_send(&st1_mission_pack);
+			}
+			cout << "새로운 미션 추가: ";
+			switch (stage_missions[1].type) {
+			case MISSION_KILL:
+				cout << "[처치] ";
+				break;
+			}
+			cout << stage_missions[1].curr << " / " << stage_missions[1].goal << "\n" << endl;
 			break;
 		case PACKET_KEY_NUM2:
 			if (clients[client_id].curr_stage == 2) break;
@@ -1838,6 +1896,7 @@ int main(int argc, char* argv[])
 {
 	b_isfirstplayer = true;
 	initDummies();//[TEST] 충돌테스트 더미
+	setMissions();//미션 설정
 
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);

@@ -402,7 +402,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
 			break;
 		case VK_SPACE:
-			if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
 			break;
 		case 'M':
 			if (m_nMode == SCENE1STAGE) {

@@ -44,7 +44,7 @@
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
 #define BULLET_DAMAGE 1					// 총알 피격데미지
 
-#define BULLET_RANGE 400				// 총알 최대이동거리
+#define BULLET_RANGE 500				// 총알 최대이동거리
 
 
 //============================================================
@@ -60,7 +60,7 @@
 #define RESPAWN_POS_Y 6.0f
 #define RESPAWN_POS_Z 935.0f
 
-#define HUMAN_VIEW_RANGE 400.0f
+#define HUMAN_VIEW_RANGE 500.0f
 
 //============================================================
 //						헬기정보 관련 상수
@@ -79,4 +79,3 @@
 //============================================================
 #define STAGE1_TIMELIMIT 600		// 스테이지1 제한시간 (단위: sec)
 #define STAGE2_TIMELIMIT 600		// 스테이지2 제한시간 (단위: sec)
-

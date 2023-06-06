@@ -29,6 +29,22 @@ bool stage2_enter_ok;
 chrono::system_clock::time_point last_ping;   // ping을 서버로 보낸 시간
 chrono::system_clock::time_point last_pong;   // 서버의 ping에 대한 응답을 받은 시간
 
+class Mission
+{
+public:
+    short type;
+    float goal;
+    float curr;
+
+public:
+    Mission() {
+        type = MISSION_KILL;
+        goal = 0.0f;
+        curr = 0.0f;
+    }
+};
+array<Mission, TOTAL_STAGE> stage_missions;
+
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
 class OVER_EX {
@@ -196,8 +212,6 @@ void processPacket(char* ptr)
             npcs_info[recv_id].m_state = OBJ_ST_RUNNING;
             npcs_info[recv_id].m_ingame_state = PL_ST_IDLE;
             npcs_info[recv_id].m_new_state_update = true;
-
-            left_npc++;
         }
         else {
             cout << "[ADD ERROR] Unknown Target!" << endl;
@@ -332,8 +346,6 @@ void processPacket(char* ptr)
             npcs_info[npc_id].m_id = -1;
             npcs_info[npc_id].m_pos = { 0.f ,0.f ,0.f };
             npcs_info[npc_id].m_state = OBJ_ST_LOGOUT;
-            left_npc--;
-            if (left_npc < 0) left_npc = 0;
         }
         else {
             cout << "[REMOVE ERROR] Unknown Target!" << endl;
@@ -472,6 +484,17 @@ void processPacket(char* ptr)
 
         break;
     }//SC_BULLET_COUNT case end
+    case SC_MISSION:
+    {
+        SC_MISSION_PACKET* recv_packet = reinterpret_cast<SC_MISSION_PACKET*>(ptr);
+
+        short stage_num = recv_packet->stage_num;
+        stage_missions[stage_num].type = recv_packet->mission_type;
+        stage_missions[stage_num].goal = recv_packet->mission_goal;
+        stage_missions[stage_num].curr = recv_packet->mission_curr;
+
+        break;
+    }//SC_MISSION case end
     case SC_TIME_TICKING:
     {
         SC_TIME_TICKING_PACKET* recv_packet = reinterpret_cast<SC_TIME_TICKING_PACKET*>(ptr);

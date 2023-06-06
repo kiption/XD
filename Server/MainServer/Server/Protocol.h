@@ -58,6 +58,8 @@ constexpr int WORLD_X_POS = 2000;
 constexpr int WORLD_Y_POS = 2000;
 constexpr int WORLD_Z_POS = 2000;
 
+constexpr int TOTAL_STAGE = 1;
+
 //======================================================================
 // key value
 constexpr char INPUT_KEY_W = 0b100000;
@@ -72,7 +74,8 @@ constexpr char INPUT_KEY_E = 0b000001;
 enum PacketID {
 	CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_PING, CS_RELOGIN
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
-	, SC_DAMAGED, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_BULLET_COUNT, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN
+	, SC_DAMAGED, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_BULLET_COUNT, SC_MISSION
+	, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
 	, CLGN_LOGIN_REQUEST, LGNC_LOGIN_RESULT, LGNC_USER_MATCH_PACKET
 	, NPC_FULL_INFO, NPC_MOVE, NPC_ROTATE, NPC_MOVE_ROTATE, NPC_REMOVE, NPC_ATTACK, NPC_CHANGE_STATE
@@ -253,6 +256,16 @@ struct SC_BULLET_COUNT_PACKET {
 	int bullet_cnt;
 };
 
+enum MISSION_TYPE { MISSION_KILL };
+struct SC_MISSION_PACKET {
+	unsigned char size;
+	char type;
+	short stage_num;
+	short mission_type;
+	float mission_goal;
+	float mission_curr;
+};
+
 // ================================
 // 4) UI 관련 패킷
 struct SC_TIME_TICKING_PACKET {
@@ -262,7 +275,7 @@ struct SC_TIME_TICKING_PACKET {
 };
 
 // ================================
-// 4) 맵 정보 관련 패킷
+// 5) 맵 정보 관련 패킷
 struct SC_MAP_OBJINFO_PACKET {
 	unsigned char size;
 	char type;
@@ -271,7 +284,7 @@ struct SC_MAP_OBJINFO_PACKET {
 };
 
 // ================================
-// 5) 이중화 관련 패킷
+// 6) 이중화 관련 패킷
 struct SC_PING_RETURN_PACKET {	// 현재는 클라-서버 -> 추후에 클라-릴레이서버 로 바꿀 예정.
 	unsigned char size;
 	char type;

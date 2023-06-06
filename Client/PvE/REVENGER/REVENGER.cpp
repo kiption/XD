@@ -28,39 +28,6 @@ void networkThreadFunc();
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-	//==================================================
-	//					Server Code
-	//==================================================
-	//wcout.imbue(locale("korean"));
-	//WSADATA WSAData;
-	//WSAStartup(MAKEWORD(2, 2), &WSAData);
-
-	//active_servernum = MAX_LOGIC_SERVER - 1;
-
-	//CS_LOGIN_PACKET login_pack;
-	//login_pack.size = sizeof(CS_LOGIN_PACKET);
-	//login_pack.type = CS_LOGIN;
-	//strcpy_s(login_pack.name, "COPTER");
-
-	//// Active Server에 연결
-	//sockets[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	//SOCKADDR_IN server0_addr;
-	//ZeroMemory(&server0_addr, sizeof(server0_addr));
-	//server0_addr.sin_family = AF_INET;
-	//int new_portnum = PORTNUM_LOGIC_0 + active_servernum;
-	//server0_addr.sin_port = htons(new_portnum);
-	////inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);// 루프백
-	//inet_pton(AF_INET, LOGIC1_ADDR, &server0_addr.sin_addr);
-	//connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
-
-	//sendPacket(&login_pack, active_servernum);
-	//recvPacket(active_servernum);
-
-	//stage1_enter_ok = false;
-	//stage2_enter_ok = false;
-	//last_ping = last_pong = chrono::system_clock::now();
-	//==================================================
-
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
@@ -79,7 +46,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	// Server Code
 	thread networkThread(networkThreadFunc);
 	networkThread.detach();
-	//networkThread.join();
 	//==
 
 	while (1)
@@ -117,7 +83,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//					서버 연결 확인
 				//==================================================
 				// 1초마다 서버로 핑을 던져서 살아있는지 확인합니다.
-				if (chrono::system_clock::now() > last_ping + chrono::seconds(1)) {
+				if (chrono::system_clock::now() > last_ping + chrono::seconds(3)) {
 					CS_PING_PACKET ping_packet;
 					ping_packet.type = CS_PING;
 					ping_packet.size = sizeof(CS_PING_PACKET);
@@ -129,8 +95,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//==================================================
 				//				   플레이어 동기화
 				//==================================================
-				//1. 다른 플레이어 업데이트
-				// 1) 좌표 및 벡터 업데이트
+				//1. 좌표 및 벡터 업데이트
+				// 1) 다른 플레이어
 				for (int i = 0; i < MAX_USER; ++i) {
 					if (i == my_info.m_id) continue;
 					if (other_players[i].m_state == OBJ_ST_RUNNING) {
@@ -141,16 +107,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						other_players[i].InfoClear();
 						gGameFramework.remove_OtherPlayer(i);
 					}
-
-					//if (gGameFramework.m_nMode == SCENE2STAGE)
-					//{
-					//	other_players[i].m_state = OBJ_ST_LOGOUT;
-					//	other_players[i].InfoClear();
-					//	gGameFramework.remove_OtherPlayer(i);
-					//}
 				}
 
-				// 2. NPC 움직임 최신화
+				// 2. NPC
 				/*
 				for (int i{}; i < MAX_NPCS; ++i) {
 					//cout << npcs_info[i].m_id << "번째 Pos:" << npcs_info[i].m_pos.x << ',' << npcs_info[i].m_pos.y << ',' << npcs_info[i].m_pos.z << endl;
@@ -166,8 +125,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				*/
 
 				//==================================================
-				// 2) 객체 인게임 상태 업데이트 (자기 자신 제외, 자기 자신은 클라 독자적으로 돌아가기 때문)
-				//  2-1) Other Players
+				// 2. 객체 인게임 상태 업데이트 (자기 자신 제외, 자기 자신은 클라 독자적으로 돌아가기 때문)
+				//  1) Other Players
 				for (int i = 0; i < MAX_USER; ++i) {
 					if (i == my_id) break;
 
@@ -198,7 +157,32 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 				}
 
-				//  2-2) Dummies ([TEST] NPC 완성전까지 임시 코드)
+				//  2) NPC
+				for (int i = 0; i < MAX_NPCS; ++i) {
+					if (npcs_info[i].m_id == -1) continue;
+
+					if (npcs_info[i].m_new_state_update) {
+						switch (npcs_info[i].m_ingame_state) {
+						case PL_ST_IDLE:
+							break;
+						case PL_ST_MOVE_FRONT: // 앞으로 이동
+							break;
+						case PL_ST_MOVE_BACK: // 뒤로 이동
+							break;
+						case PL_ST_MOVE_SIDE: // 옆으로 이동
+							break;
+						case PL_ST_ATTACK:
+							break;
+						case PL_ST_DEAD:
+							((Stage1*)gGameFramework.m_pScene)->m_ppShaders[0]->m_ppObjects[10 + i]->m_xmf4x4ToParent._42 = 0.0f;
+							break;
+						}
+
+						npcs_info[i].m_new_state_update = false;
+					}
+				}
+
+				//  3) Dummies ([TEST] NPC 완성전까지 임시 코드)
 				for (int i = 0; i < 3; ++i) {
 					if (dummies[i].m_new_state_update) {
 						if (dummies[i].m_ingame_state == PL_ST_DEAD) {
@@ -226,69 +210,21 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				gGameFramework.m_10SecOftime = (servertime_sec - gGameFramework.m_1MinOfTime * 60) / 10;
 				gGameFramework.m_1SecOfTime = servertime_sec % 10;
 
-				// 4. NPC 객체 수 동기화
-				gGameFramework.m_remainNPC = left_npc;
+				// 4. 미션 진행상황 동기화
+				switch (gGameFramework.m_nMode) {
+				case OPENINGSCENE:
+					break;
+				case SCENE1STAGE:
+					gGameFramework.m_remainNPC = stage_missions[1].curr;
+					break;
+				case SCENE2STAGE:
+					gGameFramework.m_remainNPC = stage_missions[2].curr;
+					break;
+				}
 
 				wchar_t lateNPC[20];
 				_itow_s(gGameFramework.m_remainNPC, lateNPC, sizeof(lateNPC), 10);
 				wcscpy_s(gGameFramework.m_remainNPCPrint, lateNPC);
-
-				//==================================================
-				//					충돌 이펙트 관련
-				//==================================================
-
-				//1. 자기 자신
-				if (my_info.m_damaged_effect_on) {
-					// 여기에 이펙트 넣어줘.
-				}
-
-				// 2. 다른 플레이어
-				for (auto& other_pl : other_players) {
-					if (other_pl.m_damaged_effect_on) {
-						/*((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->m_bActive = true;
-						((Stage1*)gGameFramework.m_pScene)->m_ppFragShaders[0]->ParticlePosition = other_pl.m_pos;
-						((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->SetActive(true);
-						((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(other_pl.m_pos);*/
-						gGameFramework.m_bDamageOn = true;
-
-						other_pl.m_damaged_effect_on = false;
-					}
-
-				}
-				
-				//// 3. NPC
-				//for (auto& npc : npcs_info) {
-				//	if (npc.m_damaged_effect_on) {
-				//		// 여기에 이펙트 넣어줘.
-				//	}
-				//}
-
-
-				//==================================================
-				//				객체 사망 후처리 관련
-				//==================================================
-				while (!new_death_objs.empty()) {
-					DeathInfo new_deadobj = new_death_objs.front();
-					new_death_objs.pop();
-
-					switch (new_deadobj.obj_type) {
-					case D_OBJ_PLAYER:
-						if (new_deadobj.obj_id == my_id) {
-							// 게임오버 화면 전환
-
-						}
-						else {
-							// id번째 Player 사망 연출 후 객체 삭제(또는 안보이는 곳에 숨겨두기)
-
-						}
-						break;
-					case D_OBJ_NPC:
-						// id번째 Npc 사망 연출 후 객체 삭제(또는 안보이는 곳에 숨겨두기)
-						((Stage1*)gGameFramework.m_pScene)->m_ppShaders[0]->m_ppObjects[10 + new_deadobj.obj_id]->m_xmf4x4ToParent._42 = 0.0f;
-
-						break;
-					}
-				}
 
 				//==================================================
 				//					Map 충돌 관련
@@ -583,10 +519,8 @@ void networkThreadFunc()
 				break;
 			}
 		}
+		this_thread::yield();
 	}
 }
-
-
-
 
 
