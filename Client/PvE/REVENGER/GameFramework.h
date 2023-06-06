@@ -176,7 +176,6 @@ private:
 	_TCHAR						m_pszFrameRate[70];
 	float ShootCnt = 0.0;
 
-	void AnimationLoop(float EleapsedTime);
 //==================================================
 //			  서버 통신을 위한 것들...
 //==================================================

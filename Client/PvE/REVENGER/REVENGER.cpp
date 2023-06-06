@@ -97,7 +97,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		}
 		else
 		{
-			if (gGameFramework.m_nMode == OPENINGSCENE )
+			if (gGameFramework.m_nMode == OPENINGSCENE && gGameFramework.m_nMode != SCENE1STAGE)
 			{
 				if (stage1_enter_ok) {
 					gGameFramework.ChangeScene(SCENE1STAGE);
@@ -173,10 +173,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						gGameFramework.otherPlayerReturnToIdle(i);
 						break;
 					case PL_ST_MOVE_FRONT: // 앞으로 이동
-						gGameFramework.otherPlayerBackwardMotion(i);
+						gGameFramework.otherPlayerForwardMotion(i);
 						break;
 					case PL_ST_MOVE_BACK: // 뒤로 이동
-						gGameFramework.otherPlayerForwardMotion(i);
+						gGameFramework.otherPlayerBackwardMotion(i);
 						break;
 					case PL_ST_MOVE_SIDE: // 옆으로 이동
 						gGameFramework.otherPlayerSfrateMotion(i);

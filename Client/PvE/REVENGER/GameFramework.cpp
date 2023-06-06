@@ -368,8 +368,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case '1':
 		{
-
-			m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
 			q_keyboardInput.push(SEND_KEY_NUM1);//S
 			break;
 		}
@@ -959,7 +957,6 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
 			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((Stage1*)m_pScene)->m_pTerrain);
 			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
-			m_pScene->m_pPlayer->SetPosition(XMFLOAT3(850.0, 0.0, 120.0));
 			m_pCamera = m_pPlayer->GetCamera();
 
 			m_pScene->SetCurScene(SCENE1STAGE);
@@ -1474,9 +1471,6 @@ void CGameFramework::CreateDirect2DDevice()
 }
 #endif
 
-void CGameFramework::AnimationLoop(float EleapsedTime)
-{
-}
 
 //==================================================
 //			  서버 통신에 필요한 함수들
@@ -1589,17 +1583,11 @@ void CGameFramework::setPosition_OtherPlayer(int id, XMFLOAT3 pos)
 		{
 			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetPosition(pos);
 
-			/*cout << "상대플레이어 x -> " << ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5+id]->m_xmf4x4ToParent._41
-				<< "상대플레이어 z-> " << ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->m_xmf4x4ToParent._43 << endl;*/
+
 
 		}
 	}
-	else if (m_nMode == SCENE2STAGE) {
-		if (((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id])
-		{
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetPosition(pos);
-		}
-	}
+
 }
 void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
@@ -1613,13 +1601,7 @@ void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(7.0, 7.0, 7.0);
 
 	}
-	else if (m_nMode == SCENE2STAGE) {
 
-		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetUp(upVec);
-		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetRight(rightVec);
-		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetLook(lookVec);
-		((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetScale(14.0, 14.0, 14.0);
-	}
 }
 void CGameFramework::remove_OtherPlayer(int id)
 {
@@ -1630,12 +1612,7 @@ void CGameFramework::remove_OtherPlayer(int id)
 			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
 		}
 	}
-	if (m_nMode == SCENE2STAGE) {
-
-		if (((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]) {
-			((Stage2*)m_pScene)->m_ppShadowShaders[0]->m_ppObjects[1 + id]->SetScale(0.0, 0.0, 0.0);
-		}
-	}
+	
 }
 
 
@@ -1645,7 +1622,7 @@ void CGameFramework::setPosition_Npc(int id, XMFLOAT3 pos)
 	if (m_nMode == SCENE1STAGE)
 	{
 
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetPosition(pos);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8 + id]->SetPosition(pos);
 
 
 	}
@@ -1657,10 +1634,10 @@ void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, X
 	if (m_nMode == SCENE1STAGE)
 	{
 
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetRight(rightVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetUp(upVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetLook(lookVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10 + id]->SetScale(3.4, 3.0, 3.0);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8 + id]->SetRight(rightVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8 + id]->SetUp(upVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8 + id]->SetLook(lookVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8 + id]->SetScale(3.4, 3.0, 3.0);
 
 
 	}
@@ -1779,7 +1756,7 @@ void CGameFramework::otherPlayerForwardMotion(int p_id)
 {
 	if (m_nMode == SCENE1STAGE) {
 
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->MoveForward(m_GameTimer.GetTimeElapsed());
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->SetTrackAnimationSet(0,1);
 	}
 
 }
@@ -1839,9 +1816,8 @@ void CGameFramework::CollisionStaticObjects()
 	XMFLOAT3 HumanPosition = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->GetPosition();
 	XMFLOAT3 HumanPosition2 = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6]->GetPosition();
 	XMFLOAT3 HumanPosition3 = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]->GetPosition();
-	XMFLOAT3 HumanPosition4 = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]->GetPosition();
-	XMFLOAT3 HumanPosition5 = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9]->GetPosition();
-	XMFLOAT3 HeliPosition = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10]->GetPosition();
+
+	XMFLOAT3 HeliPosition = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]->GetPosition();
 
 
 	BoundingOrientedBox HeliOOBB = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10]->m_xmOOBoundingBox = BoundingOrientedBox(HeliPosition, XMFLOAT3(8.0, 6.0, 13.0), XMFLOAT4(0, 0, 0, 1));
@@ -1854,11 +1830,6 @@ void CGameFramework::CollisionStaticObjects()
 	BoundingOrientedBox HumanOOBB3 = ((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_xoobb =
 		BoundingOrientedBox(HumanPosition3, XMFLOAT3(5.0, 12.0, 5.0), XMFLOAT4(0, 0, 0, 1));
 
-	BoundingOrientedBox HumanOOBB4 = ((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8])->m_xoobb =
-		BoundingOrientedBox(HumanPosition4, XMFLOAT3(5.0, 12.0, 5.0), XMFLOAT4(0, 0, 0, 1));
-
-	BoundingOrientedBox HumanOOBB5 = ((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9])->m_xoobb =
-		BoundingOrientedBox(HumanPosition5, XMFLOAT3(5.0, 12.0, 5.0), XMFLOAT4(0, 0, 0, 1));
 
 	CValkanObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
 	for (int i = 0; i < BULLETS; i++)
@@ -1877,8 +1848,7 @@ void CGameFramework::CollisionStaticObjects()
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HumanPosition;
 			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6]->SetTrackAnimationSet(0, 0);
 			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9]->SetTrackAnimationSet(0, 0);
+
 		}
 
 		if (ppBullets[i]->m_xmOOBoundingBox.Intersects(HumanOOBB2))
@@ -1892,8 +1862,7 @@ void CGameFramework::CollisionStaticObjects()
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HumanPosition2;
 			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->SetTrackAnimationSet(0, 0);
 			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9]->SetTrackAnimationSet(0, 0);
+
 
 		}
 
@@ -1908,39 +1877,10 @@ void CGameFramework::CollisionStaticObjects()
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HumanPosition3;
 			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->SetTrackAnimationSet(0, 0);
 			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9]->SetTrackAnimationSet(0, 0);
+
 		}
 
-		if (ppBullets[i]->m_xmOOBoundingBox.Intersects(HumanOOBB4))
-		{
-			// 충돌 모션 
-			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8])
-			{
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]->SetTrackAnimationSet(0, 11);
-			}
-			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
-			((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HumanPosition4;
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9]->SetTrackAnimationSet(0, 0);
-		}
-
-		if (ppBullets[i]->m_xmOOBoundingBox.Intersects(HumanOOBB5))
-		{
-			// 충돌 모션 
-			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9])
-			{
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9]->SetTrackAnimationSet(0, 11);
-			}
-			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
-			((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HumanPosition5;
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]->SetTrackAnimationSet(0, 0);
-		}
+	
 	}
 	
 }

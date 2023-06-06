@@ -18,7 +18,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 {
 	if (m_nCurScene == SCENE1STAGE)
 	{
-		m_nObjects = 24;
+		m_nObjects = 20;
 		m_ppObjects = new CGameObject * [m_nObjects];
 
 		CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
@@ -38,11 +38,11 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[4] = new CGameObject(1);
 
 
-		int OtherPlayers = 5;
-		CMaterial* pOtherPlayerMaterial = new CMaterial(5);
-		pOtherPlayerMaterial->SetReflection(5);
+		int OtherPlayers = 3;
+		CMaterial* pOtherPlayerMaterial = new CMaterial(3);
+		pOtherPlayerMaterial->SetReflection(3);
 
-		for (int x = 5; x < OtherPlayers + 5; x++)
+		for (int x = 5; x < 8; x++)
 		{
 			m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL , NULL);
 			m_ppObjects[x]->SetMaterial(0, pOtherPlayerMaterial);
@@ -52,10 +52,9 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[5]->SetPosition(XMFLOAT3(30.0, 6.0, 905.0));
 		m_ppObjects[6]->SetPosition(XMFLOAT3(60.0, 6.0, 1155.0));
 		m_ppObjects[7]->SetPosition(XMFLOAT3(100.0, 6.0, 1205.0));
-		m_ppObjects[8]->SetPosition(XMFLOAT3(50.0, 6.0, 955.0));
-		m_ppObjects[9]->SetPosition(XMFLOAT3(100.0, 6.0, 1305.0));
+	
 
-		m_nHeliNpcObjects = 10;
+		m_nHeliNpcObjects = 5;
 
 		m_ppNpc_Heli_Objects = new CGameObject * [m_nHeliNpcObjects];
 
@@ -71,16 +70,16 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppNpc_Heli_Objects[i]->OnPrepareAnimate();
 		}
 
-		m_ppObjects[10] = m_ppNpc_Heli_Objects[0];
-		m_ppObjects[11] = m_ppNpc_Heli_Objects[1];
-		m_ppObjects[12] = m_ppNpc_Heli_Objects[2];
-		m_ppObjects[13] = m_ppNpc_Heli_Objects[3];
-		m_ppObjects[14] = m_ppNpc_Heli_Objects[4];
-		m_ppObjects[10]->SetPosition(XMFLOAT3(100.0, 30.0, 1100.0));
-		m_ppObjects[11]->SetPosition(XMFLOAT3(150.0, 50.0, 1000.0));
-		m_ppObjects[12]->SetPosition(XMFLOAT3(200.0, 60.0, 900.0));
-		m_ppObjects[13]->SetPosition(XMFLOAT3(250.0, 40.0, 800.0));
-		m_ppObjects[14]->SetPosition(XMFLOAT3(300.0, 20.0, 700.0));
+		m_ppObjects[8] = m_ppNpc_Heli_Objects[0];
+		m_ppObjects[9] = m_ppNpc_Heli_Objects[1];
+		m_ppObjects[10] = m_ppNpc_Heli_Objects[2];
+		m_ppObjects[11] = m_ppNpc_Heli_Objects[3];
+		m_ppObjects[12] = m_ppNpc_Heli_Objects[4];
+		m_ppObjects[8]->SetPosition(XMFLOAT3(100.0, 100.0, 1100.0));
+		m_ppObjects[9]->SetPosition(XMFLOAT3(150.0, 100.0, 1000.0));
+		m_ppObjects[10]->SetPosition(XMFLOAT3(200.0, 100.0, 900.0));
+		m_ppObjects[11]->SetPosition(XMFLOAT3(250.0, 100.0, 800.0));
+		m_ppObjects[12]->SetPosition(XMFLOAT3(300.0, 100.0, 1300.0));
 
 		CMaterial* pCityMaterial;
 		pCityMaterial = new CMaterial(6);
@@ -106,31 +105,29 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppCityGameObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
 			m_ppCityGameObjects[i]->SetScale(1.0f, 1.0f, 1.0f);
 			m_ppCityGameObjects[i]->OnPrepareAnimate();
-		pGeneratorModel->AddRef();
+			pGeneratorModel->AddRef();
 		}
 
-		m_ppObjects[15] = m_ppCityGameObjects[0];
-		m_ppObjects[16] = m_ppCityGameObjects[1];
-		m_ppObjects[17] = m_ppCityGameObjects[2];
-		m_ppObjects[18] = m_ppCityGameObjects[3];
+		m_ppObjects[13] = m_ppCityGameObjects[0];
+		m_ppObjects[14] = m_ppCityGameObjects[1];
+		m_ppObjects[15] = m_ppCityGameObjects[2];
+		m_ppObjects[16] = m_ppCityGameObjects[3];
 
+		m_ppObjects[13]->SetPosition(0.0f, 0.0f, 0.0f);
+		m_ppObjects[14]->SetPosition(0.0f, 0.0f, 0.0f);
 		m_ppObjects[15]->SetPosition(0.0f, 0.0f, 0.0f);
 		m_ppObjects[16]->SetPosition(0.0f, 0.0f, 0.0f);
-		m_ppObjects[17]->SetPosition(0.0f, 0.0f, 0.0f);
-		m_ppObjects[18]->SetPosition(0.0f, 0.0f, 0.0f);
 
-		m_nSoldiarNpcObjects = 24;
+		m_nSoldiarNpcObjects = 20;
 		CMaterial* pSoldiarNpcMaterial = new CMaterial(3);
 		pSoldiarNpcMaterial->SetReflection(3);
-		//CLoadedModelInfo* pSoldierNpcModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MODEL.bin", NULL);
-		for (int h = 19; h < m_nSoldiarNpcObjects; h++)
+		for (int h = 17; h < m_nSoldiarNpcObjects; h++)
 		{
 			m_ppObjects[h] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, NULL);
 			m_ppObjects[h]->SetMaterial(0, pSoldiarNpcMaterial);
 			m_ppObjects[h]->SetScale(9.0, 9.0, 9.0);
 			m_ppObjects[h]->SetPosition(400.0 + h * 15, 6.0, 705.0 + h * 15);
 		}
-		//if (pSoldierNpcModel) delete pSoldierNpcModel;
 
 	}
 	//if (m_nCurScene == SCENE2STAGE)

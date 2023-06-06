@@ -2170,7 +2170,7 @@ void CSoldiarOtherPlayerObjects::IdleState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	m_pSkinnedAnimationController->SetTrackEnable(3, false);
 	m_pSkinnedAnimationController->SetTrackEnable(4, false);
-	m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
+	//m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
 	CGameObject::Animate(EleapsedTime);
 }
 

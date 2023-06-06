@@ -228,7 +228,7 @@ void CHumanPlayer::ReloadState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 		//m_pSkinnedAnimationController->SetTrackEnable(9, false);
 		//m_pSkinnedAnimationController->SetTrackEnable(10, false);
 		//m_pSkinnedAnimationController->SetTrackEnable(11, false);
-		m_pSkinnedAnimationController->SetTrackAnimationSet(1, 8);
+		//m_pSkinnedAnimationController->SetTrackAnimationSet(1, 8);
 
 	
 
@@ -306,7 +306,20 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 		m_pSkinnedAnimationController->SetTrackEnable(7, false);
 
 	}
+	if ((dwDirection & DIR_UP ) && (dwDirection & DIR_FORWARD))
+	{
+		m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		m_pSkinnedAnimationController->SetTrackEnable(5, false);
+		m_pSkinnedAnimationController->SetTrackEnable(6, false);
+		m_pSkinnedAnimationController->SetTrackEnable(7, false);
+		m_pSkinnedAnimationController->SetTrackEnable(8, true);
+		m_pSkinnedAnimationController->SetTrackEnable(9, false);
 
+	}
 
 	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
 }
