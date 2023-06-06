@@ -466,8 +466,7 @@ void SESSION::update_viewlist()
 
 	// 2. NPC 업데이트 (임시로 더미로 대체함.)
 	for (auto& dummy : dummies) {
-		int moved_pl_id = id + PLAYER_ID_START;		// 이동한 객체 (자신)
-		int dummy_id = dummy.id + NPC_ID_START;		// 이동한 객체 (자신)
+		int dummy_id = dummy.id + NPC_ID_START;
 
 		// 1) 움직였더니 새로운 객체가 시야 안에 생긴 경우
 		if (XMF_Distance(pos, dummy.pos) <= HUMAN_VIEW_RANGE) {
@@ -756,8 +755,6 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].send_login_packet();
 		clients[client_id].s_lock.unlock();
 
-		clients[client_id].update_viewlist();
-
 		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "]이(가) 접속하였습니다." << endl;	// server message
 
 		if (!b_active_server) {
@@ -767,6 +764,8 @@ void process_packet(int client_id, char* packet)
 
 		cout << "새로운 오브젝트가 생성되었습니다! - POS:(" << clients[client_id].pos.x
 			<< "," << clients[client_id].pos.y << "," << clients[client_id].pos.z << ").\n" << endl;
+
+		clients[client_id].update_viewlist();
 
 		//====================
 		// 1. Player 객체 정보
@@ -853,7 +852,7 @@ void process_packet(int client_id, char* packet)
 
 		// 4. 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
 		for (auto& vl_key : clients[client_id].view_list) {
-			if (!(PLAYER_ID_START <= vl_key && vl_key <= PLAYER_ID_END)) break;	// Player가 아니면 break
+			if (!(PLAYER_ID_START <= vl_key && vl_key <= PLAYER_ID_END)) continue;	// Player가 아니면 continue
 
 			int pl_id = vl_key - PLAYER_ID_START;
 			if (pl_id == client_id) break;
@@ -861,9 +860,10 @@ void process_packet(int client_id, char* packet)
 
 			lock_guard<mutex> lg{ clients[pl_id].s_lock };
 			clients[pl_id].send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
+			
 		}
 
-		// 4. NPC 서버에게도 플레이어가 이동한 위치를 알려준다.
+		// 5. NPC 서버에게도 플레이어가 이동한 위치를 알려준다.
 		if (b_npcsvr_conn) {
 			lock_guard<mutex> lg{ npc_server.s_lock };
 			npc_server.send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
@@ -1145,7 +1145,7 @@ void process_packet(int client_id, char* packet)
 				for (auto& cl : clients) {
 					if (cl.s_state != ST_INGAME) continue;
 					if (cl.curr_stage == 0) continue;
-					//if (cl.id == client_id) continue;
+					if (cl.id == client_id) continue;
 
 					lock_guard<mutex> lg{ cl.s_lock };
 					cl.do_send(&change2idle_pack);

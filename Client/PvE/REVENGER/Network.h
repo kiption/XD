@@ -156,6 +156,8 @@ void processPacket(char* ptr)
         my_info.m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
         my_info.m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
         my_info.m_state = OBJ_ST_RUNNING;
+        my_info.m_ingame_state = PL_ST_IDLE;
+        my_info.m_new_state_update = true;
         break;
     }// SC_LOGIN_INFO case end
     case SC_ADD_OBJECT:
@@ -175,6 +177,8 @@ void processPacket(char* ptr)
                 other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
                 other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
                 other_players[recv_id].m_state = OBJ_ST_RUNNING;
+                other_players[recv_id].m_ingame_state = PL_ST_IDLE;
+                other_players[recv_id].m_new_state_update = true;
             }
             else {
                 cout << "[SC_ADD Error] Unknown ID." << endl;
@@ -190,6 +194,8 @@ void processPacket(char* ptr)
             npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
             npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
             npcs_info[recv_id].m_state = OBJ_ST_RUNNING;
+            npcs_info[recv_id].m_ingame_state = PL_ST_IDLE;
+            npcs_info[recv_id].m_new_state_update = true;
 
             left_npc++;
         }
@@ -205,24 +211,22 @@ void processPacket(char* ptr)
 
         // 1. Move Player
         if (recv_packet->target == TARGET_PLAYER) {
-            if (recv_id == my_info.m_id) break;            // 자기자신은 클라에서 움직여주고 있음.
+            if (recv_id == my_info.m_id) break;             // 자기자신은 클라에서 움직여주고 있음.
             if (recv_id < 0 || recv_id > MAX_USER) break;   // 잘못된 ID값
 
             other_players[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };      // 상대방Players Object 이동
             switch (recv_packet->direction) {
             case MV_FRONT:
                 other_players[recv_id].m_ingame_state = PL_ST_MOVE_FRONT;
-                //cout << "Player[" << recv_id << "]의 상태가 \'MOVE_FRONT\' 로 변경되었습니다.\n" << endl;//TEST
                 break;
             case MV_BACK:
                 other_players[recv_id].m_ingame_state = PL_ST_MOVE_BACK;
-                //cout << "Player[" << recv_id << "]의 상태가 \'MOVE_BACK\' 로 변경되었습니다.\n" << endl;//TEST
                 break;
             case MV_SIDE:
                 other_players[recv_id].m_ingame_state = PL_ST_MOVE_SIDE;
-                //cout << "Player[" << recv_id << "]의 상태가 \'MOVE_SIDE\' 로 변경되었습니다.\n" << endl;//TEST
                 break;
             }
+            other_players[recv_id].m_new_state_update = true;
         }
         // 2. Move Npc
         else if (recv_packet->target == TARGET_NPC) {
@@ -284,6 +288,7 @@ void processPacket(char* ptr)
                 other_players[recv_id].m_ingame_state = PL_ST_MOVE_SIDE;
                 break;
             }
+            other_players[recv_id].m_new_state_update = true;
             // 상대 Object 회전
             other_players[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
             other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
@@ -395,6 +400,7 @@ void processPacket(char* ptr)
         if (recvd_target == TARGET_PLAYER) {
             if (recvd_id == my_id) {
                 my_info.m_ingame_state = recvd_state;
+                my_info.m_new_state_update = true;
                 switch (recvd_state) {
                 case PL_ST_IDLE:
                     break;
@@ -404,13 +410,13 @@ void processPacket(char* ptr)
                     gamesound.collisionSound();
 
                     my_info.m_hp = 0;
-                    my_info.m_new_state_update = true;
                     my_info.m_damaged_effect_on = true;
                     break;
                 }
             }
             else {
                 other_players[recvd_id].m_ingame_state = recvd_state;
+                other_players[recvd_id].m_new_state_update = true;
                 switch (recvd_state) {
                 case PL_ST_IDLE:
                     break;
@@ -423,12 +429,13 @@ void processPacket(char* ptr)
 
                     other_players[recvd_id].m_hp = 0;
                     other_players[recvd_id].m_new_state_update = true;
-                    other_players[recvd_id].m_damaged_effect_on = true;
                     break;
                 }
             }
         }
         else if (recvd_target == TARGET_NPC) {
+            npcs_info[recvd_id].m_ingame_state = recvd_state;
+            npcs_info[recvd_id].m_new_state_update = true;
             switch (recvd_state) {
             case PL_ST_IDLE:
                 break;
@@ -437,23 +444,21 @@ void processPacket(char* ptr)
             case PL_ST_ATTACK:
                 break;
             case PL_ST_DEAD:
-                npcs_info[recvd_id].m_ingame_state = PL_ST_DEAD;
                 gamesound.collisionSound();
 
                 npcs_info[recvd_id].m_hp = 0;
-                npcs_info[recvd_id].m_new_state_update = true;
                 npcs_info[recvd_id].m_damaged_effect_on = true;
                 break;
             }
         }
         else if (recvd_target == TARGET_DUMMY) { // NPC 완성 전까지 임시 사용
+            dummies[recvd_id].m_ingame_state = recvd_state;
+            dummies[recvd_id].m_new_state_update = true;
             switch (recvd_state) {
             case PL_ST_DEAD:
-                dummies[recvd_id].m_ingame_state = PL_ST_DEAD;
                 gamesound.collisionSound();
 
                 dummies[recvd_id].m_hp = 0;
-                dummies[recvd_id].m_new_state_update = true;
                 break;
             }
         }
