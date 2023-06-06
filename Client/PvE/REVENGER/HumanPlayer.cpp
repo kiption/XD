@@ -14,20 +14,20 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	//m_pHeadFindFrame = pSoldiarModel->m_pModelRootObject->FindFrame("SK_Soldier_Head_LOD1");
 
 	//7°³
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 12, pSoldiarModel); 
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 12, pSoldiarModel);
 
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0,0);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(1,1);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(2,2);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(3,3);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(4,4);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(5,5);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(6,6);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(7,7);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(8,8);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(9,9);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(10,10);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(11,11);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(5, 5);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(7, 7);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(8, 8);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(9, 9);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(10, 10);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(11, 11);
 
 	m_pSkinnedAnimationController->SetTrackEnable(0, true);
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
@@ -62,7 +62,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 #endif
 	CAnimationCallbackHandler* pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
-	
+
 
 	pBCBulletEffectShader = new CBulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
@@ -86,9 +86,9 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 
-	m_xoobb = BoundingOrientedBox(XMFLOAT3(this->GetPosition()), XMFLOAT3(15.0, 18.0, 13.0), XMFLOAT4(0, 0, 0, 1));
-
+	m_xoobb = BoundingOrientedBox(XMFLOAT3(this->GetPosition()), XMFLOAT3(5.0, 12.0, 5.0), XMFLOAT4(0, 0, 0, 1));
 	if (pSoldiarModel) delete pSoldiarModel;
+
 
 }
 
@@ -112,7 +112,7 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.5f, -2.2f));
-		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(GetPosition().x, GetPosition().y+1.0f, GetPosition().z), m_pCamera->GetOffset()));
+		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(GetPosition().x, GetPosition().y + 1.0f, GetPosition().z), m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -197,45 +197,47 @@ void CHumanPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 void CHumanPlayer::JumpState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 {
 
-	m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	m_pSkinnedAnimationController->SetTrackEnable(4, false);
-	m_pSkinnedAnimationController->SetTrackEnable(5, false);
-	m_pSkinnedAnimationController->SetTrackEnable(6, false);
-	m_pSkinnedAnimationController->SetTrackEnable(7, false);
-	m_pSkinnedAnimationController->SetTrackEnable(8, false);
-	m_pSkinnedAnimationController->SetTrackEnable(9, true);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 9);
-	
+	//m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(5, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(7, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(8, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(9, true);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 9);
+
 	CPlayer::Animate(EleapsedTime, pxmf4x4Parent);
 }
 
 void CHumanPlayer::ReloadState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 {
 	
-	m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	m_pSkinnedAnimationController->SetTrackEnable(4, false);
-	m_pSkinnedAnimationController->SetTrackEnable(5, false);
-	m_pSkinnedAnimationController->SetTrackEnable(6, false);
-	m_pSkinnedAnimationController->SetTrackEnable(7, false);
-	m_pSkinnedAnimationController->SetTrackEnable(8, true);
-	m_pSkinnedAnimationController->SetTrackEnable(9, false);
-	m_pSkinnedAnimationController->SetTrackEnable(10, false);
-	m_pSkinnedAnimationController->SetTrackEnable(11, false);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 8);
+
+		//m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		//m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		//m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		//m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		//m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		//m_pSkinnedAnimationController->SetTrackEnable(5, false);
+		//m_pSkinnedAnimationController->SetTrackEnable(6, false);
+		//m_pSkinnedAnimationController->SetTrackEnable(7, false);
+		//m_pSkinnedAnimationController->SetTrackEnable(8, true);
+		//m_pSkinnedAnimationController->SetTrackEnable(9, false);
+		//m_pSkinnedAnimationController->SetTrackEnable(10, false);
+		//m_pSkinnedAnimationController->SetTrackEnable(11, false);
+		m_pSkinnedAnimationController->SetTrackAnimationSet(1, 8);
 
 	
+
 	CPlayer::Animate(EleapsedTime, pxmf4x4Parent);
 }
 
 void CHumanPlayer::ShootState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 {
-	
+
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
@@ -250,7 +252,7 @@ void CHumanPlayer::ShootState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 
 void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
-	if (dwDirection& DIR_FORWARD)
+	if (dwDirection & DIR_FORWARD)
 	{
 		m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		m_pSkinnedAnimationController->SetTrackEnable(1, true);
@@ -259,6 +261,10 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 		m_pSkinnedAnimationController->SetTrackEnable(4, false);
 		m_pSkinnedAnimationController->SetTrackEnable(5, false);
 		m_pSkinnedAnimationController->SetTrackEnable(6, false);
+		m_pSkinnedAnimationController->SetTrackEnable(7, false);
+		m_pSkinnedAnimationController->SetTrackEnable(8, false);
+		m_pSkinnedAnimationController->SetTrackEnable(9, false);
+
 	}
 	if (dwDirection & DIR_BACKWARD)
 	{
@@ -269,6 +275,10 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 		m_pSkinnedAnimationController->SetTrackEnable(4, false);
 		m_pSkinnedAnimationController->SetTrackEnable(5, false);
 		m_pSkinnedAnimationController->SetTrackEnable(6, false);
+		m_pSkinnedAnimationController->SetTrackEnable(7, false);
+		m_pSkinnedAnimationController->SetTrackEnable(8, false);
+		m_pSkinnedAnimationController->SetTrackEnable(9, false);
+
 	}
 	if (dwDirection & DIR_LEFT)
 	{
@@ -279,6 +289,10 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 		m_pSkinnedAnimationController->SetTrackEnable(4, false);
 		m_pSkinnedAnimationController->SetTrackEnable(5, false);
 		m_pSkinnedAnimationController->SetTrackEnable(6, false);
+		m_pSkinnedAnimationController->SetTrackEnable(7, false);
+		m_pSkinnedAnimationController->SetTrackEnable(8, false);
+		m_pSkinnedAnimationController->SetTrackEnable(9, false);
+
 	}
 	if (dwDirection & DIR_RIGHT)
 	{
@@ -289,8 +303,10 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 		m_pSkinnedAnimationController->SetTrackEnable(4, true);
 		m_pSkinnedAnimationController->SetTrackEnable(5, false);
 		m_pSkinnedAnimationController->SetTrackEnable(6, false);
+		m_pSkinnedAnimationController->SetTrackEnable(7, false);
+
 	}
-	
+
 
 	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
 }
@@ -302,12 +318,12 @@ void CHumanPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	for (int i = 0; i < BULLETS; i++)
 	{
 		if (m_ppBullets[i]->m_bActive) {
-			
+
 			m_ppBullets[i]->Animate(fTimeElapsed);
-		
+
 		}
 	}
-	
+
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
@@ -335,14 +351,14 @@ void CHumanPlayer::Update(float fTimeElapsed)
 			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
 		}
 	}
-	
+
 }
 
 void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	CPlayer::Render(pd3dCommandList, pCamera);
 	if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
-	for (int i = 0; i < BULLETS; i++) 
+	for (int i = 0; i < BULLETS; i++)
 		if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
 }
 
@@ -359,8 +375,8 @@ void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 			pBulletObject->Reset();
 			break;
 		}
-		
-		
+
+
 	}
 	XMFLOAT3 PlayerLook = this->GetLookVector();
 	XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
@@ -378,14 +394,14 @@ void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 10.0f, false));
-		
+
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->Rotate(90.0, 0.0, 0.0);
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->SetScale(0.2, 0.2, 1.0);
 		pBulletObject->SetActive(true);
-	
+
 	}
 
 }

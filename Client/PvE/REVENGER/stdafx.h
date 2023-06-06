@@ -141,6 +141,14 @@ static int FRAME_BUFFER_HEIGHT = GetSystemMetrics(SM_CYSCREEN);
 #define SCENE2STAGE 0x02
 #define BULLETS					50
 #define BULLETS2				10
+
+//====
+#define KEY_A         0x41
+#define KEY_D         0x44
+#define KEY_S         0x53
+#define KEY_W         0x57
+#define KEY_Q         0x51
+#define KEY_E		  0x45
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 
 extern int gnCurrentParticles;

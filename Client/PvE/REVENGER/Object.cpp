@@ -1786,10 +1786,10 @@ void CHelicopterObjects::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(21)
 {
 	
-	pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MODEL.bin", NULL);
-	SetChild(pModel->m_pModelRootObject, true);
-	pModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pModel);
+	CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MODEL.bin", NULL);
+	SetChild(psModel->m_pModelRootObject, true);
+	psModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 7, psModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
@@ -1813,8 +1813,8 @@ CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 6);
 	m_pSkinnedAnimationController->SetCallbackKeys(6, 1);
 
-	if (pModel) delete pModel;
-	m_xmOOBoundingBox = BoundingOrientedBox(this->GetPosition(),XMFLOAT3(3.0,6.0,3.0),XMFLOAT4(0,0,0,1));
+	if (psModel) delete psModel;
+	m_xmOOBoundingBox = BoundingOrientedBox(this->GetPosition(),XMFLOAT3(5.0,6.0,5.0),XMFLOAT4(0,0,0,1));
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 

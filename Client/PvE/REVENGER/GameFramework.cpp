@@ -577,9 +577,10 @@ void CGameFramework::ProcessInput()
 			dwDirection |= DIR_RIGHT;
 		}
 
-		if (pKeysBuffer[KEY_Q] & 0xF0) {
+		if (pKeysBuffer[KEY_Q] & 0xF0 || ((pKeysBuffer[KEY_W] & 0xF0)&&(pKeysBuffer[KEY_Q] & 0xF0)))
+		{
 			dwDirection |= DIR_UP;
-			if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->ReloadState(m_GameTimer.GetTimeElapsed());
+			if (m_nMode == SCENE1STAGE) ((CHumanPlayer*)m_pPlayer)->ReloadState(m_GameTimer.GetTimeElapsed());
 			q_keyboardInput.push(SEND_KEY_UP);//S
 		}
 		if (pKeysBuffer[KEY_E] & 0xF0) {
@@ -650,6 +651,7 @@ void CGameFramework::AnimateObjects()
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed());
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 
+	if(m_nMode==SCENE1STAGE)CollisionStaticObjects();
 	((CHumanPlayer*)m_pPlayer)->m_fShootDelay += m_GameTimer.GetTimeElapsed();
 	if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.2)
 	{
@@ -1843,36 +1845,104 @@ void CGameFramework::CollisionStaticObjects()
 
 
 	BoundingOrientedBox HeliOOBB = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10]->m_xmOOBoundingBox = BoundingOrientedBox(HeliPosition, XMFLOAT3(8.0, 6.0, 13.0), XMFLOAT4(0, 0, 0, 1));
-	BoundingOrientedBox HumanOOBB1 = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->m_xmOOBoundingBox = BoundingOrientedBox(HumanPosition, XMFLOAT3(3.0, 9.0, 3.0), XMFLOAT4(0, 0, 0, 1));
+	BoundingOrientedBox HumanOOBB1 = ((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5])->m_xoobb=
+		BoundingOrientedBox(HumanPosition, XMFLOAT3(5.0, 12.0, 5.0), XMFLOAT4(0, 0, 0, 1));
+
+	BoundingOrientedBox HumanOOBB2 = ((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6])->m_xoobb =
+		BoundingOrientedBox(HumanPosition2, XMFLOAT3(5.0, 12.0, 5.0), XMFLOAT4(0, 0, 0, 1));
+
+	BoundingOrientedBox HumanOOBB3 = ((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_xoobb =
+		BoundingOrientedBox(HumanPosition3, XMFLOAT3(5.0, 12.0, 5.0), XMFLOAT4(0, 0, 0, 1));
+
+	BoundingOrientedBox HumanOOBB4 = ((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8])->m_xoobb =
+		BoundingOrientedBox(HumanPosition4, XMFLOAT3(5.0, 12.0, 5.0), XMFLOAT4(0, 0, 0, 1));
+
+	BoundingOrientedBox HumanOOBB5 = ((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9])->m_xoobb =
+		BoundingOrientedBox(HumanPosition5, XMFLOAT3(5.0, 12.0, 5.0), XMFLOAT4(0, 0, 0, 1));
+
 	CValkanObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
 	for (int i = 0; i < BULLETS; i++)
 	{
 		ppBullets[i]->m_xmOOBoundingBox = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 2.0), XMFLOAT4(0, 0, 0, 1));
-		for (int j = 5; j < 10; j++)
+
+
+		if (ppBullets[i]->m_xmOOBoundingBox.Intersects(HumanOOBB1))
 		{
-
-			if (ppBullets[i]->m_xmOOBoundingBox.Intersects(HumanOOBB1))
+			// 충돌 모션 
+			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5])
 			{
-				// 충돌 모션 
-
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[j]->SetTrackAnimationSet(0, 4);
-
-				((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->SetActive(false);
-				((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = false;
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->SetTrackAnimationSet(0, 11);
 			}
-			if (ppBullets[i]->m_xmOOBoundingBox.Intersects(HeliOOBB))
-			{
-				// 충돌 모션 
-				((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->SetActive(true);
-				((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
-				((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(HeliPosition);
-				((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HeliPosition;
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[j]->SetTrackAnimationSet(0, 0);
-
-			}
+			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
+			((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HumanPosition;
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6]->SetTrackAnimationSet(0, 0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]->SetTrackAnimationSet(0, 0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]->SetTrackAnimationSet(0, 0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9]->SetTrackAnimationSet(0, 0);
 		}
 
+		if (ppBullets[i]->m_xmOOBoundingBox.Intersects(HumanOOBB2))
+		{
+			// 충돌 모션 
+			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6])
+			{
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6]->SetTrackAnimationSet(0, 11);
+			}
+			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
+			((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HumanPosition2;
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->SetTrackAnimationSet(0, 0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]->SetTrackAnimationSet(0, 0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]->SetTrackAnimationSet(0, 0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9]->SetTrackAnimationSet(0, 0);
+
+		}
+
+		if (ppBullets[i]->m_xmOOBoundingBox.Intersects(HumanOOBB3))
+		{
+			// 충돌 모션 
+			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])
+			{
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]->SetTrackAnimationSet(0, 11);
+			}
+			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
+			((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HumanPosition3;
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->SetTrackAnimationSet(0, 0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6]->SetTrackAnimationSet(0, 0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]->SetTrackAnimationSet(0, 0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9]->SetTrackAnimationSet(0, 0);
+		}
+
+		if (ppBullets[i]->m_xmOOBoundingBox.Intersects(HumanOOBB4))
+		{
+			// 충돌 모션 
+			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8])
+			{
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]->SetTrackAnimationSet(0, 11);
+			}
+			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
+			((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HumanPosition4;
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->SetTrackAnimationSet(0, 0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6]->SetTrackAnimationSet(0, 0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]->SetTrackAnimationSet(0, 0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9]->SetTrackAnimationSet(0, 0);
+		}
+
+		if (ppBullets[i]->m_xmOOBoundingBox.Intersects(HumanOOBB5))
+		{
+			// 충돌 모션 
+			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9])
+			{
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9]->SetTrackAnimationSet(0, 11);
+			}
+			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
+			((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HumanPosition5;
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]->SetTrackAnimationSet(0, 0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6]->SetTrackAnimationSet(0, 0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]->SetTrackAnimationSet(0, 0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]->SetTrackAnimationSet(0, 0);
+		}
 	}
+	
 }
 
 

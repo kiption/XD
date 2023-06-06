@@ -42,20 +42,18 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		CMaterial* pOtherPlayerMaterial = new CMaterial(5);
 		pOtherPlayerMaterial->SetReflection(5);
 
-		CLoadedModelInfo* pSoldierModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MODEL.bin", NULL);
 		for (int x = 5; x < OtherPlayers + 5; x++)
 		{
-			m_ppObjects[x] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSoldierModel , 7);
+			m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL , NULL);
 			m_ppObjects[x]->SetMaterial(0, pOtherPlayerMaterial);
 			m_ppObjects[x]->SetScale(9.0, 9.0, 9.0);
 		}
-		if (pSoldierModel) delete pSoldierModel;
 
-		m_ppObjects[5]->SetPosition(XMFLOAT3(50.0, 6.0, 905.0));
-		m_ppObjects[6]->SetPosition(XMFLOAT3(150.0, 6.0, 905.0));
-		m_ppObjects[7]->SetPosition(XMFLOAT3(200.0, 6.0, 905.0));
-		m_ppObjects[8]->SetPosition(XMFLOAT3(250.0, 6.0, 905.0));
-		m_ppObjects[9]->SetPosition(XMFLOAT3(300.0, 6.0, 905.0));
+		m_ppObjects[5]->SetPosition(XMFLOAT3(30.0, 6.0, 905.0));
+		m_ppObjects[6]->SetPosition(XMFLOAT3(60.0, 6.0, 1155.0));
+		m_ppObjects[7]->SetPosition(XMFLOAT3(100.0, 6.0, 1205.0));
+		m_ppObjects[8]->SetPosition(XMFLOAT3(50.0, 6.0, 955.0));
+		m_ppObjects[9]->SetPosition(XMFLOAT3(100.0, 6.0, 1305.0));
 
 		m_nHeliNpcObjects = 10;
 
@@ -124,15 +122,15 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_nSoldiarNpcObjects = 24;
 		CMaterial* pSoldiarNpcMaterial = new CMaterial(3);
 		pSoldiarNpcMaterial->SetReflection(3);
-		CLoadedModelInfo* pSoldierNpcModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MODEL.bin", NULL);
+		//CLoadedModelInfo* pSoldierNpcModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/MODEL.bin", NULL);
 		for (int h = 19; h < m_nSoldiarNpcObjects; h++)
 		{
-			m_ppObjects[h] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSoldierNpcModel, 7);
+			m_ppObjects[h] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, NULL);
 			m_ppObjects[h]->SetMaterial(0, pSoldiarNpcMaterial);
 			m_ppObjects[h]->SetScale(9.0, 9.0, 9.0);
 			m_ppObjects[h]->SetPosition(400.0 + h * 15, 6.0, 705.0 + h * 15);
 		}
-		if (pSoldierNpcModel) delete pSoldierNpcModel;
+		//if (pSoldierNpcModel) delete pSoldierNpcModel;
 
 	}
 	//if (m_nCurScene == SCENE2STAGE)
