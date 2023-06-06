@@ -220,7 +220,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						if (dummies[i].m_ingame_state == PL_ST_DEAD) {
 							// 여기에 더미 죽는 모션 실행
 							// (더미 죽는 모션이 한 사이클 완료되면 객체를 날려버리던가 scale 해주면 됨.)
-
+							gGameFramework.otherPlayerDyingMotion(i);
 
 							dummies[i].m_new_state_update = false;
 						}
