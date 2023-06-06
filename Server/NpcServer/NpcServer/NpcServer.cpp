@@ -40,7 +40,6 @@ using namespace DirectX::PackedVector;
 //============================================================
 #include "../../MainServer/Server/Protocol.h"
 #include "../../MainServer/Server/Constant.h"
-//#include "../../MainServer/Server/MapObjects.h"
 #include "../../MainServer/Server/CP_KEYS.h"
 #include "CheckPoint.h"
 
@@ -170,6 +169,21 @@ XMFLOAT3 NPCNormalize(XMFLOAT3 vec)
 	}
 
 	return vec;
+}
+
+XMFLOAT3 ProjectToXZPlane(const XMFLOAT3& vector)
+{
+	return XMFLOAT3(vector.x, 0.0f, vector.z);
+}
+
+// 벡터를 정규화하고 xz 평면으로 투영하는 함수
+XMFLOAT3 ProjectToXZPlaneNormalized(const XMFLOAT3& vector)
+{
+	XMFLOAT3 projectedVector = ProjectToXZPlane(vector);
+	XMVECTOR normalizedVector = XMVector3Normalize(XMLoadFloat3(&projectedVector));
+	XMFLOAT3 normalizedResult;
+	XMStoreFloat3(&normalizedResult, normalizedVector);
+	return normalizedResult;
 }
 
 float HeuristicEstimate(int startNode, int targetNode)
@@ -333,8 +347,9 @@ public:
 	float CalculateYawToTarget(const XMFLOAT3& targetPosition) const;						// yaw 각도에 따른 회전
 	float CalculatePitchToTarget(const XMFLOAT3& targetPosition) const;						// Pitch 각도에 따른 회전
 	float CalculateRollToTarget(const XMFLOAT3& targetPosition) const;						// Roll 각도에 따른 회전
-	void SetRotation(float yaw, float pitch, float roll);									// 회전 설정
-	XMFLOAT3 NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll);				// 전체 각에 따른 look 설정
+	XMFLOAT3 NPCcalcRightRotate();						// 전체 각에 따른 right 설정
+	XMFLOAT3 NPCcalcUpRotate();							// 전체 각에 따른 up 설정
+	XMFLOAT3 NPCcalcLookRotate();							// 전체 각에 따른 look 설정
 
 	// Base
 		// Random
@@ -372,9 +387,6 @@ public:
 	void NPC_Damege_Calc(int id);															// 플레이어 ID 값 받아서 데미지 계산
 	void NPC_Check_HP();																	// HP 계산
 	void NPC_Death_motion();																// HP 0
-
-
-
 };
 
 float NPC::CalculateYawToTarget(const XMFLOAT3& targetPosition) const
@@ -426,24 +438,69 @@ float NPC::CalculateRollToTarget(const XMFLOAT3& targetPosition) const
 	// 이 예시에서는 NPC의 Roll 값 계산을 생략하고 0을 반환합니다.
 	return 0.0f;
 }
-void NPC::SetRotation(float yaw, float pitch, float roll)
-{
-	// Yaw, pitch, roll 값을 기반으로 회전 행렬을 생성합니다.
-	XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
-
-	// 현재 Look, Right, Up Vectors를 업데이트합니다.
-	m_lookvec = XMFLOAT3(rotationMatrix.r[2].m128_f32[0], rotationMatrix.r[2].m128_f32[1], rotationMatrix.r[2].m128_f32[2]);
-	m_rightvec = XMFLOAT3(rotationMatrix.r[0].m128_f32[0], rotationMatrix.r[0].m128_f32[1], rotationMatrix.r[0].m128_f32[2]);
-	m_upvec = XMFLOAT3(rotationMatrix.r[1].m128_f32[0], rotationMatrix.r[1].m128_f32[1], rotationMatrix.r[1].m128_f32[2]);
-
-	// 회전 값을 NPC에 설정합니다.
-	//m_rotation = rotationMatrix;
-}
-XMFLOAT3 NPC::NPCcalcRotate(XMFLOAT3 vec, float pitch, float yaw, float roll)
+XMFLOAT3 NPC::NPCcalcRightRotate()
 {
 	float curr_pitch = XMConvertToRadians(pitch);
 	float curr_yaw = XMConvertToRadians(yaw);
 	float curr_roll = XMConvertToRadians(roll);
+
+	XMFLOAT3 vec = { 1.0f, 0.0f, 0.0f };
+
+	// roll
+	float x1, y1;
+	x1 = vec.x * cos(curr_roll) - vec.y * sin(curr_roll);
+	y1 = vec.x * sin(curr_roll) + vec.y * cos(curr_roll);
+
+	// pitch
+	float y2, z1;
+	y2 = y1 * cos(curr_pitch) - vec.z * sin(curr_pitch);
+	z1 = y1 * sin(curr_pitch) + vec.z * cos(curr_pitch);
+
+	// yaw
+	float x2, z2;
+	z2 = z1 * cos(curr_yaw) - x1 * sin(curr_yaw);
+	x2 = z1 * sin(curr_yaw) + x1 * cos(curr_yaw);
+
+	// Update
+	vec = { x2, y2, z2 };
+
+	return NPCNormalize(vec);
+}
+XMFLOAT3 NPC::NPCcalcUpRotate()
+{
+	float curr_pitch = XMConvertToRadians(pitch);
+	float curr_yaw = XMConvertToRadians(yaw);
+	float curr_roll = XMConvertToRadians(roll);
+
+	XMFLOAT3 vec = { 0.0f, 1.0f, 0.0f };
+
+	// roll
+	float x1, y1;
+	x1 = vec.x * cos(curr_roll) - vec.y * sin(curr_roll);
+	y1 = vec.x * sin(curr_roll) + vec.y * cos(curr_roll);
+
+	// pitch
+	float y2, z1;
+	y2 = y1 * cos(curr_pitch) - vec.z * sin(curr_pitch);
+	z1 = y1 * sin(curr_pitch) + vec.z * cos(curr_pitch);
+
+	// yaw
+	float x2, z2;
+	z2 = z1 * cos(curr_yaw) - x1 * sin(curr_yaw);
+	x2 = z1 * sin(curr_yaw) + x1 * cos(curr_yaw);
+
+	// Update
+	vec = { x2, y2, z2 };
+
+	return NPCNormalize(vec);
+}
+XMFLOAT3 NPC::NPCcalcLookRotate()
+{
+	float curr_pitch = XMConvertToRadians(pitch);
+	float curr_yaw = XMConvertToRadians(yaw);
+	float curr_roll = XMConvertToRadians(roll);
+
+	XMFLOAT3 vec = { 0.0f, 0.0f, 1.0f };
 
 	// roll
 	float x1, y1;
@@ -493,7 +550,6 @@ bool NPC::CheckChaseState()
 	}
 	return false;
 }
-
 void NPC::NPC_State_Manegement(int state)
 {
 	switch (m_state)
@@ -533,7 +589,6 @@ void NPC::NPC_State_Manegement(int state)
 	NPC_Check_HP();
 	SetFrustum();
 }
-
 void NPC::Caculation_Distance(XMFLOAT3 vec, int id) // 서버에서 따로 부를 것.
 {
 	m_Distance[id] = sqrtf(pow((vec.x - pos.x), 2) + pow((vec.z - pos.z), 2));
@@ -562,6 +617,26 @@ void NPC::MoveToNode()
 
 		if ((isMovingForward && pos.x <= destination) || (!isMovingForward && pos.x >= destination)) UpdateCurrentNodeIndex();
 	}
+
+	int section = m_currentNodeIndex % 4;
+
+	switch (section)
+	{
+	case 0:
+		yaw = 0.0f;
+		break;
+	case 1:
+		yaw = 270.0f;
+		break;
+	case 2:
+		yaw = 180.0f;
+		break;
+	case 3:
+		yaw = 90.0f;
+		break;
+	}
+	m_rightvec = NPCcalcRightRotate();
+	m_lookvec = NPCcalcLookRotate();
 }
 void NPC::UpdateCurrentNodeIndex()
 {
@@ -607,7 +682,8 @@ int NPC::FindUserNode(int user_City)
 }
 void NPC::IsPathMove()
 {
-	if (path.empty() || path.size() < 2) return;
+	if (path.empty() || path.size() < 2)
+		return;
 
 	NodeMesh currentNode = MeshInfo[path[0]];
 	NodeMesh nextNode = MeshInfo[path[1]];
@@ -616,14 +692,24 @@ void NPC::IsPathMove()
 	const bool isMovingForward = nextNode.GetIndex() % 4 < 2;
 	const float speed = m_Speed;
 
+	float destination;
 	if (isMovingInZ) {
-		if (isMovingForward) pos.z += speed;
-		else pos.z -= speed;
+		destination = isMovingForward ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
+		pos.z += isMovingForward ? speed : -speed;
+		yaw = isMovingForward ? 0.0f : 180.0f;
+
+		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) m_currentNodeIndex = nextNode.GetIndex();
 	}
 	else {
-		if (isMovingForward) pos.x -= speed;
-		else pos.x += speed;
+		destination = isMovingForward ? currentNode.GetLargeX() - m_destinationRange : currentNode.GetSmallX() + m_destinationRange;
+		pos.x += isMovingForward ? speed : -speed;
+		yaw = isMovingForward ? 90.0f : 270.0f;
+
+		if ((isMovingForward && pos.x >= destination) || (!isMovingForward && pos.x <= destination)) m_currentNodeIndex = nextNode.GetIndex();
 	}
+
+	m_rightvec = NPCcalcRightRotate();
+	m_lookvec = NPCcalcLookRotate();
 }
 void NPC::PlayerChasing()
 {
@@ -637,15 +723,33 @@ void NPC::PlayerChasing()
 
 	// 노드 검색 후 같은 섹션에 있는 지 판별
 	if (user_node == m_currentNodeIndex) {
+		if (m_Distance[m_chaseID] >= 150.0f) {
+			// 내 포지션과 유저의 포지션이 이루는 벡터를 구함
+			XMFLOAT3 positionToUser = { m_User_Pos[m_chaseID].x - pos.x, m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
+			XMFLOAT3 DefaultTemp = { 0.0f, 0.0f, 1.0f };
 
-		// 내 포지션과 유저의 포지션이 이루는 벡터와 내가 바라보는 벡터의 각도를 구함
+			// xz 평면으로 투영
+			XMFLOAT3 projectedPositionToUser = { positionToUser.x, 0.0f, positionToUser.z };
+			NPCNormalize(projectedPositionToUser);
 
-		// 이후 해당 각도를 통해 pitch 회전
+			// DefalutTemp, 가야하는 방향 사이의 각도 구하기
+			float angleRadian = atan2(DefaultTemp.z, DefaultTemp.x) - atan2(projectedPositionToUser.z, projectedPositionToUser.x);
+			float angleDegree = XMConvertToDegrees(angleRadian);
 
-		// 회전한 look 벡터를 통해 이동 (look은 계산하기 전에 노멀라이즈)
+			yaw = angleDegree;
 
-		pos.x += m_lookvec.x * m_Speed;
-		pos.z += m_lookvec.z * m_Speed;
+			if (yaw > 360.0f)
+				yaw -= 360.0f;
+			if (yaw < 0.0f)
+				yaw += 360.0f;
+
+			// 회전한 look 벡터를 통해 이동 (look은 계산하기 전에 노멀라이즈)
+			m_lookvec = NPCcalcLookRotate();
+			m_rightvec = NPCcalcRightRotate();
+
+			pos.x += m_lookvec.x * m_Speed;
+			pos.z += m_lookvec.z * m_Speed;
+		}
 	}
 	else {
 		// path 데이터가 있다면 제거
@@ -672,15 +776,16 @@ vector<int> NPC::AStarSearch(int startNode, int targetNode, int user_City)
 	openSet.emplace(startNode, fScore[startNode], gScore[startNode], nullptr);
 	visited[startNode] = true;
 
-	vector<int> path;
+	vector<int> temppath;
 	while (!openSet.empty()) {
 		if (cameFrom[targetNode] != nullptr) {
 			Node* node = cameFrom[targetNode];
 			while (node != nullptr) {
-				path.push_back(node->index);
+				temppath.push_back(node->index);
 				node = node->parent;
 			}
-			reverse(path.begin(), path.end());
+			reverse(temppath.begin(), temppath.end());
+			temppath.push_back(targetNode);
 			break;
 		}
 
@@ -697,7 +802,7 @@ vector<int> NPC::AStarSearch(int startNode, int targetNode, int user_City)
 				float tentative_gScore = gScore[current.index] + DistanceBetween(current.index, neighborIndex);
 
 				if (tentative_gScore < gScore[neighborIndex]) {
-					cameFrom[neighborIndex] = &current;
+					cameFrom[neighborIndex] = new Node(current);  // 복사본을 만들어서 cameFrom에 저장
 					gScore[neighborIndex] = tentative_gScore;
 					fScore[neighborIndex] = gScore[neighborIndex] + HeuristicEstimate(neighborIndex, targetNode);
 
@@ -706,7 +811,8 @@ vector<int> NPC::AStarSearch(int startNode, int targetNode, int user_City)
 			}
 		}
 	}
-	return path;
+
+	return temppath;
 }
 
 bool NPC::PlayerDetact()
@@ -837,12 +943,11 @@ void NPC::NPC_Death_motion()
 	pos.y -= 6.0f;
 
 	// 빙글빙글 돌며 추락
-	yaw += 3.0f;
+	pitch += 3.0f;
 
 	Coordinate base_coordinate;
-	m_coordinate.right = NPCcalcRotate(base_coordinate.right, pitch, yaw, roll);
-	m_coordinate.up = NPCcalcRotate(base_coordinate.up, pitch, yaw, roll);
-	m_coordinate.look = NPCcalcRotate(base_coordinate.look, pitch, yaw, roll);
+	m_rightvec = NPCcalcRightRotate();
+	m_lookvec = NPCcalcLookRotate();
 }
 
 array<NPC, MAX_NPCS> npcsInfo;
@@ -1405,7 +1510,7 @@ void MoveNPC()
 						if (cl.id != -1) {
 							npcsInfo[i].Caculation_Distance(cl.pos, cl.id);
 							// 가장 가까운 거리를 갖고있는 아이를 chase_id로 지정
-							float distance =  npcsInfo[i].GetDistance(cl.id);
+							float distance = npcsInfo[i].GetDistance(cl.id);
 							if (temp_min > distance) {
 								temp_min = distance;
 								temp_id = cl.id;
@@ -1414,7 +1519,7 @@ void MoveNPC()
 					}
 
 					npcsInfo[i].SetChaseID(temp_id);
-							
+
 					npcsInfo[i].NPC_State_Manegement(npcsInfo[i].GetState());
 					// NPC가 추적하려는 아이디가 있는지부터 확인, 있으면 추적 대상 플레이어 좌표를 임시 저장
 					if (npcsInfo[i].GetChaseID() != -1) {

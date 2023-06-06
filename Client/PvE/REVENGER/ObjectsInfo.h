@@ -56,7 +56,7 @@ struct ObjectsInfo
 ObjectsInfo my_info;
 std::array<ObjectsInfo, MAX_USER> other_players;
 std::array<ObjectsInfo, MAX_NPCS> npcs_info;
-int left_npc = MAX_NPCS;
+int left_npc = 0;
 
 std::array<ObjectsInfo, 3> dummies;//[TEST] NPC 완성 전까지 임시 사용
 
