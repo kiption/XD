@@ -43,7 +43,7 @@ public:
         curr = 0.0f;
     }
 };
-array<Mission, TOTAL_STAGE> stage_missions;
+array<Mission, TOTAL_STAGE + 1> stage_missions;
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
