@@ -49,8 +49,10 @@ constexpr int MAX_USER = 3;
 constexpr int MAX_NPCS = 5;
 constexpr int MAX_BULLET = 10;
 
-constexpr int ID_STARTNUM_PLAYER = 1000;	// Player ID 시작값. (ID_VALUE_PLAYER + client_id)
-constexpr int ID_STARTNUM_NPC = 2000;		// Npc ID 시작값. (ID_VALUE_NPC + npc_id)
+constexpr int PLAYER_ID_START = 1000;		// Player ID 시작값. (ID_VALUE_PLAYER + client_id)
+constexpr int PLAYER_ID_END   = 1999;		// Player ID 끝값
+constexpr int NPC_ID_START    = 2000;		// Npc ID 시작값. (ID_VALUE_NPC + npc_id)
+constexpr int NPC_ID_END      = 2999;		// Npc ID 끝값
 
 constexpr int WORLD_X_POS = 2000;
 constexpr int WORLD_Y_POS = 2000;
@@ -80,7 +82,7 @@ enum PacketID {
 enum PLAYER_STATE { PL_ST_IDLE, PL_ST_MOVE_FRONT, PL_ST_MOVE_BACK, PL_ST_MOVE_SIDE, PL_ST_FLY, PL_ST_CHASE, PL_ST_ATTACK, PL_ST_DEAD };
 
 //======================================================================
-enum TargetType { TARGET_PLAYER, TARGET_BULLET, TARGET_NPC };
+enum TargetType { TARGET_PLAYER, TARGET_BULLET, TARGET_NPC, TARGET_DUMMY };	//[TEST] DUMMY는 임시로 넣었다. NPC 구현 다 되면 빼자.
 
 //======================================================================
 // Packets ( CS: Client->Server, SC: Server->Client, SS: Server->Other Server )

@@ -18,6 +18,8 @@ struct ObjectsInfo
 	int curr_scene;		// 몇번째 씬인지
 	int m_ingame_state;	// 인게임내 상태
 
+	bool m_new_state_update; // 상태가 바뀌었는지
+
 	bool m_damaged_effect_on;
 
 	ObjectsInfo() {
@@ -31,6 +33,7 @@ struct ObjectsInfo
 		m_look_vec = { 0.0f, 0.0f, 1.0f };
 		m_state = OBJ_ST_EMPTY;
 		m_ingame_state = PL_ST_DEAD;
+		m_new_state_update = false;
 		m_damaged_effect_on = false;
 	}
 
@@ -45,6 +48,7 @@ struct ObjectsInfo
 		m_look_vec = { 0.0f, 0.0f, 1.0f };
 		m_state = OBJ_ST_EMPTY;
 		m_ingame_state = PL_ST_DEAD;
+		m_new_state_update = false;
 		m_damaged_effect_on = false;
 	}
 };
@@ -53,6 +57,8 @@ ObjectsInfo my_info;
 std::array<ObjectsInfo, MAX_USER> other_players;
 std::array<ObjectsInfo, MAX_NPCS> npcs_info;
 int left_npc = MAX_NPCS;
+
+std::array<ObjectsInfo, 3> dummies;//[TEST] NPC 완성 전까지 임시 사용
 
 struct MapObjectsInfo
 {

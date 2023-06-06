@@ -403,11 +403,9 @@ void processPacket(char* ptr)
                 case PL_ST_DEAD:
                     gamesound.collisionSound();
 
-                    my_info.m_damaged_effect_on = true;
                     my_info.m_hp = 0;
-
-                    DeathInfo deadobj{ D_OBJ_PLAYER, recvd_id };
-                    new_death_objs.push(deadobj);
+                    my_info.m_new_state_update = true;
+                    my_info.m_damaged_effect_on = true;
                     break;
                 }
             }
@@ -423,11 +421,9 @@ void processPacket(char* ptr)
                 case PL_ST_DEAD:
                     gamesound.collisionSound();
 
-                    other_players[recvd_id].m_damaged_effect_on = true;
                     other_players[recvd_id].m_hp = 0;
-
-                    DeathInfo deadobj{ D_OBJ_PLAYER, recvd_id };
-                    new_death_objs.push(deadobj);
+                    other_players[recvd_id].m_new_state_update = true;
+                    other_players[recvd_id].m_damaged_effect_on = true;
                     break;
                 }
             }
@@ -444,11 +440,20 @@ void processPacket(char* ptr)
                 npcs_info[recvd_id].m_ingame_state = PL_ST_DEAD;
                 gamesound.collisionSound();
 
-                npcs_info[recvd_id].m_damaged_effect_on = true;
                 npcs_info[recvd_id].m_hp = 0;
+                npcs_info[recvd_id].m_new_state_update = true;
+                npcs_info[recvd_id].m_damaged_effect_on = true;
+                break;
+            }
+        }
+        else if (recvd_target == TARGET_DUMMY) { // NPC 완성 전까지 임시 사용
+            switch (recvd_state) {
+            case PL_ST_DEAD:
+                dummies[recvd_id].m_ingame_state = PL_ST_DEAD;
+                gamesound.collisionSound();
 
-                DeathInfo deadobj{ D_OBJ_NPC, recvd_id };
-                new_death_objs.push(deadobj);
+                dummies[recvd_id].m_hp = 0;
+                dummies[recvd_id].m_new_state_update = true;
                 break;
             }
         }
