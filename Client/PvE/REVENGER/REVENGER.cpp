@@ -150,7 +150,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					//}
 				}
 
-					// 2. NPC 움직임 최신화
+				// 2. NPC 움직임 최신화
+				/*
 				for (int i{}; i < MAX_NPCS; ++i) {
 					//cout << npcs_info[i].m_id << "번째 Pos:" << npcs_info[i].m_pos.x << ',' << npcs_info[i].m_pos.y << ',' << npcs_info[i].m_pos.z << endl;
 					if (npcs_info[i].m_id == -1) {
@@ -162,34 +163,17 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					((Stage1*)gGameFramework.m_pScene)->SmokePosition = npcs_info[i].m_pos;
 					//((Stage1*)gGameFramework.m_pScene)->m_pBillboardShader[3]->ParticlePosition = npcs_info[i].m_pos;
 				}
+				*/
 
 				//==================================================
-				// 2) 객체 인게임 상태 업데이트
-				//  2-1) My Player
-				if (my_info.m_new_state_update) {
-					switch (my_info.m_ingame_state) {
-					case PL_ST_IDLE:
-						break;
-					case PL_ST_MOVE_FRONT:
-					case PL_ST_MOVE_BACK:
-					case PL_ST_MOVE_SIDE:
-						break;
-					case PL_ST_ATTACK:
-						my_info.m_ingame_state = PL_ST_IDLE;	// 한번쏘고 바로 제자리.
-						break;
-					case PL_ST_DEAD:
-						break;
-					}
-					my_info.m_new_state_update = false;
-				}
-
-				//  2-2) Other Players
+				// 2) 객체 인게임 상태 업데이트 (자기 자신 제외, 자기 자신은 클라 독자적으로 돌아가기 때문)
+				//  2-1) Other Players
 				for (int i = 0; i < MAX_USER; ++i) {
 					if (i == my_id) break;
 
 					if (other_players[i].m_new_state_update) {
 						switch (other_players[i].m_ingame_state) {
-						case PL_ST_IDLE: // 아무키도 누르고 있지않을때
+						case PL_ST_IDLE:
 							gGameFramework.otherPlayerReturnToIdle(i);
 							break;
 						case PL_ST_MOVE_FRONT: // 앞으로 이동
@@ -203,18 +187,18 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							break;
 						case PL_ST_ATTACK:
 							gGameFramework.otherPlayerShootingMotion(i);
-							//other_players[i].m_ingame_state = PL_ST_IDLE;	// 한번쏘고 바로 제자리.
 							break;
 							// + 구르기 및 점프
 						case PL_ST_DEAD:
 							gGameFramework.otherPlayerDyingMotion(i);
 							break;
 						}
+
 						other_players[i].m_new_state_update = false;
 					}
 				}
 
-				//  2-3) Dummies ([TEST] NPC 완성전까지 임시 코드)
+				//  2-2) Dummies ([TEST] NPC 완성전까지 임시 코드)
 				for (int i = 0; i < 3; ++i) {
 					if (dummies[i].m_new_state_update) {
 						if (dummies[i].m_ingame_state == PL_ST_DEAD) {
