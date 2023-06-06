@@ -192,17 +192,19 @@ SESSION npc_server;
 array<SESSION, MAX_NPCS> npcs;
 array<SESSION, 5> dummies;//[TEST] 충돌테스트용 더미
 void initDummies() {	  //[TEST] 충돌테스트용 더미 생성
-	dummies[0].pos = { 100.0f, 6.0f, 905.0f };
-	dummies[1].pos = { 0.0f, 0.0f, 0.0f };
-	dummies[2].pos = { 0.0f, 0.0f, 0.0f };
-	dummies[3].pos = { 0.0f, 0.0f, 0.0f };
-	dummies[4].pos = { 0.0f, 0.0f, 0.0f };
-	for (auto& dummy : dummies) {
-		dummy.hp = HUMAN_MAXHP;
-		dummy.m_rightvec = { 1.0f, 0.0f, 0.0f };
-		dummy.m_upvec = { 0.0f, 1.0f, 0.0f };
-		dummy.m_lookvec = { 0.0f, 0.0f, 1.0f };
-		dummy.setBB();
+	dummies[0].pos = { 30.0f, 6.0f, 905.0f };
+	dummies[1].pos = { 60.0f, 6.0f, 1155.0f };
+	dummies[2].pos = { 100.0f, 6.0f, 1205.0f };
+	dummies[3].pos = XMF_fault;
+	dummies[4].pos = XMF_fault;
+	for (int i = 0; i < 5; ++i) {
+		dummies[i].id = i;
+		dummies[i].hp = HUMAN_MAXHP;
+		dummies[i].pl_state = PL_ST_IDLE;
+		dummies[i].m_rightvec = { 1.0f, 0.0f, 0.0f };
+		dummies[i].m_upvec = { 0.0f, 1.0f, 0.0f };
+		dummies[i].m_lookvec = { 0.0f, 0.0f, 1.0f };
+		dummies[i].setBB();
 	}
 }
 
@@ -419,8 +421,8 @@ void SESSION::update_viewlist()
 		if (other_pl.s_state != ST_INGAME) continue;
 		if (other_pl.curr_stage != curr_stage) continue;
 
-		int moved_pl_id = id + ID_STARTNUM_PLAYER;		// 이동한 객체 (자신)
-		int other_pl_id = other_pl.id + ID_STARTNUM_PLAYER;		// 다른 객체
+		int moved_pl_id = id + PLAYER_ID_START;		// 이동한 객체 (자신)
+		int other_pl_id = other_pl.id + PLAYER_ID_START;		// 다른 객체
 
 		// 1) 움직였더니 새로운 객체가 시야 안에 생긴 경우
 		if (XMF_Distance(pos, other_pl.pos) <= HUMAN_VIEW_RANGE) {
@@ -443,7 +445,7 @@ void SESSION::update_viewlist()
 		}
 		// 2) 움직였더니 원래는 시야에 있었던 객체가 시야에서 사라진 경우
 		else {
-			// 1-1) 자신의 ViewList에 시야에 새로 들어온 플레이어의 ID 추가
+			// 2-1) 자신의 ViewList에 시야에 새로 들어온 플레이어의 ID 제거
 			if (view_list.count(other_pl_id)) {
 				s_lock.lock();
 				view_list.erase(other_pl_id);
@@ -451,7 +453,7 @@ void SESSION::update_viewlist()
 
 				cout << "Player[" << id << "]의 ViewList에서 OtherPlayer[" << other_pl.id << "]를 제거합니다.\n" << endl;
 			}
-			// 1-2) 시야에 새로 들어온 플레이어의 ViewList에 자신의 ID추가
+			// 2-2) 시야에 새로 들어온 플레이어의 ViewList에 자신의 ID 제거
 			if (other_pl.view_list.count(moved_pl_id)) {
 				other_pl.s_lock.lock();
 				other_pl.view_list.erase(moved_pl_id);
@@ -462,7 +464,37 @@ void SESSION::update_viewlist()
 		}
 	}
 
-	// 2.
+	// 2. NPC 업데이트 (임시로 더미로 대체함.)
+	for (auto& dummy : dummies) {
+		int moved_pl_id = id + PLAYER_ID_START;		// 이동한 객체 (자신)
+		int dummy_id = dummy.id + NPC_ID_START;		// 이동한 객체 (자신)
+
+		// 1) 움직였더니 새로운 객체가 시야 안에 생긴 경우
+		if (XMF_Distance(pos, dummy.pos) <= HUMAN_VIEW_RANGE) {
+			// 1-1) 자신의 ViewList에 시야에 새로 들어온 플레이어의 ID 추가
+			if (!view_list.count(dummy_id)) {
+				s_lock.lock();
+				view_list.insert(dummy_id);
+				s_lock.unlock();
+
+				cout << "Player[" << id << "]의 ViewList에 Dummy[" << dummy.id << "]를 추가합니다.\n" << endl;
+			}
+			// 더미는 View List X
+		}
+		// 2) 움직였더니 원래는 시야에 있었던 객체가 시야에서 사라진 경우
+		else {
+			// 2-1) 자신의 ViewList에 시야에 새로 들어온 플레이어의 ID 제거
+			if (view_list.count(dummy_id)) {
+				s_lock.lock();
+				view_list.erase(dummy_id);
+				s_lock.unlock();
+
+				cout << "Player[" << id << "]의 ViewList에서 Dummy[" << dummy.id << "]를 제거합니다.\n" << endl;
+			}
+			// 더미는 View List X
+		}
+	}
+	
 	// 3.
 }
 
@@ -724,6 +756,8 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].send_login_packet();
 		clients[client_id].s_lock.unlock();
 
+		clients[client_id].update_viewlist();
+
 		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "]이(가) 접속하였습니다." << endl;	// server message
 
 		if (!b_active_server) {
@@ -800,12 +834,9 @@ void process_packet(int client_id, char* packet)
 		// 1. 충돌체크를 한다. -> 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
 		bool b_isCollide = false;
 		//  1) 맵 오브젝트
-
 		//  2) 다른 플레이어
-
 		//  3) NPC
-		
-		//if (b_isCollide) break;
+		//if (b_isCollide) {}
 
 		// 2. 정상적인 이동이라면 세션 정보를 업데이트 한다.
 		clients[client_id].s_lock.lock();
@@ -821,12 +852,15 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].update_viewlist();
 
 		// 4. 다른 클라이언트에게 플레이어가 이동한 위치를 알려준다.
-		for (auto& other_pl : clients) {
-			if (other_pl.id == client_id) continue;
-			if (other_pl.s_state != ST_INGAME) continue;
+		for (auto& vl_key : clients[client_id].view_list) {
+			if (!(PLAYER_ID_START <= vl_key && vl_key <= PLAYER_ID_END)) break;	// Player가 아니면 break
 
-			lock_guard<mutex> lg{ other_pl.s_lock };
-			other_pl.send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
+			int pl_id = vl_key - PLAYER_ID_START;
+			if (pl_id == client_id) break;
+			if (clients[pl_id].s_state != ST_INGAME) break;
+
+			lock_guard<mutex> lg{ clients[pl_id].s_lock };
+			clients[pl_id].send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
 		}
 
 		// 4. NPC 서버에게도 플레이어가 이동한 위치를 알려준다.
@@ -851,15 +885,18 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].s_lock.unlock();
 
 		// 2. 다른 클라이언트에게 플레이어가 회전한 방향을 알려준다.
-		for (auto& other_pl : clients) {
-			if (other_pl.id == client_id) continue;
-			if (other_pl.s_state != ST_INGAME) continue;
+		for (auto& vl_key : clients[client_id].view_list) {
+			if (!(PLAYER_ID_START <= vl_key && vl_key <= PLAYER_ID_END)) break;	// Player가 아니면 break
 
-			lock_guard<mutex> lg{ other_pl.s_lock };
-			other_pl.send_rotate_packet(client_id, TARGET_PLAYER);
+			int pl_id = vl_key - PLAYER_ID_START;
+			if (pl_id == client_id) break;
+			if (clients[pl_id].s_state != ST_INGAME) break;
+
+			lock_guard<mutex> lg{ clients[pl_id].s_lock };
+			clients[pl_id].send_rotate_packet(client_id, TARGET_PLAYER);
 		}
 
-		// 4. NPC 서버에게도 플레이어가 회전한 방향를 알려준다.
+		// 3. NPC 서버에게도 플레이어가 회전한 방향를 알려준다.
 		if (b_npcsvr_conn) {
 			lock_guard<mutex> lg{ npc_server.s_lock };
 			npc_server.send_rotate_packet(client_id, TARGET_PLAYER);
@@ -927,10 +964,13 @@ void process_packet(int client_id, char* packet)
 		}
 		*/
 
-		// 우선 이 플레이어가 총알을 발사했다는 정보를 "게임에 접속 중인 모든" 클라이언트에게 알려줍니다. (총알 나가는 모션 동기화를 위함)
-		for (auto& cl : clients) {
-			if (cl.s_state != ST_INGAME) continue;
-			if (cl.curr_stage == 0) continue;
+		// 총알을 발사했다는 정보를 다른 클라이언트에게 알려줍니다. (총알 나가는 모션 동기화를 위함)
+		for (auto& vl_key : clients[client_id].view_list) {
+			if (!(PLAYER_ID_START <= vl_key && vl_key <= PLAYER_ID_END)) break;	// Player가 아니면 break
+
+			int pl_id = vl_key - PLAYER_ID_START;
+			if (pl_id == client_id) break;
+			if (clients[pl_id].s_state != ST_INGAME) break;
 
 			SC_OBJECT_STATE_PACKET atk_pack;
 			atk_pack.type = SC_OBJECT_STATE;
@@ -938,7 +978,8 @@ void process_packet(int client_id, char* packet)
 			atk_pack.target = TARGET_PLAYER;
 			atk_pack.id = client_id;
 			atk_pack.state = PL_ST_ATTACK;
-			cl.do_send(&atk_pack);
+			lock_guard<mutex> lg{ clients[pl_id].s_lock };
+			clients[pl_id].do_send(&atk_pack);
 		}
 
 		//==============================
@@ -965,10 +1006,51 @@ void process_packet(int client_id, char* packet)
 
 		XMFLOAT3 bullet_initpos = bullet.pos;
 		while (XMF_Distance(bullet.pos, bullet_initpos) <= BULLET_RANGE) {
-			if (bullet.m_xoobb.Intersects(dummies[0].m_xoobb)) {
-				b_collide = true;
-				break;
+			for (auto& vl_key : clients[client_id].view_list) {
+				if (!(NPC_ID_START <= vl_key && vl_key <= NPC_ID_END)) continue;
+
+				int dummy_id = vl_key - NPC_ID_START;
+				if (dummies[dummy_id].pl_state == PL_ST_DEAD) continue;
+				
+				if (bullet.m_xoobb.Intersects(dummies[dummy_id].m_xoobb)) {
+					b_collide = true;
+					
+					// Dummy 데미지 처리
+					
+					if (dummies[dummy_id].hp <= 10) {
+						dummies[dummy_id].s_lock.lock();
+						dummies[dummy_id].hp = 0;
+						dummies[dummy_id].pl_state = PL_ST_DEAD;
+						dummies[dummy_id].s_lock.unlock();
+
+						cout << "Player[" << client_id << "]의 공격에 Dummy[" << dummy_id << "]가 사망하였다.\n" << endl;
+
+						SC_OBJECT_STATE_PACKET dummy_die_packet;
+						dummy_die_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
+						dummy_die_packet.type = SC_OBJECT_STATE;
+						dummy_die_packet.target = TARGET_DUMMY;
+						dummy_die_packet.id = dummy_id;
+						dummy_die_packet.state = PL_ST_DEAD;
+						for (auto& cl : clients) {
+							if (cl.s_state != ST_INGAME) continue;
+							if (cl.curr_stage != clients[client_id].curr_stage) continue;
+							lock_guard<mutex> lg{ cl.s_lock };
+							cl.do_send(&dummy_die_packet);
+						}
+					}
+					else {
+						dummies[dummy_id].s_lock.lock();
+						dummies[dummy_id].hp -= 10;
+						dummies[dummy_id].s_lock.unlock();
+
+						cout << "Player[" << client_id << "]의 공격에 Dummy[" << dummy_id << "]가 맞았다. (HP: " << dummies[dummy_id].hp << " 남음)\n" << endl;
+					}
+
+					break;
+				}
 			}
+			if (b_collide) break;
+
 			bullet.pos = XMF_Add(bullet.pos, XMF_MultiplyScalar(bullet.m_lookvec, 1.f));
 			bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
 				, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -991,7 +1073,7 @@ void process_packet(int client_id, char* packet)
 		*/
 
 		if (b_collide) {
-			cout << "[Collide Check] Player[" << client_id << "]의 공격 -> 충돌 O\n" << endl;//test
+
 		}
 		else {
 			cout << "[Collide Check] Player[" << client_id << "]의 공격 -> 충돌 X\n" << endl;//test

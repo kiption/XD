@@ -150,61 +150,80 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					//}
 				}
 
-				// 2) 객체 인게임 상태 업데이트
-				switch (my_info.m_ingame_state) {
-				case PL_ST_IDLE:
-					break;
-				case PL_ST_MOVE_FRONT:
-				case PL_ST_MOVE_BACK:
-				case PL_ST_MOVE_SIDE:
-					break;
-				case PL_ST_ATTACK:
-					my_info.m_ingame_state = PL_ST_IDLE;	// 한번쏘고 바로 제자리.
-					break;
-				case PL_ST_DEAD:
-					break;
+					// 2. NPC 움직임 최신화
+				for (int i{}; i < MAX_NPCS; ++i) {
+					//cout << npcs_info[i].m_id << "번째 Pos:" << npcs_info[i].m_pos.x << ',' << npcs_info[i].m_pos.y << ',' << npcs_info[i].m_pos.z << endl;
+					if (npcs_info[i].m_id == -1) {
+						continue;
+					}
+
+					gGameFramework.setPosition_Npc(npcs_info[i].m_id, npcs_info[i].m_pos);
+					gGameFramework.setVectors_Npc(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
+					((Stage1*)gGameFramework.m_pScene)->SmokePosition = npcs_info[i].m_pos;
+					//((Stage1*)gGameFramework.m_pScene)->m_pBillboardShader[3]->ParticlePosition = npcs_info[i].m_pos;
 				}
 
-				for (int i = 0; i < MAX_USER; ++i) {
-					if (i == my_id) break;
-					
-					switch (other_players[i].m_ingame_state) {
-					case PL_ST_IDLE: // 아무키도 누르고 있지않을때
-						gGameFramework.otherPlayerReturnToIdle(i);
+				//==================================================
+				// 2) 객체 인게임 상태 업데이트
+				//  2-1) My Player
+				if (my_info.m_new_state_update) {
+					switch (my_info.m_ingame_state) {
+					case PL_ST_IDLE:
 						break;
-					case PL_ST_MOVE_FRONT: // 앞으로 이동
-						gGameFramework.otherPlayerForwardMotion(i);
-						break;
-					case PL_ST_MOVE_BACK: // 뒤로 이동
-						gGameFramework.otherPlayerBackwardMotion(i);
-						break;
-					case PL_ST_MOVE_SIDE: // 옆으로 이동
-						gGameFramework.otherPlayerSfrateMotion(i);
+					case PL_ST_MOVE_FRONT:
+					case PL_ST_MOVE_BACK:
+					case PL_ST_MOVE_SIDE:
 						break;
 					case PL_ST_ATTACK:
-						gGameFramework.otherPlayerShootingMotion(i);
-						//other_players[i].m_ingame_state = PL_ST_IDLE;	// 한번쏘고 바로 제자리.
+						my_info.m_ingame_state = PL_ST_IDLE;	// 한번쏘고 바로 제자리.
 						break;
-						 // + 구르기 및 점프
 					case PL_ST_DEAD:
-						gGameFramework.otherPlayerDyingMotion(i);
 						break;
+					}
+					my_info.m_new_state_update = false;
+				}
+
+				//  2-2) Other Players
+				for (int i = 0; i < MAX_USER; ++i) {
+					if (i == my_id) break;
+
+					if (other_players[i].m_new_state_update) {
+						switch (other_players[i].m_ingame_state) {
+						case PL_ST_IDLE: // 아무키도 누르고 있지않을때
+							gGameFramework.otherPlayerReturnToIdle(i);
+							break;
+						case PL_ST_MOVE_FRONT: // 앞으로 이동
+							gGameFramework.otherPlayerForwardMotion(i);
+							break;
+						case PL_ST_MOVE_BACK: // 뒤로 이동
+							gGameFramework.otherPlayerBackwardMotion(i);
+							break;
+						case PL_ST_MOVE_SIDE: // 옆으로 이동
+							gGameFramework.otherPlayerSfrateMotion(i);
+							break;
+						case PL_ST_ATTACK:
+							gGameFramework.otherPlayerShootingMotion(i);
+							//other_players[i].m_ingame_state = PL_ST_IDLE;	// 한번쏘고 바로 제자리.
+							break;
+							// + 구르기 및 점프
+						case PL_ST_DEAD:
+							gGameFramework.otherPlayerDyingMotion(i);
+							break;
+						}
+						other_players[i].m_new_state_update = false;
 					}
 				}
 
-				if (gGameFramework.m_nMode == SCENE1STAGE) {
-					// 2. NPC 움직임 최신화
-					for (int i{}; i < MAX_NPCS; ++i)
-					{
-						//cout << npcs_info[i].m_id << "번째 Pos:" << npcs_info[i].m_pos.x << ',' << npcs_info[i].m_pos.y << ',' << npcs_info[i].m_pos.z << endl;
-						if (npcs_info[i].m_id == -1) {
-							continue;
-						}
+				//  2-3) Dummies ([TEST] NPC 완성전까지 임시 코드)
+				for (int i = 0; i < 3; ++i) {
+					if (dummies[i].m_new_state_update) {
+						if (dummies[i].m_ingame_state == PL_ST_DEAD) {
+							// 여기에 더미 죽는 모션 실행
+							// (더미 죽는 모션이 한 사이클 완료되면 객체를 날려버리던가 scale 해주면 됨.)
 
-						gGameFramework.setPosition_Npc(npcs_info[i].m_id, npcs_info[i].m_pos);
-						gGameFramework.setVectors_Npc(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
-						((Stage1*)gGameFramework.m_pScene)->SmokePosition = npcs_info[i].m_pos;
-						//((Stage1*)gGameFramework.m_pScene)->m_pBillboardShader[3]->ParticlePosition = npcs_info[i].m_pos;
+
+							dummies[i].m_new_state_update = false;
+						}
 					}
 				}
 
@@ -572,8 +591,6 @@ void networkThreadFunc()
 				attack_pack.size = sizeof(CS_ATTACK_PACKET);
 				attack_pack.type = CS_ATTACK;
 				sendPacket(&attack_pack, active_servernum);
-
-				cout << "공격키 전송\n" << endl;
 				break;
 			case SEND_BUTTON_R:
 				if (gGameFramework.m_nMode == OPENINGSCENE) break;
