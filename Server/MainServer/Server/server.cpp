@@ -47,14 +47,21 @@ public:
 		curr = 0.0f;
 	}
 };
-array<Mission, TOTAL_STAGE + 1> stage_missions;
+array<Mission, ST1_MISSION_NUM> stage1_missions;
 
+Mission setMission(short type, float goal, float curr) {
+	Mission new_mission;
+	new_mission.type = type;
+	new_mission.goal = goal;
+	new_mission.curr = curr;
+	return new_mission;
+}
 void setMissions() {
 	// 스테이지1 미션
-	stage_missions[1].type = MISSION_KILL;
-	stage_missions[1].goal = 3.0f;
-	stage_missions[1].curr = 0.0f;
+	stage1_missions[0] = setMission(MISSION_KILL, 3.0f, 0.0f);
+	stage1_missions[1] = setMission(MISSION_OCCUPY, 10.0f, 0.0f);
 
+	//
 }
 
 //======================================================================
@@ -127,6 +134,7 @@ public:
 	chrono::system_clock::time_point reload_time;	// 총알 장전 시작시간
 
 	short curr_stage;
+	short curr_mission;
 
 	BoundingOrientedBox m_xoobb;	// Bounding Box
 
@@ -150,6 +158,7 @@ public:
 		m_upvec = { 0.0f, 1.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 1.0f };
 		curr_stage = 0;
+		curr_mission = 0;
 
 		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	}
@@ -186,6 +195,7 @@ public:
 	void send_move_packet(int obj_id, short obj_type, short dir);
 	void send_rotate_packet(int obj_id, short obj_type);
 	void send_move_rotate_packet(int obj_id, short obj_type, short dir);
+	void send_mission_packet(short curr_stage, short mission_type);
 
 	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 	
@@ -207,6 +217,7 @@ public:
 		m_upvec = { 0.0f, 1.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 1.0f };
 		curr_stage = 0;
+		curr_mission = 0;
 
 		setBB();
 	}
@@ -437,6 +448,27 @@ void SESSION::send_move_rotate_packet(int obj_id, short obj_type, short dir)
 		break;
 	}
 	do_send(&update_pl_packet);
+}
+void SESSION::send_mission_packet(short curr_stage, short mission_num)
+{
+	SC_MISSION_PACKET mission_packet;
+	mission_packet.type = SC_MISSION;
+	mission_packet.size = sizeof(SC_MISSION_PACKET);
+	mission_packet.stage_num = curr_stage;
+	mission_packet.mission_num = mission_num;
+
+	if (curr_stage == 1) {
+		mission_packet.mission_type = stage1_missions[curr_mission].type;
+		mission_packet.mission_goal = stage1_missions[curr_mission].goal;
+		mission_packet.mission_curr = stage1_missions[curr_mission].curr;
+	}
+	else if (curr_stage == 2) {
+		//mission_packet.mission_type = stage2_missions[curr_mission].type;
+		//mission_packet.mission_goal = stage2_missions[curr_mission].goal;
+		//mission_packet.mission_curr = stage2_missions[curr_mission].curr;
+	}
+
+	do_send(&mission_packet);
 }
 void SESSION::update_viewlist()
 {
@@ -1062,26 +1094,91 @@ void process_packet(int client_id, char* packet)
 							cl.do_send(&dummy_die_packet);
 						}
 
+
 						// 미션 업데이트
-						SC_MISSION_PACKET mission_update_pack;
-						mission_update_pack.type = SC_MISSION;
-						mission_update_pack.size = sizeof(SC_MISSION_PACKET);
-						mission_update_pack.stage_num = clients[client_id].curr_stage;
-						mission_update_pack.mission_type = stage_missions[clients[client_id].curr_stage].type;
-						mission_update_pack.mission_goal = stage_missions[clients[client_id].curr_stage].goal;
-						stage_missions[clients[client_id].curr_stage].curr++;
-						mission_update_pack.mission_curr = stage_missions[clients[client_id].curr_stage].curr;
+						short curr_mission = clients[client_id].curr_mission;
+						bool mission_clear = false;
+						if (clients[client_id].curr_stage == 1) {
+							stage1_missions[curr_mission].curr++;
+
+							if (stage1_missions[curr_mission].curr == stage1_missions[curr_mission].goal) {
+								mission_clear = true;
+							}
+						}
+						else if (clients[client_id].curr_stage == 2) {
+							//stage2_missions[clients[client_id].curr_mission].curr++;
+						}
+
 						{
 							lock_guard<mutex> lg{ clients[client_id].s_lock };
-							clients[client_id].do_send(&mission_update_pack);
+							clients[client_id].send_mission_packet(clients[client_id].curr_stage, curr_mission);
 						}
-						cout << "스테이지[" << clients[client_id].curr_stage << "] 미션 업데이트: ";
-						switch (stage_missions[1].type) {
-						case MISSION_KILL:
-							cout << "[처치] ";
-							break;
+
+						if (mission_clear) {
+							if (clients[client_id].curr_stage == 1) {
+								cout << "스테이지[1]의 미션[" << curr_mission << "] 완료!" << endl;
+
+								// 미션 완료 패킷
+								SC_MISSION_COMPLETE_PACKET mission_complete;
+								mission_complete.type = SC_MISSION_COMPLETE;
+								mission_complete.size = sizeof(SC_MISSION_COMPLETE_PACKET);
+								mission_complete.stage_num = clients[client_id].curr_stage;
+								mission_complete.mission_num = curr_mission;
+								{
+									lock_guard<mutex> lg{ clients[client_id].s_lock };
+									clients[client_id].do_send(&mission_complete);
+								}
+
+								if (curr_mission + 1 >= ST1_MISSION_NUM) {	// 모든 미션 완료
+									cout << "스테이지[1]의 모든 미션을 완료하였습니다.\n" << endl;
+								}
+								else {
+									clients[client_id].s_lock.lock();
+									clients[client_id].curr_mission++;
+									clients[client_id].s_lock.unlock();
+									curr_mission = clients[client_id].curr_mission;
+
+									// 다음 미션 전달
+									{
+										lock_guard<mutex> lg{ clients[client_id].s_lock };
+										clients[client_id].send_mission_packet(clients[client_id].curr_stage, curr_mission);
+									}
+
+									cout << "새로운 미션 추가: ";
+									switch (stage1_missions[curr_mission].type) {
+									case MISSION_KILL:
+										cout << "[처치] ";
+										break;
+									case MISSION_OCCUPY:
+										cout << "[점령] ";
+										break;
+									}
+									cout << stage1_missions[curr_mission].curr << " / " << stage1_missions[curr_mission].goal << "\n" << endl;
+								}
+							}
+							else if (clients[client_id].curr_stage == 2) {
+								//cout << "스테이지[2] 미션-" << curr_mission << " 완료";
+							}
 						}
-						cout << stage_missions[clients[client_id].curr_stage].curr << " / " << stage_missions[clients[client_id].curr_stage].goal << "\n" << endl;
+						else {
+							if (clients[client_id].curr_stage == 1) {
+								cout << "스테이지[1] 현재 미션 업데이트: ";
+								switch (stage1_missions[curr_mission].type) {
+								case MISSION_KILL:
+									cout << "[처치] ";
+									break;
+								case MISSION_OCCUPY:
+									cout << "[점령] ";
+									break;
+								}
+								cout << stage1_missions[curr_mission].curr << " / "
+									<< stage1_missions[curr_mission].goal << "\n" << endl;
+							}
+							else if (clients[client_id].curr_stage == 2) {
+								//cout << "스테이지[2] 미션 업데이트: ";
+							}
+						}
+
 					}
 					else {
 						dummies[dummy_id].s_lock.lock();
@@ -1152,20 +1249,26 @@ void process_packet(int client_id, char* packet)
 			st1_mission_pack.type = SC_MISSION;
 			st1_mission_pack.size = sizeof(SC_MISSION_PACKET);
 			st1_mission_pack.stage_num = 1;
-			st1_mission_pack.mission_type = stage_missions[1].type;
-			st1_mission_pack.mission_goal = stage_missions[1].goal;
-			st1_mission_pack.mission_curr = stage_missions[1].curr;
+			st1_mission_pack.mission_num = 0;
+			st1_mission_pack.mission_type = stage1_missions[0].type;
+			st1_mission_pack.mission_goal = stage1_missions[0].goal;
+			st1_mission_pack.mission_curr = stage1_missions[0].curr;
+
 			{
 				lock_guard<mutex> lg{ clients[client_id].s_lock };
-				clients[client_id].do_send(&st1_mission_pack);
+				clients[client_id].send_mission_packet(clients[client_id].curr_stage, 0);
 			}
+
 			cout << "새로운 미션 추가: ";
-			switch (stage_missions[1].type) {
+			switch (stage1_missions[0].type) {
 			case MISSION_KILL:
 				cout << "[처치] ";
 				break;
+			case MISSION_OCCUPY:
+				cout << "[점령] ";
+				break;
 			}
-			cout << stage_missions[1].curr << " / " << stage_missions[1].goal << "\n" << endl;
+			cout << stage1_missions[0].curr << " / " << stage1_missions[0].goal << "\n" << endl;
 			break;
 		case PACKET_KEY_NUM2:
 			if (clients[client_id].curr_stage == 2) break;

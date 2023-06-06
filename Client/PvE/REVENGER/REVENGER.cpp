@@ -25,6 +25,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 void networkThreadFunc();
+void uiThreadFunc();
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
@@ -46,6 +47,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	// Server Code
 	thread networkThread(networkThreadFunc);
 	networkThread.detach();
+
+	thread uiThread(uiThreadFunc);
+	uiThread.detach();
 	//==
 
 	while (1)
@@ -196,33 +200,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//==================================================
 				//					  UI 동기화
 				//==================================================
-				// 1. 총알 업데이트
-				gGameFramework.m_currbullet = my_info.m_bullet;
-
-				// 2. HP 업데이트
-				gGameFramework.m_currHp = my_info.m_hp;
-
-				// 3. 시간 동기화
-				gGameFramework.m_10MinOfTime = servertime_sec / 600;
-				gGameFramework.m_1MinOfTime = (servertime_sec - gGameFramework.m_10MinOfTime * 600) / 60;
-				gGameFramework.m_10SecOftime = (servertime_sec - gGameFramework.m_1MinOfTime * 60) / 10;
-				gGameFramework.m_1SecOfTime = servertime_sec % 10;
-
-				// 4. 미션 진행상황 동기화
-				switch (gGameFramework.m_nMode) {
-				case OPENINGSCENE:
-					break;
-				case SCENE1STAGE:
-					gGameFramework.m_remainNPC = stage_missions[1].curr;
-					break;
-				case SCENE2STAGE:
-					gGameFramework.m_remainNPC = stage_missions[2].curr;
-					break;
-				}
-
-				wchar_t lateNPC[20];
-				_itow_s(gGameFramework.m_remainNPC, lateNPC, sizeof(lateNPC), 10);
-				wcscpy_s(gGameFramework.m_remainNPCPrint, lateNPC);
 
 				//==================================================
 				//					Map 충돌 관련
@@ -521,4 +498,56 @@ void networkThreadFunc()
 	}
 }
 
+
+void uiThreadFunc() {
+	while (1) {
+		if (gGameFramework.m_nMode != OPENINGSCENE) {
+			// 1. 총알 업데이트
+			gGameFramework.m_currbullet = my_info.m_bullet;
+
+			// 2. HP 업데이트
+			gGameFramework.m_currHp = my_info.m_hp;
+
+			// 3. 시간 동기화
+			gGameFramework.m_10MinOfTime = servertime_sec / 600;
+			gGameFramework.m_1MinOfTime = (servertime_sec - gGameFramework.m_10MinOfTime * 600) / 60;
+			gGameFramework.m_10SecOftime = (servertime_sec - gGameFramework.m_1MinOfTime * 60) / 10;
+			gGameFramework.m_1SecOfTime = servertime_sec % 10;
+
+			// 4. 미션 진행상황 동기화
+			switch (gGameFramework.m_nMode) {
+			case OPENINGSCENE:
+				break;
+			case SCENE1STAGE:
+				gGameFramework.m_remainNPC = stage_missions[1].goal - stage_missions[1].curr;
+				break;
+			case SCENE2STAGE:
+				gGameFramework.m_remainNPC = stage_missions[2].goal - stage_missions[2].curr;
+				break;
+			}
+
+			wchar_t lateNPC[20];
+			_itow_s(gGameFramework.m_remainNPC, lateNPC, sizeof(lateNPC), 10);
+			wcscpy_s(gGameFramework.m_remainNPCPrint, lateNPC);
+
+			// 5. 미션 종류 동기화
+			if (trigger_stage_clear) {
+				trigger_stage_clear = false;
+				curr_mission_num = 0;
+
+				// 스테이지 전환
+				if (gGameFramework.m_nMode == SCENE1STAGE) {
+				}
+				else if (gGameFramework.m_nMode == SCENE2STAGE) {
+				}
+			}
+			if (trigger_mission_complete) {
+				trigger_mission_complete = false;
+				gGameFramework.m_mainmissionnum = curr_mission_num;
+			}
+		}
+
+		this_thread::yield();
+	}
+}
 

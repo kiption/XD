@@ -59,6 +59,7 @@ constexpr int WORLD_Y_POS = 2000;
 constexpr int WORLD_Z_POS = 2000;
 
 constexpr int TOTAL_STAGE = 1;
+constexpr int ST1_MISSION_NUM = 2;		// Stage1 ÃÑ ¹Ì¼Ç ¼ö
 
 //======================================================================
 // key value
@@ -74,7 +75,7 @@ constexpr char INPUT_KEY_E = 0b000001;
 enum PacketID {
 	CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_PING, CS_RELOGIN
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
-	, SC_DAMAGED, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_BULLET_COUNT, SC_MISSION
+	, SC_DAMAGED, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_BULLET_COUNT, SC_MISSION, SC_MISSION_COMPLETE
 	, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
 	, CLGN_LOGIN_REQUEST, LGNC_LOGIN_RESULT, LGNC_USER_MATCH_PACKET
@@ -256,14 +257,21 @@ struct SC_BULLET_COUNT_PACKET {
 	int bullet_cnt;
 };
 
-enum MISSION_TYPE { MISSION_KILL };
+enum MISSION_TYPE { MISSION_KILL, MISSION_OCCUPY };
 struct SC_MISSION_PACKET {
 	unsigned char size;
 	char type;
 	short stage_num;
+	short mission_num;
 	short mission_type;
 	float mission_goal;
 	float mission_curr;
+};
+struct SC_MISSION_COMPLETE_PACKET {
+	unsigned char size;
+	char type;
+	short stage_num;
+	short mission_num;
 };
 
 // ================================

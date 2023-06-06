@@ -26,6 +26,8 @@ int servertime_sec;
 bool stage1_enter_ok;
 bool stage2_enter_ok;
 
+int curr_connection_num = 1;
+
 chrono::system_clock::time_point last_ping;   // ping을 서버로 보낸 시간
 chrono::system_clock::time_point last_pong;   // 서버의 ping에 대한 응답을 받은 시간
 
@@ -44,6 +46,9 @@ public:
     }
 };
 array<Mission, TOTAL_STAGE + 1> stage_missions;
+bool trigger_mission_complete = false;
+bool trigger_stage_clear = false;
+short curr_mission_num = 0;
 
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
@@ -195,6 +200,9 @@ void processPacket(char* ptr)
                 other_players[recv_id].m_state = OBJ_ST_RUNNING;
                 other_players[recv_id].m_ingame_state = PL_ST_IDLE;
                 other_players[recv_id].m_new_state_update = true;
+
+                curr_connection_num++;
+                cout << "새로운 유저가 접속하여 동접이 " << curr_connection_num << "명이 되었습니다." << endl;
             }
             else {
                 cout << "[SC_ADD Error] Unknown ID." << endl;
@@ -338,6 +346,10 @@ void processPacket(char* ptr)
                 other_players[recv_id].m_id = -1;
                 other_players[recv_id].m_pos = { 0.f ,0.f ,0.f };
                 other_players[recv_id].m_state = OBJ_ST_LOGOUT;
+
+                curr_connection_num--;
+                if (curr_connection_num < 1) curr_connection_num = 1;
+                cout << "한 명이 게임을 종료하여 동접이 " << curr_connection_num <<"명이 되었습니다." << endl;
             }
         }
         // 2. Remove Npc
@@ -495,6 +507,26 @@ void processPacket(char* ptr)
 
         break;
     }//SC_MISSION case end
+    case SC_MISSION_COMPLETE:
+    {
+        SC_MISSION_COMPLETE_PACKET* recv_packet = reinterpret_cast<SC_MISSION_COMPLETE_PACKET*>(ptr);
+
+        if (recv_packet->stage_num == 1) {
+            if (curr_mission_num >= ST1_MISSION_NUM) {
+                trigger_stage_clear = true;
+            }
+            else {
+                trigger_mission_complete = true;
+                curr_mission_num = recv_packet->mission_num + 1;
+            }
+        }
+        else if (recv_packet->stage_num == 2) {
+            //
+        }
+        
+
+        break;
+    }//SC_MISSION_COMPLETE case end
     case SC_TIME_TICKING:
     {
         SC_TIME_TICKING_PACKET* recv_packet = reinterpret_cast<SC_TIME_TICKING_PACKET*>(ptr);
