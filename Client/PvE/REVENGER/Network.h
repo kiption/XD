@@ -202,7 +202,6 @@ void processPacket(char* ptr)
                 other_players[recv_id].m_new_state_update = true;
 
                 curr_connection_num++;
-                cout << "새로운 유저가 접속하여 동접이 " << curr_connection_num << "명이 되었습니다." << endl;
             }
             else {
                 cout << "[SC_ADD Error] Unknown ID." << endl;
@@ -349,7 +348,6 @@ void processPacket(char* ptr)
 
                 curr_connection_num--;
                 if (curr_connection_num < 1) curr_connection_num = 1;
-                cout << "한 명이 게임을 종료하여 동접이 " << curr_connection_num <<"명이 되었습니다." << endl;
             }
         }
         // 2. Remove Npc

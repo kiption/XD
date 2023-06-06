@@ -47,6 +47,7 @@ public:
 		curr = 0.0f;
 	}
 };
+array<int, TOTAL_STAGE + 1> curr_mission_stage;
 array<Mission, ST1_MISSION_NUM> stage1_missions;
 
 Mission setMission(short type, float goal, float curr) {
@@ -134,7 +135,6 @@ public:
 	chrono::system_clock::time_point reload_time;	// 총알 장전 시작시간
 
 	short curr_stage;
-	short curr_mission;
 
 	BoundingOrientedBox m_xoobb;	// Bounding Box
 
@@ -158,7 +158,6 @@ public:
 		m_upvec = { 0.0f, 1.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 1.0f };
 		curr_stage = 0;
-		curr_mission = 0;
 
 		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	}
@@ -195,7 +194,7 @@ public:
 	void send_move_packet(int obj_id, short obj_type, short dir);
 	void send_rotate_packet(int obj_id, short obj_type);
 	void send_move_rotate_packet(int obj_id, short obj_type, short dir);
-	void send_mission_packet(short curr_stage, short mission_type);
+	void send_mission_packet(short curr_stage);
 
 	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 	
@@ -217,7 +216,6 @@ public:
 		m_upvec = { 0.0f, 1.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 1.0f };
 		curr_stage = 0;
-		curr_mission = 0;
 
 		setBB();
 	}
@@ -449,13 +447,14 @@ void SESSION::send_move_rotate_packet(int obj_id, short obj_type, short dir)
 	}
 	do_send(&update_pl_packet);
 }
-void SESSION::send_mission_packet(short curr_stage, short mission_num)
+void SESSION::send_mission_packet(short curr_stage)
 {
 	SC_MISSION_PACKET mission_packet;
 	mission_packet.type = SC_MISSION;
 	mission_packet.size = sizeof(SC_MISSION_PACKET);
 	mission_packet.stage_num = curr_stage;
-	mission_packet.mission_num = mission_num;
+	int curr_mission = curr_mission_stage[curr_stage];
+	mission_packet.mission_num = curr_mission;
 
 	if (curr_stage == 1) {
 		mission_packet.mission_type = stage1_missions[curr_mission].type;
@@ -1096,7 +1095,7 @@ void process_packet(int client_id, char* packet)
 
 
 						// 미션 업데이트
-						short curr_mission = clients[client_id].curr_mission;
+						short curr_mission = curr_mission_stage[clients[client_id].curr_stage];
 						bool mission_clear = false;
 						if (clients[client_id].curr_stage == 1) {
 							stage1_missions[curr_mission].curr++;
@@ -1109,9 +1108,11 @@ void process_packet(int client_id, char* packet)
 							//stage2_missions[clients[client_id].curr_mission].curr++;
 						}
 
-						{
-							lock_guard<mutex> lg{ clients[client_id].s_lock };
-							clients[client_id].send_mission_packet(clients[client_id].curr_stage, curr_mission);
+						for (auto& cl: clients) {
+							if (cl.s_state != ST_INGAME) continue;
+							if (cl.curr_stage != clients[client_id].curr_stage) continue;
+							lock_guard<mutex> lg{ cl.s_lock };
+							cl.send_mission_packet(clients[client_id].curr_stage);
 						}
 
 						if (mission_clear) {
@@ -1124,24 +1125,26 @@ void process_packet(int client_id, char* packet)
 								mission_complete.size = sizeof(SC_MISSION_COMPLETE_PACKET);
 								mission_complete.stage_num = clients[client_id].curr_stage;
 								mission_complete.mission_num = curr_mission;
-								{
-									lock_guard<mutex> lg{ clients[client_id].s_lock };
-									clients[client_id].do_send(&mission_complete);
+								for (auto& cl:clients) {
+									if (cl.s_state != ST_INGAME) continue;
+									if (cl.curr_stage != clients[client_id].curr_stage) continue;
+									lock_guard<mutex> lg{ cl.s_lock };
+									cl.do_send(&mission_complete);
 								}
 
 								if (curr_mission + 1 >= ST1_MISSION_NUM) {	// 모든 미션 완료
 									cout << "스테이지[1]의 모든 미션을 완료하였습니다.\n" << endl;
 								}
 								else {
-									clients[client_id].s_lock.lock();
-									clients[client_id].curr_mission++;
-									clients[client_id].s_lock.unlock();
-									curr_mission = clients[client_id].curr_mission;
+									curr_mission_stage[clients[client_id].curr_stage]++;
+									curr_mission = curr_mission_stage[clients[client_id].curr_stage];
 
 									// 다음 미션 전달
-									{
-										lock_guard<mutex> lg{ clients[client_id].s_lock };
-										clients[client_id].send_mission_packet(clients[client_id].curr_stage, curr_mission);
+									for (auto& cl : clients) {
+										if (cl.s_state != ST_INGAME) continue;
+										if (cl.curr_stage != clients[client_id].curr_stage) continue;
+										lock_guard<mutex> lg{ cl.s_lock };
+										cl.send_mission_packet(clients[client_id].curr_stage);
 									}
 
 									cout << "새로운 미션 추가: ";
@@ -1245,18 +1248,9 @@ void process_packet(int client_id, char* packet)
 			}
 
 			// 스테이지1 미션 전달
-			SC_MISSION_PACKET st1_mission_pack;
-			st1_mission_pack.type = SC_MISSION;
-			st1_mission_pack.size = sizeof(SC_MISSION_PACKET);
-			st1_mission_pack.stage_num = 1;
-			st1_mission_pack.mission_num = 0;
-			st1_mission_pack.mission_type = stage1_missions[0].type;
-			st1_mission_pack.mission_goal = stage1_missions[0].goal;
-			st1_mission_pack.mission_curr = stage1_missions[0].curr;
-
 			{
 				lock_guard<mutex> lg{ clients[client_id].s_lock };
-				clients[client_id].send_mission_packet(clients[client_id].curr_stage, 0);
+				clients[client_id].send_mission_packet(clients[client_id].curr_stage);
 			}
 
 			cout << "새로운 미션 추가: ";
