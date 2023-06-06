@@ -216,7 +216,7 @@ void CHumanPlayer::ReloadState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 {
 	
 
-		//m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		//m_pSkinnedAnimationController->SetTrackEnable(1, false);
 		//m_pSkinnedAnimationController->SetTrackEnable(2, false);
 		//m_pSkinnedAnimationController->SetTrackEnable(3, false);
@@ -228,10 +228,7 @@ void CHumanPlayer::ReloadState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 		//m_pSkinnedAnimationController->SetTrackEnable(9, false);
 		//m_pSkinnedAnimationController->SetTrackEnable(10, false);
 		//m_pSkinnedAnimationController->SetTrackEnable(11, false);
-		//m_pSkinnedAnimationController->SetTrackAnimationSet(1, 8);
-
-	
-
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 8);
 	CPlayer::Animate(EleapsedTime, pxmf4x4Parent);
 }
 
