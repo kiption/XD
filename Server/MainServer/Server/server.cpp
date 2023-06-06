@@ -798,9 +798,9 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].hp = HELI_MAXHP;
 		strcpy_s(clients[client_id].name, login_packet->name);
 
-		clients[client_id].pos.x = RESPAWN_POS_X;
+		clients[client_id].pos.x = RESPAWN_POS_X + 15 * client_id;
 		clients[client_id].pos.y = RESPAWN_POS_Y;
-		clients[client_id].pos.z = RESPAWN_POS_Z - 100 * client_id;
+		clients[client_id].pos.z = RESPAWN_POS_Z;
 
 		clients[client_id].m_rightvec = XMFLOAT3{ 1.0f, 0.0f, 0.0f };
 		clients[client_id].m_upvec =    XMFLOAT3{ 0.0f, 1.0f, 0.0f };

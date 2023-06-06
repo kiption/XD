@@ -7,7 +7,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	pSoldiarModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
 	SetChild(pSoldiarModel->m_pModelRootObject, true);
-	Rotate(0.0, 90.0, 0.0);
+	Rotate(0.0, 0.0, 0.0);
 	pSoldiarModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
 	//Weapon_R
 	m_pBulletFindFrame = pSoldiarModel->m_pModelRootObject->FindFrame("Rifle__1_");
