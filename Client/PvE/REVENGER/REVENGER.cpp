@@ -548,6 +548,9 @@ void uiThreadFunc() {
 				trigger_mission_complete = false;
 				gGameFramework.m_mainmissionnum = curr_mission_num;
 			}
+
+			// 6. Team 인원 동기화
+			gGameFramework.m_CurrentPlayerNum = curr_connection_num;
 		}
 
 		this_thread::yield();

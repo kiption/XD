@@ -39,6 +39,8 @@ public:
 	short type;
 	float goal;
 	float curr;
+	int start;				// 미션 시작 시간
+	int time_since_start;	// 미션 진행 시간
 
 public:
 	Mission() {
@@ -60,7 +62,7 @@ Mission setMission(short type, float goal, float curr) {
 void setMissions() {
 	// 스테이지1 미션
 	stage1_missions[0] = setMission(MISSION_KILL, 3.0f, 0.0f);
-	stage1_missions[1] = setMission(MISSION_OCCUPY, 10.0f, 0.0f);
+	stage1_missions[1] = setMission(MISSION_OCCUPY, 30.0f, 0.0f);
 
 	//
 }
@@ -798,9 +800,9 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].hp = HELI_MAXHP;
 		strcpy_s(clients[client_id].name, login_packet->name);
 
-		clients[client_id].pos.x = RESPAWN_POS_X;
+		clients[client_id].pos.x = RESPAWN_POS_X + 15 * client_id;
 		clients[client_id].pos.y = RESPAWN_POS_Y;
-		clients[client_id].pos.z = RESPAWN_POS_Z - 100 * client_id;
+		clients[client_id].pos.z = RESPAWN_POS_Z;
 
 		clients[client_id].m_rightvec = XMFLOAT3{ 1.0f, 0.0f, 0.0f };
 		clients[client_id].m_upvec =    XMFLOAT3{ 0.0f, 1.0f, 0.0f };
@@ -911,8 +913,8 @@ void process_packet(int client_id, char* packet)
 			if (!(PLAYER_ID_START <= vl_key && vl_key <= PLAYER_ID_END)) continue;	// Player가 아니면 continue
 
 			int pl_id = vl_key - PLAYER_ID_START;
-			if (pl_id == client_id) break;
-			if (clients[pl_id].s_state != ST_INGAME) break;
+			if (pl_id == client_id) continue;
+			if (clients[pl_id].s_state != ST_INGAME) continue;
 
 			lock_guard<mutex> lg{ clients[pl_id].s_lock };
 			clients[pl_id].send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
@@ -942,11 +944,11 @@ void process_packet(int client_id, char* packet)
 
 		// 2. 다른 클라이언트에게 플레이어가 회전한 방향을 알려준다.
 		for (auto& vl_key : clients[client_id].view_list) {
-			if (!(PLAYER_ID_START <= vl_key && vl_key <= PLAYER_ID_END)) break;	// Player가 아니면 break
+			if (!(PLAYER_ID_START <= vl_key && vl_key <= PLAYER_ID_END)) continue;;	// Player가 아니면 break
 
 			int pl_id = vl_key - PLAYER_ID_START;
-			if (pl_id == client_id) break;
-			if (clients[pl_id].s_state != ST_INGAME) break;
+			if (pl_id == client_id) continue;
+			if (clients[pl_id].s_state != ST_INGAME) continue;
 
 			lock_guard<mutex> lg{ clients[pl_id].s_lock };
 			clients[pl_id].send_rotate_packet(client_id, TARGET_PLAYER);
@@ -1022,11 +1024,11 @@ void process_packet(int client_id, char* packet)
 
 		// 총알을 발사했다는 정보를 다른 클라이언트에게 알려줍니다. (총알 나가는 모션 동기화를 위함)
 		for (auto& vl_key : clients[client_id].view_list) {
-			if (!(PLAYER_ID_START <= vl_key && vl_key <= PLAYER_ID_END)) break;	// Player가 아니면 break
+			if (!(PLAYER_ID_START <= vl_key && vl_key <= PLAYER_ID_END)) continue;	// Player가 아니면 break
 
 			int pl_id = vl_key - PLAYER_ID_START;
-			if (pl_id == client_id) break;
-			if (clients[pl_id].s_state != ST_INGAME) break;
+			if (pl_id == client_id) continue;
+			if (clients[pl_id].s_state != ST_INGAME) continue;
 
 			SC_OBJECT_STATE_PACKET atk_pack;
 			atk_pack.type = SC_OBJECT_STATE;
@@ -1147,7 +1149,8 @@ void process_packet(int client_id, char* packet)
 										cl.send_mission_packet(clients[client_id].curr_stage);
 									}
 
-									cout << "새로운 미션 추가: ";
+									stage1_missions[curr_mission].start = static_cast<int>(g_curr_servertime.count());
+									cout << "[" << stage1_missions[curr_mission].start << "] 새로운 미션 추가: ";
 									switch (stage1_missions[curr_mission].type) {
 									case MISSION_KILL:
 										cout << "[처치] ";
@@ -1253,7 +1256,8 @@ void process_packet(int client_id, char* packet)
 				clients[client_id].send_mission_packet(clients[client_id].curr_stage);
 			}
 
-			cout << "새로운 미션 추가: ";
+			stage1_missions[0].start = static_cast<int>(g_curr_servertime.count());
+			cout << "[" << stage1_missions[0].start << "]  새로운 미션 추가: ";
 			switch (stage1_missions[0].type) {
 			case MISSION_KILL:
 				cout << "[처치] ";
