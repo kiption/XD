@@ -41,6 +41,7 @@ using namespace DirectX::PackedVector;
 #include "../../MainServer/Server/Protocol.h"
 #include "../../MainServer/Server/Constant.h"
 #include "../../MainServer/Server/CP_KEYS.h"
+#include "../../MainServer/Server/RayCast.h"
 #include "CheckPoint.h"
 
 using namespace std;
@@ -52,6 +53,8 @@ mutex servertime_lock;	// 서버시간 lock
 
 enum NPCState { NPC_IDLE, NPC_CHASE, NPC_ST_ATK, NPC_DEATH };
 enum Hit_target { g_none, g_body, g_profeller };
+
+
 
 bool ConnectingServer = false;
 
@@ -141,21 +144,6 @@ public:
 	}
 };
 vector<NodeMesh>MeshInfo;
-
-//======================================================================
-
-struct Coordinate {
-	XMFLOAT3 right;
-	XMFLOAT3 up;
-	XMFLOAT3 look;
-
-	Coordinate() {
-		right = { 1.0f, 0.0f, 0.0f };
-		up = { 0.0f, 1.0f, 0.0f };
-		look = { 0.0f, 0.0f, 1.0f };
-	}
-};
-Coordinate basic_coordinate;	// 기본(초기) 좌표계
 
 //======================================================================
 XMFLOAT3 NPCNormalize(XMFLOAT3 vec)
@@ -280,9 +268,8 @@ array<PLAYER, MAX_USER> playersInfo;
 //======================================================================
 class NPC : public OBJECT {
 private:
-	Coordinate m_coordinate;
 	XMFLOAT3 m_User_Pos[MAX_USER];
-
+	XMFLOAT3 m_AttackVec;
 	short m_Hit;
 	short m_state;
 	int m_attack;
@@ -325,7 +312,7 @@ public:
 	float GetDistance(int id) { return m_Distance[id]; }
 	float GetSpeed() { return m_Speed; }
 	XMFLOAT3 GetPosition() { return pos; }
-	Coordinate GetCurr_coordinate() { return m_coordinate; }
+	XMFLOAT3 GetAttackVec() { return m_AttackVec; }
 
 public:
 	// Set
@@ -339,7 +326,7 @@ public:
 	void SetRotate(float y, float p, float r) { yaw = y, pitch = p, roll = r; }
 	void SetPosition(XMFLOAT3 tpos) { pos = tpos; }
 	void SetUser_Pos(XMFLOAT3 pos, int cid) { m_User_Pos[cid] = pos; }
-	void SetCurr_coordinate(Coordinate cor) { m_coordinate = cor; }
+	void SetAttackVec(XMFLOAT3 vec) { m_AttackVec = vec; }
 
 public:
 	// Base
@@ -819,41 +806,35 @@ bool NPC::PlayerDetact()
 {
 	XMVECTOR PlayerPos = XMLoadFloat3(&m_User_Pos[m_chaseID]);
 
-	XMVECTOR FrustumOrigin = XMLoadFloat3(&m_frustum.Origin);
-	XMVECTOR FrustumOrientation = XMLoadFloat4(&m_frustum.Orientation);
+	XMVECTOR NPCPos = XMLoadFloat3(&pos);
+	XMVECTOR NPCLook = XMLoadFloat3(&m_lookvec);
+	XMVECTOR NPCToPlayer = XMVectorSubtract(PlayerPos, NPCPos);
 
-	// Frustum의 꼭짓점 8개를 구한다.
-	XMFLOAT3 corners[8];
-	m_frustum.GetCorners(corners);
-
-	// Frustum과 Player의 bounding sphere와의 거리를 구한다.
-	float distance = FLT_MAX;
-	for (int i = 0; i < 8; i++)
+	// 플레이어의 위치가 NPC가 바라보는 방향에 있어야만 충돌로 간주한다.
+	if (XMVectorGetX(XMVector3Dot(NPCToPlayer, NPCLook)) > 0)
 	{
-		float d = XMVectorGetX(XMVector3Length(PlayerPos - XMLoadFloat3(&corners[i])));
-		if (d < distance)
+		// 프러스텀과 Player의 bounding sphere와의 거리를 구한다.
+		float distance = XMVectorGetX(XMVector3Length(NPCToPlayer));
+
+		// 거리가 bounding sphere의 반지름보다 작으면 충돌했다고 판단한다.
+		if (distance < 200.0f)
 		{
-			distance = d;
+			return true;
 		}
-	}
-
-	// 거리가 bounding sphere의 반지름보다 작으면 충돌했다고 판단한다.
-	if (distance < 50.0f)
-	{
-		return true;
 	}
 
 	return false;
 }
+
 void NPC::SetFrustum()
 {
 	// NPC의 위치와 Look 벡터를 가져온다.
 	XMVECTOR position = XMLoadFloat3(&pos);
-	XMVECTOR look = XMLoadFloat3(&m_coordinate.look);
+	XMVECTOR look = XMLoadFloat3(&m_lookvec);
 
 	// Frustum의 사이드 범위와 상하 범위를 설정한다.
-	float width = 50.0f;
-	float height = 50.0f;
+	float width = 100.0f;
+	float height = 100.0f;
 
 	// Frustum의 시작점을 설정한다.
 	XMVECTOR startPoint = position;
@@ -890,11 +871,11 @@ void NPC::PlayerAttack()
 	PlayerChasing();
 
 	// Attack
-	/*Cube ChasePlayer{ {m_User_Pos[m_chaseID].x, m_User_Pos[m_chaseID].y, m_User_Pos[m_chaseID].z },
-		HELI_BOXSIZE_X, HELI_BOXSIZE_Y, HELI_BOXSIZE_Z };
-	MyVector3 NPC_bullet_Pos = { pos.x, pos.y , pos.z };
-	MyVector3 NPC_Look_Vec = { m_coordinate.look.x, m_coordinate.look.y , m_coordinate.look.z };
-	MyVector3 NPC_result;
+	/* ChasePlayer{ {m_User_Pos[m_chaseID].x, m_User_Pos[m_chaseID].y, m_User_Pos[m_chaseID].z },
+		HELI_BBSIZE_X, HELI_BBSIZE_X, HELI_BBSIZE_X };
+	XMFLOAT3 NPC_bullet_Pos = { pos.x, pos.y , pos.z };
+	XMFLOAT3 NPC_Look_Vec = m_lookvec;
+	XMFLOAT3 NPC_result;
 	NPC_result = MyRaycast_InfiniteRay(NPC_bullet_Pos, NPC_Look_Vec, ChasePlayer);
 	if (NPC_result != m_VectorMAX) {
 		PrintRayCast = false;
@@ -902,6 +883,9 @@ void NPC::PlayerAttack()
 	else {
 		PrintRayCast = true;
 	}*/
+
+	XMFLOAT3 AttackVec = { m_User_Pos[m_chaseID].x - pos.x,m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
+	m_AttackVec = NPCNormalize(AttackVec);
 
 	//NPCtoBuilding_collide();
 }
@@ -945,7 +929,6 @@ void NPC::NPC_Death_motion()
 	// 빙글빙글 돌며 추락
 	pitch += 3.0f;
 
-	Coordinate base_coordinate;
 	m_rightvec = NPCcalcRightRotate();
 	m_lookvec = NPCcalcLookRotate();
 }
@@ -1023,6 +1006,7 @@ public:
 	void send_npc_move_packet(int npc_id);
 	void send_npc_rotate_packet(int npc_id);
 	void send_npc_move_rotate_packet(int npc_id);
+	void send_npc_attack_packet(int npc_id);
 };
 
 HANDLE h_iocp;											// IOCP 핸들
@@ -1086,6 +1070,20 @@ void SERVER::send_npc_rotate_packet(int npc_id) {
 void SERVER::send_npc_move_rotate_packet(int npc_id) {
 	send_npc_move_packet(npc_id);
 	send_npc_rotate_packet(npc_id);
+}
+
+void SERVER::send_npc_attack_packet(int npc_id)
+{
+	NPC_ATTACK_PACKET npc_attack_packet;
+	npc_attack_packet.size = sizeof(NPC_ATTACK_PACKET);
+	npc_attack_packet.type = NPC_ATTACK;
+	npc_attack_packet.n_id = npc_id;
+	npc_attack_packet.atklook_x = npcsInfo[npc_id].GetAttackVec().x;
+	npc_attack_packet.atklook_y = npcsInfo[npc_id].GetAttackVec().y;
+	npc_attack_packet.atklook_z = npcsInfo[npc_id].GetAttackVec().z;
+
+	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
+	g_logicservers[a_lgcsvr_num].do_send(&npc_attack_packet);
 }
 
 //======================================================================
@@ -1444,7 +1442,7 @@ void initNpc() {
 
 		float x = npcsInfo[i].getRandomOffset(MeshInfo[npcsInfo[i].GetNodeIndex()].GetSmallX(),
 			MeshInfo[npcsInfo[i].GetNodeIndex()].GetLargeX());
-		float y = npcsInfo[i].getRandomOffset(30.0f, 100.0f);
+		float y = npcsInfo[i].getRandomOffset(30.0f, 60.0f);
 		float z = npcsInfo[i].getRandomOffset(MeshInfo[npcsInfo[i].GetNodeIndex()].GetSmallZ(),
 			MeshInfo[npcsInfo[i].GetNodeIndex()].GetLargeZ());
 
@@ -1528,12 +1526,12 @@ void MoveNPC()
 
 					// npc pos 확인
 
-					//cout << "=============" << endl;
-					////cout << i << "번째 NPC의 도시 ID: " << npcsInfo[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcsInfo[i].GetIdleSection() << endl;
-					//cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
-					//cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
-					////cout << i << "번째 NPC의 Look: " << npcsInfo[i].m_lookvec.x << ", " << npcsInfo[i].m_lookvec.y << ", " << npcsInfo[i].m_lookvec.z << endl;
-					//cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
+					cout << "=============" << endl;
+					//cout << i << "번째 NPC의 도시 ID: " << npcsInfo[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcsInfo[i].GetIdleSection() << endl;
+					cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
+					cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
+					//cout << i << "번째 NPC의 Look: " << npcsInfo[i].m_lookvec.x << ", " << npcsInfo[i].m_lookvec.y << ", " << npcsInfo[i].m_lookvec.z << endl;
+					cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
 
 
 					//if (npcs[i].PrintRayCast) {
@@ -1541,6 +1539,11 @@ void MoveNPC()
 					//}
 
 					g_logicservers[a_lgcsvr_num].send_npc_move_rotate_packet(npcsInfo[i].GetID());
+
+					if (npcsInfo[i].GetState() == NPC_ATTACK) {
+						g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
+					}
+
 				}
 			}
 

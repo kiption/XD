@@ -415,6 +415,7 @@ struct NPC_ATTACK_PACKET {
 	unsigned char size;
 	char type;
 	short n_id;
+	float atklook_x, atklook_y, atklook_z;
 };
 
 struct NPC_CHANGE_STATE_PACKET {
