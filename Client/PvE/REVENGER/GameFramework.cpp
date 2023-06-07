@@ -1945,7 +1945,12 @@ void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
 }
 
 
-
+float DeleteTime = 0.0f;
+bool DieState = false;
+bool DieState2 = false;
+bool DieState3 = false;
+bool DieState4 = false;
+bool DieState5 = false;
 void CGameFramework::CollisionStaticObjects()
 {
 	XMFLOAT3 HumanPosition = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17]->GetPosition();
@@ -1984,14 +1989,11 @@ void CGameFramework::CollisionStaticObjects()
 			// 충돌 모션 
 			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17])
 			{
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17]->SetTrackAnimationSet(0, 4);
+			
+				DieState = true;
 			}
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HumanPosition;
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[18]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->SetTrackAnimationSet(0, 0);
 
 		}
 
@@ -2000,16 +2002,11 @@ void CGameFramework::CollisionStaticObjects()
 			// 충돌 모션 
 			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[18])
 			{
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[18]->SetTrackAnimationSet(0, 4);
+
+				DieState2 = true;
 			}
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HumanPosition2;
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->SetTrackAnimationSet(0, 0);
-
-
 		}
 
 		if (ppBullets[i]->m_xoobb.Intersects(HumanOOBB3))
@@ -2017,15 +2014,10 @@ void CGameFramework::CollisionStaticObjects()
 			// 충돌 모션 
 			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19])
 			{
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->SetTrackAnimationSet(0, 4);
+				DieState3 = true;
 			}
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HumanPosition3;
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[18]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->SetTrackAnimationSet(0, 0);
-
 		}
 
 		if (ppBullets[i]->m_xoobb.Intersects(HumanOOBB4))
@@ -2033,15 +2025,11 @@ void CGameFramework::CollisionStaticObjects()
 			// 충돌 모션 
 			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20])
 			{
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->SetTrackAnimationSet(0, 4);
+
+				DieState4 = true;
 			}
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HumanPosition4;
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[18]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->SetTrackAnimationSet(0, 0);
-
 		}
 
 		if (ppBullets[i]->m_xoobb.Intersects(HumanOOBB5))
@@ -2049,18 +2037,64 @@ void CGameFramework::CollisionStaticObjects()
 			// 충돌 모션 
 			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21])
 			{
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->SetTrackAnimationSet(0, 4);
+				DieState5 = true;
 			}
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition = HumanPosition5;
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[18]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->SetTrackAnimationSet(0, 0);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->SetTrackAnimationSet(0, 0);
-
 		}
 	}
 
+	if (DieState == true)
+	{
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17]->SetTrackAnimationSet(0, 4);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17]->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
+		DeleteTime++;
+		if (DeleteTime > 500.0 && ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17])
+		{
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17]->SetScale(0, 0, 0);DeleteTime = 0;
+		}
+	}
+	if (DieState2 == true)
+	{
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[18]->SetTrackAnimationSet(0, 4);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[18]->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
+		DeleteTime++;
+		if (DeleteTime > 500.0 && ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17])
+		{
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[18]->SetScale(0, 0, 0);DeleteTime = 0;
+		}
+	}
+	if (DieState3 == true)
+	{
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->SetTrackAnimationSet(0, 4);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
+
+		DeleteTime++;
+		if (DeleteTime > 500.0 && ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17])
+		{
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->SetScale(0, 0, 0);DeleteTime = 0;
+		}
+	}
+	if (DieState4 == true)
+	{
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->SetTrackAnimationSet(0, 4);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
+		DeleteTime++;
+		if (DeleteTime > 500.0 && ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17])
+		{
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->SetScale(0, 0, 0);DeleteTime = 0;
+		}
+	}
+	if (DieState5 == true)
+	{
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->SetTrackAnimationSet(0, 4);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
+		DeleteTime++;
+		if (DeleteTime > 500.0 && ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17])
+		{
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->SetScale(0, 0, 0);DeleteTime = 0;
+		}
+	}
 }
 
 
