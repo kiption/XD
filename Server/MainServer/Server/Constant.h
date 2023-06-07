@@ -79,3 +79,8 @@
 //============================================================
 #define STAGE1_TIMELIMIT 600		// 스테이지1 제한시간 (단위: sec)
 #define STAGE2_TIMELIMIT 600		// 스테이지2 제한시간 (단위: sec)
+
+#define ST1_OCCUPY_AREA_POS_X 68.25f
+#define ST1_OCCUPY_AREA_POS_Z 1007.5f
+#define ST1_OCCUPY_AREA_SIZE_X 136.5f
+#define ST1_OCCUPY_AREA_SIZE_Z 125.0f

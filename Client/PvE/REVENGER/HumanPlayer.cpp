@@ -133,7 +133,7 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	case THIRD_PERSON_CAMERA:
 		SetFriction(600);
 		SetGravity(XMFLOAT3(0.0f, 0.0, 0.0f));
-		SetMaxVelocityXZ(20.0f);
+		SetMaxVelocityXZ(40.0f);
 		SetMaxVelocityY(5.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);

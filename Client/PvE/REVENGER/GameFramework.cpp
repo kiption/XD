@@ -649,7 +649,7 @@ void CGameFramework::ProcessInput()
 				}
 			}
 
-			if (m_nMode == SCENE1STAGE) if (dwDirection) m_pPlayer->Move(dwDirection, 8.0, true);
+			if (m_nMode == SCENE1STAGE) if (dwDirection) m_pPlayer->Move(dwDirection, 13.0, true);
 
 		}
 	}

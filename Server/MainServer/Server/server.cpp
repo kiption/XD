@@ -60,11 +60,27 @@ Mission setMission(short type, float goal, float curr) {
 	return new_mission;
 }
 void setMissions() {
+	cout << "[Init Missions...]";
 	// 스테이지1 미션
 	stage1_missions[0] = setMission(MISSION_KILL, 3.0f, 0.0f);
 	stage1_missions[1] = setMission(MISSION_OCCUPY, 30.0f, 0.0f);
 
 	//
+	cout << " ---- OK." << endl;
+}
+
+//======================================================================
+array<MapObject, TOTAL_STAGE + 1> occupy_areas;	// 스테이지별 점령지역
+void setOccupyAreas() {
+	cout << "[Init Occupy Areas...]";
+	// 스테이지0 에는 점령지역이 없다.
+	occupy_areas[0] = MapObject{ -9999.f, -9999.f, -9999.f, 0.f, 0.f, 0.f };
+
+	// 스테이지1 점령지역
+	occupy_areas[1] = MapObject{ ST1_OCCUPY_AREA_POS_X, 0, ST1_OCCUPY_AREA_POS_Z, ST1_OCCUPY_AREA_SIZE_X, 0, ST1_OCCUPY_AREA_SIZE_Z };
+
+	//
+	cout << " ---- OK." << endl;
 }
 
 //======================================================================
@@ -228,6 +244,7 @@ SESSION npc_server;
 array<SESSION, MAX_NPCS> npcs;
 array<SESSION, 5> dummies;//[TEST] 충돌테스트용 더미
 void initDummies() {	  //[TEST] 충돌테스트용 더미 생성
+	cout << "[Init Dummies...]";
 	dummies[0].pos = { 30.0f, 6.0f, 905.0f };
 	dummies[1].pos = { 60.0f, 6.0f, 1155.0f };
 	dummies[2].pos = { 100.0f, 6.0f, 1205.0f };
@@ -242,6 +259,7 @@ void initDummies() {	  //[TEST] 충돌테스트용 더미 생성
 		dummies[i].m_lookvec = { 0.0f, 0.0f, 1.0f };
 		dummies[i].setBB();
 	}
+	cout << " ---- OK." << endl;
 }
 
 
@@ -2039,8 +2057,6 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 int main(int argc, char* argv[])
 {
 	b_isfirstplayer = true;
-	initDummies();//[TEST] 충돌테스트 더미
-	setMissions();//미션 설정
 
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
@@ -2310,6 +2326,12 @@ int main(int argc, char* argv[])
 		}
 		txtfile.close();
 	}
+
+	//======================================================================
+	// [ Main - 정보 초기화 ]
+	initDummies();//[TEST] 충돌테스트 더미
+	setMissions();//미션 설정
+	setOccupyAreas();//점령지역 설정
 	cout << "\n";
 
 	//======================================================================
