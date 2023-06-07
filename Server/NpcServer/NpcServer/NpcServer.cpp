@@ -1526,12 +1526,12 @@ void MoveNPC()
 
 					// npc pos 확인
 
-					cout << "=============" << endl;
-					//cout << i << "번째 NPC의 도시 ID: " << npcsInfo[i].GetIdleCity() << ", NPC의 섹션 ID: " << npcsInfo[i].GetIdleSection() << endl;
+					/*cout << "=============" << endl;
+					
 					cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
 					cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
-					//cout << i << "번째 NPC의 Look: " << npcsInfo[i].m_lookvec.x << ", " << npcsInfo[i].m_lookvec.y << ", " << npcsInfo[i].m_lookvec.z << endl;
-					cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
+					cout << i << "번째 NPC의 Look: " << npcsInfo[i].m_lookvec.x << ", " << npcsInfo[i].m_lookvec.y << ", " << npcsInfo[i].m_lookvec.z << endl;
+					cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;*/
 
 
 					//if (npcs[i].PrintRayCast) {
