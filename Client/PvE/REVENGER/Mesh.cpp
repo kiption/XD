@@ -50,6 +50,7 @@ void CMesh::ReleaseUploadBuffers()
 void CMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
 {
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
+	pd3dCommandList->IASetVertexBuffers(m_nSlot, m_nVertexBufferViews, m_d3dVertexBufferView);
 }
 
 void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
@@ -79,8 +80,8 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
 
 void CMesh::CalculateBoundingBox(XMFLOAT3* pxmf3Points, UINT nStride)
 {
-	m_nStride = nStride;
-	BoundingBox::CreateFromPoints(m_xmBoundingBox, m_nVertices, pxmf3Points, nStride);
+	//m_nStride = nStride;
+	//BoundingOrientedBox::CreateFromPoints(m_xmOOBoundingBox , m_nVertices, pxmf3Points, nStride);
 
 }
 
@@ -313,6 +314,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
 
 			m_xmBoundingBox = BoundingBox(XMFLOAT3(m_xmf3AABBCenter), XMFLOAT3(m_xmf3AABBExtents));
+			//m_xmBoundingOrientedBox.Orientation = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
 		}
 		else if (!strcmp(pstrToken, "<Positions>:"))
@@ -567,4 +569,80 @@ void CTexturedRectMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int n
 	{
 		pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 	}
+}
+
+CBoundingBoxMesh::CBoundingBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	m_nVertices = 12 * 2;
+	m_nStride = sizeof(XMFLOAT3);
+	m_nOffset = 0;
+	m_nSlot = 0;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_LINELIST;
+
+	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, m_nStride * m_nVertices, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dPositionBuffer->Map(0, NULL, (void**)&m_pcbMappedPositions);
+
+	m_nVertexBufferViews = 1;
+	m_d3dVertexBufferView = new D3D12_VERTEX_BUFFER_VIEW[m_nVertexBufferViews];
+
+	m_d3dVertexBufferView[0].BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView[0].StrideInBytes = sizeof(XMFLOAT3);
+	m_d3dVertexBufferView[0].SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+}
+
+CBoundingBoxMesh::~CBoundingBoxMesh()
+{
+	if (m_pd3dPositionBuffer) m_pd3dPositionBuffer->Unmap(0, NULL);
+}
+
+void CBoundingBoxMesh::UpdateVertexPosition(BoundingOrientedBox* pxmBoundingBox)
+{
+	XMFLOAT3 xmf3Corners[8];
+	pxmBoundingBox->GetCorners(xmf3Corners);
+
+	int i = 0;
+
+	m_pcbMappedPositions[i++] = xmf3Corners[0];
+	m_pcbMappedPositions[i++] = xmf3Corners[1];
+
+	m_pcbMappedPositions[i++] = xmf3Corners[1];
+	m_pcbMappedPositions[i++] = xmf3Corners[2];
+
+	m_pcbMappedPositions[i++] = xmf3Corners[2];
+	m_pcbMappedPositions[i++] = xmf3Corners[3];
+
+	m_pcbMappedPositions[i++] = xmf3Corners[3];
+	m_pcbMappedPositions[i++] = xmf3Corners[0];
+
+	m_pcbMappedPositions[i++] = xmf3Corners[4];
+	m_pcbMappedPositions[i++] = xmf3Corners[5];
+
+	m_pcbMappedPositions[i++] = xmf3Corners[5];
+	m_pcbMappedPositions[i++] = xmf3Corners[6];
+
+	m_pcbMappedPositions[i++] = xmf3Corners[6];
+	m_pcbMappedPositions[i++] = xmf3Corners[7];
+
+	m_pcbMappedPositions[i++] = xmf3Corners[7];
+	m_pcbMappedPositions[i++] = xmf3Corners[4];
+
+	m_pcbMappedPositions[i++] = xmf3Corners[0];
+	m_pcbMappedPositions[i++] = xmf3Corners[4];
+
+	m_pcbMappedPositions[i++] = xmf3Corners[1];
+	m_pcbMappedPositions[i++] = xmf3Corners[5];
+
+	m_pcbMappedPositions[i++] = xmf3Corners[2];
+	m_pcbMappedPositions[i++] = xmf3Corners[6];
+
+	m_pcbMappedPositions[i++] = xmf3Corners[3];
+	m_pcbMappedPositions[i++] = xmf3Corners[7];
+}
+
+void CBoundingBoxMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	OnPreRender(pd3dCommandList,NULL);
+	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
+	pd3dCommandList->IASetVertexBuffers(m_nSlot, m_nVertexBufferViews, m_d3dVertexBufferView);
+	pd3dCommandList->DrawInstanced(m_nVertices, 1, m_nOffset, 0);
 }

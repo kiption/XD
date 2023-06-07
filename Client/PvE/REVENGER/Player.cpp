@@ -73,6 +73,12 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	}
 }
 
+void CPlayer::SetPosition(const XMFLOAT3& xmf3Position, bool bMove)
+{
+	if (bMove) Move(XMFLOAT3(xmf3Position.x - m_xmf3Position.x, xmf3Position.y - m_xmf3Position.y, xmf3Position.z - m_xmf3Position.z), false);
+	else m_xmf3Position = xmf3Position;
+}
+
 void CPlayer:: Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
 	if (bUpdateVelocity)

@@ -167,6 +167,7 @@ private:
 
 	CGameTimer					m_GameTimer;
 
+public:
 	XMFLOAT3	PrevPosition;
 	CPlayer						*m_pPlayer = NULL;
 	CCamera						*m_pCamera = NULL;
@@ -253,7 +254,7 @@ public:
 //==================================================
 	// 서버에서 받은 Bound 값과의 충돌설정 함수입니다.
 	//player - map
-	void CollisionMap_by_PLAYER(XMFLOAT3 mappos, XMFLOAT3 mapextents);
+	bool CollisionMap_by_PLAYER(XMFLOAT3 mappos, XMFLOAT3 mapextents, CGameObject* pTargetGameObject);
 	//bullet - map
 	void CollisionMap_by_BULLET(XMFLOAT3 mappos, XMFLOAT3 mapextents);
 	//npc - (player/map/bullet)

@@ -155,6 +155,7 @@
     <ClInclude Include="..\..\..\Server\MainServer\Server\Protocol.h" />
     <ClInclude Include="BillboardObjects.h" />
     <ClInclude Include="BillboardObjectsShader.h" />
+    <ClInclude Include="BoundingWire.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="IlluminateMesh.h" />
     <ClInclude Include="MapObjectShaders.h" />
@@ -197,6 +198,7 @@
   <ItemGroup>
     <ClCompile Include="BillboardObjects.cpp" />
     <ClCompile Include="BillboardObjectsShader.cpp" />
+    <ClCompile Include="BoundingWire.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="IlluminateMesh.cpp" />
     <ClCompile Include="MapObjectShaders.cpp" />

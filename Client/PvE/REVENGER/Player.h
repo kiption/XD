@@ -35,12 +35,12 @@ protected:
 
 	CCamera						*m_pCamera = NULL;
 	CHeightMapTerrain* pTerrain = NULL;
-	
 public:
 	CPlayer();
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual ~CPlayer();
 	
+	XMFLOAT3					m_xmf3BeforeCollidedPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float           			m_fPitch = 0.0f;
 	float           			m_fYaw = 0.0f;
 	float           			m_fRoll = 0.0f;
@@ -56,8 +56,8 @@ public:
 	void SetMaxVelocityXZ(float fMaxVelocity) { m_fMaxVelocityXZ = fMaxVelocity; }
 	void SetMaxVelocityY(float fMaxVelocity) { m_fMaxVelocityY = fMaxVelocity; }
 	void SetVelocity(const XMFLOAT3& xmf3Velocity) { m_xmf3Velocity = xmf3Velocity; }
-	void SetPosition(const XMFLOAT3& xmf3Position) { Move(XMFLOAT3(xmf3Position.x - m_xmf3Position.x, xmf3Position.y - m_xmf3Position.y, xmf3Position.z - m_xmf3Position.z), false); }
-
+	//virtual void SetPosition(const XMFLOAT3& xmf3Position) { Move(XMFLOAT3(xmf3Position.x - m_xmf3Position.x, xmf3Position.y - m_xmf3Position.y, xmf3Position.z - m_xmf3Position.z), false); }
+	void SetPosition(const XMFLOAT3& xmf3Position, bool bMove = true);
 	void SetScale(XMFLOAT3& xmf3Scale) { m_xmf3Scale = xmf3Scale; }
 	void SetMyRight(const XMFLOAT3 xmf3right) { m_xmf3Right = xmf3right; }
 	void SetMyUp(const XMFLOAT3 xmf3up) { m_xmf3Up = xmf3up; }
@@ -74,8 +74,9 @@ public:
 	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
 	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
 	void Move(float fxOffset = 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
-	virtual void Jump() {};
-	virtual void Roll() {};
+	virtual void JumpState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL) {};
+	virtual void ReloadState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL) {};
+	virtual void ShootState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL) {};
 
 	void Rotate(float x, float y, float z);
 

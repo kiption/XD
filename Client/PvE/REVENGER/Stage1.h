@@ -1,6 +1,7 @@
 #pragma once
 #include "Scene.h"
 #include "SpriteAnimationBillboard.h"
+#include "BoundingWire.h"
 class Player;
 class CHumanPlayer;
 
@@ -24,6 +25,7 @@ public:
 	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	ID3D12RootSignature* GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 
+	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	bool ProcessInput(UCHAR* pKeysBuffer);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);

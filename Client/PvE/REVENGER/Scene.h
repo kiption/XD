@@ -14,6 +14,8 @@
 #include "MapObjectShaders.h"
 #include "ShadowShader.h"
 #include "PostProcessShader.h"
+#include "BoundingWire.h"
+
 #include "Player.h"
 #include "HumanPlayer.h"
 #include "HelicopterPlayer.h"
@@ -81,7 +83,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
 	virtual void ReleaseUploadBuffers();
-
+	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) {};
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
@@ -89,6 +91,11 @@ public:
 	int GetCurScene() { return m_nCurScene; }
 	void SetCurScene(int nCurScene) { m_nCurScene = nCurScene; }
 	void ParticleAnimation();
+
+
+	BoundingWireShader* m_pBoundingBoxShader = NULL;
+
+
 	XMFLOAT3 SmokePosition;
 	XMFLOAT3 ExplosingPosition;
 	GameSound gamesound;

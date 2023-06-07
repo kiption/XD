@@ -76,6 +76,8 @@ protected:
 	ID3D12Resource					*m_pd3dPositionBuffer = NULL;
 	ID3D12Resource					*m_pd3dPositionUploadBuffer = NULL;
 	D3D12_VERTEX_BUFFER_VIEW		m_d3dPositionBufferView;
+	UINT							m_nVertexBufferViews = 0;
+	D3D12_VERTEX_BUFFER_VIEW*		m_d3dVertexBufferView;
 
 	int								m_nSubMeshes = 0;
 	int								*m_pnSubSetIndices = NULL;
@@ -184,4 +186,17 @@ protected:
 public:
 	virtual void ReleaseUploadBuffers();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
+};
+
+
+class CBoundingBoxMesh : public CMesh
+{
+public:
+	CBoundingBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual ~CBoundingBoxMesh();
+
+	XMFLOAT3* m_pcbMappedPositions = NULL;
+
+	void UpdateVertexPosition(BoundingOrientedBox* pxmBoundingBox);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList);
 };

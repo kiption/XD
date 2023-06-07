@@ -137,6 +137,8 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	BuildDefaultLightsAndMaterials();
 
+
+
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pSkyBox->SetCurScene(SCENE1STAGE);
@@ -209,7 +211,10 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
 
-	gamesound.m_bStopSound = false;
+	m_pBoundingBoxShader = new BoundingWireShader();
+	m_pBoundingBoxShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE, 1, pdxgiRtvFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	m_pBoundingBoxShader->SetCurScene(SCENE1STAGE);
+
 	gamesound.SpeakMusic(gamesound.m_bStopSound);
 	gamesound.backGroundMusic();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -220,6 +225,7 @@ void Stage1::ReleaseObjects()
 {
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
 	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
+	if (m_pBoundingBoxShader) m_pBoundingBoxShader->Release();
 
 	if (m_pBillboardShader)
 	{
@@ -267,7 +273,6 @@ void Stage1::ReleaseObjects()
 		m_pDepthRenderShader->ReleaseObjects();
 		m_pDepthRenderShader->Release();
 	}
-
 	if (m_pShadowShader)delete m_pShadowShader;
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
@@ -740,6 +745,17 @@ bool Stage1::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	return(false);
 }
 
+void Stage1::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	m_pBoundingBoxShader->Render(pd3dCommandList, pCamera,0);
+	for (int i = 0; i < m_nShaders; i++)
+	{
+		if (m_ppShaders[i]) m_ppShaders[i]->RenderBoundingBox(pd3dCommandList, pCamera);
+	}
+
+	m_pPlayer->RenderBoundingBox(pd3dCommandList, pCamera);
+}
+
 bool Stage1::ProcessInput(UCHAR* pKeysBuffer)
 {
 	return(false);
@@ -803,8 +819,11 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
+
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
+	
 	if (m_ppShaders[0])m_ppShaders[0]->Render(pd3dCommandList, pCamera,0);
+	RenderBoundingBox(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);

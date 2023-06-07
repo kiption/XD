@@ -106,6 +106,8 @@ public:
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseShaderVariables();
 
+
+
 	//	void LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, wchar_t* pszFileName, UINT nIndex);
 	void LoadTextureFromDDSFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, wchar_t* pszFileName, UINT nResourceType, UINT nIndex);
 	//	void LoadBufferFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, wchar_t *pszFileName, UINT nIndex);
@@ -423,11 +425,12 @@ public:
 
 
 
-	BoundingBox						m_xmBoundingBox;
-
-	BoundingOrientedBox m_xmOOBoundingBox;
-	BoundingOrientedBox GetBoundingBox() { return(m_xmOOBoundingBox); }
-
+	BoundingBox	m_xmBoundingBox;
+	CBoundingBoxMesh* m_pBoundingBoxMesh = NULL;
+	BoundingOrientedBox m_xoobb = BoundingOrientedBox(XMFLOAT3(), XMFLOAT3(), XMFLOAT4());
+	BoundingOrientedBox GetBoundingBox() { return(m_xoobb); }
+	void UpdateBoundingBox();
+	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 public:
 	//게임 객체가 카메라에 보인는 가를 검사한다.
 	bool IsVisible(CCamera* pCamera = NULL);
@@ -448,7 +451,7 @@ public:
 
 	XMFLOAT3 m_xmf3RotationAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	XMFLOAT3 m_xmf3MovingDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	BoundingOrientedBox m_xoobb = BoundingOrientedBox(XMFLOAT3(),XMFLOAT3(),XMFLOAT4());
+
 	CAnimationController*			m_pSkinnedAnimationController = NULL;
 	CAnimationTrack* m_ppAnimationTrack = NULL;
 	virtual void SetMesh(CMesh *pMesh);

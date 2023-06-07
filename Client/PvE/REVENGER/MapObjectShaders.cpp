@@ -100,10 +100,10 @@ D3D12_SHADER_BYTECODE CMapObjectShader::CreatePixelShader(ID3DBlob** ppd3dShader
 
 BoundingBox CMapObjectShader::CalculateBoundingBox()
 {
-	for (int i = 0; i < m_nObjects; i++) m_ppObjects[i]->CalculateBoundingBox();
+	//for (int i = 0; i < m_nObjects; i++) m_ppObjects[i]->CalculateBoundingBox();
 	BoundingBox xmBoundingBox;
-	for (int i = 1; i < m_ppObjects[0]->m_nMeshes; i++)xmBoundingBox = m_ppObjects[0]->m_ppMeshes[i]->m_xmBoundingBox;
-	for (int i = 1; i < m_nObjects; i++)BoundingBox::CreateMerged(xmBoundingBox, xmBoundingBox, m_ppObjects[i]->m_xmBoundingBox);
+	//for (int i = 1; i < m_ppObjects[0]->m_nMeshes; i++)xmBoundingBox = m_ppObjects[0]->m_ppMeshes[i]->m_xmBoundingBox;
+	//for (int i = 1; i < m_nObjects; i++)BoundingBox::CreateMerged(xmBoundingBox, xmBoundingBox, m_ppObjects[i]->m_xmBoundingBox);
 
 	return(xmBoundingBox);
 }

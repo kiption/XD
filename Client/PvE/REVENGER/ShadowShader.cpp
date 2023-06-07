@@ -18,7 +18,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 {
 	if (m_nCurScene == SCENE1STAGE)
 	{
-		m_nObjects = 20;
+		m_nObjects = 22;
 		m_ppObjects = new CGameObject * [m_nObjects];
 
 		CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
@@ -44,15 +44,16 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 		for (int x = 5; x < 8; x++)
 		{
-			m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL , NULL);
+			m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, NULL);
 			m_ppObjects[x]->SetMaterial(0, pOtherPlayerMaterial);
-			m_ppObjects[x]->SetScale(9.0, 9.0, 9.0);
+			m_ppObjects[x]->SetScale(7.0, 7.0, 7.0);
+
 		}
 
-		m_ppObjects[5]->SetPosition(XMFLOAT3(30.0, 6.0, 905.0));
-		m_ppObjects[6]->SetPosition(XMFLOAT3(60.0, 6.0, 1155.0));
-		m_ppObjects[7]->SetPosition(XMFLOAT3(100.0, 6.0, 1205.0));
-	
+		m_ppObjects[5]->SetPosition(XMFLOAT3(30.0, 6.2, 905.0));
+		m_ppObjects[6]->SetPosition(XMFLOAT3(60.0, 6.2, 1155.0));
+		m_ppObjects[7]->SetPosition(XMFLOAT3(100.0, 6.2, 1205.0));
+
 
 		m_nHeliNpcObjects = 5;
 
@@ -65,8 +66,9 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 			m_ppNpc_Heli_Objects[i] = new CNpcHelicopterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			m_ppNpc_Heli_Objects[i]->SetMaterial(0, pNpcHeliMaterial);
-			m_ppNpc_Heli_Objects[i]->Rotate(0.0f, 90.0f, 0.0f);
-			m_ppNpc_Heli_Objects[i]->SetScale(3.0f, 3.0, 3.0);
+			m_ppNpc_Heli_Objects[i]->Rotate(0.0f, 45.0f, 0.0f);
+			m_ppNpc_Heli_Objects[i]->SetScale(3.0,3.0,3.0);
+
 			m_ppNpc_Heli_Objects[i]->OnPrepareAnimate();
 		}
 
@@ -118,15 +120,15 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[15]->SetPosition(0.0f, 0.0f, 0.0f);
 		m_ppObjects[16]->SetPosition(0.0f, 0.0f, 0.0f);
 
-		m_nSoldiarNpcObjects = 20;
-		CMaterial* pSoldiarNpcMaterial = new CMaterial(3);
-		pSoldiarNpcMaterial->SetReflection(3);
+		m_nSoldiarNpcObjects = 22;
+		CMaterial* pSoldiarNpcMaterial = new CMaterial(5);
+		pSoldiarNpcMaterial->SetReflection(5);
 		for (int h = 17; h < m_nSoldiarNpcObjects; h++)
 		{
 			m_ppObjects[h] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, NULL);
 			m_ppObjects[h]->SetMaterial(0, pSoldiarNpcMaterial);
-			m_ppObjects[h]->SetScale(9.0, 9.0, 9.0);
-			m_ppObjects[h]->SetPosition(400.0 + h * 15, 6.0, 705.0 + h * 15);
+			m_ppObjects[h]->SetScale(7.0, 7.0, 7.0);
+			m_ppObjects[h]->SetPosition(-50.0 + (h-17)*50, 6.0,1300.0);
 		}
 
 	}
@@ -256,9 +258,9 @@ BoundingBox CObjectsShader::CalculateBoundingBox()
 			xmBoundingBox = m_ppObjects[i]->m_pMesh->m_xmBoundingBox;
 			BoundingBox::CreateMerged(xmBoundingBox, xmBoundingBox, m_ppObjects[i]->m_pMesh->m_xmBoundingBox);
 		}
-		}
-	return(xmBoundingBox);
 	}
+	return(xmBoundingBox);
+}
 
 D3D12_SHADER_BYTECODE CObjectsShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
@@ -300,6 +302,14 @@ void CObjectsShader::ReleaseShaderVariables()
 	}
 
 	CIlluminatedShader::ReleaseShaderVariables();
+}
+
+void CObjectsShader::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j]) m_ppObjects[j]->RenderBoundingBox(pd3dCommandList, pCamera);
+	}
 }
 
 CShadowMapShader::CShadowMapShader(CObjectsShader* pObjectsShader)

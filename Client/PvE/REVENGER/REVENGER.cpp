@@ -205,7 +205,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//					Map 충돌 관련
 				//==================================================
 				for (auto& mapobj : stage1_mapobj_info) {
-					gGameFramework.CollisionMap_by_PLAYER(XMFLOAT3(mapobj.m_xoobb.Center), XMFLOAT3(mapobj.m_xoobb.Extents));
+					/*if (gGameFramework.CollisionMap_by_PLAYER(XMFLOAT3(mapobj.m_xoobb.Center), XMFLOAT3(mapobj.m_xoobb.Extents), gGameFramework.m_pPlayer))
+					{
+						gGameFramework.m_pPlayer->SetPosition(gGameFramework.m_pPlayer->m_xmf3BeforeCollidedPosition, false);
+					}*/
 				}
 				//gGameFramework.CollisionEndWorldObject(XMFLOAT3(0.0, 0.0, 0.0), XMFLOAT3(1200.0, 110.0, 1200.0));
 				gGameFramework.CollisionMap_by_BULLET(XMFLOAT3(/*MAP CENTER*/), XMFLOAT3(/*MAP EXTENTS*/));

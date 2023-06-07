@@ -107,6 +107,8 @@ void CTexture::ReleaseShaderVariables()
 {
 }
 
+
+
 void CTexture::ReleaseUploadBuffers()
 {
 	if (m_ppd3dTextureUploadBuffers)
@@ -856,14 +858,33 @@ void CGameObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
 	}
 }
 
+void CGameObject::UpdateBoundingBox()
+{
+	OnPrepareRender();
+	if (m_pMesh)
+	{
+		m_pMesh->m_xmBoundingOrientedBox.Transform(m_xoobb, XMLoadFloat4x4(&m_xmf4x4World));
+		XMStoreFloat4(&m_xoobb.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xoobb.Orientation)));
+	}
+}
+
+void CGameObject::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	if (m_pBoundingBoxMesh)
+	{
+		m_pBoundingBoxMesh->UpdateVertexPosition(&m_xoobb);
+		m_pBoundingBoxMesh->Render(pd3dCommandList);
+	}
+}
+
 bool CGameObject::IsVisible(CCamera* pCamera)
 {
 	OnPrepareRender();
 	bool bIsVisible = false;
-	BoundingBox xmBoundingBox = m_pMesh->GetBoundingBox();
-	//모델 좌표계의 바운딩 박스를 월드 좌표계로 변환한다. 
-	xmBoundingBox.Transform(xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
-	if (pCamera) bIsVisible = pCamera->IsInFrustum(xmBoundingBox);
+	//// xmBoundingBox = m_pMesh->GetBoundingBox();
+	////모델 좌표계의 바운딩 박스를 월드 좌표계로 변환한다. 
+	//xmBoundingBox.Transform(xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
+	//if (pCamera) bIsVisible = pCamera->IsInFrustum(xmBoundingBox);
 	return(bIsVisible);
 }
 
@@ -989,6 +1010,7 @@ void CGameObject::SetTrackAnimationPosition(int nAnimationTrack, float fPosition
 void CGameObject::Animate(float fTimeElapsed)
 {
 	OnPrepareRender();
+	UpdateBoundingBox();
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->AdvanceTime(fTimeElapsed, this);
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
 	if (m_pChild) m_pChild->Animate(fTimeElapsed);
@@ -996,6 +1018,8 @@ void CGameObject::Animate(float fTimeElapsed)
 
 void CGameObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
+	OnPrepareRender();
+	UpdateBoundingBox();
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed, pxmf4x4Parent);
 	if (m_pChild) m_pChild->Animate(fTimeElapsed, &m_xmf4x4World);
 }
@@ -1003,7 +1027,7 @@ void CGameObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 void CGameObject::AnimateObject(CCamera* pCamera, float fTimeElapsed)
 {
 	OnPrepareRender();
-
+	UpdateBoundingBox();
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->AdvanceTime(fTimeElapsed, this);
 
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
@@ -1039,6 +1063,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 				}
 				//if (IsVisible(pCamera))
 				//{
+				m_pMesh->OnPreRender(pd3dCommandList,NULL);
 				m_pMesh->Render(pd3dCommandList, i);
 
 				//}
@@ -1147,11 +1172,11 @@ void CGameObject::SetScale(float x, float y, float z)
 
 void CGameObject::CalculateBoundingBox()
 {
-	for (int i = 0; i < m_nMeshes; i++)
+	/*for (int i = 0; i < m_nMeshes; i++)
 	{
 		m_xmBoundingBox = m_pMesh->m_xmBoundingBox;
 		BoundingBox::CreateMerged(m_xmBoundingBox, m_xmBoundingBox, m_pMesh->m_xmBoundingBox);
-	}
+	}*/
 	m_xmBoundingBox.Transform(m_xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
 }
 
@@ -1814,7 +1839,7 @@ CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_pSkinnedAnimationController->SetCallbackKeys(6, 1);
 
 	if (psModel) delete psModel;
-	m_xmOOBoundingBox = BoundingOrientedBox(this->GetPosition(),XMFLOAT3(5.0,6.0,5.0),XMFLOAT4(0,0,0,1));
+	m_xoobb = BoundingOrientedBox(this->GetPosition(),XMFLOAT3(5.0,6.0,5.0),XMFLOAT4(0,0,0,1));
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -2008,6 +2033,7 @@ CSoldiarOtherPlayerObjects::CSoldiarOtherPlayerObjects(ID3D12Device* pd3dDevice,
 {
 	CLoadedModelInfo* pSModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
 	SetChild(pSModel->m_pModelRootObject, true);
+	
 	pSModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 12, pSModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
@@ -2147,7 +2173,8 @@ void CSoldiarOtherPlayerObjects::DieState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(10, false);
 	m_pSkinnedAnimationController->SetTrackEnable(11, true);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
-	CGameObject::Animate(EleapsedTime);
+
+	//CGameObject::Animate(EleapsedTime);
 }
 
 void CSoldiarOtherPlayerObjects::ShootState(float EleapsedTime)

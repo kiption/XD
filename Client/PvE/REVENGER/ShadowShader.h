@@ -28,7 +28,6 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
 	virtual void ReleaseShaderVariables();
 public:
-	CSkyBox* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;
 	int	m_nHierarchicalGameObjects = 0;
 	CGameObject** m_ppHierarchicalGameObjects = NULL;
@@ -38,12 +37,7 @@ public:
 	int	m_nSoldiarNpcObjects = 0;
 	CGameObject** m_ppNpc_Heli_Objects = NULL;
 
-	CMapObjectShader** m_ppMapShader = NULL;
-
-
-	//////////////////////////////////////////
-	int m_nSkinnShaders = 1;
-	CSkinnedAnimationStandardShader* m_ppSkinnShaders = NULL;
+	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 	////////////////////////////////////////////
 
