@@ -534,6 +534,8 @@ void processPacket(char* ptr)
         else if (recv_packet->stage_num == 2) {
             //
         }
+
+        stage_missions[recv_packet->stage_num].curr = 0;
         
 
         break;

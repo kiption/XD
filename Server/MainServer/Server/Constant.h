@@ -80,7 +80,10 @@
 #define STAGE1_TIMELIMIT 600		// 스테이지1 제한시간 (단위: sec)
 #define STAGE2_TIMELIMIT 600		// 스테이지2 제한시간 (단위: sec)
 
-#define ST1_OCCUPY_AREA_POS_X 68.25f
-#define ST1_OCCUPY_AREA_POS_Z 1007.5f
-#define ST1_OCCUPY_AREA_SIZE_X 136.5f
+#define STAGE1_MISSION1_GOAL 3.0f		// 스테이지1 미션 목표
+#define STAGE1_MISSION2_GOAL 10.0f
+
+#define ST1_OCCUPY_AREA_POS_X 68.25f		// 스테이지1 점령지역 좌표
+#define ST1_OCCUPY_AREA_POS_Z -1007.5f
+#define ST1_OCCUPY_AREA_SIZE_X 136.5f		// 스테이지1 점령지역 크기
 #define ST1_OCCUPY_AREA_SIZE_Z 125.0f

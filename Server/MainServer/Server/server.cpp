@@ -49,6 +49,7 @@ public:
 		curr = 0.0f;
 	}
 };
+mutex mission_lock;			// 미션 lock
 array<int, TOTAL_STAGE + 1> curr_mission_stage;
 array<Mission, ST1_MISSION_NUM> stage1_missions;
 
@@ -62,12 +63,16 @@ Mission setMission(short type, float goal, float curr) {
 void setMissions() {
 	cout << "[Init Missions...]";
 	// 스테이지1 미션
-	stage1_missions[0] = setMission(MISSION_KILL, 3.0f, 0.0f);
-	stage1_missions[1] = setMission(MISSION_OCCUPY, 30.0f, 0.0f);
+	stage1_missions[0] = setMission(MISSION_KILL, STAGE1_MISSION1_GOAL, 0.0f);
+	stage1_missions[1] = setMission(MISSION_OCCUPY, STAGE1_MISSION2_GOAL * 25'000.f, 0.0f);
 
 	//
 	cout << " ---- OK." << endl;
 }
+
+bool b_occupying = false;	// 점령 중인지
+int occupying_people_cnt;	// 점령 중인 사람 수
+int occupy_start_time = 0;	// 점령 시작 시간
 
 //======================================================================
 array<MapObject, TOTAL_STAGE + 1> occupy_areas;	// 스테이지별 점령지역
@@ -979,13 +984,62 @@ void process_packet(int client_id, char* packet)
 
 			lock_guard<mutex> lg{ clients[pl_id].s_lock };
 			clients[pl_id].send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
-			
+
 		}
 
 		// 5. NPC 서버에게도 플레이어가 이동한 위치를 알려준다.
 		if (b_npcsvr_conn) {
 			lock_guard<mutex> lg{ npc_server.s_lock };
 			npc_server.send_move_packet(client_id, TARGET_PLAYER, cl_move_packet->direction);
+		}
+
+		// 6. 점령미션 중이라면 점령지역에 있는지 확인한다.
+		bool is_mission_occupy = false;
+		bool in_occupy_area = false;
+		short curr_mission = curr_mission_stage[clients[client_id].curr_stage];
+		if (clients[client_id].curr_stage == 1) {
+			if (stage1_missions[curr_mission].type == MISSION_OCCUPY) {
+				is_mission_occupy = true;
+
+				float occupy_leftup_x = occupy_areas[1].getPosX() - occupy_areas[1].getScaleX() / 2.0f;
+				float occupy_leftup_z = occupy_areas[1].getPosZ() - occupy_areas[1].getScaleZ() / 2.0f;
+				float occupy_rightbottom_x = occupy_areas[1].getPosX() + occupy_areas[1].getScaleX() / 2.0f;
+				float occupy_rightbottom_z = occupy_areas[1].getPosZ() + occupy_areas[1].getScaleZ() / 2.0f;
+
+				if (occupy_leftup_x <= clients[client_id].pos.x && clients[client_id].pos.x <= occupy_rightbottom_x) {
+					if (occupy_leftup_z <= clients[client_id].pos.z && clients[client_id].pos.z <= occupy_rightbottom_z) {
+						in_occupy_area = true;
+					}
+				}
+			}
+		}
+		else if (clients[client_id].curr_stage == 2) {
+		}
+
+		if (is_mission_occupy) {
+			if (!b_occupying) {
+				if (in_occupy_area) {
+					occupying_people_cnt++;
+					if (occupying_people_cnt >= 1/*MAX_USER*/) {	// MAX_USER 명이 모두 점령지역에 모이면 점령이 시작된다.
+						mission_lock.lock();
+						b_occupying = true;
+						occupy_start_time = static_cast<int>(g_curr_servertime.count());
+						mission_lock.unlock();
+
+						cout << "점령을 진행합니다. (START TIME: " << occupy_start_time << ")\n" << endl;
+					}
+				}
+			}
+			else {
+				if (!in_occupy_area) {	// 한 명이라도 점령 지역을 이탈하면 점령이 진행되지 않는다.
+					mission_lock.lock();
+					b_occupying = false;
+					occupy_start_time = 0;
+					mission_lock.unlock();
+
+					cout << "점령을 중단합니다.\n" << endl;
+				}
+			}
 		}
 
 		break;
@@ -1918,8 +1972,8 @@ void timerFunc() {
 	while (true) {
 		auto start_t = system_clock::now();
 		// ================================
-		// 서버 시간 업데이트
 		if (b_active_server && !b_isfirstplayer) {
+			// 서버 시간 업데이트
 			servertime_lock.lock();
 			g_curr_servertime = duration_cast<milliseconds>(start_t - g_s_start_time);
 			servertime_lock.unlock();
@@ -1933,6 +1987,81 @@ void timerFunc() {
 				if (left_time < 0) left_time = 0;
 				ticking_packet.servertime_ms = left_time;
 				cl.do_send(&ticking_packet);
+			}
+
+			// 만약 현재 미션이 점령 중이라면 점령 관련 계산을 한다.
+			if (b_occupying) {
+				for (auto& cl : clients) {
+					if (cl.s_state != ST_INGAME) continue;
+					if (cl.curr_stage == 0) continue;
+
+					if (cl.curr_stage == 1) {
+						// 미션 진행 업데이트
+						int curr_mission_id = curr_mission_stage[1];
+						mission_lock.lock();
+						stage1_missions[curr_mission_id].curr += static_cast<int>(g_curr_servertime.count()) - occupy_start_time;
+						mission_lock.unlock();
+
+						// 미션 완료
+						if (stage1_missions[curr_mission_id].curr >= stage1_missions[curr_mission_id].goal) {
+							cout << "점령 완료!\n" << endl;
+							cout << "스테이지[1]의 미션[" << curr_mission_id << "] 완료!" << endl;
+
+							// 미션 완료 패킷
+							SC_MISSION_COMPLETE_PACKET mission_complete;
+							mission_complete.type = SC_MISSION_COMPLETE;
+							mission_complete.size = sizeof(SC_MISSION_COMPLETE_PACKET);
+							mission_complete.stage_num = 1;
+							mission_complete.mission_num = curr_mission_id;
+							for (auto& cl : clients) {
+								if (cl.s_state != ST_INGAME) continue;
+								if (cl.curr_stage != 1) continue;
+								lock_guard<mutex> lg{ cl.s_lock };
+								cl.do_send(&mission_complete);
+							}
+
+							if (curr_mission_id + 1 >= ST1_MISSION_NUM) {	// 모든 미션 완료
+								cout << "스테이지[1]의 모든 미션을 완료하였습니다.\n" << endl;
+							}
+							else {	// 아직 스테이지의 미션이 남은 경우
+								curr_mission_stage[1]++;
+								curr_mission_id = curr_mission_stage[1];
+
+								// 다음 미션 전달
+								for (auto& cl : clients) {
+									if (cl.s_state != ST_INGAME) continue;
+									if (cl.curr_stage != 1) continue;
+									lock_guard<mutex> lg{ cl.s_lock };
+									cl.send_mission_packet(1);
+								}
+
+								stage1_missions[curr_mission_id].start = static_cast<int>(g_curr_servertime.count());
+								cout << "[" << stage1_missions[curr_mission_id].start << "] 새로운 미션 추가: ";
+								switch (stage1_missions[curr_mission_id].type) {
+								case MISSION_KILL:
+									cout << "[처치] ";
+									break;
+								case MISSION_OCCUPY:
+									cout << "[점령] ";
+									break;
+								}
+								cout << stage1_missions[curr_mission_id].curr << " / " << stage1_missions[curr_mission_id].goal << "\n" << endl;
+							}
+						}
+						else {
+							for (auto& cl : clients) {
+								if (cl.s_state != ST_INGAME) continue;
+								if (cl.curr_stage != 1) continue;
+								lock_guard<mutex> lg{ cl.s_lock };
+								cl.send_mission_packet(1);
+							}
+
+							cout << "점령 진행상황: " << (int)(stage1_missions[curr_mission_id].curr / 2500) << "%"  << endl;
+						}
+					}
+					else if (cl.curr_stage == 2) {
+					}
+				}
 			}
 		}
 
