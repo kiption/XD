@@ -1086,43 +1086,42 @@ void process_packet(int client_id, char* packet)
 		//==============================
 		// 1. 총알
 		// Bullet 쿨타임 체크
-		/*
-		milliseconds shoot_term = duration_cast<milliseconds>(chrono::system_clock::now() - clients[client_id].shoot_time);
-		if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) break;	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
+		//milliseconds shoot_term = duration_cast<milliseconds>(chrono::system_clock::now() - clients[client_id].shoot_time);
+		//if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) break;	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
+		
+		//// Bullet 개수 체크
+		//bool enough_bullet = true;
+		//if (clients[client_id].remain_bullet <= 0) {
+		//	// Bullet 장전 중 여부 체크
+		//	milliseconds reload_term = duration_cast<milliseconds>(chrono::system_clock::now() - clients[client_id].reload_time);
+		//	if (reload_term < milliseconds(RELOAD_TIME)) {
+		//		enough_bullet = false;
+		//	}
+		//	else {
+		//		clients[client_id].s_lock.lock();
+		//		clients[client_id].remain_bullet = MAX_BULLET;
+		//		clients[client_id].s_lock.unlock();
 
-		// Bullet 개수 체크
-		bool enough_bullet = true;
-		if (clients[client_id].remain_bullet <= 0) {
-			// Bullet 장전 중 여부 체크
-			milliseconds reload_term = duration_cast<milliseconds>(chrono::system_clock::now() - clients[client_id].reload_time);
-			if (reload_term < milliseconds(RELOAD_TIME)) {
-				enough_bullet = false;
-			}
-			else {
-				clients[client_id].s_lock.lock();
-				clients[client_id].remain_bullet = MAX_BULLET;
-				clients[client_id].s_lock.unlock();
+		//		if (clients[client_id].s_state == ST_INGAME) {
+		//			SC_BULLET_COUNT_PACKET reload_done_pack;
+		//			reload_done_pack.type = SC_BULLET_COUNT;
+		//			reload_done_pack.size = sizeof(SC_BULLET_COUNT_PACKET);
+		//			reload_done_pack.bullet_cnt = MAX_BULLET;
 
-				if (clients[client_id].s_state == ST_INGAME) {
-					SC_BULLET_COUNT_PACKET reload_done_pack;
-					reload_done_pack.type = SC_BULLET_COUNT;
-					reload_done_pack.size = sizeof(SC_BULLET_COUNT_PACKET);
-					reload_done_pack.bullet_cnt = MAX_BULLET;
+		//			lock_guard<mutex> lg{ clients[client_id].s_lock };
+		//			clients[client_id].do_send(&reload_done_pack);
+		//		}
+		//	}
+		//}
+		//if (!enough_bullet) break;
 
-					lock_guard<mutex> lg{ clients[client_id].s_lock };
-					clients[client_id].do_send(&reload_done_pack);
-				}
-			}
-		}
-		if (!enough_bullet) break;
-
-		// 세션정보 업데이트
+		// 총알 개수 업데이트
 		clients[client_id].s_lock.lock();
-		clients[client_id].shoot_time = chrono::system_clock::now(); // 발사 시간 업데이트
+		//clients[client_id].shoot_time = chrono::system_clock::now(); // 발사 시간 업데이트
 		clients[client_id].remain_bullet -= 1;
 		if (clients[client_id].remain_bullet <= 0) { // 장전 시작
-			clients[client_id].remain_bullet = 0;
-			clients[client_id].reload_time = chrono::system_clock::now();
+			clients[client_id].remain_bullet = MAX_BULLET/*0*/;
+			//clients[client_id].reload_time = chrono::system_clock::now();
 		}
 		clients[client_id].s_lock.unlock();
 
@@ -1135,7 +1134,6 @@ void process_packet(int client_id, char* packet)
 			lock_guard<mutex> lg{ clients[client_id].s_lock };
 			clients[client_id].do_send(&bullet_update_pack);
 		}
-		*/
 
 		// 총알을 발사했다는 정보를 다른 클라이언트에게 알려줍니다. (총알 나가는 모션 동기화를 위함)
 		for (auto& vl_key : clients[client_id].view_list) {
@@ -2004,8 +2002,8 @@ void timerFunc() {
 
 						// 미션 완료
 						if (stage1_missions[curr_mission_id].curr >= stage1_missions[curr_mission_id].goal) {
-							cout << "점령 완료!\n" << endl;
-							cout << "스테이지[1]의 미션[" << curr_mission_id << "] 완료!" << endl;
+							//cout << "점령 완료!\n" << endl;
+							//cout << "스테이지[1]의 미션[" << curr_mission_id << "] 완료!" << endl;
 
 							// 미션 완료 패킷
 							SC_MISSION_COMPLETE_PACKET mission_complete;
@@ -2021,7 +2019,7 @@ void timerFunc() {
 							}
 
 							if (curr_mission_id + 1 >= ST1_MISSION_NUM) {	// 모든 미션 완료
-								cout << "스테이지[1]의 모든 미션을 완료하였습니다.\n" << endl;
+								//cout << "스테이지[1]의 모든 미션을 완료하였습니다.\n" << endl;
 							}
 							else {	// 아직 스테이지의 미션이 남은 경우
 								curr_mission_stage[1]++;
