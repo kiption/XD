@@ -369,7 +369,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case '1':
 		{
 			q_keyboardInput.push(SEND_KEY_NUM1);//S
-			//UI_Switch = true;
+		
 			break;
 		}
 		case '2':
@@ -664,7 +664,7 @@ void CGameFramework::AnimateObjects()
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed());
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 
-	if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
+	//if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
 	((CHumanPlayer*)m_pPlayer)->m_fShootDelay += m_GameTimer.GetTimeElapsed();
 	if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.2)
 	{

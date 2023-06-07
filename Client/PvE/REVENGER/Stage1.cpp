@@ -211,9 +211,9 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
 
-	m_pBoundingBoxShader = new BoundingWireShader();
-	m_pBoundingBoxShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE, 1, pdxgiRtvFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
-	m_pBoundingBoxShader->SetCurScene(SCENE1STAGE);
+	//m_pBoundingBoxShader = new BoundingWireShader();
+	//m_pBoundingBoxShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE, 1, pdxgiRtvFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	//m_pBoundingBoxShader->SetCurScene(SCENE1STAGE);
 
 	gamesound.SpeakMusic(gamesound.m_bStopSound);
 	gamesound.backGroundMusic();
@@ -225,7 +225,7 @@ void Stage1::ReleaseObjects()
 {
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
 	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
-	if (m_pBoundingBoxShader) m_pBoundingBoxShader->Release();
+	//if (m_pBoundingBoxShader) m_pBoundingBoxShader->Release();
 
 	if (m_pBillboardShader)
 	{
@@ -747,13 +747,13 @@ bool Stage1::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 
 void Stage1::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	m_pBoundingBoxShader->Render(pd3dCommandList, pCamera,0);
+	/*m_pBoundingBoxShader->Render(pd3dCommandList, pCamera,0);
 	for (int i = 0; i < m_nShaders; i++)
 	{
 		if (m_ppShaders[i]) m_ppShaders[i]->RenderBoundingBox(pd3dCommandList, pCamera);
 	}
 
-	m_pPlayer->RenderBoundingBox(pd3dCommandList, pCamera);
+	m_pPlayer->RenderBoundingBox(pd3dCommandList, pCamera);*/
 }
 
 bool Stage1::ProcessInput(UCHAR* pKeysBuffer)

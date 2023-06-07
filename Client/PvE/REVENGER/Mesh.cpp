@@ -80,9 +80,8 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
 
 void CMesh::CalculateBoundingBox(XMFLOAT3* pxmf3Points, UINT nStride)
 {
-	//m_nStride = nStride;
-	//BoundingOrientedBox::CreateFromPoints(m_xmOOBoundingBox , m_nVertices, pxmf3Points, nStride);
-
+	m_nStride = nStride;
+	BoundingBox::CreateFromPoints(m_xmBoundingBox, m_nVertices, pxmf3Points, nStride);
 }
 
 void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)

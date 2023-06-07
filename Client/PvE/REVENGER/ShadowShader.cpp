@@ -306,10 +306,10 @@ void CObjectsShader::ReleaseShaderVariables()
 
 void CObjectsShader::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	for (int j = 0; j < m_nObjects; j++)
+	/*for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j]) m_ppObjects[j]->RenderBoundingBox(pd3dCommandList, pCamera);
-	}
+	}*/
 }
 
 CShadowMapShader::CShadowMapShader(CObjectsShader* pObjectsShader)

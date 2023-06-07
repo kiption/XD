@@ -860,21 +860,21 @@ void CGameObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
 
 void CGameObject::UpdateBoundingBox()
 {
-	OnPrepareRender();
+	/*OnPrepareRender();
 	if (m_pMesh)
 	{
 		m_pMesh->m_xmBoundingOrientedBox.Transform(m_xoobb, XMLoadFloat4x4(&m_xmf4x4World));
 		XMStoreFloat4(&m_xoobb.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xoobb.Orientation)));
-	}
+	}*/
 }
 
 void CGameObject::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	if (m_pBoundingBoxMesh)
+	/*if (m_pBoundingBoxMesh)
 	{
 		m_pBoundingBoxMesh->UpdateVertexPosition(&m_xoobb);
 		m_pBoundingBoxMesh->Render(pd3dCommandList);
-	}
+	}*/
 }
 
 bool CGameObject::IsVisible(CCamera* pCamera)
@@ -1010,7 +1010,7 @@ void CGameObject::SetTrackAnimationPosition(int nAnimationTrack, float fPosition
 void CGameObject::Animate(float fTimeElapsed)
 {
 	OnPrepareRender();
-	UpdateBoundingBox();
+	//UpdateBoundingBox();
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->AdvanceTime(fTimeElapsed, this);
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
 	if (m_pChild) m_pChild->Animate(fTimeElapsed);
@@ -1019,7 +1019,7 @@ void CGameObject::Animate(float fTimeElapsed)
 void CGameObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 	OnPrepareRender();
-	UpdateBoundingBox();
+	//UpdateBoundingBox();
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed, pxmf4x4Parent);
 	if (m_pChild) m_pChild->Animate(fTimeElapsed, &m_xmf4x4World);
 }
@@ -1027,7 +1027,7 @@ void CGameObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 void CGameObject::AnimateObject(CCamera* pCamera, float fTimeElapsed)
 {
 	OnPrepareRender();
-	UpdateBoundingBox();
+	//UpdateBoundingBox();
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->AdvanceTime(fTimeElapsed, this);
 
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
@@ -1063,7 +1063,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 				}
 				//if (IsVisible(pCamera))
 				//{
-				m_pMesh->OnPreRender(pd3dCommandList,NULL);
+				//m_pMesh->OnPreRender(pd3dCommandList,NULL);
 				m_pMesh->Render(pd3dCommandList, i);
 
 				//}
