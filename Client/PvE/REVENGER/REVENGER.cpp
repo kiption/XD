@@ -524,10 +524,28 @@ void uiThreadFunc() {
 			case OPENINGSCENE:
 				break;
 			case SCENE1STAGE:
-				gGameFramework.m_remainNPC = stage_missions[1].goal - stage_missions[1].curr;
+				if (gGameFramework.m_mainmissionnum == 0) {	// 0번 미션
+					// ~~ 생존
+					gGameFramework.m_remainNPC = stage_missions[1].goal - stage_missions[1].curr;
+
+					// 적 모두 처치 ~~ / 20
+					// 이거는 GameFramework에서 알아서 되고 있음.
+
+				}
+				else if (gGameFramework.m_mainmissionnum == 1) { // 1번 미션
+					// 0 생존으로 고정
+					gGameFramework.m_remainNPC = 0;
+
+					// 거점 점령 ~~% / 100%
+					int curr_percentage = static_cast<int>(stage_missions[1].curr / 2500);
+					if (curr_percentage >= 100) curr_percentage = 100;
+					
+					gGameFramework.m_occupationnum = curr_percentage;
+				}
+				
 				break;
 			case SCENE2STAGE:
-				gGameFramework.m_remainNPC = stage_missions[2].goal - stage_missions[2].curr;
+				//gGameFramework.m_remainNPC = stage_missions[2].goal - stage_missions[2].curr;
 				break;
 			}
 
@@ -550,17 +568,6 @@ void uiThreadFunc() {
 				trigger_mission_complete = false;
 				gGameFramework.m_mainmissionnum = curr_mission_num;
 			}
-
-			// [승환]
-			// 되면 이 주석 삭제
-			
-			/*if (서버에서 받은 변수 >= 100) {
-				gGameFramework.m_occupationnum = 100;
-			}
-			gGameFramework.m_occupationnum = 서버에서 받은 변수;*/
-
-
-
 
 			// 6. Team 인원 동기화
 			gGameFramework.m_CurrentPlayerNum = curr_connection_num;
