@@ -537,7 +537,7 @@ void uiThreadFunc() {
 					gGameFramework.m_remainNPC = 0;
 
 					// 거점 점령 ~~% / 100%
-					int curr_percentage = static_cast<int>(stage_missions[1].curr / 2500);
+					int curr_percentage = static_cast<int>(stage_missions[1].curr / 5000);
 					if (curr_percentage >= 100) curr_percentage = 100;
 					
 					gGameFramework.m_occupationnum = curr_percentage;

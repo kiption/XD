@@ -64,7 +64,7 @@ void setMissions() {
 	cout << "[Init Missions...]";
 	// 스테이지1 미션
 	stage1_missions[0] = setMission(MISSION_KILL, STAGE1_MISSION1_GOAL, 0.0f);
-	stage1_missions[1] = setMission(MISSION_OCCUPY, STAGE1_MISSION2_GOAL * 25'000.f, 0.0f);
+	stage1_missions[1] = setMission(MISSION_OCCUPY, STAGE1_MISSION2_GOAL * 50'000.f, 0.0f);
 
 	//
 	cout << " ---- OK." << endl;
@@ -253,8 +253,8 @@ void initDummies() {	  //[TEST] 충돌테스트용 더미 생성
 	dummies[0].pos = { 30.0f, 6.0f, 905.0f };
 	dummies[1].pos = { 60.0f, 6.0f, 1155.0f };
 	dummies[2].pos = { 100.0f, 6.0f, 1205.0f };
-	dummies[3].pos = XMF_fault;
-	dummies[4].pos = XMF_fault;
+	dummies[3].pos = { -50.0f, 6.0f, 1300.0f };
+	dummies[4].pos = { 20.0f, 6.0f, 1350.0f };
 	for (int i = 0; i < 5; ++i) {
 		dummies[i].id = i;
 		dummies[i].hp = HUMAN_MAXHP;
