@@ -94,7 +94,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					sendPacket(&ping_packet, active_servernum);
 					last_ping = chrono::system_clock::now();
 					//cout << "ping" << endl;
-				}				
+				}
 
 				//==================================================
 				//				   플레이어 동기화
@@ -205,7 +205,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//					Map 충돌 관련
 				//==================================================
 				for (auto& mapobj : stage1_mapobj_info) {
-					
+
 					/*if (gGameFramework.CollisionMap_by_PLAYER(XMFLOAT3(mapobj.m_xoobb.Center), XMFLOAT3(mapobj.m_xoobb.Extents), gGameFramework.m_pPlayer))
 					{
 						gGameFramework.m_pPlayer->SetPosition(gGameFramework.m_pPlayer->m_xmf3BeforeCollidedPosition, false);
@@ -239,7 +239,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hInstance = hInstance;
 	wcex.hIcon = ::LoadIcon(hInstance, MAKEINTRESOURCE(IDI_LABPROJECT0797ANIMATION));
 	wcex.hCursor = ::LoadCursor(NULL, IDC_CROSS);
-	wcex.hbrBackground = (HBRUSH)(COLOR_MENU+4);
+	wcex.hbrBackground = (HBRUSH)(COLOR_MENU + 4);
 	wcex.lpszMenuName = L"REVENGER";
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = ::LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDM_ABOUT));
@@ -550,6 +550,17 @@ void uiThreadFunc() {
 				trigger_mission_complete = false;
 				gGameFramework.m_mainmissionnum = curr_mission_num;
 			}
+
+			// [승환]
+			// 되면 이 주석 삭제
+			
+			/*if (서버에서 받은 변수 >= 100) {
+				gGameFramework.m_occupationnum = 100;
+			}
+			gGameFramework.m_occupationnum = 서버에서 받은 변수;*/
+
+
+
 
 			// 6. Team 인원 동기화
 			gGameFramework.m_CurrentPlayerNum = curr_connection_num;

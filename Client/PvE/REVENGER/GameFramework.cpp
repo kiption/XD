@@ -369,7 +369,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case '1':
 		{
 			q_keyboardInput.push(SEND_KEY_NUM1);//S
-		
+
 			break;
 		}
 		case '2':
@@ -812,157 +812,155 @@ void CGameFramework::FrameAdvance()
 		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[25] : m_pd2dfxGaussianBlur[25], &D2_OpeningUI, &D2_OpeningUIRect);
 	}
 
-	if (UI_Switch) {
-		if (m_nMode = SCENE1STAGE) {
-			// Time 
-			D2D_POINT_2F D2_RemainTime = { FRAME_BUFFER_WIDTH / 128, FRAME_BUFFER_HEIGHT / 128 };
-			D2D_RECT_F D2_RemainTimeRect = { 0.0f, 0.0f, 182.0f, 47.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[0] : m_pd2dfxGaussianBlur[0], &D2_RemainTime, &D2_RemainTimeRect);
+	else if (m_nMode = SCENE1STAGE) {
+		// Time 
+		D2D_POINT_2F D2_RemainTime = { FRAME_BUFFER_WIDTH / 128, FRAME_BUFFER_HEIGHT / 128 };
+		D2D_RECT_F D2_RemainTimeRect = { 0.0f, 0.0f, 182.0f, 47.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[0] : m_pd2dfxGaussianBlur[0], &D2_RemainTime, &D2_RemainTimeRect);
 
-			D2D_POINT_2F D2_RemainTimeDot = { D2_RemainTime.x + 70.0f ,D2_RemainTime.y + 52.5f };
-			D2D_RECT_F D2_RemainTimeDotRect = { 56.0f, 64.0f, 63.0f, 108.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &D2_RemainTimeDot, &D2_RemainTimeDotRect);
+		D2D_POINT_2F D2_RemainTimeDot = { D2_RemainTime.x + 70.0f ,D2_RemainTime.y + 52.5f };
+		D2D_RECT_F D2_RemainTimeDotRect = { 56.0f, 64.0f, 63.0f, 108.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &D2_RemainTimeDot, &D2_RemainTimeDotRect);
 
-			D2D_POINT_2F D2_RemainTime10Min = { D2_RemainTime.x, D2_RemainTime.y + 50.0f };
-			D2D_RECT_F D2_RemainTime10MinRect = { m_10MinOfTime * 31.3f, 0.0f, 31.3f + m_10MinOfTime * 31.3f, 50.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[2] : m_pd2dfxGaussianBlur[2], &D2_RemainTime10Min, &D2_RemainTime10MinRect);
+		D2D_POINT_2F D2_RemainTime10Min = { D2_RemainTime.x, D2_RemainTime.y + 50.0f };
+		D2D_RECT_F D2_RemainTime10MinRect = { m_10MinOfTime * 31.3f, 0.0f, 31.3f + m_10MinOfTime * 31.3f, 50.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[2] : m_pd2dfxGaussianBlur[2], &D2_RemainTime10Min, &D2_RemainTime10MinRect);
 
-			D2D_POINT_2F D2_RemainTime1Min = { D2_RemainTime10Min.x + 31.3f, D2_RemainTime.y + 50.0f };
-			D2D_RECT_F D2_RemainTime1MinRect = { m_1MinOfTime * 31.3f, 0.0f, 31.3f + m_1MinOfTime * 31.3f, 50.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[3] : m_pd2dfxGaussianBlur[3], &D2_RemainTime1Min, &D2_RemainTime1MinRect);
+		D2D_POINT_2F D2_RemainTime1Min = { D2_RemainTime10Min.x + 31.3f, D2_RemainTime.y + 50.0f };
+		D2D_RECT_F D2_RemainTime1MinRect = { m_1MinOfTime * 31.3f, 0.0f, 31.3f + m_1MinOfTime * 31.3f, 50.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[3] : m_pd2dfxGaussianBlur[3], &D2_RemainTime1Min, &D2_RemainTime1MinRect);
 
-			D2D_POINT_2F D2_RemainTime10Sec = { D2_RemainTimeDot.x + 14.4f, D2_RemainTime.y + 50.0f };
-			D2D_RECT_F D2_RemainTime10SecRect = { m_10SecOftime * 31.3f, 0.0f, 31.3f + m_10SecOftime * 31.3f, 50.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[4] : m_pd2dfxGaussianBlur[4], &D2_RemainTime10Sec, &D2_RemainTime10SecRect);
+		D2D_POINT_2F D2_RemainTime10Sec = { D2_RemainTimeDot.x + 14.4f, D2_RemainTime.y + 50.0f };
+		D2D_RECT_F D2_RemainTime10SecRect = { m_10SecOftime * 31.3f, 0.0f, 31.3f + m_10SecOftime * 31.3f, 50.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[4] : m_pd2dfxGaussianBlur[4], &D2_RemainTime10Sec, &D2_RemainTime10SecRect);
 
-			D2D_POINT_2F D2_RemainTime1Sec = { D2_RemainTime10Sec.x + 31.3f, D2_RemainTime.y + 50.0f };
-			D2D_RECT_F D2_RemainTime1SecRect = { m_1SecOfTime * 31.3f, 0.0f, 31.3f + m_1SecOfTime * 31.3f, 50.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[5] : m_pd2dfxGaussianBlur[5], &D2_RemainTime1Sec, &D2_RemainTime1SecRect);
+		D2D_POINT_2F D2_RemainTime1Sec = { D2_RemainTime10Sec.x + 31.3f, D2_RemainTime.y + 50.0f };
+		D2D_RECT_F D2_RemainTime1SecRect = { m_1SecOfTime * 31.3f, 0.0f, 31.3f + m_1SecOfTime * 31.3f, 50.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[5] : m_pd2dfxGaussianBlur[5], &D2_RemainTime1Sec, &D2_RemainTime1SecRect);
 
-			// Progress
-			if (m_remainNPC < 10) {
-				D2D_POINT_2F D2_ProgressUI = { FRAME_BUFFER_WIDTH / 2 - 325.0f, 160.0f };
-				D2D_RECT_F D2_ProgressUIRect = { 0.0f, 0.0f, 67.0f, 36.0f };
-				m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[6] : m_pd2dfxGaussianBlur[6], &D2_ProgressUI, &D2_ProgressUIRect);
+		// Progress
+		if (m_mainmissionnum == 1) {
+			D2D_POINT_2F D2_ProgressUI = { FRAME_BUFFER_WIDTH / 2 - 325.0f, 160.0f };
+			D2D_RECT_F D2_ProgressUIRect = { 0.0f, 0.0f, 67.0f, 36.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[6] : m_pd2dfxGaussianBlur[6], &D2_ProgressUI, &D2_ProgressUIRect);
 
-				D2D_POINT_2F D2_ProgressBG = { FRAME_BUFFER_WIDTH / 2 - 251.0f, 160.0f };
-				D2D_RECT_F D2_ProgressBGRect = { 0.0f, 0.0f, 502.0f, 36.0f };
-				m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[7] : m_pd2dfxGaussianBlur[7], &D2_ProgressBG, &D2_ProgressBGRect);
+			D2D_POINT_2F D2_ProgressBG = { FRAME_BUFFER_WIDTH / 2 - 251.0f, 160.0f };
+			D2D_RECT_F D2_ProgressBGRect = { 0.0f, 0.0f, 502.0f, 36.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[7] : m_pd2dfxGaussianBlur[7], &D2_ProgressBG, &D2_ProgressBGRect);
 
-				D2D_POINT_2F D2_CurrentProgress = { FRAME_BUFFER_WIDTH / 2 - 250.0f, 160.5f };
-				D2D_RECT_F D2_CurrentProgressRect = { 0.0f, 0.0f, (500.0f / 100 * m_occupationnum), 36.0f };
-				m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[8] : m_pd2dfxGaussianBlur[8], &D2_CurrentProgress, &D2_CurrentProgressRect);
-			}
-			// Compress
-			D2D_POINT_2F D2_CompressArrow = { FRAME_BUFFER_WIDTH / 2 - 61.0f, 0.0f };
-			D2D_RECT_F D2_CompressArrowRect = { 0.0f, 0.0f, 122.0f, 115.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[9] : m_pd2dfxGaussianBlur[9], &D2_CompressArrow, &D2_CompressArrowRect);
+			D2D_POINT_2F D2_CurrentProgress = { FRAME_BUFFER_WIDTH / 2 - 250.0f, 160.5f };
+			D2D_RECT_F D2_CurrentProgressRect = { 0.0f, 0.0f, (500.0f / 100 * m_occupationnum), 36.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[8] : m_pd2dfxGaussianBlur[8], &D2_CurrentProgress, &D2_CurrentProgressRect);
+		}
+		// Compress
+		D2D_POINT_2F D2_CompressArrow = { FRAME_BUFFER_WIDTH / 2 - 61.0f, 0.0f };
+		D2D_RECT_F D2_CompressArrowRect = { 0.0f, 0.0f, 122.0f, 115.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[9] : m_pd2dfxGaussianBlur[9], &D2_CompressArrow, &D2_CompressArrowRect);
 
-			float myAngle = abs(m_pPlayer->m_fYaw);
-			if (myAngle > 315.0f) {
-				myAngle -= 360.0f;
-			}
+		float myAngle = abs(m_pPlayer->m_fYaw);
+		if (myAngle > 315.0f) {
+			myAngle -= 360.0f;
+		}
 
-			D2D_POINT_2F D2_Compress = { FRAME_BUFFER_WIDTH / 2 - 150.5f, D2_CompressArrow.y + 50.0f };
-			D2D_RECT_F D2_CompressRect = { 75.3f + (myAngle * 1.6741f) , 0.0f, 376.3f + (myAngle * 1.6741f), 150.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[10] : m_pd2dfxGaussianBlur[10], &D2_Compress, &D2_CompressRect);
+		D2D_POINT_2F D2_Compress = { FRAME_BUFFER_WIDTH / 2 - 150.5f, D2_CompressArrow.y + 50.0f };
+		D2D_RECT_F D2_CompressRect = { 75.3f + (myAngle * 1.6741f) , 0.0f, 376.3f + (myAngle * 1.6741f), 150.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[10] : m_pd2dfxGaussianBlur[10], &D2_Compress, &D2_CompressRect);
 
-			// My
-			D2D_POINT_2F D2_BulletUIBG = { FRAME_BUFFER_WIDTH - 420.0f, FRAME_BUFFER_HEIGHT / 4 * 3 };
-			D2D_RECT_F D2_BulletUIBGRect = { 0.0f, 0.0f, 402.0f, 65.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[11] : m_pd2dfxGaussianBlur[11], &D2_BulletUIBG, &D2_BulletUIBGRect);
+		// My
+		D2D_POINT_2F D2_BulletUIBG = { FRAME_BUFFER_WIDTH - 420.0f, FRAME_BUFFER_HEIGHT / 4 * 3 };
+		D2D_RECT_F D2_BulletUIBGRect = { 0.0f, 0.0f, 402.0f, 65.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[11] : m_pd2dfxGaussianBlur[11], &D2_BulletUIBG, &D2_BulletUIBGRect);
 
-			D2D_POINT_2F D2_HPUIBG = { D2_BulletUIBG.x, D2_BulletUIBG.y + D2_BulletUIBGRect.bottom };
-			D2D_RECT_F D2_HPUIBGRect = { 0.0f, 0.0f, 402.0f, 48.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[12] : m_pd2dfxGaussianBlur[12], &D2_HPUIBG, &D2_HPUIBGRect);
+		D2D_POINT_2F D2_HPUIBG = { D2_BulletUIBG.x, D2_BulletUIBG.y + D2_BulletUIBGRect.bottom };
+		D2D_RECT_F D2_HPUIBGRect = { 0.0f, 0.0f, 402.0f, 48.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[12] : m_pd2dfxGaussianBlur[12], &D2_HPUIBG, &D2_HPUIBGRect);
 
-			D2D_POINT_2F D2_BulletIcon = { FRAME_BUFFER_WIDTH / 16 * 13, D2_BulletUIBG.y + (D2_BulletUIBGRect.bottom / 2) - 16.0f };
-			D2D_RECT_F D2_BulletIconRect = { 0.0f, 0.0f, 32.0f, 32.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[13] : m_pd2dfxGaussianBlur[13], &D2_BulletIcon, &D2_BulletIconRect);
+		D2D_POINT_2F D2_BulletIcon = { FRAME_BUFFER_WIDTH / 16 * 13, D2_BulletUIBG.y + (D2_BulletUIBGRect.bottom / 2) - 16.0f };
+		D2D_RECT_F D2_BulletIconRect = { 0.0f, 0.0f, 32.0f, 32.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[13] : m_pd2dfxGaussianBlur[13], &D2_BulletIcon, &D2_BulletIconRect);
 
-			D2D_POINT_2F D2_Bullet10Num = { FRAME_BUFFER_WIDTH - 255.3f, D2_BulletUIBG.y + (D2_BulletUIBGRect.bottom / 2) - 30.0f };
-			D2D_RECT_F D2_Bullet10NumRect = { 45.3f * (m_currbullet / 10), 0.0f, 45.3f + (m_currbullet / 10) * 45.3f, 60.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[14] : m_pd2dfxGaussianBlur[14], &D2_Bullet10Num, &D2_Bullet10NumRect);
+		D2D_POINT_2F D2_Bullet10Num = { FRAME_BUFFER_WIDTH - 255.3f, D2_BulletUIBG.y + (D2_BulletUIBGRect.bottom / 2) - 30.0f };
+		D2D_RECT_F D2_Bullet10NumRect = { 45.3f * (m_currbullet / 10), 0.0f, 45.3f + (m_currbullet / 10) * 45.3f, 60.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[14] : m_pd2dfxGaussianBlur[14], &D2_Bullet10Num, &D2_Bullet10NumRect);
 
-			D2D_POINT_2F D2_Bullet1Num = { D2_Bullet10Num.x + 45.3f, D2_BulletUIBG.y + (D2_BulletUIBGRect.bottom / 2) - 30.0f };
-			D2D_RECT_F D2_Bullet1NumRect = { 45.3f * (m_currbullet % 10), 0.0f, 45.3f + (m_currbullet % 10) * 45.3f, 60.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[15] : m_pd2dfxGaussianBlur[15], &D2_Bullet1Num, &D2_Bullet1NumRect);
+		D2D_POINT_2F D2_Bullet1Num = { D2_Bullet10Num.x + 45.3f, D2_BulletUIBG.y + (D2_BulletUIBGRect.bottom / 2) - 30.0f };
+		D2D_RECT_F D2_Bullet1NumRect = { 45.3f * (m_currbullet % 10), 0.0f, 45.3f + (m_currbullet % 10) * 45.3f, 60.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[15] : m_pd2dfxGaussianBlur[15], &D2_Bullet1Num, &D2_Bullet1NumRect);
 
-			D2D_POINT_2F D2_HPBar = { D2_HPUIBG.x + 2.5f, D2_HPUIBG.y + (D2_HPUIBGRect.bottom / 2) - 20.0f };
-			D2D_RECT_F D2_HPBarRect = { 0.0f, 0.0f, 397.0f, 40.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[16] : m_pd2dfxGaussianBlur[16], &D2_HPBar, &D2_HPBarRect);
+		D2D_POINT_2F D2_HPBar = { D2_HPUIBG.x + 2.5f, D2_HPUIBG.y + (D2_HPUIBGRect.bottom / 2) - 20.0f };
+		D2D_RECT_F D2_HPBarRect = { 0.0f, 0.0f, 397.0f, 40.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[16] : m_pd2dfxGaussianBlur[16], &D2_HPBar, &D2_HPBarRect);
 
-			// Remain NPC
-			D2D_POINT_2F D2_RemainNPCBG = { FRAME_BUFFER_WIDTH - 191.0f, FRAME_BUFFER_HEIGHT / 128 };
-			D2D_RECT_F D2_RemainNPCBGRect = { 0.0f, 0.0f, 135.0f, 50.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[17] : m_pd2dfxGaussianBlur[17], &D2_RemainNPCBG, &D2_RemainNPCBGRect);
+		// Remain NPC
+		D2D_POINT_2F D2_RemainNPCBG = { FRAME_BUFFER_WIDTH - 191.0f, FRAME_BUFFER_HEIGHT / 128 };
+		D2D_RECT_F D2_RemainNPCBGRect = { 0.0f, 0.0f, 135.0f, 50.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[17] : m_pd2dfxGaussianBlur[17], &D2_RemainNPCBG, &D2_RemainNPCBGRect);
 
-			// Mission
-			D2D_POINT_2F D2_MainMissionUI = { FRAME_BUFFER_WIDTH - 300.0f, D2_RemainNPCBG.y + 65.0f };
-			D2D_RECT_F D2_MainMissionUIRect = { 271.5f * m_mainmissionnum, 0.0f, 271.5f + (271.5f * m_mainmissionnum), 167.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[18] : m_pd2dfxGaussianBlur[18], &D2_MainMissionUI, &D2_MainMissionUIRect);
+		// Mission
+		D2D_POINT_2F D2_MainMissionUI = { FRAME_BUFFER_WIDTH - 300.0f, D2_RemainNPCBG.y + 65.0f };
+		D2D_RECT_F D2_MainMissionUIRect = { 271.5f * m_mainmissionnum, 0.0f, 271.5f + (271.5f * m_mainmissionnum), 167.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[18] : m_pd2dfxGaussianBlur[18], &D2_MainMissionUI, &D2_MainMissionUIRect);
 
+		if (UI_Switch) {
 			D2D_POINT_2F D2_SubMissionUI = { FRAME_BUFFER_WIDTH - 300.0f, D2_MainMissionUI.y + 200.0f };
 			D2D_RECT_F D2_SubMissionUIRect = { 265.7f * m_submissionnum, 0.0f, 265.7f + (265.7f * m_submissionnum), 159.5f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[19] : m_pd2dfxGaussianBlur[19], &D2_SubMissionUI, &D2_SubMissionUIRect);
+		}
 
-			// Cross Hair
-			D2D_POINT_2F D2_CrossHairUI = { (FRAME_BUFFER_WIDTH / 2) - 30.0f, (FRAME_BUFFER_HEIGHT / 2) - 30.0f };
-			D2D_RECT_F D2_CrossHairRect = { 0.0f, 0.0f, 60.0f, 60.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[20] : m_pd2dfxGaussianBlur[20], &D2_CrossHairUI, &D2_CrossHairRect);
+		// Cross Hair
+		D2D_POINT_2F D2_CrossHairUI = { (FRAME_BUFFER_WIDTH / 2) - 30.0f, (FRAME_BUFFER_HEIGHT / 2) - 30.0f };
+		D2D_RECT_F D2_CrossHairRect = { 0.0f, 0.0f, 60.0f, 60.0f };
+		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[20] : m_pd2dfxGaussianBlur[20], &D2_CrossHairUI, &D2_CrossHairRect);
 
-			// Team
-			if (m_CurrentPlayerNum > 1) {
-				D2D_POINT_2F D2_Team1UI = { FRAME_BUFFER_WIDTH / 128, FRAME_BUFFER_HEIGHT / 5 * 3 };
-				D2D_RECT_F D2_Team1UIRect = { 0.0f, 0.0f, 323.0f, 60.0f };
-				m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[21] : m_pd2dfxGaussianBlur[21], &D2_Team1UI, &D2_Team1UIRect);
+		// Team
+		if (m_CurrentPlayerNum > 1) {
+			D2D_POINT_2F D2_Team1UI = { FRAME_BUFFER_WIDTH / 128, FRAME_BUFFER_HEIGHT / 5 * 3 };
+			D2D_RECT_F D2_Team1UIRect = { 0.0f, 0.0f, 323.0f, 60.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[21] : m_pd2dfxGaussianBlur[21], &D2_Team1UI, &D2_Team1UIRect);
 
-				D2D_POINT_2F D2_Team1UIHP = { FRAME_BUFFER_WIDTH / 128 + 14.0f, D2_Team1UI.y + 44.0f };
-				D2D_RECT_F D2_Team1UIHPRect = { 0.0f, 0.0f, 295.0f, 11.0f };
-				m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[23] : m_pd2dfxGaussianBlur[23], &D2_Team1UIHP, &D2_Team1UIHPRect);
-			}
+			D2D_POINT_2F D2_Team1UIHP = { FRAME_BUFFER_WIDTH / 128 + 14.0f, D2_Team1UI.y + 44.0f };
+			D2D_RECT_F D2_Team1UIHPRect = { 0.0f, 0.0f, 295.0f, 11.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[23] : m_pd2dfxGaussianBlur[23], &D2_Team1UIHP, &D2_Team1UIHPRect);
+		}
 
-			if (m_CurrentPlayerNum > 2) {
-				D2D_POINT_2F D2_Team2UI = { FRAME_BUFFER_WIDTH / 128, FRAME_BUFFER_HEIGHT / 5 * 3 + 75.0f };
-				D2D_RECT_F D2_Team2UIRect = { 0.0f, 0.0f, 323.0f, 60.0f };
-				m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[22] : m_pd2dfxGaussianBlur[22], &D2_Team2UI, &D2_Team2UIRect);
+		if (m_CurrentPlayerNum > 2) {
+			D2D_POINT_2F D2_Team2UI = { FRAME_BUFFER_WIDTH / 128, FRAME_BUFFER_HEIGHT / 5 * 3 + 75.0f };
+			D2D_RECT_F D2_Team2UIRect = { 0.0f, 0.0f, 323.0f, 60.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[22] : m_pd2dfxGaussianBlur[22], &D2_Team2UI, &D2_Team2UIRect);
 
-				D2D_POINT_2F D2_Team2UIHP = { FRAME_BUFFER_WIDTH / 128 + 14.0f, D2_Team2UI.y + 44.0f };
-				D2D_RECT_F D2_Team2UIHPRect = { 0.0f, 0.0f, 295.0f, 11.0f };
-				m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[24] : m_pd2dfxGaussianBlur[24], &D2_Team2UIHP, &D2_Team2UIHPRect);
-			}
-
-
+			D2D_POINT_2F D2_Team2UIHP = { FRAME_BUFFER_WIDTH / 128 + 14.0f, D2_Team2UI.y + 44.0f };
+			D2D_RECT_F D2_Team2UIHPRect = { 0.0f, 0.0f, 295.0f, 11.0f };
+			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[24] : m_pd2dfxGaussianBlur[24], &D2_Team2UIHP, &D2_Team2UIHPRect);
 		}
 	}
 
 #endif
-	if (UI_Switch) {
-		if (m_nMode == SCENE1STAGE) {
-			D2D1_RECT_F D2_RemainNPCText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 57, 0.0f, (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 16) * 1);
-			m_pd2dDeviceContext->DrawTextW(m_remainNPCPrint, (UINT32)wcslen(m_remainNPCPrint), m_pdwFont, &D2_RemainNPCText, m_pd2dbrText);
+	if (m_nMode == SCENE1STAGE) {
+		D2D1_RECT_F D2_RemainNPCText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 57, 0.0f, (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 16) * 1);
+		m_pd2dDeviceContext->DrawTextW(m_remainNPCPrint, (UINT32)wcslen(m_remainNPCPrint), m_pdwFont, &D2_RemainNPCText, m_pd2dbrText);
 
-			switch (m_mainmissionnum)
-			{
-			case 0:
-			{
-				int killNPC = 20 - m_remainNPC;
-				wchar_t killNPCprint[20];
-				_itow_s(killNPC, killNPCprint, sizeof(killNPCprint), 10);
-				D2D1_RECT_F D2_KillNPCText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 59, (FRAME_BUFFER_HEIGHT / 16) * 3, (FRAME_BUFFER_WIDTH / 64) * 61, (FRAME_BUFFER_HEIGHT / 16) * 3);
-				m_pd2dDeviceContext->DrawTextW(killNPCprint, (UINT32)wcslen(killNPCprint), m_pdwFont, &D2_KillNPCText, m_pd2dbrText);
-			}
-			break;
-			case 1:
-			{
-				wchar_t occupationPrint[20];
-				_itow_s(m_occupationnum, occupationPrint, sizeof(occupationPrint), 10);
-				D2D1_RECT_F D2_OccupationText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 59, (FRAME_BUFFER_HEIGHT / 16) * 3, (FRAME_BUFFER_WIDTH / 64) * 61, (FRAME_BUFFER_HEIGHT / 16) * 3);
-				m_pd2dDeviceContext->DrawTextW(occupationPrint, (UINT32)wcslen(occupationPrint), m_pdwFont, &D2_OccupationText, m_pd2dbrText);
-			}
-			break;
-			}
+		switch (m_mainmissionnum)
+		{
+		case 0:
+		{
+			int killNPC = 20 - m_remainNPC;
+			wchar_t killNPCprint[20];
+			_itow_s(killNPC, killNPCprint, sizeof(killNPCprint), 10);
+			D2D1_RECT_F D2_KillNPCText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 59, (FRAME_BUFFER_HEIGHT / 16) * 3, (FRAME_BUFFER_WIDTH / 64) * 61, (FRAME_BUFFER_HEIGHT / 16) * 3);
+			m_pd2dDeviceContext->DrawTextW(killNPCprint, (UINT32)wcslen(killNPCprint), m_pdwFont, &D2_KillNPCText, m_pd2dbrText);
+		}
+		break;
+		case 1:
+		{
+			wchar_t occupationPrint[20];
+			_itow_s(m_occupationnum, occupationPrint, sizeof(occupationPrint), 10);
+			D2D1_RECT_F D2_OccupationText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 57, (FRAME_BUFFER_HEIGHT / 16) * 3, (FRAME_BUFFER_WIDTH / 64) * 59, (FRAME_BUFFER_HEIGHT / 16) * 3);
+			m_pd2dDeviceContext->DrawTextW(occupationPrint, (UINT32)wcslen(occupationPrint), m_pdwFont, &D2_OccupationText, m_pd2dbrText);
+		}
+		break;
+		}
 
+		if (UI_Switch) {
 			switch (m_submissionnum)
 			{
 			case 0:
@@ -990,16 +988,16 @@ void CGameFramework::FrameAdvance()
 			}
 			break;
 			}
+		}
 
-			if (m_CurrentPlayerNum > 1) {
-				D2D1_RECT_F Friend1Text = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 1, (FRAME_BUFFER_HEIGHT / 64) * 42, (FRAME_BUFFER_WIDTH / 64) * 7, (FRAME_BUFFER_HEIGHT / 64) * 42);
-				m_pd2dDeviceContext->DrawTextW(L"Other 1", (UINT32)wcslen(L"Other 1"), m_pdwFont, &Friend1Text, m_pd2dbrText);
-			}
+		if (m_CurrentPlayerNum > 1) {
+			D2D1_RECT_F Friend1Text = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 1, (FRAME_BUFFER_HEIGHT / 64) * 42, (FRAME_BUFFER_WIDTH / 64) * 7, (FRAME_BUFFER_HEIGHT / 64) * 42);
+			m_pd2dDeviceContext->DrawTextW(L"Other 1", (UINT32)wcslen(L"Other 1"), m_pdwFont, &Friend1Text, m_pd2dbrText);
+		}
 
-			if (m_CurrentPlayerNum > 2) {
-				D2D1_RECT_F Friend2Text = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 1, (FRAME_BUFFER_HEIGHT / 128) * 93, (FRAME_BUFFER_WIDTH / 64) * 7, (FRAME_BUFFER_HEIGHT / 128) * 93);
-				m_pd2dDeviceContext->DrawTextW(L"Other 2", (UINT32)wcslen(L"Other 2"), m_pdwFont, &Friend2Text, m_pd2dbrText);
-			}
+		if (m_CurrentPlayerNum > 2) {
+			D2D1_RECT_F Friend2Text = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 1, (FRAME_BUFFER_HEIGHT / 128) * 93, (FRAME_BUFFER_WIDTH / 64) * 7, (FRAME_BUFFER_HEIGHT / 128) * 93);
+			m_pd2dDeviceContext->DrawTextW(L"Other 2", (UINT32)wcslen(L"Other 2"), m_pdwFont, &Friend2Text, m_pd2dbrText);
 		}
 	}
 
@@ -1989,7 +1987,7 @@ void CGameFramework::CollisionStaticObjects()
 			// 충돌 모션 
 			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17])
 			{
-			
+
 				DieState = true;
 			}
 			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
@@ -2051,7 +2049,7 @@ void CGameFramework::CollisionStaticObjects()
 		DeleteTime++;
 		if (DeleteTime > 500.0 && ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17])
 		{
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17]->SetScale(0, 0, 0);DeleteTime = 0;
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17]->SetScale(0, 0, 0); DeleteTime = 0;
 		}
 	}
 	if (DieState2 == true)
@@ -2061,7 +2059,7 @@ void CGameFramework::CollisionStaticObjects()
 		DeleteTime++;
 		if (DeleteTime > 500.0 && ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17])
 		{
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[18]->SetScale(0, 0, 0);DeleteTime = 0;
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[18]->SetScale(0, 0, 0); DeleteTime = 0;
 		}
 	}
 	if (DieState3 == true)
@@ -2072,7 +2070,7 @@ void CGameFramework::CollisionStaticObjects()
 		DeleteTime++;
 		if (DeleteTime > 500.0 && ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17])
 		{
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->SetScale(0, 0, 0);DeleteTime = 0;
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->SetScale(0, 0, 0); DeleteTime = 0;
 		}
 	}
 	if (DieState4 == true)
@@ -2082,7 +2080,7 @@ void CGameFramework::CollisionStaticObjects()
 		DeleteTime++;
 		if (DeleteTime > 500.0 && ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17])
 		{
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->SetScale(0, 0, 0);DeleteTime = 0;
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->SetScale(0, 0, 0); DeleteTime = 0;
 		}
 	}
 	if (DieState5 == true)
@@ -2092,7 +2090,7 @@ void CGameFramework::CollisionStaticObjects()
 		DeleteTime++;
 		if (DeleteTime > 500.0 && ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17])
 		{
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->SetScale(0, 0, 0);DeleteTime = 0;
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->SetScale(0, 0, 0); DeleteTime = 0;
 		}
 	}
 }

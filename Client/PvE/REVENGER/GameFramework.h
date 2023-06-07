@@ -210,7 +210,7 @@ public:
 
 	int m_CurrentPlayerNum;
 
-	int m_occupationnum = 50;
+	int m_occupationnum = 0;
 	queue<BulletPos> m_shoot_info;
 
 	bool W_KEY, A_KEY, S_KEY, D_KEY, SPACE_KEY,SHOOT_KEY = false;
