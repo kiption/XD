@@ -198,7 +198,7 @@ void processPacket(char* ptr)
                 other_players[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
                 other_players[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
                 other_players[recv_id].m_state = OBJ_ST_RUNNING;
-                other_players[recv_id].m_ingame_state = PL_ST_IDLE;
+                other_players[recv_id].m_ingame_state = recv_packet->obj_state;
                 other_players[recv_id].m_new_state_update = true;
 
                 curr_connection_num++;
@@ -217,8 +217,21 @@ void processPacket(char* ptr)
             npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
             npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
             npcs_info[recv_id].m_state = OBJ_ST_RUNNING;
-            npcs_info[recv_id].m_ingame_state = PL_ST_IDLE;
+            npcs_info[recv_id].m_ingame_state = recv_packet->obj_state;
             npcs_info[recv_id].m_new_state_update = true;
+        }
+        // 3. [TEST] Add Dummy
+        else if (recv_packet->target == TARGET_DUMMY) {
+            if (dummies[recv_id].m_state != OBJ_ST_EMPTY) break;
+
+            dummies[recv_id].m_id = recv_id;
+            dummies[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+            dummies[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+            dummies[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+            dummies[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+            dummies[recv_id].m_state = OBJ_ST_RUNNING;
+            dummies[recv_id].m_ingame_state = recv_packet->obj_state;
+            dummies[recv_id].m_new_state_update = true;
         }
         else {
             cout << "[ADD ERROR] Unknown Target!" << endl;

@@ -287,6 +287,7 @@ void SESSION::send_add_obj_packet(int obj_id, short obj_type)
 		add_player_packet.target = TARGET_PLAYER;
 		add_player_packet.id = obj_id;
 		strcpy_s(add_player_packet.name, name);
+		add_player_packet.obj_state = clients[obj_id].pl_state;
 
 		add_player_packet.x = clients[obj_id].pos.x;
 		add_player_packet.y = clients[obj_id].pos.y;
@@ -316,6 +317,7 @@ void SESSION::send_add_obj_packet(int obj_id, short obj_type)
 		add_npc_packet.target = TARGET_NPC;
 		add_npc_packet.id = obj_id;
 		strcpy_s(add_npc_packet.name, name);
+		add_npc_packet.obj_state = npcs[obj_id].pl_state;
 
 		add_npc_packet.x = npcs[obj_id].pos.x;
 		add_npc_packet.y = npcs[obj_id].pos.y;
@@ -334,6 +336,36 @@ void SESSION::send_add_obj_packet(int obj_id, short obj_type)
 		add_npc_packet.look_z = npcs[obj_id].m_lookvec.z;
 
 		do_send(&add_npc_packet);
+
+		break;
+
+	case TARGET_DUMMY:
+		SC_ADD_OBJECT_PACKET add_dummy_packet;
+		add_dummy_packet.size = sizeof(SC_ADD_OBJECT_PACKET);
+		add_dummy_packet.type = SC_ADD_OBJECT;
+
+		add_dummy_packet.target = TARGET_DUMMY;
+		add_dummy_packet.id = obj_id;
+		strcpy_s(add_dummy_packet.name, name);
+		add_dummy_packet.obj_state = dummies[obj_id].pl_state;
+
+		add_dummy_packet.x = dummies[obj_id].pos.x;
+		add_dummy_packet.y = dummies[obj_id].pos.y;
+		add_dummy_packet.z = dummies[obj_id].pos.z;
+		
+		add_dummy_packet.right_x = dummies[obj_id].m_rightvec.x;
+		add_dummy_packet.right_y = dummies[obj_id].m_rightvec.y;
+		add_dummy_packet.right_z = dummies[obj_id].m_rightvec.z;
+		
+		add_dummy_packet.up_x = dummies[obj_id].m_upvec.x;
+		add_dummy_packet.up_y = dummies[obj_id].m_upvec.y;
+		add_dummy_packet.up_z = dummies[obj_id].m_upvec.z;
+		
+		add_dummy_packet.look_x = dummies[obj_id].m_lookvec.x;
+		add_dummy_packet.look_y = dummies[obj_id].m_lookvec.y;
+		add_dummy_packet.look_z = dummies[obj_id].m_lookvec.z;
+
+		do_send(&add_dummy_packet);
 		break;
 	}
 }
@@ -826,7 +858,26 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].update_viewlist();
 
 		//====================
-		// 1. Player 객체 정보
+		// 1. 맵 정보
+		// 새로 접속한 클라이언트에게 맵 정보를 보내줍니다.
+		for (auto& building : buildings_info) {
+			SC_MAP_OBJINFO_PACKET building_packet;
+			building_packet.type = SC_MAP_OBJINFO;
+			building_packet.size = sizeof(SC_MAP_OBJINFO_PACKET);
+
+			building_packet.pos_x = building.getPosX();
+			building_packet.pos_y = building.getPosY();
+			building_packet.pos_z = building.getPosZ();
+
+			building_packet.scale_x = building.getScaleX();
+			building_packet.scale_y = building.getScaleY();
+			building_packet.scale_z = building.getScaleZ();
+
+			clients[client_id].do_send(&building_packet);
+		}
+
+		//====================
+		// 2. Player 객체 정보
 		//  1) Clients
 		// 현재 접속해 있는 모든 클라이언트에게 새로운 클라이언트(client_id)의 정보를 전송합니다.
 		for (auto& pl : clients) {
@@ -856,31 +907,23 @@ void process_packet(int client_id, char* packet)
 			lock_guard<mutex> lg{ clients[client_id].s_lock};
 			clients[client_id].send_add_obj_packet(npc.id, TARGET_NPC);
 		}
+
+		//  3) Dummies
+		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 NPC의 정보를 전송합니다.
+		for (auto& dummy : dummies) {
+			if (dummy.id == -1) continue;
+
+			lock_guard<mutex> lg{ clients[client_id].s_lock };
+			clients[client_id].send_add_obj_packet(dummy.id, TARGET_DUMMY);
+		}
 		
-		//  3) NPC서버로 새로 접속한 클라이언트의 정보를 전송합니다.
+		//  4) NPC서버로 새로 접속한 클라이언트의 정보를 전송합니다.
 		if (b_npcsvr_conn) {
 			lock_guard<mutex> lg{ npc_server.s_lock };
 			npc_server.send_add_obj_packet(client_id, TARGET_PLAYER);
 		}
 
-		//====================
-		// 2. 맵 정보
-		// 새로 접속한 클라이언트에게 맵 정보를 보내줍니다.
-		for (auto& building : buildings_info) {
-			SC_MAP_OBJINFO_PACKET building_packet;
-			building_packet.type = SC_MAP_OBJINFO;
-			building_packet.size = sizeof(SC_MAP_OBJINFO_PACKET);
 
-			building_packet.pos_x = building.getPosX();
-			building_packet.pos_y = building.getPosY();
-			building_packet.pos_z = building.getPosZ();
-
-			building_packet.scale_x = building.getScaleX();
-			building_packet.scale_y = building.getScaleY();
-			building_packet.scale_z = building.getScaleZ();
-
-			clients[client_id].do_send(&building_packet);
-		}
 		break;
 	}// CS_LOGIN end
 	case CS_MOVE:

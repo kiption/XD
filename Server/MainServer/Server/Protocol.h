@@ -179,6 +179,7 @@ struct SC_ADD_OBJECT_PACKET {
 	char type;
 	short target;
 	short id;
+	short obj_state;
 	char name[NAME_SIZE];
 	float x, y, z;
 	float right_x, right_y, right_z;
