@@ -525,6 +525,7 @@ void processPacket(char* ptr)
         if (recv_packet->stage_num == 1) {
             if (curr_mission_num >= ST1_MISSION_NUM) {
                 trigger_stage_clear = true;
+                stage_missions[1].curr = 0;
             }
             else {
                 trigger_mission_complete = true;
@@ -534,8 +535,6 @@ void processPacket(char* ptr)
         else if (recv_packet->stage_num == 2) {
             //
         }
-
-        stage_missions[recv_packet->stage_num].curr = 0;
         
 
         break;

@@ -50,9 +50,9 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 		}
 
-		m_ppObjects[5]->SetPosition(XMFLOAT3(30.0, 6.2, 905.0));
-		m_ppObjects[6]->SetPosition(XMFLOAT3(60.0, 6.2, 1155.0));
-		m_ppObjects[7]->SetPosition(XMFLOAT3(100.0, 6.2, 1205.0));
+		m_ppObjects[5]->SetPosition(XMFLOAT3(160.0, 0.0, 1000.0));  // 안보이게 숨겨놨지롱
+		m_ppObjects[6]->SetPosition(XMFLOAT3(160.0, 0.0, 1000.0));  // 안보이게 숨겨놨지롱
+		m_ppObjects[7]->SetPosition(XMFLOAT3(160.0, 0.0, 1000.0));  // 안보이게 숨겨놨지롱
 
 
 		m_nHeliNpcObjects = 5;
@@ -128,8 +128,12 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppObjects[h] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, NULL);
 			m_ppObjects[h]->SetMaterial(0, pSoldiarNpcMaterial);
 			m_ppObjects[h]->SetScale(7.0, 7.0, 7.0);
-			m_ppObjects[h]->SetPosition(-50.0 + (h-17)*50, 6.0,1300.0);
 		}
+		m_ppObjects[17]->SetPosition(30.0f, 6.0f, 905.0f);		// 더미들 위치를 직접 정해줬음.
+		m_ppObjects[18]->SetPosition(60.0f, 6.0f, 1155.0f);		// 더미들 위치를 직접 정해줬음.
+		m_ppObjects[19]->SetPosition(100.0f, 6.0f, 1205.0f);	// 더미들 위치를 직접 정해줬음.
+		m_ppObjects[20]->SetPosition(-50.0f, 6.0f, 1300.0f);	// 더미들 위치를 직접 정해줬음.
+		m_ppObjects[21]->SetPosition(20.0f, 6.0f, 1350.0f);		// 더미들 위치를 직접 정해줬음.
 
 	}
 	//if (m_nCurScene == SCENE2STAGE)
