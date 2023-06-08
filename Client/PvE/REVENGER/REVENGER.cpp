@@ -185,12 +185,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				}
 
 				//  3) Dummies ([TEST] NPC 완성전까지 임시 코드)
-				for (int i = 0; i < 3; ++i) {
+				for (int i = 0; i < 5; ++i) {
 					if (dummies[i].m_new_state_update) {
 						if (dummies[i].m_ingame_state == PL_ST_DEAD) {
-							// 여기에 더미 죽는 모션 실행
+							// 여기에 더미 죽는 모션 실행1
 							// (더미 죽는 모션이 한 사이클 완료되면 객체를 날려버리던가 scale 해주면 됨.)
-							gGameFramework.otherPlayerDyingMotion(i);
+							//gGameFramework.otherPlayerDyingMotion(i);
+							gGameFramework.CollisionDummiesObjects(i);
 
 							dummies[i].m_new_state_update = false;
 						}
