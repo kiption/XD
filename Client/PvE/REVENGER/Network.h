@@ -23,8 +23,8 @@ int my_id;
 int servertime_ms;
 int servertime_sec;
 
-bool stage1_enter_ok;
-bool stage2_enter_ok;
+volatile bool stage1_enter_ok;
+volatile bool stage2_enter_ok;
 
 int curr_connection_num = 1;
 

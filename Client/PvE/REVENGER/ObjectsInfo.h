@@ -15,7 +15,7 @@ struct ObjectsInfo
 	XMFLOAT3 m_up_vec;
 	XMFLOAT3 m_look_vec;
 	int m_state;		// 세션 상태
-	int curr_scene;		// 몇번째 씬인지
+	volatile int curr_scene;		// 몇번째 씬인지
 	int m_ingame_state;	// 인게임내 상태
 
 	bool m_new_state_update; // 상태가 바뀌었는지
