@@ -132,9 +132,9 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		break;
 	case THIRD_PERSON_CAMERA:
 		SetFriction(600);
-		SetGravity(XMFLOAT3(0.0f, 0.0, 0.0f));
-		SetMaxVelocityXZ(40.0f);
-		SetMaxVelocityY(5.0f);
+		SetGravity(XMFLOAT3(0.0f, -3.f, 0.0f));
+		SetMaxVelocityXZ(40.0);
+		SetMaxVelocityY(0.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 15.0f, -20.0f));
@@ -315,7 +315,33 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 		m_pSkinnedAnimationController->SetTrackEnable(7, false);
 
 	}
+	if (dwDirection & DIR_DOWN)
+	{
+		m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		m_pSkinnedAnimationController->SetTrackEnable(5, false);
+		m_pSkinnedAnimationController->SetTrackEnable(6, false);
+		m_pSkinnedAnimationController->SetTrackEnable(7, false);
+		m_pSkinnedAnimationController->SetTrackEnable(8, false);
+		m_pSkinnedAnimationController->SetTrackEnable(9, true);
 
+	}
+	if (dwDirection & DIR_UP)
+	{
+		m_pSkinnedAnimationController->SetTrackEnable(0, false);
+		m_pSkinnedAnimationController->SetTrackEnable(1, false);
+		m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		m_pSkinnedAnimationController->SetTrackEnable(4, false);
+		m_pSkinnedAnimationController->SetTrackEnable(5, false);
+		m_pSkinnedAnimationController->SetTrackEnable(6, false);
+		m_pSkinnedAnimationController->SetTrackEnable(7, false);
+		m_pSkinnedAnimationController->SetTrackEnable(8, true);
+
+	}
 
 	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
 }

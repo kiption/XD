@@ -581,11 +581,13 @@ void CGameFramework::ProcessInput()
 
 		if (pKeysBuffer[KEY_Q] & 0xF0)
 		{
-			if (m_nMode == SCENE1STAGE)
-			{
-				((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_nAnimationTracks = 8;
-				((CHumanPlayer*)m_pPlayer)->ReloadState(m_GameTimer.GetTimeElapsed());
-			}
+			dwDirection |= DIR_UP;
+
+			//if (m_nMode == SCENE1STAGE)
+			//{
+			//	((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_nAnimationTracks = 8;
+			//	((CHumanPlayer*)m_pPlayer)->ReloadState(m_GameTimer.GetTimeElapsed());
+			//}
 			q_keyboardInput.push(SEND_KEY_UP);//S
 		}
 
@@ -595,11 +597,13 @@ void CGameFramework::ProcessInput()
 		}
 
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
-			if (m_nMode == SCENE1STAGE)
-			{
-				((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_nAnimationTracks = 9;
-				((CHumanPlayer*)m_pPlayer)->JumpState(m_GameTimer.GetTimeElapsed());
-			}
+			dwDirection |= DIR_DOWN;
+
+			//if (m_nMode == SCENE1STAGE)
+			//{
+			//	((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_nAnimationTracks = 9;
+			//	((CHumanPlayer*)m_pPlayer)->JumpState(m_GameTimer.GetTimeElapsed());
+			//}
 			q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
 		}
 
@@ -610,8 +614,8 @@ void CGameFramework::ProcessInput()
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 1.5f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 1.5f;
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.5f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.5f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
@@ -654,7 +658,7 @@ void CGameFramework::ProcessInput()
 				}
 			}
 
-			if (m_nMode == SCENE1STAGE) if (dwDirection) m_pPlayer->Move(dwDirection, 13.0, true);
+			if (m_nMode == SCENE1STAGE) if (dwDirection && WM_KEYDOWN) m_pPlayer->Move(dwDirection, 690.0* m_GameTimer.GetFrameRate(), true);
 
 		}
 	}
@@ -748,7 +752,7 @@ float g_reverse_time = 0.0f;
 void CGameFramework::FrameAdvance()
 {
 	if (m_nMode == SCENE2STAGE)m_GameTimer.Tick(30.0f);
-	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick();
+	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick(60.0f);
 
 	ProcessInput();
 
