@@ -137,7 +137,7 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(0.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 15.0f, -20.0f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 14.0f, -18.0f));
 		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z), m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
@@ -426,7 +426,7 @@ void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 		XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
 		XMFLOAT3 xmf3Position = m_pBulletFindFrame->GetPosition();
 		XMFLOAT3 xmf3Direction = CameraLook;
-
+		xmf3Direction.y += 0.05;
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 10.0f, false));
 

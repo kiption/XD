@@ -771,10 +771,6 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
-
-//	m_pBillboardShader[3]->ParticlePosition = XMFLOAT3(500.0, 500.0, 500.0);
-	//if(m_ppFragShaders[0]->m_bActive==true)
-	//m_ppSpriteBillboard[0]->SetActive(false);
 	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();
 	if (m_pPlayer->m_bCollisionTerrain == true)
 	{
@@ -784,16 +780,6 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	{
 		//m_ppSpriteBillboard[0]->m_bActive = false;
 
-	}
-
-	if (m_pLights)
-	{
-		//		m_pLights->m_pLights[1].m_xmf3Position = m_pPlayer->GetCamera()->GetPosition();
-		//		m_pLights->m_pLights[1].m_xmf3Direction = m_pPlayer->GetCamera()->GetLookVector();
-
-		m_fLightRotationAngle += fTimeElapsed;
-		XMMATRIX xmmtxRotation = XMMatrixRotationY(fTimeElapsed * 0.2f);
-		//XMStoreFloat3(&m_pLights->m_pLights[0].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction), xmmtxRotation));
 	}
 	CValkanObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
 	XMFLOAT3 Position2P = m_ppShaders[0]->m_ppObjects[5]->GetPosition();
@@ -809,7 +795,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		m_pLights->m_pLights[5].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[0]->GetPosition();
 	}
 
-	ParticleAnimation();
+	//ParticleAnimation();
 }
 
 void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -824,12 +810,11 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 	
 	if (m_ppShaders[0])m_ppShaders[0]->Render(pd3dCommandList, pCamera,0);
-	RenderBoundingBox(pd3dCommandList, pCamera);
+	//RenderBoundingBox(pd3dCommandList, pCamera);
+	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
-
-	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 

@@ -322,6 +322,7 @@ void CGameFramework::ChangeSwapChainState()
 void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	if (m_pScene) m_pScene->OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+	// key Delay
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
@@ -332,11 +333,9 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 
 
 	case WM_LBUTTONUP:
-		::SetCapture(hWnd);
-		::GetCursorPos(&m_ptOldCursorPos);
-		break;
 	case WM_RBUTTONUP:
 		::ReleaseCapture();
+		
 		break;
 	case WM_MOUSEMOVE:
 		break;
@@ -436,17 +435,17 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	}
 	case WM_SIZE:
 		break;
-	case WM_LBUTTONDOWN:
-	case WM_RBUTTONDOWN:
-	case WM_LBUTTONUP:
-	case WM_RBUTTONUP:
-	case WM_MOUSEMOVE:
-		OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
-		break;
-	case WM_KEYDOWN:
-	case WM_KEYUP:
-		OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
-		break;
+	//case WM_LBUTTONDOWN:
+	//case WM_RBUTTONDOWN:
+	//case WM_LBUTTONUP:
+	//case WM_RBUTTONUP:
+	//case WM_MOUSEMOVE:
+		//OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+		//break;
+	//case WM_KEYDOWN:
+	//case WM_KEYUP:
+	//	OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+	//	break;
 	}
 	return(0);
 }
@@ -614,8 +613,8 @@ void CGameFramework::ProcessInput()
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.5f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.5f;
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 7.5f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 7.5f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
@@ -658,7 +657,11 @@ void CGameFramework::ProcessInput()
 				}
 			}
 
-			if (m_nMode == SCENE1STAGE) if (dwDirection && WM_KEYDOWN) m_pPlayer->Move(dwDirection, 690.0* m_GameTimer.GetFrameRate(), true);
+			if (m_nMode == SCENE1STAGE) {
+			
+				if (dwDirection && WM_KEYDOWN) m_pPlayer->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
+
+			}
 
 		}
 	}
@@ -674,7 +677,7 @@ void CGameFramework::AnimateObjects()
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 	//if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
 	((CHumanPlayer*)m_pPlayer)->m_fShootDelay += m_GameTimer.GetTimeElapsed();
-	if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.2)
+	if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.1)
 	{
 		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
 		((CHumanPlayer*)m_pPlayer)->m_fShootDelay = 0.0f;
@@ -684,7 +687,6 @@ void CGameFramework::AnimateObjects()
 		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.8, 0.4, 0.1, 1.0);
 	}
 
-	//if (m_nMode == SCENE1STAGE) CollisionDummiesObjects();
 }
 
 void CGameFramework::WaitForGpuComplete()
@@ -754,7 +756,7 @@ void CGameFramework::FrameAdvance()
 	if (m_nMode == SCENE2STAGE)m_GameTimer.Tick(30.0f);
 	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick(60.0f);
 
-	ProcessInput();
+	
 
 	AnimateObjects();
 
@@ -763,11 +765,13 @@ void CGameFramework::FrameAdvance()
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-	::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
-	m_pScene->OnPreRender(m_pd3dCommandList, m_pCamera);
-
-	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+	//::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	if (m_nMode == SCENE1STAGE)
+	{
+		m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
+		m_pScene->OnPreRender(m_pd3dCommandList, m_pCamera);
+	}
+	//m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
 	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
@@ -779,13 +783,14 @@ void CGameFramework::FrameAdvance()
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
 
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * ::gnRtvDescriptorIncrementSize);
+//	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+//	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * ::gnRtvDescriptorIncrementSize);
 
 	float pfClearColor[4] = { 0.0f, 0.0f, 0.0f, 0.5f };
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], pfClearColor/*Colors::Azure*/, 0, NULL);
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], TRUE, &d3dDsvCPUDescriptorHandle);
+
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
@@ -793,7 +798,6 @@ void CGameFramework::FrameAdvance()
 	if (m_nMode == SCENE1STAGE)
 	{
 		if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
-		//m_pScene->RenderBoundingBox(m_pd3dCommandList, m_pCamera);
 	}
 	// Stage2
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;

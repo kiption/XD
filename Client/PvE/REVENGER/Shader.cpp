@@ -148,6 +148,17 @@ D3D12_STREAM_OUTPUT_DESC CShader::CreateStreamOuputState(int nPipelineState)
 
 	return(d3dStreamOutputDesc);
 }
+
+
+#define _WITH_WFOPEN
+//#define _WITH_STD_STREAM
+
+#ifdef _WITH_STD_STREAM
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <sstream>
+#endif
 D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob)
 {
 	UINT nCompileFlags = 0;
@@ -166,17 +177,6 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR* pszFileName, LPCSTR 
 
 	return(d3dShaderByteCode);
 }
-
-#define _WITH_WFOPEN
-//#define _WITH_STD_STREAM
-
-#ifdef _WITH_STD_STREAM
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <sstream>
-#endif
-
 D3D12_SHADER_BYTECODE CShader::ReadCompiledShaderFromFile(WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob)
 {
 	UINT nReadBytes = 0;
