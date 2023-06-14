@@ -11,7 +11,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pSoldiarModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
 	//Weapon_R
 	m_pBulletFindFrame = pSoldiarModel->m_pModelRootObject->FindFrame("Rifle__1_");
-	//m_pHeadFindFrame = pSoldiarModel->m_pModelRootObject->FindFrame("SK_Soldier_Head_LOD1");
+	m_pHeadFindFrame = pSoldiarModel->m_pModelRootObject->FindFrame("head");
 
 	//7°³
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 12, pSoldiarModel);
@@ -111,21 +111,24 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(0.0f);
 		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.5f, -2.2f));
-		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(GetPosition().x, GetPosition().y + 1.0f, GetPosition().z), m_pCamera->GetOffset()));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.5f, -8.3f));
+		m_pCamera->SetPosition(Vector3::Add(
+			XMFLOAT3(m_pHeadFindFrame->GetPosition().x, m_pHeadFindFrame->GetPosition().y , m_pHeadFindFrame->GetPosition().z),
+			m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
 	case SPACESHIP_CAMERA:
-		SetFriction(0.0f);
-		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(15.0f);
-		SetMaxVelocityY(5.0f);
+		SetFriction(600);
+		SetGravity(XMFLOAT3(0.0f, -3.f, 0.0f));
+		SetMaxVelocityXZ(40.0);
+		SetMaxVelocityY(0.0f);
 		m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 1.0f, 3.0f));
-		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(GetPosition()), m_pCamera->GetOffset()));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 2.0f, -5.0f));
+		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_pHeadFindFrame->GetPosition().x, m_pHeadFindFrame->GetPosition().y, m_pHeadFindFrame->GetPosition().z),
+			m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -137,7 +140,7 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(0.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 14.0f, -18.0f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 11.0f, -16.0f));
 		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z), m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
@@ -355,7 +358,7 @@ void CHumanPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 		if (m_ppBullets[i]->m_bActive) {
 
 			m_ppBullets[i]->Animate(fTimeElapsed);
-
+			
 		}
 	}
 
@@ -399,8 +402,8 @@ void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 
 void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 {
-
-	gamesound.shootingSound();
+	
+	
 	CValkanObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS; i++)
 	{
@@ -408,6 +411,7 @@ void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 		{
 			pBulletObject = m_ppBullets[i];
 			pBulletObject->Reset();
+			//gamesound.shootSound->release();
 			break;
 		}
 
@@ -426,7 +430,7 @@ void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 		XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
 		XMFLOAT3 xmf3Position = m_pBulletFindFrame->GetPosition();
 		XMFLOAT3 xmf3Direction = CameraLook;
-		xmf3Direction.y += 0.05;
+		//xmf3Direction.y += 0.0;
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 10.0f, false));
 

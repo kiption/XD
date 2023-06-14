@@ -53,7 +53,7 @@ void HeliPlayer::Firevalkan(CGameObject* pLockedObject)
 {
 
 
-	gamesound.shootingSound();
+	//gamesound.shootingSound();
 	CValkanObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS; i++)
 	{

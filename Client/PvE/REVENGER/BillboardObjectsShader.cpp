@@ -111,7 +111,7 @@ void BloodMarkShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.0, 5.0, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 4.0, 4.0, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	m_nObjects = 1;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -141,7 +141,7 @@ void BloodMarkShader::ReleaseObjects()
 
 void BloodMarkShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	if (m_bActiveLook)
+	if (m_bActiveMark)
 	{
 
 		xmf3CameraPosition = pCamera->GetPosition();

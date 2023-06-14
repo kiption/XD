@@ -302,7 +302,7 @@ XMVECTOR RandomUnitVectorOnSphere()
 
 	while (true)
 	{
-		XMVECTOR v = XMVectorSet(RandF(-1.0f, 1.0f), RandF(-1.0f, 1.0f), RandF(-1.0f, 1.0f), 0.0f);
+		XMVECTOR v = XMVectorSet(RandF(-1.0f, 1.0f), RandF(-0.1f, 0.1f), RandF(-0.3f, 0.2f), 0.0f);
 		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
 	}
 }
@@ -339,6 +339,7 @@ void CFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		m_ppObjects[i]->SetChild(pFragmentModel, false);
 		m_ppObjects[i]->SetScale(0.2, 0.2, 0.2);
 		m_ppObjects[i]->SetPosition(530.0, 500.0, -230.0);
+		m_ppObjects[i]->Rotate(0, 0, 90);
 		pFragmentModel->AddRef();
 		ParticlePosition = m_ppObjects[i]->GetPosition();
 	}
@@ -394,24 +395,26 @@ void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 {
 	if (m_bActive == true)
 	{
-		XMFLOAT3 gravity = XMFLOAT3(6.8, -6.8f, 0);
-		m_fElapsedTimes += fTimeElapsed * 2.0f;
+		XMFLOAT3 gravity = XMFLOAT3(-9.8, -9.8, 0);
+		m_fElapsedTimes += fTimeElapsed * 2.05f;
 		if (m_fElapsedTimes <= m_fDuration)
 		{
 			for (int i = 0; i < EXPLOSION_DEBRISES; i++)
 			{
-				m_fExplosionSpeed = Random(8.0f, 13.0f);
-				
+				m_fExplosionSpeed = Random(1.0f, 10.0f);
+
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
 				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.x * m_fElapsedTimes * m_fElapsedTimes;;
-				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;// 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;
+				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + gravity.y *0.5f * m_fElapsedTimes * m_fElapsedTimes;// 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;
 				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes + gravity.z;
 				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
 
 				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
 				m_ppObjects[i]->m_xmf4x4ToParent._42 = m_pxmf4x4Transforms[i]._42;
 				m_ppObjects[i]->m_xmf4x4ToParent._43 = m_pxmf4x4Transforms[i]._43;
-			//	m_ppObjects[i]->Rotate(10.0, 15.0, 20.0);
+				//	m_ppObjects[i]->Rotate(10.0, 15.0, 20.0);
+
+				
 			}
 		}
 		else

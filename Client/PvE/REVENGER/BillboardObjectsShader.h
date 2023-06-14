@@ -30,7 +30,7 @@ public:
 	CMaterial* m_ppFlowerMaterials[2] = { NULL, NULL };
 #endif
 
-	bool m_bActiveLook = false;
+	bool m_bActiveMark = false;
 };
 
 class BillboardParticleShader : public BillboardShader

@@ -382,6 +382,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				UI_Switch = !UI_Switch;
 			}
 			break;
+
+		case 'C':
+			gamesound.shootSound->release();
+			break;
 		case KEY_W:
 		case KEY_A:
 		case KEY_S:
@@ -619,23 +623,25 @@ void CGameFramework::ProcessInput()
 		}
 
 		if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
-
+			
 
 			if (m_nMode != OPENINGSCENE)
 			{
 
-				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay < 0.01)
+				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay < 0.02)
 				{
+					
 					ShootKey = true;
 					if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->ShootState(m_GameTimer.GetTimeElapsed());
 					((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
-
+					
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
 					q_mouseInput.push(lclick);//s
 				}
-				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.01)
+				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.02)
 				{
 					ShootKey = false;
+					//gamesound.shootSound->release();
 					/*	((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);*/
 					if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 				}
@@ -680,13 +686,9 @@ void CGameFramework::AnimateObjects()
 	{
 		((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->SetActive(true);
 		((Stage1*)m_pScene)->m_pBillboardShader[3]->SetActive(true);
-		((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition.x = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->GetPosition().x;
-		((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition.y = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->GetPosition().y+10.0f;
-		((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition.z = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->GetPosition().z;
+
 
 		((Stage1*)m_pScene)->m_pBillboardShader[3]->ParticlePosition = XMFLOAT3(61.0, 20.0, 1170.0);
-		((Stage1*)m_pScene)->m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->GetPosition().x,
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->GetPosition().y+10.0f, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->GetPosition().z);
 
 		((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->GetPosition().x
 		,((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->GetPosition().y+10.0, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->GetPosition().z);
@@ -698,14 +700,18 @@ void CGameFramework::AnimateObjects()
 
 
 	((CHumanPlayer*)m_pPlayer)->m_fShootDelay += m_GameTimer.GetTimeElapsed();
-	if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.1)
+	if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.15)
 	{
-		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
+		
 		((CHumanPlayer*)m_pPlayer)->m_fShootDelay = 0.0f;
 	}
 	if (ShootKey == true)
 	{
-		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.8, 0.4, 0.1, 1.0);
+		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
+	}
+	if (ShootKey == false)
+	{
+		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
 	}
 
 }
@@ -758,10 +764,10 @@ void CGameFramework::UpdateShaderVariables()
 {
 	m_pcbMappedFrameworkInfo->m_fCurrentTime = m_GameTimer.GetTotalTime();
 	m_pcbMappedFrameworkInfo->m_fElapsedTime = m_GameTimer.GetTimeElapsed();
-	m_pcbMappedFrameworkInfo->m_fSecondsPerFirework = 0.5f;
+	/*m_pcbMappedFrameworkInfo->m_fSecondsPerFirework = 0.5f;
 	m_pcbMappedFrameworkInfo->m_nFlareParticlesToEmit = 100;
 	m_pcbMappedFrameworkInfo->m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
-	m_pcbMappedFrameworkInfo->m_nMaxFlareType2Particles = 15 * 1.5f;
+	m_pcbMappedFrameworkInfo->m_nMaxFlareType2Particles = 15 * 1.5f;*/
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
 	m_pd3dCommandList->SetGraphicsRootConstantBufferView(21, d3dGpuVirtualAddress);
@@ -791,6 +797,7 @@ void CGameFramework::FrameAdvance()
 	{
 		m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
 		m_pScene->OnPreRender(m_pd3dCommandList, m_pCamera);
+		UpdateShaderVariables();
 	}
 	//m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 

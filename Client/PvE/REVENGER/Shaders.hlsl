@@ -177,7 +177,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	//float4 cIllumination = Lighting(input.positionW, normalize(input.normalW));
 	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
 
-	return(lerp(cColor, cIllumination, 0.5f));
+	return(lerp(cColor, cIllumination, 0.4f));
 }
 
 float3 ParticleLogic()
@@ -255,7 +255,8 @@ float4 PSParticleStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
 	{
 		normalW = normalize(input.normalW);
 	}
-
+	float2 uv = input.uv;
+	input.uv+= gfCurrentTime * 0.125f;
 	float4 uvs[MAX_LIGHTS];
 	float4 cIllumination = ParticleLighting(input.positionW, normalize(input.normalW), false, uvs);
 
@@ -530,6 +531,8 @@ VS_TEXTURED_OUTPUT VSParticleBillBoardTextured(VS_TEXTURED_INPUT input)
 	VS_TEXTURED_OUTPUT output;
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
 	output.uv = input.uv;
+
+
 	return (output);
 
 }
@@ -537,6 +540,8 @@ float4 PSBillBoardTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
 
 	float4 cColor = gtxtBillboardTexture.Sample(gssWrap, input.uv);
+	float2 uv = input.uv;
+	input.uv += gfCurrentTime * 0.125f;
 	return (cColor);
 }
 
@@ -546,7 +551,8 @@ float4 PSSmokeBillBoardTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
 
 	float4 cColor = gtxtBillboardTexture.Sample(gssWrap, input.uv);
-
+	float2 uv = input.uv;
+	input.uv += gfCurrentTime * 0.125f;
 	return (cColor);
 }
 

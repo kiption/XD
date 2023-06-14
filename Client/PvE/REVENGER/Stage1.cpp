@@ -87,19 +87,19 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[4].m_xmf3Position = XMFLOAT3(0.0f, 128.0f, 0.0f);
 	m_pLights->m_pLights[4].m_xmf3Direction = XMFLOAT3(+1.0f, -1.0f, 0.0f);
 
-	m_pLights->m_pLights[5].m_bEnable = true;
+	m_pLights->m_pLights[5].m_bEnable = false;
 	m_pLights->m_pLights[5].m_nType = SPOT_LIGHT;
 	m_pLights->m_pLights[5].m_fRange = 50.0f;
-	m_pLights->m_pLights[5].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[5].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 0.0f);
 	m_pLights->m_pLights[5].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
-	m_pLights->m_pLights[5].m_xmf4Specular = XMFLOAT4(0.8f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[5].m_xmf4Specular = XMFLOAT4(0.8f, 0.1f, 0.1f, 0.0f);
 	m_pLights->m_pLights[5].m_xmf4Emissive = XMFLOAT4(0.9f, 0.2f, 0.2f, 1.0f);
 	m_pLights->m_pLights[5].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pLights->m_pLights[5].m_xmf3Direction = XMFLOAT3(0.5f, -1.0f, 0.5f);
 	m_pLights->m_pLights[5].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
 	m_pLights->m_pLights[5].m_fFalloff = 1.0f;
 	m_pLights->m_pLights[5].m_fPhi = (float)cos(XMConvertToRadians(359.0f));
-	m_pLights->m_pLights[5].m_fTheta = (float)cos(XMConvertToRadians(15.0));
+	m_pLights->m_pLights[5].m_fTheta = (float)cos(XMConvertToRadians(1.0));
 
 	m_pLights->m_pLights[6].m_bEnable = false;
 	m_pLights->m_pLights[6].m_nType = SPOT_LIGHT;
@@ -750,10 +750,10 @@ bool Stage1::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			m_ppSpriteBillboard[0]->SetActive(!m_ppSpriteBillboard[0]->GetActive());
 			break;
 		case 'K':
-			((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveLook = true;
+			((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveMark = true;
 			break;
 		case 'J':
-			((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveLook = false;
+			((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveMark = false;
 			break;
 		default:
 			break;
@@ -798,6 +798,12 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		//m_ppSpriteBillboard[0]->m_bActive = false;
 
 	}
+	((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveMark = true;
+	m_ppFragShaders[0]->m_bActive = true;
+	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(m_ppShaders[0]->m_ppObjects[20]->GetPosition().x,
+		m_ppShaders[0]->m_ppObjects[20]->GetPosition().y +6.5f, m_ppShaders[0]->m_ppObjects[20]->GetPosition().z);
+	m_ppFragShaders[0]->ParticlePosition = m_pBillboardShader[1]->m_ppObjects[0]->GetPosition();
+
 	CValkanObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
 	XMFLOAT3 Position2P = m_ppShaders[0]->m_ppObjects[5]->GetPosition();
 	XMFLOAT3 Look2P = m_ppShaders[0]->m_ppObjects[5]->GetLook();

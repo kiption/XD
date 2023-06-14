@@ -72,7 +72,7 @@ public:
 
 	float						m_fElapsedTimes = 0.0f;
 	float						m_fDuration = 1.0f;
-	float						m_fExplosionSpeed = 10.0f;
+	float						m_fExplosionSpeed = 3.0f;
 	float						m_fExplosionRotation = 720.0f;
 	XMFLOAT3 m_pxmf3SphereVectors[EXPLOSION_DEBRISES];
 };
