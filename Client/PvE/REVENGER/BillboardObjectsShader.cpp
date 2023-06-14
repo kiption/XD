@@ -43,7 +43,7 @@ XMFLOAT3 RandomBillboardPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int
 
 	return(xmf3Position);
 }
-D3D12_INPUT_LAYOUT_DESC CrossHairShader::CreateInputLayout(int nPipelineState)
+D3D12_INPUT_LAYOUT_DESC BloodMarkShader::CreateInputLayout(int nPipelineState)
 {
 	UINT nInputElementDescs = 2;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
@@ -58,7 +58,7 @@ D3D12_INPUT_LAYOUT_DESC CrossHairShader::CreateInputLayout(int nPipelineState)
 	return(d3dInputLayoutDesc);
 }
 
-D3D12_BLEND_DESC CrossHairShader::CreateBlendState(int nPipelineState)
+D3D12_BLEND_DESC BloodMarkShader::CreateBlendState(int nPipelineState)
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
 	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
@@ -78,7 +78,7 @@ D3D12_BLEND_DESC CrossHairShader::CreateBlendState(int nPipelineState)
 	return(d3dBlendDesc);
 }
 
-void CrossHairShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
+void BloodMarkShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
@@ -87,32 +87,27 @@ void CrossHairShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D
 		nRenderTargets, pdxgiRtvFormats, dxgiDsvFormat, nPipelineState);
 }
 
-D3D12_SHADER_BYTECODE CrossHairShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE BloodMarkShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
 }
 
-D3D12_SHADER_BYTECODE CrossHairShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE BloodMarkShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
 }
 
-void CrossHairShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+void BloodMarkShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/SpaceCross.dds", RESOURCE_TEXTURE2D, 0);
-	CTexture* ppSpriteTextures2 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures2->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/SpaceRedCross.dds", RESOURCE_TEXTURE2D, 0);
-	CTexture* ppSpriteTextures3 = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures3->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/SpaceCross.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/blood.dds", RESOURCE_TEXTURE2D, 0);
+
 
 	CMaterial* pSpriteMaterial = new CMaterial(1);
-	CMaterial* pSpriteMaterial2 = new CMaterial(1);
-	CMaterial* pSpriteMaterial3 = new CMaterial(1);
+
 
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
-	pSpriteMaterial2->SetTexture(ppSpriteTextures2, 0);
-	pSpriteMaterial3->SetTexture(ppSpriteTextures3, 0);
+
 
 
 	CTexturedRectMesh* pSpriteMesh;
@@ -121,8 +116,7 @@ void CrossHairShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_nObjects = 1;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures, 0, 15);
-	SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures2, 0, 15);
-	SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures3, 0, 15);
+
 
 	m_ppObjects = new CGameObject * [m_nObjects];
 
@@ -140,32 +134,35 @@ void CrossHairShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 
 }
 
-void CrossHairShader::ReleaseObjects()
+void BloodMarkShader::ReleaseObjects()
 {
 	BillboardShader::ReleaseObjects();
 }
 
-void CrossHairShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+void BloodMarkShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	xmf3CameraPosition = pCamera->GetPosition();
-	XMFLOAT3 xmf3CameraLook = pCamera->GetLookVector();
-	CPlayer* pPlayer = pCamera->GetPlayer();
-	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
-	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
-	xmf3Position = Vector3::Add(xmf3CameraPosition, Vector3::ScalarProduct(xmf3CameraLook, 60.0f, false));
-	m_ppObjects[0]->SetPosition(xmf3CameraPosition.x, xmf3CameraPosition.x, xmf3CameraPosition.z + 30.0f);
-	m_ppObjects[0]->SetLookAt(xmf3CameraLook, XMFLOAT3(0, 1, 0));
+	if (m_bActiveLook)
+	{
 
-	BillboardShader::Render(pd3dCommandList, pCamera, nPipelineState);
+		xmf3CameraPosition = pCamera->GetPosition();
+		XMFLOAT3 xmf3CameraLook = pCamera->GetLookVector();
+		CPlayer* pPlayer = pCamera->GetPlayer();
+		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
+		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
+
+		m_ppObjects[0]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0, 1, 0));
+
+		BillboardShader::Render(pd3dCommandList, pCamera, nPipelineState);
+	}
 }
 
-void CrossHairShader::AnimateObjects(float fTimeElapsed)
+void BloodMarkShader::AnimateObjects(float fTimeElapsed)
 {
 
 	BillboardShader::AnimateObjects(fTimeElapsed);
 }
 
-void CrossHairShader::ReleaseUploadBuffers()
+void BloodMarkShader::ReleaseUploadBuffers()
 {
 	BillboardShader::ReleaseUploadBuffers();
 }
@@ -593,7 +590,7 @@ void HelicopterSparkBillboard::AnimateObjects(float fTimeElapsed)
 			{
 				gravity = XMFLOAT3(0, -RandomBillboard(2.0f, 3.0f), 0);
 				m_fExplosionSpeed = RandomBillboard(2.0f, 6.5f);
-				
+
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
 				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + gravity.x;
 				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;
@@ -603,7 +600,7 @@ void HelicopterSparkBillboard::AnimateObjects(float fTimeElapsed)
 				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
 				m_ppObjects[i]->m_xmf4x4ToParent._42 = m_pxmf4x4Transforms[i]._42;
 				m_ppObjects[i]->m_xmf4x4ToParent._43 = m_pxmf4x4Transforms[i]._43;
-			
+
 			}
 		}
 		else
@@ -612,7 +609,7 @@ void HelicopterSparkBillboard::AnimateObjects(float fTimeElapsed)
 			m_fElapsedTimes = 0.0f;
 		}
 	}
-	
+
 
 	BillboardShader::AnimateObjects(fTimeElapsed);
 }

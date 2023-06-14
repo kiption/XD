@@ -5,11 +5,11 @@
 
 class SceneManager;
 
-class CrossHairShader : public BillboardShader
+class BloodMarkShader : public BillboardShader
 {
 public:
-	CrossHairShader() {};
-	virtual ~CrossHairShader() {};
+	BloodMarkShader() {};
+	virtual ~BloodMarkShader() {};
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);

@@ -174,8 +174,8 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 
 
 	float4 uvs[MAX_LIGHTS];
-	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW));
-	//float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
+	//float4 cIllumination = Lighting(input.positionW, normalize(input.normalW));
+	float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
 
 	return(lerp(cColor, cIllumination, 0.5f));
 }
@@ -245,7 +245,6 @@ float4 PSParticleStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
 	float3 normalW;
 	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
-
 	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	{
 		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
@@ -354,7 +353,7 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 	output.tangentW = mul(input.tangent, (float3x3)mtxVertexToBoneWorld).xyz;
 	output.bitangentW = mul(input.bitangent, (float3x3)mtxVertexToBoneWorld).xyz;
 
-	//	output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
+	//output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
 
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
@@ -492,6 +491,23 @@ float4 PSIllumiTextured(VS_TEXTURED_OUTPUT input, uint nPrimitiveID : SV_Primiti
 
 	return(cColor);
 }
+
+VS_TEXTURED_OUTPUT VSSpritTextured(VS_TEXTURED_INPUT input)
+{
+	VS_TEXTURED_OUTPUT output;
+
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	output.uv = input.uv;
+
+	return(output);
+}
+
+float4 PSSpritTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
+{
+	float4 cColor = gtxtBillboardTexture.Sample(gssWrap, input.uv);
+
+	return(cColor);
+}
 VS_TEXTURED_OUTPUT VSSpriteAnimation(VS_TEXTURED_INPUT input)
 {
 	VS_TEXTURED_OUTPUT output;
@@ -534,22 +550,7 @@ float4 PSSmokeBillBoardTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 	return (cColor);
 }
 
-VS_TEXTURED_OUTPUT VSSpritTextured(VS_TEXTURED_INPUT input)
-{
-	VS_TEXTURED_OUTPUT output;
 
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
-	output.uv = input.uv;
-
-	return(output);
-}
-
-float4 PSSpritTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
-{
-	float4 cColor = gtxtBillboardTexture.Sample(gssWrap, input.uv);
-
-	return(cColor);
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //

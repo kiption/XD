@@ -56,7 +56,7 @@ class CFragmentsShader : public CStandardShader
 public:
 	CFragmentsShader() {};
 	virtual ~CFragmentsShader() {};
-
+	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual void ReleaseObjects();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
@@ -71,7 +71,7 @@ public:
 	XMFLOAT4X4					m_pxmf4x4Transforms[EXPLOSION_DEBRISES];
 
 	float						m_fElapsedTimes = 0.0f;
-	float						m_fDuration = 5.0f;
+	float						m_fDuration = 1.0f;
 	float						m_fExplosionSpeed = 10.0f;
 	float						m_fExplosionRotation = 720.0f;
 	XMFLOAT3 m_pxmf3SphereVectors[EXPLOSION_DEBRISES];

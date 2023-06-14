@@ -138,51 +138,6 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	}
 	//if (m_nCurScene == SCENE2STAGE)
 	//{
-	//	m_nObjects = 12;
-	//	m_ppObjects = new CGameObject * [m_nObjects];
-
-	//	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
-	//	CCubeMeshIlluminated* pCubeMesh = new CCubeMeshIlluminated(pd3dDevice, pd3dCommandList, 300.0f, 300.0f, 300.0f);
-	//	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-
-	//	CMaterial* pPlaneMaterial = new CMaterial(1);
-	//	pPlaneMaterial->SetReflection(1);
-	//	m_ppObjects[0] = new CGameObject(1);
-	//	m_ppObjects[0]->SetMesh(pPlaneMesh);
-	//	m_ppObjects[0]->SetMaterial(0, pPlaneMaterial);
-	//	m_ppObjects[0]->SetPosition(XMFLOAT3(1500.0f, 6.0, 2000.0f));
-
-
-	//	CMaterial* pMaterial = new CMaterial(10);
-	//	pMaterial->SetReflection(10);
-	//	for (int x = 1; x < m_nObjects; x++)
-	//	{
-	//		CLoadedModelInfo* pSoldierModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL);
-	//		m_ppObjects[x] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSoldierModel, 7);
-	//		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	//		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.85f);
-	//		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackPosition(0, 0);
-
-	//		XMFLOAT3 xmf3Position = XMFLOAT3(1610.0, 146.0f, 2250.0f);
-	//		xmf3Position.y = pTerrain->GetHeight(xmf3Position.x, xmf3Position.z);
-	//		m_ppObjects[x]->SetMaterial(0, pMaterial);
-	//		m_ppObjects[x]->SetScale(7.0, 7.0, 7.0);
-	//		m_ppObjects[x]->SetPosition(xmf3Position.x + x * 10.0f, xmf3Position.y, xmf3Position.z);
-	//		if (pSoldierModel) delete pSoldierModel;
-	//	}
-
-	//	CMaterial* pMapMaterial = new CMaterial(1);
-	//	pMapMaterial->SetReflection(1);
-	//	CGameObject* pSceneModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/GameObject.bin", NULL);
-
-	//	m_ppObjects[11] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	//	m_ppObjects[11]->SetChild(pSceneModel, false);
-	//	m_ppObjects[11]->SetMaterial(0, pMapMaterial);
-	//	m_ppObjects[11]->Rotate(0.0f, 0.0f, 0.0f);
-	//	m_ppObjects[11]->SetScale(20.0, 20.0, 20.0);
-	//	m_ppObjects[11]->SetPosition(1500.0, -3.5, 1500.0);
-	//	pSceneModel->AddRef();
-
 	//}
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

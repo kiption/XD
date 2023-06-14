@@ -76,9 +76,6 @@
     <ClInclude Include="WICTextureLoader12.h">
       <Filter>Asset</Filter>
     </ClInclude>
-    <ClInclude Include="REVENGER.h">
-      <Filter>Client\Main</Filter>
-    </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Client\Player</Filter>
     </ClInclude>
@@ -190,6 +187,9 @@
     <ClInclude Include="BoundingWire.h">
       <Filter>Client\Shader\Header</Filter>
     </ClInclude>
+    <ClInclude Include="REVENGER.h">
+      <Filter>Client\Mesh\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSound.cpp">
@@ -270,9 +270,6 @@
     <ClCompile Include="ParticleObject.cpp">
       <Filter>Client\Object\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Skybox.cpp">
-      <Filter>Client\Object\Source</Filter>
-    </ClCompile>
     <ClCompile Include="Terrain.cpp">
       <Filter>Client\Object\Source</Filter>
     </ClCompile>
@@ -305,6 +302,9 @@
     </ClCompile>
     <ClCompile Include="BoundingWire.cpp">
       <Filter>Client\Shader\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Skybox.cpp">
+      <Filter>Client\Player</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

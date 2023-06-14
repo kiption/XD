@@ -335,7 +335,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
 		::ReleaseCapture();
-		
+
 		break;
 	case WM_MOUSEMOVE:
 		break;
@@ -435,17 +435,17 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	}
 	case WM_SIZE:
 		break;
-	//case WM_LBUTTONDOWN:
-	//case WM_RBUTTONDOWN:
-	//case WM_LBUTTONUP:
-	//case WM_RBUTTONUP:
-	//case WM_MOUSEMOVE:
-		//OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
-		//break;
-	//case WM_KEYDOWN:
-	//case WM_KEYUP:
-	//	OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
-	//	break;
+		//case WM_LBUTTONDOWN:
+		//case WM_RBUTTONDOWN:
+		//case WM_LBUTTONUP:
+		//case WM_RBUTTONUP:
+		//case WM_MOUSEMOVE:
+			//OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+			//break;
+		//case WM_KEYDOWN:
+		//case WM_KEYUP:
+		//	OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+		//	break;
 	}
 	return(0);
 }
@@ -619,7 +619,7 @@ void CGameFramework::ProcessInput()
 		}
 
 		if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
-			
+
 
 			if (m_nMode != OPENINGSCENE)
 			{
@@ -658,7 +658,7 @@ void CGameFramework::ProcessInput()
 			}
 
 			if (m_nMode == SCENE1STAGE) {
-			
+
 				if (dwDirection && WM_KEYDOWN) m_pPlayer->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
 
 			}
@@ -676,13 +676,34 @@ void CGameFramework::AnimateObjects()
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed());
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 	//if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
+	if (m_nMode == SCENE1STAGE)
+	{
+		((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->SetActive(true);
+		((Stage1*)m_pScene)->m_pBillboardShader[3]->SetActive(true);
+		((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition.x = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->GetPosition().x;
+		((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition.y = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->GetPosition().y+10.0f;
+		((Stage1*)m_pScene)->m_ppFragShaders[0]->ParticlePosition.z = ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->GetPosition().z;
+
+		((Stage1*)m_pScene)->m_pBillboardShader[3]->ParticlePosition = XMFLOAT3(61.0, 20.0, 1170.0);
+		((Stage1*)m_pScene)->m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->GetPosition().x,
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->GetPosition().y+10.0f, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20]->GetPosition().z);
+
+		((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->GetPosition().x
+		,((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->GetPosition().y+10.0, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->GetPosition().z);
+
+		((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[1]->SetPosition(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->GetPosition().x
+			, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->GetPosition().y + 10.0, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->GetPosition().z);
+
+	}
+
+
 	((CHumanPlayer*)m_pPlayer)->m_fShootDelay += m_GameTimer.GetTimeElapsed();
 	if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.1)
 	{
 		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
 		((CHumanPlayer*)m_pPlayer)->m_fShootDelay = 0.0f;
 	}
-	if (ShootKey==true)
+	if (ShootKey == true)
 	{
 		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.8, 0.4, 0.1, 1.0);
 	}
@@ -756,7 +777,7 @@ void CGameFramework::FrameAdvance()
 	if (m_nMode == SCENE2STAGE)m_GameTimer.Tick(30.0f);
 	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick(60.0f);
 
-	
+
 
 	AnimateObjects();
 
@@ -783,8 +804,8 @@ void CGameFramework::FrameAdvance()
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
 
-//	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-//	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * ::gnRtvDescriptorIncrementSize);
+	//	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	//	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * ::gnRtvDescriptorIncrementSize);
 
 	float pfClearColor[4] = { 0.0f, 0.0f, 0.0f, 0.5f };
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], pfClearColor/*Colors::Azure*/, 0, NULL);
@@ -792,6 +813,10 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], TRUE, &d3dDsvCPUDescriptorHandle);
 
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
+	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+
+	if (m_nMode == SCENE1STAGE)
+		((Stage1*)m_pScene)->BillBoardRender(m_pd3dCommandList, m_pCamera);
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
@@ -1046,7 +1071,7 @@ void CGameFramework::FrameAdvance()
 	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
 	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
-}
+	}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -1109,7 +1134,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 		}
 		}
 	}
-}
+		}
 
 #ifdef _WITH_DIRECT2D
 void CGameFramework::CreateDirect2DDevice()
@@ -1148,7 +1173,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-	}
+}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -1620,7 +1645,7 @@ void CGameFramework::CreateDirect2DDevice()
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
 #endif
-}
+	}
 #endif
 
 
@@ -1966,7 +1991,7 @@ void CGameFramework::CollisionDummiesObjects(int id)
 	if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17 + id])
 	{
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17 + id]->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17 + id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17 + id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	}
 }
 
