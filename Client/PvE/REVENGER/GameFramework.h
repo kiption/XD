@@ -213,6 +213,13 @@ public:
 	int m_occupationnum = 0;
 	queue<BulletPos> m_shoot_info;
 
+	wchar_t killNPCprint[100];
+	wchar_t occupationPrint[100];
+	wchar_t SurviveSecPrint[20];
+	wchar_t FlyAtkPrint[20];
+	wchar_t KillArmyPrint[20];
+
+
 	bool W_KEY, A_KEY, S_KEY, D_KEY, SPACE_KEY,SHOOT_KEY = false;
 //==================================================
 
