@@ -57,7 +57,7 @@ enum NPCType { NPC_HELICOPTER, NPC_ARMY };
 
 bool ConnectingServer = false;
 constexpr int HelicopterNum = 5;
-constexpr int ArmyNum = 0;
+constexpr int ArmyNum = 15;
 
 struct Node
 {
