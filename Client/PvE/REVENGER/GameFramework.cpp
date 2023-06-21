@@ -855,7 +855,7 @@ void CGameFramework::FrameAdvance()
 		// Opening
 		D2D_POINT_2F D2_OpeningUI = { FRAME_BUFFER_WIDTH / 6,0.0f };
 		D2D_RECT_F D2_OpeningUIRect = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[25] : m_pd2dfxGaussianBlur[25], &D2_OpeningUI, &D2_OpeningUIRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[25], &D2_OpeningUI, &D2_OpeningUIRect);
 	}
 
 	else if (m_nMode = SCENE1STAGE) {
@@ -988,9 +988,9 @@ void CGameFramework::FrameAdvance()
 		switch (m_mainmissionnum)
 		{
 		case 0:
-		{
+		{	
 			int killNPC = 20 - m_remainNPC;
-			wchar_t killNPCprint[20];
+			
 			_itow_s(killNPC, killNPCprint, sizeof(killNPCprint), 10);
 			D2D1_RECT_F D2_KillNPCText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 59, (FRAME_BUFFER_HEIGHT / 16) * 3, (FRAME_BUFFER_WIDTH / 64) * 61, (FRAME_BUFFER_HEIGHT / 16) * 3);
 			m_pd2dDeviceContext->DrawTextW(killNPCprint, (UINT32)wcslen(killNPCprint), m_pdwFont, &D2_KillNPCText, m_pd2dbrText);
@@ -998,7 +998,7 @@ void CGameFramework::FrameAdvance()
 		break;
 		case 1:
 		{
-			wchar_t occupationPrint[20];
+			
 			_itow_s(m_occupationnum, occupationPrint, sizeof(occupationPrint), 10);
 			D2D1_RECT_F D2_OccupationText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 57, (FRAME_BUFFER_HEIGHT / 16) * 3, (FRAME_BUFFER_WIDTH / 64) * 59, (FRAME_BUFFER_HEIGHT / 16) * 3);
 			m_pd2dDeviceContext->DrawTextW(occupationPrint, (UINT32)wcslen(occupationPrint), m_pdwFont, &D2_OccupationText, m_pd2dbrText);
@@ -1011,7 +1011,7 @@ void CGameFramework::FrameAdvance()
 			{
 			case 0:
 			{
-				wchar_t SurviveSecPrint[20];
+				
 				_itow_s(m_survive, SurviveSecPrint, sizeof(SurviveSecPrint), 10);
 				D2D1_RECT_F D2_Survive30sText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 29, (FRAME_BUFFER_HEIGHT / 64) * 25, (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 64) * 25);
 				m_pd2dDeviceContext->DrawTextW(SurviveSecPrint, (UINT32)wcslen(SurviveSecPrint), m_pdwFont, &D2_Survive30sText, m_pd2dbrText);
@@ -1019,7 +1019,7 @@ void CGameFramework::FrameAdvance()
 			break;
 			case 1:
 			{
-				wchar_t FlyAtkPrint[20];
+				
 				_itow_s(m_AttackFly, FlyAtkPrint, sizeof(FlyAtkPrint), 10);
 				D2D1_RECT_F D2_FlyAttackText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 29, (FRAME_BUFFER_HEIGHT / 64) * 25, (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 64) * 25);
 				m_pd2dDeviceContext->DrawTextW(FlyAtkPrint, (UINT32)wcslen(FlyAtkPrint), m_pdwFont, &D2_FlyAttackText, m_pd2dbrText);
@@ -1027,7 +1027,7 @@ void CGameFramework::FrameAdvance()
 			break;
 			case 2:
 			{
-				wchar_t KillArmyPrint[20];
+				
 				_itow_s(m_killArmy, KillArmyPrint, sizeof(KillArmyPrint), 10);
 				D2D1_RECT_F D2_ExecutionText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 29, (FRAME_BUFFER_HEIGHT / 64) * 25, (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 64) * 25);
 				m_pd2dDeviceContext->DrawTextW(KillArmyPrint, (UINT32)wcslen(KillArmyPrint), m_pdwFont, &D2_ExecutionText, m_pd2dbrText);

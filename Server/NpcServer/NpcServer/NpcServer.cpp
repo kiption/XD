@@ -53,10 +53,11 @@ mutex servertime_lock;	// 서버시간 lock
 
 enum NPCState { NPC_IDLE, NPC_CHASE, NPC_ST_ATK, NPC_DEATH };
 enum Hit_target { g_none, g_body, g_profeller };
-
-
+enum NPCType { NPC_HELICOPTER, NPC_ARMY };
 
 bool ConnectingServer = false;
+constexpr int HelicopterNum = 5;
+constexpr int ArmyNum = 0;
 
 struct Node
 {
@@ -204,6 +205,7 @@ public:
 
 	int id;
 	char name[NAME_SIZE];
+	short type;
 
 	short state;	// PLAYER_STATE
 	int hp;
@@ -348,32 +350,62 @@ public:
 	void NPC_State_Manegement(int state);													// 상태 관리
 	void Caculation_Distance(XMFLOAT3 vec, int id);											// 범위 내 플레이어 탐색
 
+	// 1. Helicopter
 	// State
 		// Idle
-	void MoveToNode();																		// 지정된 노드를 찾아가며 이동 - Idle
-	void UpdateCurrentNodeIndex();															// 노드 변환 시 다음 노드 지정
-	void MoveChangeIdle();																	// Idle 상태로 전환하면서 세팅
+	void		H_MoveToNode();																		// 지정된 노드를 찾아가며 이동 - Idle
+	void		H_UpdateCurrentNodeIndex();															// 노드 변환 시 다음 노드 지정
+	void		H_MoveChangeIdle();																	// Idle 상태로 전환하면서 세팅
 
 	// State
 		// Chase
-	bool IsUserOnSafeZone(int user_City);													// User가 안전지대에 존재하는 지 확인
-	int GetUserCity();																		// User가 속한 도시 확인
-	int FindUserNode(int user_City);														// User가 속한 도시의 노드 확인
-	void IsPathMove();																		// Path가 있다면 해당 Path대로 이동
-	void PlayerChasing();																	// Chase 상태에서 동작하는 함수
-	vector<int>AStarSearch(int startNode, int targetNode, int user_City);					// 길찾기 알고리즘
+	bool		H_IsUserOnSafeZone(int user_City);													// User가 안전지대에 존재하는 지 확인
+	int			H_GetUserCity();																	// User가 속한 도시 확인
+	int			H_FindUserNode(int user_City);														// User가 속한 도시의 노드 확인
+	void		H_IsPathMove();																		// Path가 있다면 해당 Path대로 이동
+	void		H_PlayerChasing();																	// Chase 상태에서 동작하는 함수
+	vector<int> H_AStarSearch(int startNode, int targetNode, int user_City);						// 길찾기 알고리즘
 
 	// State
 		// Attack
-	bool PlayerDetact();																	// 뷰 프러스텀 내의 플레이어 탐색
-	void SetFrustum();																		// 프러스텀 설정
-	void PlayerAttack();																	// Attack 상태에서 동작하는 함수
+	bool		H_PlayerDetact();																	// 뷰 프러스텀 내의 플레이어 탐색
+	void		H_SetFrustum();																		// 프러스텀 설정
+	void		H_PlayerAttack();																	// Attack 상태에서 동작하는 함수
 
 	// State
 		// Death
-	void NPC_Damege_Calc(int id);															// 플레이어 ID 값 받아서 데미지 계산
-	void NPC_Check_HP();																	// HP 계산
-	void NPC_Death_motion();																// HP 0
+	void		H_NPC_Damege_Calc(int id);															// 플레이어 ID 값 받아서 데미지 계산
+	void		H_NPC_Check_HP();																	// HP 계산
+	void		H_NPC_Death_motion();																// HP 0
+
+	// 2. Army
+	// State
+		// Idle
+	void		A_MoveToNode();																		// 지정된 노드를 찾아가며 이동 - Idle
+	void		A_UpdateCurrentNodeIndex();															// 노드 변환 시 다음 노드 지정
+	void		A_MoveChangeIdle();																	// Idle 상태로 전환하면서 세팅
+
+	// State
+		// Chase
+	bool		A_IsUserOnSafeZone(int user_City);													// User가 안전지대에 존재하는 지 확인
+	int			A_GetUserCity();																	// User가 속한 도시 확인
+	int			A_FindUserNode(int user_City);														// User가 속한 도시의 노드 확인
+	void		A_IsPathMove();																		// Path가 있다면 해당 Path대로 이동
+	void		A_PlayerChasing();																	// Chase 상태에서 동작하는 함수
+	vector<int> A_AStarSearch(int startNode, int targetNode, int user_City);						// 길찾기 알고리즘
+
+	// State
+		// Attack
+	bool		A_PlayerDetact();																	// 뷰 프러스텀 내의 플레이어 탐색
+	void		A_SetFrustum();																		// 프러스텀 설정
+	void		A_PlayerAttack();																	// Attack 상태에서 동작하는 함수
+
+	// State
+		// Death
+	void		A_NPC_Damege_Calc(int id);															// 플레이어 ID 값 받아서 데미지 계산
+	void		A_NPC_Check_HP();																	// HP 계산
+	void		A_NPC_Death_motion();																// HP 0
+
 };
 
 float NPC::CalculateYawToTarget(const XMFLOAT3& targetPosition) const
@@ -522,7 +554,7 @@ float NPC::getRandomOffset(float min, float max)
 bool NPC::CheckChaseState()
 {
 	if (m_chaseID != -1) {
-		int userCity = GetUserCity();
+		int userCity = H_GetUserCity();
 		int npcCity = m_currentNodeIndex / 4;
 		if (npcCity == userCity)
 		{
@@ -539,49 +571,62 @@ bool NPC::CheckChaseState()
 }
 void NPC::NPC_State_Manegement(int state)
 {
-	switch (m_state)
+	switch (type)
 	{
-	case NPC_IDLE:
-		MoveToNode();
-		if (CheckChaseState()) {
-			m_state = NPC_CHASE;
-		}
-		break;
-	case NPC_CHASE:
-		if (!CheckChaseState()) {
-			m_state = NPC_IDLE;
+	case NPC_HELICOPTER:
+	{
+		switch (m_state)
+		{
+		case NPC_IDLE:
+			H_MoveToNode();
+			if (CheckChaseState()) {
+				m_state = NPC_CHASE;
+			}
+			break;
+		case NPC_CHASE:
+			if (!CheckChaseState()) {
+				m_state = NPC_IDLE;
+				break;
+			}
+			H_PlayerChasing();
+			if (H_PlayerDetact())
+				m_state = NPC_ATTACK;
+			break;
+		case NPC_ATTACK:
+			if (!H_PlayerDetact()) {
+				m_state = NPC_CHASE;
+				PrintRayCast = false;
+			}
+			else {
+				H_PlayerAttack();
+			}
+			break;
+		case NPC_DEATH:
+			if (pos.y > 0.0f)
+				H_NPC_Death_motion();
+			break;
+		default:
 			break;
 		}
-		PlayerChasing();
-		if (PlayerDetact())
-			m_state = NPC_ATTACK;
-		break;
-	case NPC_ATTACK:
-		if (!PlayerDetact()) {
-			m_state = NPC_CHASE;
-			PrintRayCast = false;
-		}
-		else {
-			PlayerAttack();
-		}
-		break;
-	case NPC_DEATH:
-		if (pos.y > 0.0f)
-			NPC_Death_motion();
-		break;
-	default:
+
+		H_NPC_Check_HP();
+		H_SetFrustum();
 		break;
 	}
+	case NPC_ARMY:
+	{
 
-	NPC_Check_HP();
-	SetFrustum();
+		break;
+	}
+	}
 }
 void NPC::Caculation_Distance(XMFLOAT3 vec, int id) // 서버에서 따로 부를 것.
 {
 	m_Distance[id] = sqrtf(pow((vec.x - pos.x), 2) + pow((vec.z - pos.z), 2));
 }
 
-void NPC::MoveToNode()
+// Helicopter
+void NPC::H_MoveToNode()
 {
 	NodeMesh currentNode = MeshInfo[m_currentNodeIndex];
 	const bool isMovingInZ = currentNode.GetMoveingSpaceZ();
@@ -594,7 +639,7 @@ void NPC::MoveToNode()
 		if (isMovingForward) pos.z += speed;
 		else pos.z -= speed;
 
-		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) UpdateCurrentNodeIndex();
+		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) H_UpdateCurrentNodeIndex();
 	}
 	else {
 		const float destination = isMovingForward ? currentNode.GetSmallX() + m_destinationRange : currentNode.GetLargeX() - m_destinationRange;
@@ -602,7 +647,7 @@ void NPC::MoveToNode()
 		if (isMovingForward) pos.x -= speed;
 		else pos.x += speed;
 
-		if ((isMovingForward && pos.x <= destination) || (!isMovingForward && pos.x >= destination)) UpdateCurrentNodeIndex();
+		if ((isMovingForward && pos.x <= destination) || (!isMovingForward && pos.x >= destination)) H_UpdateCurrentNodeIndex();
 	}
 
 	int section = m_currentNodeIndex % 4;
@@ -625,22 +670,22 @@ void NPC::MoveToNode()
 	m_rightvec = NPCcalcRightRotate();
 	m_lookvec = NPCcalcLookRotate();
 }
-void NPC::UpdateCurrentNodeIndex()
+void NPC::H_UpdateCurrentNodeIndex()
 {
 	const int cityNum = m_currentNodeIndex / 4;
 	const int nextSection = m_currentNodeIndex + 1;
 	m_currentNodeIndex = (cityNum * 4) + (nextSection % 4);
 }
-void NPC::MoveChangeIdle()
+void NPC::H_MoveChangeIdle()
 {
 
 }
 
-bool NPC::IsUserOnSafeZone(int user_City)
+bool NPC::H_IsUserOnSafeZone(int user_City)
 {
 	return (-1 < user_City < 4) ? false : true;
 }
-int NPC::GetUserCity()
+int NPC::H_GetUserCity()
 {
 	for (int i = 0; i < 4; ++i) {
 		if (m_User_Pos[m_chaseID].z < MeshInfo[i * 4 + 1].GetLargeZ() &&
@@ -652,7 +697,7 @@ int NPC::GetUserCity()
 	}
 	return -1;
 }
-int NPC::FindUserNode(int user_City)
+int NPC::H_FindUserNode(int user_City)
 {
 	for (int i = 0; i < 4; ++i) {
 		if (m_User_Pos[m_chaseID].x > MeshInfo[4 * user_City + i].GetLargeX() ||
@@ -667,7 +712,7 @@ int NPC::FindUserNode(int user_City)
 	}
 	return -1;
 }
-void NPC::IsPathMove()
+void NPC::H_IsPathMove()
 {
 	if (path.empty() || path.size() < 2)
 		return;
@@ -698,14 +743,14 @@ void NPC::IsPathMove()
 	m_rightvec = NPCcalcRightRotate();
 	m_lookvec = NPCcalcLookRotate();
 }
-void NPC::PlayerChasing()
+void NPC::H_PlayerChasing()
 {
 	// 같은 도시에 있는 지 판별
-	int user_City = GetUserCity();
-	if (user_City == -1 || IsUserOnSafeZone(user_City)) return;
+	int user_City = H_GetUserCity();
+	if (user_City == -1 || H_IsUserOnSafeZone(user_City)) return;
 
 	// 있다면 노드 검색
-	int user_node = FindUserNode(user_City);
+	int user_node = H_FindUserNode(user_City);
 	if (user_node == -1) return;
 
 	// 노드 검색 후 같은 섹션에 있는 지 판별
@@ -742,13 +787,13 @@ void NPC::PlayerChasing()
 		// path 데이터가 있다면 제거
 		path.clear();
 
-		path = AStarSearch(m_currentNodeIndex, user_node, user_City);
+		path = H_AStarSearch(m_currentNodeIndex, user_node, user_City);
 		m_targetNodeIndex = path[path.size() - 1];
 		m_currentNodeIndex = path[0];
-		IsPathMove();
+		H_IsPathMove();
 	}
 }
-vector<int> NPC::AStarSearch(int startNode, int targetNode, int user_City)
+vector<int> NPC::H_AStarSearch(int startNode, int targetNode, int user_City)
 {
 	const int m_NumTotalNode = MeshInfo.size();
 	vector<bool> visited(m_NumTotalNode, false);
@@ -802,7 +847,7 @@ vector<int> NPC::AStarSearch(int startNode, int targetNode, int user_City)
 	return temppath;
 }
 
-bool NPC::PlayerDetact()
+bool NPC::H_PlayerDetact()
 {
 	XMVECTOR PlayerPos = XMLoadFloat3(&m_User_Pos[m_chaseID]);
 
@@ -826,7 +871,7 @@ bool NPC::PlayerDetact()
 	return false;
 }
 
-void NPC::SetFrustum()
+void NPC::H_SetFrustum()
 {
 	// NPC의 위치와 Look 벡터를 가져온다.
 	XMVECTOR position = XMLoadFloat3(&pos);
@@ -865,10 +910,10 @@ void NPC::SetFrustum()
 
 	m_frustum = frustum;
 }
-void NPC::PlayerAttack()
+void NPC::H_PlayerAttack()
 {
 	// Look
-	PlayerChasing();
+	H_PlayerChasing();
 
 	// Attack
 	/* ChasePlayer{ {m_User_Pos[m_chaseID].x, m_User_Pos[m_chaseID].y, m_User_Pos[m_chaseID].z },
@@ -889,7 +934,7 @@ void NPC::PlayerAttack()
 
 	//NPCtoBuilding_collide();
 }
-void NPC::NPC_Damege_Calc(int id)
+void NPC::H_NPC_Damege_Calc(int id)
 {
 	if (m_Hit == g_body) {
 		int distance_damege = 0;
@@ -916,13 +961,366 @@ void NPC::NPC_Damege_Calc(int id)
 		m_Hit = g_none;
 	}
 }
-void NPC::NPC_Check_HP()
+void NPC::H_NPC_Check_HP()
 {
 	if ((m_BodyHP <= 0) || (m_ProfellerHP <= 0)) {
 		m_state = NPC_DEATH;
 	}
 }
-void NPC::NPC_Death_motion()
+void NPC::H_NPC_Death_motion()
+{
+	pos.y -= 6.0f;
+
+	// 빙글빙글 돌며 추락
+	pitch += 3.0f;
+
+	m_rightvec = NPCcalcRightRotate();
+	m_lookvec = NPCcalcLookRotate();
+}
+
+// Army
+void NPC::A_MoveToNode()
+{
+	NodeMesh currentNode = MeshInfo[m_currentNodeIndex];
+	const bool isMovingInZ = currentNode.GetMoveingSpaceZ();
+	const bool isMovingForward = m_currentNodeIndex % 4 < 2;
+	const float speed = m_Speed;
+
+	if (isMovingInZ) {
+		const float destination = isMovingForward ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
+
+		if (isMovingForward) pos.z += speed;
+		else pos.z -= speed;
+
+		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) H_UpdateCurrentNodeIndex();
+	}
+	else {
+		const float destination = isMovingForward ? currentNode.GetSmallX() + m_destinationRange : currentNode.GetLargeX() - m_destinationRange;
+
+		if (isMovingForward) pos.x -= speed;
+		else pos.x += speed;
+
+		if ((isMovingForward && pos.x <= destination) || (!isMovingForward && pos.x >= destination)) H_UpdateCurrentNodeIndex();
+	}
+
+	int section = m_currentNodeIndex % 4;
+
+	switch (section)
+	{
+	case 0:
+		yaw = 0.0f;
+		break;
+	case 1:
+		yaw = 270.0f;
+		break;
+	case 2:
+		yaw = 180.0f;
+		break;
+	case 3:
+		yaw = 90.0f;
+		break;
+	}
+	m_rightvec = NPCcalcRightRotate();
+	m_lookvec = NPCcalcLookRotate();
+}
+void NPC::A_UpdateCurrentNodeIndex()
+{
+	const int cityNum = m_currentNodeIndex / 4;
+	const int nextSection = m_currentNodeIndex + 1;
+	m_currentNodeIndex = (cityNum * 4) + (nextSection % 4);
+}
+void NPC::A_MoveChangeIdle()
+{
+
+}
+
+bool NPC::A_IsUserOnSafeZone(int user_City)
+{
+	return (-1 < user_City < 4) ? false : true;
+}
+int NPC::A_GetUserCity()
+{
+	for (int i = 0; i < 4; ++i) {
+		if (m_User_Pos[m_chaseID].z < MeshInfo[i * 4 + 1].GetLargeZ() &&
+			m_User_Pos[m_chaseID].z > MeshInfo[i * 4 + 3].GetSmallZ() &&
+			m_User_Pos[m_chaseID].x < MeshInfo[i * 4].GetLargeX() &&
+			m_User_Pos[m_chaseID].x > MeshInfo[i * 4 + 2].GetSmallX()) {
+			return i;
+		}
+	}
+	return -1;
+}
+int NPC::A_FindUserNode(int user_City)
+{
+	for (int i = 0; i < 4; ++i) {
+		if (m_User_Pos[m_chaseID].x > MeshInfo[4 * user_City + i].GetLargeX() ||
+			m_User_Pos[m_chaseID].x < MeshInfo[4 * user_City + i].GetSmallX() ||
+			m_User_Pos[m_chaseID].z > MeshInfo[4 * user_City + i].GetLargeZ() ||
+			m_User_Pos[m_chaseID].z < MeshInfo[4 * user_City + i].GetSmallZ()) {
+			continue;
+		}
+		else {
+			return 4 * user_City + i;
+		}
+	}
+	return -1;
+}
+void NPC::A_IsPathMove()
+{
+	if (path.empty() || path.size() < 2)
+		return;
+
+	NodeMesh currentNode = MeshInfo[path[0]];
+	NodeMesh nextNode = MeshInfo[path[1]];
+
+	const bool isMovingInZ = currentNode.GetMoveingSpaceZ();
+	const bool isMovingForward = nextNode.GetIndex() % 4 < 2;
+	const float speed = m_Speed;
+
+	float destination;
+	if (isMovingInZ) {
+		destination = isMovingForward ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
+		pos.z += isMovingForward ? speed : -speed;
+		yaw = isMovingForward ? 0.0f : 180.0f;
+
+		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) m_currentNodeIndex = nextNode.GetIndex();
+	}
+	else {
+		destination = isMovingForward ? currentNode.GetLargeX() - m_destinationRange : currentNode.GetSmallX() + m_destinationRange;
+		pos.x += isMovingForward ? speed : -speed;
+		yaw = isMovingForward ? 90.0f : 270.0f;
+
+		if ((isMovingForward && pos.x >= destination) || (!isMovingForward && pos.x <= destination)) m_currentNodeIndex = nextNode.GetIndex();
+	}
+
+	m_rightvec = NPCcalcRightRotate();
+	m_lookvec = NPCcalcLookRotate();
+}
+void NPC::A_PlayerChasing()
+{
+	// 같은 도시에 있는 지 판별
+	int user_City = A_GetUserCity();
+	if (user_City == -1 || A_IsUserOnSafeZone(user_City)) return;
+
+	// 있다면 노드 검색
+	int user_node = A_FindUserNode(user_City);
+	if (user_node == -1) return;
+
+	// 노드 검색 후 같은 섹션에 있는 지 판별
+	if (user_node == m_currentNodeIndex) {
+		if (m_Distance[m_chaseID] >= 150.0f) {
+			// 내 포지션과 유저의 포지션이 이루는 벡터를 구함
+			XMFLOAT3 positionToUser = { m_User_Pos[m_chaseID].x - pos.x, m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
+			XMFLOAT3 DefaultTemp = { 0.0f, 0.0f, 1.0f };
+
+			// xz 평면으로 투영
+			XMFLOAT3 projectedPositionToUser = { positionToUser.x, 0.0f, positionToUser.z };
+			NPCNormalize(projectedPositionToUser);
+
+			// DefalutTemp, 가야하는 방향 사이의 각도 구하기
+			float angleRadian = atan2(DefaultTemp.z, DefaultTemp.x) - atan2(projectedPositionToUser.z, projectedPositionToUser.x);
+			float angleDegree = XMConvertToDegrees(angleRadian);
+
+			yaw = angleDegree;
+
+			if (yaw > 360.0f)
+				yaw -= 360.0f;
+			if (yaw < 0.0f)
+				yaw += 360.0f;
+
+			// 회전한 look 벡터를 통해 이동 (look은 계산하기 전에 노멀라이즈)
+			m_lookvec = NPCcalcLookRotate();
+			m_rightvec = NPCcalcRightRotate();
+
+			pos.x += m_lookvec.x * m_Speed;
+			pos.z += m_lookvec.z * m_Speed;
+		}
+	}
+	else {
+		// path 데이터가 있다면 제거
+		path.clear();
+
+		path = A_AStarSearch(m_currentNodeIndex, user_node, user_City);
+		m_targetNodeIndex = path[path.size() - 1];
+		m_currentNodeIndex = path[0];
+		A_IsPathMove();
+	}
+}
+vector<int> NPC::A_AStarSearch(int startNode, int targetNode, int user_City)
+{
+	const int m_NumTotalNode = MeshInfo.size();
+	vector<bool> visited(m_NumTotalNode, false);
+	vector<float> gScore(m_NumTotalNode, numeric_limits<float>::infinity());
+	vector<float> fScore(m_NumTotalNode, numeric_limits<float>::infinity());
+	vector<Node*> cameFrom(m_NumTotalNode, nullptr);
+
+	gScore[startNode] = 0.0f;
+	fScore[startNode] = HeuristicEstimate(startNode, targetNode);
+
+	priority_queue<Node> openSet;
+	openSet.emplace(startNode, fScore[startNode], gScore[startNode], nullptr);
+	visited[startNode] = true;
+
+	vector<int> temppath;
+	while (!openSet.empty()) {
+		if (cameFrom[targetNode] != nullptr) {
+			Node* node = cameFrom[targetNode];
+			while (node != nullptr) {
+				temppath.push_back(node->index);
+				node = node->parent;
+			}
+			reverse(temppath.begin(), temppath.end());
+			temppath.push_back(targetNode);
+			break;
+		}
+
+		Node current = openSet.top();
+		openSet.pop();
+
+		visited[current.index] = true;
+
+		for (int neighborIndex : MeshInfo[current.index].neighbor_mesh) {
+			if (user_City != neighborIndex / 4)
+				continue;
+
+			if (!visited[neighborIndex]) {
+				float tentative_gScore = gScore[current.index] + DistanceBetween(current.index, neighborIndex);
+
+				if (tentative_gScore < gScore[neighborIndex]) {
+					cameFrom[neighborIndex] = new Node(current);  // 복사본을 만들어서 cameFrom에 저장
+					gScore[neighborIndex] = tentative_gScore;
+					fScore[neighborIndex] = gScore[neighborIndex] + HeuristicEstimate(neighborIndex, targetNode);
+
+					openSet.emplace(neighborIndex, fScore[neighborIndex], gScore[neighborIndex], cameFrom[neighborIndex]);
+				}
+			}
+		}
+	}
+
+	return temppath;
+}
+
+bool NPC::A_PlayerDetact()
+{
+	XMVECTOR PlayerPos = XMLoadFloat3(&m_User_Pos[m_chaseID]);
+
+	XMVECTOR NPCPos = XMLoadFloat3(&pos);
+	XMVECTOR NPCLook = XMLoadFloat3(&m_lookvec);
+	XMVECTOR NPCToPlayer = XMVectorSubtract(PlayerPos, NPCPos);
+
+	// 플레이어의 위치가 NPC가 바라보는 방향에 있어야만 충돌로 간주한다.
+	if (XMVectorGetX(XMVector3Dot(NPCToPlayer, NPCLook)) > 0)
+	{
+		// 프러스텀과 Player의 bounding sphere와의 거리를 구한다.
+		float distance = XMVectorGetX(XMVector3Length(NPCToPlayer));
+
+		// 거리가 bounding sphere의 반지름보다 작으면 충돌했다고 판단한다.
+		if (distance < 200.0f)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void NPC::A_SetFrustum()
+{
+	// NPC의 위치와 Look 벡터를 가져온다.
+	XMVECTOR position = XMLoadFloat3(&pos);
+	XMVECTOR look = XMLoadFloat3(&m_lookvec);
+
+	// Frustum의 사이드 범위와 상하 범위를 설정한다.
+	float width = 100.0f;
+	float height = 100.0f;
+
+	// Frustum의 시작점을 설정한다.
+	XMVECTOR startPoint = position;
+
+	// Frustum의 끝점을 설정한다.
+	XMVECTOR endPoint = position + (look * 200.0f);
+
+	// Frustum의 Up 벡터를 설정한다.
+	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	// Frustum을 생성하고 설정한다.
+	BoundingFrustum frustum;
+
+	// Frustum의 Origin을 설정한다.
+	XMStoreFloat3(&frustum.Origin, startPoint);
+
+	// Frustum의 Orientation을 설정한다.
+	XMMATRIX viewMatrix = XMMatrixLookAtRH(startPoint, endPoint, up);
+	XMVECTOR quaternion = XMQuaternionRotationMatrix(viewMatrix);
+	XMStoreFloat4(&frustum.Orientation, quaternion);
+
+	frustum.RightSlope = width / 50.0f;
+	frustum.LeftSlope = width / -50.0f;
+	frustum.TopSlope = height / 50.0f;
+	frustum.BottomSlope = height / -50.0f;
+	frustum.Near = 0.1f;
+	frustum.Far = 50.0f;
+
+	m_frustum = frustum;
+}
+void NPC::A_PlayerAttack()
+{
+	// Look
+	A_PlayerChasing();
+
+	// Attack
+	/* ChasePlayer{ {m_User_Pos[m_chaseID].x, m_User_Pos[m_chaseID].y, m_User_Pos[m_chaseID].z },
+		HELI_BBSIZE_X, HELI_BBSIZE_X, HELI_BBSIZE_X };
+	XMFLOAT3 NPC_bullet_Pos = { pos.x, pos.y , pos.z };
+	XMFLOAT3 NPC_Look_Vec = m_lookvec;
+	XMFLOAT3 NPC_result;
+	NPC_result = MyRaycast_InfiniteRay(NPC_bullet_Pos, NPC_Look_Vec, ChasePlayer);
+	if (NPC_result != m_VectorMAX) {
+		PrintRayCast = false;
+	}
+	else {
+		PrintRayCast = true;
+	}*/
+
+	XMFLOAT3 AttackVec = { m_User_Pos[m_chaseID].x - pos.x,m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
+	m_AttackVec = NPCNormalize(AttackVec);
+
+	//NPCtoBuilding_collide();
+}
+void NPC::A_NPC_Damege_Calc(int id)
+{
+	if (m_Hit == g_body) {
+		int distance_damege = 0;
+		if (((int)(m_Distance[id])) > 2000) {
+			distance_damege = (2000 / 100) * 5;
+		}
+		else {
+			distance_damege = ((((int)(m_Distance[id])) / 100) * 5);
+		}
+		int damege = (20 * distance_damege) / m_defence;
+		m_BodyHP -= damege;
+		m_Hit = g_none;
+	}
+	else if (m_Hit == g_profeller) {
+		int distance_damege = 0;
+		if (((int)(m_Distance[id])) > 2000) {
+			distance_damege = (2000 / 100) * 5;
+		}
+		else {
+			distance_damege = ((((int)(m_Distance[id])) / 100) * 5);
+		}
+		int damege = (20 * distance_damege) / m_defence;
+		m_ProfellerHP -= damege;
+		m_Hit = g_none;
+	}
+}
+void NPC::A_NPC_Check_HP()
+{
+	if ((m_BodyHP <= 0) || (m_ProfellerHP <= 0)) {
+		m_state = NPC_DEATH;
+	}
+}
+void NPC::A_NPC_Death_motion()
 {
 	pos.y -= 6.0f;
 
@@ -1430,9 +1828,10 @@ void do_worker()
 
 //======================================================================
 void initNpc() {
-	for (int i{}; i < MAX_NPCS; i++) {
+	for (int i{}; i < HelicopterNum; i++) {
 		int npc_id = i;
 		npcsInfo[i].SetID(npc_id);
+		npcsInfo[i].type = NPC_HELICOPTER;
 		random_device rd;
 		default_random_engine dre(rd());
 
@@ -1461,6 +1860,42 @@ void initNpc() {
 		npcsInfo[i].path.clear();
 		npcsInfo[i].SetTargetNodeIndex(-1);
 		g_logicservers[a_lgcsvr_num].send_npc_init_packet(npc_id);
+	}
+
+	if (MAX_NPCS != HelicopterNum) {
+		for (int i = HelicopterNum; i < MAX_NPCS; i++) {
+			int npc_id = i;
+			npcsInfo[i].SetID(npc_id);
+			npcsInfo[i].type = NPC_ARMY;
+			random_device rd;
+			default_random_engine dre(rd());
+
+			uniform_int_distribution<int>idx(0, 15);
+			//npcsInfo[i].graph = CP;
+			npcsInfo[i].SetNodeIndex(idx(dre));
+
+			float x = npcsInfo[i].getRandomOffset(MeshInfo[npcsInfo[i].GetNodeIndex()].GetSmallX(),
+				MeshInfo[npcsInfo[i].GetNodeIndex()].GetLargeX());
+			float y = 11.0f;
+			float z = npcsInfo[i].getRandomOffset(MeshInfo[npcsInfo[i].GetNodeIndex()].GetSmallZ(),
+				MeshInfo[npcsInfo[i].GetNodeIndex()].GetLargeZ());
+
+			XMFLOAT3 tpos = { x,y,z };
+			npcsInfo[i].SetPosition(tpos);
+
+			npcsInfo[i].SetRotate(0.0f, 0.0f, 0.0f);
+
+			uniform_int_distribution<int>drange(0.0f, 20.0f);
+			npcsInfo[i].SetDestinationRange(drange(dre));
+
+			uniform_real_distribution<float>SpdSet(10.0f, 20.0f);
+			float speed = SpdSet(dre);
+			npcsInfo[i].SetSpeed(speed);
+			npcsInfo[i].SetChaseID(-1);
+			npcsInfo[i].path.clear();
+			npcsInfo[i].SetTargetNodeIndex(-1);
+			g_logicservers[a_lgcsvr_num].send_npc_init_packet(npc_id);
+		}
 	}
 }
 
@@ -1526,13 +1961,17 @@ void MoveNPC()
 
 					// npc pos 확인
 
-					/*cout << "=============" << endl;
-					
-					cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
-					cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
-					cout << i << "번째 NPC의 Look: " << npcsInfo[i].m_lookvec.x << ", " << npcsInfo[i].m_lookvec.y << ", " << npcsInfo[i].m_lookvec.z << endl;
-					cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;*/
+					if (i > 8 && i < 12) {
 
+						cout << "=============" << endl;
+
+						cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
+						cout << i << "번째 NPC의 Type: " << npcsInfo[i].type << endl;
+						cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
+						cout << i << "번째 NPC의 Look: " << npcsInfo[i].m_lookvec.x << ", " << npcsInfo[i].m_lookvec.y << ", " << npcsInfo[i].m_lookvec.z << endl;
+						cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
+
+					}
 
 					//if (npcs[i].PrintRayCast) {
 					//	cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
