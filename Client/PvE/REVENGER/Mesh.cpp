@@ -249,7 +249,7 @@ CSkyBoxMesh::CSkyBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
 	m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 
-	
+	m_xmBoundingBox = BoundingBox(XMFLOAT3(0,0,0), XMFLOAT3(fx,fy,fz));
 }
 
 CSkyBoxMesh::~CSkyBoxMesh()
@@ -313,7 +313,7 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
 
 			m_xmBoundingBox = BoundingBox(XMFLOAT3(m_xmf3AABBCenter), XMFLOAT3(m_xmf3AABBExtents));
-			//m_xmBoundingOrientedBox.Orientation = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+			
 
 		}
 		else if (!strcmp(pstrToken, "<Positions>:"))

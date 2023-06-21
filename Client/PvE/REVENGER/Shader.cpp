@@ -222,6 +222,9 @@ void CShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12Graphi
 	ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets,
 	DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
 {
+
+	m_nPipelineStates = 1;
+	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 	ID3DBlob* pd3dVertexShaderBlob = NULL, * pd3dPixelShaderBlob = NULL, * pd3dGeometryShaderBlob = NULL;
 
 	::ZeroMemory(&m_d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
@@ -237,12 +240,9 @@ void CShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12Graphi
 	m_d3dPipelineStateDesc.SampleMask = UINT_MAX;
 	m_d3dPipelineStateDesc.PrimitiveTopologyType = GetPrimitiveTopologyType(nPipelineState);
 	m_d3dPipelineStateDesc.NumRenderTargets = GetNumRenderTargets(nPipelineState);
-	//m_d3dPipelineStateDesc.RTVFormats[0] = GetRTVFormat(nPipelineState, 0);
-	for (UINT i = 0; i < nRenderTargets; i++)
-	{
-		m_d3dPipelineStateDesc.RTVFormats[i] = (pdxgiRtvFormats) ? pdxgiRtvFormats[i] :  GetRTVFormat(nRenderTargets, 0);
-	}
-	m_d3dPipelineStateDesc.DSVFormat = GetDSVFormat(nRenderTargets,0);
+	for (UINT i = 0; i < GetNumRenderTargets(nPipelineState); i++)
+		m_d3dPipelineStateDesc.RTVFormats[i] = GetRTVFormat(nPipelineState, nRenderTargets);
+	m_d3dPipelineStateDesc.DSVFormat = GetDSVFormat(nRenderTargets);
 	m_d3dPipelineStateDesc.SampleDesc.Count = 1;
 	m_d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	HRESULT hResult = pd3dDevice->CreateGraphicsPipelineState(&m_d3dPipelineStateDesc, __uuidof(ID3D12PipelineState), (void**)&m_ppd3dPipelineStates[nPipelineState]);

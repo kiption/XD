@@ -681,6 +681,8 @@ void CGameFramework::AnimateObjects()
 	if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed());
 	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed(), NULL);
+
+
 	//if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
 	if (m_nMode == SCENE1STAGE)
 	{
@@ -810,10 +812,6 @@ void CGameFramework::FrameAdvance()
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
-
-	//	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	//	d3dRtvCPUDescriptorHandle.ptr += (m_nSwapChainBufferIndex * ::gnRtvDescriptorIncrementSize);
-
 	float pfClearColor[4] = { 0.0f, 0.0f, 0.0f, 0.5f };
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], pfClearColor/*Colors::Azure*/, 0, NULL);
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
@@ -850,7 +848,6 @@ void CGameFramework::FrameAdvance()
 	m_pd3d11On12Device->AcquireWrappedResources(ppd3dResources, _countof(ppd3dResources));
 
 	m_pd2dDeviceContext->BeginDraw();
-
 	m_pd2dDeviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
@@ -2003,4 +2000,12 @@ void CGameFramework::CollisionDummiesObjects(int id)
 }
 
 
-
+void CGameFramework::HeliNpcUnderAttack(XMFLOAT3 ToLook)
+{
+	//========헬기 NPC========//8~12
+	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]    )->Firevalkan(ToLook);
+	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9]    )->Firevalkan(ToLook);
+	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10]    )->Firevalkan(ToLook);
+	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[11]    )->Firevalkan(ToLook);
+	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12]    )->Firevalkan(ToLook);
+}

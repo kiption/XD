@@ -64,7 +64,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		for (int i = 0; i < m_nHeliNpcObjects; i++)
 		{
 
-			m_ppNpc_Heli_Objects[i] = new CNpcHelicopterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			m_ppNpc_Heli_Objects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			m_ppNpc_Heli_Objects[i]->SetMaterial(0, pNpcHeliMaterial);
 			m_ppNpc_Heli_Objects[i]->Rotate(0.0f, 45.0f, 0.0f);
 			m_ppNpc_Heli_Objects[i]->SetScale(3.0,3.0,3.0);
@@ -144,7 +144,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
 {
-
+	((CHelicopterObjects*)m_ppObjects[8])->Firevalkan(NULL);
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		m_ppObjects[j]->Animate(fTimeElapsed);
@@ -172,7 +172,7 @@ void CObjectsShader::ReleaseUploadBuffers()
 
 void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CIlluminatedShader::Render(pd3dCommandList, pCamera, nPipelineState);
+	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
 	CPlayer* pPlayer = pCamera->GetPlayer();
 
 	for (int j = 0; j < m_nObjects; j++)
@@ -260,7 +260,7 @@ void CObjectsShader::ReleaseShaderVariables()
 		m_pd3dcbGameObjects->Release();
 	}
 
-	CIlluminatedShader::ReleaseShaderVariables();
+	CShader::ReleaseShaderVariables();
 }
 
 void CObjectsShader::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -306,7 +306,7 @@ D3D12_DEPTH_STENCIL_DESC CShadowMapShader::CreateDepthStencilState(int nPipeline
 	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
 	d3dDepthStencilDesc.DepthEnable = TRUE;
 	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
 	d3dDepthStencilDesc.StencilEnable = FALSE;
 	d3dDepthStencilDesc.StencilReadMask = 0x00;
 	d3dDepthStencilDesc.StencilWriteMask = 0x00;
@@ -379,11 +379,7 @@ void CShadowMapShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		m_pDepthTexture->AddRef();
 		m_pScene->CreateShaderResourceViews(pd3dDevice, m_pDepthTexture, 0, 22);
 	}
-	if (m_nCurScene == SCENE2STAGE)
-	{
-		m_pDepthTexture->AddRef();
-		m_pScene->CreateShaderResourceViews(pd3dDevice, m_pDepthTexture, 0, 16);
-	}
+	
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 

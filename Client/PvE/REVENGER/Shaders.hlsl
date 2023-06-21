@@ -135,13 +135,19 @@ VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 {
 	VS_STANDARD_OUTPUT output;
 
-	output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
-	output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
-	output.tangentW = mul(input.tangent, (float3x3)gmtxGameObject);
-	output.bitangentW = mul(input.bitangent, (float3x3)gmtxGameObject);
-	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-	output.uv = input.uv;
+    float4 positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
+    output.positionW = positionW.xyz;
+    output.normalW = mul(input.normal, (float3x3) gmtxGameObject);
+    output.tangentW = mul(input.tangent, (float3x3) gmtxGameObject);
+    output.bitangentW = mul(input.bitangent, (float3x3) gmtxGameObject);
+    output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+    output.uv = input.uv;
 
+	for (int i = 0; i < MAX_LIGHTS; i++)
+	{
+		if (gcbToLightSpaces[i].f4Position.w != 0.0f)
+			output.uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
+	}
 	return(output);
 }
 
@@ -177,7 +183,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	//float4 cIllumination = Lighting(input.positionW, normalize(input.normalW));
 	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
 
-	return(lerp(cColor, cIllumination, 0.4f));
+	return(lerp(cColor, cIllumination, 0.5f));
 }
 
 float3 ParticleLogic()
@@ -986,7 +992,7 @@ struct VS_SHADOW_MAP_OUTPUT
 	float4 position : SV_POSITION;
 	float3 positionW : POSITION;
 	float3 normalW : NORMAL;
-	float2 uv : TEXCOORD0;
+	float2 uv : TEXCOORD;
 	float4 uvs[MAX_LIGHTS] : TEXCOORD1;
 };
 
@@ -1004,6 +1010,8 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 	output.position = mul(mul(positionW, gmtxView), gmtxProjection);
 	output.normalW = mul(float4(input.normal, 0.0f), gmtxGameObject).xyz;
 	output.uv = input.uv;
+	//output.tangentW = mul(input.tangent, (float3x3) gmtxGameObject);
+	//output.bitangentW = mul(input.bitangent, (float3x3) gmtxGameObject);
 
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
@@ -1031,10 +1039,10 @@ float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 		cSpecularColor = gMaterial.m_cSpecular;
 	
 	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
-	cColor = cAlbedoColor+ cSpecularColor;
+	cColor = cAlbedoColor;
 	
 
-	return(lerp(cColor, cIllumination, 0.75f));
+	return(lerp(cColor, cIllumination, 0.4f));
 }
 
 ////////////////////////////////////////////////////////////////

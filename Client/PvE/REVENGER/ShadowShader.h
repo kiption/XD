@@ -6,7 +6,7 @@
 #include "Terrain.h"
 #include "Skybox.h"
 #define _WITH_BATCH_MATERIAL
-class CObjectsShader : public CIlluminatedShader
+class CObjectsShader : public CShader
 {
 public:
 	CObjectsShader();
@@ -62,7 +62,7 @@ struct TOLIGHTSPACES
 };
 
 
-class CDepthRenderShader : public CIlluminatedShader
+class CDepthRenderShader : public CShader
 {
 public:
 	CDepthRenderShader(CObjectsShader* pObjectsShader, LIGHT* pLights);
@@ -118,7 +118,7 @@ public:
 	TOLIGHTSPACES* m_pcbMappedToLightSpaces = NULL;
 };
 
-class CShadowMapShader : public CIlluminatedShader
+class CShadowMapShader : public CShader
 {
 public:
 	CShadowMapShader(CObjectsShader* pObjectsShader);
@@ -145,7 +145,7 @@ public:
 
 public:
 	CObjectsShader* m_pObjectsShader = NULL;
-	//CTexture* m_pDepthTexture = NULL;
+	CTexture* m_pDepthTexture = NULL;
 };
 
 class CTextureToViewportShader : public CShader
