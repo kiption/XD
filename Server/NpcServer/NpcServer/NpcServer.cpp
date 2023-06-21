@@ -198,6 +198,19 @@ float DistanceBetween(int nodeIndex1, int nodeIndex2)
 	return distance;
 }
 
+XMFLOAT3 Lerp(XMFLOAT3 start, XMFLOAT3 end, float t)
+{
+	XMVECTOR startVector = XMLoadFloat3(&start);
+	XMVECTOR endVector = XMLoadFloat3(&end);
+
+	XMVECTOR interpolatedVector = XMVectorLerp(startVector, endVector, t);
+
+	XMFLOAT3 interpolatedFloat3;
+	XMStoreFloat3(&interpolatedFloat3, interpolatedVector);
+
+	return interpolatedFloat3;
+}
+
 //======================================================================
 class OBJECT {
 public:
@@ -669,6 +682,8 @@ void NPC::H_MoveToNode()
 	const bool isMovingForward = m_currentNodeIndex % 4 < 2;
 	const float speed = m_Speed;
 
+	XMFLOAT3 prevPos = pos;
+
 	if (isMovingInZ) {
 		const float destination = isMovingForward ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
 
@@ -685,6 +700,8 @@ void NPC::H_MoveToNode()
 
 		if ((isMovingForward && pos.x <= destination) || (!isMovingForward && pos.x >= destination)) H_UpdateCurrentNodeIndex();
 	}
+	float t = 0.3f; // 보간 시간 (조정 가능)
+	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
 
 	int section = m_currentNodeIndex % 4;
 
@@ -705,6 +722,8 @@ void NPC::H_MoveToNode()
 	}
 	m_rightvec = NPCcalcRightRotate();
 	m_lookvec = NPCcalcLookRotate();
+
+	pos = interpolatedPos;
 }
 void NPC::H_UpdateCurrentNodeIndex()
 {
@@ -759,6 +778,7 @@ void NPC::H_IsPathMove()
 	const bool isMovingInZ = currentNode.GetMoveingSpaceZ();
 	const bool isMovingForward = nextNode.GetIndex() % 4 < 2;
 	const float speed = m_Speed;
+	XMFLOAT3 prevPos = pos;
 
 	float destination;
 	if (isMovingInZ) {
@@ -775,9 +795,14 @@ void NPC::H_IsPathMove()
 
 		if ((isMovingForward && pos.x >= destination) || (!isMovingForward && pos.x <= destination)) m_currentNodeIndex = nextNode.GetIndex();
 	}
+	float t = 0.3f; // 보간 시간 (조정 가능)
+	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
+
 
 	m_rightvec = NPCcalcRightRotate();
 	m_lookvec = NPCcalcLookRotate();
+
+	pos = interpolatedPos;
 }
 void NPC::H_PlayerChasing()
 {
@@ -793,6 +818,7 @@ void NPC::H_PlayerChasing()
 	if (user_node == m_currentNodeIndex) {
 		if (m_Distance[m_chaseID] >= 150.0f) {
 			// 내 포지션과 유저의 포지션이 이루는 벡터를 구함
+			XMFLOAT3 prevPos = pos;
 			XMFLOAT3 positionToUser = { m_User_Pos[m_chaseID].x - pos.x, m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
 			XMFLOAT3 DefaultTemp = { 0.0f, 0.0f, 1.0f };
 
@@ -817,6 +843,11 @@ void NPC::H_PlayerChasing()
 
 			pos.x += m_lookvec.x * m_Speed;
 			pos.z += m_lookvec.z * m_Speed;
+
+			float t = 0.3f; // 보간 시간 (조정 가능)
+			XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
+
+			pos = interpolatedPos;
 		}
 	}
 	else {
@@ -1006,6 +1037,8 @@ void NPC::A_MoveToNode()
 	const bool isMovingForward = m_currentNodeIndex % 4 < 2;
 	const float speed = m_Speed;
 
+	XMFLOAT3 prevPos = pos;
+
 	if (isMovingInZ) {
 		const float destination = isMovingForward ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
 
@@ -1022,6 +1055,8 @@ void NPC::A_MoveToNode()
 
 		if ((isMovingForward && pos.x <= destination) || (!isMovingForward && pos.x >= destination)) H_UpdateCurrentNodeIndex();
 	}
+	float t = 0.3f; // 보간 시간 (조정 가능)
+	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
 
 	int section = m_currentNodeIndex % 4;
 
@@ -1042,6 +1077,8 @@ void NPC::A_MoveToNode()
 	}
 	m_rightvec = NPCcalcRightRotate();
 	m_lookvec = NPCcalcLookRotate();
+
+	pos = interpolatedPos;
 }
 void NPC::A_UpdateCurrentNodeIndex()
 {
@@ -1097,6 +1134,8 @@ void NPC::A_IsPathMove()
 	const bool isMovingForward = nextNode.GetIndex() % 4 < 2;
 	const float speed = m_Speed;
 
+	XMFLOAT3 prevPos = pos;
+
 	float destination;
 	if (isMovingInZ) {
 		destination = isMovingForward ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
@@ -1112,9 +1151,13 @@ void NPC::A_IsPathMove()
 
 		if ((isMovingForward && pos.x >= destination) || (!isMovingForward && pos.x <= destination)) m_currentNodeIndex = nextNode.GetIndex();
 	}
+	float t = 0.3f; // 보간 시간 (조정 가능)
+	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
 
 	m_rightvec = NPCcalcRightRotate();
 	m_lookvec = NPCcalcLookRotate();
+
+	pos = interpolatedPos;
 }
 void NPC::A_PlayerChasing()
 {
@@ -1129,6 +1172,7 @@ void NPC::A_PlayerChasing()
 	// 노드 검색 후 같은 섹션에 있는 지 판별
 	if (user_node == m_currentNodeIndex) {
 		if (m_Distance[m_chaseID] >= 150.0f) {
+			XMFLOAT3 prevPos = pos;
 			// 내 포지션과 유저의 포지션이 이루는 벡터를 구함
 			XMFLOAT3 positionToUser = { m_User_Pos[m_chaseID].x - pos.x, m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
 			XMFLOAT3 DefaultTemp = { 0.0f, 0.0f, 1.0f };
@@ -1154,6 +1198,11 @@ void NPC::A_PlayerChasing()
 
 			pos.x += m_lookvec.x * m_Speed;
 			pos.z += m_lookvec.z * m_Speed;
+
+			float t = 0.5f; // 보간 시간 (조정 가능)
+			XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
+
+			pos = interpolatedPos;
 		}
 	}
 	else {
@@ -1966,7 +2015,7 @@ void MoveNPC()
 
 					// npc pos 확인
 
-					if (i > 8 && i < 12) {
+					if (i < 4) {
 
 						cout << "=============" << endl;
 
@@ -1993,8 +2042,8 @@ void MoveNPC()
 
 			//======================================================================
 			auto curr_t = system_clock::now();
-			if (curr_t - start_t < 500ms)
-				this_thread::sleep_for(500ms - (curr_t - start_t));
+			if (curr_t - start_t < 33ms)
+				this_thread::sleep_for(33ms - (curr_t - start_t));
 		}
 	}
 }
