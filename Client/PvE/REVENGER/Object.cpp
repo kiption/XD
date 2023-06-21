@@ -1754,8 +1754,8 @@ void CHelicopterObjects::Firevalkan(XMFLOAT3 ToPlayerLook)
 		//xmf3Position.y += .0f;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
-		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->Rotate(90.0, 0.0, 0.0);
+		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->SetScale(4.0, 7.0, 4.0);
 		pBulletObject->SetActive(true);
 

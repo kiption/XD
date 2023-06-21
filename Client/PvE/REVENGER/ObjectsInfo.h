@@ -20,7 +20,7 @@ struct ObjectsInfo
 	int m_ingame_state;	// 인게임내 상태
 
 	bool m_new_state_update; // 상태가 바뀌었는지
-
+	bool m_attack_on;	// 공격을 했는 지
 	bool m_damaged_effect_on;
 
 	ObjectsInfo() {
@@ -36,6 +36,7 @@ struct ObjectsInfo
 		m_ingame_state = PL_ST_DEAD;
 		m_new_state_update = false;
 		m_damaged_effect_on = false;
+		m_attack_on = false;
 	}
 
 	void InfoClear() {

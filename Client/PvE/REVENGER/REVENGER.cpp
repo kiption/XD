@@ -123,6 +123,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					gGameFramework.setPosition_Npc(npcs_info[i].m_id, npcs_info[i].m_pos);
 					gGameFramework.setVectors_Npc(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
 					((Stage1*)gGameFramework.m_pScene)->SmokePosition = npcs_info[i].m_pos;
+
+					if (npcs_info[i].m_attack_on) {
+						if (npcs_info[i].m_id < 5) {
+							gGameFramework.HeliNpcUnderAttack(i, npcs_info[i].m_attack_dir);
+						}
+						npcs_info[i].m_attack_on = false;
+					}
+
 					//((Stage1*)gGameFramework.m_pScene)->m_pBillboardShader[3]->ParticlePosition = npcs_info[i].m_pos;
 				}
 
@@ -185,18 +193,18 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				}
 
 				//  3) Dummies ([TEST] NPC 완성전까지 임시 코드)
-				for (int i = 0; i < 5; ++i) {
-					if (dummies[i].m_new_state_update) {
-						if (dummies[i].m_ingame_state == PL_ST_DEAD) {
-							// 여기에 더미 죽는 모션 실행1
-							// (더미 죽는 모션이 한 사이클 완료되면 객체를 날려버리던가 scale 해주면 됨.)
-							//gGameFramework.otherPlayerDyingMotion(i);
-							gGameFramework.CollisionDummiesObjects(i);
+				//for (int i = 0; i < 5; ++i) {
+				//	if (dummies[i].m_new_state_update) {
+				//		if (dummies[i].m_ingame_state == PL_ST_DEAD) {
+				//			// 여기에 더미 죽는 모션 실행1
+				//			// (더미 죽는 모션이 한 사이클 완료되면 객체를 날려버리던가 scale 해주면 됨.)
+				//			//gGameFramework.otherPlayerDyingMotion(i);
+				//			gGameFramework.CollisionDummiesObjects(i);
 
-							dummies[i].m_new_state_update = false;
-						}
-					}
-				}
+				//			dummies[i].m_new_state_update = false;
+				//		}
+				//	}
+				//}
 
 				//==================================================
 				//					  UI 동기화
@@ -546,10 +554,10 @@ void uiThreadFunc() {
 					// 거점 점령 ~~% / 100%
 					int curr_percentage = static_cast<int>(stage_missions[1].curr / 5000);
 					if (curr_percentage >= 100) curr_percentage = 100;
-					
+
 					gGameFramework.m_occupationnum = curr_percentage;
 				}
-				
+
 				break;
 			case SCENE2STAGE:
 				//gGameFramework.m_remainNPC = stage_missions[2].goal - stage_missions[2].curr;
