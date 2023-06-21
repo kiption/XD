@@ -32,8 +32,8 @@ public:
 
 public:
 	float m_fBulletEffectiveRange = 1600.0f;
-	CValkanObject* pBulletObject = NULL;
-	CValkanObject* m_ppBullets[BULLETS];
+	CBulletObject* pBulletObject = NULL;
+	CBulletObject* m_ppBullets[BULLETS];
 	void FireBullet(CGameObject* pLockedObject);
 	float m_fShootDelay = 0.0f;
 };

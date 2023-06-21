@@ -55,8 +55,8 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[7]->SetPosition(XMFLOAT3(160.0, 0.0, 1000.0));  // 안보이게 숨겨놨지롱
 
 		CMaterial* pCityMaterial;
-		pCityMaterial = new CMaterial(6);
-		pCityMaterial->SetReflection(6);
+		pCityMaterial = new CMaterial(4);
+		pCityMaterial->SetReflection(4);
 
 
 		int Cities = 4;
@@ -78,6 +78,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppCityGameObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
 			m_ppCityGameObjects[i]->SetScale(1.0f, 1.0f, 1.0f);
 			m_ppCityGameObjects[i]->OnPrepareAnimate();
+			m_ppCityGameObjects[i]->SetPosition(0,0,0);
 			pGeneratorModel->AddRef();
 		}
 
@@ -85,11 +86,6 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[9] = m_ppCityGameObjects[1];
 		m_ppObjects[10] = m_ppCityGameObjects[2];
 		m_ppObjects[11] = m_ppCityGameObjects[3];
-
-		m_ppObjects[8]->SetPosition(0.0f, 0.0f, 0.0f);
-		m_ppObjects[9]->SetPosition(0.0f, 0.0f, 0.0f);
-		m_ppObjects[10]->SetPosition(0.0f, 0.0f, 0.0f);
-		m_ppObjects[11]->SetPosition(0.0f, 0.0f, 0.0f);
 
 		m_nHeliNpcObjects = 5;
 
@@ -99,12 +95,10 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		pNpcHeliMaterial->SetReflection(m_nHeliNpcObjects);
 		for (int i = 0; i < m_nHeliNpcObjects; i++)
 		{
-
 			m_ppNpc_Heli_Objects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			m_ppNpc_Heli_Objects[i]->SetMaterial(0, pNpcHeliMaterial);
 			m_ppNpc_Heli_Objects[i]->Rotate(0.0f, 45.0f, 0.0f);
 			m_ppNpc_Heli_Objects[i]->SetScale(3.0, 3.0, 3.0);
-
 			m_ppNpc_Heli_Objects[i]->OnPrepareAnimate();
 		}
 
@@ -120,25 +114,20 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[15]->SetPosition(XMFLOAT3(250.0, 100.0, 800.0));
 		m_ppObjects[16]->SetPosition(XMFLOAT3(300.0, 100.0, 1300.0));
 
-		m_nSoldiarNpcObjects = 22;
-		CMaterial* pSoldiarNpcMaterial = new CMaterial(5);
-		pSoldiarNpcMaterial->SetReflection(5);
+		m_nSoldiarNpcObjects = 17+5;
+		CMaterial* pSoldiarNpcMaterial = new CMaterial(15);
+		pSoldiarNpcMaterial->SetReflection(15);
 		for (int h = 17; h < m_nSoldiarNpcObjects; h++)
 		{
 			m_ppObjects[h] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, NULL);
 			m_ppObjects[h]->SetMaterial(0, pSoldiarNpcMaterial);
 			m_ppObjects[h]->SetScale(7.0, 7.0, 7.0);
+			m_ppObjects[h]->SetPosition(500.0+h*5, 6.0, 500.0+ h * 5);
 		}
-		//m_ppObjects[17]->SetPosition(30.0f, 6.0f, 905.0f);		// 더미들 위치를 직접 정해줬음.
-		//m_ppObjects[18]->SetPosition(60.0f, 6.0f, 1155.0f);		// 더미들 위치를 직접 정해줬음.
-		//m_ppObjects[19]->SetPosition(100.0f, 6.0f, 1205.0f);	// 더미들 위치를 직접 정해줬음.
-		//m_ppObjects[20]->SetPosition(-50.0f, 6.0f, 1300.0f);	// 더미들 위치를 직접 정해줬음.
-		//m_ppObjects[21]->SetPosition(20.0f, 6.0f, 1350.0f);		// 더미들 위치를 직접 정해줬음.
+		
 
 	}
-	//if (m_nCurScene == SCENE2STAGE)
-	//{
-	//}
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 

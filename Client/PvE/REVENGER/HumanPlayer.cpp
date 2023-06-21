@@ -72,7 +72,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	{
 
 		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
-		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
+		pBulletObject = new CBulletObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, false);
 		pBulletObject->SetMovingSpeed(1000.0f);
 		pBulletObject->SetActive(false);
@@ -412,7 +412,7 @@ void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 {
 
 
-	CValkanObject* pBulletObject = NULL;
+	CBulletObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS; i++)
 	{
 		if (!m_ppBullets[i]->m_bActive)

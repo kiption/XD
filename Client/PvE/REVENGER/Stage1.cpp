@@ -134,7 +134,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 2, 800);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 2, 1500);
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
@@ -199,7 +199,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 5, pdxgiMultiRtvFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
 	pObjectShader->SetCurScene(SCENE1STAGE);
 	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
-	m_xmBoundingBox = pObjectShader->CalculateBoundingBox();
+	//m_xmBoundingBox = pObjectShader->CalculateBoundingBox();
 	m_ppShaders[0] = pObjectShader;
 
 	m_pDepthRenderShader = new CDepthRenderShader(pObjectShader, m_pLights->m_pLights);
@@ -804,7 +804,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		m_ppShaders[0]->m_ppObjects[20]->GetPosition().y +6.5f, m_ppShaders[0]->m_ppObjects[20]->GetPosition().z);
 	m_ppFragShaders[0]->ParticlePosition = m_pBillboardShader[1]->m_ppObjects[0]->GetPosition();
 
-	CValkanObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
+	CBulletObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
 	XMFLOAT3 Position2P = m_ppShaders[0]->m_ppObjects[5]->GetPosition();
 	XMFLOAT3 Look2P = m_ppShaders[0]->m_ppObjects[5]->GetLook();
 	if (m_pLights)

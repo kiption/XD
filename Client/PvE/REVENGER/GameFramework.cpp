@@ -774,8 +774,8 @@ float g_time = 0.0f;
 float g_reverse_time = 0.0f;
 void CGameFramework::FrameAdvance()
 {
-	if (m_nMode == SCENE2STAGE)m_GameTimer.Tick(30.0f);
-	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick();
+
+	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick(144.0f);
 
 
 
@@ -1845,7 +1845,7 @@ void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos, XMFLOAT3 mapextents
 {
 	m_mapxmoobb = BoundingOrientedBox(mappos, mapextents, XMFLOAT4(0, 0, 0, 1));
 
-	CValkanObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
+	CBulletObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
 
 	for (int i = 0; i < BULLETS; i++)
 	{
@@ -1898,7 +1898,7 @@ void CGameFramework::CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents
 {
 	m_npcoobb = BoundingOrientedBox(npcpos, npcextents, XMFLOAT4(0, 0, 0, 1));
 
-	CValkanObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
+	CBulletObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
 	for (int i = 0; i < BULLETS; i++)
 	{
 		ppBullets[i]->m_xoobb = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
@@ -1989,12 +1989,19 @@ void CGameFramework::CollisionDummiesObjects(int id)
 	}
 }
 
+
 void CGameFramework::HeliNpcUnderAttack(int id, XMFLOAT3 ToLook)
 {
-	//========헬기 NPC========//8~12
-	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]    )->Firevalkan(ToLook);
-	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9]    )->Firevalkan(ToLook);
-	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10]    )->Firevalkan(ToLook);
-	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[11]    )->Firevalkan(ToLook);
-	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12]    )->Firevalkan(ToLook);
+	//========헬기 NPC========//12
+	if(id)
+	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12+id])->Firevalkan(ToLook);
+
+
+	////========휴먼
+	/*((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17])->Firevalkan(ToLook);
+	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[18])->Firevalkan(ToLook);
+	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19])->Firevalkan(ToLook);
+	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[20])->Firevalkan(ToLook);
+	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21])->Firevalkan(ToLook);*/
+
 }

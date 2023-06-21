@@ -569,6 +569,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+class CBulletObject;
+class CValkanObject;
+class CNPCbulletObject;
 class CHelicopterObjects : public CGameObject
 {
 public:
@@ -584,7 +587,7 @@ public:
 	float m_fBulletEffectiveRange = 2000.0f;
 	CBulletEffectShader* pBCBulletEffectShader = NULL;
 	CValkanObject* pBulletObject = NULL;
-	CValkanObject* m_ppBullets[BULLETS];
+	CValkanObject* m_ppBullets[HELIBULLETS];
 	void Firevalkan(XMFLOAT3 ToPlayerLook);
 public:
 	virtual void OnPrepareAnimate();
@@ -620,12 +623,13 @@ public:
 	void ShootState(float EleapsedTime);
 	void IdleState(float EleapsedTime);
 	virtual void Animate(float fTimeElapsed);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
 public:
 	float m_fBulletEffectiveRange = 2000.0f;
 	CBulletEffectShader* pBCBulletEffectShader = NULL;
-	CValkanObject* pBulletObject = NULL;
-	CValkanObject* m_ppBullets[BULLETS];
+	CNPCbulletObject* pBulletObject = NULL;
+	CNPCbulletObject* m_ppBullets[HUMANBULLETS];
 	void Firevalkan(XMFLOAT3 ToPlayerLook);
 	
 };
