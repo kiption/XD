@@ -620,6 +620,13 @@ public:
 	void ShootState(float EleapsedTime);
 	void IdleState(float EleapsedTime);
 	virtual void Animate(float fTimeElapsed);
+
+public:
+	float m_fBulletEffectiveRange = 2000.0f;
+	CBulletEffectShader* pBCBulletEffectShader = NULL;
+	CValkanObject* pBulletObject = NULL;
+	CValkanObject* m_ppBullets[BULLETS];
+	void Firevalkan(XMFLOAT3 ToPlayerLook);
 	
 };
 

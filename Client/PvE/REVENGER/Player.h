@@ -75,7 +75,7 @@ public:
 	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
 	void Move(float fxOffset = 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
 	virtual void JumpState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL) {};
-	virtual void ReloadState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL) {};
+	
 	virtual void ShootState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL) {};
 
 	void Rotate(float x, float y, float z);

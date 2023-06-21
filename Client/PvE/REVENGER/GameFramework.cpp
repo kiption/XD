@@ -390,10 +390,12 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case KEY_A:
 		case KEY_S:
 		case KEY_D:
-			//q_keyboardInput.push(SEND_KEYUP_MOVEKEY);//S
+			q_keyboardInput.push(SEND_KEYUP_MOVEKEY);//S
 			break;
 
 		case VK_SPACE:
+			((CHumanPlayer*)m_pPlayer)->m_bJumeState = true;
+			((CHumanPlayer*)m_pPlayer)->JumpState();
 			break;
 		default:
 			break;
@@ -584,13 +586,10 @@ void CGameFramework::ProcessInput()
 
 		if (pKeysBuffer[KEY_Q] & 0xF0)
 		{
-			dwDirection |= DIR_UP;
-
-			//if (m_nMode == SCENE1STAGE)
-			//{
-			//	((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_nAnimationTracks = 8;
-			//	((CHumanPlayer*)m_pPlayer)->ReloadState(m_GameTimer.GetTimeElapsed());
-			//}
+			//dwDirection |= DIR_UP;
+			((CHumanPlayer*)m_pPlayer)->m_bReloadState = true;
+	
+			((CHumanPlayer*)m_pPlayer)->ReloadState();
 			q_keyboardInput.push(SEND_KEY_UP);//S
 		}
 
@@ -600,13 +599,9 @@ void CGameFramework::ProcessInput()
 		}
 
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
-			dwDirection |= DIR_DOWN;
+		
 
-			//if (m_nMode == SCENE1STAGE)
-			//{
-			//	((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->m_nAnimationTracks = 9;
-			//	((CHumanPlayer*)m_pPlayer)->JumpState(m_GameTimer.GetTimeElapsed());
-			//}
+			
 			q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
 		}
 
@@ -617,32 +612,30 @@ void CGameFramework::ProcessInput()
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 40.5f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 40.5f;
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 40.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 40.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
 		if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
-			
 
-			if (m_nMode != OPENINGSCENE)
+			MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
+
+			if (m_nMode == SCENE1STAGE)
 			{
 
-				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay < 0.02)
+				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay < 0.01)
 				{
-					
+
 					ShootKey = true;
 					if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->ShootState(m_GameTimer.GetTimeElapsed());
 					((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
-					
-					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
+
 					q_mouseInput.push(lclick);//s
 				}
-				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.02)
+				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.01)
 				{
 					ShootKey = false;
-					//gamesound.shootSound->release();
-					/*	((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);*/
 					if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 				}
 			}
@@ -662,12 +655,11 @@ void CGameFramework::ProcessInput()
 					q_mouseInput.push(mousemove);//s
 				}
 			}
-
+			
 			if (m_nMode == SCENE1STAGE) {
-
-				if (dwDirection && WM_KEYDOWN) m_pPlayer->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
-
+				if (dwDirection) m_pPlayer->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
 			}
+			
 
 		}
 	}
@@ -693,7 +685,7 @@ void CGameFramework::AnimateObjects()
 		((Stage1*)m_pScene)->m_pBillboardShader[3]->ParticlePosition = XMFLOAT3(61.0, 20.0, 1170.0);
 
 		((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->GetPosition().x
-		,((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->GetPosition().y+10.0, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->GetPosition().z);
+			, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->GetPosition().y + 10.0, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->GetPosition().z);
 
 		((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[1]->SetPosition(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->GetPosition().x
 			, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->GetPosition().y + 10.0, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->GetPosition().z);
@@ -704,7 +696,7 @@ void CGameFramework::AnimateObjects()
 	((CHumanPlayer*)m_pPlayer)->m_fShootDelay += m_GameTimer.GetTimeElapsed();
 	if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.15)
 	{
-		
+
 		((CHumanPlayer*)m_pPlayer)->m_fShootDelay = 0.0f;
 	}
 	if (ShootKey == true)
@@ -783,7 +775,7 @@ float g_reverse_time = 0.0f;
 void CGameFramework::FrameAdvance()
 {
 	if (m_nMode == SCENE2STAGE)m_GameTimer.Tick(30.0f);
-	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick(60.0f);
+	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick();
 
 
 
@@ -818,7 +810,7 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], TRUE, &d3dDsvCPUDescriptorHandle);
 
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
-	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+	//m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
 	if (m_nMode == SCENE1STAGE)
 		((Stage1*)m_pScene)->BillBoardRender(m_pd3dCommandList, m_pCamera);
@@ -828,7 +820,7 @@ void CGameFramework::FrameAdvance()
 	if (m_nMode == SCENE1STAGE)
 	{
 		if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
-	}
+}
 	// Stage2
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -988,9 +980,9 @@ void CGameFramework::FrameAdvance()
 		switch (m_mainmissionnum)
 		{
 		case 0:
-		{	
+		{
 			int killNPC = 20 - m_remainNPC;
-			
+
 			_itow_s(killNPC, killNPCprint, sizeof(killNPCprint), 10);
 			D2D1_RECT_F D2_KillNPCText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 59, (FRAME_BUFFER_HEIGHT / 16) * 3, (FRAME_BUFFER_WIDTH / 64) * 61, (FRAME_BUFFER_HEIGHT / 16) * 3);
 			m_pd2dDeviceContext->DrawTextW(killNPCprint, (UINT32)wcslen(killNPCprint), m_pdwFont, &D2_KillNPCText, m_pd2dbrText);
@@ -998,7 +990,7 @@ void CGameFramework::FrameAdvance()
 		break;
 		case 1:
 		{
-			
+
 			_itow_s(m_occupationnum, occupationPrint, sizeof(occupationPrint), 10);
 			D2D1_RECT_F D2_OccupationText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 57, (FRAME_BUFFER_HEIGHT / 16) * 3, (FRAME_BUFFER_WIDTH / 64) * 59, (FRAME_BUFFER_HEIGHT / 16) * 3);
 			m_pd2dDeviceContext->DrawTextW(occupationPrint, (UINT32)wcslen(occupationPrint), m_pdwFont, &D2_OccupationText, m_pd2dbrText);
@@ -1011,7 +1003,7 @@ void CGameFramework::FrameAdvance()
 			{
 			case 0:
 			{
-				
+
 				_itow_s(m_survive, SurviveSecPrint, sizeof(SurviveSecPrint), 10);
 				D2D1_RECT_F D2_Survive30sText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 29, (FRAME_BUFFER_HEIGHT / 64) * 25, (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 64) * 25);
 				m_pd2dDeviceContext->DrawTextW(SurviveSecPrint, (UINT32)wcslen(SurviveSecPrint), m_pdwFont, &D2_Survive30sText, m_pd2dbrText);
@@ -1019,7 +1011,7 @@ void CGameFramework::FrameAdvance()
 			break;
 			case 1:
 			{
-				
+
 				_itow_s(m_AttackFly, FlyAtkPrint, sizeof(FlyAtkPrint), 10);
 				D2D1_RECT_F D2_FlyAttackText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 29, (FRAME_BUFFER_HEIGHT / 64) * 25, (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 64) * 25);
 				m_pd2dDeviceContext->DrawTextW(FlyAtkPrint, (UINT32)wcslen(FlyAtkPrint), m_pdwFont, &D2_FlyAttackText, m_pd2dbrText);
@@ -1027,7 +1019,7 @@ void CGameFramework::FrameAdvance()
 			break;
 			case 2:
 			{
-				
+
 				_itow_s(m_killArmy, KillArmyPrint, sizeof(KillArmyPrint), 10);
 				D2D1_RECT_F D2_ExecutionText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 29, (FRAME_BUFFER_HEIGHT / 64) * 25, (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 64) * 25);
 				m_pd2dDeviceContext->DrawTextW(KillArmyPrint, (UINT32)wcslen(KillArmyPrint), m_pdwFont, &D2_ExecutionText, m_pd2dbrText);
@@ -1075,7 +1067,7 @@ void CGameFramework::FrameAdvance()
 	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
 	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
-	}
+}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -1138,7 +1130,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 		}
 		}
 	}
-		}
+}
 
 #ifdef _WITH_DIRECT2D
 void CGameFramework::CreateDirect2DDevice()
@@ -1177,7 +1169,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-}
+	}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -1649,7 +1641,7 @@ void CGameFramework::CreateDirect2DDevice()
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
 #endif
-	}
+}
 #endif
 
 
@@ -2003,9 +1995,9 @@ void CGameFramework::CollisionDummiesObjects(int id)
 void CGameFramework::HeliNpcUnderAttack(XMFLOAT3 ToLook)
 {
 	//========헬기 NPC========//8~12
-	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]    )->Firevalkan(ToLook);
-	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9]    )->Firevalkan(ToLook);
-	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10]    )->Firevalkan(ToLook);
-	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[11]    )->Firevalkan(ToLook);
-	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12]    )->Firevalkan(ToLook);
+	((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8])->Firevalkan(ToLook);
+	((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9])->Firevalkan(ToLook);
+	((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10])->Firevalkan(ToLook);
+	((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[11])->Firevalkan(ToLook);
+	((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12])->Firevalkan(ToLook);
 }

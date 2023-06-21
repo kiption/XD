@@ -113,7 +113,7 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		m_pCamera->SetTimeLag(0.0f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.5f, -8.3f));
 		m_pCamera->SetPosition(Vector3::Add(
-			XMFLOAT3(m_pHeadFindFrame->GetPosition().x, m_pHeadFindFrame->GetPosition().y , m_pHeadFindFrame->GetPosition().z),
+			XMFLOAT3(m_pHeadFindFrame->GetPosition().x, m_pHeadFindFrame->GetPosition().y, m_pHeadFindFrame->GetPosition().z),
 			m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 6000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
@@ -197,11 +197,12 @@ void CHumanPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 	}
 }
 
-void CHumanPlayer::JumpState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
+void CHumanPlayer::JumpState()
 {
-	if (m_pSkinnedAnimationController->m_nAnimationTracks == 9)
+
+	if (m_bJumeState == true)
 	{
-		m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
+
 		m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		m_pSkinnedAnimationController->SetTrackEnable(1, false);
 		m_pSkinnedAnimationController->SetTrackEnable(2, false);
@@ -215,17 +216,17 @@ void CHumanPlayer::JumpState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 		m_pSkinnedAnimationController->SetTrackEnable(10, false);
 		m_pSkinnedAnimationController->SetTrackEnable(11, false);
 		m_pSkinnedAnimationController->SetTrackAnimationSet(0, 9);
+	
 	}
-	CPlayer::Animate(EleapsedTime, pxmf4x4Parent);
+
 }
 
-void CHumanPlayer::ReloadState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
+void CHumanPlayer::ReloadState()
 {
 
-	if (m_pSkinnedAnimationController->m_nAnimationTracks == 8)
-	{
 
-		m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
+	if (m_bReloadState == true)
+	{
 		m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		m_pSkinnedAnimationController->SetTrackEnable(1, false);
 		m_pSkinnedAnimationController->SetTrackEnable(2, false);
@@ -239,9 +240,10 @@ void CHumanPlayer::ReloadState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 		m_pSkinnedAnimationController->SetTrackEnable(10, false);
 		m_pSkinnedAnimationController->SetTrackEnable(11, false);
 		m_pSkinnedAnimationController->SetTrackAnimationSet(0, 8);
+
 	}
 
-	CPlayer::Animate(EleapsedTime, pxmf4x4Parent);
+
 
 }
 
@@ -262,6 +264,8 @@ void CHumanPlayer::ShootState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 
 void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
+	m_bReloadState = false;
+	m_bJumeState = false;
 	m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_LOOP;
 	if (dwDirection & DIR_FORWARD)
 	{
@@ -332,17 +336,8 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 		m_pSkinnedAnimationController->SetTrackEnable(9, true);
 
 	}
-	if (dwDirection & DIR_UP)
+	if (DIR_UP)
 	{
-		m_pSkinnedAnimationController->SetTrackEnable(0, false);
-		m_pSkinnedAnimationController->SetTrackEnable(1, false);
-		m_pSkinnedAnimationController->SetTrackEnable(2, false);
-		m_pSkinnedAnimationController->SetTrackEnable(3, false);
-		m_pSkinnedAnimationController->SetTrackEnable(4, false);
-		m_pSkinnedAnimationController->SetTrackEnable(5, false);
-		m_pSkinnedAnimationController->SetTrackEnable(6, false);
-		m_pSkinnedAnimationController->SetTrackEnable(7, false);
-		m_pSkinnedAnimationController->SetTrackEnable(8, true);
 
 	}
 
@@ -358,9 +353,22 @@ void CHumanPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 		if (m_ppBullets[i]->m_bActive) {
 
 			m_ppBullets[i]->Animate(fTimeElapsed);
-			
+
 		}
 	}
+	if (m_bReloadState == true)
+		m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
+	if (m_bReloadState == false)
+	{
+		m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	}
+
+	if (m_bJumeState == true)
+		m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
+	/*if (m_bJumeState == false)
+	{
+		m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	}*/
 
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
 }
@@ -402,8 +410,8 @@ void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 
 void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 {
-	
-	
+
+
 	CValkanObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS; i++)
 	{

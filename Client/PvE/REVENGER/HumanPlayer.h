@@ -19,14 +19,16 @@ public:
 	virtual void OnCameraUpdateCallback(float fTimeElapsed);
 
 	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
-	virtual void JumpState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL);
-	virtual void ReloadState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	void JumpState();
+	void ReloadState();
 	virtual void ShootState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-
+	
+	bool m_bReloadState = false;
+	bool m_bJumeState = false;
 
 public:
 	float m_fBulletEffectiveRange = 1600.0f;
