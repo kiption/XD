@@ -291,6 +291,9 @@ public:
 	bool m_bCollisionCheck = false;
 
 	float m_fResponCount = 0.0;
+//=================================================
+	//NPC Attack
+	void HeliNpcUnderAttack(XMFLOAT3 ToLook);
 };
 
 

@@ -585,7 +585,7 @@ public:
 	CBulletEffectShader* pBCBulletEffectShader = NULL;
 	CValkanObject* pBulletObject = NULL;
 	CValkanObject* m_ppBullets[BULLETS];
-	void Firevalkan(CGameObject* pLockedObject);
+	void Firevalkan(XMFLOAT3 ToPlayerLook);
 public:
 	virtual void OnPrepareAnimate();
 	virtual void Animate(float fTimeElapsed);

@@ -144,7 +144,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
 {
-	((CHelicopterObjects*)m_ppObjects[8])->Firevalkan(NULL);
+	
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		m_ppObjects[j]->Animate(fTimeElapsed);

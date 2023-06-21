@@ -1729,7 +1729,7 @@ CHelicopterObjects::~CHelicopterObjects()
 	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
 }
 
-void CHelicopterObjects::Firevalkan(CGameObject* pLockedObject)
+void CHelicopterObjects::Firevalkan(XMFLOAT3 ToPlayerLook)
 {
 	CValkanObject* pBulletObject = NULL;
 	for (int i = 0; i < BULLETS2; i++)
@@ -1744,7 +1744,7 @@ void CHelicopterObjects::Firevalkan(CGameObject* pLockedObject)
 
 	if (pBulletObject)
 	{
-		XMFLOAT3 PlayerLook = GetLook();
+		XMFLOAT3 PlayerLook = ToPlayerLook;
 
 		XMFLOAT3 xmf3Position = GetPosition();
 		XMFLOAT3 xmf3Direction = PlayerLook;

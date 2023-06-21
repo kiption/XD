@@ -617,8 +617,8 @@ void CGameFramework::ProcessInput()
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 7.5f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 7.5f;
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 40.5f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 40.5f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
