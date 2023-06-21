@@ -577,6 +577,21 @@ void processPacket(char* ptr)
         }
         break;
     }//SC_BULLET_COUNT case end
+    case NPC_ATTACK:
+    {
+        NPC_ATTACK_PACKET* npc_attack_pack = reinterpret_cast<NPC_ATTACK_PACKET*>(ptr);
+
+        cout << "NPC[" << npc_attack_pack->n_id << "]가 공격하였다. - 공격방향: ("
+            << npc_attack_pack->atklook_x << ", " << npc_attack_pack->atklook_y << ", " << npc_attack_pack->atklook_z << ")" << endl;
+        
+        short recv_id = npc_attack_pack->n_id;
+        
+        npcs_info[recv_id].m_attack_dir.x = npc_attack_pack->atklook_x;
+        npcs_info[recv_id].m_attack_dir.y = npc_attack_pack->atklook_y;
+        npcs_info[recv_id].m_attack_dir.z = npc_attack_pack->atklook_z;
+        npcs_info[recv_id].m_attack_on = true;
+        break;
+    }
     }
 }
 

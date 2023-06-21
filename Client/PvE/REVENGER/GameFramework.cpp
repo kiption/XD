@@ -618,8 +618,7 @@ void CGameFramework::ProcessInput()
 		}
 
 		if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
-
-			MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
+			
 
 			if (m_nMode == SCENE1STAGE)
 			{
@@ -631,6 +630,7 @@ void CGameFramework::ProcessInput()
 					if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->ShootState(m_GameTimer.GetTimeElapsed());
 					((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
 
+					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
 					q_mouseInput.push(lclick);//s
 				}
 				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.01)
@@ -1796,7 +1796,7 @@ void CGameFramework::setPosition_Npc(int id, XMFLOAT3 pos)
 	if (m_nMode == SCENE1STAGE)
 	{
 
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8 + id]->SetPosition(pos);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetPosition(pos);
 
 
 	}
@@ -1808,10 +1808,10 @@ void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, X
 	if (m_nMode == SCENE1STAGE)
 	{
 
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8 + id]->SetRight(rightVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8 + id]->SetUp(upVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8 + id]->SetLook(lookVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8 + id]->SetScale(3.0, 3.0, 3.0);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetRight(rightVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetUp(upVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetLook(lookVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetScale(3.0, 3.0, 3.0);
 
 
 
@@ -1980,8 +1980,6 @@ void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
 
 }
 
-
-
 void CGameFramework::CollisionDummiesObjects(int id)
 {
 	if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17 + id])
@@ -1991,13 +1989,12 @@ void CGameFramework::CollisionDummiesObjects(int id)
 	}
 }
 
-
-void CGameFramework::HeliNpcUnderAttack(XMFLOAT3 ToLook)
+void CGameFramework::HeliNpcUnderAttack(int id, XMFLOAT3 ToLook)
 {
 	//========헬기 NPC========//8~12
-	((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8])->Firevalkan(ToLook);
-	((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9])->Firevalkan(ToLook);
-	((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10])->Firevalkan(ToLook);
-	((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[11])->Firevalkan(ToLook);
-	((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12])->Firevalkan(ToLook);
+	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[8]    )->Firevalkan(ToLook);
+	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[9]    )->Firevalkan(ToLook);
+	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[10]    )->Firevalkan(ToLook);
+	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[11]    )->Firevalkan(ToLook);
+	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12]    )->Firevalkan(ToLook);
 }

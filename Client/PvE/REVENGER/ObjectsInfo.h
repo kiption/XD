@@ -14,12 +14,13 @@ struct ObjectsInfo
 	XMFLOAT3 m_right_vec;
 	XMFLOAT3 m_up_vec;
 	XMFLOAT3 m_look_vec;
+	XMFLOAT3 m_attack_dir;
 	int m_state;		// 세션 상태
 	volatile int curr_scene;		// 몇번째 씬인지
 	int m_ingame_state;	// 인게임내 상태
 
 	bool m_new_state_update; // 상태가 바뀌었는지
-
+	bool m_attack_on;	// 공격을 했는 지
 	bool m_damaged_effect_on;
 
 	ObjectsInfo() {
@@ -35,6 +36,7 @@ struct ObjectsInfo
 		m_ingame_state = PL_ST_DEAD;
 		m_new_state_update = false;
 		m_damaged_effect_on = false;
+		m_attack_on = false;
 	}
 
 	void InfoClear() {

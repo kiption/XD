@@ -615,7 +615,43 @@ void NPC::NPC_State_Manegement(int state)
 	}
 	case NPC_ARMY:
 	{
+		switch (m_state)
+		{
+		case NPC_IDLE:
+			A_MoveToNode();
+			if (CheckChaseState()) {
+				m_state = NPC_CHASE;
+			}
+			break;
+		case NPC_CHASE:
+			if (!CheckChaseState()) {
+				m_state = NPC_IDLE;
+				break;
+			}
+			A_PlayerChasing();
+			if (A_PlayerDetact())
+				m_state = NPC_ATTACK;
+			break;
+		case NPC_ATTACK:
+			if (!A_PlayerDetact()) {
+				m_state = NPC_CHASE;
+				PrintRayCast = false;
+			}
+			else {
+				A_PlayerAttack();
+			}
+			break;
+		case NPC_DEATH:
+			if (pos.y > 0.0f)
+				A_NPC_Death_motion();
+			break;
+		default:
+			break;
+		}
 
+		A_NPC_Check_HP();
+		A_SetFrustum();
+		break;
 		break;
 	}
 	}
@@ -915,24 +951,8 @@ void NPC::H_PlayerAttack()
 	// Look
 	H_PlayerChasing();
 
-	// Attack
-	/* ChasePlayer{ {m_User_Pos[m_chaseID].x, m_User_Pos[m_chaseID].y, m_User_Pos[m_chaseID].z },
-		HELI_BBSIZE_X, HELI_BBSIZE_X, HELI_BBSIZE_X };
-	XMFLOAT3 NPC_bullet_Pos = { pos.x, pos.y , pos.z };
-	XMFLOAT3 NPC_Look_Vec = m_lookvec;
-	XMFLOAT3 NPC_result;
-	NPC_result = MyRaycast_InfiniteRay(NPC_bullet_Pos, NPC_Look_Vec, ChasePlayer);
-	if (NPC_result != m_VectorMAX) {
-		PrintRayCast = false;
-	}
-	else {
-		PrintRayCast = true;
-	}*/
-
 	XMFLOAT3 AttackVec = { m_User_Pos[m_chaseID].x - pos.x,m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
 	m_AttackVec = NPCNormalize(AttackVec);
-
-	//NPCtoBuilding_collide();
 }
 void NPC::H_NPC_Damege_Calc(int id)
 {
@@ -1268,24 +1288,8 @@ void NPC::A_PlayerAttack()
 	// Look
 	A_PlayerChasing();
 
-	// Attack
-	/* ChasePlayer{ {m_User_Pos[m_chaseID].x, m_User_Pos[m_chaseID].y, m_User_Pos[m_chaseID].z },
-		HELI_BBSIZE_X, HELI_BBSIZE_X, HELI_BBSIZE_X };
-	XMFLOAT3 NPC_bullet_Pos = { pos.x, pos.y , pos.z };
-	XMFLOAT3 NPC_Look_Vec = m_lookvec;
-	XMFLOAT3 NPC_result;
-	NPC_result = MyRaycast_InfiniteRay(NPC_bullet_Pos, NPC_Look_Vec, ChasePlayer);
-	if (NPC_result != m_VectorMAX) {
-		PrintRayCast = false;
-	}
-	else {
-		PrintRayCast = true;
-	}*/
-
 	XMFLOAT3 AttackVec = { m_User_Pos[m_chaseID].x - pos.x,m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
 	m_AttackVec = NPCNormalize(AttackVec);
-
-	//NPCtoBuilding_collide();
 }
 void NPC::A_NPC_Damege_Calc(int id)
 {
@@ -1417,6 +1421,7 @@ void SERVER::send_npc_init_packet(int npc_id) {
 	npc_init_packet.size = sizeof(NPC_FULL_INFO);
 	npc_init_packet.type = NPC_FULL_INFO;
 	npc_init_packet.n_id = npc_id;
+	npc_init_packet.ishuman = npcsInfo[npc_id].type;
 	strcpy_s(npc_init_packet.name, npcsInfo[npc_id].name);
 	npc_init_packet.hp = npcsInfo[npc_id].hp;
 	npc_init_packet.x = npcsInfo[npc_id].pos.x;
@@ -1862,7 +1867,7 @@ void initNpc() {
 		g_logicservers[a_lgcsvr_num].send_npc_init_packet(npc_id);
 	}
 
-	if (MAX_NPCS != HelicopterNum) {
+	if (HelicopterNum != MAX_NPCS) {
 		for (int i = HelicopterNum; i < MAX_NPCS; i++) {
 			int npc_id = i;
 			npcsInfo[i].SetID(npc_id);
@@ -1876,7 +1881,7 @@ void initNpc() {
 
 			float x = npcsInfo[i].getRandomOffset(MeshInfo[npcsInfo[i].GetNodeIndex()].GetSmallX(),
 				MeshInfo[npcsInfo[i].GetNodeIndex()].GetLargeX());
-			float y = 11.0f;
+			float y = 6.0f;
 			float z = npcsInfo[i].getRandomOffset(MeshInfo[npcsInfo[i].GetNodeIndex()].GetSmallZ(),
 				MeshInfo[npcsInfo[i].GetNodeIndex()].GetLargeZ());
 

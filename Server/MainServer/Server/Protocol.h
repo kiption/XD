@@ -46,7 +46,7 @@ constexpr int BUF_SIZE = 200;
 constexpr int NAME_SIZE = 20;
 
 constexpr int MAX_USER = 3;
-constexpr int MAX_NPCS = 5;
+constexpr int MAX_NPCS = 10;
 constexpr int MAX_BULLET = 10;
 
 constexpr int PLAYER_ID_START = 1000;		// Player ID 시작값. (ID_VALUE_PLAYER + client_id)
@@ -371,6 +371,7 @@ struct NPC_FULL_INFO_PACKET {
 	unsigned char size;
 	char type;
 	short n_id;
+	char ishuman;	// 0: 헬기, 1: 사람
 	char name[20];
 	int hp;
 	float x, y, z;

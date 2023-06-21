@@ -361,35 +361,6 @@ void SESSION::send_add_obj_packet(int obj_id, short obj_type)
 		do_send(&add_npc_packet);
 
 		break;
-
-	case TARGET_DUMMY:
-		SC_ADD_OBJECT_PACKET add_dummy_packet;
-		add_dummy_packet.size = sizeof(SC_ADD_OBJECT_PACKET);
-		add_dummy_packet.type = SC_ADD_OBJECT;
-
-		add_dummy_packet.target = TARGET_DUMMY;
-		add_dummy_packet.id = obj_id;
-		strcpy_s(add_dummy_packet.name, name);
-		add_dummy_packet.obj_state = dummies[obj_id].pl_state;
-
-		add_dummy_packet.x = dummies[obj_id].pos.x;
-		add_dummy_packet.y = dummies[obj_id].pos.y;
-		add_dummy_packet.z = dummies[obj_id].pos.z;
-		
-		add_dummy_packet.right_x = dummies[obj_id].m_rightvec.x;
-		add_dummy_packet.right_y = dummies[obj_id].m_rightvec.y;
-		add_dummy_packet.right_z = dummies[obj_id].m_rightvec.z;
-		
-		add_dummy_packet.up_x = dummies[obj_id].m_upvec.x;
-		add_dummy_packet.up_y = dummies[obj_id].m_upvec.y;
-		add_dummy_packet.up_z = dummies[obj_id].m_upvec.z;
-		
-		add_dummy_packet.look_x = dummies[obj_id].m_lookvec.x;
-		add_dummy_packet.look_y = dummies[obj_id].m_lookvec.y;
-		add_dummy_packet.look_z = dummies[obj_id].m_lookvec.z;
-
-		do_send(&add_dummy_packet);
-		break;
 	}
 }
 void SESSION::send_move_packet(int obj_id, short obj_type, short dir)
@@ -578,32 +549,32 @@ void SESSION::update_viewlist()
 	}
 
 	// 2. NPC 업데이트 (임시로 더미로 대체함.)
-	for (auto& dummy : dummies) {
-		int dummy_id = dummy.id + NPC_ID_START;
+	for (auto& npc : npcs) {
+		int npc_id = npc.id + NPC_ID_START;
 
 		// 1) 움직였더니 새로운 객체가 시야 안에 생긴 경우
-		if (XMF_Distance(pos, dummy.pos) <= HUMAN_VIEW_RANGE) {
+		if (XMF_Distance(pos, npc.pos) <= HUMAN_VIEW_RANGE) {
 			// 1-1) 자신의 ViewList에 시야에 새로 들어온 플레이어의 ID 추가
-			if (!view_list.count(dummy_id)) {
+			if (!view_list.count(npc_id)) {
 				s_lock.lock();
-				view_list.insert(dummy_id);
+				view_list.insert(npc_id);
 				s_lock.unlock();
 
-				cout << "Player[" << id << "]의 ViewList에 Dummy[" << dummy.id << "]를 추가합니다.\n" << endl;
+				cout << "Player[" << id << "]의 ViewList에 Npc[" << npc.id << "]를 추가합니다.\n" << endl;
 			}
 			// 더미는 View List X
 		}
 		// 2) 움직였더니 원래는 시야에 있었던 객체가 시야에서 사라진 경우
 		else {
 			// 2-1) 자신의 ViewList에 시야에 새로 들어온 플레이어의 ID 제거
-			if (view_list.count(dummy_id)) {
+			if (view_list.count(npc_id)) {
 				s_lock.lock();
-				view_list.erase(dummy_id);
+				view_list.erase(npc_id);
 				s_lock.unlock();
 
-				cout << "Player[" << id << "]의 ViewList에서 Dummy[" << dummy.id << "]를 제거합니다.\n" << endl;
+				cout << "Player[" << id << "]의 ViewList에서 Npc[" << npc.id << "]를 제거합니다.\n" << endl;
 			}
-			// 더미는 View List X
+			// Npc의 시야는 Npc서버에서 관리.
 		}
 	}
 	
@@ -930,17 +901,8 @@ void process_packet(int client_id, char* packet)
 			lock_guard<mutex> lg{ clients[client_id].s_lock};
 			clients[client_id].send_add_obj_packet(npc.id, TARGET_NPC);
 		}
-
-		//  3) Dummies
-		// 새로 접속한 클라이언트에게 현재 접속해 있는 모든 NPC의 정보를 전송합니다.
-		for (auto& dummy : dummies) {
-			if (dummy.id == -1) continue;
-
-			lock_guard<mutex> lg{ clients[client_id].s_lock };
-			clients[client_id].send_add_obj_packet(dummy.id, TARGET_DUMMY);
-		}
 		
-		//  4) NPC서버로 새로 접속한 클라이언트의 정보를 전송합니다.
+		//  3) NPC서버로 새로 접속한 클라이언트의 정보를 전송합니다.
 		if (b_npcsvr_conn) {
 			lock_guard<mutex> lg{ npc_server.s_lock };
 			npc_server.send_add_obj_packet(client_id, TARGET_PLAYER);
@@ -1180,32 +1142,32 @@ void process_packet(int client_id, char* packet)
 			for (auto& vl_key : clients[client_id].view_list) {
 				if (!(NPC_ID_START <= vl_key && vl_key <= NPC_ID_END)) continue;
 
-				int dummy_id = vl_key - NPC_ID_START;
-				if (dummies[dummy_id].pl_state == PL_ST_DEAD) continue;
+				int npc_id = vl_key - NPC_ID_START;
+				if (npcs[npc_id].pl_state == PL_ST_DEAD) continue;
 				
-				if (bullet.m_xoobb.Intersects(dummies[dummy_id].m_xoobb)) {
+				if (bullet.m_xoobb.Intersects(npcs[npc_id].m_xoobb)) {
 					b_collide = true;
 					
-					// Dummy 데미지 처리
-					if (dummies[dummy_id].hp <= 10) {
-						dummies[dummy_id].s_lock.lock();
-						dummies[dummy_id].hp = 0;
-						dummies[dummy_id].pl_state = PL_ST_DEAD;
-						dummies[dummy_id].s_lock.unlock();
+					// npc 데미지 처리
+					if (npcs[npc_id].hp <= 10) {
+						npcs[npc_id].s_lock.lock();
+						npcs[npc_id].hp = 0;
+						npcs[npc_id].pl_state = PL_ST_DEAD;
+						npcs[npc_id].s_lock.unlock();
 
-						cout << "Player[" << client_id << "]의 공격에 Dummy[" << dummy_id << "]가 사망하였다." << endl;
+						cout << "Player[" << client_id << "]의 공격에 Npc[" << npc_id << "]가 사망하였다." << endl;
 
-						SC_OBJECT_STATE_PACKET dummy_die_packet;
-						dummy_die_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
-						dummy_die_packet.type = SC_OBJECT_STATE;
-						dummy_die_packet.target = TARGET_DUMMY;
-						dummy_die_packet.id = dummy_id;
-						dummy_die_packet.state = PL_ST_DEAD;
+						SC_OBJECT_STATE_PACKET npc_die_packet;
+						npc_die_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
+						npc_die_packet.type = SC_OBJECT_STATE;
+						npc_die_packet.target = TARGET_NPC;
+						npc_die_packet.id = npc_id;
+						npc_die_packet.state = PL_ST_DEAD;
 						for (auto& cl : clients) {
 							if (cl.s_state != ST_INGAME) continue;
 							if (cl.curr_stage != clients[client_id].curr_stage) continue;
 							lock_guard<mutex> lg{ cl.s_lock };
-							cl.do_send(&dummy_die_packet);
+							cl.do_send(&npc_die_packet);
 						}
 
 
@@ -1300,11 +1262,11 @@ void process_packet(int client_id, char* packet)
 
 					}
 					else {
-						dummies[dummy_id].s_lock.lock();
-						dummies[dummy_id].hp -= 10;
-						dummies[dummy_id].s_lock.unlock();
+						npcs[npc_id].s_lock.lock();
+						npcs[npc_id].hp -= 10;
+						npcs[npc_id].s_lock.unlock();
 
-						cout << "Player[" << client_id << "]의 공격에 Dummy[" << dummy_id << "]가 맞았다. (HP: " << dummies[dummy_id].hp << " 남음)\n" << endl;
+						cout << "Player[" << client_id << "]의 공격에 Npc[" << npc_id << "]가 맞았다. (HP: " << npcs[npc_id].hp << " 남음)\n" << endl;
 					}
 
 					break;
@@ -1317,7 +1279,7 @@ void process_packet(int client_id, char* packet)
 				, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 		}
 
-		/* My Raycast
+		/* My Raycast 원래는 raycast로 해야함.
 		XMFLOAT3 human_intersection\
 			= Intersect_Ray_Box(clients[client_id].pos, clients[client_id].m_lookvec, BULLET_RANGE, dummy_humanoid.pos, HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z);
 		if (human_intersection != XMF_fault) {
@@ -1552,6 +1514,14 @@ void process_packet(int client_id, char* packet)
 		npcs[npc_id].m_rightvec = { npc_info_pack->right_x, npc_info_pack->right_y, npc_info_pack->right_z };
 		npcs[npc_id].m_upvec = { npc_info_pack->up_x, npc_info_pack->up_y, npc_info_pack->up_z };
 		npcs[npc_id].m_lookvec = { npc_info_pack->look_x, npc_info_pack->look_y, npc_info_pack->look_z };
+
+		if (npc_info_pack->ishuman) {
+			npcs[npc_id].setBB();
+		}
+		else {
+			npcs[npc_id].m_xoobb = BoundingOrientedBox(XMFLOAT3(npcs[npc_id].pos.x, npcs[npc_id].pos.y, npcs[npc_id].pos.z)
+								 , XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+		}
 		npcs[npc_id].s_lock.unlock();
 
 		cout << "NPC[" << npc_id << "]의 모든 정보를 받았습니다.\n" << endl;
@@ -1656,6 +1626,20 @@ void process_packet(int client_id, char* packet)
 
 		break;
 	}// NPC_REMOVE end
+	case NPC_ATTACK:
+	{
+		NPC_ATTACK_PACKET* npc_attack_pack = reinterpret_cast<NPC_ATTACK_PACKET*>(packet);
+
+		// 그대로 클라에게 전달
+		for (auto& cl : clients) {
+			if (cl.curr_stage != 1) continue;
+			if (cl.s_state != ST_INGAME) continue;
+
+			lock_guard<mutex> lg{ cl.s_lock };
+			cl.do_send(npc_attack_pack);
+		}
+		break;
+	}
 	case NPC_CHANGE_STATE:
 	{
 		NPC_CHANGE_STATE_PACKET* npc_chgstate_pack = reinterpret_cast<NPC_CHANGE_STATE_PACKET*>(packet);
@@ -2053,8 +2037,6 @@ void timerFunc() {
 								lock_guard<mutex> lg{ cl.s_lock };
 								cl.send_mission_packet(1);
 							}
-
-							cout << "점령 진행상황: " << (int)(stage1_missions[curr_mission_id].curr / 2500) << "%"  << endl;
 						}
 					}
 					else if (cl.curr_stage == 2) {

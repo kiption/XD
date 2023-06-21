@@ -54,35 +54,6 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[6]->SetPosition(XMFLOAT3(160.0, 0.0, 1000.0));  // 안보이게 숨겨놨지롱
 		m_ppObjects[7]->SetPosition(XMFLOAT3(160.0, 0.0, 1000.0));  // 안보이게 숨겨놨지롱
 
-
-		m_nHeliNpcObjects = 5;
-
-		m_ppNpc_Heli_Objects = new CGameObject * [m_nHeliNpcObjects];
-
-		CMaterial* pNpcHeliMaterial = new CMaterial(m_nHeliNpcObjects);
-		pNpcHeliMaterial->SetReflection(m_nHeliNpcObjects);
-		for (int i = 0; i < m_nHeliNpcObjects; i++)
-		{
-
-			m_ppNpc_Heli_Objects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			m_ppNpc_Heli_Objects[i]->SetMaterial(0, pNpcHeliMaterial);
-			m_ppNpc_Heli_Objects[i]->Rotate(0.0f, 45.0f, 0.0f);
-			m_ppNpc_Heli_Objects[i]->SetScale(3.0,3.0,3.0);
-
-			m_ppNpc_Heli_Objects[i]->OnPrepareAnimate();
-		}
-
-		m_ppObjects[8] = m_ppNpc_Heli_Objects[0];
-		m_ppObjects[9] = m_ppNpc_Heli_Objects[1];
-		m_ppObjects[10] = m_ppNpc_Heli_Objects[2];
-		m_ppObjects[11] = m_ppNpc_Heli_Objects[3];
-		m_ppObjects[12] = m_ppNpc_Heli_Objects[4];
-		m_ppObjects[8]->SetPosition(XMFLOAT3(100.0, 100.0, 1100.0));
-		m_ppObjects[9]->SetPosition(XMFLOAT3(150.0, 100.0, 1000.0));
-		m_ppObjects[10]->SetPosition(XMFLOAT3(200.0, 100.0, 900.0));
-		m_ppObjects[11]->SetPosition(XMFLOAT3(250.0, 100.0, 800.0));
-		m_ppObjects[12]->SetPosition(XMFLOAT3(300.0, 100.0, 1300.0));
-
 		CMaterial* pCityMaterial;
 		pCityMaterial = new CMaterial(6);
 		pCityMaterial->SetReflection(6);
@@ -110,15 +81,44 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			pGeneratorModel->AddRef();
 		}
 
-		m_ppObjects[13] = m_ppCityGameObjects[0];
-		m_ppObjects[14] = m_ppCityGameObjects[1];
-		m_ppObjects[15] = m_ppCityGameObjects[2];
-		m_ppObjects[16] = m_ppCityGameObjects[3];
+		m_ppObjects[8] = m_ppCityGameObjects[0];
+		m_ppObjects[9] = m_ppCityGameObjects[1];
+		m_ppObjects[10] = m_ppCityGameObjects[2];
+		m_ppObjects[11] = m_ppCityGameObjects[3];
 
-		m_ppObjects[13]->SetPosition(0.0f, 0.0f, 0.0f);
-		m_ppObjects[14]->SetPosition(0.0f, 0.0f, 0.0f);
-		m_ppObjects[15]->SetPosition(0.0f, 0.0f, 0.0f);
-		m_ppObjects[16]->SetPosition(0.0f, 0.0f, 0.0f);
+		m_ppObjects[8]->SetPosition(0.0f, 0.0f, 0.0f);
+		m_ppObjects[9]->SetPosition(0.0f, 0.0f, 0.0f);
+		m_ppObjects[10]->SetPosition(0.0f, 0.0f, 0.0f);
+		m_ppObjects[11]->SetPosition(0.0f, 0.0f, 0.0f);
+
+		m_nHeliNpcObjects = 5;
+
+		m_ppNpc_Heli_Objects = new CGameObject * [m_nHeliNpcObjects];
+
+		CMaterial* pNpcHeliMaterial = new CMaterial(m_nHeliNpcObjects);
+		pNpcHeliMaterial->SetReflection(m_nHeliNpcObjects);
+		for (int i = 0; i < m_nHeliNpcObjects; i++)
+		{
+
+			m_ppNpc_Heli_Objects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+			m_ppNpc_Heli_Objects[i]->SetMaterial(0, pNpcHeliMaterial);
+			m_ppNpc_Heli_Objects[i]->Rotate(0.0f, 45.0f, 0.0f);
+			m_ppNpc_Heli_Objects[i]->SetScale(3.0, 3.0, 3.0);
+
+			m_ppNpc_Heli_Objects[i]->OnPrepareAnimate();
+		}
+
+		m_ppObjects[12] = m_ppNpc_Heli_Objects[0];
+		m_ppObjects[13] = m_ppNpc_Heli_Objects[1];
+		m_ppObjects[14] = m_ppNpc_Heli_Objects[2];
+		m_ppObjects[15] = m_ppNpc_Heli_Objects[3];
+		m_ppObjects[16] = m_ppNpc_Heli_Objects[4];
+
+		m_ppObjects[12]->SetPosition(XMFLOAT3(100.0, 100.0, 1100.0));
+		m_ppObjects[13]->SetPosition(XMFLOAT3(150.0, 100.0, 1000.0));
+		m_ppObjects[14]->SetPosition(XMFLOAT3(200.0, 100.0, 900.0));
+		m_ppObjects[15]->SetPosition(XMFLOAT3(250.0, 100.0, 800.0));
+		m_ppObjects[16]->SetPosition(XMFLOAT3(300.0, 100.0, 1300.0));
 
 		m_nSoldiarNpcObjects = 22;
 		CMaterial* pSoldiarNpcMaterial = new CMaterial(5);
@@ -129,11 +129,11 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppObjects[h]->SetMaterial(0, pSoldiarNpcMaterial);
 			m_ppObjects[h]->SetScale(7.0, 7.0, 7.0);
 		}
-		m_ppObjects[17]->SetPosition(30.0f, 6.0f, 905.0f);		// 더미들 위치를 직접 정해줬음.
-		m_ppObjects[18]->SetPosition(60.0f, 6.0f, 1155.0f);		// 더미들 위치를 직접 정해줬음.
-		m_ppObjects[19]->SetPosition(100.0f, 6.0f, 1205.0f);	// 더미들 위치를 직접 정해줬음.
-		m_ppObjects[20]->SetPosition(-50.0f, 6.0f, 1300.0f);	// 더미들 위치를 직접 정해줬음.
-		m_ppObjects[21]->SetPosition(20.0f, 6.0f, 1350.0f);		// 더미들 위치를 직접 정해줬음.
+		//m_ppObjects[17]->SetPosition(30.0f, 6.0f, 905.0f);		// 더미들 위치를 직접 정해줬음.
+		//m_ppObjects[18]->SetPosition(60.0f, 6.0f, 1155.0f);		// 더미들 위치를 직접 정해줬음.
+		//m_ppObjects[19]->SetPosition(100.0f, 6.0f, 1205.0f);	// 더미들 위치를 직접 정해줬음.
+		//m_ppObjects[20]->SetPosition(-50.0f, 6.0f, 1300.0f);	// 더미들 위치를 직접 정해줬음.
+		//m_ppObjects[21]->SetPosition(20.0f, 6.0f, 1350.0f);		// 더미들 위치를 직접 정해줬음.
 
 	}
 	//if (m_nCurScene == SCENE2STAGE)
