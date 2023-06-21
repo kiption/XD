@@ -371,6 +371,7 @@ struct NPC_FULL_INFO_PACKET {
 	unsigned char size;
 	char type;
 	short n_id;
+	char ishuman;	// 0: Çï±â, 1: »ç¶÷
 	char name[20];
 	int hp;
 	float x, y, z;
