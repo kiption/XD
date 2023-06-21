@@ -1656,6 +1656,20 @@ void process_packet(int client_id, char* packet)
 
 		break;
 	}// NPC_REMOVE end
+	case NPC_ATTACK:
+	{
+		NPC_ATTACK_PACKET* npc_attack_pack = reinterpret_cast<NPC_ATTACK_PACKET*>(packet);
+
+		// 그대로 클라에게 전달
+		for (auto& cl : clients) {
+			if (cl.curr_stage != 1) continue;
+			if (cl.s_state != ST_INGAME) continue;
+
+			lock_guard<mutex> lg{ cl.s_lock };
+			cl.do_send(npc_attack_pack);
+		}
+		break;
+	}
 	case NPC_CHANGE_STATE:
 	{
 		NPC_CHANGE_STATE_PACKET* npc_chgstate_pack = reinterpret_cast<NPC_CHANGE_STATE_PACKET*>(packet);
@@ -2053,8 +2067,6 @@ void timerFunc() {
 								lock_guard<mutex> lg{ cl.s_lock };
 								cl.send_mission_packet(1);
 							}
-
-							cout << "점령 진행상황: " << (int)(stage1_missions[curr_mission_id].curr / 2500) << "%"  << endl;
 						}
 					}
 					else if (cl.curr_stage == 2) {
