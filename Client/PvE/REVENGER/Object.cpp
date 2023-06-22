@@ -1939,7 +1939,7 @@ void CSoldiarNpcObjects::Animate(float fTimeElapsed)
 
 		}
 	}
-	MoveForward(fTimeElapsed);
+	//MoveForward(fTimeElapsed);
 	CGameObject::Animate(fTimeElapsed);
 }
 
