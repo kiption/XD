@@ -177,8 +177,8 @@ D3D12_SHADER_BYTECODE SpriteAnimationBillboard::CreateVertexShader(ID3DBlob** pp
 void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures[2];
-	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
-	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 4);
+	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/EX.dds", RESOURCE_TEXTURE2D, 0);
 	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 6, 6);
 	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explosion_6x6.dds", RESOURCE_TEXTURE2D, 0);
 
@@ -189,7 +189,7 @@ void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	pTerrainMaterial[1]->SetTexture(ppSpriteTextures[1], 0);
 
 
-	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 30.0, 30.0, 0.0f, 0.0f, 0.0f, 0.0f);
+	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 15.0, 15.0, 0.0f, 0.0f, 0.0f, 0.0f);
 
 
 	SceneManager* pScene = NULL;
@@ -213,7 +213,7 @@ void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 		pSpriteObject->SetMaterial(0, pTerrainMaterial[0]);
 		pSpriteObject->SetPosition(XMFLOAT3(xmf3Position.x, xmf3Position.y, xmf3Position.z));
 		pSpriteObject->SetCbvGPUDescriptorHandlePtr(((Stage1*)pScene)->m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
-		pSpriteObject->m_fSpeed = 12.0f / (ppSpriteTextures[0]->m_nRows * ppSpriteTextures[0]->m_nCols);
+		pSpriteObject->m_fSpeed = 6.0f / (ppSpriteTextures[0]->m_nRows * ppSpriteTextures[0]->m_nCols);
 		m_ppObjects[i] = pSpriteObject;
 	}
 }

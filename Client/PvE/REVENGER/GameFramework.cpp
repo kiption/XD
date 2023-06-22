@@ -1819,7 +1819,6 @@ void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, X
 		}
 
 
-
 	}
 
 }

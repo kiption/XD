@@ -1830,10 +1830,9 @@ CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		pBulletMesh->AddRef();
 	}
 
-	CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
-	SetChild(psModel->m_pModelRootObject, true);
-	psModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 4, psModel);
+	SetChild(pModel->m_pModelRootObject, true);
+	pModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 4, pModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
@@ -1844,7 +1843,7 @@ CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	m_pSkinnedAnimationController->SetTrackEnable(3, false);
 
-	if (psModel) delete psModel;
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -1870,8 +1869,8 @@ void CSoldiarNpcObjects::MoveSide(float EleapsedTime)
 {
 
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	m_pSkinnedAnimationController->SetTrackEnable(2, true);
+	m_pSkinnedAnimationController->SetTrackEnable(1, true);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	m_pSkinnedAnimationController->SetTrackEnable(3, false);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	CGameObject::Animate(EleapsedTime);
@@ -1940,6 +1939,7 @@ void CSoldiarNpcObjects::Animate(float fTimeElapsed)
 
 		}
 	}
+	MoveForward(fTimeElapsed);
 	CGameObject::Animate(fTimeElapsed);
 }
 

@@ -78,7 +78,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppCityGameObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
 			m_ppCityGameObjects[i]->SetScale(1.0f, 1.0f, 1.0f);
 			m_ppCityGameObjects[i]->OnPrepareAnimate();
-			m_ppCityGameObjects[i]->SetPosition(0,0,0);
+			m_ppCityGameObjects[i]->SetPosition(0, 0, 0);
 			pGeneratorModel->AddRef();
 		}
 
@@ -114,18 +114,20 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[15]->SetPosition(XMFLOAT3(250.0, 100.0, 800.0));
 		m_ppObjects[16]->SetPosition(XMFLOAT3(300.0, 100.0, 1300.0));
 
-		m_nSoldiarNpcObjects = 17+5;
+		m_nSoldiarNpcObjects = 17 + 5;
 		CMaterial* pSoldiarNpcMaterial = new CMaterial(15);
 		pSoldiarNpcMaterial->SetReflection(15);
+
 		for (int h = 17; h < m_nSoldiarNpcObjects; h++)
 		{
-			m_ppObjects[h] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, NULL);
+			CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
+			m_ppObjects[h] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, NULL);
 			m_ppObjects[h]->SetMaterial(0, pSoldiarNpcMaterial);
 			m_ppObjects[h]->SetScale(7.0, 7.0, 7.0);
-			m_ppObjects[h]->SetPosition(500.0+h*5, 6.0, 500.0+ h * 5);
-		}
-		
+			m_ppObjects[h]->SetPosition(500.0 + h * 5, 6.0, 500.0 + h * 5);
 
+			if (psModel) delete psModel;
+		}
 	}
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -133,7 +135,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
 {
-	
+
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		m_ppObjects[j]->Animate(fTimeElapsed);
@@ -225,7 +227,7 @@ void CObjectsShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graph
 
 void CObjectsShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
 {
-	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
+	/*UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		for (int k = 0; k < m_ppObjects[j]->m_nMaterials; k++)
@@ -238,7 +240,7 @@ void CObjectsShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComman
 			if (m_ppMaterials[k]) pbMappedcbGameObject->m_nObjectID = j;
 #endif
 		}
-	}
+	}*/
 }
 
 void CObjectsShader::ReleaseShaderVariables()
@@ -368,7 +370,7 @@ void CShadowMapShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		m_pDepthTexture->AddRef();
 		m_pScene->CreateShaderResourceViews(pd3dDevice, m_pDepthTexture, 0, 22);
 	}
-	
+
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
