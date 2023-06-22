@@ -73,12 +73,13 @@ constexpr char INPUT_KEY_E = 0b000001;
 //======================================================================
 // Packet ID
 enum PacketID {
-	CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_PING, CS_RELOGIN
+	CLGN_LOGIN_REQUEST, LGNC_LOGIN_RESULT, LGNC_USER_MATCH_PACKET
+	, CLBY_MATCH_REQUEST, LBYC_MATCH_RESULT
+	, CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_PING, CS_RELOGIN
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
 	, SC_DAMAGED, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_BULLET_COUNT, SC_MISSION, SC_MISSION_COMPLETE
 	, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
-	, CLGN_LOGIN_REQUEST, LGNC_LOGIN_RESULT, LGNC_USER_MATCH_PACKET
 	, NPC_FULL_INFO, NPC_MOVE, NPC_ROTATE, NPC_MOVE_ROTATE, NPC_REMOVE, NPC_ATTACK, NPC_CHANGE_STATE
 };
 
@@ -92,8 +93,45 @@ enum TargetType { TARGET_PLAYER, TARGET_BULLET, TARGET_NPC, TARGET_DUMMY };	//[T
 // Packets ( CS: Client->Server, SC: Server->Client, SS: Server->Other Server )
 #pragma pack (push, 1)
 // ================================
-//			1. C-S Packet
+//     클라이언트 - 로그인서버
 // ================================
+// 1. 클라 -> 로그인서버
+struct CLGN_LOGIN_REQUEST_PACKET {
+	unsigned char size;
+	char type;
+	char login_id[20];
+	char login_pw[20];
+};
+
+// 2. 로그인서버 -> 클라
+struct LGNC_LOGIN_RESULT_PACKET {
+	unsigned char size;
+	char type;
+	char login_accept;	// 0: Deny, 1: Accept
+};
+
+
+//================================
+//      클라이언트 - 로비서버
+//================================
+// 1. 클라 -> 로비서버
+struct CLBY_MATCH_REQUEST_PACKET {
+	unsigned char size;
+	char type;
+};
+
+// 2. 로비서버 -> 클라
+struct LBYC_MATCH_RESULT_PACKET {
+	unsigned char size;
+	char type;
+	char result;	// 0: fail, 1: success
+};
+
+
+// ================================
+//     클라이언트 - 로직서버
+// ================================
+// 1. 클라 -> 로직서버
 // 1) 로그인 관련 패킷
 struct CS_LOGIN_PACKET {
 	unsigned char size;
@@ -157,9 +195,7 @@ struct CS_RELOGIN_PACKET {
 	short id;
 };
 
-// ================================
-//			2. S-C Packet
-// ================================
+// 2. 로직서버 -> 클라
 // 1) 객체 생성 및 제거 관련 패킷
 struct SC_LOGIN_INFO_PACKET {
 	unsigned char size;
@@ -194,7 +230,6 @@ struct SC_REMOVE_OBJECT_PACKET {
 	short id;
 };
 
-// ================================
 // 2) 기본 조작 관련 패킷
 struct SC_MOVE_OBJECT_PACKET {
 	unsigned char size;
@@ -227,7 +262,6 @@ struct SC_MOVE_ROTATE_OBJECT_PACKET {
 	short direction;
 };
 
-// ================================
 // 3) 컨텐츠 관련 패킷
 struct SC_DAMAGED_PACKET {
 	unsigned char size;
@@ -275,7 +309,6 @@ struct SC_MISSION_COMPLETE_PACKET {
 	short mission_num;
 };
 
-// ================================
 // 4) UI 관련 패킷
 struct SC_TIME_TICKING_PACKET {
 	unsigned char size;
@@ -283,7 +316,6 @@ struct SC_TIME_TICKING_PACKET {
 	int servertime_ms;	// 단위: ms
 };
 
-// ================================
 // 5) 맵 정보 관련 패킷
 struct SC_MAP_OBJINFO_PACKET {
 	unsigned char size;
@@ -292,7 +324,6 @@ struct SC_MAP_OBJINFO_PACKET {
 	float scale_x, scale_y, scale_z;
 };
 
-// ================================
 // 6) 이중화 관련 패킷
 struct SC_PING_RETURN_PACKET {	// 현재는 클라-서버 -> 추후에 클라-릴레이서버 로 바꿀 예정.
 	unsigned char size;
@@ -306,8 +337,9 @@ struct SC_ACTIVE_DOWN_PACKET {	// 현재는 클라-서버 -> 추후에 클라-릴레이서버 로 
 	short my_s_id;
 };
 
+
 // ================================
-//			3. S-S Packet
+//           서버 - 서버
 // ================================
 struct SS_CONNECT_PACKET {
 	unsigned char size;
@@ -338,34 +370,9 @@ struct SS_DATA_REPLICA_PACKET {
 	short curr_stage;
 };
 
-// ================================
-//		  4. CL-LGNS Pakcet
-// ================================
-struct CLGN_LOGIN_REQUEST_PACKET {
-	unsigned char size;
-	char type;
-	char login_id[20];
-	char login_pw[20];
-};
 
 // ================================
-//		  5. LGNS-CL Packet
-// ================================
-struct LGNC_LOGIN_RESULT_PACKET {
-	unsigned char size;
-	char type;
-	char login_accept;	// 0: Deny, 1: Accept
-};
-
-struct LGNC_USER_MATCH_PACKET {
-	unsigned char size;
-	char type;
-	char match_ok;	// 1: OK, else: error
-};
-
-
-// ================================
-//			6. NPC Packet
+//          NPC 관련 패킷
 // ================================
 struct NPC_FULL_INFO_PACKET {
 	unsigned char size;

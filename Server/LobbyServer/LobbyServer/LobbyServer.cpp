@@ -1,6 +1,3 @@
-//============================================================
-//						  Standard
-//============================================================
 #include <iostream>
 #include <WS2tcpip.h>
 #include <MSWSock.h>
@@ -10,13 +7,11 @@
 #include <vector>
 #include <chrono>
 #include <random>
-#include <queue>
 #pragma comment(lib, "WS2_32.lib")
 #pragma comment(lib, "MSWSock.lib")
 
-//============================================================
-//			메인서버에서 사용한 것들을 그대로 사용
-//============================================================
+#include "Constant.h"
+
 #include "../../MainServer/Server/Protocol.h"
 #include "../../MainServer/Server/Constant.h"
 
@@ -24,8 +19,12 @@ using namespace std;
 using namespace chrono;
 
 //======================================================================
-enum PACKET_PROCESS_TYPE { OP_RECV, OP_SEND, OP_CONNECT };
+HANDLE h_iocp;											// IOCP 핸들
+SOCKET g_sc_listensock;									// 클라이언트 통신 listen소켓
+int a_lgcsvr_num;										// Active상태인 메인서버
 
+//======================================================================
+enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_CONNECT };
 class OVER_EX {
 public:
 	WSAOVERLAPPED overlapped;
@@ -52,15 +51,20 @@ public:
 };
 
 //======================================================================
+enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_LOGOUT };
 class SESSION {
 public:
 	OVER_EX recv_over;
 	int remain_size;
 	int id;
+	char name[NAME_SIZE];
+	SESSION_STATE s_state;
 	SOCKET sock;
 
+	mutex s_lock;
+
 public:
-	SESSION() { remain_size = 0; id = -1; sock = 0; }
+	SESSION() { remain_size = 0; id = -1; sock = 0; s_state = ST_FREE; }
 
 public:
 	void do_recv()
@@ -89,39 +93,162 @@ public:
 		}
 	}
 
-	void send_login_ok_packet(int c_id);
-	void send_login_deny_packet(int c_id);
+	void send_match_result_packet(char is_success);
 };
 
-HANDLE h_iocp;											// IOCP 핸들
-int a_lgcsvr_num;										// Active상태인 메인서버
-array<SESSION, MAX_USER> clients;						// 세션 정보
+array<SESSION, MAX_USER * MAX_ROOM> clients;						// 세션 정보
 
-void SESSION::send_login_ok_packet(int npc_id) {
-	NPC_FULL_INFO_PACKET npc_init_packet;
-	npc_init_packet.size = sizeof(NPC_MOVE_PACKET);
-	npc_init_packet.type = NPC_ROTATE;
+void SESSION::send_match_result_packet(char is_success) {
+	LBYC_MATCH_RESULT_PACKET match_result_packet;
+	match_result_packet.size = sizeof(LBYC_MATCH_RESULT_PACKET);
+	match_result_packet.type = LBYC_MATCH_RESULT;
+	match_result_packet.result = is_success;
 
-	clients[a_lgcsvr_num].do_send(&npc_init_packet);
+	do_send(&match_result_packet);
 }
-void SESSION::send_login_deny_packet(int npc_id) {
-	NPC_MOVE_PACKET npc_move_packet;
-	npc_move_packet.size = sizeof(NPC_MOVE_PACKET);
-	npc_move_packet.type = NPC_MOVE;
 
-	clients[a_lgcsvr_num].do_send(&npc_move_packet);
+int get_new_client_id()	// clients의 비어있는 칸을 찾아서 새로운 client의 아이디를 할당해주는 함수
+{
+	for (int i = 0; i < MAX_USER * MAX_ROOM; ++i) {
+		clients[i].s_lock.lock();
+		if (clients[i].s_state == ST_FREE) {
+			clients[i].s_state = ST_ACCEPTED;
+			clients[i].s_lock.unlock();
+			return i;
+		}
+		clients[i].s_lock.unlock();
+	}
+	return -1;
+}
+
+enum SESSION_TYPE { SESSION_CLIENT, SESSION_LOGIC };
+void disconnect(int target_id, int target)
+{
+	switch (target) {
+	case SESSION_CLIENT:
+		clients[target_id].s_lock.lock();
+		if (clients[target_id].s_state == ST_FREE) {
+			clients[target_id].s_lock.unlock();
+			return;
+		}
+		closesocket(clients[target_id].sock);
+		clients[target_id].s_state = ST_FREE;
+		clients[target_id].s_lock.unlock();
+
+		cout << "Player[ID: " << clients[target_id].id << ", name: " << clients[target_id].name << " is log out\n" << endl;	// server message
+		break;
+
+	case SESSION_LOGIC:
+		cout << "로직 서버가 다운되었습니다." << endl;
+		//closesocket(npc_server.socket);
+		//npc_server.socket = 0;
+		//b_npcsvr_conn = false;
+		break;
+	}
 }
 
 
 //======================================================================
-void process_packet(char* packet)
+class Game_Room {
+private:
+	array<int, MAX_USER> users;
+	
+public:
+	int room_id;
+	int user_count;
+
+public:
+	Game_Room() {
+		for (int i = 0; i < MAX_USER; ++i) { users[i] = -1; }
+		room_id = -1;
+		user_count = 0;
+	}
+
+public:
+	int user_join(int c_id);
+	int user_leave(int c_id);
+};
+vector<Game_Room> game_rooms;
+mutex r_lock;
+int room_count = 0;	// 0부터 시작해서 새로운 방을 만들때마다 계속해서 1씩 증가한다. (방 ID에 사용됨)
+
+int Game_Room::user_join(int c_id) {
+	if (user_count >= MAX_USER) return -1;
+
+	for (int i = 0; i < MAX_USER; ++i) {
+		if (users[i] == -1) {
+			r_lock.lock();
+
+			users[i] = c_id;
+			user_count++;
+			cout << "Room[" << room_id << "]에 Client[" << c_id << "]가 입장하였습니다." << endl;
+			cout << "Room[" << room_id << "]의 현재 참가인원: " << user_count << "(명)\n" << endl;
+
+			r_lock.unlock();
+			return 0;
+		}
+	}
+	return -1;
+}
+int Game_Room::user_leave(int c_id) {
+	if (user_count == 0) return -1;
+
+	for (int i = 0; i < MAX_USER; ++i) {
+		if (users[i] == c_id) {
+			r_lock.lock();
+
+			users[i] = -1;
+			user_count--;
+			cout << "Room[" << room_id << "]에서 Client[" << c_id << "]가 퇴장하였습니다." << endl;
+			cout << "Room[" << room_id << "]의 현재 참가인원: " << user_count << "(명)\n" << endl;
+
+			r_lock.unlock();
+			return 0;
+		}
+	}
+	return -1;
+}
+
+int create_new_room() {
+	Game_Room new_room;
+	new_room.room_id = room_count++;
+	new_room.user_count = 0;
+	game_rooms.push_back(new_room);
+
+	cout << "Room[" << new_room.room_id << "]이 생성되었습니다." << endl;
+	return new_room.room_id;
+}
+int find_joinable_room() {
+	for (auto& room : game_rooms) {
+		if (room.user_count < MAX_USER) return room.room_id;
+	}
+
+	return -1;
+}
+
+//======================================================================
+void process_packet(int client_id, char* packet)
 {
 	switch (packet[1]) {
-	case SC_ADD_OBJECT:
+	case CLBY_MATCH_REQUEST:
 	{
-		SC_ADD_OBJECT_PACKET* login_packet = reinterpret_cast<SC_ADD_OBJECT_PACKET*>(packet);
+		CLBY_MATCH_REQUEST_PACKET* match_request_packet = reinterpret_cast<CLBY_MATCH_REQUEST_PACKET*>(packet);
 
-	}// SC_ADD_OBJECT end
+		int room_id = find_joinable_room();
+		if (room_id == -1) {
+			room_id = create_new_room();
+		}
+
+		for (auto& room : game_rooms) {
+			if (room.room_id == room_id) {
+				int join_ret = room.user_join(client_id);
+				if (join_ret == -1) {
+					cout << "Join 실패" << endl;
+				}
+			}
+		}
+
+	}// CLBY_MATCH_REQUEST end
 	}
 }
 
@@ -136,6 +263,7 @@ void do_worker()
 		OVER_EX* ex_over = reinterpret_cast<OVER_EX*>(over);
 		if (FALSE == ret) {
 			if (ex_over->process_type == OP_CONNECT) {
+				/*
 				// 서버번호를 바꿔가면서 비동기Connect를 재시도합니다.
 				if (a_lgcsvr_num == 0)		a_lgcsvr_num = 1;
 				else if (a_lgcsvr_num == 1)	a_lgcsvr_num = 0;
@@ -197,54 +325,89 @@ void do_worker()
 						cout << WSAGetLastError() << endl;
 					}
 				}
+				*/
 			}
 			else {
 				//cout << "GQCS Error ( client[" << key << "] )" << endl;
-
-				//disconnect(static_cast<int>(key - CP_KEY_LOGIC2CLIENT));
+				disconnect(static_cast<int>(key), SESSION_CLIENT);
 				if (ex_over->process_type == OP_SEND) delete ex_over;
 				continue;
 			}
 		}
 
 		switch (ex_over->process_type) {
+		case OP_ACCEPT: {
+			if (key == CP_KEY_CLIENT) {
+				SOCKET c_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
+				int client_id = get_new_client_id();
+				cout << "새로운 클라이언트가 접속하였습니다. (ID: " << client_id << ")\n" << endl;
+				if (client_id != -1) {
+					// 클라이언트 id, 소켓
+					clients[client_id].s_lock.lock();
+					clients[client_id].id = client_id;
+					clients[client_id].remain_size = 0;
+					clients[client_id].sock = c_socket;
+					clients[client_id].s_lock.unlock();
+					CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), h_iocp, client_id, 0);
+					clients[client_id].do_recv();
+					c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+				}
+				else {
+					cout << "어떤 Client의 연결요청을 받았으나, 현재 서버가 꽉 찼습니다.\n" << endl;
+				}
+
+				ZeroMemory(&ex_over->overlapped, sizeof(ex_over->overlapped));
+				ex_over->wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
+				int addr_size = sizeof(SOCKADDR_IN);
+
+				int option = TRUE;//Nagle
+				setsockopt(g_sc_listensock, IPPROTO_TCP, TCP_NODELAY, (const char*)&option, sizeof(option));
+				AcceptEx(g_sc_listensock, c_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
+			}
+
+			break;
+		}//OP_ACPT end
 		case OP_RECV: {
-			int remain_data = num_bytes + clients[a_lgcsvr_num].remain_size;
+			int remain_data = num_bytes + clients[key].remain_size;
 			char* p = ex_over->send_buf;
 			while (remain_data > 0) {
 				int packet_size = p[0];
 				if (packet_size <= remain_data) {
-					process_packet(p);
+					process_packet(static_cast<int>(key), p);
 					p = p + packet_size;
 					remain_data = remain_data - packet_size;
 				}
 				else break;
 			}
-			clients[a_lgcsvr_num].remain_size = remain_data;
+			clients[key].remain_size = remain_data;
 			if (remain_data > 0) {
 				memcpy(ex_over->send_buf, p, remain_data);
 			}
 
-			clients[a_lgcsvr_num].do_recv();
+			clients[key].do_recv();
 
 			break;
 		}//OP_RECV end
 		case OP_SEND: {
-			//if (0 == num_bytes) disconnect(key - CP_KEY_LOGIC2CLIENT, SESSION_CLIENT);
-			delete ex_over;
+			if ((0 <= key && key < MAX_USER) || key == CP_KEY_CLIENT) {
+				if (0 == num_bytes) disconnect(static_cast<int>(key), SESSION_CLIENT);
+				delete ex_over;
+			}
 			break;
 		}//OP_SEND end
+		/*
 		case OP_CONNECT: {
 			if (FALSE != ret) {
 				int server_id = key - PORTNUM_LGCNPC_0;
 				std::cout << "성공적으로 Logic Server[" << server_id << "]에 연결되었습니다.\n" << endl;
-				clients[a_lgcsvr_num].remain_size = 0;
-				CreateIoCompletionPort(reinterpret_cast<HANDLE>(clients[a_lgcsvr_num].sock), h_iocp, NULL, 0);
+				clients[key].remain_size = 0;
+				CreateIoCompletionPort(reinterpret_cast<HANDLE>(clients[key].sock), h_iocp, NULL, 0);
 				delete ex_over;
-				clients[a_lgcsvr_num].do_recv();
+				clients[key].do_recv();
 			}
 
 		}//OP_CONN end
+		*/
 		}
 	}
 }
@@ -253,13 +416,15 @@ void do_worker()
 //======================================================================
 int main(int argc, char* argv[])
 {
+	create_new_room();
+
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
 
-	//======================================================================
-	//					로직서버로 비동기 Connect 요청
-	//======================================================================
+	//======================================================================	
+	/*
+	// [ Main - 로직서버로 비동기 Connect 요청 ]
 	int lgvsvr_port = PORTNUM_LGCNPC_0 + a_lgcsvr_num;
 
 	cout << "로직 서버(Server[" << a_lgcsvr_num << "] (PORT: " << lgvsvr_port << ")에 비동기Connect를 요청합니다." << endl;
@@ -317,6 +482,32 @@ int main(int argc, char* argv[])
 			cout << WSAGetLastError() << endl;
 		}
 	}
+	*/
+
+	//======================================================================
+	// [ Main - 클라이언트 연결 ]
+	// Client Listen Socket (클라이언트-서버 통신을 위한 Listen소켓)
+	g_sc_listensock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	SOCKADDR_IN server_addr;
+	memset(&server_addr, 0, sizeof(server_addr));
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(PORTNUM_LOBBY_0);
+	server_addr.sin_addr.S_un.S_addr = INADDR_ANY;
+	bind(g_sc_listensock, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+	listen(g_sc_listensock, SOMAXCONN);
+	SOCKADDR_IN cl_addr;
+	int addr_size = sizeof(cl_addr);
+
+	// Client Accept
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_sc_listensock), h_iocp, CP_KEY_CLIENT, 0);
+	SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	OVER_EX a_over;
+	a_over.process_type = OP_ACCEPT;
+	a_over.wsabuf.buf = reinterpret_cast<CHAR*>(c_socket);
+
+	int option = TRUE;//Nagle
+	setsockopt(g_sc_listensock, IPPROTO_TCP, TCP_NODELAY, (const char*)&option, sizeof(option));
+	AcceptEx(g_sc_listensock, c_socket, a_over.send_buf, 0, addr_size + 16, addr_size + 16, 0, &a_over.overlapped);
 
 
 	//======================================================================

@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{18340d13-577e-4b31-a648-11de7ac23a21}</ProjectGuid>
-    <RootNamespace>LoginServer</RootNamespace>
+    <ProjectGuid>{05b4d659-077b-4b2a-b786-c16e7b64837f}</ProjectGuid>
+    <RootNamespace>LobbyServer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -127,7 +127,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="LoginServer.cpp" />
+    <ClCompile Include="LobbyServer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\MainServer\Server\Protocol.h" />
+    <ClInclude Include="Constant.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
