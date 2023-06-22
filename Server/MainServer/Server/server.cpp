@@ -1121,9 +1121,7 @@ void process_packet(int client_id, char* packet)
 
 		enum CollideTarget { CT_PLAYER, CT_NPC, CT_BUILDING };
 		int collide_target = -1;
-
 		int collide_id = -1;
-
 		float min_dist = FLT_MAX;
 
 		// [TEST] 테스트용 더미 충돌검사
@@ -1630,14 +1628,66 @@ void process_packet(int client_id, char* packet)
 	{
 		NPC_ATTACK_PACKET* npc_attack_pack = reinterpret_cast<NPC_ATTACK_PACKET*>(packet);
 
-		// 그대로 클라에게 전달
+		bool b_collide = false;
 		for (auto& cl : clients) {
 			if (cl.curr_stage != 1) continue;
 			if (cl.s_state != ST_INGAME) continue;
 
-			lock_guard<mutex> lg{ cl.s_lock };
-			cl.do_send(npc_attack_pack);
+			// 1. NPC공격 연출을 위해 받은 패킷 그대로 클라에게 전달
+			{
+				lock_guard<mutex> lg{ cl.s_lock };
+				cl.do_send(npc_attack_pack);
+			}
+
+			// 2. NPC공격 - Player 충돌 검사
+			// 야매방법
+			if (b_collide) continue;					// 이미 충돌해서 데미지계산 처리가되었으면 충돌검사는 할 필요가 없다
+			if (cl.pl_state == PL_ST_DEAD) continue;	// 죽은 애는 충돌검사할 필요x
+			SESSION bullet;
+			bullet.pos = clients[client_id].pos;
+			bullet.m_lookvec = XMFLOAT3(npc_attack_pack->atklook_x, npc_attack_pack->atklook_y, npc_attack_pack->atklook_z);
+			bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
+				, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+
+			XMFLOAT3 bullet_initpos = bullet.pos;
+			while (XMF_Distance(bullet.pos, bullet_initpos) <= BULLET_RANGE) {
+				if (bullet.m_xoobb.Intersects(cl.m_xoobb)) {
+					b_collide = true;
+
+					// 플레이어 데미지 처리
+					if (cl.hp <= BULLET_DAMAGE/10) {// [임시코드] NPC가 공격을 너무 잘맞춘다... NPC 너프전까지 임시로 10을 나눠주었따.
+						cl.s_lock.lock();
+						cl.hp = 0;
+						cl.pl_state = PL_ST_DEAD;
+						cl.s_lock.unlock();
+						//cout << "Npc[" << npc_attack_pack->n_id << "]의 공격에 Player[" << cl.id << "]가 사망하였다." << endl;
+						
+						// 플레이어 사망처리는 나중에...
+					}
+					else {
+						SC_DAMAGED_PACKET damaged_packet;
+						damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
+						damaged_packet.type = SC_DAMAGED;
+						damaged_packet.target = TARGET_PLAYER;
+						damaged_packet.id = cl.id;
+						damaged_packet.damage = BULLET_DAMAGE / 10; // [임시코드] NPC가 공격을 너무 잘맞춘다... NPC 너프전까지 임시로 10을 나눠주었따.
+
+						cl.s_lock.lock();
+						cl.hp -= BULLET_DAMAGE / 10;
+						cout << "Npc[" << npc_attack_pack->n_id << "]의 공격에 Player[" << cl.id << "]가 맞았다. (HP: " << cl.hp << " 남음)\n" << endl;
+
+						cl.do_send(&damaged_packet);
+						cl.s_lock.unlock();
+					}
+
+					break;
+				}
+			}
+			bullet.pos = XMF_Add(bullet.pos, XMF_MultiplyScalar(bullet.m_lookvec, 1.f));
+			bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
+				, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 		}
+
 		break;
 	}
 	case NPC_CHANGE_STATE:

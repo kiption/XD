@@ -42,7 +42,7 @@
 #define RELOAD_TIME 1500				// 장전완료까지 걸리는 시간(ms)
 
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
-#define BULLET_DAMAGE 1					// 총알 피격데미지
+#define BULLET_DAMAGE 10				// 총알 피격데미지
 
 #define BULLET_RANGE 500				// 총알 최대이동거리
 

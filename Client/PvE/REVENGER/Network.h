@@ -580,9 +580,6 @@ void processPacket(char* ptr)
     case NPC_ATTACK:
     {
         NPC_ATTACK_PACKET* npc_attack_pack = reinterpret_cast<NPC_ATTACK_PACKET*>(ptr);
-
-        cout << "NPC[" << npc_attack_pack->n_id << "]가 공격하였다. - 공격방향: ("
-            << npc_attack_pack->atklook_x << ", " << npc_attack_pack->atklook_y << ", " << npc_attack_pack->atklook_z << ")" << endl;
         
         short recv_id = npc_attack_pack->n_id;
         
