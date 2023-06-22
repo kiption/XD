@@ -2015,7 +2015,7 @@ void MoveNPC()
 
 					// npc pos 확인
 
-					if (i < 4) {
+					/*if (i < 4) {
 
 						cout << "=============" << endl;
 
@@ -2025,7 +2025,7 @@ void MoveNPC()
 						cout << i << "번째 NPC의 Look: " << npcsInfo[i].m_lookvec.x << ", " << npcsInfo[i].m_lookvec.y << ", " << npcsInfo[i].m_lookvec.z << endl;
 						cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
 
-					}
+					}*/
 
 					//if (npcs[i].PrintRayCast) {
 					//	cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;

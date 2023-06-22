@@ -526,7 +526,8 @@ void uiThreadFunc() {
 			gGameFramework.m_currbullet = my_info.m_bullet;
 
 			// 2. HP 업데이트
-			gGameFramework.m_currHp = my_info.m_hp;
+			int currHP = my_info.m_hp;
+			gGameFramework.m_currHp = currHP;
 
 			// 3. 시간 동기화
 			gGameFramework.m_10MinOfTime = servertime_sec / 600;

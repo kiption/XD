@@ -926,7 +926,7 @@ void CGameFramework::FrameAdvance()
 		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[15] : m_pd2dfxGaussianBlur[15], &D2_Bullet1Num, &D2_Bullet1NumRect);
 
 		D2D_POINT_2F D2_HPBar = { D2_HPUIBG.x + 2.5f, D2_HPUIBG.y + (D2_HPUIBGRect.bottom / 2) - 20.0f };
-		D2D_RECT_F D2_HPBarRect = { 0.0f, 0.0f, 397.0f, 40.0f };
+		D2D_RECT_F D2_HPBarRect = { 0.0f, 0.0f, 3.97f * m_currHp, 40.0f };
 		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[16] : m_pd2dfxGaussianBlur[16], &D2_HPBar, &D2_HPBarRect);
 
 		// Remain NPC
