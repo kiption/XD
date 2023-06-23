@@ -775,7 +775,7 @@ float g_reverse_time = 0.0f;
 void CGameFramework::FrameAdvance()
 {
 
-	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick(144.0f);
+	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick(60.0f);
 
 
 
@@ -1737,7 +1737,7 @@ void CGameFramework::setVectors_Self(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3
 		((CHumanPlayer*)m_pPlayer)->SetUp(upVec);
 		((CHumanPlayer*)m_pPlayer)->SetRight(rightVec);
 		((CHumanPlayer*)m_pPlayer)->SetLook(lookVec);
-		((CHumanPlayer*)m_pPlayer)->SetScale(XMFLOAT3(7.0, 7.0, 7.0));
+		((CHumanPlayer*)m_pPlayer)->SetScale(XMFLOAT3(5.0, 5.0, 5.0));
 	}
 	else if (m_nMode == SCENE2STAGE) {
 		((CHumanPlayer*)m_pPlayer)->SetUp(upVec);

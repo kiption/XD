@@ -22,7 +22,7 @@ CCamera::CCamera()
 	m_pPlayer = NULL;
 }
 
-CCamera::CCamera(CCamera *pCamera)
+CCamera::CCamera(CCamera* pCamera)
 {
 	if (pCamera)
 	{
@@ -50,7 +50,7 @@ CCamera::CCamera(CCamera *pCamera)
 }
 
 CCamera::~CCamera()
-{ 
+{
 }
 
 void CCamera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, float fMinZ, float fMaxZ)
@@ -109,15 +109,15 @@ void CCamera::RegenerateViewMatrix()
 	GenerateFrustum();
 }
 
-void CCamera::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
+void CCamera::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(VS_CB_CAMERA_INFO) + 255) & ~255); //256의 배수
 	m_pd3dcbCamera = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
-	m_pd3dcbCamera->Map(0, NULL, (void **)&m_pcbMappedCamera);
+	m_pd3dcbCamera->Map(0, NULL, (void**)&m_pcbMappedCamera);
 }
 
-void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
+void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4View, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4View)));
 	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4Projection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Projection)));
@@ -136,7 +136,7 @@ void CCamera::ReleaseShaderVariables()
 	}
 }
 
-void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList *pd3dCommandList)
+void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->RSSetViewports(1, &m_d3dViewport);
 	pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
@@ -160,14 +160,14 @@ bool CCamera::IsInFrustum(BoundingBox& xmBoundingBox)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CSpaceShipCamera
 
-CSpaceShipCamera::CSpaceShipCamera(CCamera *pCamera) : CCamera(pCamera)
+CSpaceShipCamera::CSpaceShipCamera(CCamera* pCamera) : CCamera(pCamera)
 {
 	m_nMode = SPACESHIP_CAMERA;
 }
 
 void CSpaceShipCamera::Rotate(float x, float y, float z)
 {
-	if (m_pPlayer && (x != 0.0f))
+	/*if (m_pPlayer && (x != 0.0f))
 	{
 		XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Right), XMConvertToRadians(x));
@@ -177,7 +177,7 @@ void CSpaceShipCamera::Rotate(float x, float y, float z)
 		m_xmf3Position = Vector3::Subtract(m_xmf3Position, m_pPlayer->GetPosition());
 		m_xmf3Position = Vector3::TransformCoord(m_xmf3Position, xmmtxRotate);
 		m_xmf3Position = Vector3::Add(m_xmf3Position, m_pPlayer->GetPosition());
-	}
+	}*/
 	if (m_pPlayer && (y != 0.0f))
 	{
 		XMFLOAT3 xmf3Up = m_pPlayer->GetUpVector();
@@ -189,20 +189,23 @@ void CSpaceShipCamera::Rotate(float x, float y, float z)
 		m_xmf3Position = Vector3::TransformCoord(m_xmf3Position, xmmtxRotate);
 		m_xmf3Position = Vector3::Add(m_xmf3Position, m_pPlayer->GetPosition());
 	}
-	if (m_pPlayer && (z != 0.0f))
-	{
-		XMFLOAT3 xmf3Look = m_pPlayer->GetLookVector();
-		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Look), XMConvertToRadians(z));
-		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
-		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-		m_xmf3Position = Vector3::Subtract(m_xmf3Position, m_pPlayer->GetPosition());
-		m_xmf3Position = Vector3::TransformCoord(m_xmf3Position, xmmtxRotate);
-		m_xmf3Position = Vector3::Add(m_xmf3Position, m_pPlayer->GetPosition());
-	}
+	//if (m_pPlayer && (z != 0.0f))
+	//{
+	//	XMFLOAT3 xmf3Look = m_pPlayer->GetLookVector();
+	//	XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Look), XMConvertToRadians(z));
+	//	m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+	//	m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
+	//	m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
+	//	m_xmf3Position = Vector3::Subtract(m_xmf3Position, m_pPlayer->GetPosition());
+	//	m_xmf3Position = Vector3::TransformCoord(m_xmf3Position, xmmtxRotate);
+	//	m_xmf3Position = Vector3::Add(m_xmf3Position, m_pPlayer->GetPosition());
+	//}
 }
 void CSpaceShipCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
+
+
+
 	if (m_pPlayer)
 	{
 		XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
@@ -214,9 +217,14 @@ void CSpaceShipCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
 		xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
 		//xmf4x4Rotate._41 = xmf3Pos.x; xmf4x4Rotate._42 = xmf3Pos.y; xmf4x4Rotate._43 = xmf3Pos.z;//연출
+			// 플레이어를 항상 화면의 좌측에 고정시키기 위해 카메라의 위치를 업데이트합니다.
+		XMFLOAT3 xmf3PlayerPosition = m_pPlayer->GetPosition(); // 플레이어의 위치를 얻어옵니다.
 
+		// 카메라의 위치를 플레이어 위치로 설정합니다.
+		m_xmf3Position = XMFLOAT3(xmf3PlayerPosition.x - 1.0f, xmf3PlayerPosition.y, xmf3PlayerPosition.z);
 		XMFLOAT3 xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, xmf4x4Rotate);
 		XMFLOAT3 xmf3Position = Vector3::Add(XMFLOAT3(m_pPlayer->m_xmf3Position.x, m_pPlayer->m_xmf3Position.y, m_pPlayer->m_xmf3Position.z), xmf3Offset);
+		XMFLOAT3 xmf3LookAt = m_pPlayer->GetLook(); // 플레이어의 LookAt 위치를 얻어옵니다.	
 
 		XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
 		float fLength = Vector3::Length(xmf3Direction);
@@ -228,7 +236,8 @@ void CSpaceShipCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		if (fDistance > 0)
 		{
 			m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
-			SetLookAt(xmf3LookAt);
+			// 카메라의 LookAt 위치를 플레이어 위치로 설정합니다.
+			SetLookAt(xmf3LookAt); // LookAt 위치를 설정합니다.
 		}
 	}
 }
@@ -236,16 +245,15 @@ void CSpaceShipCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 void CSpaceShipCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 {
 	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(m_xmf3Position, xmf3LookAt, m_pPlayer->GetUpVector());
-
 	m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
-	m_xmf3Up = XMFLOAT3(0, 1,0);
-	m_xmf3Look = XMFLOAT3(mtxLookAt._13, mtxLookAt._23, mtxLookAt._33);
+	m_xmf3Up = XMFLOAT3(0, 1, 0);
+	m_xmf3Look = XMFLOAT3(mtxLookAt._13 * 12, mtxLookAt._23 / 6, mtxLookAt._33 * 12);
 
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CFirstPersonCamera
 
-CFirstPersonCamera::CFirstPersonCamera(CCamera *pCamera) : CCamera(pCamera)
+CFirstPersonCamera::CFirstPersonCamera(CCamera* pCamera) : CCamera(pCamera)
 {
 	m_nMode = FIRST_PERSON_CAMERA;
 	if (pCamera)
@@ -294,7 +302,7 @@ void CFirstPersonCamera::Rotate(float x, float y, float z)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CThirdPersonCamera
 
-CThirdPersonCamera::CThirdPersonCamera(CCamera *pCamera) : CCamera(pCamera)
+CThirdPersonCamera::CThirdPersonCamera(CCamera* pCamera) : CCamera(pCamera)
 {
 	m_nMode = THIRD_PERSON_CAMERA;
 	if (pCamera)
@@ -325,7 +333,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
 		xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
 		//xmf4x4Rotate._41 = xmf3Pos.x; xmf4x4Rotate._42 = xmf3Pos.y; xmf4x4Rotate._43 = xmf3Pos.z;//연출
-	
+
 		XMFLOAT3 xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, xmf4x4Rotate);
 		XMFLOAT3 xmf3Position = Vector3::Add(XMFLOAT3(m_pPlayer->m_xmf3Position.x, m_pPlayer->m_xmf3Position.y, m_pPlayer->m_xmf3Position.z), xmf3Offset);
 		xmf3Position.y += 12.0f;
@@ -350,6 +358,6 @@ void CThirdPersonCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 {
 	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(m_xmf3Position, xmf3LookAt, m_pPlayer->GetUpVector());
 	m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
-	m_xmf3Up = XMFLOAT3(0,1,0);
-	m_xmf3Look = XMFLOAT3(mtxLookAt._13*12, mtxLookAt._23/6, mtxLookAt._33*12);
+	m_xmf3Up = XMFLOAT3(0, 1, 0);
+	m_xmf3Look = XMFLOAT3(mtxLookAt._13 * 12, mtxLookAt._23 / 6, mtxLookAt._33 * 12);
 }

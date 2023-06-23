@@ -17,8 +17,9 @@ class CPlayer;
 
 class CCamera
 {
-protected:
+public:
 	XMFLOAT3						m_xmf3Position;
+protected:
 	XMFLOAT3						m_xmf3Right;
 	XMFLOAT3						m_xmf3Up;
 	XMFLOAT3						m_xmf3Look;
