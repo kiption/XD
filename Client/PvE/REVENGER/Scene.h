@@ -11,7 +11,7 @@
 #include "BillboardObjectsShader.h"
 #include "SkyboxShader.h"
 #include "TerrainShader.h"
-#include "MapObjectShaders.h"
+
 #include "ShadowShader.h"
 #include "PostProcessShader.h"
 #include "BoundingWire.h"
@@ -123,6 +123,8 @@ public:
 	static D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorNextHandle;
 	static D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dSrvCPUDescriptorNextHandle;
 	static D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorNextHandle;
+	static D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dShadowGPUDescriptorHandle;//그림자 텍스쳐를 넘기기위한 디스크립터의 주소
+
 public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUCbvDescriptorStartHandle() { return(m_d3dCbvCPUDescriptorStartHandle); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUCbvDescriptorStartHandle() { return(m_d3dCbvGPUDescriptorStartHandle); }
@@ -139,6 +141,8 @@ public:
 	static D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferViews(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride);
 	static void CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex);
 	static void CreateShaderResourceViews(ID3D12Device* pd3dDevice, int nResources, ID3D12Resource** ppd3dResources, DXGI_FORMAT* pdxgiSrvFormats) {};
+	static void CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex, ID3D12Resource* pShadowMap);
+
 	void SetCbvGPUDescriptorHandlePtr(UINT64 nCbvGPUDescriptorHandlePtr) { m_d3dCbvGPUDescriptorStartHandle.ptr = nCbvGPUDescriptorHandlePtr; }
 	float m_fBulletEffectiveRange = 2000.0f;
 	CBulletObject* pBulletObject = NULL;
@@ -148,7 +152,7 @@ public:
 public:
 	CShadowMapShader* m_pShadowShader = NULL;
 	CDepthRenderShader* m_pDepthRenderShader = NULL;
-	CTextureToViewportShader* m_pShadowMapToViewport = NULL;
+	
 	int count = 0;
 	BoundingBox						m_xmBoundingBox;
 public:
@@ -171,12 +175,11 @@ public:
 
 	CShader* m_pShader = NULL;
 	CBulletEffectShader* m_pBulletEffect = NULL;
-	CUseWaterMoveTerrain* m_pUseWaterMove = NULL;
+	
 	int									m_nMapShaders = 0;
 	int									m_nStageMapShaders = 0;
 	int									m_nFragShaders = 0;
-	CMapObjectShader** m_ppMapShaders = NULL;
-	CStage2MapObjectShader** m_ppStageMapShaders = NULL;
+
 	CFragmentsShader** m_ppFragShaders = NULL;
 
 	COpeningBackScene* m_pSkyBox = NULL;

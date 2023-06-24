@@ -17,12 +17,12 @@ D3D12_INPUT_LAYOUT_DESC CSpriteTexturedShader::CreateInputLayout(int nPipelineSt
 	return(d3dInputLayoutDesc);
 }
 
-void CSpriteTexturedShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
+void CSpriteTexturedShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, d3dPrimitiveTopology,
-		nRenderTargets, pdxgiRtvFormats, dxgiDsvFormat, nPipelineState);
+	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 }
 
 D3D12_SHADER_BYTECODE CSpriteTexturedShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
@@ -55,16 +55,13 @@ void CSpriteObjectsShader::ReleaseObjects()
 		delete[] m_ppObjects;
 	}
 
-#ifdef _WITH_BATCH_MATERIAL
-	if (m_ppMaterials) delete[] m_ppMaterials;
-#endif
+
 }
 
 void CSpriteObjectsShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
-	m_pd3dcbGameObjects = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes * m_nObjects, 
-		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbGameObjects = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes * m_nObjects, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbGameObjects->Map(0, NULL, (void**)&m_pcbMappedGameObjects);
 }
@@ -80,6 +77,7 @@ void CSpriteObjectsShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3d
 		{
 			for (int k = 0; k < m_ppObjects[j]->m_ppMaterials[i]->m_nTextures; k++)
 			{
+
 				if (m_ppObjects[j]->m_ppMaterials[i] && m_ppObjects[j]->m_ppMaterials[i]->m_ppTextures[k])
 				{
 					XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&(m_ppObjects[j]->m_ppMaterials[i]->m_ppTextures[k]->m_xmf4x4Texture))));
@@ -98,6 +96,7 @@ void CSpriteObjectsShader::ReleaseShaderVariables()
 		m_pd3dcbGameObjects->Release();
 	}
 
+	CShader::ReleaseShaderVariables();
 	CSpriteTexturedShader::ReleaseShaderVariables();
 }
 
@@ -111,7 +110,7 @@ void CSpriteObjectsShader::ReleaseUploadBuffers()
 
 void CSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CSpriteTexturedShader::Render(pd3dCommandList, pCamera, nPipelineState);
+	CSpriteTexturedShader::Render(pd3dCommandList, pCamera, nPipelineState, false);
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
@@ -160,13 +159,12 @@ D3D12_BLEND_DESC SpriteAnimationBillboard::CreateBlendState(int nPipelineState)
 	return(d3dBlendDesc);
 }
 
-void SpriteAnimationBillboard::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
+void SpriteAnimationBillboard::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, d3dPrimitiveTopology,
-		nRenderTargets, pdxgiRtvFormats, dxgiDsvFormat, nPipelineState);
-
+	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 }
 
 D3D12_SHADER_BYTECODE SpriteAnimationBillboard::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
@@ -177,44 +175,42 @@ D3D12_SHADER_BYTECODE SpriteAnimationBillboard::CreateVertexShader(ID3DBlob** pp
 void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures[2];
-	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 4);
-	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/EX.dds", RESOURCE_TEXTURE2D, 0);
-	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 6, 6);
-	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explosion_6x6.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
+	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
+	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
 
 	CMaterial* pTerrainMaterial[2];
 	pTerrainMaterial[0] = new CMaterial(1);
-	pTerrainMaterial[0]->SetTexture(ppSpriteTextures[0], 0);
 	pTerrainMaterial[1] = new CMaterial(1);
+
+	pTerrainMaterial[0]->SetTexture(ppSpriteTextures[0], 0);
 	pTerrainMaterial[1]->SetTexture(ppSpriteTextures[1], 0);
 
-
-	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 15.0, 15.0, 0.0f, 0.0f, 0.0f, 0.0f);
+	CTexturedRectMesh* pSpriteMesh;
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 40.0, 40.0, 0.0f, 0.0f, 0.0f, 0.0f);
 
 
 	SceneManager* pScene = NULL;
-	m_nObjects = 3;
+	m_nObjects = 2;
 	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
-
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	((Stage1*)pScene)->CreateConstantBufferView(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
-	((Stage1*)pScene)->CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[0], 0, 15);//+
-	((Stage1*)pScene)->CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[1], 0, 15);//+
+	pScene->CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[0], 0, 15);//+
+	pScene->CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[1], 0, 15);//+
+	pScene->CreateConstantBufferView(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
 	m_ppObjects = new CGameObject * [m_nObjects];
-
-	//CMultiSpriteObject** pThirdObject = new CMultiSpriteObject * [m_nObjects];
-	CMultiSpriteObject* pSpriteObject = NULL;
+	CMultiSpriteObject** pThirdObject = new CMultiSpriteObject * [m_nObjects];
 	XMFLOAT3 xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < m_nObjects; i++)
 	{
 
-		pSpriteObject = new CMultiSpriteObject();
-		pSpriteObject->SetMesh(pSpriteMesh);
-		pSpriteObject->SetMaterial(0, pTerrainMaterial[0]);
-		pSpriteObject->SetPosition(XMFLOAT3(xmf3Position.x, xmf3Position.y, xmf3Position.z));
-		pSpriteObject->SetCbvGPUDescriptorHandlePtr(((Stage1*)pScene)->m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
-		pSpriteObject->m_fSpeed = 6.0f / (ppSpriteTextures[0]->m_nRows * ppSpriteTextures[0]->m_nCols);
-		m_ppObjects[i] = pSpriteObject;
+		pThirdObject[i] = new CMultiSpriteObject();
+		pThirdObject[i]->SetMesh(pSpriteMesh);
+		pThirdObject[i]->SetMaterial(0, pTerrainMaterial[i]);
+		pThirdObject[i]->SetPosition(XMFLOAT3(xmf3Position.x, xmf3Position.y, xmf3Position.z));
+		pScene->SetCbvGPUDescriptorHandlePtr(((Stage1*)pScene)->m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
+		pThirdObject[i]->m_fSpeed = 6.0f / (ppSpriteTextures[i]->m_nRows * ppSpriteTextures[i]->m_nCols);
+		m_ppObjects[i] = pThirdObject[i];
 	}
 }
 
@@ -231,12 +227,17 @@ void SpriteAnimationBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList
 		XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 50.0f, false));
 		for (int j = 0; j < m_nObjects; j++)
 		{
-			
-				//m_ppObjects[j]->SetPosition(XMFLOAT3(xmf3Position.x + j * 2.5, xmf3Position.y, xmf3Position.z + j * 2.5));
-			
-				m_ppObjects[j]->SetLookAt(xmf3PlayerPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
+			if (m_ppObjects[j])
+			{
+				ExplosionPosition.x = m_ppObjects[j]->m_xmf4x4ToParent._41;
+				ExplosionPosition.y = m_ppObjects[j]->m_xmf4x4ToParent._42;
+				ExplosionPosition.z = m_ppObjects[j]->m_xmf4x4ToParent._43;
+				m_ppObjects[j]->SetPosition(xmf3PlayerPosition);
+				m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
+			}
 		}
-		CSpriteObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState);
+
+		CSpriteObjectsShader::Render(pd3dCommandList, pCamera, 0);
 	}
 }
 
@@ -252,5 +253,11 @@ void SpriteAnimationBillboard::ReleaseObjects()
 
 void SpriteAnimationBillboard::AnimateObjects(float fTimeElapsed)
 {
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		ExplosionPosition.x = m_ppObjects[j]->m_xmf4x4ToParent._41;
+		ExplosionPosition.y = m_ppObjects[j]->m_xmf4x4ToParent._42;
+		ExplosionPosition.z = m_ppObjects[j]->m_xmf4x4ToParent._43;
+	}
 	CSpriteObjectsShader::AnimateObjects(fTimeElapsed);
 }

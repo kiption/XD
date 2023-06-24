@@ -57,15 +57,15 @@ D3D12_SHADER_BYTECODE PostProcessShader::CreatePixelShader(ID3DBlob** ppd3dShade
 
 void PostProcessShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
 {
-#ifdef _WITH_SCENE_ROOT_SIGNATURE
-	m_pd3dGraphicsRootSignature = pd3dGraphicsRootSignature;
-	m_pd3dGraphicsRootSignature->AddRef();
-#else
-	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
-#endif
-
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, d3dPrimitiveTopology,
-		nRenderTargets, pdxgiRtvFormats, dxgiDsvFormat, nPipelineState);
+//#ifdef _WITH_SCENE_ROOT_SIGNATURE
+//	m_pd3dGraphicsRootSignature = pd3dGraphicsRootSignature;
+//	m_pd3dGraphicsRootSignature->AddRef();
+//#else
+//	//m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
+//#endif
+//
+//	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,
+//		nPipelineState);
 }
 
 ID3D12RootSignature* PostProcessShader::CreateGraphicsRootSignature(ID3D12Device* pd3dDevice)
@@ -192,7 +192,7 @@ void PostProcessShader::OnPostRenderTarget(ID3D12GraphicsCommandList* pd3dComman
 
 void PostProcessShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, void* pContext, int nPipelineStates)
 {
-	CShader::Render(pd3dCommandList, pCamera, nPipelineStates);
+	CShader::Render(pd3dCommandList, pCamera, nPipelineStates,false);
 
 	if (m_pTexture) m_pTexture->UpdateShaderVariables(pd3dCommandList);
 
@@ -234,7 +234,7 @@ void CTextureToFullScreenShader::UpdateShaderVariables(ID3D12GraphicsCommandList
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbDrawOptions->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(19, d3dGpuVirtualAddress);
 
-	PostProcessShader::UpdateShaderVariables(pd3dCommandList, pContext);
+	PostProcessShader::UpdateShaderVariables(pd3dCommandList);
 }
 
 void CTextureToFullScreenShader::ReleaseShaderVariables()

@@ -109,9 +109,6 @@
     <ClInclude Include="BillboardObjectsShader.h">
       <Filter>Client\Shader\Header</Filter>
     </ClInclude>
-    <ClInclude Include="MapObjectShaders.h">
-      <Filter>Client\Shader\Header</Filter>
-    </ClInclude>
     <ClInclude Include="ObjcetsShaderList.h">
       <Filter>Client\Shader\Header</Filter>
     </ClInclude>
@@ -235,9 +232,6 @@
       <Filter>Client\Scene</Filter>
     </ClCompile>
     <ClCompile Include="BillboardObjectsShader.cpp">
-      <Filter>Client\Shader\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="MapObjectShaders.cpp">
       <Filter>Client\Shader\Source</Filter>
     </ClCompile>
     <ClCompile Include="ObjcetsShaderList.cpp">

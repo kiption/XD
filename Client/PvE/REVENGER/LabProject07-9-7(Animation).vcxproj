@@ -158,7 +158,6 @@
     <ClInclude Include="BoundingWire.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="IlluminateMesh.h" />
-    <ClInclude Include="MapObjectShaders.h" />
     <ClInclude Include="mfplay.h" />
     <ClInclude Include="MissileObject.h" />
     <ClInclude Include="Network.h" />
@@ -201,7 +200,6 @@
     <ClCompile Include="BoundingWire.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="IlluminateMesh.cpp" />
-    <ClCompile Include="MapObjectShaders.cpp" />
     <ClCompile Include="MissileObject.cpp" />
     <ClCompile Include="ParticleMesh.cpp" />
     <ClCompile Include="ParticleObject.cpp" />

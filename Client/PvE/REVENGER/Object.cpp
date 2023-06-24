@@ -304,11 +304,11 @@ void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 {
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	m_pStandardShader = new CStandardShader();
-	m_pStandardShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	m_pStandardShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
 	m_pStandardShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	m_pSkinnedAnimationShader = new CSkinnedAnimationStandardShader();
-	m_pSkinnedAnimationShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, pdxgiRtvBaseFormats, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	m_pSkinnedAnimationShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,0);
 	m_pSkinnedAnimationShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -1034,14 +1034,22 @@ void CGameObject::AnimateObject(CCamera* pCamera, float fTimeElapsed)
 	if (m_pChild) m_pChild->Animate(fTimeElapsed);
 }
 
-void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bPrerender, CShader* pShaderComponent)
 {
-
-	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+	if (m_pSkinnedAnimationController)
+		m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
 	OnPrepareRender();
-	//게임 객체가 카메라에 보이면 렌더링한다. 
-
+	if (m_pShaderInfo != NULL)
+	{
+		m_pShaderInfo->Render(pd3dCommandList, pCamera, 0, bPrerender);
+		m_pShaderInfo->UpdateShaderVariables(pd3dCommandList);
+		//pd3dCommandList->SetGraphicsRootDescriptorTable(0, m_pShaderComponent->GetCbvGPUDescriptorHandle());
+		if (m_pTextureInfo != NULL)
+		{
+			m_pTextureInfo->UpdateShaderVariables(pd3dCommandList);
+		}
+	}
 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 	if (m_pMesh)
@@ -1050,29 +1058,82 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		{
 			for (int i = 0; i < m_nMaterials; i++)
 			{
-
 				if (m_ppMaterials[i])
 				{
-					if (m_ppMaterials[i]->m_pShader)
-					{
-						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0);
-						UpdateShaderVariables(pd3dCommandList);
-					}
-					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
-				}
-				for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
-					if (m_ppMaterials[i]->m_ppTextures[k]) m_ppMaterials[i]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
-				if (IsVisible(pCamera))
-				{
-					m_pMesh->Render(pd3dCommandList, i);
-				}
+					if (m_ppMaterials[i]->m_pShader) {
 
+						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, false);
+						pShaderComponent->SetPipelineState(pd3dCommandList, 0);
+
+					}
+
+					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+
+					/*for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
+					{
+						if (m_ppMaterials[i]->m_ppTextures[k]) m_ppMaterials[i]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
+					}*/
+				}
+				m_pMesh->Render(pd3dCommandList, i);
 			}
+
+		}
+
+	}
+
+	if (m_pSibling) m_pSibling->ShadowRender(pd3dCommandList, pCamera, bPrerender, pShaderComponent);
+	if (m_pChild) m_pChild->ShadowRender(pd3dCommandList, pCamera, bPrerender, pShaderComponent);
+
+}
+
+void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bPrerender)
+{
+
+	if (m_pSkinnedAnimationController)
+		m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+
+	OnPrepareRender();
+	if (m_pShaderInfo != NULL)
+	{
+		m_pShaderInfo->Render(pd3dCommandList, pCamera, 0, bPrerender);
+		m_pShaderInfo->UpdateShaderVariables(pd3dCommandList);
+		//pd3dCommandList->SetGraphicsRootDescriptorTable(0, m_pShaderComponent->GetCbvGPUDescriptorHandle());
+		if (m_pTextureInfo != NULL)
+		{
+			m_pTextureInfo->UpdateShaderVariables(pd3dCommandList);
 		}
 	}
 
-	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
-	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+	if (m_pMesh)
+	{
+		if (m_nMaterials > 0)
+		{
+			for (int i = 0; i < m_nMaterials; i++)
+			{
+				if (m_ppMaterials[i])
+				{
+					if (m_ppMaterials[i]->m_pShader) {
+
+						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, bPrerender);
+						UpdateShaderVariables(pd3dCommandList);
+					}
+					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+
+					for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
+					{
+						if (m_ppMaterials[i]->m_ppTextures[k]) m_ppMaterials[i]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
+					}
+				}
+				m_pMesh->Render(pd3dCommandList, i);
+			}
+
+		}
+
+	}
+
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera, bPrerender);
+	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera, bPrerender);
 
 }
 
@@ -1704,7 +1765,7 @@ CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	pOtherPlayerModel->AddRef();
 
 	pBCBulletEffectShader = new CBulletEffectShader();
-	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
 	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
 
 
@@ -1798,6 +1859,7 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 	CGameObject::Animate(fTimeElapsed);
 }
 
+
 void CHelicopterObjects::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	CGameObject::Render(pd3dCommandList, pCamera);
@@ -1811,7 +1873,7 @@ void CHelicopterObjects::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(20)
 {
 	pBCBulletEffectShader = new CBulletEffectShader();
-	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, 1, NULL, DXGI_FORMAT_D24_UNORM_S8_UINT, 0);
+	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
 	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
 	for (int i = 0; i < HUMANBULLETS; i++)
 	{

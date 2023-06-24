@@ -101,7 +101,7 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 
 			if (m_ppMaterials[i]->m_pShader)
 			{
-				m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0);
+				m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0,false);
 				m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList);
 
 				UpdateShaderVariables(pd3dCommandList);

@@ -422,7 +422,8 @@ public:
 	CGameObject 					*m_pParent = NULL;
 	CGameObject 					*m_pChild = NULL;
 	CGameObject 					*m_pSibling = NULL;
-
+	CShader* m_pShaderInfo = NULL;
+	CTexture* m_pTextureInfo = NULL;
 
 
 	BoundingBox	m_xmBoundingBox;
@@ -471,8 +472,8 @@ public:
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent);
 	virtual void AnimateObject(CCamera* pCamera, float fTimeElapsed);
 	virtual void OnPrepareRender() { }
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
-
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bPreRender = false);
+	void ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bPrerender, CShader* pShaderComponent);
 	virtual void OnLateUpdate() { }
 
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);

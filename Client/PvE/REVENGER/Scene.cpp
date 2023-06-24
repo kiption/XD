@@ -16,6 +16,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE	SceneManager::m_d3dSrvCPUDescriptorNextHandle;
 D3D12_GPU_DESCRIPTOR_HANDLE	SceneManager::m_d3dSrvGPUDescriptorNextHandle;
 D3D12_CPU_DESCRIPTOR_HANDLE	SceneManager::m_d3dCbvCPUDescriptorNextHandle;
 D3D12_GPU_DESCRIPTOR_HANDLE	SceneManager::m_d3dCbvGPUDescriptorNextHandle;
+D3D12_GPU_DESCRIPTOR_HANDLE	SceneManager::m_d3dShadowGPUDescriptorHandle;
 
 
 SceneManager::SceneManager()
@@ -514,6 +515,47 @@ void SceneManager::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture*
 	}
 	int nRootParameters = pTexture->GetRootParameters();
 	for (int j = 0; j < nRootParameters; j++) pTexture->SetRootParameterIndex(j, nRootParameterStartIndex + j);
+}
+
+void SceneManager::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex, ID3D12Resource* pShadowMap)
+{
+	m_d3dSrvCPUDescriptorNextHandle.ptr += (::gnCbvSrvDescriptorIncrementSize * nDescriptorHeapIndex);
+	m_d3dSrvGPUDescriptorNextHandle.ptr += (::gnCbvSrvDescriptorIncrementSize * nDescriptorHeapIndex);
+
+	int nTextures = pTexture->GetTextures();
+	UINT nTextureType = pTexture->GetTextureType();
+	int nTotalTextures = nTextures;
+
+	if (pShadowMap != NULL)
+		nTotalTextures = nTextures + 1;
+
+	for (int i = 0; i < nTextures; i++)
+	{
+		ID3D12Resource* pShaderResource = pTexture->GetResource(i);
+		D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = pTexture->GetShaderResourceViewDesc(i);
+		pd3dDevice->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, m_d3dSrvCPUDescriptorNextHandle);
+		m_d3dSrvCPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
+		pTexture->SetGpuDescriptorHandle(i, m_d3dSrvGPUDescriptorNextHandle);
+		m_d3dSrvGPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
+	}
+	int nRootParameters = pTexture->GetRootParameters();
+	for (int i = 0; i < nRootParameters; i++) pTexture->SetRootParameterIndex(i, nRootParameterStartIndex + i);
+
+	if (nTotalTextures > nTextures)
+	{
+		D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceDsec;
+
+		d3dShaderResourceDsec.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+		d3dShaderResourceDsec.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		d3dShaderResourceDsec.Texture2D.MipLevels = 1;
+		d3dShaderResourceDsec.Texture2D.PlaneSlice = 0;
+		d3dShaderResourceDsec.Texture2D.MostDetailedMip = 0;
+		d3dShaderResourceDsec.Texture2D.ResourceMinLODClamp = 0;
+		d3dShaderResourceDsec.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+
+		pd3dDevice->CreateShaderResourceView(pShadowMap, &d3dShaderResourceDsec, m_d3dSrvCPUDescriptorNextHandle);
+		m_d3dShadowGPUDescriptorHandle = m_d3dSrvGPUDescriptorNextHandle;
+	}
 }
 
 
