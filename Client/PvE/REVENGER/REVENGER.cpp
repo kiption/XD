@@ -227,10 +227,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				gGameFramework.CollisionNPC_by_MAP(XMFLOAT3(/*NPC CENTER*/), XMFLOAT3(/*NPC EXTENTS*/), XMFLOAT3(/*MAP CENTER*/), XMFLOAT3(/*MAP EXTENTS*/));
 				gGameFramework.CollisionNPC_by_PLAYER(XMFLOAT3(/*NPC CENTER*/), XMFLOAT3(/*NPC EXTENTS*/));
 			}
+
+			gGameFramework.ProcessInput();
+			gGameFramework.FrameAdvance();
 		}
 
-		gGameFramework.ProcessInput();
-		gGameFramework.FrameAdvance();
+	
 	}
 
 	gGameFramework.OnDestroy();
@@ -290,20 +292,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	switch (message)
 	{
-	case WM_SIZE:
+		case WM_SIZE:
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
 	case WM_RBUTTONDOWN:
 	case WM_RBUTTONUP:
-		gGameFramework.OnProcessingMouseMessage(hWnd, message, wParam, lParam);
-		break;
 	case WM_MOUSEMOVE:
 	case WM_KEYDOWN:
 	case WM_KEYUP:
-		gGameFramework.OnProcessingKeyboardMessage(hWnd, message, wParam, lParam);
+		gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
 		break;
-		//gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
-		//break;
 	case WM_COMMAND:
 		wmId = LOWORD(wParam);
 		wmEvent = HIWORD(wParam);

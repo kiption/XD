@@ -1045,7 +1045,7 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 	if (m_pShaderInfo != NULL)
 	{
 		m_pShaderInfo->Render(pd3dCommandList, pCamera, 0, bPrerender);
-		m_pShaderInfo->UpdateShaderVariables(pd3dCommandList);
+		m_pShaderInfo->UpdateShaderVariables(pd3dCommandList,&m_xmf4x4World,NULL);
 		if (m_pTextureInfo != NULL)
 		{
 			m_pTextureInfo->UpdateShaderVariables(pd3dCommandList);

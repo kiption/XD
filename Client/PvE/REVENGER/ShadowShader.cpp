@@ -99,7 +99,6 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppNpc_Heli_Objects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			m_ppNpc_Heli_Objects[i]->SetMaterial(0, pNpcHeliMaterial);
 			m_ppNpc_Heli_Objects[i]->Rotate(0.0f, 45.0f, 0.0f);
-			m_ppNpc_Heli_Objects[i]->SetScale(3.0, 3.0, 3.0);
 			m_ppNpc_Heli_Objects[i]->OnPrepareAnimate();
 		}
 
@@ -124,7 +123,6 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
 			m_ppObjects[h] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, NULL);
 			m_ppObjects[h]->SetMaterial(0, pSoldiarNpcMaterial);
-			m_ppObjects[h]->SetScale(7.0, 7.0, 7.0);
 			m_ppObjects[h]->SetPosition(500.0 + h * 5, 6.0, 500.0 + h * 5);
 
 			if (psModel) delete psModel;

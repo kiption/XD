@@ -325,19 +325,19 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	// key Delay
 	switch (nMessageID)
 	{
-	case WM_LBUTTONDOWN:
+	case WM_LBUTTONUP:
 	case WM_RBUTTONDOWN:
+		::ReleaseCapture();
+		break;
+
+
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONUP:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
 		break;
-
-
-	case WM_LBUTTONUP:
-	case WM_RBUTTONUP:
-		::ReleaseCapture();
-
-		break;
 	case WM_MOUSEMOVE:
+
 		break;
 	default:
 		break;
@@ -386,12 +386,12 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case 'C':
 			gamesound.shootSound->release();
 			break;
-		case KEY_W:
-		case KEY_A:
-		case KEY_S:
-		case KEY_D:
-			q_keyboardInput.push(SEND_KEYUP_MOVEKEY);//S
-			break;
+			/*	case KEY_W:
+				case KEY_A:
+				case KEY_S:
+				case KEY_D:
+
+					break;*/
 
 		case VK_SPACE:
 			((CHumanPlayer*)m_pPlayer)->m_bJumeState = true;
@@ -440,18 +440,22 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 		break;
 	}
 	case WM_SIZE:
+	{
+		m_nWndClientWidth = LOWORD(lParam);
+		m_nWndClientHeight = HIWORD(lParam);
 		break;
-		//case WM_LBUTTONDOWN:
-		//case WM_RBUTTONDOWN:
-		//case WM_LBUTTONUP:
-		//case WM_RBUTTONUP:
-		//case WM_MOUSEMOVE:
-			//OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
-			//break;
-		//case WM_KEYDOWN:
-		//case WM_KEYUP:
-		//	OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
-		//	break;
+	}
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_RBUTTONUP:
+	case WM_MOUSEMOVE:
+		OnProcessingMouseMessage(hWnd, nMessageID, wParam, lParam);
+		break;
+	case WM_KEYDOWN:
+	case WM_KEYUP:
+		OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+		break;
 	}
 	return(0);
 }
@@ -545,68 +549,32 @@ void CGameFramework::ProcessInput()
 	static UCHAR pKeysBuffer[256];
 	bool bProcessedByScene = false;
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
+	//GetKeyboardState(pKeysBuffer);
 	if (!bProcessedByScene)
 	{
 		DWORD dwDirection = 0;
+		if (pKeysBuffer[KEY_W] & 0xF0) {/* q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_W); */dwDirection |= DIR_FORWARD; }
+		if (pKeysBuffer[KEY_S] & 0xF0) { /*q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_S);*/ dwDirection |= DIR_BACKWARD; }
 
-		if (pKeysBuffer[VK_UP] & 0xF0) {
-			dwDirection |= DIR_UP;
-
-		}
-		if (pKeysBuffer[VK_DOWN] & 0xF0) {
-			dwDirection |= DIR_DOWN;
-			q_keyboardInput.push(SEND_KEY_DOWN);//S
-		}
-		if (pKeysBuffer[VK_LEFT] & 0xF0) {
-			m_pPlayer->Rotate(0.0f, -0.5f, 0.0f);
-			q_keyboardInput.push(SEND_KEY_LEFT);//S
-		}
-		if (pKeysBuffer[VK_RIGHT] & 0xF0) {
-			(m_pPlayer)->Rotate(0.0f, 0.5f, 0.0f);
-			q_keyboardInput.push(SEND_KEY_RIGHT);//S
-		}
-
-		if (pKeysBuffer[KEY_W] & 0xF0) {
-			q_keyboardInput.push(SEND_KEY_W);//S
-			dwDirection |= DIR_FORWARD;
-		}
-		if (pKeysBuffer[KEY_S] & 0xF0) {
-			q_keyboardInput.push(SEND_KEY_S);//S
-			dwDirection |= DIR_BACKWARD;
-		}
-		if (pKeysBuffer[KEY_A] & 0xF0) {
-			q_keyboardInput.push(SEND_KEY_A);//S
-			dwDirection |= DIR_LEFT;
-		}
-
-		if (pKeysBuffer[KEY_D] & 0xF0) {
-			q_keyboardInput.push(SEND_KEY_D);//S
-			dwDirection |= DIR_RIGHT;
-		}
-
+		if (pKeysBuffer[KEY_A] & 0xF0) {/* q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_A); */dwDirection |= DIR_LEFT; }
+		if (pKeysBuffer[KEY_D] & 0xF0) {/*q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_D); */dwDirection |= DIR_RIGHT;}
 		if (pKeysBuffer[KEY_Q] & 0xF0)
 		{
-			//dwDirection |= DIR_UP;
 			((CHumanPlayer*)m_pPlayer)->m_bReloadState = true;
-	
 			((CHumanPlayer*)m_pPlayer)->ReloadState();
-			q_keyboardInput.push(SEND_KEY_UP);//S
+			//q_keyboardInput.push(SEND_KEY_UP);//S
 		}
 
 		if (pKeysBuffer[KEY_E] & 0xF0) {
-
-			q_keyboardInput.push(SEND_KEY_DOWN);//S
+			//q_keyboardInput.push(SEND_KEY_DOWN);//S
 		}
 
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
-		
-
-			
 			q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
 		}
 
 
-		float cxDelta = 0.0f, cyDelta = 0.0f, czDelta = 0.0f;
+		float cxDelta = 0.0f, cyDelta = 0.0f;
 		POINT ptCursorPos;
 		if (GetCapture() == m_hWnd)
 		{
@@ -644,22 +612,20 @@ void CGameFramework::ProcessInput()
 
 
 
+		//MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
-			if (cxDelta || cyDelta)
-			{
-				if (m_nMode == SCENE1STAGE)
-				{
-					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
-					MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
-					q_mouseInput.push(mousemove);//s
-				}
-			}
-			
 			if (m_nMode == SCENE1STAGE) {
+				if (cxDelta || cyDelta)
+				{
+
+					m_pPlayer->Rotate(0.0f, cxDelta, 0.0f);
+					//q_mouseInput.push(mousemove);//s
+
+				}
 				if (dwDirection) m_pPlayer->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
 			}
-			
+
 
 		}
 	}
@@ -744,14 +710,11 @@ void CGameFramework::CreateShaderVariables()
 
 void CGameFramework::ReleaseShaderVariables()
 {
-	
+
 }
 
 void CGameFramework::UpdateShaderVariables()
 {
-	
-
-
 }
 
 // 2#define _WITH_PLAYER_TOP
@@ -806,7 +769,7 @@ void CGameFramework::FrameAdvance()
 	if (m_nMode == SCENE1STAGE)
 	{
 		if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
-}
+	}
 	// Stage2
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -956,7 +919,7 @@ void CGameFramework::FrameAdvance()
 			D2D_RECT_F D2_Team2UIHPRect = { 0.0f, 0.0f, 295.0f, 11.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[24] : m_pd2dfxGaussianBlur[24], &D2_Team2UIHP, &D2_Team2UIHPRect);
 		}
-	}
+}
 
 #endif
 	if (m_nMode == SCENE1STAGE) {
@@ -1072,7 +1035,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_nMode = nMode;
 			m_pScene = new Stage1();
 			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
-			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(),NULL, ((Stage1*)m_pScene)->m_pTerrain);
+			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, ((Stage1*)m_pScene)->m_pTerrain);
 			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 			m_pCamera = m_pPlayer->GetCamera();
 
@@ -1097,7 +1060,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_nMode = nMode;
 			m_pScene = new Stage2();
 			if (m_pScene) ((Stage2*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
-			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(),NULL, ((Stage2*)m_pScene)->m_pTerrain);
+			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, ((Stage2*)m_pScene)->m_pTerrain);
 			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 			m_pCamera = m_pPlayer->GetCamera();
 			m_pScene->SetCurScene(SCENE2STAGE);
@@ -1114,8 +1077,8 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_GameTimer.Reset();
 			break;
 		}
-		}
 	}
+}
 }
 
 #ifdef _WITH_DIRECT2D
@@ -1757,7 +1720,7 @@ void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(7.0, 7.0, 7.0);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(5.0, 5.0, 5.0);
 
 
 	}
@@ -1801,7 +1764,7 @@ void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, X
 			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetScale(3.0, 3.0, 3.0);
 		}
 		else {
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetScale(7.3, 7.3, 7.3);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetScale(5.0, 5.0, 5.0);
 		}
 
 
@@ -1983,7 +1946,7 @@ void CGameFramework::CollisionDummiesObjects(int id)
 void CGameFramework::HeliNpcUnderAttack(int id, XMFLOAT3 ToLook)
 {
 	//========헬기 NPC========//12
-	((CHelicopterObjects*)  ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12+id])->Firevalkan(ToLook);
+	((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->Firevalkan(ToLook);
 
 
 	////========휴먼

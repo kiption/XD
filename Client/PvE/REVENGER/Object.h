@@ -249,6 +249,10 @@ public:
 	int								m_nKeyFrames = 0;
 	float							*m_pfKeyFrameTimes = NULL;
 	XMFLOAT4X4						**m_ppxmf4x4KeyFrameTransforms = NULL;
+	CAnimationCallbackHandler* m_pAnimationCallbackHandler = NULL;
+	int 							m_nCallbackKeys = 0;
+	CALLBACKKEY* m_pCallbackKeys = NULL;
+	float 							m_fPosition = 0.0f;
 
 #ifdef _WITH_ANIMATION_SRT
 	int								m_nKeyFrameScales = 0;
@@ -264,6 +268,7 @@ public:
 
 public:
 	XMFLOAT4X4 GetSRT(int nBone, float fPosition);
+	void HandleCallback();
 };
 
 class CAnimationSets

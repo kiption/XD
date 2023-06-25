@@ -268,9 +268,8 @@ void CShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 }
 void CShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World, CMaterial* pMaterial)
 {
-	//m_pcbMappedFrameworkInfo->m_bAnimationShader = pMaterial->m_isAnimationShader;
-	::memcpy(&m_pcbMappedFrameworkInfo->m_bAnimationShader, &pMaterial->m_isAnimationShader, sizeof(bool));//에니메이션 상태를 업데이트 해준다.
-
+	
+	::memcpy(&m_pcbMappedFrameworkInfo->m_bAnimationShader, &pMaterial->m_isAnimationShader, sizeof(bool));
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(21, d3dGpuVirtualAddress);
 }

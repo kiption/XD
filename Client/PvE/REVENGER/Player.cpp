@@ -73,11 +73,11 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	}
 }
 
-void CPlayer::SetPosition(const XMFLOAT3& xmf3Position, bool bMove)
-{
-	if (bMove) Move(XMFLOAT3(xmf3Position.x - m_xmf3Position.x, xmf3Position.y - m_xmf3Position.y, xmf3Position.z - m_xmf3Position.z), false);
-	else m_xmf3Position = xmf3Position;
-}
+//void CPlayer::SetPosition(const XMFLOAT3& xmf3Position, bool bMove)
+//{
+//	if (bMove) Move(XMFLOAT3(xmf3Position.x - m_xmf3Position.x, xmf3Position.y - m_xmf3Position.y, xmf3Position.z - m_xmf3Position.z), false);
+//	else m_xmf3Position = xmf3Position;
+//}
 
 void CPlayer:: Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
@@ -134,13 +134,13 @@ void CPlayer::Rotate(float x, float y, float z)
 			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
 		}
-		if (z != 0.0f) {
+	/*	if (z != 0.0f) {
 			XMFLOAT3 DefalutLook = { 0.0f, 0.0f, 1.0f };
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(z));
 			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
 			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-		}
+		}*/
 
 	}
 	else if (nCurrentCameraMode == SPACESHIP_CAMERA)
@@ -191,7 +191,7 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
 
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
-	if (nCurrentCameraMode == THIRD_PERSON_CAMERA || nCurrentCameraMode == SPACESHIP_CAMERA) m_pCamera->Update(this->GetLook(), fTimeElapsed);
+	if (nCurrentCameraMode == THIRD_PERSON_CAMERA || nCurrentCameraMode == SPACESHIP_CAMERA) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
 	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA || nCurrentCameraMode == SPACESHIP_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
 	m_pCamera->RegenerateViewMatrix();
