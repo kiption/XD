@@ -325,12 +325,12 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	// key Delay
 	switch (nMessageID)
 	{
-	case WM_LBUTTONUP:
 	case WM_RBUTTONDOWN:
 		::ReleaseCapture();
 		break;
 
 
+	case WM_LBUTTONUP:
 	case WM_LBUTTONDOWN:
 	case WM_RBUTTONUP:
 		::SetCapture(hWnd);
@@ -553,20 +553,20 @@ void CGameFramework::ProcessInput()
 	if (!bProcessedByScene)
 	{
 		DWORD dwDirection = 0;
-		if (pKeysBuffer[KEY_W] & 0xF0) {/* q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_W); */dwDirection |= DIR_FORWARD; }
-		if (pKeysBuffer[KEY_S] & 0xF0) { /*q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_S);*/ dwDirection |= DIR_BACKWARD; }
+		if (pKeysBuffer[KEY_W] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_W); dwDirection |= DIR_FORWARD; }
+		if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; }
 
-		if (pKeysBuffer[KEY_A] & 0xF0) {/* q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_A); */dwDirection |= DIR_LEFT; }
-		if (pKeysBuffer[KEY_D] & 0xF0) {/*q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_D); */dwDirection |= DIR_RIGHT;}
+		if (pKeysBuffer[KEY_A] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_A); dwDirection |= DIR_LEFT; }
+		if (pKeysBuffer[KEY_D] & 0xF0) {q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT;}
 		if (pKeysBuffer[KEY_Q] & 0xF0)
 		{
 			((CHumanPlayer*)m_pPlayer)->m_bReloadState = true;
 			((CHumanPlayer*)m_pPlayer)->ReloadState();
-			//q_keyboardInput.push(SEND_KEY_UP);//S
+			q_keyboardInput.push(SEND_KEY_UP);//S
 		}
 
 		if (pKeysBuffer[KEY_E] & 0xF0) {
-			//q_keyboardInput.push(SEND_KEY_DOWN);//S
+			q_keyboardInput.push(SEND_KEY_DOWN);//S
 		}
 
 		if (pKeysBuffer[VK_SPACE] & 0xF0) {
@@ -612,7 +612,7 @@ void CGameFramework::ProcessInput()
 
 
 
-		//MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
+		MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
 			if (m_nMode == SCENE1STAGE) {
@@ -620,7 +620,7 @@ void CGameFramework::ProcessInput()
 				{
 
 					m_pPlayer->Rotate(0.0f, cxDelta, 0.0f);
-					//q_mouseInput.push(mousemove);//s
+					q_mouseInput.push(mousemove);//s
 
 				}
 				if (dwDirection) m_pPlayer->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
