@@ -223,6 +223,8 @@ D3D12_SHADER_BYTECODE CShader::ReadCompiledShaderFromFile(WCHAR* pszFileName, ID
 	return(d3dShaderByteCode);
 }
 
+
+
 void CShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,
 	ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
 {
@@ -257,6 +259,30 @@ void CShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12Graphi
 
 	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
+void CShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256의 배수
+	m_pd3dcbFrameworkInfo = ::CreateBufResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes,
+		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+	m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
+}
+void CShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World, CMaterial* pMaterial)
+{
+	//m_pcbMappedFrameworkInfo->m_bAnimationShader = pMaterial->m_isAnimationShader;
+	::memcpy(&m_pcbMappedFrameworkInfo->m_bAnimationShader, &pMaterial->m_isAnimationShader, sizeof(bool));//에니메이션 상태를 업데이트 해준다.
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(21, d3dGpuVirtualAddress);
+}
+
+void CShader::ReleaseShaderVariables()
+{
+	if (m_pd3dcbFrameworkInfo)
+	{
+		m_pd3dcbFrameworkInfo->Unmap(0, NULL);
+		m_pd3dcbFrameworkInfo->Release();
+	}
+}
 
 //void CShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState)
 //{
@@ -269,6 +295,7 @@ void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 {
 	//if (pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(pd3dGraphicsRootSignature);
 	if (m_ppd3dPipelineStates && !bPrerender) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
+	UpdateShaderVariables(pd3dCommandList);
 }
 //void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelinestates)
 //{

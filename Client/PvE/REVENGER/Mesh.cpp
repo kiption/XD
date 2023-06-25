@@ -51,17 +51,17 @@ void CMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pConte
 {
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, m_nVertexBufferViews, m_d3dVertexBufferView);
+	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 }
+
 
 void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
 {
 	//Stage2
 	UpdateShaderVariables(pd3dCommandList);
-	//
+
 	OnPreRender(pd3dCommandList, NULL);
 
-	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
-	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 	if (m_pd3dIndexBuffer)
 	{
 		pd3dCommandList->IASetIndexBuffer(&m_d3dIndexBufferView);

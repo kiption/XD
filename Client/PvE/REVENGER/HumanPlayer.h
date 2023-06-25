@@ -6,7 +6,7 @@ class SceneManager;
 class CHumanPlayer : public CPlayer
 {
 public:
-	CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
+	CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,CLoadedModelInfo* playermodel, void* pContext = NULL);
 	virtual ~CHumanPlayer();
 	CLoadedModelInfo* pSoldiarModel = NULL;
 	CGameObject* pSoldiarObject = NULL;

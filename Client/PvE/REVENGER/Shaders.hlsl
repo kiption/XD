@@ -44,6 +44,7 @@ cbuffer cbGameObjectInfo : register(b2)
 	MATERIAL				gMaterial : packoffset(c4);
 	uint					gnTexturesMask : packoffset(c8);
 	uint					gnMaterial : packoffset(c12);
+
 };
 cbuffer cbFrameworkInfo : register(b11)
 {
@@ -53,11 +54,13 @@ cbuffer cbFrameworkInfo : register(b11)
 	int			gnFlareParticlesToEmit : packoffset(c0.w);;
 	float3		gf3Gravity : packoffset(c1.x);
 	int			gnMaxFlareType2Particles : packoffset(c1.w);;
+	bool		bAnimationShader : packoffset(c2);
 };
 cbuffer cbStreamGameObjectInfo : register(b9)
 {
 	matrix		gmtxWorld : packoffset(c0);
 	EXPLOSIONMATERIAL	gAniMaterial : packoffset(c4);
+
 
 };
 
@@ -548,11 +551,6 @@ float4 PSSpritTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 	return(cColor);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-
-
-
 struct VS_PARTICLE_INPUT
 {
 	float3 position : POSITION;
@@ -812,6 +810,8 @@ struct VS_LIGHTING_INPUT
 	float3 tangent : TANGENT;
 	float3 bitangent : BITANGENT;
 	float2 uv : TEXCOORD;
+	int4 indices : BONEINDEX;
+	float4 weights : BONEWEIGHT;
 };
 
 struct VS_LIGHTING_OUTPUT
@@ -827,12 +827,31 @@ struct VS_LIGHTING_OUTPUT
 VS_LIGHTING_OUTPUT VSLighting(VS_LIGHTING_INPUT input)
 {
 	VS_LIGHTING_OUTPUT output;
-	output.normalW = mul(input.normal, (float3x3) gmtxGameObject);
-	output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxGameObject);
-	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-	output.uv = input.uv;
-	output.tangentW = mul(input.tangent, (float3x3) gmtxGameObject);
-	output.bitangentW = mul(input.bitangent, (float3x3) gmtxGameObject);
+
+	if (!bAnimationShader)
+	{
+		output.normalW = mul(input.normal, (float3x3) gmtxGameObject);
+		output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxGameObject);
+		output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+		output.uv = input.uv;
+		output.tangentW = mul(input.tangent, (float3x3) gmtxGameObject);
+		output.bitangentW = mul(input.bitangent, (float3x3) gmtxGameObject);
+	}
+	else if (bAnimationShader)
+	{
+		float4x4 mtxVertexToBoneWorld = (float4x4) 0.0f;
+		for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
+		{
+			mtxVertexToBoneWorld += input.weights[i] * mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
+		}
+		float4 positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld);
+		output.positionW = positionW.xyz;
+		output.normalW = mul(input.normal, (float3x3) mtxVertexToBoneWorld).xyz;
+		output.tangentW = mul(input.tangent, (float3x3) mtxVertexToBoneWorld).xyz;
+		output.bitangentW = mul(input.bitangent, (float3x3) mtxVertexToBoneWorld).xyz;
+		output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+		output.uv = input.uv;
+	}
 
 
 	return(output);
@@ -853,109 +872,7 @@ VS_CIRCULAR_SHADOW_INPUT VSCircularShadow(VS_CIRCULAR_SHADOW_INPUT input)
 	return(input);
 }
 
-static float2 pf2UVs[4] = { float2(0.0f,1.0f), float2(0.0f,0.0f), float2(1.0f,1.0f), float2(1.0f,0.0f) };
-
-
-[maxvertexcount(4)]
-void GSCircularShadow(point VS_CIRCULAR_SHADOW_INPUT input[1], inout TriangleStream<GS_CIRCULAR_SHADOW_GEOMETRY_OUTPUT> outStream)
-{
-	float fHalfWidth = input[0].size.x * 0.5f;
-	float fHalfDepth = input[0].size.y * 0.5f;
-
-	float3 f3Right = float3(1.0f, 0.0f, 0.0f);
-	float3 f3Look = float3(0.0f, 0.0f, 1.0f);
-
-	float4 pf4Vertices[4];
-	pf4Vertices[0] = float4(input[0].center.xyz - (fHalfWidth * f3Right) - (fHalfDepth * f3Look), 1.0f);
-	pf4Vertices[1] = float4(input[0].center.xyz - (fHalfWidth * f3Right) + (fHalfDepth * f3Look), 1.0f);
-	pf4Vertices[2] = float4(input[0].center.xyz + (fHalfWidth * f3Right) - (fHalfDepth * f3Look), 1.0f);
-	pf4Vertices[3] = float4(input[0].center.xyz + (fHalfWidth * f3Right) + (fHalfDepth * f3Look), 1.0f);
-
-	GS_CIRCULAR_SHADOW_GEOMETRY_OUTPUT output;
-	for (int i = 0; i < 4; i++)
-	{
-		output.position = mul(mul(pf4Vertices[i], gmtxView), gmtxProjection);
-		output.uv = pf2UVs[i];
-
-		outStream.Append(output);
-	}
-}
-float4 PSCircularShadow(GS_CIRCULAR_SHADOW_GEOMETRY_OUTPUT input) : SV_TARGET
-{
-	float4 cColor = gtxtCircularShadowTexture.Sample(gssWrap, input.uv);
-
-	return(cColor);
-}
-VS_TEXTURED_OUTPUT VSTextureToViewport(uint nVertexID : SV_VertexID)
-{
-	VS_TEXTURED_OUTPUT output = (VS_TEXTURED_OUTPUT)0;
-
-	if (nVertexID == 0) { output.position = float4(-1.0f, +1.0f, 0.0f, 1.0f); output.uv = float2(0.0f, 0.0f); }
-	if (nVertexID == 1) { output.position = float4(+1.0f, +1.0f, 0.0f, 1.0f); output.uv = float2(1.0f, 0.0f); }
-	if (nVertexID == 2) { output.position = float4(+1.0f, -1.0f, 0.0f, 1.0f); output.uv = float2(1.0f, 1.0f); }
-	if (nVertexID == 3) { output.position = float4(-1.0f, +1.0f, 0.0f, 1.0f); output.uv = float2(0.0f, 0.0f); }
-	if (nVertexID == 4) { output.position = float4(+1.0f, -1.0f, 0.0f, 1.0f); output.uv = float2(1.0f, 1.0f); }
-	if (nVertexID == 5) { output.position = float4(-1.0f, -1.0f, 0.0f, 1.0f); output.uv = float2(0.0f, 1.0f); }
-
-	return(output);
-}
-float4 GetColorFromDepth(float fDepth)
-{
-	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-
-	if (fDepth < 0.00625f) cColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
-	else if (fDepth < 0.0125f) cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
-	else if (fDepth < 0.025f) cColor = float4(0.0f, 0.0f, 1.0f, 1.0f);
-	else if (fDepth < 0.05f) cColor = float4(1.0f, 1.0f, 0.0f, 1.0f);
-	else if (fDepth < 0.075f) cColor = float4(0.0f, 1.0f, 1.0f, 1.0f);
-	else if (fDepth < 0.1f) cColor = float4(1.0f, 0.5f, 0.5f, 1.0f);
-	else if (fDepth < 0.4f) cColor = float4(0.5f, 1.0f, 1.0f, 1.0f);
-	else if (fDepth < 0.6f) cColor = float4(1.0f, 0.0f, 1.0f, 1.0f);
-	else if (fDepth < 0.8f) cColor = float4(0.5f, 0.5f, 1.0f, 1.0f);
-	else if (fDepth < 0.9f) cColor = float4(0.5f, 1.0f, 0.5f, 1.0f);
-	else if (fDepth < 0.95f) cColor = float4(0.5f, 0.0f, 0.5f, 1.0f);
-	else if (fDepth < 0.99f) cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
-	else if (fDepth < 0.999f) cColor = float4(1.0f, 0.0f, 1.0f, 1.0f);
-	else if (fDepth == 1.0f) cColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
-	else if (fDepth > 1.0f) cColor = float4(0.0f, 0.0f, 0.5f, 1.0f);
-	else cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-
-	return(cColor);
-}
-//
 SamplerState gssBorder : register(s3);
-//
-float4 PSTextureToViewport(VS_TEXTURED_OUTPUT input) : SV_Target
-{
-	float4 cColor = gtxtDepthTextures[1].SampleLevel(gssBorder, input.uv, 0).r * 1.0f;
-
-	//cColor = GetColorFromDepth(cColor.r);
-
-	return(cColor);
-}
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-struct VS_PLANAR_SHADOW_OUTPUT
-{
-	float4 position : SV_POSITION;
-};
-
-VS_PLANAR_SHADOW_OUTPUT VSPlanarShadow(VS_LIGHTING_INPUT input)
-{
-	VS_PLANAR_SHADOW_OUTPUT output;
-
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
-
-	return(output);
-}
-
-float4 PSPlanarShadow(VS_PLANAR_SHADOW_OUTPUT input) : SV_TARGET
-{
-	return(float4(0.26f, 0.26f, 0.26f, 1.0f));
-}
 
 
 struct PS_DEPTH_OUTPUT
@@ -987,6 +904,8 @@ struct VS_SHADOW_MAP_OUTPUT
 	float3 tangentW : TANGENT;
 	float3 bitangentW : BITANGENT;
 	float4 uvs[MAX_LIGHTS] : TEXCOORD1;
+	int4 indices : BONEINDEX;
+	float4 weights : BONEWEIGHT;
 };
 
 static matrix gmxTexture = { 0.5,0.0,0.0,0.0,
@@ -998,13 +917,31 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 {
 	VS_SHADOW_MAP_OUTPUT output = (VS_SHADOW_MAP_OUTPUT)0;
 	float4 positionW = (float4) 0.0f;
-	positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
-	output.positionW = positionW.xyz;
-	output.position = mul(mul(positionW, gmtxView), gmtxProjection);
-	output.normalW = mul(float4(input.normal, 0.0f), gmtxGameObject).xyz;
-	output.uv = input.uv;
-	output.tangentW = mul(input.tangent, (float3x3) gmtxGameObject);
-	output.bitangentW = mul(input.bitangent, (float3x3) gmtxGameObject);
+	if (!bAnimationShader)
+	{
+		positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
+		output.positionW = positionW.xyz;
+		output.position = mul(mul(positionW, gmtxView), gmtxProjection);
+		output.normalW = mul(float4(input.normal, 0.0f), gmtxGameObject).xyz;
+		output.uv = input.uv;
+		output.tangentW = mul(input.tangent, (float3x3) gmtxGameObject);
+		output.bitangentW = mul(input.bitangent, (float3x3) gmtxGameObject);
+	}
+	else if (bAnimationShader)
+	{
+		float4x4 mtxVertexToBoneWorld = (float4x4) 0.0f;
+		for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
+		{
+			mtxVertexToBoneWorld += input.weights[i] * mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
+		}
+		positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld);
+		output.positionW = positionW.xyz;
+		output.normalW = mul(input.normal, (float3x3) mtxVertexToBoneWorld).xyz;
+		output.tangentW = mul(input.tangent, (float3x3) mtxVertexToBoneWorld).xyz;
+		output.bitangentW = mul(input.bitangent, (float3x3) mtxVertexToBoneWorld).xyz;
+		output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+		output.uv = input.uv;
+	}
 
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
@@ -1022,20 +959,14 @@ float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 		cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, /*float2(0.5f, 0.5f) */input.uv);
 	else
 		cAlbedoColor = gMaterial.m_cDiffuse;
-
-	float4 CSpecularColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	if (gnTexturesMask & MATERIAL_SPECULAR_MAP)
-		CSpecularColor = gtxtSpecularTexture.Sample(gssWrap, /*float2(0.5f, 0.5f) */input.uv);
-	else
-		CSpecularColor = gMaterial.m_cSpecular;
 	
-	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) 
 		cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
 
 	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
-	float4 cColor = cAlbedoColor;
-	return (lerp(cIllumination,cColor,0.25f));
+	float4 cColor = cAlbedoColor+ cEmissionColor;
+	return (lerp(cIllumination,cColor,0.35f));
 
 
 }

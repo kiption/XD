@@ -35,22 +35,21 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[0].m_fRange = 20000.0f;
-	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.4f, 0.4, 0.4f, 0.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3, 0.3, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.4f, 0.4, 0.4f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-800, 900.0f, 250.0f);
+	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1, 0.1f, 0.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.45f, 0.3, 0.3, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.1f, 0.1, 0.1f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-800, 1000.0f, 250.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+1.0f, -0.9f, 0.5f);
 
 
-	m_pLights->m_pLights[1].m_bEnable = false;
+	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 3000.0f;
-	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.f, 0.f, 0.f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.33f, 0.33f, 0.33f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.13f, 0.13f, 0.13f, 0.0f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(800, 400.0f, 800.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.1, -1.0f, 0.3f);
-	//m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.01f);
+	m_pLights->m_pLights[1].m_fRange = 20000.0f;
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1, 0.1f, 0.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.45f, 0.3, 0.3, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1, 0.1f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-800, 1000.0f, -800.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(+0.8f, -0.9f, 0.5f);
 
 	m_pLights->m_pLights[2].m_bEnable = true;
 	m_pLights->m_pLights[2].m_nType = SPOT_LIGHT;
@@ -134,13 +133,11 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 2, 1500);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 2, 1000);
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	BuildDefaultLightsAndMaterials();
-
-
 
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
@@ -149,7 +146,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
 
 	BillboardParticleShader* pBillboardParticleShader = new BillboardParticleShader();
-	pBillboardParticleShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,0);
+	pBillboardParticleShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pBillboardParticleShader->SetCurScene(SCENE1STAGE);
 	pBillboardParticleShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[0] = pBillboardParticleShader;
@@ -161,13 +158,13 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pBillboardShader[1] = pCrossHairShader;
 
 	ResponeEffectShader* pResponeEffectShader = new ResponeEffectShader();
-	pResponeEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,0);
+	pResponeEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pResponeEffectShader->SetCurScene(SCENE1STAGE);
 	pResponeEffectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[2] = pResponeEffectShader;
 
 	HelicopterSparkBillboard* pHelicopterSparkBillboard = new HelicopterSparkBillboard();
-	pHelicopterSparkBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,0);
+	pHelicopterSparkBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHelicopterSparkBillboard->SetCurScene(SCENE1STAGE);
 	pHelicopterSparkBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pHelicopterSparkBillboard->m_bActive = true;
@@ -176,7 +173,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_nSpriteBillboards = 1;
 	m_ppSpriteBillboard = new CSpriteObjectsShader * [m_nSpriteBillboards];
 	SpriteAnimationBillboard* pSpriteAnimationBillboard = new SpriteAnimationBillboard();
-	pSpriteAnimationBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,0);
+	pSpriteAnimationBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pSpriteAnimationBillboard->SetCurScene(SCENE1STAGE);
 	pSpriteAnimationBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pSpriteAnimationBillboard->SetActive(false);
@@ -185,7 +182,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_nFragShaders = 1;
 	m_ppFragShaders = new CFragmentsShader * [m_nFragShaders];
 	CFragmentsShader* pFragmentsShader = new CFragmentsShader();
-	pFragmentsShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,  0);
+	pFragmentsShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pFragmentsShader->SetCurScene(SCENE1STAGE);
 	pFragmentsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppFragShaders[0] = pFragmentsShader;
@@ -194,10 +191,22 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_ppShaders = new CObjectsShader * [m_nShaders];
 
 	CObjectsShader* pObjectShader = new CObjectsShader();
-	pObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature,  0);
+	pObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pObjectShader->SetCurScene(SCENE1STAGE);
 	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 	m_ppShaders[0] = pObjectShader;
+
+	m_nGameObjects = 1;
+	CMaterial* pSoldiarNpcMaterial = new CMaterial(15);
+	pSoldiarNpcMaterial->SetReflection(15);
+
+	m_ppGameObjects = new CGameObject * [m_nGameObjects];
+	CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
+	m_ppGameObjects[0] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, psModel, NULL);
+	m_ppGameObjects[0]->SetMaterial(0, pSoldiarNpcMaterial);
+	m_ppGameObjects[0]->SetScale(7.0, 7.0, 7.0);
+	m_ppGameObjects[0]->SetPosition(-170.0, 6.0, 550.0);
+	if (psModel) delete psModel;
 
 	m_pDepthRenderShader = new CDepthRenderShader(pObjectShader, m_pLights->m_pLights);
 	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
@@ -210,7 +219,6 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pShadowShader->SetCurScene(SCENE1STAGE);
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
-	gamesound.SpeakMusic(gamesound.m_bStopSound);
 	gamesound.backGroundMusic();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -251,6 +259,16 @@ void Stage1::ReleaseObjects()
 			m_ppShaders[i]->Release();
 		}
 		delete[] m_ppShaders;
+	}
+	if (m_ppGameObjects)
+	{
+		for (int i = 0; i < m_nGameObjects; i++)
+		{
+			m_ppGameObjects[i]->ReleaseShaderVariables();
+			//m_ppGameObjects[i]->ReleaseObjects();
+			m_ppGameObjects[i]->Release();
+		}
+		delete[] m_ppGameObjects;
 	}
 	if (m_ppFragShaders)
 	{
@@ -520,10 +538,6 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dRootParameters[24].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 
-	//pd3dRootParameters[25].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	//pd3dRootParameters[25].DescriptorTable.NumDescriptorRanges = 1;
-	//pd3dRootParameters[25].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[16]; //Texture2D
-	//pd3dRootParameters[25].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[4];
 
@@ -651,6 +665,7 @@ void Stage1::ReleaseUploadBuffers()
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->ReleaseUploadBuffers();
 
@@ -778,6 +793,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
+	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed);
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
@@ -794,7 +810,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveMark = true;
 	m_ppFragShaders[0]->m_bActive = true;
 	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(m_ppShaders[0]->m_ppObjects[20]->GetPosition().x,
-		m_ppShaders[0]->m_ppObjects[20]->GetPosition().y +6.5f, m_ppShaders[0]->m_ppObjects[20]->GetPosition().z);
+		m_ppShaders[0]->m_ppObjects[20]->GetPosition().y + 6.5f, m_ppShaders[0]->m_ppObjects[20]->GetPosition().z);
 	m_ppFragShaders[0]->ParticlePosition = m_pBillboardShader[1]->m_ppObjects[0]->GetPosition();
 
 	CBulletObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
@@ -802,7 +818,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	XMFLOAT3 Look2P = m_ppShaders[0]->m_ppObjects[5]->GetLook();
 	if (m_pLights)
 	{
-		m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(Position2P.x, Position2P.y+8.0, Position2P.z);
+		m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(Position2P.x, Position2P.y + 8.0, Position2P.z);
 		m_pLights->m_pLights[2].m_xmf3Direction = Look2P;
 		m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(xmfPosition.x, xmfPosition.y + 8.0, xmfPosition.z);
 		m_pLights->m_pLights[3].m_xmf3Direction = m_pPlayer->GetLook();
@@ -817,17 +833,17 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 
-	//UpdateShaderVariables(pd3dCommandList);
+	UpdateShaderVariables(pd3dCommandList);
 
 	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
-	
-	if (m_ppShaders[0]) m_ppShaders[0]->Render(pd3dCommandList, pCamera,0,false);
+
+	if (m_ppGameObjects[0]) m_ppGameObjects[0]->Render(pd3dCommandList, pCamera,0);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->Render(pd3dCommandList, pCamera, 0);
-	for (int i = 0; i < m_nBillboardShaders; i++) if (i!=1 && m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
+	for (int i = 0; i < m_nBillboardShaders; i++) if (i != 1 && m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
@@ -860,7 +876,7 @@ void Stage1::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 }
 
 void Stage1::BillBoardRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-{	
+{
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[1]) m_pBillboardShader[1]->Render(pd3dCommandList, pCamera, 0);
 
 }
@@ -870,90 +886,4 @@ void Stage1::ParticleAnimation()
 	m_pBillboardShader[0]->NextPosition.x = SmokePosition.x;
 	m_pBillboardShader[0]->NextPosition.y = SmokePosition.y + 10.0f;
 	m_pBillboardShader[0]->NextPosition.z = SmokePosition.z;
-}
-
-bool Stage1::CheckCollision(DirectX::BoundingOrientedBox& box1, DirectX::BoundingOrientedBox& box2, DirectX::XMFLOAT3& posA, DirectX::XMFLOAT3& lookA, DirectX::XMFLOAT3& upA, DirectX::XMFLOAT3& rightA)
-{
-	// BoundingOrientedBox 간 충돌 검사 수행
-	bool isIntersecting = IsIntersecting(box1, box2);
-
-	//XMFLOAT3 BoxOrient = boxIntersection.Orientation();
-	if (isIntersecting)
-	{
-
-		BoundingOrientedBox boxIntersection = BoundingOrientedBox{};
-		XMFLOAT3 vector3 = XMFLOAT3(0.0, 0.0, 1.0);
-		float depth = box1.Intersects((box2, boxIntersection));
-
-		// 'A' 객체의 이전 위치와 현재 위치를 이용하여 충돌 지점을 통해 반사 벡터 계산
-		XMVECTOR posPrev = DirectX::XMLoadFloat3(&posA);
-		XMVECTOR posCurr = DirectX::XMVectorAdd(posPrev, DirectX::XMVectorScale(DirectX::XMLoadFloat3(&lookA), depth));
-		XMVECTOR normal = DirectX::XMVector3Normalize(DirectX::XMVectorSubtract(DirectX::XMVectorSetW(XMLoadFloat3(&vector3), 0.f), posCurr));
-		XMVECTOR incident = DirectX::XMVector3Normalize(DirectX::XMLoadFloat3(&lookA));
-		XMVECTOR reflected = DirectX::XMVector3Reflect(incident, normal);
-
-		// 'A' 객체의 위치를 업데이트
-		XMStoreFloat3(&posA, XMVectorAdd(posCurr, DirectX::XMVectorScale(reflected, depth)));
-		XMStoreFloat3(&lookA, ::XMVector3Normalize(DirectX::XMVectorSubtract(::XMVectorSetW(XMLoadFloat3(&vector3), 0.f), ::XMLoadFloat3(&posA))));
-		XMStoreFloat3(&upA, ::XMVector3Normalize(DirectX::XMVector3Cross(::XMLoadFloat3(&rightA), ::XMLoadFloat3(&lookA))));
-		XMStoreFloat3(&rightA, ::XMVector3Cross(DirectX::XMLoadFloat3(&lookA), ::XMLoadFloat3(&upA)));
-	}
-
-	return isIntersecting;
-}
-
-// 두 개의 BoundingOrientedBox 간 충돌 검사 함수
-bool Stage1::IsIntersecting(BoundingOrientedBox box1, BoundingOrientedBox box2)
-{
-	XMVECTOR center1 = XMLoadFloat3(&box1.Center);
-	XMVECTOR center2 = XMLoadFloat3(&box2.Center);
-
-	XMVECTOR extents1 = XMLoadFloat3(&box1.Extents);
-	XMVECTOR extents2 = XMLoadFloat3(&box2.Extents);
-
-	XMVECTOR orientation1 = XMLoadFloat4(&box1.Orientation);
-	XMVECTOR orientation2 = XMLoadFloat4(&box2.Orientation);
-
-	// 두 객체 간의 최소 거리 벡터 계산
-	XMVECTOR distance = center2 - center1;
-
-	// 두 객체 간의 축을 계산하여 행렬에 저장
-	XMMATRIX rotation1 = XMMatrixRotationQuaternion(orientation1);
-	XMMATRIX rotation2 = XMMatrixRotationQuaternion(orientation2);
-	XMMATRIX rotation1_T = XMMatrixTranspose(rotation1);
-	XMMATRIX rotation2_T = XMMatrixTranspose(rotation2);
-
-	XMMATRIX axes1 = rotation1 * rotation2_T;
-	XMMATRIX axes2 = rotation2 * rotation1_T;
-
-	// 충돌 검사를 위한 축의 벡터 계산
-	XMVECTOR axes[15];
-	axes[0] = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-	axes[1] = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	axes[2] = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-	for (int i = 0; i < 3; i++)
-	{
-		axes[i + 3] = XMVector3Normalize(XMVector3Transform(axes[i], axes1));
-		axes[i + 6] = XMVector3Normalize(XMVector3Transform(axes[i], axes2));
-	}
-	axes[9] = XMVector3Cross(axes[0], axes[3]);
-	axes[10] = XMVector3Cross(axes[0], axes[4]);
-	axes[11] = XMVector3Cross(axes[0], axes[5]);
-	axes[12] = XMVector3Cross(axes[1], axes[3]);
-	axes[13] = XMVector3Cross(axes[1], axes[4]);
-	axes[14] = XMVector3Cross(axes[1], axes[5]);
-
-	// 충돌 검사 수행
-	for (int i = 0; i < 15; i++)
-	{
-		float projection1 = XMVectorGetX(XMVector3Dot(distance, axes[i]));
-		float projection2 = XMVectorGetX(XMVector3Length(XMVector3Transform(extents1, axes1)));
-		float projection3 = XMVectorGetX(XMVector3Length(XMVector3Transform(extents2, axes2)));
-		if (projection1 >= projection2 + projection3)
-		{
-			return false;
-		}
-	}
-
-	return true;
 }

@@ -35,15 +35,7 @@ struct BulletPos {
 
 
 
-struct CB_FRAMEWORK_INFO
-{
-	float					m_fCurrentTime = 0.0f;
-	float					m_fElapsedTime = 0.0f;
-	float					m_fSecondsPerFirework = 0.1f;
-	int						m_nFlareParticlesToEmit = 30;
-	XMFLOAT3				m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
-	int						m_nMaxFlareType2Particles = 15;
-};
+
 
 
 
@@ -91,9 +83,7 @@ public:
 	int m_NumOfUI = 26;
 	bool UI_Switch = false;
 	bool m_bRollState = false;
-protected:
-	ID3D12Resource* m_pd3dcbFrameworkInfo = NULL;
-	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;
+
 public:
 	PostProcessShader* m_pPostProcessingShader = NULL;
 #ifdef _WITH_DIRECT2D
@@ -173,7 +163,7 @@ public:
 	CCamera						*m_pCamera = NULL;
 	CGameObject* m_pGameObject = NULL;
 	POINT						m_ptOldCursorPos;
-
+	CMaterial* m_pMaterial = NULL;
 	_TCHAR						m_pszFrameRate[70];
 	float ShootCnt = 0.0;
 

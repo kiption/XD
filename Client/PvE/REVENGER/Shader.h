@@ -52,11 +52,10 @@ public:
 	D3D12_SHADER_BYTECODE CompileShaderFromFile(WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob);
 	D3D12_SHADER_BYTECODE ReadCompiledShaderFromFile(WCHAR* pszFileName, ID3DBlob** ppd3dShaderBlob = NULL);
 
-	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) { }
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World) { }
-	virtual void ReleaseShaderVariables() { }
-
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) {}
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World, CMaterial* pMaterial);
+	virtual void ReleaseShaderVariables();
 	//virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList, int nPipelineState);
 	//virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool bPrerender);
@@ -68,8 +67,11 @@ public:
 	virtual void ReleaseObjects() { }
 	void SetCurScene(int nCurScene) { m_nCurScene = nCurScene; }
 
-
 public:
+	ID3D12Resource* m_pd3dcbFrameworkInfo = NULL;
+	CB_FRAMEWORK_INFO* m_pcbMappedFrameworkInfo = NULL;
+
+
 	int									m_nPipelineStates = 0;
 	ID3D12PipelineState** m_ppd3dPipelineStates = NULL;
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC	m_d3dPipelineStateDesc;
@@ -79,5 +81,7 @@ public:
 	int									m_nCurScene;
 public:
 	CGameObject** m_ppObjects = 0;
+	CLoadedModelInfo* m_pSkinObjects = 0;
+	CAnimationController* m_pAnimationController = 0;
 	int									m_nObjects = 0;
 };

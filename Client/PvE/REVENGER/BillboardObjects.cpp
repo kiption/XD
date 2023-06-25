@@ -37,7 +37,7 @@ void CBillboardParticleObject::Animate(float fTimeElapsed)
 	CGameObject::Animate(fTimeElapsed);
 }
 
-CMultiSpriteObject::CMultiSpriteObject(/*ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature*/) : CGameObject(1)
+CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
 {
 }
 

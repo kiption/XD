@@ -48,9 +48,8 @@ struct CB_GAMEOBJECT_INFO
 	XMFLOAT4X4						m_xmf4x4Texture;
 	XMINT2							m_xmi2TextureTiling;
 	XMFLOAT2						m_xmf2TextureOffset;
-
-	UINT							m_nObjectID;
-	UINT							m_nMaterialID;
+	UINT							m_nType;
+	bool							m_bAnimateshader;
 };
 
 class CShader;
@@ -148,7 +147,10 @@ public:
 #define MATERIAL_DETAIL_NORMAL_MAP		0x40
 
 class CGameObject;
-
+struct CB_FRAMEWORK_INFO
+{
+	bool					m_bAnimationShader = false;
+};
 class CMaterial
 {
 public:
@@ -189,6 +191,7 @@ public:
 	float							m_fMetallic = 0.0f;
 	float							m_fGlossyReflection = 0.0f;
 
+	bool m_isAnimationShader = false;
 public:
 	int 							m_nTextures = 0;
 	_TCHAR							(*m_ppstrTextureNames)[64] = NULL;
@@ -204,7 +207,7 @@ public:
 	static void CMaterial::PrepareShaders(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
 
 	void SetStandardShader() { CMaterial::SetShader(m_pStandardShader); }
-	void SetSkinnedAnimationShader() { CMaterial::SetShader(m_pSkinnedAnimationShader); }
+	void SetSkinnedAnimationShader() { CMaterial::SetShader(m_pSkinnedAnimationShader); m_isAnimationShader = true;}
 
 
 };
@@ -432,6 +435,7 @@ public:
 	BoundingOrientedBox GetBoundingBox() { return(m_xoobb); }
 	void UpdateBoundingBox();
 	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+
 public:
 	//게임 객체가 카메라에 보인는 가를 검사한다.
 	bool IsVisible(CCamera* pCamera = NULL);

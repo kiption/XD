@@ -80,7 +80,8 @@ void CSpriteObjectsShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3d
 
 				if (m_ppObjects[j]->m_ppMaterials[i] && m_ppObjects[j]->m_ppMaterials[i]->m_ppTextures[k])
 				{
-					XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&(m_ppObjects[j]->m_ppMaterials[i]->m_ppTextures[k]->m_xmf4x4Texture))));
+					XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4Texture, 
+						XMMatrixTranspose(XMLoadFloat4x4(&(m_ppObjects[j]->m_ppMaterials[i]->m_ppTextures[k]->m_xmf4x4Texture))));
 				}
 			}
 
@@ -96,8 +97,7 @@ void CSpriteObjectsShader::ReleaseShaderVariables()
 		m_pd3dcbGameObjects->Release();
 	}
 
-	CShader::ReleaseShaderVariables();
-	CSpriteTexturedShader::ReleaseShaderVariables();
+
 }
 
 void CSpriteObjectsShader::ReleaseUploadBuffers()
@@ -204,7 +204,7 @@ void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	for (int i = 0; i < m_nObjects; i++)
 	{
 
-		pThirdObject[i] = new CMultiSpriteObject();
+		pThirdObject[i] = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		pThirdObject[i]->SetMesh(pSpriteMesh);
 		pThirdObject[i]->SetMaterial(0, pTerrainMaterial[i]);
 		pThirdObject[i]->SetPosition(XMFLOAT3(xmf3Position.x, xmf3Position.y, xmf3Position.z));

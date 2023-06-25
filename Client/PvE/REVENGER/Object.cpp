@@ -302,7 +302,6 @@ CShader* CMaterial::m_pStandardShader = NULL;
 
 void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
-	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	m_pStandardShader = new CStandardShader();
 	m_pStandardShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
 	m_pStandardShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -319,13 +318,15 @@ void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &m_xmf4SpecularColor, 24);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &m_xmf4EmissiveColor, 28);
 
+	//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_isAnimationShader, 33);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nType, 32);
+	
 
 	for (int i = 0; i < m_nTextures; i++)
 		if (m_ppTextures[i]) m_ppTextures[i]->UpdateShaderVariables(pd3dCommandList);
 
 
-	//if (m_pTexture) m_pTexture->UpdateShaderVariables(pd3dCommandList);
+
 }
 
 void CMaterial::ReleaseShaderVariables()
@@ -333,9 +334,10 @@ void CMaterial::ReleaseShaderVariables()
 	for (int i = 0; i < m_nTextures; i++)
 		if (m_ppTextures[i]) m_ppTextures[i]->ReleaseShaderVariables();
 
-	//
+	
 	if (m_pShader) m_pShader->ReleaseShaderVariables();
-	//if (m_pTexture) m_pTexture->ReleaseShaderVariables();
+
+
 }
 
 void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR* pwstrTextureName, CTexture** ppTexture, CGameObject* pParent, FILE* pInFile, CShader* pShader)
@@ -800,7 +802,7 @@ CGameObject::CGameObject(int nMeshes, int nMaterials)
 
 CGameObject::~CGameObject()
 {
-	ReleaseShaderVariables();
+	//ReleaseShaderVariables();
 	if (m_pMesh) m_pMesh->Release();
 
 	if (m_ppMeshes)
@@ -1044,7 +1046,6 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 	{
 		m_pShaderInfo->Render(pd3dCommandList, pCamera, 0, bPrerender);
 		m_pShaderInfo->UpdateShaderVariables(pd3dCommandList);
-		//pd3dCommandList->SetGraphicsRootDescriptorTable(0, m_pShaderComponent->GetCbvGPUDescriptorHandle());
 		if (m_pTextureInfo != NULL)
 		{
 			m_pTextureInfo->UpdateShaderVariables(pd3dCommandList);
@@ -1064,15 +1065,16 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 
 						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, false);
 						pShaderComponent->SetPipelineState(pd3dCommandList, 0);
-
+						m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, m_ppMaterials[i]);
 					}
 
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 
-					/*for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
+
+					for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
 					{
 						if (m_ppMaterials[i]->m_ppTextures[k]) m_ppMaterials[i]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
-					}*/
+					}
 				}
 				m_pMesh->Render(pd3dCommandList, i);
 			}
@@ -1096,8 +1098,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	if (m_pShaderInfo != NULL)
 	{
 		m_pShaderInfo->Render(pd3dCommandList, pCamera, 0, bPrerender);
-		m_pShaderInfo->UpdateShaderVariables(pd3dCommandList);
-		//pd3dCommandList->SetGraphicsRootDescriptorTable(0, m_pShaderComponent->GetCbvGPUDescriptorHandle());
+		m_pShaderInfo->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, NULL);
 		if (m_pTextureInfo != NULL)
 		{
 			m_pTextureInfo->UpdateShaderVariables(pd3dCommandList);
@@ -1116,6 +1117,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 					if (m_ppMaterials[i]->m_pShader) {
 
 						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, bPrerender);
+						m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList,&m_xmf4x4World,m_ppMaterials[i]);
 						UpdateShaderVariables(pd3dCommandList);
 					}
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
@@ -1140,10 +1142,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 void CGameObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
-	//UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
-	//m_pd3dcbGameObject = ::CreateBufResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
-	//	D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
-	//m_pd3dcbGameObject->Map(0, NULL, (void**)&m_pcbMappedGameObject);
+
 
 }
 
@@ -1395,6 +1394,8 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 					if (nMeshType & VERTEXT_BONE_INDEX_WEIGHT)
 					{
 						pMaterial->SetSkinnedAnimationShader();
+						pMaterial->m_isAnimationShader = true;
+						
 					}
 					else
 					{
@@ -1772,10 +1773,10 @@ CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	for (int i = 0; i < HELIBULLETS; i++)
 	{
 
-		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
+		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader );
 		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, false);
-		pBulletObject->SetMovingSpeed(2000.0f);
+		pBulletObject->SetMovingSpeed(200.0f);
 		pBulletObject->SetActive(false);
 		pBulletObject->SetCurScene(SCENE1STAGE);
 		m_ppBullets[i] = pBulletObject;
@@ -1878,10 +1879,10 @@ CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	for (int i = 0; i < HUMANBULLETS; i++)
 	{
 
-		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
+		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", NULL);
 		pBulletObject = new CNPCbulletObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, false);
-		pBulletObject->SetMovingSpeed(1000.0f);
+		pBulletObject->SetMovingSpeed(100.0f);
 		pBulletObject->SetActive(false);
 		pBulletObject->SetCurScene(SCENE1STAGE);
 		m_ppBullets[i] = pBulletObject;

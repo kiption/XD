@@ -738,33 +738,19 @@ void CGameFramework::MoveToNextFrame()
 
 void CGameFramework::CreateShaderVariables()
 {
-	UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256의 배수
-	m_pd3dcbFrameworkInfo = ::CreateBufResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes,
-		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
-	m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
+
 
 }
 
 void CGameFramework::ReleaseShaderVariables()
 {
-	if (m_pd3dcbFrameworkInfo)
-	{
-		m_pd3dcbFrameworkInfo->Unmap(0, NULL);
-		m_pd3dcbFrameworkInfo->Release();
-	}
+	
 }
 
 void CGameFramework::UpdateShaderVariables()
 {
-	m_pcbMappedFrameworkInfo->m_fCurrentTime = m_GameTimer.GetTotalTime();
-	m_pcbMappedFrameworkInfo->m_fElapsedTime = m_GameTimer.GetTimeElapsed();
-	/*m_pcbMappedFrameworkInfo->m_fSecondsPerFirework = 0.5f;
-	m_pcbMappedFrameworkInfo->m_nFlareParticlesToEmit = 100;
-	m_pcbMappedFrameworkInfo->m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
-	m_pcbMappedFrameworkInfo->m_nMaxFlareType2Particles = 15 * 1.5f;*/
+	
 
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
-	m_pd3dCommandList->SetGraphicsRootConstantBufferView(21, d3dGpuVirtualAddress);
 
 }
 
@@ -1086,7 +1072,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_nMode = nMode;
 			m_pScene = new Stage1();
 			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
-			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((Stage1*)m_pScene)->m_pTerrain);
+			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(),NULL, ((Stage1*)m_pScene)->m_pTerrain);
 			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 			m_pCamera = m_pPlayer->GetCamera();
 
@@ -1111,7 +1097,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_nMode = nMode;
 			m_pScene = new Stage2();
 			if (m_pScene) ((Stage2*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
-			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), ((Stage2*)m_pScene)->m_pTerrain);
+			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(),NULL, ((Stage2*)m_pScene)->m_pTerrain);
 			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 			m_pCamera = m_pPlayer->GetCamera();
 			m_pScene->SetCurScene(SCENE2STAGE);

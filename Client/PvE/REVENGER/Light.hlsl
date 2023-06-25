@@ -31,6 +31,7 @@ struct LIGHT
 cbuffer cbMaterial : register(b10)
 {
 	MATERIAL			gMaterials[MAX_MATERIALS];
+
 };
 
 cbuffer cbLights : register(b4)
