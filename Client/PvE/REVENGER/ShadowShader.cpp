@@ -19,7 +19,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	if (m_nCurScene == SCENE1STAGE)
 	{
-		m_nObjects = 23;
+		m_nObjects = 42;
 		m_ppObjects = new CGameObject * [m_nObjects];
 
 		CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
@@ -36,33 +36,32 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[1] = new CGameObject(1);
 		m_ppObjects[2] = new CGameObject(1);
 		m_ppObjects[3] = new CGameObject(1);
-		m_ppObjects[4] = new CGameObject(1);
 
 
-		int OtherPlayers = 3;
+		/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
+		
 		CMaterial* pOtherPlayerMaterial = new CMaterial(3);
 		pOtherPlayerMaterial->SetReflection(3);
-
-		for (int x = 5; x < 8; x++)
+		CLoadedModelInfo* pSModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
+		for (int x = 4; x < 8; x++)
 		{
-			m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, NULL);
+			m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
 			m_ppObjects[x]->SetMaterial(0, pOtherPlayerMaterial);
-			m_ppObjects[x]->SetScale(7.0, 7.0, 7.0);
-
+			pSModel->m_pModelRootObject->AddRef();
 		}
-
-		m_ppObjects[5]->SetPosition(XMFLOAT3(160.0, 0.0, 1000.0));  // ¾Èº¸ÀÌ°Ô ¼û°Ü³ùÁö·Õ
-		m_ppObjects[6]->SetPosition(XMFLOAT3(160.0, 0.0, 1000.0));  // ¾Èº¸ÀÌ°Ô ¼û°Ü³ùÁö·Õ
-		m_ppObjects[7]->SetPosition(XMFLOAT3(160.0, 0.0, 1000.0));  // ¾Èº¸ÀÌ°Ô ¼û°Ü³ùÁö·Õ
-
+		m_ppObjects[5]->SetPosition(XMFLOAT3(160.0, 6.0, 1000.0));  // ¾Èº¸ÀÌ°Ô ¼û°Ü³ùÁö·Õ
+		m_ppObjects[6]->SetPosition(XMFLOAT3(160.0, 6.0, 1000.0));  // ¾Èº¸ÀÌ°Ô ¼û°Ü³ùÁö·Õ
+		m_ppObjects[7]->SetPosition(XMFLOAT3(160.0, 6.0, 1000.0));  // ¾Èº¸ÀÌ°Ô ¼û°Ü³ùÁö·Õ
+		if (pSModel) delete pSModel;
+	
+		/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
+	
+		////////////////////////////////////////////////////MAP_LOAD///////////////////////////////////////////////////////////////
 		CMaterial* pCityMaterial;
 		pCityMaterial = new CMaterial(4);
 		pCityMaterial->SetReflection(4);
-
-
 		int Cities = 4;
 		m_ppCityGameObjects = new CGameObject * [Cities];
-
 		for (int i = 0; i < Cities; i++)
 		{
 			string filename{ "Model/Stage1_(" };
@@ -87,9 +86,10 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[9] = m_ppCityGameObjects[1];
 		m_ppObjects[10] = m_ppCityGameObjects[2];
 		m_ppObjects[11] = m_ppCityGameObjects[3];
+		////////////////////////////////////////////////////MAP_LOAD///////////////////////////////////////////////////////////////
 
-		m_nHeliNpcObjects = 5;
-
+		////////////////////////////////////////////////////HELI_LOAD///////////////////////////////////////////////////////////////
+		m_nHeliNpcObjects = 10;
 		m_ppNpc_Heli_Objects = new CGameObject * [m_nHeliNpcObjects];
 
 		CMaterial* pNpcHeliMaterial = new CMaterial(m_nHeliNpcObjects);
@@ -100,39 +100,59 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppNpc_Heli_Objects[i]->SetMaterial(0, pNpcHeliMaterial);
 			m_ppNpc_Heli_Objects[i]->Rotate(0.0f, 45.0f, 0.0f);
 			m_ppNpc_Heli_Objects[i]->OnPrepareAnimate();
+			m_ppNpc_Heli_Objects[i]->SetPosition(XMFLOAT3(50.0+i*15, 70.0, -1000.0));
 		}
-
 		m_ppObjects[12] = m_ppNpc_Heli_Objects[0];
 		m_ppObjects[13] = m_ppNpc_Heli_Objects[1];
 		m_ppObjects[14] = m_ppNpc_Heli_Objects[2];
 		m_ppObjects[15] = m_ppNpc_Heli_Objects[3];
 		m_ppObjects[16] = m_ppNpc_Heli_Objects[4];
+		m_ppObjects[17] = m_ppNpc_Heli_Objects[5];
+		m_ppObjects[18] = m_ppNpc_Heli_Objects[6];
+		m_ppObjects[19] = m_ppNpc_Heli_Objects[7];
+		m_ppObjects[20] = m_ppNpc_Heli_Objects[8];
+		m_ppObjects[21] = m_ppNpc_Heli_Objects[9];
+		////////////////////////////////////////////////////HELI_LOAD//////////////////////////////////////////////////////////////
+	
 
-		m_ppObjects[12]->SetPosition(XMFLOAT3(100.0, 100.0, 1100.0));
-		m_ppObjects[13]->SetPosition(XMFLOAT3(150.0, 100.0, 1000.0));
-		m_ppObjects[14]->SetPosition(XMFLOAT3(200.0, 100.0, 900.0));
-		m_ppObjects[15]->SetPosition(XMFLOAT3(250.0, 100.0, 800.0));
-		m_ppObjects[16]->SetPosition(XMFLOAT3(300.0, 100.0, 1300.0));
+		////////////////////////////////////////////////SOLDIAR_NPC_LOAD///////////////////////////////////////////////////////////
+		m_nSoldiarNpcObjects = 21;
+		CMaterial* pSoldiarNpcMaterial = new CMaterial(21);
+		pSoldiarNpcMaterial->SetReflection(21);
 
-		m_nSoldiarNpcObjects = 17 + 5;
-		CMaterial* pSoldiarNpcMaterial = new CMaterial(15);
-		pSoldiarNpcMaterial->SetReflection(15);
-
-		for (int h = 17; h < m_nSoldiarNpcObjects; h++)
+		m_ppSoldiarNpcObjects = new CGameObject * [m_nSoldiarNpcObjects];
+		CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
+		for (int i = 0; i < m_nSoldiarNpcObjects; i++)
 		{
-			CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
-			m_ppObjects[h] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, NULL);
-			m_ppObjects[h]->SetMaterial(0, pSoldiarNpcMaterial);
-			m_ppObjects[h]->SetPosition(500.0 + h * 5, 6.0, 500.0 + h * 5);
-
-			if (psModel) delete psModel;
+			m_ppSoldiarNpcObjects[i] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, 4);
+			m_ppSoldiarNpcObjects[i]->SetMaterial(0, pSoldiarNpcMaterial);
+			m_ppSoldiarNpcObjects[i]->SetScale(5.0,5.0,5.0);
+			m_ppSoldiarNpcObjects[i]->SetPosition(-170.0, 6.0, 550.0 + i * 20);
+			psModel->m_pModelRootObject->AddRef();
 		}
 
-		m_SkingAnimationShader = new CSkinnedAnimationObjectsShader();
-		m_SkingAnimationShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
-		m_SkingAnimationShader->SetCurScene(SCENE1STAGE);
-		m_SkingAnimationShader->BuildObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, NULL, NULL);
-		m_ppObjects[22] = m_SkingAnimationShader->m_ppObjects[0];
+		m_ppObjects[22] = m_ppSoldiarNpcObjects[0];
+		m_ppObjects[23] = m_ppSoldiarNpcObjects[1];
+		m_ppObjects[24] = m_ppSoldiarNpcObjects[2];
+		m_ppObjects[25] = m_ppSoldiarNpcObjects[3];
+		m_ppObjects[26] = m_ppSoldiarNpcObjects[4];
+		m_ppObjects[27] = m_ppSoldiarNpcObjects[5];
+		m_ppObjects[28] = m_ppSoldiarNpcObjects[6];
+		m_ppObjects[29] = m_ppSoldiarNpcObjects[7];
+		m_ppObjects[30] = m_ppSoldiarNpcObjects[8];
+		m_ppObjects[31] = m_ppSoldiarNpcObjects[9];
+		m_ppObjects[32] = m_ppSoldiarNpcObjects[11];
+		m_ppObjects[33] = m_ppSoldiarNpcObjects[12];
+		m_ppObjects[34] = m_ppSoldiarNpcObjects[13];
+		m_ppObjects[35] = m_ppSoldiarNpcObjects[14];
+		m_ppObjects[36] = m_ppSoldiarNpcObjects[15];
+		m_ppObjects[37] = m_ppSoldiarNpcObjects[16];
+		m_ppObjects[38] = m_ppSoldiarNpcObjects[17];
+		m_ppObjects[39] = m_ppSoldiarNpcObjects[18];
+		m_ppObjects[40] = m_ppSoldiarNpcObjects[19];
+		m_ppObjects[41] = m_ppSoldiarNpcObjects[20];
+		if (psModel) delete psModel;
+		////////////////////////////////////////////////SOLDIAR_NPC_LOAD////////////////////////////////////////////
 
 	}
 
@@ -141,10 +161,10 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
 {
-	//m_ppFragShaders[0]->AnimateObject(fTimeElapsed);
+	
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		
+
 		m_ppObjects[j]->Animate(fTimeElapsed);
 	}
 }
@@ -161,7 +181,7 @@ void CObjectsShader::ReleaseObjects()
 
 void CObjectsShader::ReleaseUploadBuffers()
 {
-	//m_ppFragShaders[0]->ReleaseUploadBuffers();
+	
 	if (m_ppObjects)
 	{
 		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
@@ -218,6 +238,7 @@ void CObjectsShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D1
 
 void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
+
 }
 
 void CObjectsShader::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -352,10 +373,17 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 
 	for (int i = 0; i < m_pObjectsShader->m_nObjects; i++)
 	{
-		if (m_pObjectsShader->m_ppObjects[i])
+		if (i >= 22)
+		{
+			m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
+			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
+			m_pObjectsShader->m_ppObjects[i]->Render(pd3dCommandList, pCamera, false);
+		}
+		else
 		{
 			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
 			m_pObjectsShader->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera, true, this);
+
 		}
 	}
 }

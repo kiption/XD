@@ -110,7 +110,7 @@ void CSpriteObjectsShader::ReleaseUploadBuffers()
 
 void CSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CSpriteTexturedShader::Render(pd3dCommandList, pCamera, nPipelineState, false);
+	CSpriteTexturedShader::Render(pd3dCommandList, pCamera, nPipelineState, NULL);
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
@@ -188,7 +188,7 @@ void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	pTerrainMaterial[1]->SetTexture(ppSpriteTextures[1], 0);
 
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 40.0, 40.0, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 80.0, 80.0, 0.0f, 0.0f, 0.0f, 0.0f);
 
 
 	SceneManager* pScene = NULL;

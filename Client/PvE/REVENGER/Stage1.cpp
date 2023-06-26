@@ -196,17 +196,20 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 	m_ppShaders[0] = pObjectShader;
 
-	m_nGameObjects = 1;
-	CMaterial* pSoldiarNpcMaterial = new CMaterial(15);
-	pSoldiarNpcMaterial->SetReflection(15);
+	m_nGameObjects = 0;
+	//CMaterial* pSoldiarNpcMaterial = new CMaterial(15);
+	//pSoldiarNpcMaterial->SetReflection(15);
 
-	m_ppGameObjects = new CGameObject * [m_nGameObjects];
-	CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
-	m_ppGameObjects[0] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, psModel, NULL);
-	m_ppGameObjects[0]->SetMaterial(0, pSoldiarNpcMaterial);
-	m_ppGameObjects[0]->SetScale(7.0, 7.0, 7.0);
-	m_ppGameObjects[0]->SetPosition(-170.0, 6.0, 550.0);
-	if (psModel) delete psModel;
+	//m_ppGameObjects = new CGameObject * [m_nGameObjects];
+	//CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
+	//for (int i = 0; i <= 10; i++)
+	//{
+	//	m_ppGameObjects[i] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, psModel, NULL);
+	//	m_ppGameObjects[i]->SetMaterial(0, pSoldiarNpcMaterial);
+	//	m_ppGameObjects[i]->SetScale(7.0, 7.0, 7.0);
+	//	m_ppGameObjects[i]->SetPosition(-170.0+i*20, 6.0, 550.0 + i * 20);
+	//	m_ppGameObjects[i]->AddRef();
+	//}
 
 	m_pDepthRenderShader = new CDepthRenderShader(pObjectShader, m_pLights->m_pLights);
 	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
@@ -219,6 +222,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pShadowShader->SetCurScene(SCENE1STAGE);
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
+	//if (psModel) delete psModel;
 	gamesound.backGroundMusic();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -259,6 +263,16 @@ void Stage1::ReleaseObjects()
 			m_ppShaders[i]->Release();
 		}
 		delete[] m_ppShaders;
+	}
+	if (m_ppHumanShaders)
+	{
+		for (int i = 0; i < m_nHumanShaders; i++)
+		{
+			m_ppHumanShaders[i]->ReleaseShaderVariables();
+			m_ppHumanShaders[i]->ReleaseObjects();
+			m_ppHumanShaders[i]->Release();
+		}
+		delete[] m_ppHumanShaders;
 	}
 	if (m_ppGameObjects)
 	{
@@ -664,6 +678,7 @@ void Stage1::ReleaseUploadBuffers()
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < m_nHumanShaders; i++) m_ppHumanShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->ReleaseUploadBuffers();
@@ -716,6 +731,47 @@ D3D12_GPU_DESCRIPTOR_HANDLE Stage1::CreateConstantBufferViews(ID3D12Device* pd3d
 	return(d3dCbvGPUDescriptorHandle);
 }
 
+
+D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(D3D12_RESOURCE_DESC d3dResourceDesc, UINT nTextureType)
+{
+	D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc;
+	d3dShaderResourceViewDesc.Format = d3dResourceDesc.Format;
+	d3dShaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	switch (nTextureType)
+	{
+	case RESOURCE_TEXTURE2D: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize == 1)
+	case RESOURCE_TEXTURE2D_ARRAY:
+		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		d3dShaderResourceViewDesc.Texture2D.MipLevels = -1;
+		d3dShaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
+		d3dShaderResourceViewDesc.Texture2D.PlaneSlice = 0;
+		d3dShaderResourceViewDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+		break;
+	case RESOURCE_TEXTURE2DARRAY: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize != 1)
+		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+		d3dShaderResourceViewDesc.Texture2DArray.MipLevels = -1;
+		d3dShaderResourceViewDesc.Texture2DArray.MostDetailedMip = 0;
+		d3dShaderResourceViewDesc.Texture2DArray.PlaneSlice = 0;
+		d3dShaderResourceViewDesc.Texture2DArray.ResourceMinLODClamp = 0.0f;
+		d3dShaderResourceViewDesc.Texture2DArray.FirstArraySlice = 0;
+		d3dShaderResourceViewDesc.Texture2DArray.ArraySize = d3dResourceDesc.DepthOrArraySize;
+		break;
+	case RESOURCE_TEXTURE_CUBE: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D)(d3dResourceDesc.DepthOrArraySize == 6)
+		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+		d3dShaderResourceViewDesc.TextureCube.MipLevels = -1;
+		d3dShaderResourceViewDesc.TextureCube.MostDetailedMip = 0;
+		d3dShaderResourceViewDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+		break;
+	case RESOURCE_BUFFER: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER)
+		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		d3dShaderResourceViewDesc.Buffer.FirstElement = 0;
+		d3dShaderResourceViewDesc.Buffer.NumElements = 0;
+		d3dShaderResourceViewDesc.Buffer.StructureByteStride = 0;
+		d3dShaderResourceViewDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+		break;
+	}
+	return(d3dShaderResourceViewDesc);
+}
 void Stage1::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex)
 {
 	m_d3dSrvCPUDescriptorNextHandle.ptr += (::gnCbvSrvDescriptorIncrementSize * nDescriptorHeapIndex);
@@ -724,14 +780,17 @@ void Stage1::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pText
 	if (pTexture)
 	{
 		int nTextures = pTexture->GetTextures();
+		int nTextureType = pTexture->GetTextureType();
 		for (int i = 0; i < nTextures; i++)
 		{
 			ID3D12Resource* pShaderResource = pTexture->GetResource(i);
-			D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = pTexture->GetShaderResourceViewDesc(i);
+			D3D12_RESOURCE_DESC d3dResourceDesc = pShaderResource->GetDesc();
+			D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = GetShaderResourceViewDesc(d3dResourceDesc, nTextureType);
 			pd3dDevice->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, m_d3dSrvCPUDescriptorNextHandle);
-			m_d3dSrvCPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
+			m_d3dSrvCPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize * i;
+
 			pTexture->SetGpuDescriptorHandle(i, m_d3dSrvGPUDescriptorNextHandle);
-			m_d3dSrvGPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
+			m_d3dSrvGPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize * i;
 		}
 	}
 	int nRootParameters = pTexture->GetRootParameters();
@@ -797,6 +856,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
+	for (int i = 0; i < m_nHumanShaders; i++) if (m_ppHumanShaders[i]) m_ppHumanShaders[i]->AnimateObjects(fTimeElapsed);
 	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();
 	if (m_pPlayer->m_bCollisionTerrain == true)
 	{
@@ -833,7 +893,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 
-	UpdateShaderVariables(pd3dCommandList);
+	//UpdateShaderVariables(pd3dCommandList);
 
 	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
@@ -841,10 +901,21 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 
-	if (m_ppGameObjects[0]) m_ppGameObjects[0]->Render(pd3dCommandList, pCamera,0);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (i != 1 && m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
+
+	//if (m_ppHumanShaders[0]) m_ppHumanShaders[0]->Render(pd3dCommandList, pCamera,0,true);
+	//for (int i = 0; i < m_nGameObjects; i++)
+	//{
+	//	if (m_ppGameObjects[i])
+	//	{
+	//		m_ppGameObjects[i]->Animate(m_fElapsedTime);
+	//		m_ppGameObjects[i]->UpdateTransform(NULL);
+	//		m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
+	//	}
+	//}
+
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);

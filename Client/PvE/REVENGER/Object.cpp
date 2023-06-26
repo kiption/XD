@@ -78,6 +78,10 @@ void CTexture::SetGpuDescriptorHandle(int nIndex, D3D12_GPU_DESCRIPTOR_HANDLE d3
 	m_pd3dSrvGpuDescriptorHandles[nIndex] = d3dSrvGpuDescriptorHandle;
 }
 
+void CTexture::SetRootArgument(int nIndex, UINT nRootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE d3dsrvGpuDescriptorHandle)
+{
+}
+
 void CTexture::SetSampler(int nIndex, D3D12_GPU_DESCRIPTOR_HANDLE d3dSamplerGpuDescriptorHandle)
 {
 	m_pd3dSamplerGpuDescriptorHandles[nIndex] = d3dSamplerGpuDescriptorHandle;
@@ -1066,6 +1070,7 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, false);
 						pShaderComponent->SetPipelineState(pd3dCommandList, 0);
 						m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, m_ppMaterials[i]);
+						UpdateShaderVariables(pd3dCommandList);
 					}
 
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
@@ -1118,6 +1123,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 
 						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, bPrerender);
 						m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList,&m_xmf4x4World,m_ppMaterials[i]);
+						
 						UpdateShaderVariables(pd3dCommandList);
 					}
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
@@ -1759,7 +1765,7 @@ void CNpcHelicopterObject::Animate(float fTimeElapsed)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "MissileObject.h"
-CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(5)
+CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(10)
 {
 	CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 	SetChild(pOtherPlayerModel, false);
@@ -1871,7 +1877,7 @@ void CHelicopterObjects::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(20)
+CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(21)
 {
 	pBCBulletEffectShader = new CBulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
@@ -1879,9 +1885,10 @@ CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	for (int i = 0; i < HUMANBULLETS; i++)
 	{
 
-		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", NULL);
+		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
 		pBulletObject = new CNPCbulletObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, false);
+		pBulletObject->SetMovingSpeed(1000.0f);
 		pBulletObject->SetMovingSpeed(100.0f);
 		pBulletObject->SetActive(false);
 		pBulletObject->SetCurScene(SCENE1STAGE);
@@ -1904,6 +1911,7 @@ CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
 }
 
 CSoldiarNpcObjects::~CSoldiarNpcObjects()
@@ -2127,11 +2135,11 @@ void CCityObject::Animate(float fTimeElapsed)
 
 CSoldiarOtherPlayerObjects::CSoldiarOtherPlayerObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(5)
 {
-	CLoadedModelInfo* pSModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
-	SetChild(pSModel->m_pModelRootObject, true);
+	pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
+	SetChild(pModel->m_pModelRootObject, true);
 
-	pSModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 12, pSModel);
+	pModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 12, pModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
@@ -2159,7 +2167,7 @@ CSoldiarOtherPlayerObjects::CSoldiarOtherPlayerObjects(ID3D12Device* pd3dDevice,
 	m_pSkinnedAnimationController->SetTrackEnable(10, false);
 	m_pSkinnedAnimationController->SetTrackEnable(11, false);
 
-	if (pSModel) delete pSModel;
+	if (pModel) delete pModel;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -2300,4 +2308,18 @@ void CSoldiarOtherPlayerObjects::IdleState(float EleapsedTime)
 void CSoldiarOtherPlayerObjects::Animate(float fTimeElapsed)
 {
 	CGameObject::Animate(fTimeElapsed);
+}
+
+CEthanObject::CEthanObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks)
+{
+	CLoadedModelInfo* pEthanModel = pModel;
+	if (!pEthanModel) pEthanModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
+
+	SetChild(pEthanModel->m_pModelRootObject, true);
+	SetScale(15,15,15);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pEthanModel);
+}
+
+CEthanObject::~CEthanObject()
+{
 }

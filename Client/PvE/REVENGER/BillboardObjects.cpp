@@ -85,7 +85,7 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 	}
 				
 
-	//CGameObject::Animate(fTimeElapsed);
+	CGameObject::Animate(fTimeElapsed);
 }
 
 void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -101,7 +101,7 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 
 			if (m_ppMaterials[i]->m_pShader)
 			{
-				m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0,false);
+				m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0,NULL);
 				m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList);
 
 				UpdateShaderVariables(pd3dCommandList);
@@ -118,7 +118,7 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 		}
 	}
 
-	pd3dCommandList->SetGraphicsRootDescriptorTable(19, m_pScene->m_d3dCbvGPUDescriptorStartHandle);
+	pd3dCommandList->SetGraphicsRootDescriptorTable(1, m_pScene->m_d3dCbvGPUDescriptorStartHandle);
 
 	if (m_pMesh)
 	{

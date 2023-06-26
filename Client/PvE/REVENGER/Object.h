@@ -57,7 +57,11 @@ class CStandardShader;
 class CBulletEffectShader;
 class CValkanObject;
 class CPlayer;
-
+struct SRVROOTARGUMENTINFO
+{
+	int								m_nRootParameterIndex = 0;
+	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dSrvGpuDescriptorHandle;
+};
 class CTexture
 {
 public:
@@ -88,7 +92,8 @@ private:
 
 	int 							m_nRow = 0;
 	int 							m_nCol = 0;
-
+public:
+	SRVROOTARGUMENTINFO* m_pRootArgumentInfos = NULL;
 public:
 	int 							m_nRows = 1;
 	int 							m_nCols = 1;
@@ -117,6 +122,7 @@ public:
 
 	void SetRootParameterIndex(int nIndex, UINT nRootParameterIndex);
 	void SetGpuDescriptorHandle(int nIndex, D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGpuDescriptorHandle);
+	void SetRootArgument(int nIndex, UINT nRootParameterIndex, D3D12_GPU_DESCRIPTOR_HANDLE d3dsrvGpuDescriptorHandle);
 
 	int GetRootParameters() { return(m_nRootParameters); }
 	int GetTextures() { return(m_nTextures); }
@@ -694,3 +700,9 @@ public:
 
 
 
+class CEthanObject : public CGameObject
+{
+public:
+	CEthanObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks);
+	virtual ~CEthanObject();
+};

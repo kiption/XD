@@ -326,12 +326,12 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	switch (nMessageID)
 	{
 	case WM_RBUTTONDOWN:
-		::ReleaseCapture();
-		break;
+		//::ReleaseCapture();
+		//break;
 
 
-	case WM_LBUTTONUP:
 	case WM_LBUTTONDOWN:
+	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
@@ -409,15 +409,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		case VK_SPACE:
 			break;
-		case 'M':
-			if (m_nMode == SCENE1STAGE) {
 
-				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-
-			}
-			break;
 		default:
 			break;
 		}
@@ -557,7 +549,7 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; }
 
 		if (pKeysBuffer[KEY_A] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_A); dwDirection |= DIR_LEFT; }
-		if (pKeysBuffer[KEY_D] & 0xF0) {q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT;}
+		if (pKeysBuffer[KEY_D] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT; }
 		if (pKeysBuffer[KEY_Q] & 0xF0)
 		{
 			((CHumanPlayer*)m_pPlayer)->m_bReloadState = true;
@@ -586,12 +578,12 @@ void CGameFramework::ProcessInput()
 		}
 
 		if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
-			
+
 
 			if (m_nMode == SCENE1STAGE)
 			{
 
-				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay < 0.01)
+				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay < 0.005)
 				{
 
 					ShootKey = true;
@@ -601,7 +593,7 @@ void CGameFramework::ProcessInput()
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
 					q_mouseInput.push(lclick);//s
 				}
-				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.01)
+				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.005)
 				{
 					ShootKey = false;
 					if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
@@ -612,7 +604,6 @@ void CGameFramework::ProcessInput()
 
 
 
-		MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
 			if (m_nMode == SCENE1STAGE) {
@@ -620,6 +611,7 @@ void CGameFramework::ProcessInput()
 				{
 
 					m_pPlayer->Rotate(0.0f, cxDelta, 0.0f);
+					MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
 					q_mouseInput.push(mousemove);//s
 
 				}
@@ -646,15 +638,25 @@ void CGameFramework::AnimateObjects()
 	{
 		((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->SetActive(true);
 		((Stage1*)m_pScene)->m_pBillboardShader[3]->SetActive(true);
+		((Stage1*)m_pScene)->m_pBillboardShader[3]->ParticlePosition = XMFLOAT3(
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[23]->GetPosition().x
+			, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[23]->GetPosition().y + 10.0,
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[23]->GetPosition().z);
 
+		((Stage1*)m_pScene)->m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[24]->GetPosition().x
+			, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[24]->GetPosition().y + 10.0,
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[24]->GetPosition().z);
 
-		((Stage1*)m_pScene)->m_pBillboardShader[3]->ParticlePosition = XMFLOAT3(61.0, 20.0, 1170.0);
+		((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[25]->GetPosition().x
+			, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[25]->GetPosition().y + 10.0,
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[25]->GetPosition().z);
 
-		((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->GetPosition().x
-			, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->GetPosition().y + 10.0, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[19]->GetPosition().z);
-
-		((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[1]->SetPosition(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->GetPosition().x
-			, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->GetPosition().y + 10.0, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[21]->GetPosition().z);
+		((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[1]->SetPosition(
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[26]->GetPosition().x
+			, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[26]->GetPosition().y + 10.0,
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[26]->GetPosition().z);
 
 	}
 
@@ -662,7 +664,6 @@ void CGameFramework::AnimateObjects()
 	((CHumanPlayer*)m_pPlayer)->m_fShootDelay += m_GameTimer.GetTimeElapsed();
 	if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.15)
 	{
-
 		((CHumanPlayer*)m_pPlayer)->m_fShootDelay = 0.0f;
 	}
 	if (ShootKey == true)
@@ -919,7 +920,7 @@ void CGameFramework::FrameAdvance()
 			D2D_RECT_F D2_Team2UIHPRect = { 0.0f, 0.0f, 295.0f, 11.0f };
 			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[24] : m_pd2dfxGaussianBlur[24], &D2_Team2UIHP, &D2_Team2UIHPRect);
 		}
-}
+	}
 
 #endif
 	if (m_nMode == SCENE1STAGE) {
@@ -1077,8 +1078,8 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_GameTimer.Reset();
 			break;
 		}
+		}
 	}
-}
 }
 
 #ifdef _WITH_DIRECT2D
@@ -1698,36 +1699,32 @@ void CGameFramework::setVectors_Self(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3
 
 void CGameFramework::setPosition_OtherPlayer(int id, XMFLOAT3 pos)
 {
+	/* 5~8 다른플레이어 */
 	if (id < 0 || id > 5) return;   // 배열 범위 벗어나는 거 방지
-
 	if (m_nMode == SCENE1STAGE) {
 		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])
 		{
 			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetPosition(pos);
-
-
-
 		}
 	}
 
 }
 void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
+	/* 5~8 다른플레이어 */
 	if (id < 0 || id > 5) return;   // 배열 범위 벗어나는 거 방지
-
 	if (m_nMode == SCENE1STAGE) {
 
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
 		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(5.0, 5.0, 5.0);
-
-
 	}
 
 }
 void CGameFramework::remove_OtherPlayer(int id)
 {
+	/* 5~8 다른플레이어 */
 	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE) {
 
@@ -1741,11 +1738,14 @@ void CGameFramework::remove_OtherPlayer(int id)
 
 void CGameFramework::setPosition_Npc(int id, XMFLOAT3 pos)
 {
-	//if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
+	/* 12~21 = 헬리콥터NPC , 22~40 = 사람NPC */
 	if (m_nMode == SCENE1STAGE)
 	{
-
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetPosition(pos);
+		if (0 <= id && id < 5) {
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetPosition(pos);
+		}
+		else
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22+id]->SetPosition(pos);
 
 
 	}
@@ -1753,20 +1753,21 @@ void CGameFramework::setPosition_Npc(int id, XMFLOAT3 pos)
 }
 void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
-	//if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
+	/* 12~21 = 헬리콥터NPC , 22~40 = 사람NPC */
 	if (m_nMode == SCENE1STAGE)
 	{
-
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetRight(rightVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetUp(upVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetLook(lookVec);
 		if (0 <= id && id < 5) {
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetRight(rightVec);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetUp(upVec);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetLook(lookVec);
 			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetScale(3.0, 3.0, 3.0);
 		}
 		else {
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetScale(5.0, 5.0, 5.0);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22+id]->SetRight(rightVec);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22+id]->SetUp(upVec);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22+id]->SetLook(lookVec);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22+id]->SetScale(5.0, 5.0, 5.0);
 		}
-
 
 	}
 
@@ -1810,17 +1811,6 @@ void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos, XMFLOAT3 mapextents
 			ppBullets[i]->Reset();
 		}
 	}
-
-
-	/*for (int k = 5; k < 10; k++)
-	{
-		CValkanObject** ppOtherBullets = ((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[k])->m_ppBullets;
-		for (int i = 0; i < BULLETS2; i++)
-		{
-			ppOtherBullets[i]->m_xmOOBoundingBox = BoundingOrientedBox(ppOtherBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
-
-		}
-	}*/
 }
 
 void CGameFramework::CollisionNPC_by_PLAYER(XMFLOAT3 npcpos, XMFLOAT3 npcextents)

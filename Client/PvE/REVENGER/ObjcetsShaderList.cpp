@@ -75,19 +75,28 @@ CSkinnedAnimationObjectsShader::~CSkinnedAnimationObjectsShader()
 
 void CSkinnedAnimationObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
 {
-	m_nObjects = 1;
-	CMaterial* pSoldiarNpcMaterial = new CMaterial(15);
-	pSoldiarNpcMaterial->SetReflection(15);
+	/*int xObjects = 5, zObjects = 6, i = 0;
+	m_nObjects = xObjects+zObjects;
 
 	m_ppObjects = new CGameObject * [m_nObjects];
-	CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
-	m_ppObjects[0] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, NULL);
-	m_ppObjects[0]->SetMaterial(0, pSoldiarNpcMaterial);
-	m_ppObjects[0]->SetScale(7.0, 7.0, 7.0);
-	m_ppObjects[0]->SetPosition(-170.0, 6.0, 500.0);
 
-	if (psModel) delete psModel;
 
+	CLoadedModelInfo* psModel = pModel;
+
+	int nObjects = 0;
+	for (int x = 0; x <= m_nObjects; x++)
+	{
+		
+	if (!psModel) psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
+			m_ppObjects[nObjects] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, 4);
+
+			m_ppObjects[nObjects++]->SetPosition(500.0f + x * 20, 6.3, 500.0f);
+		
+	}
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	if (!pModel && psModel) delete psModel;*/
 }
 
 void CSkinnedAnimationObjectsShader::ReleaseObjects()
@@ -102,7 +111,7 @@ void CSkinnedAnimationObjectsShader::ReleaseObjects()
 void CSkinnedAnimationObjectsShader::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
-	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->Animate(fTimeElapsed);
+	//for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->Animate(fTimeElapsed);
 }
 
 void CSkinnedAnimationObjectsShader::ReleaseUploadBuffers()
@@ -112,14 +121,14 @@ void CSkinnedAnimationObjectsShader::ReleaseUploadBuffers()
 
 void CSkinnedAnimationObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CSkinnedAnimationStandardShader::Render(pd3dCommandList, pCamera, nPipelineState, false);
+	CSkinnedAnimationStandardShader::Render(pd3dCommandList, pCamera, nPipelineState, true);
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		if (m_ppObjects[j])
 		{
 			m_ppObjects[j]->Animate(m_fElapsedTime);
-			m_ppObjects[j]->Render(pd3dCommandList, pCamera, false);
+			m_ppObjects[j]->Render(pd3dCommandList, pCamera, true);
 		}
 	}
 }
@@ -135,14 +144,14 @@ CHumanObjectsShader::~CHumanObjectsShader()
 void CHumanObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
 {
 
-	/*m_nObjects = 10;
+	m_nObjects = 10;
 
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
 	CLoadedModelInfo* pEthanModel = pModel;
-	if (!pEthanModel) pEthanModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_demo.bin", NULL);
+	if (!pEthanModel) pEthanModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Ethan.bin", NULL);
 
 	for (int x = 0; x <= m_nObjects; x++)
 	{
@@ -151,16 +160,16 @@ void CHumanObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.25f);
 		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackPosition(0, 0);
-		XMFLOAT3 xmf3Position = XMFLOAT3(1610.0, 146.0f, 2250.0f);
-		xmf3Position.y = pTerrain->GetHeight(xmf3Position.x, xmf3Position.z);
-		m_ppObjects[x]->SetScale(7.0, 7.0, 7.0);
+		XMFLOAT3 xmf3Position = XMFLOAT3(580.0, 6.0f, 850.0f+x*10);
+		//xmf3Position.y = pTerrain->GetHeight(xmf3Position.x, xmf3Position.z);
+		m_ppObjects[x]->SetScale(15.0,15.0,15.0);
 		m_ppObjects[x]->SetPosition(xmf3Position);
 
 	}
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	if (!pModel && pEthanModel) delete pEthanModel;*/
+	if (!pModel && pEthanModel) delete pEthanModel;
 }
 
 CBulletEffectShader::CBulletEffectShader()

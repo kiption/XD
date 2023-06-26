@@ -32,6 +32,7 @@ public:
 
 	int	m_nHeliNpcObjects = 0;
 	int	m_nSoldiarNpcObjects = 0;
+	CGameObject** m_ppSoldiarNpcObjects = 0;
 	CGameObject** m_ppNpc_Heli_Objects = NULL;
 	int									m_nFragShaders = 0;
 

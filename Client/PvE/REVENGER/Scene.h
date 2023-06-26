@@ -169,6 +169,9 @@ public:
 	int									m_nShaders = 0;
 	CObjectsShader** m_ppShaders = NULL;
 
+	int									m_nHumanShaders = 0;
+	CShader** m_ppHumanShaders = NULL;
+
 	int									m_nShadowShaders = 0;
 	CObjectsShader** m_ppShadowShaders = NULL;
 
