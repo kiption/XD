@@ -80,20 +80,25 @@ CGameFramework::CGameFramework()
 	gamepos[2].lx = 541.0f;
 	gamepos[2].ly = 972.0f;
 
-	lobbypos[0].sx;
-	lobbypos[0].sy;
-	lobbypos[0].lx;
-	lobbypos[0].ly;
+	lobbypos[0].sx = 1004.0f;
+	lobbypos[0].sy = 215.0f;
+	lobbypos[0].lx = 1232.0f;
+	lobbypos[0].ly = 291.0f;
 
-	lobbypos[1].sx;
-	lobbypos[1].sy;
-	lobbypos[1].lx;
-	lobbypos[1].ly;
+	lobbypos[1].sx = 1310.0f;
+	lobbypos[1].sy = 215.0f;
+	lobbypos[1].lx = 1541.0f;
+	lobbypos[1].ly = 291.0f;
 
-	lobbypos[2].sx;
-	lobbypos[2].sy;
-	lobbypos[2].lx;
-	lobbypos[2].ly;
+	roompos[0].sx = 975.0f;
+	roompos[0].sy = 390.0f;
+	roompos[0].lx = 1225.0f;
+	roompos[0].ly = 485.0f;
+
+	roompos[1].sx = 1295.0f;
+	roompos[1].sy = 390.0f;
+	roompos[1].lx = 1545.0f;
+	roompos[1].ly = 485.0f;
 }
 
 CGameFramework::~CGameFramework()
@@ -383,49 +388,80 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
 	{
+		cout << m_ptOldCursorPos.x << ", " << m_ptOldCursorPos.y << endl;
 		switch (m_LoginScene)
 		{
 		case 0:
 			if (loginpos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[0].lx && loginpos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[0].ly) {
-				memset(m_Login, 0, sizeof(m_Login));
-				m_Login[0] = true;
+				memset(m_LoginClick, 0, sizeof(m_LoginClick));
+				m_LoginClick[0] = true;
 			}
 			else if (loginpos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[1].lx && loginpos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[1].ly) {
-				memset(m_Login, 0, sizeof(m_Login));
-				m_Login[1] = true;
+				memset(m_LoginClick, 0, sizeof(m_LoginClick));
+				m_LoginClick[1] = true;
 			}
 			else if (loginpos[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[2].lx && loginpos[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[2].ly) {
-				memset(m_Login, 0, sizeof(m_Login));
-				m_Login[2] = true;
+				memset(m_LoginClick, 0, sizeof(m_LoginClick));
+				m_LoginClick[2] = true;
 			}
 			else if (loginpos[3].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[3].lx && loginpos[3].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[3].ly) {
-				memset(m_Login, 0, sizeof(m_Login));
-				m_Login[3] = true;
+				memset(m_LoginClick, 0, sizeof(m_LoginClick));
+				m_LoginClick[3] = true;
 				m_LoginScene = 1;
 			}
 			else {
-				memset(m_Login, 0, sizeof(m_Login));
+				memset(m_LoginClick, 0, sizeof(m_LoginClick));
 			}
 			break;
 		case 1:
 			if (gamepos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < gamepos[0].lx && gamepos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < gamepos[0].ly) {
-				memset(m_GameState, 0, sizeof(m_GameState));
-				m_GameState[0] = true;
+				memset(m_GameClick, 0, sizeof(m_GameClick));
+				m_GameClick[0] = true;
 				m_LoginScene = 2;
 			}
 			else if (gamepos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < gamepos[1].lx && gamepos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < gamepos[1].ly) {
-				memset(m_GameState, 0, sizeof(m_GameState));
-				m_GameState[1] = true;
+				memset(m_GameClick, 0, sizeof(m_GameClick));
+				m_GameClick[1] = true;
 			}
 			else if (gamepos[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < gamepos[2].lx && gamepos[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < gamepos[2].ly) {
-				memset(m_GameState, 0, sizeof(m_GameState));
-				m_GameState[2] = true;
+				memset(m_GameClick, 0, sizeof(m_GameClick));
+				m_GameClick[2] = true;
 			}
 			else {
-				memset(m_GameState, 0, sizeof(m_GameState));
+				memset(m_GameClick, 0, sizeof(m_GameClick));
+			}
+			break;
+		case 2:
+			if (lobbypos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[0].lx && lobbypos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[0].ly) {
+				memset(m_LobbyClick, 0, sizeof(m_LobbyClick));
+				m_LobbyClick[0] = true;
+				m_LoginScene = 3;
+				cout << "Start Click" << endl;
+			}
+			else if (lobbypos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[1].lx && lobbypos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[1].ly) {
+				memset(m_LobbyClick, 0, sizeof(m_LobbyClick));
+				m_LobbyClick[1] = true;
+				cout << "Room Click" << endl;
+			}
+			else {
+				memset(m_LobbyClick, 0, sizeof(m_LobbyClick));
+			}
+			break;
+		case 3:
+			if (roompos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[0].lx && roompos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[0].ly) {
+				m_RoomClick[0] = true;
+				cout << "RS" << endl;
+			}
+			else if (roompos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[1].lx && roompos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[1].ly) {
+				m_RoomClick[1] = true;
+				cout << "RR" << endl;
+			}
+			else {
+				memset(m_RoomClick, 0, sizeof(m_RoomClick));
 			}
 			break;
 		}
+
 	}
 	if (m_nMode == SCENE1STAGE) ::SetCapture(hWnd);
 	::GetCursorPos(&m_ptOldCursorPos);
@@ -441,87 +477,153 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	if (m_pScene) m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
-	switch (nMessageID)
-	{
+	if (m_LoginScene == 0) {
+		switch (nMessageID) {
+		case WM_KEYUP:
+			if (m_LoginClick[0]) {
+				if (wParam == VK_BACK) {
+					size_t idLength = wcslen(m_LoginID);
+					if (idLength > 0) {
+						m_LoginID[idLength - 1] = L'\0';  // 마지막 문자를 null 문자로 설정하여 백스페이스 효과를 구현
+					}
+				}
+				else {
+					WCHAR IDchar = static_cast<WCHAR>(wParam);
+					if (IDchar == L'.') {
+						IDchar = L'*';  // . 대신 *로 대체
+					}
+					size_t idLength = wcslen(m_LoginID);
+					size_t remainingSpace = sizeof(m_LoginID) / sizeof(m_LoginID[0]) - idLength - 1;
 
-	case WM_KEYUP:
-		switch (wParam)
-		{
-		case VK_ESCAPE:
-			::PostQuitMessage(0);
-			break;
-		case VK_RETURN:
-			break;
-		case VK_F1:
-		case VK_F2:
-		case VK_F3:
-			m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
-			break;
-		case VK_F9:
-			ChangeSwapChainState();
-			break;
-		case '1':
-		{
-			q_keyboardInput.push(SEND_KEY_NUM1);//S
+					if (remainingSpace > 0) {
+						wcsncat_s(m_LoginID, sizeof(m_LoginID) / sizeof(m_LoginID[0]), &IDchar, remainingSpace);
+					}
+				}
+			}
+			else if (m_LoginClick[1]) {
+				if (wParam == VK_BACK) {
+					size_t pwLength = wcslen(m_LoginPW);
+					if (pwLength > 0) {
+						m_LoginPW[pwLength - 1] = L'\0';
+					}
+				}
+				else {
+					WCHAR PWchar = static_cast<WCHAR>(wParam);
+					if (PWchar == L'.') {
+						PWchar = L'*';  // . 대신 *로 대체
+					}
+					size_t pwLength = wcslen(m_LoginPW);
+					size_t remainingSpace = sizeof(m_LoginPW) / sizeof(m_LoginPW[0]) - pwLength - 1;
 
-			break;
-		}
-		case '2':
-		{
-			q_keyboardInput.push(SEND_KEY_NUM2);//S
-			UI_Switch = false;
-			break;
-		}
-		case '3':
-			if (m_nMode == SCENE1STAGE) {
-				UI_Switch = !UI_Switch;
+					if (remainingSpace > 0) {
+						wcsncat_s(m_LoginPW, sizeof(m_LoginPW) / sizeof(m_LoginPW[0]), &PWchar, remainingSpace);
+					}
+				}
+			}
+			else if (m_LoginClick[2]) {
+				if (wParam == VK_BACK) {
+					size_t ipLength = wcslen(m_LoginIP);
+					if (ipLength > 0) {
+						m_LoginIP[ipLength - 1] = L'\0';
+					}
+				}
+				else {
+					WCHAR IPchar = static_cast<WCHAR>(wParam);
+					if (IPchar == L'.') {
+						IPchar = L'*';  // . 대신 *로 대체
+					}
+					size_t ipLength = wcslen(m_LoginIP);
+					size_t remainingSpace = sizeof(m_LoginIP) / sizeof(m_LoginIP[0]) - ipLength - 1;
+
+					if (remainingSpace > 0) {
+						wcsncat_s(m_LoginIP, sizeof(m_LoginIP) / sizeof(m_LoginIP[0]), &IPchar, remainingSpace);
+					}
+				}
 			}
 			break;
-
-		case 'C':
-			gamesound.shootSound->release();
-			break;
-			/*	case KEY_W:
-				case KEY_A:
-				case KEY_S:
-				case KEY_D:
-
-					break;*/
-
-		case VK_SPACE:
-			((CHumanPlayer*)m_pPlayer)->m_bJumeState = true;
-			((CHumanPlayer*)m_pPlayer)->JumpState();
-			break;
-		default:
-			cout << wParam << endl;
-			break;
 		}
-		break;
-	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		case VK_CONTROL:
-			((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
-			break;
-		case VK_SPACE:
-			break;
-		case 'M':
-			if (m_nMode == SCENE1STAGE) {
-
-				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-
-			}
-			break;
-		default:
-			break;
-		}
-		break;
-	default:
-		break;
 	}
+	else {
+		switch (nMessageID)
+		{
+		case WM_KEYUP:
+			switch (wParam)
+			{
+			case VK_ESCAPE:
+				::PostQuitMessage(0);
+				break;
+			case VK_RETURN:
+				break;
+			case VK_F1:
+			case VK_F2:
+			case VK_F3:
+				m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
+				break;
+			case VK_F9:
+				ChangeSwapChainState();
+				break;
+			case '1':
+			{
+				q_keyboardInput.push(SEND_KEY_NUM1);//S
 
+				break;
+			}
+			case '2':
+			{
+				q_keyboardInput.push(SEND_KEY_NUM2);//S
+				UI_Switch = false;
+				break;
+			}
+			case '3':
+				if (m_nMode == SCENE1STAGE) {
+					UI_Switch = !UI_Switch;
+				}
+				break;
+
+			case 'C':
+				gamesound.shootSound->release();
+				break;
+				/*	case KEY_W:
+					case KEY_A:
+					case KEY_S:
+					case KEY_D:
+
+						break;*/
+
+			case VK_SPACE:
+				((CHumanPlayer*)m_pPlayer)->m_bJumeState = true;
+				((CHumanPlayer*)m_pPlayer)->JumpState();
+				break;
+			default:
+				cout << wParam << endl;
+				break;
+			}
+			break;
+		case WM_KEYDOWN:
+			switch (wParam)
+			{
+			case VK_CONTROL:
+				((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
+				break;
+			case VK_SPACE:
+				break;
+			case 'M':
+				if (m_nMode == SCENE1STAGE) {
+
+					((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+					((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+					((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+
+				}
+				break;
+			default:
+				break;
+			}
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -903,61 +1005,76 @@ void CGameFramework::FrameAdvance()
 		D2D_RECT_F D2_OpeningUIRect = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[25], &D2_OpeningUI, &D2_OpeningUIRect);
 
-		if (!m_Login[3] && m_LoginScene == 0) {
+		if (!m_LoginClick[3] && m_LoginScene == 0) {
 			D2D_POINT_2F D2_LoginUI = { D2_OpeningUI.x + 12.0f, FRAME_BUFFER_HEIGHT / 16 * 9 };
 			D2D_RECT_F D2_LoginUIRect = { 0.0f, 0.0f, 381.0f, 388.0f };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[26], &D2_LoginUI, &D2_LoginUIRect);
 		}
 
-		if (m_LoginScene == 2) {
+		if (m_LoginScene > 1) {
+			// 로비 ui
 			D2D_POINT_2F D2_RobbyUI = { D2_OpeningUI.x - 5.0f, FRAME_BUFFER_HEIGHT / 8 };
 			D2D_RECT_F D2_RobbyUIRect = { 0.0f, 0.0f, 1280.0f, 698.0f };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[27], &D2_RobbyUI, &D2_RobbyUIRect);
+
+			D2D_POINT_2F D2_RobbyPeopleUI[8];
+			D2D_RECT_F D2_RobbyPeopleUIRect[8];
+
+			D2D_POINT_2F D2_RobbyReadyUI[8];
+			D2D_RECT_F D2_RobbyReadyUIRect[8];
+
+			int infosize = 8;
+			for (int i = 0; i < infosize; ++i) {
+				int resulty = 375 + 54 * i;
+				float textypos = (((float)(FRAME_BUFFER_HEIGHT)) / ((float)(resulty)));
+
+				// 각 방 현재 인원
+				D2_RobbyPeopleUI[i] = { FRAME_BUFFER_WIDTH / 1.60f, FRAME_BUFFER_HEIGHT / textypos };
+				D2_RobbyPeopleUIRect[i] = { 0.0f, 0.0f,120.0f, 48.0f };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[28 + i], &D2_RobbyPeopleUI[i], &D2_RobbyPeopleUIRect[i]);
+
+				// 각 방 준비 상태
+				D2_RobbyReadyUI[i] = { FRAME_BUFFER_WIDTH / 1.42f, FRAME_BUFFER_HEIGHT / textypos };
+				D2_RobbyReadyUIRect[i] = { 0.0f, 0.0f,225.0f, 50.0f };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[36 + i], &D2_RobbyReadyUI[i], &D2_RobbyReadyUIRect[i]);
+			}
+			if (m_LoginScene == 3) {
+				// 방 ui
+				D2D_POINT_2F D2_RoomUI = { D2_OpeningUI.x, FRAME_BUFFER_HEIGHT / 2 - 223.5f };
+				D2D_RECT_F D2_RoomUIRect = { 0.0f, 0.0f, 1280.0f, 447.0f };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[44], &D2_RoomUI, &D2_RoomUIRect);
+
+				// 시작 버튼
+				if (m_RoomClick[0]) m_StartKey = 0.0f;
+				else m_StartKey = 102.5f;
+
+				D2D_POINT_2F D2_RoomStartUI = { FRAME_BUFFER_WIDTH / 2, D2_RoomUI.y + 40.0f };
+				D2D_RECT_F D2_RoomStartUIRect = { 0.0f , 0.0f + m_StartKey, 261.0f, 102.5f + m_StartKey};
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[45], &D2_RoomStartUI, &D2_RoomStartUIRect);
+
+				// 준비 버튼
+				if (m_RoomClick[1]) m_ReadyKey = 102.5f;
+				else m_ReadyKey = 0.0f;
+
+				D2D_POINT_2F D2_RoomReadyUI = { D2_RoomStartUI.x + 320.0f, D2_RoomStartUI.y };
+				D2D_RECT_F D2_RoomReadyUIRect = { 0.0f, 0.0f + m_ReadyKey, 261.0f, 102.5f + m_ReadyKey };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[46], &D2_RoomReadyUI, &D2_RoomReadyUIRect);
+
+				// 모든 인원 준비 표시
+				D2D_POINT_2F D2_RoomReadyNumUI[3];
+				D2D_RECT_F D2_RoomReadyNumUIRect[3];
+
+				int rinfosize = 3;
+				for (int i = 0; i < rinfosize; ++i) {
+					int resulty = 560 + 58 * i;
+					float textypos = (((float)(FRAME_BUFFER_HEIGHT)) / ((float)(resulty)));
+
+					D2_RoomReadyNumUI[i] = { FRAME_BUFFER_WIDTH / 1.48f, FRAME_BUFFER_HEIGHT / textypos };
+					D2_RoomReadyNumUIRect[i] = { 0.0f, 0.0f, 284.0f, 58.6f };
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[47 + i], &D2_RoomReadyNumUI[i], &D2_RoomReadyNumUIRect[i]);
+				}
+			}
 		}
-
-		D2D_POINT_2F D2_RobbyPeopleUI[8];
-		D2D_RECT_F D2_RobbyPeopleUIRect[8];
-
-		int infosize = 0;
-		for (int i{}; i < infosize; ++i) {
-			D2_RobbyPeopleUI[i] = { (float)FRAME_BUFFER_WIDTH / 6,0.0f };
-			D2_RobbyPeopleUIRect[i] = { 0.0f, 0.0f, (float)FRAME_BUFFER_WIDTH, (float)FRAME_BUFFER_HEIGHT };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[28 + i], &D2_RobbyPeopleUI[i], &D2_RobbyPeopleUIRect[i]);
-		}
-		//D2D_POINT_2F D2_RobbyPeople1UI = { FRAME_BUFFER_WIDTH / 6,0.0f };
-		//D2D_RECT_F D2_RobbyPeople1UIRect = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
-		//m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[28], &D2_RobbyPeople1UI, &D2_RobbyPeople1UIRect);
-
-		//D2D_POINT_2F D2_RobbyPeople2UI = { FRAME_BUFFER_WIDTH / 6,0.0f };
-		//D2D_RECT_F D2_RobbyPeople2UIRect = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
-		//m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[29], &D2_RobbyPeople2UI, &D2_RobbyPeople2UIRect);
-
-		//D2D_POINT_2F D2_RobbyPeople3UI = { FRAME_BUFFER_WIDTH / 6,0.0f };
-		//D2D_RECT_F D2_RobbyPeople3UIRect = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
-		//m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[30], &D2_RobbyPeople3UI, &D2_RobbyPeople3UIRect);
-
-		//D2D_POINT_2F D2_RobbyPeople4UI = { FRAME_BUFFER_WIDTH / 6,0.0f };
-		//D2D_RECT_F D2_RobbyPeople4UIRect = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
-		//m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[31], &D2_RobbyPeople4UI, &D2_RobbyPeople4UIRect);
-
-		//D2D_POINT_2F D2_RobbyPeople5UI = { FRAME_BUFFER_WIDTH / 6,0.0f };
-		//D2D_RECT_F D2_RobbyPeople5UIRect = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
-		//m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[32], &D2_RobbyPeople5UI, &D2_RobbyPeople5UIRect);
-
-		//D2D_POINT_2F D2_RobbyPeople6UI = { FRAME_BUFFER_WIDTH / 6,0.0f };
-		//D2D_RECT_F D2_RobbyPeople6UIRect = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
-		//m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[33], &D2_RobbyPeople6UI, &D2_RobbyPeople6UIRect);
-
-		//D2D_POINT_2F D2_RobbyPeople7UI = { FRAME_BUFFER_WIDTH / 6,0.0f };
-		//D2D_RECT_F D2_RobbyPeople7UIRect = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
-		//m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[34], &D2_RobbyPeople7UI, &D2_RobbyPeople7UIRect);
-
-		//D2D_POINT_2F D2_RobbyPeople8UI = { FRAME_BUFFER_WIDTH / 6,0.0f };
-		//D2D_RECT_F D2_RobbyPeople8UIRect = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
-		//m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[35], &D2_RobbyPeople8UI, &D2_RobbyPeople8UIRect);
-
-
-
 	}
 	else if (m_nMode = SCENE1STAGE) {
 		// Time 
@@ -1083,11 +1200,35 @@ void CGameFramework::FrameAdvance()
 
 #endif
 	if (m_nMode == OPENINGSCENE) {
+		if (m_LoginScene == 0) {
+			D2D_RECT_F D2_LoginIDText = D2D1::RectF((FRAME_BUFFER_WIDTH / 4.2), (FRAME_BUFFER_HEIGHT / 1.63f), (FRAME_BUFFER_WIDTH / 2.8), (FRAME_BUFFER_HEIGHT / 1.63f));
+			m_pd2dDeviceContext->DrawTextW(m_LoginID, (UINT32)wcslen(m_LoginID), m_pdwFont[1], &D2_LoginIDText, m_pd2dbrText[1]);
 
+			D2D_RECT_F D2_LoginPWText = D2D1::RectF((FRAME_BUFFER_WIDTH / 4.2), (FRAME_BUFFER_HEIGHT / 1.43f), (FRAME_BUFFER_WIDTH / 2.8), (FRAME_BUFFER_HEIGHT / 1.43f));
+			m_pd2dDeviceContext->DrawTextW(m_LoginPW, (UINT32)wcslen(m_LoginPW), m_pdwFont[1], &D2_LoginPWText, m_pd2dbrText[1]);
+
+			D2D_RECT_F D2_LoginIPText = D2D1::RectF((FRAME_BUFFER_WIDTH / 4.2), (FRAME_BUFFER_HEIGHT / 1.28f), (FRAME_BUFFER_WIDTH / 2.8), (FRAME_BUFFER_HEIGHT / 1.28f));
+			m_pd2dDeviceContext->DrawTextW(m_LoginIP, (UINT32)wcslen(m_LoginIP), m_pdwFont[1], &D2_LoginIPText, m_pd2dbrText[1]);
+		}
+		else if (m_LoginScene == 2) {
+			int roomsize = 8;
+			D2D_RECT_F D2_LoginRoomNumText[8];
+			D2D_RECT_F D2_LoginRoomNameText[8];
+			for (int i{}; i < roomsize; ++i) {
+				int resultY = 400 + 55 * i;
+				float textypos = (((float)FRAME_BUFFER_HEIGHT) / ((float)resultY));
+
+				D2_LoginRoomNumText[i] = D2D1::RectF((FRAME_BUFFER_WIDTH / 5.2), (FRAME_BUFFER_HEIGHT / textypos), (FRAME_BUFFER_WIDTH / 4.0), (FRAME_BUFFER_HEIGHT / textypos)); //2.7, 2.37, 2.12, 1.92
+				m_pd2dDeviceContext->DrawTextW(m_LoginID, (UINT32)wcslen(m_LoginID), m_pdwFont[2], &D2_LoginRoomNumText[i], m_pd2dbrText[2]);
+
+				D2_LoginRoomNameText[i] = D2D1::RectF((FRAME_BUFFER_WIDTH / 4.1), (FRAME_BUFFER_HEIGHT / textypos), (FRAME_BUFFER_WIDTH / 1.61), (FRAME_BUFFER_HEIGHT / textypos));
+				m_pd2dDeviceContext->DrawTextW(m_LoginIP, (UINT32)wcslen(m_LoginIP), m_pdwFont[2], &D2_LoginRoomNameText[i], m_pd2dbrText[2]);
+			}
+		}
 	}
 	else if (m_nMode == SCENE1STAGE) {
 		D2D1_RECT_F D2_RemainNPCText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 57, 0.0f, (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 16) * 1);
-		m_pd2dDeviceContext->DrawTextW(m_remainNPCPrint, (UINT32)wcslen(m_remainNPCPrint), m_pdwFont, &D2_RemainNPCText, m_pd2dbrText);
+		m_pd2dDeviceContext->DrawTextW(m_remainNPCPrint, (UINT32)wcslen(m_remainNPCPrint), m_pdwFont[0], &D2_RemainNPCText, m_pd2dbrText[0]);
 
 		switch (m_mainmissionnum)
 		{
@@ -1096,14 +1237,14 @@ void CGameFramework::FrameAdvance()
 			int killNPC = 20 - m_remainNPC;
 			_itow_s(killNPC, killNPCprint, sizeof(killNPCprint), 10);
 			D2D1_RECT_F D2_KillNPCText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 59, (FRAME_BUFFER_HEIGHT / 16) * 3, (FRAME_BUFFER_WIDTH / 64) * 61, (FRAME_BUFFER_HEIGHT / 16) * 3);
-			m_pd2dDeviceContext->DrawTextW(killNPCprint, (UINT32)wcslen(killNPCprint), m_pdwFont, &D2_KillNPCText, m_pd2dbrText);
+			m_pd2dDeviceContext->DrawTextW(killNPCprint, (UINT32)wcslen(killNPCprint), m_pdwFont[0], &D2_KillNPCText, m_pd2dbrText[0]);
 		}
 		break;
 		case 1:
 		{
 			_itow_s(m_occupationnum, occupationPrint, sizeof(occupationPrint), 10);
 			D2D1_RECT_F D2_OccupationText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 57, (FRAME_BUFFER_HEIGHT / 16) * 3, (FRAME_BUFFER_WIDTH / 64) * 59, (FRAME_BUFFER_HEIGHT / 16) * 3);
-			m_pd2dDeviceContext->DrawTextW(occupationPrint, (UINT32)wcslen(occupationPrint), m_pdwFont, &D2_OccupationText, m_pd2dbrText);
+			m_pd2dDeviceContext->DrawTextW(occupationPrint, (UINT32)wcslen(occupationPrint), m_pdwFont[0], &D2_OccupationText, m_pd2dbrText[0]);
 		}
 		break;
 		}
@@ -1115,21 +1256,21 @@ void CGameFramework::FrameAdvance()
 			{
 				_itow_s(m_survive, SurviveSecPrint, sizeof(SurviveSecPrint), 10);
 				D2D1_RECT_F D2_Survive30sText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 29, (FRAME_BUFFER_HEIGHT / 64) * 25, (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 64) * 25);
-				m_pd2dDeviceContext->DrawTextW(SurviveSecPrint, (UINT32)wcslen(SurviveSecPrint), m_pdwFont, &D2_Survive30sText, m_pd2dbrText);
+				m_pd2dDeviceContext->DrawTextW(SurviveSecPrint, (UINT32)wcslen(SurviveSecPrint), m_pdwFont[0], &D2_Survive30sText, m_pd2dbrText[0]);
 			}
 			break;
 			case 1:
 			{
 				_itow_s(m_AttackFly, FlyAtkPrint, sizeof(FlyAtkPrint), 10);
 				D2D1_RECT_F D2_FlyAttackText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 29, (FRAME_BUFFER_HEIGHT / 64) * 25, (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 64) * 25);
-				m_pd2dDeviceContext->DrawTextW(FlyAtkPrint, (UINT32)wcslen(FlyAtkPrint), m_pdwFont, &D2_FlyAttackText, m_pd2dbrText);
+				m_pd2dDeviceContext->DrawTextW(FlyAtkPrint, (UINT32)wcslen(FlyAtkPrint), m_pdwFont[0], &D2_FlyAttackText, m_pd2dbrText[0]);
 			}
 			break;
 			case 2:
 			{
 				_itow_s(m_killArmy, KillArmyPrint, sizeof(KillArmyPrint), 10);
 				D2D1_RECT_F D2_ExecutionText = D2D1::RectF((FRAME_BUFFER_WIDTH / 32) * 29, (FRAME_BUFFER_HEIGHT / 64) * 25, (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 64) * 25);
-				m_pd2dDeviceContext->DrawTextW(KillArmyPrint, (UINT32)wcslen(KillArmyPrint), m_pdwFont, &D2_ExecutionText, m_pd2dbrText);
+				m_pd2dDeviceContext->DrawTextW(KillArmyPrint, (UINT32)wcslen(KillArmyPrint), m_pdwFont[0], &D2_ExecutionText, m_pd2dbrText[0]);
 			}
 			break;
 			}
@@ -1137,12 +1278,12 @@ void CGameFramework::FrameAdvance()
 
 		if (m_CurrentPlayerNum > 1) {
 			D2D1_RECT_F Friend1Text = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 1, (FRAME_BUFFER_HEIGHT / 64) * 42, (FRAME_BUFFER_WIDTH / 64) * 7, (FRAME_BUFFER_HEIGHT / 64) * 42);
-			m_pd2dDeviceContext->DrawTextW(L"Other 1", (UINT32)wcslen(L"Other 1"), m_pdwFont, &Friend1Text, m_pd2dbrText);
+			m_pd2dDeviceContext->DrawTextW(L"Other 1", (UINT32)wcslen(L"Other 1"), m_pdwFont[0], &Friend1Text, m_pd2dbrText[0]);
 		}
 
 		if (m_CurrentPlayerNum > 2) {
 			D2D1_RECT_F Friend2Text = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 1, (FRAME_BUFFER_HEIGHT / 128) * 93, (FRAME_BUFFER_WIDTH / 64) * 7, (FRAME_BUFFER_HEIGHT / 128) * 93);
-			m_pd2dDeviceContext->DrawTextW(L"Other 2", (UINT32)wcslen(L"Other 2"), m_pdwFont, &Friend2Text, m_pd2dbrText);
+			m_pd2dDeviceContext->DrawTextW(L"Other 2", (UINT32)wcslen(L"Other 2"), m_pdwFont[0], &Friend2Text, m_pd2dbrText[0]);
 		}
 	}
 
@@ -1294,11 +1435,23 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(0.3f, 0.0f, 0.0f, 0.5f), &m_pd2dbrBackground);
 	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF(0x9ACD32, 1.0f)), &m_pd2dbrBorder);
 
-	hResult = m_pdWriteFactory->CreateTextFormat(L"NanumSquare_acEB.ttf", NULL, DWRITE_FONT_WEIGHT_DEMI_BOLD, DWRITE_FONT_STYLE_OBLIQUE, DWRITE_FONT_STRETCH_NORMAL, 35.0f, L"ko-kr", &m_pdwFont);
-	hResult = m_pdwFont->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-	hResult = m_pdwFont->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
-	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White, 5.0f), &m_pd2dbrText);
-	hResult = m_pdWriteFactory->CreateTextLayout(L"텍스트 레이아웃", 6, m_pdwFont, 1024, 1024, &m_pdwTextLayout);
+	hResult = m_pdWriteFactory->CreateTextFormat(L"NanumSquare_acEB.ttf", NULL, DWRITE_FONT_WEIGHT_DEMI_BOLD, DWRITE_FONT_STYLE_OBLIQUE, DWRITE_FONT_STRETCH_NORMAL, 35.0f, L"ko-kr", &m_pdwFont[0]);
+	hResult = m_pdwFont[0]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+	hResult = m_pdwFont[0]->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White, 5.0f), &m_pd2dbrText[0]);
+	hResult = m_pdWriteFactory->CreateTextLayout(L"텍스트 레이아웃", 6, m_pdwFont[0], 1024, 1024, &m_pdwTextLayout[0]);
+
+	hResult = m_pdWriteFactory->CreateTextFormat(L"NanumSquare_acEB.ttf", NULL, DWRITE_FONT_WEIGHT_DEMI_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 24.0f, L"ko-kr", &m_pdwFont[1]);
+	hResult = m_pdwFont[1]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+	hResult = m_pdwFont[1]->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black, 5.0f), &m_pd2dbrText[1]);
+	hResult = m_pdWriteFactory->CreateTextLayout(L"텍스트 레이아웃", 6, m_pdwFont[1], 1024, 1024, &m_pdwTextLayout[1]);
+
+	hResult = m_pdWriteFactory->CreateTextFormat(L"NanumSquare_acEB.ttf", NULL, DWRITE_FONT_WEIGHT_DEMI_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 24.0f, L"ko-kr", &m_pdwFont[2]);
+	hResult = m_pdwFont[2]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+	hResult = m_pdwFont[2]->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White, 5.0f), &m_pd2dbrText[2]);
+	hResult = m_pdWriteFactory->CreateTextLayout(L"텍스트 레이아웃", 6, m_pdwFont[2], 1024, 1024, &m_pdwTextLayout[2]);
 
 	float fDpi = (float)GetDpiForWindow(m_hWnd);
 	D2D1_BITMAP_PROPERTIES1 d2dBitmapProperties = D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW, D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED), fDpi, fDpi);

@@ -84,16 +84,18 @@ public:
 	int m_NumOfUI = 50;
 	bool UI_Switch = false;
 	bool m_bRollState = false;
-	bool m_Login[4]{ false };
-	bool m_GameState[3]{ false };
+	bool m_LoginClick[4]{ false };
+	bool m_GameClick[3]{ false };
+	bool m_LobbyClick[2]{ false };
+	bool m_RoomClick[2]{ false };
 	LoginSceneInfo loginpos[4];
 	LoginSceneInfo gamepos[3];
-	LoginSceneInfo lobbypos[3];
+	LoginSceneInfo lobbypos[2];
+	LoginSceneInfo roompos[2];
 
-	vector<WCHAR>IDProcess;
-	vector<WCHAR>PWProcess;
-	vector<WCHAR>IPProcess;
 	int m_LoginScene = 0;
+	float m_StartKey = 0;
+	float m_ReadyKey = 0;
 public:
 	PostProcessShader* m_pPostProcessingShader = NULL;
 #ifdef _WITH_DIRECT2D
@@ -114,9 +116,9 @@ public:
 
 	ID2D1SolidColorBrush* m_pd2dbrBackground = NULL;
 	ID2D1SolidColorBrush* m_pd2dbrBorder = NULL;
-	IDWriteTextFormat* m_pdwFont = NULL;
-	IDWriteTextLayout* m_pdwTextLayout = NULL;
-	ID2D1SolidColorBrush* m_pd2dbrText = NULL;
+	IDWriteTextFormat* m_pdwFont[3];
+	IDWriteTextLayout* m_pdwTextLayout[3];
+	ID2D1SolidColorBrush* m_pd2dbrText[3];
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
@@ -191,6 +193,10 @@ public:
 	// 서버에서 받은 총알 개수
 	WCHAR m_remainNPCPrint[20];
 	
+	WCHAR m_LoginID[20];
+	WCHAR m_LoginPW[20];
+	WCHAR m_LoginIP[20];
+
 	int m_mainmissionnum = 0;
 	int m_submissionnum = 0;
 
