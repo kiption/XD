@@ -1,4 +1,5 @@
 #pragma once
+#pragma once
 
 
 #include "Timer.h"
@@ -33,9 +34,9 @@ struct BulletPos {
 	float x, y, z;
 };
 
-
-
-
+struct LoginSceneInfo {
+	float sx, sy, lx, ly;
+};
 
 
 
@@ -80,10 +81,19 @@ public:
 	DWORD						m_nMode = OPENINGSCENE;
 
 	GameSound gamesound;
-	int m_NumOfUI = 26;
+	int m_NumOfUI = 50;
 	bool UI_Switch = false;
 	bool m_bRollState = false;
+	bool m_Login[4]{ false };
+	bool m_GameState[3]{ false };
+	LoginSceneInfo loginpos[4];
+	LoginSceneInfo gamepos[3];
+	LoginSceneInfo lobbypos[3];
 
+	vector<WCHAR>IDProcess;
+	vector<WCHAR>PWProcess;
+	vector<WCHAR>IPProcess;
+	int m_LoginScene = 0;
 public:
 	PostProcessShader* m_pPostProcessingShader = NULL;
 #ifdef _WITH_DIRECT2D
@@ -110,9 +120,9 @@ public:
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
-	ID2D1Effect* m_pd2dfxBitmapSource[26];
-	ID2D1Effect* m_pd2dfxGaussianBlur[26];
-	ID2D1Effect* m_pd2dfxEdgeDetection[26];
+	ID2D1Effect* m_pd2dfxBitmapSource[50];
+	ID2D1Effect* m_pd2dfxGaussianBlur[50];
+	ID2D1Effect* m_pd2dfxEdgeDetection[50];
 	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState = NULL;
 	IWICFormatConverter* m_pwicFormatConverter = NULL;
 	int							m_nDrawEffectImage = 0;
