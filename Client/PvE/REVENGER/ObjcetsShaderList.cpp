@@ -34,7 +34,7 @@ CHellicopterObjectsShader::~CHellicopterObjectsShader()
 
 void CHellicopterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
 {
-	m_nObjects = 20;
+	/*m_nObjects = 20;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CLoadedModelInfo* pGunshipModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", this);
@@ -48,19 +48,19 @@ void CHellicopterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 	for (int i = 0; i < m_nObjects; i++)
 	{
 
-		m_ppObjects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppObjects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pGunshipModel);
 		m_ppObjects[i]->SetChild(pGunshipModel->m_pModelRootObject, true);
 
 		m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), Random(20.0f, 100.0f), nColumnSize - int(floor(nColumnSize / 2.0f)), nColumnSpace));
 		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
 		m_ppObjects[i]->OnPrepareAnimate();
 
-	}
+	}*/
 
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	if (pGunshipModel) delete pGunshipModel;
+	//if (pGunshipModel) delete pGunshipModel;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

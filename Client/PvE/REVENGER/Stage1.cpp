@@ -30,26 +30,26 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	::ZeroMemory(m_pLights, sizeof(LIGHTS) * m_nLights);
 
 
-	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[0].m_fRange = 20000.0f;
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1, 0.1f, 0.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.45f, 0.3, 0.3, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3, 0.3, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.1f, 0.1, 0.1f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-800, 1000.0f, 250.0f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-750, 900.0f, 200.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+1.0f, -0.9f, 0.5f);
 
 
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 20000.0f;
-	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1, 0.1f, 0.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.45f, 0.3, 0.3, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1, 0.1f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-800, 1000.0f, -800.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(+0.8f, -0.9f, 0.5f);
+	m_pLights->m_pLights[1].m_fRange = 10000.0f;
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3, 0.3, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-800, 900.0f, -700.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(+0.8f, -0.9f, 0.2f);
 
 	m_pLights->m_pLights[2].m_bEnable = true;
 	m_pLights->m_pLights[2].m_nType = SPOT_LIGHT;
@@ -196,21 +196,6 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 	m_ppShaders[0] = pObjectShader;
 
-	m_nGameObjects = 0;
-	//CMaterial* pSoldiarNpcMaterial = new CMaterial(15);
-	//pSoldiarNpcMaterial->SetReflection(15);
-
-	//m_ppGameObjects = new CGameObject * [m_nGameObjects];
-	//CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
-	//for (int i = 0; i <= 10; i++)
-	//{
-	//	m_ppGameObjects[i] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, psModel, NULL);
-	//	m_ppGameObjects[i]->SetMaterial(0, pSoldiarNpcMaterial);
-	//	m_ppGameObjects[i]->SetScale(7.0, 7.0, 7.0);
-	//	m_ppGameObjects[i]->SetPosition(-170.0+i*20, 6.0, 550.0 + i * 20);
-	//	m_ppGameObjects[i]->AddRef();
-	//}
-
 	m_pDepthRenderShader = new CDepthRenderShader(pObjectShader, m_pLights->m_pLights);
 	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
 	m_pDepthRenderShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
@@ -222,7 +207,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pShadowShader->SetCurScene(SCENE1STAGE);
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
-	//if (psModel) delete psModel;
+
 	gamesound.backGroundMusic();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 

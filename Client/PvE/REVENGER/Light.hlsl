@@ -8,7 +8,7 @@
 
 //#define _WITH_LOCAL_VIEWER_HIGHLIGHTING
 #define _WITH_THETA_PHI_CONES
-#define _WITH_REFLECT
+//#define _WITH_REFLECT
 #define MAX_DEPTH_TEXTURES		MAX_LIGHTS
 #define _WITH_PCF_FILTERING
 struct LIGHT
@@ -66,7 +66,7 @@ float Compute3x3ShadowFactor(float2 uv, float fDepth, uint nIndex)
 	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, -DELTA_Y), fDepth).r;
 	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, +DELTA_Y), fDepth).r;
 
-	return(fPercentLit / 9.0f);
+	return(fPercentLit / 6.0f);
 }
 
 float Compute5x5ShadowFactor(float2 uv, float fDepth, uint nIndex)

@@ -166,9 +166,6 @@
     <ClInclude Include="Terrain.h">
       <Filter>Client\Object\Header</Filter>
     </ClInclude>
-    <ClInclude Include="mfplay.h">
-      <Filter>Asset</Filter>
-    </ClInclude>
     <ClInclude Include="GameFramework.h">
       <Filter>Client\FrameWork</Filter>
     </ClInclude>
@@ -321,10 +318,13 @@
     <FxCompile Include="Light.hlsl">
       <Filter>Asset</Filter>
     </FxCompile>
-    <FxCompile Include="LightShader.hlsl">
+    <FxCompile Include="Post.hlsl">
       <Filter>Asset</Filter>
     </FxCompile>
-    <FxCompile Include="Post.hlsl">
+    <FxCompile Include="Shadow.hlsl">
+      <Filter>Asset</Filter>
+    </FxCompile>
+    <FxCompile Include="PCF.hlsl">
       <Filter>Asset</Filter>
     </FxCompile>
   </ItemGroup>

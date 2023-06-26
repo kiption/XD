@@ -1765,21 +1765,19 @@ void CNpcHelicopterObject::Animate(float fTimeElapsed)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "MissileObject.h"
-CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(10)
+CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,CGameObject* pModel) :CGameObject(10)
 {
-	CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
-	SetChild(pOtherPlayerModel, false);
-	pOtherPlayerModel->AddRef();
+	SetChild(pModel, false);
+	pModel->AddRef();
 
 	pBCBulletEffectShader = new CBulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
 	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
 
 
+	CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader );
 	for (int i = 0; i < HELIBULLETS; i++)
 	{
-
-		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader );
 		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, false);
 		pBulletObject->SetMovingSpeed(200.0f);
@@ -2135,10 +2133,10 @@ void CCityObject::Animate(float fTimeElapsed)
 
 CSoldiarOtherPlayerObjects::CSoldiarOtherPlayerObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(5)
 {
-	pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
-	SetChild(pModel->m_pModelRootObject, true);
 
+	SetChild(pModel->m_pModelRootObject, true);
 	pModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
+
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 12, pModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
@@ -2166,8 +2164,6 @@ CSoldiarOtherPlayerObjects::CSoldiarOtherPlayerObjects(ID3D12Device* pd3dDevice,
 	m_pSkinnedAnimationController->SetTrackEnable(9, false);
 	m_pSkinnedAnimationController->SetTrackEnable(10, false);
 	m_pSkinnedAnimationController->SetTrackEnable(11, false);
-
-	if (pModel) delete pModel;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
