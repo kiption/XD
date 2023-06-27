@@ -34,19 +34,19 @@ void Stage1::BuildDefaultLightsAndMaterials()
 
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[0].m_fRange = 20000.0f;
-	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1, 0.1f, 0.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3, 0.3, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.1f, 0.1, 0.1f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(550, 900.0f, 200.0f);
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+0.2f, -0.9f, 0.2f);
+	m_pLights->m_pLights[0].m_fRange = 25000.0f;
+	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.5f, 0.1, 0.1f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.35f, 0.3, 0.2, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.1, 0.1f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-350, 900.0f, 400.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+0.5f, -0.9f, 0.2f);
 
 
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 10000.0f;
+	m_pLights->m_pLights[1].m_fRange = 20000.0f;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3, 0.3, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.35f, 0.3, 0.2, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-800, 900.0f, -700.0f);
 	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(+0.8f, -0.9f, 0.2f);
