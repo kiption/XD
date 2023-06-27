@@ -78,18 +78,12 @@ VS_LIGHTING_OUTPUT VSAnimationLighting(VS_LIGHTING_INPUT input)
 	VS_LIGHTING_OUTPUT output;
 
 	
-		float4x4 mtxVertexToBoneWorld = (float4x4) 0.0f;
-		for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
-		{
-			mtxVertexToBoneWorld += input.weights[i] * mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
-		}
-		float4 positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld);
-		output.positionW = positionW.xyz;
-		output.normalW = mul(input.normal, (float3x3) mtxVertexToBoneWorld).xyz;
-		output.tangentW = mul(input.tangent, (float3x3) mtxVertexToBoneWorld).xyz;
-		output.bitangentW = mul(input.bitangent, (float3x3) mtxVertexToBoneWorld).xyz;
-		output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-		output.uv = input.uv;
+	output.normalW = mul(input.normal, (float3x3) gmtxGameObject);
+	output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxGameObject);
+	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+	output.uv = input.uv;
+	output.tangentW = mul(input.tangent, (float3x3) gmtxGameObject);
+	output.bitangentW = mul(input.bitangent, (float3x3) gmtxGameObject);
 	
 
 
@@ -152,6 +146,7 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 	return(output);
 }
 
+
 float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 {
 	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -172,6 +167,15 @@ float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 }
 
 
+PS_DEPTH_OUTPUT PSDynamicDepthWriteShader(VS_LIGHTING_OUTPUT input)
+{
+	PS_DEPTH_OUTPUT output;
+
+	output.fzPosition = input.position.z;
+	output.fDepth = input.position.z;
+
+	return(output);
+}
 VS_SHADOW_MAP_OUTPUT VSDynamicShadowMapShadow(VS_LIGHTING_INPUT input)
 {
 	VS_SHADOW_MAP_OUTPUT output = (VS_SHADOW_MAP_OUTPUT)0;
@@ -211,12 +215,8 @@ float4 PSDynamicShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 	else
 		cAlbedoColor = gMaterial.m_cDiffuse;
 
-	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	if (gnTexturesMask & MATERIAL_EMISSION_MAP)
-		cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
-
 	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
-	float4 cColor = cAlbedoColor + cEmissionColor;
+	float4 cColor = cAlbedoColor;
 	return (lerp(cIllumination,cColor,0.35f));
 
 

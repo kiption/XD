@@ -148,7 +148,7 @@ void Stage2::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 
 	gamesound.m_bStopSound = true;
-	gamesound.SpeakMusic(gamesound.m_bStopSound);
+	gamesound.SpeakMusic();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -157,10 +157,10 @@ void Stage2::ReleaseObjects()
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
 	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
 
-	if (m_ppGameObjects)
+	if (m_ppPlayerObjects)
 	{
-		for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Release();
-		delete[] m_ppGameObjects;
+		for (int i = 0; i < m_nPlayerObjects; i++) if (m_ppPlayerObjects[i]) m_ppPlayerObjects[i]->Release();
+		delete[] m_ppPlayerObjects;
 	}
 
 	if (m_ppShadowShaders)
@@ -513,7 +513,7 @@ void Stage2::ReleaseUploadBuffers()
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nShadowShaders; i++) m_ppShadowShaders[i]->ReleaseUploadBuffers();
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < m_nPlayerObjects; i++) if (m_ppPlayerObjects[i]) m_ppPlayerObjects[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++) m_ppHierarchicalGameObjects[i]->ReleaseUploadBuffers();
 }

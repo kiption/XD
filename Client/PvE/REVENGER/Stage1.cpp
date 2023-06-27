@@ -36,7 +36,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[0].m_fRange = 25000.0f;
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.5f, 0.1, 0.1f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.35f, 0.3, 0.2, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.32f, 0.3, 0.3, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.1, 0.1f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-350, 900.0f, 400.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+0.5f, -0.9f, 0.2f);
@@ -46,7 +46,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 20000.0f;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.35f, 0.3, 0.2, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.32f, 0.3, 0.3, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-800, 900.0f, -700.0f);
 	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(+0.8f, -0.9f, 0.2f);
@@ -215,7 +215,20 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pAnimationShadowShader->SetCurScene(SCENE1STAGE);
 	m_pAnimationShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pAnimationDepthRenderShader->GetDepthTexture());
 
-	gamesound.backGroundMusic();
+
+	m_nPlayerObjects = 1;
+	CMaterial* pPlayerMaterial = new CMaterial(2);
+	pPlayerMaterial->SetReflection(2);
+	m_ppPlayerObjects = new CGameObject * [m_nPlayerObjects];
+	CLoadedModelInfo* pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
+	for (int i = 0; i < m_nPlayerObjects; i++)
+	{
+		m_ppPlayerObjects[i] = new CHumanPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pPlayerModel, NULL);
+		m_ppPlayerObjects[i]->SetMaterial(0, pPlayerMaterial);
+		pPlayerModel->m_pModelRootObject->AddRef();
+	}
+	if (pPlayerModel) delete pPlayerModel;
+	gamesound.SpeakMusic();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }
@@ -256,26 +269,8 @@ void Stage1::ReleaseObjects()
 		}
 		delete[] m_ppShaders;
 	}
-	if (m_ppHumanShaders)
-	{
-		for (int i = 0; i < m_nHumanShaders; i++)
-		{
-			m_ppHumanShaders[i]->ReleaseShaderVariables();
-			m_ppHumanShaders[i]->ReleaseObjects();
-			m_ppHumanShaders[i]->Release();
-		}
-		delete[] m_ppHumanShaders;
-	}
-	if (m_ppGameObjects)
-	{
-		for (int i = 0; i < m_nGameObjects; i++)
-		{
-			m_ppGameObjects[i]->ReleaseShaderVariables();
-			//m_ppGameObjects[i]->ReleaseObjects();
-			m_ppGameObjects[i]->Release();
-		}
-		delete[] m_ppGameObjects;
-	}
+
+	if (m_ppPlayerObjects)delete[] m_ppPlayerObjects;
 	if (m_ppFragShaders)
 	{
 		for (int i = 0; i < m_nFragShaders; i++)
@@ -298,7 +293,7 @@ void Stage1::ReleaseObjects()
 		m_pAnimationDepthRenderShader->ReleaseShaderVariables();
 		m_pAnimationDepthRenderShader->ReleaseObjects();
 		m_pAnimationDepthRenderShader->Release();
-		
+
 	}
 	if (m_pShadowShader)delete m_pShadowShader;
 	if (m_pAnimationShadowShader)delete m_pAnimationShadowShader;
@@ -681,7 +676,7 @@ void Stage1::ReleaseUploadBuffers()
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nHumanShaders; i++) m_ppHumanShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->ReleaseUploadBuffers();
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < m_nPlayerObjects; i++) if (m_ppPlayerObjects[i]) m_ppPlayerObjects[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->ReleaseUploadBuffers();
 
@@ -853,21 +848,21 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
-	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Animate(fTimeElapsed);
+	for (int i = 0; i < m_nPlayerObjects; i++) if (m_ppPlayerObjects[i]) m_ppPlayerObjects[i]->Animate(fTimeElapsed);
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nHumanShaders; i++) if (m_ppHumanShaders[i]) m_ppHumanShaders[i]->AnimateObjects(fTimeElapsed);
 	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();
-	if (m_pPlayer->m_bCollisionTerrain == true)
-	{
-		//m_ppSpriteBillboard[0]->m_bActive = true;
-	}
-	else
-	{
-		//m_ppSpriteBillboard[0]->m_bActive = false;
+	//if (m_pPlayer->m_bCollisionTerrain == true)
+	//{
+	//	//m_ppSpriteBillboard[0]->m_bActive = true;
+	//}
+	//else
+	//{
+	//	//m_ppSpriteBillboard[0]->m_bActive = false;
 
-	}
+	//}
 	((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveMark = true;
 	m_ppFragShaders[0]->m_bActive = true;
 	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(m_ppShaders[0]->m_ppObjects[20]->GetPosition().x,
@@ -887,14 +882,17 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.4, 0.4, 0.4, 1.0);
 		m_pLights->m_pLights[5].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[0]->GetPosition();
 	}
-
+	m_fLightRotationAngle += fTimeElapsed;
+	XMMATRIX xmmtxRotation = XMMatrixRotationY(fTimeElapsed * 0.02f);
+	XMStoreFloat3(&m_pLights->m_pLights[0].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction), xmmtxRotation));
+	XMStoreFloat3(&m_pLights->m_pLights[1].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[1].m_xmf3Direction), xmmtxRotation));
 	ParticleAnimation();
 }
 
 void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 
-	//UpdateShaderVariables(pd3dCommandList);
+	UpdateShaderVariables(pd3dCommandList);
 
 	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
@@ -908,7 +906,16 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (i != 1 && m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
-
+	
+	for (int i = 0; i < m_nPlayerObjects; i++)
+	{
+		if (m_ppPlayerObjects[i])
+		{
+			((CHumanPlayer*)m_ppPlayerObjects[i])->Animate(m_fElapsedTime);
+			((CHumanPlayer*)m_ppPlayerObjects[i])->UpdateTransform(NULL);
+			((CHumanPlayer*)m_ppPlayerObjects[i])->Render(pd3dCommandList, pCamera);
+		}
+	}
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);

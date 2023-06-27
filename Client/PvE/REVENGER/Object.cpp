@@ -824,8 +824,8 @@ CGameObject::~CGameObject()
 		{
 			if (m_ppMaterials[i]) m_ppMaterials[i]->Release();
 		}
+		 delete[] m_ppMaterials;
 	}
-	if (m_ppMaterials) delete[] m_ppMaterials;
 	if (m_pMaterials) m_pMaterials->Release();
 	if (m_pSkinnedAnimationController) delete m_pSkinnedAnimationController;
 }

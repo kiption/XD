@@ -167,6 +167,7 @@
     <ClInclude Include="PostProcessShader.h" />
     <ClInclude Include="ShadowShader.h" />
     <ClInclude Include="Skybox.h" />
+    <ClInclude Include="SoldiarPlayerObject.h" />
     <ClInclude Include="SpriteAnimationBillboard.h" />
     <ClInclude Include="Stage2.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
@@ -206,6 +207,7 @@
     <ClCompile Include="PostProcessShader.cpp" />
     <ClCompile Include="ShadowShader.cpp" />
     <ClCompile Include="Skybox.cpp" />
+    <ClCompile Include="SoldiarPlayerObject.cpp" />
     <ClCompile Include="SpriteAnimationBillboard.cpp" />
     <ClCompile Include="Stage2.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />

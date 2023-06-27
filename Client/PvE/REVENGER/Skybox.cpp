@@ -11,7 +11,7 @@ CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	CTexture* pSkyBoxTexture[1];
 	pSkyBoxTexture[0] = new CTexture(1, RESOURCE_TEXTURE_CUBE, 0, 1);
-	pSkyBoxTexture[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"SkyBox/dusksky.dds", RESOURCE_TEXTURE_CUBE, 0);
+	pSkyBoxTexture[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"SkyBox/pinksky.dds", RESOURCE_TEXTURE_CUBE, 0);
 
 	CSkyBoxShader* pSkyBoxShader = new CSkyBoxShader();
 	pSkyBoxShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,0);

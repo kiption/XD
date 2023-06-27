@@ -35,6 +35,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[4] = new CGameObject(1);
 
 
+
 	/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
 
 	CMaterial* pOtherPlayerMaterial = new CMaterial(4);
@@ -43,13 +44,12 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	CLoadedModelInfo* pSModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
 	for (int x = 5; x < 8; x++)
 	{
-		m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, 12);
+		m_ppObjects[x] = new CHumanPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel,NULL);
 		m_ppObjects[x]->SetMaterial(0, pOtherPlayerMaterial);
-		m_ppObjects[x]->SetScale(5, 5, 5);
-		m_ppObjects[x]->SetPosition(XMFLOAT3(160.0 + (x - 5) * 5, 8.0, 800.0));
+		m_ppObjects[x]->SetScale(50, 50, 50);
+		m_ppObjects[x]->SetPosition(XMFLOAT3(58.0 + (x - 5) * 5, 8.0, 800.0));
 		pSModel->m_pModelRootObject->AddRef();
 	}
-<<<<<<< Updated upstream
 
 	if (pSModel) delete pSModel;
 
@@ -94,9 +94,9 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	CMaterial* pNpcHeliMaterial = new CMaterial(m_nHeliNpcObjects);
 	pNpcHeliMaterial->SetReflection(m_nHeliNpcObjects);
 
-		CGameObject* pNPCHelicopterModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 	for (int i = 12; i < 22; i++)
 	{
+		CGameObject* pNPCHelicopterModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 		m_ppObjects[i] = new CNpcHelicopterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pNPCHelicopterModel, false);
 		m_ppObjects[i]->SetMaterial(0, pNpcHeliMaterial);
@@ -146,11 +146,10 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[41] = m_ppSoldiarNpcObjects[20];
 	if (psModel) delete psModel;
 	////////////////////////////////////////////////SOLDIAR_NPC_LOAD////////////////////////////////////////////
+	
 
-=======
 	pSkinnongStandardShader = new CSkinnedAnimationStandardShader;
 	pSkinnongStandardShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
->>>>>>> Stashed changes
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -370,23 +369,8 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 
 	for (int i = 0; i < 22; i++)
 	{
-<<<<<<< Updated upstream
 		m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
 		m_pObjectsShader->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera, true, this);
-=======
-		if (i >= 22)
-		{
-			m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
-			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
-			m_pObjectsShader->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera, true, m_pObjectsShader->pSkinnongStandardShader);
-		}
-		else
-		{
-			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
-			m_pObjectsShader->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera, true, this);
-
-		}
->>>>>>> Stashed changes
 	}
 }
 
@@ -401,6 +385,7 @@ void CShadowMapShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3
 CAnimationShadowMapShader::CAnimationShadowMapShader(CObjectsShader* pObjectsShader)
 {
 	m_pObjectsShader = pObjectsShader;
+
 }
 
 CAnimationShadowMapShader::~CAnimationShadowMapShader()
@@ -936,7 +921,7 @@ D3D12_SHADER_BYTECODE CAnimationDepthRenderShader::CreateVertexShader(ID3DBlob**
 
 D3D12_SHADER_BYTECODE CAnimationDepthRenderShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shadow.hlsl", "PSDepthWriteShader", "ps_5_1", ppd3dShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shadow.hlsl", "PSDynamicDepthWriteShader", "ps_5_1", ppd3dShaderBlob));
 }
 
 void CAnimationDepthRenderShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

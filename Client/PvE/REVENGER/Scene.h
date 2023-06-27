@@ -147,7 +147,7 @@ public:
 	float m_fBulletEffectiveRange = 2000.0f;
 	CBulletObject* pBulletObject = NULL;
 	CBulletObject* m_ppBullets[BULLETS];
-	CPlayer* m_pPlayer = NULL;
+	CGameObject* m_pPlayer = NULL;
 
 public:
 	CShadowMapShader* m_pShadowShader = NULL;
@@ -160,8 +160,8 @@ public:
 public:
 	float								m_fElapsedTime = 0.0f;
 
-	int									m_nGameObjects = 0;
-	CGameObject** m_ppGameObjects = NULL;
+	int									m_nPlayerObjects = 0;
+	CGameObject** m_ppPlayerObjects = NULL;
 
 	int									m_nHierarchicalGameObjects = 0;
 	CGameObject** m_ppHierarchicalGameObjects = NULL;

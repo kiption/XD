@@ -37,8 +37,7 @@ public:
 	int									m_nFragShaders = 0;
 
 	CFragmentsShader** m_ppFragShaders = NULL;
-	//CSkinnedAnimationObjectsShader* m_SkingAnimationShader = NULL;
-
+	
 	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 	////////////////////////////////////////////

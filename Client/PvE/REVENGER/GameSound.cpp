@@ -13,9 +13,9 @@ GameSound::GameSound()
 	result = soundSystem->createSound("Sound/CollisionSound.wav", FMOD_3D, 0, &ColliSound);
 	result = ColliSound->setMode(FMOD_LOOP_OFF);
 
-	result = soundSystem->init(64, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("Sound/Rotor.mp3", FMOD_DEFAULT, 0, &speakSound);
-	result = speakSound->setMode(FMOD_LOOP_BIDI);
+	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
+	result = soundSystem->createSound("Sound/Birl.wav", FMOD_DEFAULT, 0, &speakSound);
+	result = speakSound->setMode(FMOD_LOOP_NORMAL);
 
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
 	result = soundSystem->createSound("Sound/attacking.mp3", FMOD_3D, 0, &bgmSound);
@@ -91,11 +91,11 @@ void GameSound::backGroundMusic()
 	result = soundSystem->playSound(bgmSound, 0, false, &bgmChannel);
 	bgmChannel->setVolume(0.05f);
 }
-void GameSound::SpeakMusic(bool stop)
+void GameSound::SpeakMusic()
 {
-	stop = m_bStopSound;
-	result = soundSystem->playSound(speakSound, 0, stop, &speakChannel);
-	speakChannel->setVolume(0.005f);
+	
+	result = soundSystem->playSound(speakSound, 0, false, &speakChannel);
+	speakChannel->setVolume(0.1f);
 }
 void GameSound::walkingSound()
 {

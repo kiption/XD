@@ -62,8 +62,8 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUSrvDescriptorNextHandle() { return(m_d3dSrvGPUDescriptorNextHandle); }
 	float								m_fElapsedTime = 0.0f;
 
-	int									m_nGameObjects = 0;
-	CGameObject** m_ppGameObjects = NULL;
+	int									m_nPlayerObjects = 0;
+	CGameObject** m_ppPlayerObjects = NULL;
 
 	int									m_nHierarchicalGameObjects = 0;
 	CGameObject** m_ppHierarchicalGameObjects = NULL;

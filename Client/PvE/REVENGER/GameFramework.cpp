@@ -555,7 +555,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case VK_F1:
 			case VK_F2:
 			case VK_F3:
-				m_pCamera = m_pPlayer->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
+				m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
 				break;
 			case VK_F9:
 				ChangeSwapChainState();
@@ -589,8 +589,8 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 						break;*/
 
 			case VK_SPACE:
-				((CHumanPlayer*)m_pPlayer)->m_bJumeState = true;
-				((CHumanPlayer*)m_pPlayer)->JumpState();
+				((CHumanPlayer*)m_pScene->m_pPlayer)->m_bJumeState = true;
+				((CHumanPlayer*)m_pScene->m_pPlayer)->JumpState();
 				break;
 			default:
 				break;
@@ -706,9 +706,9 @@ void CGameFramework::BuildObjects()
 	HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL);
 
 	CreateShaderVariables();
-	m_pScene->m_pPlayer = m_pPlayer = pPlayer;
-	m_pCamera = m_pPlayer->GetCamera();
-	m_pCamera->SetMode(FIRST_PERSON_CAMERA);
+	//m_pScene->m_pPlayer = m_pScene->m_pPlayer = pPlayer;
+	//m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetCamera();
+	//m_pCamera->SetMode(FIRST_PERSON_CAMERA);
 
 
 
@@ -719,20 +719,14 @@ void CGameFramework::BuildObjects()
 	WaitForGpuComplete();
 
 	if (m_pScene) m_pScene->ReleaseUploadBuffers();
-	if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
+	if (m_pScene->m_pPlayer) ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReleaseUploadBuffers();
 	m_GameTimer.Reset();
 }
 
 void CGameFramework::ReleaseObjects()
 {
-	//ReleaseShaderVariables();
-
-	if (m_pPlayer) m_pPlayer->Release();
+	if (m_pScene->m_pPlayer) ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Release();
 	if (m_pScene) m_pScene->ReleaseObjects();
-
-	if (m_pPostProcessingShader)m_pPostProcessingShader->ReleaseObjects();
-	if (m_pPostProcessingShader)m_pPostProcessingShader->Release();
-	//if (m_pScene) delete m_pScene;
 }
 
 bool ShootKey = false;
@@ -740,7 +734,7 @@ void CGameFramework::ProcessInput()
 {
 	/*cout << "누르기 전 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
 	cout << "누르기 전 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;*/
-	m_pPlayer->m_xmf3BeforeCollidedPosition = m_pPlayer->GetPosition();
+	//((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xmf3BeforeCollidedPosition = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition();
 
 	static UCHAR pKeysBuffer[256];
 	bool bProcessedByScene = false;
@@ -756,8 +750,8 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[KEY_D] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT; }
 		if (pKeysBuffer[KEY_Q] & 0xF0)
 		{
-			((CHumanPlayer*)m_pPlayer)->m_bReloadState = true;
-			((CHumanPlayer*)m_pPlayer)->ReloadState();
+			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bReloadState = true;
+			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReloadState();
 			q_keyboardInput.push(SEND_KEY_UP);//S
 		}
 
@@ -787,20 +781,22 @@ void CGameFramework::ProcessInput()
 			if (m_nMode == SCENE1STAGE)
 			{
 
-				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay < 0.005)
+				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay < 0.005)
 				{
 
 					ShootKey = true;
-					if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->ShootState(m_GameTimer.GetTimeElapsed());
-					((CHumanPlayer*)m_pPlayer)->FireBullet(NULL);
+					if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pScene->m_pPlayer)->ShootState(m_GameTimer.GetTimeElapsed());
+					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->FireBullet(NULL);
 
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
 					q_mouseInput.push(lclick);//s
 				}
-				if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.005)
+				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay > 0.005)
 				{
 					ShootKey = false;
-					if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+					if (m_nMode == SCENE1STAGE)
+						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)
+						->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 				}
 			}
 
@@ -812,72 +808,77 @@ void CGameFramework::ProcessInput()
 				if (cxDelta || cyDelta)
 				{
 
-					m_pPlayer->Rotate(0.0f, cxDelta, 0.0f);
+					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(0.0f, cxDelta, 0.0f);
 					MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
 					q_mouseInput.push(mousemove);//s
 
 				}
-				if (dwDirection) m_pPlayer->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
+				if (dwDirection) ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)
+					->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
 			}
 
 
 		}
 	}
-	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
+	if (m_nMode == SCENE1STAGE)
+		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Update(m_GameTimer.GetTimeElapsed());
 }
 
 
 void CGameFramework::AnimateObjects()
 {
-	if (m_pScene) m_pScene->AnimateObjects(m_pCamera, m_GameTimer.GetTimeElapsed());
-	if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
-	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed());
-	m_pPlayer->Animate(m_GameTimer.GetTimeElapsed(), NULL);
-
-
-	//if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
 	if (m_nMode == SCENE1STAGE)
 	{
-		((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->SetActive(true);
-		((Stage1*)m_pScene)->m_pBillboardShader[3]->SetActive(true);
+
+		if (m_pScene) m_pScene->AnimateObjects(m_pCamera, m_GameTimer.GetTimeElapsed());
+		if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
+		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed());
+		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 
 
-		((Stage1*)m_pScene)->m_pBillboardShader[3]->ParticlePosition = XMFLOAT3(
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[23]->GetPosition().x
-			, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[23]->GetPosition().y + 10.0,
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[23]->GetPosition().z);
+		//if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
+		if (m_nMode == SCENE1STAGE)
+		{
+			((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->SetActive(true);
+			((Stage1*)m_pScene)->m_pBillboardShader[3]->SetActive(true);
 
-		((Stage1*)m_pScene)->m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[24]->GetPosition().x
-			, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[24]->GetPosition().y + 10.0,
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[24]->GetPosition().z);
 
-		((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[25]->GetPosition().x
-			, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[25]->GetPosition().y + 10.0,
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[25]->GetPosition().z);
+			((Stage1*)m_pScene)->m_pBillboardShader[3]->ParticlePosition = XMFLOAT3(
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[23]->GetPosition().x
+				, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[23]->GetPosition().y + 10.0,
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[23]->GetPosition().z);
 
-		((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[1]->SetPosition(
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[26]->GetPosition().x
-			, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[26]->GetPosition().y + 10.0,
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[26]->GetPosition().z);
+			((Stage1*)m_pScene)->m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[24]->GetPosition().x
+				, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[24]->GetPosition().y + 10.0,
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[24]->GetPosition().z);
+
+			((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[25]->GetPosition().x
+				, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[25]->GetPosition().y + 10.0,
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[25]->GetPosition().z);
+
+			((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[1]->SetPosition(
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[26]->GetPosition().x
+				, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[26]->GetPosition().y + 10.0,
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[26]->GetPosition().z);
+		}
+
+
+		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShootDelay += m_GameTimer.GetTimeElapsed();
+		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShootDelay > 0.15)
+		{
+			((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShootDelay = 0.0f;
+		}
+		if (ShootKey == true)
+		{
+			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
+		}
+		if (ShootKey == false)
+		{
+			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
+		}
 	}
-
-
-	((CHumanPlayer*)m_pPlayer)->m_fShootDelay += m_GameTimer.GetTimeElapsed();
-	if (((CHumanPlayer*)m_pPlayer)->m_fShootDelay > 0.15)
-	{
-		((CHumanPlayer*)m_pPlayer)->m_fShootDelay = 0.0f;
-	}
-	if (ShootKey == true)
-	{
-		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
-	}
-	if (ShootKey == false)
-	{
-		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
-	}
-
 }
 
 void CGameFramework::WaitForGpuComplete()
@@ -1118,7 +1119,7 @@ void CGameFramework::FrameAdvance()
 		D2D_RECT_F D2_CompressArrowRect = { 0.0f, 0.0f, 122.0f, 115.0f };
 		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[9] : m_pd2dfxGaussianBlur[9], &D2_CompressArrow, &D2_CompressArrowRect);
 
-		float myAngle = abs(m_pPlayer->m_fYaw);
+		float myAngle = abs(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fYaw);
 		if (myAngle > 315.0f) {
 			myAngle -= 360.0f;
 		}
@@ -1308,10 +1309,13 @@ void CGameFramework::FrameAdvance()
 	MoveToNextFrame();
 
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
-	size_t nLength = _tcslen(m_pszFrameRate);
-	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
-	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
-	::SetWindowText(m_hWnd, m_pszFrameRate);
+	if (m_nMode == SCENE1STAGE)
+	{
+		size_t nLength = _tcslen(m_pszFrameRate);
+		XMFLOAT3 xmf3Position = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition();
+		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
+		::SetWindowText(m_hWnd, m_pszFrameRate);
+	}
 }
 
 void CGameFramework::ChangeScene(DWORD nMode)
@@ -1327,13 +1331,13 @@ void CGameFramework::ChangeScene(DWORD nMode)
 		{
 		case SCENE1STAGE:
 		{
-
+			gamesound.SpeakMusic();
 			m_nMode = nMode;
 			m_pScene = new Stage1();
 			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
-			CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, ((Stage1*)m_pScene)->m_pTerrain);
-			m_pScene->m_pPlayer = m_pPlayer = pPlayer;
-			m_pCamera = m_pPlayer->GetCamera();
+			//CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, ((Stage1*)m_pScene)->m_pTerrain);
+			m_pScene->m_pPlayer = ((Stage1*)m_pScene)->m_ppPlayerObjects[0];
+			m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetCamera();
 
 			m_pScene->SetCurScene(SCENE1STAGE);
 
@@ -1344,14 +1348,14 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			WaitForGpuComplete();
 
 			if (m_pScene) m_pScene->ReleaseUploadBuffers();
-			if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
+			if (m_pScene->m_pPlayer) ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReleaseUploadBuffers();
 			m_GameTimer.Reset();
 			break;
 		}
 		case SCENE2STAGE:
 		{
 			gamesound.m_bStopSound = true;
-			gamesound.SpeakMusic(gamesound.m_bStopSound);
+			gamesound.SpeakMusic();
 			gamesound.speakChannel->setVolume(0.0f);
 			m_nMode = nMode;
 			m_pScene = new Stage2();
@@ -2128,63 +2132,48 @@ MouseInputVal CGameFramework::popInputVal_Mouse()
 XMFLOAT3 CGameFramework::getMyPosition()
 {
 	if (m_nMode == SCENE1STAGE) {
-		return ((CHumanPlayer*)m_pPlayer)->GetPosition();
+		return m_pScene->m_pPlayer->GetPosition();
 	}
-	else if (m_nMode == SCENE2STAGE) {
-		return ((CHumanPlayer*)m_pPlayer)->GetPosition();
-	}
+
 }
 XMFLOAT3 CGameFramework::getMyRightVec()
 {
 	if (m_nMode == SCENE1STAGE) {
-		return ((CHumanPlayer*)m_pPlayer)->GetRightVector();
+		return ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetRightVector();
 	}
-	else if (m_nMode == SCENE2STAGE) {
-		return ((CHumanPlayer*)m_pPlayer)->GetRightVector();
-	}
+
 }
 XMFLOAT3 CGameFramework::getMyUpVec()
 {
 	if (m_nMode == SCENE1STAGE) {
-		return ((CHumanPlayer*)m_pPlayer)->GetUpVector();
+		return ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetUpVector();
 	}
-	else if (m_nMode == SCENE2STAGE) {
-		return ((CHumanPlayer*)m_pPlayer)->GetUpVector();
-	}
+
 }
 XMFLOAT3 CGameFramework::getMyLookVec()
 {
 	if (m_nMode == SCENE1STAGE) {
-		return ((CHumanPlayer*)m_pPlayer)->GetLookVector();
+		return ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetLookVector();
 	}
-	else if (m_nMode == SCENE2STAGE) {
-		return ((CHumanPlayer*)m_pPlayer)->GetLookVector();
-	}
+
 }
 
 void CGameFramework::setPosition_Self(XMFLOAT3 pos)
 {
 	if (m_nMode == SCENE1STAGE) {
-		((CHumanPlayer*)m_pPlayer)->SetPosition(pos);
+		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->SetPosition(pos);
 	}
-	else if (m_nMode == SCENE2STAGE) {
-		((CHumanPlayer*)m_pPlayer)->SetPosition(pos);
-	}
+
 }
 void CGameFramework::setVectors_Self(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
 	if (m_nMode == SCENE1STAGE) {
-		((CHumanPlayer*)m_pPlayer)->SetUp(upVec);
-		((CHumanPlayer*)m_pPlayer)->SetRight(rightVec);
-		((CHumanPlayer*)m_pPlayer)->SetLook(lookVec);
-		((CHumanPlayer*)m_pPlayer)->SetScale(XMFLOAT3(5.0, 5.0, 5.0));
+		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->SetUp(upVec);
+		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->SetRight(rightVec);
+		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->SetLook(lookVec);
+		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->SetScale(XMFLOAT3(5.0, 5.0, 5.0));
 	}
-	else if (m_nMode == SCENE2STAGE) {
-		((CHumanPlayer*)m_pPlayer)->SetUp(upVec);
-		((CHumanPlayer*)m_pPlayer)->SetRight(rightVec);
-		((CHumanPlayer*)m_pPlayer)->SetLook(lookVec);
-		((CHumanPlayer*)m_pPlayer)->SetScale(XMFLOAT3{ 14.0, 14.0, 14.0 });
-	}
+
 }
 
 void CGameFramework::setPosition_OtherPlayer(int id, XMFLOAT3 pos)
@@ -2272,7 +2261,7 @@ void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos, XMFLOAT3 mapextents
 {
 	m_mapxmoobb = BoundingOrientedBox(mappos, mapextents, XMFLOAT4(0, 0, 0, 1));
 
-	CBulletObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
+	CBulletObject** ppBullets = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_ppBullets;
 
 	for (int i = 0; i < BULLETS; i++)
 	{
@@ -2288,10 +2277,10 @@ void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos, XMFLOAT3 mapextents
 
 void CGameFramework::CollisionNPC_by_PLAYER(XMFLOAT3 npcpos, XMFLOAT3 npcextents)
 {
-	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(2.5, 2.0, 4.0), XMFLOAT4(0, 0, 0, 1));
+	m_pScene->m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition()), XMFLOAT3(2.5, 2.0, 4.0), XMFLOAT4(0, 0, 0, 1));
 	m_npcoobb = BoundingOrientedBox(npcpos, npcextents, XMFLOAT4(0, 0, 0, 1));
 
-	if (m_npcoobb.Intersects(m_pPlayer->m_xoobb))
+	if (m_npcoobb.Intersects(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xoobb))
 	{
 		// 충돌 모션
 		//cout << "CollisionCheck!" << m_npcoobb.Center.x << m_npcoobb.Center.z << endl;
@@ -2314,7 +2303,7 @@ void CGameFramework::CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents
 {
 	m_npcoobb = BoundingOrientedBox(npcpos, npcextents, XMFLOAT4(0, 0, 0, 1));
 
-	CBulletObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
+	CBulletObject** ppBullets = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_ppBullets;
 	for (int i = 0; i < BULLETS; i++)
 	{
 		ppBullets[i]->m_xoobb = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
@@ -2383,11 +2372,11 @@ void CGameFramework::otherPlayerDyingMotion(int p_id)
 
 void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
 {
-	m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pPlayer->GetPosition()), XMFLOAT3(2.5, 2.0, 4.0), XMFLOAT4(0, 0, 0, 1));
+	m_pScene->m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pScene->m_pPlayer->GetPosition()), XMFLOAT3(2.5, 2.0, 4.0), XMFLOAT4(0, 0, 0, 1));
 
 	m_worldmoobb = BoundingOrientedBox(pos, XMFLOAT3(extents), XMFLOAT4(0, 0, 0, 1));
 
-	ContainmentType result = m_worldmoobb.Contains(m_pPlayer->m_xoobb);
+	ContainmentType result = m_worldmoobb.Contains(m_pScene->m_pPlayer->m_xoobb);
 
 	if (result == DISJOINT) {
 		m_bCollisionCheck = true;

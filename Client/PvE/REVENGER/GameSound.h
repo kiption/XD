@@ -40,7 +40,7 @@ public:
 public:
 
 	bool m_bStopSound = false;
-	void SpeakMusic(bool stop);
+	void SpeakMusic();
 	void shootingSound();
 	void backGroundMusic();
 	void walkingSound();

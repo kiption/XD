@@ -9,7 +9,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
-CPlayer::CPlayer()
+CPlayer::CPlayer():CGameObject(6)
 {
 	m_pCamera = NULL;
 
@@ -262,7 +262,7 @@ void CPlayer::OnPrepareRender()
 
 void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	CGameObject::Render(pd3dCommandList, pCamera);
+	CGameObject::Render(pd3dCommandList, pCamera,false);
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 	if (nCameraMode == THIRD_PERSON_CAMERA || nCameraMode == SPACESHIP_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
 }

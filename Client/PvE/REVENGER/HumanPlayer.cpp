@@ -1,19 +1,18 @@
 #include "stdafx.h"
 #include "HumanPlayer.h"
-
+#include "ShadowShader.h"
 CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* playermodel, void* pContext)
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
-	pSoldiarModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
-	SetChild(pSoldiarModel->m_pModelRootObject, true);
-	pSoldiarModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
+	SetChild(playermodel->m_pModelRootObject, true);
+	playermodel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
 
-	m_pBulletFindFrame = pSoldiarModel->m_pModelRootObject->FindFrame("Rifle__1_");
-	m_pHeadFindFrame = pSoldiarModel->m_pModelRootObject->FindFrame("head");
+	m_pBulletFindFrame = playermodel->m_pModelRootObject->FindFrame("Rifle__1_");
+	m_pHeadFindFrame = playermodel->m_pModelRootObject->FindFrame("head");
 
 	//7°³
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 12, pSoldiarModel);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 12, playermodel);
 
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
@@ -54,7 +53,6 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	for (int i = 0; i < BULLETS; i++)
 	{
-
 		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
 		pBulletObject = new CBulletObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, false);
@@ -64,14 +62,14 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ppBullets[i] = pBulletObject;
 		pBulletMesh->AddRef();
 	}
-
+	SetPosition(XMFLOAT3(58.0f, 8.0f, 1000.0));
 	SetPlayerUpdatedContext(pContext);
 	//SetCameraUpdatedContext(pContext);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 
 
-	if (pSoldiarModel) delete pSoldiarModel;
+	//if (pSoldiarModel) delete pSoldiarModel;
 
 
 }
@@ -387,6 +385,7 @@ void CHumanPlayer::Update(float fTimeElapsed)
 void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	CPlayer::Render(pd3dCommandList, pCamera);
+	
 	if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < BULLETS; i++)
 		if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
@@ -430,7 +429,7 @@ void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 		pBulletObject->Rotate(90.0, 0.0, 0.0);
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
 		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->SetScale(0.2, 0.2, 1.0);
+		pBulletObject->SetScale(0.4, 0.4, 1.2);
 		pBulletObject->SetActive(true);
 
 	}

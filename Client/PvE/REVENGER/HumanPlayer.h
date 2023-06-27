@@ -3,6 +3,7 @@
 #include "MissileObject.h"
 #include "ObjcetsShaderList.h"
 class SceneManager;
+class CShadowMapShader;
 class CHumanPlayer : public CPlayer
 {
 public:
@@ -15,6 +16,7 @@ public:
 public:
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	CBulletEffectShader* pBCBulletEffectShader = NULL;
+	
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
 	virtual void OnCameraUpdateCallback(float fTimeElapsed);
 
