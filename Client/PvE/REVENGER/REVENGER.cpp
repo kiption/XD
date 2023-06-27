@@ -67,7 +67,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		}
 		else
 		{
-			if (gGameFramework.m_nMode == OPENINGSCENE && gGameFramework.m_nMode != SCENE1STAGE)
+			if (gGameFramework.m_nMode == OPENINGSCENE)
 			{
 				if (gGameFramework.m_bLoginInfoSend && gGameFramework.m_LoginClick[3]) {
 					// id, pw, ip 받은 거 char로 바꾸는 곳		
@@ -94,11 +94,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 			}
 			else
 			{
-				if (gGameFramework.m_nMode == SCENE1STAGE) {
-					if (stage2_enter_ok) {
-						gGameFramework.ChangeScene(SCENE2STAGE);
-					}
-				}
+				//if (gGameFramework.m_nMode == SCENE1STAGE) {
+				//	if (stage2_enter_ok) {
+				//		gGameFramework.ChangeScene(SCENE2STAGE);
+				//	}
+				//}
 
 				//==================================================
 				//					서버 연결 확인
