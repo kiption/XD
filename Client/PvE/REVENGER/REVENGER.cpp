@@ -88,8 +88,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 				if (stage1_enter_ok) {
 					gGameFramework.ChangeScene(SCENE1STAGE);
-					gGameFramework.setPosition_Self(my_info.m_pos);
-					gGameFramework.setVectors_Self(my_info.m_right_vec, my_info.m_up_vec, my_info.m_look_vec);
+					gGameFramework.setPosition_Self(players_info[my_id].m_pos);
+					gGameFramework.setVectors_Self(players_info[my_id].m_right_vec, players_info[my_id].m_up_vec, players_info[my_id].m_look_vec);
 				}
 			}
 			else
@@ -119,13 +119,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//1. 좌표 및 벡터 업데이트
 				// 1) 다른 플레이어
 				for (int i = 0; i < MAX_USER; ++i) {
-					if (i == my_info.m_id) continue;
-					if (other_players[i].m_state == OBJ_ST_RUNNING) {
-						gGameFramework.setPosition_OtherPlayer(i, other_players[i].m_pos);
-						gGameFramework.setVectors_OtherPlayer(i, other_players[i].m_right_vec, other_players[i].m_up_vec, other_players[i].m_look_vec);
+					if (i == my_id) continue;
+					if (players_info[i].m_state == OBJ_ST_RUNNING) {
+						gGameFramework.setPosition_OtherPlayer(i, players_info[i].m_pos);
+						gGameFramework.setVectors_OtherPlayer(i, players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
 					}
-					else if (other_players[i].m_state == OBJ_ST_LOGOUT) {
-						other_players[i].InfoClear();
+					else if (players_info[i].m_state == OBJ_ST_LOGOUT) {
+						players_info[i].InfoClear();
 						gGameFramework.remove_OtherPlayer(i);
 					}
 				}
@@ -157,8 +157,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				for (int i = 0; i < MAX_USER; ++i) {
 					if (i == my_id) break;
 
-					if (other_players[i].m_new_state_update) {
-						switch (other_players[i].m_ingame_state) {
+					if (players_info[i].m_new_state_update) {
+						switch (players_info[i].m_ingame_state) {
 						case PL_ST_IDLE:
 							gGameFramework.otherPlayerReturnToIdle(i);
 							break;
@@ -180,7 +180,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							break;
 						}
 
-						other_players[i].m_new_state_update = false;
+						players_info[i].m_new_state_update = false;
 					}
 				}
 
@@ -538,10 +538,10 @@ void uiThreadFunc() {
 	while (1) {
 		if (gGameFramework.m_nMode != OPENINGSCENE) {
 			// 1. 총알 업데이트
-			gGameFramework.m_currbullet = my_info.m_bullet;
+			gGameFramework.m_currbullet = players_info[my_id].m_bullet;
 
 			// 2. HP 업데이트
-			int currHP = my_info.m_hp;
+			int currHP = players_info[my_id].m_hp;
 			gGameFramework.m_currHp = currHP;
 
 			// 3. 시간 동기화
