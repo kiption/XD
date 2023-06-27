@@ -69,6 +69,23 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		{
 			if (gGameFramework.m_nMode == OPENINGSCENE && gGameFramework.m_nMode != SCENE1STAGE)
 			{
+				if (gGameFramework.m_bLoginInfoSend && gGameFramework.m_LoginClick[3]) {
+					// id, pw, ip 받은 거 char로 바꾸는 곳		
+					char id[20] = { 0 };
+					char pw[20] = { 0 };
+					char ip[20] = { 0 };
+
+					size_t idLength = wcslen(gGameFramework.m_LoginID);
+					size_t pwLength = wcslen(gGameFramework.m_LoginPW);
+					size_t ipLength = wcslen(gGameFramework.m_LoginIP);
+
+					wcstombs_s(nullptr, id, sizeof(id), gGameFramework.m_LoginID, idLength);
+					wcstombs_s(nullptr, pw, sizeof(pw), gGameFramework.m_LoginPW, pwLength);
+					wcstombs_s(nullptr, ip, sizeof(ip), gGameFramework.m_LoginIP, ipLength);
+
+					gGameFramework.m_bLoginInfoSend = false;
+				}
+
 				if (stage1_enter_ok) {
 					gGameFramework.ChangeScene(SCENE1STAGE);
 					gGameFramework.setPosition_Self(my_info.m_pos);
@@ -232,7 +249,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 			gGameFramework.FrameAdvance();
 		}
 
-	
+
 	}
 
 	gGameFramework.OnDestroy();
@@ -292,7 +309,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	switch (message)
 	{
-		case WM_SIZE:
+	case WM_SIZE:
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
 	case WM_RBUTTONDOWN:

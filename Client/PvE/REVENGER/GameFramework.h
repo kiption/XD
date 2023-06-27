@@ -93,6 +93,7 @@ public:
 	LoginSceneInfo lobbypos[2];
 	LoginSceneInfo roompos[2];
 
+	bool m_bLoginInfoSend = false;
 	int m_LoginScene = 0;
 	float m_StartKey = 0;
 	float m_ReadyKey = 0;

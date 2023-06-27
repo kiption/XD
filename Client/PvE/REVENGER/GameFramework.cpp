@@ -406,6 +406,9 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			else if (loginpos[3].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[3].lx && loginpos[3].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[3].ly) {
 				memset(m_LoginClick, 0, sizeof(m_LoginClick));
 				m_LoginClick[3] = true;
+
+				m_bLoginInfoSend = true;
+
 				m_LoginScene = 1;
 			}
 			else {
