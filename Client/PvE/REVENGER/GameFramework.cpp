@@ -388,7 +388,6 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
 	{
-		cout << m_ptOldCursorPos.x << ", " << m_ptOldCursorPos.y << endl;
 		switch (m_LoginScene)
 		{
 		case 0:
@@ -436,12 +435,10 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				memset(m_LobbyClick, 0, sizeof(m_LobbyClick));
 				m_LobbyClick[0] = true;
 				m_LoginScene = 3;
-				cout << "Start Click" << endl;
 			}
 			else if (lobbypos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[1].lx && lobbypos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[1].ly) {
 				memset(m_LobbyClick, 0, sizeof(m_LobbyClick));
 				m_LobbyClick[1] = true;
-				cout << "Room Click" << endl;
 			}
 			else {
 				memset(m_LobbyClick, 0, sizeof(m_LobbyClick));
@@ -450,11 +447,9 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		case 3:
 			if (roompos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[0].lx && roompos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[0].ly) {
 				m_RoomClick[0] = true;
-				cout << "RS" << endl;
 			}
 			else if (roompos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[1].lx && roompos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[1].ly) {
 				m_RoomClick[1] = true;
-				cout << "RR" << endl;
 			}
 			else {
 				memset(m_RoomClick, 0, sizeof(m_RoomClick));
@@ -595,7 +590,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				((CHumanPlayer*)m_pPlayer)->JumpState();
 				break;
 			default:
-				cout << wParam << endl;
 				break;
 			}
 			break;
@@ -1049,7 +1043,7 @@ void CGameFramework::FrameAdvance()
 				else m_StartKey = 102.5f;
 
 				D2D_POINT_2F D2_RoomStartUI = { FRAME_BUFFER_WIDTH / 2, D2_RoomUI.y + 40.0f };
-				D2D_RECT_F D2_RoomStartUIRect = { 0.0f , 0.0f + m_StartKey, 261.0f, 102.5f + m_StartKey};
+				D2D_RECT_F D2_RoomStartUIRect = { 0.0f , 0.0f + m_StartKey, 261.0f, 102.5f + m_StartKey };
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[45], &D2_RoomStartUI, &D2_RoomStartUIRect);
 
 				// 준비 버튼
@@ -2231,11 +2225,8 @@ void CGameFramework::setPosition_Npc(int id, XMFLOAT3 pos)
 	/* 12~21 = 헬리콥터NPC , 22~40 = 사람NPC */
 	if (m_nMode == SCENE1STAGE)
 	{
-		if (0 <= id && id < 5) {
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetPosition(pos);
-		}
-		else
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + id]->SetPosition(pos);
+		if (0 <= id && id < 10) ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetPosition(pos);
+		else					((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetPosition(pos);
 	}
 }
 
@@ -2244,18 +2235,12 @@ void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, X
 	/* 12~21 = 헬리콥터NPC , 22~40 = 사람NPC */
 	if (m_nMode == SCENE1STAGE)
 	{
-		if (0 <= id && id < 5) {
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetRight(rightVec);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetUp(upVec);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetLook(lookVec);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetScale(3.0, 3.0, 3.0);
-		}
-		else {
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + id]->SetRight(rightVec);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + id]->SetUp(upVec);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + id]->SetLook(lookVec);
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + id]->SetScale(5.0, 5.0, 5.0);
-		}
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetRight(rightVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetUp(upVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetLook(lookVec);
+
+		if (0 <= id && id < 10) ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetScale(3.0, 3.0, 3.0);
+		else					((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetScale(5.0, 5.0, 5.0);
 	}
 }
 
