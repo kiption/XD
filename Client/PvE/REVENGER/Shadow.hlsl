@@ -10,7 +10,6 @@ struct VS_LIGHTING_INPUT
 	int4 indices : BONEINDEX;
 	float4 weights : BONEWEIGHT;
 };
-
 struct VS_LIGHTING_OUTPUT
 {
 	float4 position : SV_POSITION;
@@ -19,6 +18,26 @@ struct VS_LIGHTING_OUTPUT
 	float3 tangentW : TANGENT;
 	float3 bitangentW : BITANGENT;
 	float2 uv : TEXCOORD;
+};
+struct VS_SHADOW_MAP_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float3 positionW : POSITION;
+	float3 normalW : NORMAL;
+
+	float2 uv : TEXCOORD;
+	float3 tangentW : TANGENT;
+	float3 bitangentW : BITANGENT;
+	float4 uvs[MAX_LIGHTS] : TEXCOORD1;
+	int4 indices : BONEINDEX;
+	float4 weights : BONEWEIGHT;
+};
+
+struct PS_DEPTH_OUTPUT
+{
+	float fzPosition : SV_Target;
+	float fDepth : SV_Depth;
+
 };
 
 VS_LIGHTING_OUTPUT VSLighting(VS_LIGHTING_INPUT input)
@@ -78,12 +97,6 @@ VS_LIGHTING_OUTPUT VSAnimationLighting(VS_LIGHTING_INPUT input)
 }
 
 
-struct PS_DEPTH_OUTPUT
-{
-	float fzPosition : SV_Target;
-	float fDepth : SV_Depth;
-
-};
 
 PS_DEPTH_OUTPUT PSDepthWriteShader(VS_LIGHTING_OUTPUT input)
 {
@@ -94,22 +107,6 @@ PS_DEPTH_OUTPUT PSDepthWriteShader(VS_LIGHTING_OUTPUT input)
 
 	return(output);
 }
-
-
-////////////////////////////////////////////////////////////////
-struct VS_SHADOW_MAP_OUTPUT
-{
-	float4 position : SV_POSITION;
-	float3 positionW : POSITION;
-	float3 normalW : NORMAL;
-
-	float2 uv : TEXCOORD;
-	float3 tangentW : TANGENT;
-	float3 bitangentW : BITANGENT;
-	float4 uvs[MAX_LIGHTS] : TEXCOORD1;
-	int4 indices : BONEINDEX;
-	float4 weights : BONEWEIGHT;
-};
 
 static matrix gmxTexture = { 0.5,0.0,0.0,0.0,
 							0.0,-0.5,0.0,0.0,

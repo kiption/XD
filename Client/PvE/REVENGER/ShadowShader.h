@@ -6,7 +6,7 @@
 #include "Skybox.h"
 class CFragmentsShader;
 #define _WITH_BATCH_MATERIAL
-class CSkinnedAnimationObjectsShader;
+class CSkinnedAnimationStandardShader;
 class CObjectsShader : public CShader
 {
 public:
@@ -23,7 +23,7 @@ public:
 		int nPipelineState);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 
-
+	CSkinnedAnimationStandardShader* pSkinnongStandardShader=NULL;
 public:
 	CHeightMapTerrain* m_pTerrain = NULL;
 	int	m_nHierarchicalGameObjects = 0;
@@ -37,7 +37,7 @@ public:
 	int									m_nFragShaders = 0;
 
 	CFragmentsShader** m_ppFragShaders = NULL;
-	CSkinnedAnimationObjectsShader* m_SkingAnimationShader = NULL;
+	//CSkinnedAnimationObjectsShader* m_SkingAnimationShader = NULL;
 
 	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 

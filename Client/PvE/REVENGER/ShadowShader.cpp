@@ -49,6 +49,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[x]->SetPosition(XMFLOAT3(160.0 + (x - 5) * 5, 8.0, 800.0));
 		pSModel->m_pModelRootObject->AddRef();
 	}
+<<<<<<< Updated upstream
 
 	if (pSModel) delete pSModel;
 
@@ -146,6 +147,10 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	if (psModel) delete psModel;
 	////////////////////////////////////////////////SOLDIAR_NPC_LOAD////////////////////////////////////////////
 
+=======
+	pSkinnongStandardShader = new CSkinnedAnimationStandardShader;
+	pSkinnongStandardShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
+>>>>>>> Stashed changes
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -224,6 +229,8 @@ void CObjectsShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D1
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+
+
 }
 
 void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
@@ -363,8 +370,23 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 
 	for (int i = 0; i < 22; i++)
 	{
+<<<<<<< Updated upstream
 		m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
 		m_pObjectsShader->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera, true, this);
+=======
+		if (i >= 22)
+		{
+			m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
+			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
+			m_pObjectsShader->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera, true, m_pObjectsShader->pSkinnongStandardShader);
+		}
+		else
+		{
+			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
+			m_pObjectsShader->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera, true, this);
+
+		}
+>>>>>>> Stashed changes
 	}
 }
 
