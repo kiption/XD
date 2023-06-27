@@ -247,26 +247,6 @@ public:
 array<SESSION, MAX_USER> clients;
 SESSION npc_server;
 array<SESSION, MAX_NPCS> npcs;
-array<SESSION, 5> dummies;//[TEST] 충돌테스트용 더미
-void initDummies() {	  //[TEST] 충돌테스트용 더미 생성
-	cout << "[Init Dummies...]";
-	dummies[0].pos = { 30.0f, 6.0f, 905.0f };
-	dummies[1].pos = { 60.0f, 6.0f, 1155.0f };
-	dummies[2].pos = { 100.0f, 6.0f, 1205.0f };
-	dummies[3].pos = { -50.0f, 6.0f, 1300.0f };
-	dummies[4].pos = { 20.0f, 6.0f, 1350.0f };
-	for (int i = 0; i < 5; ++i) {
-		dummies[i].id = i;
-		dummies[i].hp = HUMAN_MAXHP;
-		dummies[i].pl_state = PL_ST_IDLE;
-		dummies[i].m_rightvec = { 1.0f, 0.0f, 0.0f };
-		dummies[i].m_upvec = { 0.0f, 1.0f, 0.0f };
-		dummies[i].m_lookvec = { 0.0f, 0.0f, 1.0f };
-		dummies[i].setBB();
-	}
-	cout << " ---- OK." << endl;
-}
-
 
 void SESSION::send_login_packet() {
 	SC_LOGIN_INFO_PACKET login_info_packet;
@@ -2488,7 +2468,6 @@ int main(int argc, char* argv[])
 
 	//======================================================================
 	// [ Main - 정보 초기화 ]
-	initDummies();//[TEST] 충돌테스트 더미
 	setMissions();//미션 설정
 	setOccupyAreas();//점령지역 설정
 	cout << "\n";
