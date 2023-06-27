@@ -311,7 +311,7 @@ void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_pStandardShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	m_pSkinnedAnimationShader = new CSkinnedAnimationStandardShader();
-	m_pSkinnedAnimationShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,0);
+	m_pSkinnedAnimationShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
 	m_pSkinnedAnimationShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -324,7 +324,7 @@ void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
 
 	//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_isAnimationShader, 33);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nType, 32);
-	
+
 
 	for (int i = 0; i < m_nTextures; i++)
 		if (m_ppTextures[i]) m_ppTextures[i]->UpdateShaderVariables(pd3dCommandList);
@@ -338,7 +338,7 @@ void CMaterial::ReleaseShaderVariables()
 	for (int i = 0; i < m_nTextures; i++)
 		if (m_ppTextures[i]) m_ppTextures[i]->ReleaseShaderVariables();
 
-	
+
 	if (m_pShader) m_pShader->ReleaseShaderVariables();
 
 
@@ -1049,7 +1049,7 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 	if (m_pShaderInfo != NULL)
 	{
 		m_pShaderInfo->Render(pd3dCommandList, pCamera, 0, bPrerender);
-		m_pShaderInfo->UpdateShaderVariables(pd3dCommandList,&m_xmf4x4World,NULL);
+		m_pShaderInfo->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, NULL);
 		if (m_pTextureInfo != NULL)
 		{
 			m_pTextureInfo->UpdateShaderVariables(pd3dCommandList);
@@ -1122,8 +1122,8 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 					if (m_ppMaterials[i]->m_pShader) {
 
 						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, bPrerender);
-						m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList,&m_xmf4x4World,m_ppMaterials[i]);
-						
+						m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, m_ppMaterials[i]);
+
 						UpdateShaderVariables(pd3dCommandList);
 					}
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
@@ -1401,7 +1401,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 					{
 						pMaterial->SetSkinnedAnimationShader();
 						pMaterial->m_isAnimationShader = true;
-						
+
 					}
 					else
 					{
@@ -1765,19 +1765,19 @@ void CNpcHelicopterObject::Animate(float fTimeElapsed)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "MissileObject.h"
-CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,CGameObject* pModel) :CGameObject(10)
+CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(10)
 {
-	SetChild(pModel, false);
-	pModel->AddRef();
+	//SetChild(pModel, false);
+	//pModel->AddRef();
 
 	pBCBulletEffectShader = new CBulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
 	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
 
 
-	CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader );
 	for (int i = 0; i < HELIBULLETS; i++)
 	{
+		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
 		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, false);
 		pBulletObject->SetMovingSpeed(200.0f);
@@ -1817,7 +1817,7 @@ void CHelicopterObjects::Firevalkan(XMFLOAT3 ToPlayerLook)
 
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 
-		
+
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->m_xmf4x4ToParent._31 = ToPlayerLook.x;
@@ -2312,7 +2312,7 @@ CEthanObject::CEthanObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	if (!pEthanModel) pEthanModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
 
 	SetChild(pEthanModel->m_pModelRootObject, true);
-	SetScale(15,15,15);
+	SetScale(15, 15, 15);
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pEthanModel);
 }
 

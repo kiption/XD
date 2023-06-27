@@ -151,7 +151,9 @@ public:
 
 public:
 	CShadowMapShader* m_pShadowShader = NULL;
+	CAnimationShadowMapShader* m_pAnimationShadowShader = NULL;
 	CDepthRenderShader* m_pDepthRenderShader = NULL;
+	CAnimationDepthRenderShader* m_pAnimationDepthRenderShader = NULL;
 	
 	int count = 0;
 	BoundingBox						m_xmBoundingBox;

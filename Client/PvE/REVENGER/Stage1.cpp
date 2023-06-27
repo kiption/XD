@@ -38,8 +38,8 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1, 0.1f, 0.0f);
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3, 0.3, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.1f, 0.1, 0.1f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-750, 900.0f, 200.0f);
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+1.0f, -0.9f, 0.5f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(550, 900.0f, 200.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+0.2f, -0.9f, 0.2f);
 
 
 	m_pLights->m_pLights[1].m_bEnable = true;
@@ -197,16 +197,23 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_ppShaders[0] = pObjectShader;
 
 	m_pDepthRenderShader = new CDepthRenderShader(pObjectShader, m_pLights->m_pLights);
-	DXGI_FORMAT pdxgiRtvFormats[1] = { DXGI_FORMAT_R32_FLOAT };
 	m_pDepthRenderShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	m_pDepthRenderShader->SetCurScene(SCENE1STAGE);
 	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-
 	m_pShadowShader = new CShadowMapShader(pObjectShader);
 	m_pShadowShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	m_pShadowShader->SetCurScene(SCENE1STAGE);
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
+
+	m_pAnimationDepthRenderShader = new CAnimationDepthRenderShader(pObjectShader, m_pLights->m_pLights);
+	m_pAnimationDepthRenderShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	m_pAnimationDepthRenderShader->SetCurScene(SCENE1STAGE);
+	m_pAnimationDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_pAnimationShadowShader = new CAnimationShadowMapShader(pObjectShader);
+	m_pAnimationShadowShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	m_pAnimationShadowShader->SetCurScene(SCENE1STAGE);
+	m_pAnimationShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pAnimationDepthRenderShader->GetDepthTexture());
 
 	gamesound.backGroundMusic();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -284,8 +291,17 @@ void Stage1::ReleaseObjects()
 		m_pDepthRenderShader->ReleaseShaderVariables();
 		m_pDepthRenderShader->ReleaseObjects();
 		m_pDepthRenderShader->Release();
+
+	}
+	if (m_pAnimationDepthRenderShader)
+	{
+		m_pAnimationDepthRenderShader->ReleaseShaderVariables();
+		m_pAnimationDepthRenderShader->ReleaseObjects();
+		m_pAnimationDepthRenderShader->Release();
+		
 	}
 	if (m_pShadowShader)delete m_pShadowShader;
+	if (m_pAnimationShadowShader)delete m_pAnimationShadowShader;
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
 	ReleaseShaderVariables();
@@ -883,6 +899,9 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
+	m_pAnimationDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 
@@ -890,18 +909,10 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (int i = 0; i < m_nBillboardShaders; i++) if (i != 1 && m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
 
-	//if (m_ppHumanShaders[0]) m_ppHumanShaders[0]->Render(pd3dCommandList, pCamera,0,true);
-	//for (int i = 0; i < m_nGameObjects; i++)
-	//{
-	//	if (m_ppGameObjects[i])
-	//	{
-	//		m_ppGameObjects[i]->Animate(m_fElapsedTime);
-	//		m_ppGameObjects[i]->UpdateTransform(NULL);
-	//		m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
-	//	}
-	//}
-
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+	if (m_pAnimationShadowShader) m_pAnimationShadowShader->Render(pd3dCommandList, pCamera, 0);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
@@ -910,6 +921,7 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 void Stage1::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	m_pDepthRenderShader->PrepareShadowMap(pd3dCommandList);
+	m_pAnimationDepthRenderShader->PrepareShadowMap(pd3dCommandList);
 }
 
 void Stage1::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
