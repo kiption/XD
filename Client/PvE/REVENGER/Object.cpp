@@ -1730,10 +1730,10 @@ CLoadedModelInfo* CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device* pd
 
 CNpcHelicopterObject::CNpcHelicopterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(10)
 {
-	CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
-	SetChild(pOtherPlayerModel, false);
-	SetScale(1.0, 1.0, 1.0);
-	pOtherPlayerModel->AddRef();
+	//CGameObject* pOtherPlayerModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
+	//SetChild(pOtherPlayerModel, false);
+	//SetScale(1.0, 1.0, 1.0);
+	//pOtherPlayerModel->AddRef();
 }
 
 CNpcHelicopterObject::~CNpcHelicopterObject()
@@ -1797,7 +1797,7 @@ CHelicopterObjects::~CHelicopterObjects()
 
 void CHelicopterObjects::Firevalkan(XMFLOAT3 ToPlayerLook)
 {
-	CValkanObject* pBulletObject = NULL;
+	/*CValkanObject* pBulletObject = NULL;
 	for (int i = 0; i < HELIBULLETS; i++)
 	{
 		if (!m_ppBullets[i]->m_bActive)
@@ -1828,7 +1828,7 @@ void CHelicopterObjects::Firevalkan(XMFLOAT3 ToPlayerLook)
 		pBulletObject->SetScale(4.0, 7.0, 4.0);
 		pBulletObject->SetActive(true);
 
-	}
+	}*/
 }
 
 void CHelicopterObjects::OnPrepareAnimate()

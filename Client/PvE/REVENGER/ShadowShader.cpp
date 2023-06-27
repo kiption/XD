@@ -17,137 +17,134 @@ CObjectsShader::~CObjectsShader()
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	if (m_nCurScene == SCENE1STAGE)
+
+	m_nObjects = 42;
+	m_ppObjects = new CGameObject * [m_nObjects];
+
+	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
+	CMaterial* pPlaneMaterial = new CMaterial(2);
+	pPlaneMaterial->SetReflection(2);
+	m_ppObjects[0] = new CGameObject(1);
+	m_ppObjects[0]->SetMesh(pPlaneMesh);
+	m_ppObjects[0]->SetMaterial(0, pPlaneMaterial);
+	m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 3.0, 100.0f));
+
+	m_ppObjects[1] = new CGameObject(1);
+	m_ppObjects[2] = new CGameObject(1);
+	m_ppObjects[3] = new CGameObject(1);
+	m_ppObjects[4] = new CGameObject(1);
+
+
+	/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
+
+	CMaterial* pOtherPlayerMaterial = new CMaterial(4);
+	pOtherPlayerMaterial->SetReflection(4);
+
+	CLoadedModelInfo* pSModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
+	for (int x = 5; x < 8; x++)
 	{
-		m_nObjects = 42;
-		m_ppObjects = new CGameObject * [m_nObjects];
-
-		CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
-		CMaterial* pPlaneMaterial = new CMaterial(2);
-		pPlaneMaterial->SetReflection(2);
-		m_ppObjects[0] = new CGameObject(1);
-		m_ppObjects[0]->SetMesh(pPlaneMesh);
-		m_ppObjects[0]->SetMaterial(0, pPlaneMaterial);
-		m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 3.0, 100.0f));
-
-		m_ppObjects[1] = new CGameObject(1);
-		m_ppObjects[2] = new CGameObject(1);
-		m_ppObjects[3] = new CGameObject(1);
-		m_ppObjects[4] = new CGameObject(1);
-
-
-		/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
-
-		CMaterial* pOtherPlayerMaterial = new CMaterial(4);
-		pOtherPlayerMaterial->SetReflection(4);
-
-		CLoadedModelInfo* pSModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
-		for (int x = 5; x < 8; x++)
-		{
-			m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, 12);
-			m_ppObjects[x]->SetMaterial(0, pOtherPlayerMaterial);
-			m_ppObjects[x]->SetScale(5, 5, 5);
-			m_ppObjects[x]->SetPosition(XMFLOAT3(160.0 + (x - 5) * 5, 8.0, 800.0));
-			pSModel->m_pModelRootObject->AddRef();
-		}
-
-		if (pSModel) delete pSModel;
-
-		/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
-
-		////////////////////////////////////////////////////MAP_LOAD///////////////////////////////////////////////////////////////
-		CMaterial* pCityMaterial;
-		pCityMaterial = new CMaterial(4);
-		pCityMaterial->SetReflection(4);
-		int Cities = 4;
-		m_ppCityGameObjects = new CGameObject * [Cities];
-		for (int i = 0; i < Cities; i++)
-		{
-			string filename{ "Model/Stage1_(" };
-			string num = to_string(i + 1);
-			filename += num;
-			filename += ").bin";
-			cout << filename << endl;
-			char* c_filename = const_cast<char*>(filename.c_str());
-			CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, c_filename, NULL);
-
-			m_ppCityGameObjects[i] = new CCityObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			m_ppCityGameObjects[i]->SetChild(pGeneratorModel, false);
-			m_ppCityGameObjects[i]->SetMaterial(0, pCityMaterial);
-			m_ppCityGameObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
-			m_ppCityGameObjects[i]->SetScale(1.0f, 1.0f, 1.0f);
-			m_ppCityGameObjects[i]->OnPrepareAnimate();
-			m_ppCityGameObjects[i]->SetPosition(0, 0, 0);
-			pGeneratorModel->AddRef();
-		}
-
-		m_ppObjects[8] = m_ppCityGameObjects[0];
-		m_ppObjects[9] = m_ppCityGameObjects[1];
-		m_ppObjects[10] = m_ppCityGameObjects[2];
-		m_ppObjects[11] = m_ppCityGameObjects[3];
-		////////////////////////////////////////////////////MAP_LOAD///////////////////////////////////////////////////////////////
-
-		////////////////////////////////////////////////////HELI_LOAD///////////////////////////////////////////////////////////////
-		m_nHeliNpcObjects = 10;
-		m_ppNpc_Heli_Objects = new CGameObject * [m_nHeliNpcObjects];
-
-		CMaterial* pNpcHeliMaterial = new CMaterial(m_nHeliNpcObjects);
-		pNpcHeliMaterial->SetReflection(m_nHeliNpcObjects);
-
-		for (int i = 12; i < 22; i++)
-		{
-			CGameObject* pNPCHelicopterModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
-			m_ppObjects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			m_ppObjects[i]->SetChild(pNPCHelicopterModel,false);
-			m_ppObjects[i]->SetMaterial(0, pNpcHeliMaterial);
-			m_ppObjects[i]->OnPrepareAnimate();
-			m_ppObjects[i]->SetPosition(XMFLOAT3(50.0 + i * 15, 70.0, -500.0));
-			pNPCHelicopterModel->AddRef();
-		}
-
-		////////////////////////////////////////////////////HELI_LOAD//////////////////////////////////////////////////////////////
-
-
-		////////////////////////////////////////////////SOLDIAR_NPC_LOAD///////////////////////////////////////////////////////////
-		m_nSoldiarNpcObjects = 21;
-		CMaterial* pSoldiarNpcMaterial = new CMaterial(21);
-		pSoldiarNpcMaterial->SetReflection(21);
-
-		m_ppSoldiarNpcObjects = new CGameObject * [m_nSoldiarNpcObjects];
-		CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
-		for (int i = 0; i < m_nSoldiarNpcObjects; i++)
-		{
-			m_ppSoldiarNpcObjects[i] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, 4);
-			m_ppSoldiarNpcObjects[i]->SetMaterial(0, pSoldiarNpcMaterial);
-			m_ppSoldiarNpcObjects[i]->SetScale(15.0, 15.0, 15.0);
-			m_ppSoldiarNpcObjects[i]->SetPosition(-170.0, 6.0, 300.0 + i * 20);
-			psModel->m_pModelRootObject->AddRef();
-		}
-
-		m_ppObjects[22] = m_ppSoldiarNpcObjects[0];
-		m_ppObjects[23] = m_ppSoldiarNpcObjects[1];
-		m_ppObjects[24] = m_ppSoldiarNpcObjects[2];
-		m_ppObjects[25] = m_ppSoldiarNpcObjects[3];
-		m_ppObjects[26] = m_ppSoldiarNpcObjects[4];
-		m_ppObjects[27] = m_ppSoldiarNpcObjects[5];
-		m_ppObjects[28] = m_ppSoldiarNpcObjects[6];
-		m_ppObjects[29] = m_ppSoldiarNpcObjects[7];
-		m_ppObjects[30] = m_ppSoldiarNpcObjects[8];
-		m_ppObjects[31] = m_ppSoldiarNpcObjects[9];
-		m_ppObjects[32] = m_ppSoldiarNpcObjects[11];
-		m_ppObjects[33] = m_ppSoldiarNpcObjects[12];
-		m_ppObjects[34] = m_ppSoldiarNpcObjects[13];
-		m_ppObjects[35] = m_ppSoldiarNpcObjects[14];
-		m_ppObjects[36] = m_ppSoldiarNpcObjects[15];
-		m_ppObjects[37] = m_ppSoldiarNpcObjects[16];
-		m_ppObjects[38] = m_ppSoldiarNpcObjects[17];
-		m_ppObjects[39] = m_ppSoldiarNpcObjects[18];
-		m_ppObjects[40] = m_ppSoldiarNpcObjects[19];
-		m_ppObjects[41] = m_ppSoldiarNpcObjects[20];
-		if (psModel) delete psModel;
-		////////////////////////////////////////////////SOLDIAR_NPC_LOAD////////////////////////////////////////////
-
+		m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, 12);
+		m_ppObjects[x]->SetMaterial(0, pOtherPlayerMaterial);
+		m_ppObjects[x]->SetScale(5, 5, 5);
+		m_ppObjects[x]->SetPosition(XMFLOAT3(160.0 + (x - 5) * 5, 8.0, 800.0));
+		pSModel->m_pModelRootObject->AddRef();
 	}
+
+	if (pSModel) delete pSModel;
+
+	/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////MAP_LOAD///////////////////////////////////////////////////////////////
+	CMaterial* pCityMaterial;
+	pCityMaterial = new CMaterial(4);
+	pCityMaterial->SetReflection(4);
+	int Cities = 4;
+	m_ppCityGameObjects = new CGameObject * [Cities];
+	for (int i = 0; i < Cities; i++)
+	{
+		string filename{ "Model/Stage1_(" };
+		string num = to_string(i + 1);
+		filename += num;
+		filename += ").bin";
+		cout << filename << endl;
+		char* c_filename = const_cast<char*>(filename.c_str());
+		CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, c_filename, NULL);
+
+		m_ppCityGameObjects[i] = new CCityObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppCityGameObjects[i]->SetChild(pGeneratorModel, false);
+		m_ppCityGameObjects[i]->SetMaterial(0, pCityMaterial);
+		m_ppCityGameObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
+		m_ppCityGameObjects[i]->SetScale(1.0f, 1.0f, 1.0f);
+		m_ppCityGameObjects[i]->OnPrepareAnimate();
+		m_ppCityGameObjects[i]->SetPosition(0, 0, 0);
+		pGeneratorModel->AddRef();
+	}
+
+	m_ppObjects[8] = m_ppCityGameObjects[0];
+	m_ppObjects[9] = m_ppCityGameObjects[1];
+	m_ppObjects[10] = m_ppCityGameObjects[2];
+	m_ppObjects[11] = m_ppCityGameObjects[3];
+	////////////////////////////////////////////////////MAP_LOAD///////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////HELI_LOAD///////////////////////////////////////////////////////////////
+	m_nHeliNpcObjects = 10;
+	m_ppNpc_Heli_Objects = new CGameObject * [m_nHeliNpcObjects];
+
+	CMaterial* pNpcHeliMaterial = new CMaterial(m_nHeliNpcObjects);
+	pNpcHeliMaterial->SetReflection(m_nHeliNpcObjects);
+
+		CGameObject* pNPCHelicopterModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
+	for (int i = 12; i < 22; i++)
+	{
+		m_ppObjects[i] = new CNpcHelicopterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppObjects[i]->SetChild(pNPCHelicopterModel, false);
+		m_ppObjects[i]->SetMaterial(0, pNpcHeliMaterial);
+		m_ppObjects[i]->OnPrepareAnimate();
+		m_ppObjects[i]->SetPosition(XMFLOAT3(50.0 + i * 15, 70.0, -500.0));
+		pNPCHelicopterModel->AddRef();
+	}
+
+	////////////////////////////////////////////////////HELI_LOAD//////////////////////////////////////////////////////////////
+
+
+	////////////////////////////////////////////////SOLDIAR_NPC_LOAD///////////////////////////////////////////////////////////
+	m_nSoldiarNpcObjects = 21;
+	CMaterial* pSoldiarNpcMaterial = new CMaterial(21);
+	pSoldiarNpcMaterial->SetReflection(21);
+
+	m_ppSoldiarNpcObjects = new CGameObject * [m_nSoldiarNpcObjects];
+	CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
+	for (int i = 0; i < m_nSoldiarNpcObjects; i++)
+	{
+		m_ppSoldiarNpcObjects[i] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, 4);
+		m_ppSoldiarNpcObjects[i]->SetMaterial(0, pSoldiarNpcMaterial);
+		m_ppSoldiarNpcObjects[i]->SetScale(5.0, 5.0, 5.0);
+		m_ppSoldiarNpcObjects[i]->SetPosition(-170.0, 6.0, 300.0 + i * 20);
+		psModel->m_pModelRootObject->AddRef();
+	}
+
+	m_ppObjects[22] = m_ppSoldiarNpcObjects[0];
+	m_ppObjects[23] = m_ppSoldiarNpcObjects[1];
+	m_ppObjects[24] = m_ppSoldiarNpcObjects[2];
+	m_ppObjects[25] = m_ppSoldiarNpcObjects[3];
+	m_ppObjects[26] = m_ppSoldiarNpcObjects[4];
+	m_ppObjects[27] = m_ppSoldiarNpcObjects[5];
+	m_ppObjects[28] = m_ppSoldiarNpcObjects[6];
+	m_ppObjects[29] = m_ppSoldiarNpcObjects[7];
+	m_ppObjects[30] = m_ppSoldiarNpcObjects[8];
+	m_ppObjects[31] = m_ppSoldiarNpcObjects[9];
+	m_ppObjects[32] = m_ppSoldiarNpcObjects[11];
+	m_ppObjects[33] = m_ppSoldiarNpcObjects[12];
+	m_ppObjects[34] = m_ppSoldiarNpcObjects[13];
+	m_ppObjects[35] = m_ppSoldiarNpcObjects[14];
+	m_ppObjects[36] = m_ppSoldiarNpcObjects[15];
+	m_ppObjects[37] = m_ppSoldiarNpcObjects[16];
+	m_ppObjects[38] = m_ppSoldiarNpcObjects[17];
+	m_ppObjects[39] = m_ppSoldiarNpcObjects[18];
+	m_ppObjects[40] = m_ppSoldiarNpcObjects[19];
+	m_ppObjects[41] = m_ppSoldiarNpcObjects[20];
+	if (psModel) delete psModel;
+	////////////////////////////////////////////////SOLDIAR_NPC_LOAD////////////////////////////////////////////
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -831,7 +828,7 @@ void CDepthRenderShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, I
 
 CAnimationDepthRenderShader::CAnimationDepthRenderShader(CObjectsShader* pObjectsShader, LIGHT* pLights)
 {
-	
+
 	m_pObjectsShader = pObjectsShader;
 
 	m_pLights = pLights;
