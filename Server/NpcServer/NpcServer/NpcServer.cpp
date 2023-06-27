@@ -56,8 +56,8 @@ enum Hit_target { g_none, g_body, g_profeller };
 enum NPCType { NPC_HELICOPTER, NPC_ARMY };
 
 bool ConnectingServer = false;
-constexpr int HelicopterNum = 5;
-constexpr int ArmyNum = 15;
+constexpr int HelicopterNum = 10;
+constexpr int ArmyNum = 20;
 
 struct Node
 {
