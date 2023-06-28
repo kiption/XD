@@ -67,24 +67,23 @@ GameSound::~GameSound()
 	//Common_Close();
 }
 
-void GameSound::shootingSound()
+void GameSound::shootingSound(bool Stop)
 {
 	bool isPlaying = false;
-	if (shootChannel != nullptr && shootChannel->isPlaying(&isPlaying))
-	{
-		shootChannel->stop();
-		shootChannel->setMode(FMOD_LOOP_OFF);
-		result = soundSystem->playSound(shootSound, 0, false, &shootChannel);
-		shootChannel->setVolume(0.04f);
-	}
-	else
-	{
+	//if (shootChannel != nullptr && shootChannel->isPlaying(&isPlaying))
+	//{
+	//	shootChannel->stop();
+	//	shootChannel->setMode(FMOD_LOOP_NORMAL);
+	//	result = soundSystem->playSound(shootSound, 0, false, &shootChannel);
+	//	shootChannel->setVolume(0.04f);
+	//}
+
 		result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_LOOP_NORMAL, 0, &shootSound);
-		shootSound->setMode(FMOD_LOOP_OFF);
-		result = soundSystem->playSound(shootSound, 0, false, &shootChannel);
+		shootSound->setMode(FMOD_LOOP_NORMAL);
+		result = soundSystem->playSound(shootSound, 0, Stop, &shootChannel);
 		shootChannel->setVolume(0.04f);
 		shootChannel->setMode(FMOD_LOOP_OFF);
-	}
+
 }
 void GameSound::backGroundMusic()
 {

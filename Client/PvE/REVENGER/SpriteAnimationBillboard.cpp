@@ -187,8 +187,9 @@ void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	pTerrainMaterial[0]->SetTexture(ppSpriteTextures[0], 0);
 	pTerrainMaterial[1]->SetTexture(ppSpriteTextures[1], 0);
 
-	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 80.0, 80.0, 0.0f, 0.0f, 0.0f, 0.0f);
+	CTexturedRectMesh* pSpriteMesh[2];
+	pSpriteMesh[0] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.0, 5.0, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh[1] = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 10.0, 10.0, 0.0f, 0.0f, 0.0f, 0.0f);
 
 
 	SceneManager* pScene = NULL;
@@ -200,17 +201,16 @@ void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	pScene->CreateConstantBufferView(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
 	m_ppObjects = new CGameObject * [m_nObjects];
 	CMultiSpriteObject** pThirdObject = new CMultiSpriteObject * [m_nObjects];
-	XMFLOAT3 xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	for (int i = 0; i < m_nObjects; i++)
 	{
 
 		pThirdObject[i] = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		pThirdObject[i]->SetMesh(pSpriteMesh);
+		pThirdObject[i]->SetMesh(pSpriteMesh[i]);
 		pThirdObject[i]->SetMaterial(0, pTerrainMaterial[i]);
-		pThirdObject[i]->SetPosition(XMFLOAT3(xmf3Position.x, xmf3Position.y, xmf3Position.z));
-		pScene->SetCbvGPUDescriptorHandlePtr(((Stage1*)pScene)->m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
+		pScene->SetCbvGPUDescriptorHandlePtr(pScene->m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
 		pThirdObject[i]->m_fSpeed = 6.0f / (ppSpriteTextures[i]->m_nRows * ppSpriteTextures[i]->m_nCols);
 		m_ppObjects[i] = pThirdObject[i];
+		m_ppObjects[i]->AddRef();
 	}
 }
 
@@ -229,10 +229,9 @@ void SpriteAnimationBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList
 		{
 			if (m_ppObjects[j])
 			{
-				ExplosionPosition.x = m_ppObjects[j]->m_xmf4x4ToParent._41;
-				ExplosionPosition.y = m_ppObjects[j]->m_xmf4x4ToParent._42;
-				ExplosionPosition.z = m_ppObjects[j]->m_xmf4x4ToParent._43;
-				m_ppObjects[j]->SetPosition(xmf3PlayerPosition);
+
+				m_ppObjects[j]->SetPosition(36.0 + j * 20,10.0 + j * 20,800.0+j*20);
+			
 				m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
 			}
 		}

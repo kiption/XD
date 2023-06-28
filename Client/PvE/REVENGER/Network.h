@@ -454,7 +454,7 @@ void processPacket(char* ptr)
     {
         SC_BULLET_COUNT_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COUNT_PACKET*>(ptr);
         players_info[my_id].m_bullet = recv_packet->bullet_cnt;
-        gamesound.shootingSound();
+        gamesound.shootingSound(false);
         break;
     }//SC_BULLET_COUNT case end
     case SC_MISSION:

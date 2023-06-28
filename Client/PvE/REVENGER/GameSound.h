@@ -41,7 +41,7 @@ public:
 
 	bool m_bStopSound = false;
 	void SpeakMusic();
-	void shootingSound();
+	void shootingSound(bool Stop=false);
 	void backGroundMusic();
 	void walkingSound();
 	void collisionSound();

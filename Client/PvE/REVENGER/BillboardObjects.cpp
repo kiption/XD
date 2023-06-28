@@ -61,7 +61,7 @@ void CMultiSpriteObject::ReleaseShaderVariables()
 		m_pd3dcbGameObject->Unmap(0, NULL);
 		m_pd3dcbGameObject->Release();
 	}
-	CGameObject::ReleaseShaderVariables();
+
 }
 
 void CMultiSpriteObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -88,7 +88,7 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 	CGameObject::Animate(fTimeElapsed);
 }
 
-void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bPreRender)
 {
 	OnPrepareRender();
 
@@ -101,7 +101,7 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 
 			if (m_ppMaterials[i]->m_pShader)
 			{
-				m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0,NULL);
+				m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0,false);
 				m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList);
 
 				UpdateShaderVariables(pd3dCommandList);
@@ -112,21 +112,22 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 				if (m_ppMaterials[i]->m_ppTextures[j])
 				{
 					m_ppMaterials[i]->m_ppTextures[j]->UpdateShaderVariables(pd3dCommandList);
-					if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4Texture, XMMatrixTranspose(XMLoadFloat4x4(&m_ppMaterials[i]->m_ppTextures[j]->m_xmf4x4Texture)));
+					if (m_pcbMappedGameObject) XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4Texture,
+						XMMatrixTranspose(XMLoadFloat4x4(&m_ppMaterials[i]->m_ppTextures[j]->m_xmf4x4Texture)));
 				}
 			}
+			if (m_pMesh)
+			{
+				if (m_pMesh) m_pMesh->Render(pd3dCommandList,i);
+			}
 		}
+
 	}
 
-	pd3dCommandList->SetGraphicsRootDescriptorTable(1, m_pScene->m_d3dCbvGPUDescriptorStartHandle);
-
-	if (m_pMesh)
-	{
-
-		if (m_pMesh) m_pMesh->Render(pd3dCommandList);
-	}
-
-	CGameObject::Render(pd3dCommandList, pCamera);
+	pd3dCommandList->SetGraphicsRootDescriptorTable(19, m_pScene->m_d3dCbvGPUDescriptorNextHandle);
+	
+	
+	CGameObject::Render(pd3dCommandList, pCamera, bPreRender);
 
 }
 

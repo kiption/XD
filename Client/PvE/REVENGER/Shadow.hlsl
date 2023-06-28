@@ -155,13 +155,9 @@ float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 	else
 		cAlbedoColor = gMaterial.m_cDiffuse;
 
-	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	if (gnTexturesMask & MATERIAL_EMISSION_MAP)
-		cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
-
 	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
-	float4 cColor = cAlbedoColor + cEmissionColor;
-	return (lerp(cIllumination,cColor,0.35f));
+	float4 cColor = cAlbedoColor;
+	return (lerp(cIllumination,cColor,0.6f));
 
 
 }

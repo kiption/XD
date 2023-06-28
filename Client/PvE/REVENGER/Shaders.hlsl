@@ -153,8 +153,8 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 
 	float4 uvs[MAX_LIGHTS];
 	//float4 cIllumination = Lighting(input.positionW, normalize(input.normalW));
-	float4 cIllumination = Lighting(input.positionW, input.normalW, true, uvs);
-	return(lerp(cColor, cIllumination, 0.5f));
+	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
+	return(lerp(cColor, cIllumination, 0.2f));
 }
 
 
@@ -219,11 +219,42 @@ float4 PSParticleStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
 	}
 
 	float4 uvs[MAX_LIGHTS];
-	float4 cIllumination = ParticleLighting(input.positionW, normalize(input.normalW), true, uvs);
-
-	return(lerp(cColor, cIllumination, 0.5f));
+	float4 cIllumination = ParticleLighting(input.positionW, normalize(input.normalW), false, uvs);
+	return(lerp(cColor, cIllumination, 0.2f));
 }
+float4 PSBloodParticleStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
+{
 
+	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (gnTexturesMask & MATERIAL_ALBEDO_MAP) cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
+	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (gnTexturesMask & MATERIAL_SPECULAR_MAP) cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
+	float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (gnTexturesMask & MATERIAL_NORMAL_MAP) cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
+	float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
+	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
+	float3 normalW;
+	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
+
+	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+	{
+		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
+		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
+		normalW = normalize(mul(vNormal, TBN));
+	}
+	else
+	{
+		normalW = normalize(input.normalW);
+	}
+
+	float4 uvs[MAX_LIGHTS];
+	float4 cIllumination = ParticleLighting(input.positionW, normalize(input.normalW), false, uvs);
+	cColor.w = 0.5f;
+	cColor.r += 0.2f;
+	return(lerp(cColor, cIllumination, 0.4f));
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float4 PSBulletStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 {

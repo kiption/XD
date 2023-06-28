@@ -1049,7 +1049,8 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 	if (m_pShaderInfo != NULL)
 	{
 		m_pShaderInfo->Render(pd3dCommandList, pCamera, 0, bPrerender);
-		m_pShaderInfo->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, NULL);
+		//m_pShaderInfo->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, NULL);
+		m_pShaderInfo->UpdateShaderVariables(pd3dCommandList);
 		if (m_pTextureInfo != NULL)
 		{
 			m_pTextureInfo->UpdateShaderVariables(pd3dCommandList);
@@ -1765,10 +1766,10 @@ void CNpcHelicopterObject::Animate(float fTimeElapsed)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "MissileObject.h"
-CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(10)
+CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,  CGameObject* pmodel, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(10)
 {
-	//SetChild(pModel, false);
-	//pModel->AddRef();
+	SetChild(pmodel, true);
+	pmodel->AddRef();
 
 	pBCBulletEffectShader = new CBulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
@@ -1797,7 +1798,7 @@ CHelicopterObjects::~CHelicopterObjects()
 
 void CHelicopterObjects::Firevalkan(XMFLOAT3 ToPlayerLook)
 {
-	/*CValkanObject* pBulletObject = NULL;
+	CValkanObject* pBulletObject = NULL;
 	for (int i = 0; i < HELIBULLETS; i++)
 	{
 		if (!m_ppBullets[i]->m_bActive)
@@ -1828,7 +1829,7 @@ void CHelicopterObjects::Firevalkan(XMFLOAT3 ToPlayerLook)
 		pBulletObject->SetScale(4.0, 7.0, 4.0);
 		pBulletObject->SetActive(true);
 
-	}*/
+	}
 }
 
 void CHelicopterObjects::OnPrepareAnimate()
@@ -1896,6 +1897,7 @@ CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 	SetChild(pModel->m_pModelRootObject, true);
 	pModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
+
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 4, pModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);

@@ -34,33 +34,7 @@ CHellicopterObjectsShader::~CHellicopterObjectsShader()
 
 void CHellicopterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
 {
-	/*m_nObjects = 20;
-	m_ppObjects = new CGameObject * [m_nObjects];
-
-	CLoadedModelInfo* pGunshipModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", this);
-
-	int nColumnSpace = 5, nColumnSize = 30;
-	int nFirstPassColumnSize = (m_nObjects % nColumnSize) > 0 ? (nColumnSize - 1) : nColumnSize;
-
-	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-
-
-	for (int i = 0; i < m_nObjects; i++)
-	{
-
-		m_ppObjects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pGunshipModel);
-		m_ppObjects[i]->SetChild(pGunshipModel->m_pModelRootObject, true);
-
-		m_ppObjects[i]->SetPosition(RandomPositionInSphere(XMFLOAT3(0.0f, 0.0f, 0.0f), Random(20.0f, 100.0f), nColumnSize - int(floor(nColumnSize / 2.0f)), nColumnSpace));
-		m_ppObjects[i]->Rotate(0.0f, 90.0f, 0.0f);
-		m_ppObjects[i]->OnPrepareAnimate();
-
-	}*/
-
-
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	//if (pGunshipModel) delete pGunshipModel;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -75,28 +49,6 @@ CSkinnedAnimationObjectsShader::~CSkinnedAnimationObjectsShader()
 
 void CSkinnedAnimationObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
 {
-	/*int xObjects = 5, zObjects = 6, i = 0;
-	m_nObjects = xObjects+zObjects;
-
-	m_ppObjects = new CGameObject * [m_nObjects];
-
-
-	CLoadedModelInfo* psModel = pModel;
-
-	int nObjects = 0;
-	for (int x = 0; x <= m_nObjects; x++)
-	{
-		
-	if (!psModel) psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
-			m_ppObjects[nObjects] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, 4);
-
-			m_ppObjects[nObjects++]->SetPosition(500.0f + x * 20, 6.3, 500.0f);
-		
-	}
-
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	if (!pModel && psModel) delete psModel;*/
 }
 
 void CSkinnedAnimationObjectsShader::ReleaseObjects()
@@ -160,9 +112,9 @@ void CHumanObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.25f);
 		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackPosition(0, 0);
-		XMFLOAT3 xmf3Position = XMFLOAT3(580.0, 6.0f, 850.0f+x*10);
+		XMFLOAT3 xmf3Position = XMFLOAT3(580.0, 6.0f, 850.0f + x * 10);
 		//xmf3Position.y = pTerrain->GetHeight(xmf3Position.x, xmf3Position.z);
-		m_ppObjects[x]->SetScale(15.0,15.0,15.0);
+		m_ppObjects[x]->SetScale(15.0, 15.0, 15.0);
 		m_ppObjects[x]->SetPosition(xmf3Position);
 
 	}
@@ -237,6 +189,18 @@ XMVECTOR RandomUnitVectorOnSphere()
 		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
 	}
 }
+XMVECTOR RandomBlood()
+{
+	XMVECTOR xmvOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
+	XMVECTOR xmvZero = XMVectorZero();
+
+	while (true)
+	{
+		XMVECTOR v = XMVectorSet(RandF(-1.0f, 1.0f), RandF(-0.1f, 0.1f), RandF(-0.3f, 0.2f), 0.0f);
+		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
+	}
+}
+
 void CFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
@@ -359,9 +323,138 @@ void CFragmentsShader::ReleaseUploadBuffers()
 	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
 }
 
-XMFLOAT3 CFragmentsShader::RandomDirection(float EleapsedTime)
-{
-	int u = UINT(EleapsedTime + 10 + EleapsedTime * 1000.0f) % 1024;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	return XMFLOAT3(u, u, u);
+void CBloodFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+
+
+	m_nObjects = BLOODEXPLOSION_DEBRISES;
+	m_ppObjects = new CGameObject * [m_nObjects];
+	CGameObject* pFragmentModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Blood_particle.bin", this);
+	for (int i = 0; i < m_nObjects; i++)
+	{
+		m_ppObjects[i] = new CExplosiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppObjects[i]->SetChild(pFragmentModel, false);
+		m_ppObjects[i]->SetScale(0.2, 0.1, 0.2);
+		pFragmentModel->AddRef();
+		ParticlePosition = m_ppObjects[i]->GetPosition();
+	}
+	for (int i = 0; i < BLOODEXPLOSION_DEBRISES; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomBlood());
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CBloodFragmentsShader::ReleaseObjects()
+{
+	if (m_ppObjects)
+	{
+		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->Release();
+		delete[] m_ppObjects;
+	}
+}
+
+void CBloodFragmentsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+{
+	CShader::Render(pd3dCommandList, pCamera, 0, false);
+
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			ParticlePosition = XMFLOAT3(81.0f, 12.0f, 800.0f);
+			m_ppObjects[j]->UpdateTransform(NULL);
+			m_ppObjects[j]->Render(pd3dCommandList, pCamera, false);
+		}
+	}
+
+}
+D3D12_BLEND_DESC CBloodFragmentsShader::CreateBlendState(int nPipelineState)
+{
+	D3D12_BLEND_DESC d3dBlendDesc;
+	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
+	d3dBlendDesc.AlphaToCoverageEnable = TRUE;
+	d3dBlendDesc.IndependentBlendEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	return(d3dBlendDesc);
+}
+D3D12_INPUT_LAYOUT_DESC CBloodFragmentsShader::CreateInputLayout(int nPipelineState)
+{
+	UINT nInputElementDescs = 5;
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[3] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 3, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[4] = { "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 4, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+
+	return(d3dInputLayoutDesc);
+}
+
+D3D12_SHADER_BYTECODE CBloodFragmentsShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSParticleStandard", "vs_5_1", ppd3dShaderBlob));
+
+}
+
+D3D12_SHADER_BYTECODE CBloodFragmentsShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBloodParticleStandard", "ps_5_1", ppd3dShaderBlob));
+
+}
+
+
+
+void CBloodFragmentsShader::AnimateObjects(float fTimeElapsed)
+{
+	
+	if (m_bActive == true)
+	{
+
+		XMFLOAT3 gravity = XMFLOAT3(0.0, -10.8, 0);
+		m_fElapsedTimes += fTimeElapsed * 2.05f;
+		if (m_fElapsedTimes <= m_fDuration)
+		{
+			for (int i = 0; i < BLOODEXPLOSION_DEBRISES; i++)
+			{
+				m_fExplosionSpeed = Random(1.0f, 6.0f);
+				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
+				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.x * m_fElapsedTimes * m_fElapsedTimes;;
+				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;;
+				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes + gravity.z;
+				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
+
+				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
+				m_ppObjects[i]->m_xmf4x4ToParent._42 = m_pxmf4x4Transforms[i]._42;
+				m_ppObjects[i]->m_xmf4x4ToParent._43 = m_pxmf4x4Transforms[i]._43;
+				m_ppObjects[i]->Rotate(0, 0, 90);
+			}
+		}
+		else
+		{
+
+			m_fElapsedTimes = 0.0f;
+		}
+
+	}
+}
+
+void CBloodFragmentsShader::ReleaseUploadBuffers()
+{
+	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
 }

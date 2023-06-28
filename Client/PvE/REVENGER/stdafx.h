@@ -179,7 +179,8 @@ extern float ReadFloatFromFile(FILE *pInFile);
 #define RANDOM_COLOR			XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
 
 #define EPSILON					1.0e-10f
-#define EXPLOSION_DEBRISES		100
+#define EXPLOSION_DEBRISES		60
+#define BLOODEXPLOSION_DEBRISES		50
 
 
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
@@ -296,6 +297,20 @@ namespace Vector3
 	inline XMFLOAT3 TransformCoord(XMFLOAT3& xmf3Vector, XMFLOAT4X4& xmmtx4x4Matrix)
 	{
 		return(TransformCoord(xmf3Vector, XMLoadFloat4x4(&xmmtx4x4Matrix)));
+	}
+
+	inline XMFLOAT3 Multiply(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2)
+	{
+		XMFLOAT3 xmf4Result;
+		XMStoreFloat3(&xmf4Result, XMLoadFloat3(&xmf3Vector1) * XMLoadFloat3(&xmf3Vector2));
+		return(xmf4Result);
+	}
+
+	inline XMFLOAT3 Multiply(XMFLOAT3& xmf3Vector1, float& xmf3Vector2)
+	{
+		XMFLOAT3 xmf4Result;
+		XMStoreFloat3(&xmf4Result, XMLoadFloat3(&xmf3Vector1) * XMLoadFloat(&xmf3Vector2));
+		return(xmf4Result);
 	}
 }
 

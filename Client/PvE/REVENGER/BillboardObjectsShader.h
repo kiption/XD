@@ -40,6 +40,7 @@ public:
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);
+	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelinestates);
 	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState);
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
@@ -82,12 +83,12 @@ public:
 	bool m_bResponeAnimation = false;
 
 };
-#define EXPLOSION_SPARK 50
-class HelicopterSparkBillboard: public BillboardShader
+#define EXPLOSION_SPARK 30
+class SparkBillboard: public BillboardShader
 {
 public:
-	HelicopterSparkBillboard() {};
-	virtual ~HelicopterSparkBillboard() {};
+	SparkBillboard() {};
+	virtual ~SparkBillboard() {};
 
 
 	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);
@@ -107,7 +108,7 @@ public:
 	XMFLOAT4X4					m_pxmf4x4Transforms[EXPLOSION_SPARK];
 
 	float						m_fElapsedTimes = 1.0f;
-	float						m_fDuration = 4.0f;
+	float						m_fDuration = 0.7;
 	float						m_fExplosionSpeed = 10.0f;
 	float						m_fExplosionRotation = 720.0f;
 	XMFLOAT3 m_pxmf3SphereVectors[EXPLOSION_SPARK];

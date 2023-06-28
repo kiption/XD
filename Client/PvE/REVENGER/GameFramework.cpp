@@ -110,11 +110,11 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 	m_hInstance = hInstance;
 	m_hWnd = hMainWnd;
 	m_nMode = OPENINGSCENE;
+
 	CreateDirect3DDevice();
 	CreateCommandQueueAndList();
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateSwapChain();
-
 	CoInitialize(NULL);
 
 #ifdef _WITH_DIRECT2D
@@ -781,7 +781,7 @@ void CGameFramework::ProcessInput()
 			if (m_nMode == SCENE1STAGE)
 			{
 
-				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay < 0.005)
+				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay < 0.02)
 				{
 
 					ShootKey = true;
@@ -791,8 +791,9 @@ void CGameFramework::ProcessInput()
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
 					q_mouseInput.push(lclick);//s
 				}
-				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay > 0.005)
+				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay > 0.02)
 				{
+					gamesound.shootingSound(true);
 					ShootKey = false;
 					if (m_nMode == SCENE1STAGE)
 						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)

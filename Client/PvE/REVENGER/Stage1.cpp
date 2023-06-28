@@ -30,26 +30,26 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	::ZeroMemory(m_pLights, sizeof(LIGHTS) * m_nLights);
 
 
-	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[0].m_fRange = 25000.0f;
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.5f, 0.1, 0.1f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.32f, 0.3, 0.3, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.22f, 0.2, 0.2, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.1, 0.1f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-350, 900.0f, 400.0f);
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+0.5f, -0.9f, 0.2f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+0.8f, -1.0f, 1.0f);
 
 
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 20000.0f;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.32f, 0.3, 0.3, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.22f, 0.2, 0.2, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-800, 900.0f, -700.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(+0.8f, -0.9f, 0.2f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(+0.8f, -0.9f, 0.8f);
 
 	m_pLights->m_pLights[2].m_bEnable = true;
 	m_pLights->m_pLights[2].m_nType = SPOT_LIGHT;
@@ -163,7 +163,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pResponeEffectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[2] = pResponeEffectShader;
 
-	HelicopterSparkBillboard* pHelicopterSparkBillboard = new HelicopterSparkBillboard();
+	SparkBillboard* pHelicopterSparkBillboard = new SparkBillboard();
 	pHelicopterSparkBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHelicopterSparkBillboard->SetCurScene(SCENE1STAGE);
 	pHelicopterSparkBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
@@ -179,13 +179,19 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pSpriteAnimationBillboard->SetActive(false);
 	m_ppSpriteBillboard[0] = pSpriteAnimationBillboard;
 
-	m_nFragShaders = 1;
+	m_nFragShaders = 2;
 	m_ppFragShaders = new CFragmentsShader * [m_nFragShaders];
 	CFragmentsShader* pFragmentsShader = new CFragmentsShader();
 	pFragmentsShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pFragmentsShader->SetCurScene(SCENE1STAGE);
 	pFragmentsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppFragShaders[0] = pFragmentsShader;
+
+	CBloodFragmentsShader* pBloodFragmentsShader = new CBloodFragmentsShader();
+	pBloodFragmentsShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pBloodFragmentsShader->SetCurScene(SCENE1STAGE);
+	pBloodFragmentsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppFragShaders[1] = pBloodFragmentsShader;
 
 	m_nShaders = 1;
 	m_ppShaders = new CObjectsShader * [m_nShaders];
@@ -206,14 +212,14 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
 
-	m_pAnimationDepthRenderShader = new CAnimationDepthRenderShader(pObjectShader, m_pLights->m_pLights);
-	m_pAnimationDepthRenderShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
-	m_pAnimationDepthRenderShader->SetCurScene(SCENE1STAGE);
-	m_pAnimationDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_pAnimationShadowShader = new CAnimationShadowMapShader(pObjectShader);
-	m_pAnimationShadowShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
-	m_pAnimationShadowShader->SetCurScene(SCENE1STAGE);
-	m_pAnimationShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pAnimationDepthRenderShader->GetDepthTexture());
+	//m_pAnimationDepthRenderShader = new CAnimationDepthRenderShader(pObjectShader, m_pLights->m_pLights);
+	//m_pAnimationDepthRenderShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	//m_pAnimationDepthRenderShader->SetCurScene(SCENE1STAGE);
+	//m_pAnimationDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	//m_pAnimationShadowShader = new CAnimationShadowMapShader(pObjectShader);
+	//m_pAnimationShadowShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	//m_pAnimationShadowShader->SetCurScene(SCENE1STAGE);
+	//m_pAnimationShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pAnimationDepthRenderShader->GetDepthTexture());
 
 
 	m_nPlayerObjects = 1;
@@ -288,15 +294,9 @@ void Stage1::ReleaseObjects()
 		m_pDepthRenderShader->Release();
 
 	}
-	if (m_pAnimationDepthRenderShader)
-	{
-		m_pAnimationDepthRenderShader->ReleaseShaderVariables();
-		m_pAnimationDepthRenderShader->ReleaseObjects();
-		m_pAnimationDepthRenderShader->Release();
 
-	}
 	if (m_pShadowShader)delete m_pShadowShader;
-	if (m_pAnimationShadowShader)delete m_pAnimationShadowShader;
+	
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
 	ReleaseShaderVariables();
@@ -854,21 +854,12 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nHumanShaders; i++) if (m_ppHumanShaders[i]) m_ppHumanShaders[i]->AnimateObjects(fTimeElapsed);
 	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();
-	//if (m_pPlayer->m_bCollisionTerrain == true)
-	//{
-	//	//m_ppSpriteBillboard[0]->m_bActive = true;
-	//}
-	//else
-	//{
-	//	//m_ppSpriteBillboard[0]->m_bActive = false;
 
-	//}
+	((CSpriteObjectsShader*)m_ppSpriteBillboard[0])->m_bActive = true;
 	((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveMark = true;
-	m_ppFragShaders[0]->m_bActive = true;
-	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(m_ppShaders[0]->m_ppObjects[20]->GetPosition().x,
-		m_ppShaders[0]->m_ppObjects[20]->GetPosition().y + 6.5f, m_ppShaders[0]->m_ppObjects[20]->GetPosition().z);
-	m_ppFragShaders[0]->ParticlePosition = m_pBillboardShader[1]->m_ppObjects[0]->GetPosition();
-
+	((CFragmentsShader*)m_ppFragShaders[0])->m_bActive = true;
+	((CBloodFragmentsShader*)m_ppFragShaders[1])->m_bActive = true;
+	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(81.f, 12.0, 800.f);
 	CBulletObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
 	XMFLOAT3 Position2P = m_ppShaders[0]->m_ppObjects[5]->GetPosition();
 	XMFLOAT3 Look2P = m_ppShaders[0]->m_ppObjects[5]->GetLook();
@@ -882,10 +873,10 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.4, 0.4, 0.4, 1.0);
 		m_pLights->m_pLights[5].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[0]->GetPosition();
 	}
-	m_fLightRotationAngle += fTimeElapsed;
-	XMMATRIX xmmtxRotation = XMMatrixRotationY(fTimeElapsed * 0.02f);
-	XMStoreFloat3(&m_pLights->m_pLights[0].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction), xmmtxRotation));
-	XMStoreFloat3(&m_pLights->m_pLights[1].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[1].m_xmf3Direction), xmmtxRotation));
+	//m_fLightRotationAngle += fTimeElapsed;
+	//XMMATRIX xmmtxRotation = XMMatrixRotationY(fTimeElapsed * 0.02f);
+	//XMStoreFloat3(&m_pLights->m_pLights[0].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction), xmmtxRotation));
+	//XMStoreFloat3(&m_pLights->m_pLights[1].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[1].m_xmf3Direction), xmmtxRotation));
 	ParticleAnimation();
 }
 
@@ -897,9 +888,9 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
-	m_pAnimationDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
-	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
-	pCamera->UpdateShaderVariables(pd3dCommandList);
+	//m_pAnimationDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
+	//pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	//pCamera->UpdateShaderVariables(pd3dCommandList);
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 
@@ -919,16 +910,14 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
-	if (m_pAnimationShadowShader) m_pAnimationShadowShader->Render(pd3dCommandList, pCamera, 0);
-	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
-	pCamera->UpdateShaderVariables(pd3dCommandList);
+
 
 
 }
 void Stage1::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	m_pDepthRenderShader->PrepareShadowMap(pd3dCommandList);
-	m_pAnimationDepthRenderShader->PrepareShadowMap(pd3dCommandList);
+
 }
 
 void Stage1::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
