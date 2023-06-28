@@ -97,8 +97,8 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	for (int i = 12; i < 22; i++)
 	{
 		CGameObject* pNPCHelicopterModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
-		m_ppObjects[i] = new CNpcHelicopterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		m_ppObjects[i]->SetChild(pNPCHelicopterModel, false);
+		m_ppObjects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pNPCHelicopterModel, pd3dGraphicsRootSignature);
+		//m_ppObjects[i]->SetChild(pNPCHelicopterModel, false);
 		m_ppObjects[i]->SetMaterial(0, pNpcHeliMaterial);
 		m_ppObjects[i]->OnPrepareAnimate();
 		m_ppObjects[i]->SetPosition(XMFLOAT3(50.0 + i * 15, 70.0, -500.0));
