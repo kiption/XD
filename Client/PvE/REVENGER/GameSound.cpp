@@ -18,8 +18,12 @@ GameSound::GameSound()
 	result = speakSound->setMode(FMOD_LOOP_NORMAL);
 
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("Sound/attacking.mp3", FMOD_3D, 0, &bgmSound);
-	result = bgmSound->setMode(FMOD_LOOP_NORMAL);
+	result = soundSystem->createSound("Sound/footStep.wav", FMOD_DEFAULT, 0, &bgmSound);
+	result = bgmSound->setMode(FMOD_LOOP_OFF);
+
+	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
+	result = soundSystem->createSound("Sound/Reload.wav", FMOD_DEFAULT, 0, &reloadSounds);
+	result = bossSound->setMode(FMOD_LOOP_OFF);
 
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
 	result = soundSystem->createSound("sound_walk.mp3", FMOD_DEFAULT, 0, &walkSound);
@@ -59,6 +63,7 @@ GameSound::~GameSound()
 	result = bgmSound->release();
 	result = walkSound->release();
 	result = bossSound->release();
+	result = reloadSounds->release();
 
 	result = soundSystem->close();
 	result = soundSystem->release();
@@ -106,7 +111,11 @@ void GameSound::collisionSound()
 	result = soundSystem->playSound(ColliSound, 0, false, &ColliChannel);
 	ColliChannel->setVolume(0.02f);
 }
-
+void GameSound::reloadSound()
+{
+	result = soundSystem->playSound(reloadSounds, 0, false, &reloadChannel);
+	reloadChannel->setVolume(0.3f);
+}
 void GameSound::pauseWalking()
 {
 	walkChannel->setPaused(true);
@@ -131,3 +140,5 @@ void GameSound::pauseBossSound()
 {
 	bossChannel->setPaused(true);
 }
+
+

@@ -39,13 +39,37 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	//m_pSkinnedAnimationController->SetTrackEnable(9, false);
 	//m_pSkinnedAnimationController->SetTrackEnable(10, false);
 	//m_pSkinnedAnimationController->SetTrackEnable(11, false);
-	m_pSkinnedAnimationController->SetTrackWeight(6,0.4f);
+	m_pSkinnedAnimationController->SetTrackWeight(6,0.1f);
+
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
-	m_pSkinnedAnimationController->SetCallbackKeys(2, 1);
-	m_pSkinnedAnimationController->SetCallbackKeys(1, 5);
-	m_pSkinnedAnimationController->SetCallbackKeys(5, 1);
-	m_pSkinnedAnimationController->SetCallbackKeys(1, 6);
-	m_pSkinnedAnimationController->SetCallbackKeys(6, 1);
+	m_pSkinnedAnimationController->SetCallbackKeys(2, 2);
+	m_pSkinnedAnimationController->SetCallbackKeys(3, 2);
+	m_pSkinnedAnimationController->SetCallbackKeys(4, 2);
+
+
+#ifdef _WITH_SOUND_RESOURCE
+	m_pSkinnedAnimationController->SetCallbackKey(0, 0, 0.1f, _T("Footstep01"));
+	m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.5f, _T("Footstep02"));
+	m_pSkinnedAnimationController->SetCallbackKey(3, 0, 0.9f, _T("Footstep03"));
+#else
+	m_pSkinnedAnimationController->SetCallbackKey(1, 0, 0.1f, _T("Sound/footStep.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.4f, _T("Sound/footStep.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(2, 0, 0.1f, _T("Sound/footStep.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(2, 1, 0.4f, _T("Sound/footStep.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(3, 0, 0.1f, _T("Sound/footStep.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(3, 1, 0.4f, _T("Sound/footStep.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(4, 0, 0.1f, _T("Sound/footStep.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(4, 1, 0.4f, _T("Sound/footStep.wav"));
+#endif
+	CAnimationCallbackHandler* pAnimationCallbackHandler = new CSoundCallbackHandler();
+	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
+	//m_pSkinnedAnimationController->SetAnimationCallbackHandler(2, pAnimationCallbackHandler);
+	//m_pSkinnedAnimationController->SetAnimationCallbackHandler(3, pAnimationCallbackHandler);
+	//m_pSkinnedAnimationController->SetAnimationCallbackHandler(4, pAnimationCallbackHandler);
+
+
+
+
 
 	pBCBulletEffectShader = new CBulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
@@ -216,7 +240,7 @@ void CHumanPlayer::ReloadState()
 		m_pSkinnedAnimationController->SetTrackEnable(4, false);
 		m_pSkinnedAnimationController->SetTrackEnable(5, true);
 		m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
-
+		
 	}
 
 
@@ -242,6 +266,7 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 {
 	m_bReloadState = false;
 	m_bJumeState = false;
+ 
 	m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_LOOP;
 	if (dwDirection & DIR_FORWARD)
 	{
@@ -262,13 +287,14 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 	{
 		m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		m_pSkinnedAnimationController->SetTrackEnable(1, false);
-		m_pSkinnedAnimationController->SetTrackEnable(2, true);
-		m_pSkinnedAnimationController->SetTrackEnable(3, false);
+		m_pSkinnedAnimationController->SetTrackEnable(2, false);
+		m_pSkinnedAnimationController->SetTrackEnable(3, true);
 		m_pSkinnedAnimationController->SetTrackEnable(4, false);
 		m_pSkinnedAnimationController->SetTrackEnable(5, false);
 		m_pSkinnedAnimationController->SetTrackEnable(6, false);
 		m_pSkinnedAnimationController->SetTrackEnable(7, false);
 		m_pSkinnedAnimationController->SetTrackEnable(8, false);
+		m_pSkinnedAnimationController->SetTrackEnable(9, false);
 
 
 	}
@@ -412,7 +438,6 @@ void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 		XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
 		XMFLOAT3 xmf3Position = m_pBulletFindFrame->GetPosition();
 		XMFLOAT3 xmf3Direction = CameraLook;
-		//xmf3Direction.y += 0.0;
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
 

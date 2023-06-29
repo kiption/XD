@@ -256,8 +256,8 @@ void CSpaceShipCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 {
 	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(m_xmf3Position, xmf3LookAt, m_pPlayer->GetUpVector());
 	m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
-	m_xmf3Up = XMFLOAT3(0, 1, 0);
-	m_xmf3Look = XMFLOAT3(mtxLookAt._13 * 24, mtxLookAt._23 / 12, mtxLookAt._33 * 24);
+	//m_xmf3Up = XMFLOAT3(0, 1, 0);
+	m_xmf3Look = XMFLOAT3(mtxLookAt._13 * 12, mtxLookAt._23 / 6, mtxLookAt._33 * 12);
 
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -10,6 +10,7 @@ class GameSound
 {
 public:	
 	FMOD::System* soundSystem;
+
 	FMOD::Sound* shootSound;
 	FMOD::Channel* shootChannel;
 
@@ -31,6 +32,9 @@ public:
 	FMOD::Sound* bossSound;
 	FMOD::Channel* bossChannel;
 
+	FMOD::Sound* reloadSounds;
+	FMOD::Channel* reloadChannel;
+
 	FMOD_RESULT  result;
 	void* extradriverdata = 0;
 	
@@ -50,5 +54,6 @@ public:
 	void pauseRunning();
 	void startBossSound();
 	void pauseBossSound();
+	void reloadSound();
 
 };

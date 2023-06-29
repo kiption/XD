@@ -149,6 +149,7 @@ void CPlayer::Rotate(float x, float y, float z)
 		if (x <= -0.5f)x += 0.6f; if (x >= 0.5f)x -= 0.6f;
 		if (x >= -0.5f && x <= 0.5f)
 		{
+
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(x));
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
