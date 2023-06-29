@@ -97,11 +97,11 @@ void CPlayer::Rotate(float x, float y, float z)
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	if ((nCurrentCameraMode == FIRST_PERSON_CAMERA) || (nCurrentCameraMode == THIRD_PERSON_CAMERA))
 	{
-		if (x != 0.0f)
+		if (x!=0.0f)
 		{
 			m_fPitch += x;
-			if (m_fPitch > +89.0f) { x -= (m_fPitch - 89.0f); m_fPitch = +89.0f; }
-			if (m_fPitch < -89.0f) { x -= (m_fPitch + 89.0f); m_fPitch = -89.0f; }
+			if (m_fPitch > +10.0f)m_fPitch -= 11.0f;// { x -= (m_fPitch - 10.0f); m_fPitch = 0.0f; }
+			if (m_fPitch < -10.0f)m_fPitch += 11.0f;// { x -= (m_fPitch + 10.0f); m_fPitch = 0.0f; }
 		}
 		if (y != 0.0f)
 		{
@@ -143,15 +143,16 @@ void CPlayer::Rotate(float x, float y, float z)
 		}*/
 
 	}
-	else if (nCurrentCameraMode == SPACESHIP_CAMERA)
+	else if (nCurrentCameraMode == CLOSEUP_PERSON_CAMERA)
 	{
 		m_pCamera->Rotate(x, y, z);
-		/*if (x != 0.0f)
+		if (x <= -0.5f)x += 0.6f; if (x >= 0.5f)x -= 0.6f;
+		if (x >= -0.5f && x <= 0.5f)
 		{
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(x));
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
-		}*/
+		}
 		if (y != 0.0f)
 		{
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
@@ -216,11 +217,11 @@ CCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
 	case THIRD_PERSON_CAMERA:
 		pNewCamera = new CThirdPersonCamera(m_pCamera);
 		break;
-	case SPACESHIP_CAMERA:
+	case CLOSEUP_PERSON_CAMERA:
 		pNewCamera = new CSpaceShipCamera(m_pCamera);
 		break;
 	}
-	if (nCurrentCameraMode == SPACESHIP_CAMERA)
+	if (nCurrentCameraMode == CLOSEUP_PERSON_CAMERA)
 	{
 		m_xmf3Right = Vector3::Normalize(XMFLOAT3(m_xmf3Right.x, 0.0f, m_xmf3Right.z));
 		m_xmf3Up = Vector3::Normalize(XMFLOAT3(0.0f, 1.0f, 0.0f));
@@ -231,7 +232,7 @@ CCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
 		m_fYaw = Vector3::Angle(XMFLOAT3(0.0f, 0.0f, 1.0f), m_xmf3Look);
 		if (m_xmf3Look.x < 0.0f) m_fYaw = -m_fYaw;
 	}
-	else if ((nNewCameraMode == SPACESHIP_CAMERA) && m_pCamera)
+	else if ((nNewCameraMode == CLOSEUP_PERSON_CAMERA) && m_pCamera)
 	{
 		m_xmf3Right = m_pCamera->GetRightVector();
 		m_xmf3Up = m_pCamera->GetUpVector();
@@ -265,7 +266,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 {
 	CGameObject::Render(pd3dCommandList, pCamera,false);
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
-	if (nCameraMode == THIRD_PERSON_CAMERA || nCameraMode == SPACESHIP_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
+	if (nCameraMode == THIRD_PERSON_CAMERA || nCameraMode == CLOSEUP_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
 }
 
 #define _WITH_DEBUG_CALLBACK_DATA

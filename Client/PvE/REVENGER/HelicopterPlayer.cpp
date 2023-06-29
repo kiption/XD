@@ -77,7 +77,7 @@ void HeliPlayer::Firevalkan(CGameObject* pLockedObject)
 		XMFLOAT3 xmf3Direction = TotalLookVector;
 
 		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
-		if (m_pCamera->m_nMode == SPACESHIP_CAMERA)
+		if (m_pCamera->m_nMode == CLOSEUP_PERSON_CAMERA)
 		{
 			xmf3Direction.y += 0.1f;
 			XMFLOAT3 xmf3FirePosition = Vector3::Add(CaemraPosition, Vector3::ScalarProduct(xmf3Direction, 60.0f, false));
@@ -118,12 +118,12 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
-	case SPACESHIP_CAMERA:
+	case CLOSEUP_PERSON_CAMERA:
 		SetFriction(5.0f);
 		SetGravity(XMFLOAT3(0.0f, -0.0f, 0.0f));
 		SetMaxVelocityXZ(300.0f);
 		SetMaxVelocityY(400.0f);
-		m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
+		m_pCamera = OnChangeCamera(CLOSEUP_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 1.5, 2.6f));
 		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z), m_pCamera->GetOffset()));
@@ -218,7 +218,7 @@ void HeliPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 	{
 		xmf3CameraPosition.y = fHeight;
 		m_pCamera->SetPosition(xmf3CameraPosition);
-		if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA || m_pCamera->GetMode() == SPACESHIP_CAMERA)
+		if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA || m_pCamera->GetMode() == CLOSEUP_PERSON_CAMERA)
 		{
 			CThirdPersonCamera* p3rdPersonCamera = (CThirdPersonCamera*)m_pCamera;
 			p3rdPersonCamera->SetLookAt(GetPosition());

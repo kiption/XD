@@ -162,13 +162,23 @@ bool CCamera::IsInFrustum(BoundingBox& xmBoundingBox)
 
 CSpaceShipCamera::CSpaceShipCamera(CCamera* pCamera) : CCamera(pCamera)
 {
-	m_nMode = SPACESHIP_CAMERA;
+	m_nMode = CLOSEUP_PERSON_CAMERA;
+	
+		m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		m_xmf3Right.y = 0.0f;
+		m_xmf3Look.y = 0.0f;
+		m_xmf3Right = Vector3::Normalize(m_xmf3Right);
+		m_xmf3Look = Vector3::Normalize(m_xmf3Look);
+	
 }
 
 void CSpaceShipCamera::Rotate(float x, float y, float z)
 {
-	/*if (m_pPlayer && (x != 0.0f))
+	if (x <= -0.5f)x += 0.6f; if (x >= 0.5f)x -= 0.6f;
+
+	if (m_pPlayer && (x >= -0.5f && x <= 0.5f))
 	{
+		
 		XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Right), XMConvertToRadians(x));
 		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
@@ -177,7 +187,7 @@ void CSpaceShipCamera::Rotate(float x, float y, float z)
 		m_xmf3Position = Vector3::Subtract(m_xmf3Position, m_pPlayer->GetPosition());
 		m_xmf3Position = Vector3::TransformCoord(m_xmf3Position, xmmtxRotate);
 		m_xmf3Position = Vector3::Add(m_xmf3Position, m_pPlayer->GetPosition());
-	}*/
+	}
 	if (m_pPlayer && (y != 0.0f))
 	{
 		XMFLOAT3 xmf3Up = m_pPlayer->GetUpVector();
@@ -221,7 +231,7 @@ void CSpaceShipCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		XMFLOAT3 xmf3PlayerPosition = m_pPlayer->GetPosition(); // 플레이어의 위치를 얻어옵니다.
 
 		// 카메라의 위치를 플레이어 위치로 설정합니다.
-		m_xmf3Position = XMFLOAT3(xmf3PlayerPosition.x - 1.0f, xmf3PlayerPosition.y, xmf3PlayerPosition.z);
+		m_xmf3Position = XMFLOAT3(xmf3PlayerPosition.x, xmf3PlayerPosition.y, xmf3PlayerPosition.z);
 		XMFLOAT3 xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, xmf4x4Rotate);
 		XMFLOAT3 xmf3Position = Vector3::Add(XMFLOAT3(m_pPlayer->m_xmf3Position.x, m_pPlayer->m_xmf3Position.y, m_pPlayer->m_xmf3Position.z), xmf3Offset);
 		XMFLOAT3 xmf3LookAt = m_pPlayer->GetLook(); // 플레이어의 LookAt 위치를 얻어옵니다.	
@@ -247,7 +257,7 @@ void CSpaceShipCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(m_xmf3Position, xmf3LookAt, m_pPlayer->GetUpVector());
 	m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
 	m_xmf3Up = XMFLOAT3(0, 1, 0);
-	m_xmf3Look = XMFLOAT3(mtxLookAt._13 * 12, mtxLookAt._23 / 6, mtxLookAt._33 * 12);
+	m_xmf3Look = XMFLOAT3(mtxLookAt._13 * 24, mtxLookAt._23 / 12, mtxLookAt._33 * 24);
 
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -258,7 +268,7 @@ CFirstPersonCamera::CFirstPersonCamera(CCamera* pCamera) : CCamera(pCamera)
 	m_nMode = FIRST_PERSON_CAMERA;
 	if (pCamera)
 	{
-		if (pCamera->GetMode() == SPACESHIP_CAMERA)
+		if (pCamera->GetMode() == CLOSEUP_PERSON_CAMERA)
 		{
 			m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 			m_xmf3Right.y = 0.0f;
@@ -274,23 +284,17 @@ void CFirstPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	if (m_pPlayer)
 	{
 		XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
-		//XMFLOAT3 xmf3Pos = m_pPlayer->GetPosition();
+
 		XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
 		XMFLOAT3 xmf3Up = m_pPlayer->GetUpVector();
 		XMFLOAT3 xmf3Look = m_pPlayer->GetLookVector();
 		xmf4x4Rotate._11 = xmf3Right.x; xmf4x4Rotate._21 = xmf3Up.x; xmf4x4Rotate._31 = xmf3Look.x;
 		xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
 		xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
-		//xmf4x4Rotate._41 = xmf3Pos.x; xmf4x4Rotate._42 = xmf3Pos.y; xmf4x4Rotate._43 = xmf3Pos.z;//연출
-			// 플레이어를 항상 화면의 좌측에 고정시키기 위해 카메라의 위치를 업데이트합니다.
-		XMFLOAT3 xmf3PlayerPosition = m_pPlayer->GetPosition(); // 플레이어의 위치를 얻어옵니다.
+		
 
-		// 카메라의 위치를 플레이어 위치로 설정합니다.
-		m_xmf3Position = XMFLOAT3(xmf3PlayerPosition.x - 1.0f, xmf3PlayerPosition.y, xmf3PlayerPosition.z);
 		XMFLOAT3 xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, xmf4x4Rotate);
 		XMFLOAT3 xmf3Position = Vector3::Add(XMFLOAT3(m_pPlayer->m_xmf3Position.x, m_pPlayer->m_xmf3Position.y, m_pPlayer->m_xmf3Position.z), xmf3Offset);
-		XMFLOAT3 xmf3LookAt = m_pPlayer->GetLook(); // 플레이어의 LookAt 위치를 얻어옵니다.	
-
 		XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
 		float fLength = Vector3::Length(xmf3Direction);
 		xmf3Direction = Vector3::Normalize(xmf3Direction);
@@ -301,8 +305,8 @@ void CFirstPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		if (fDistance > 0)
 		{
 			m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fDistance);
-			// 카메라의 LookAt 위치를 플레이어 위치로 설정합니다.
-			SetLookAt(xmf3LookAt); // LookAt 위치를 설정합니다.
+
+			SetLookAt(xmf3LookAt);
 		}
 	}
 }
@@ -311,9 +315,9 @@ void CFirstPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 void CFirstPersonCamera::SetLookAt(XMFLOAT3& vLookAt)
 {
 	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(m_xmf3Position, vLookAt, m_pPlayer->GetUpVector());
-	m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
+	//m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
 	//m_xmf3Up = XMFLOAT3(0, 1, 0);
-	m_xmf3Look = XMFLOAT3(mtxLookAt._13 * 24, mtxLookAt._23 / 6, mtxLookAt._33 * 12);
+	m_xmf3Look = XMFLOAT3(mtxLookAt._13 * 12, mtxLookAt._23 / 6, mtxLookAt._33 * 12);
 }
 
 void CFirstPersonCamera::Rotate(float x, float y, float z)
@@ -353,7 +357,7 @@ CThirdPersonCamera::CThirdPersonCamera(CCamera* pCamera) : CCamera(pCamera)
 	m_nMode = THIRD_PERSON_CAMERA;
 	if (pCamera)
 	{
-		if (pCamera->GetMode() == SPACESHIP_CAMERA)
+		if (pCamera->GetMode() == CLOSEUP_PERSON_CAMERA)
 		{
 			m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 			m_xmf3Right.y = 0.0f;

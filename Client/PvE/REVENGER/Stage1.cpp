@@ -888,9 +888,7 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
-	//m_pAnimationDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
-	//pCamera->SetViewportsAndScissorRects(pd3dCommandList);
-	//pCamera->UpdateShaderVariables(pd3dCommandList);
+
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 

@@ -708,7 +708,7 @@ void CGameFramework::BuildObjects()
 	CreateShaderVariables();
 	//m_pScene->m_pPlayer = m_pScene->m_pPlayer = pPlayer;
 	//m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetCamera();
-	//m_pCamera->SetMode(FIRST_PERSON_CAMERA);
+	//m_pCamera->SetMode(CLOSEUP_PERSON_CAMERA);
 
 
 
@@ -771,7 +771,7 @@ void CGameFramework::ProcessInput()
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
 			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 40.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 40.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 70.0f;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
@@ -781,7 +781,7 @@ void CGameFramework::ProcessInput()
 			if (m_nMode == SCENE1STAGE)
 			{
 
-				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay < 0.02)
+				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay < 0.05)
 				{
 
 					ShootKey = true;
@@ -791,13 +791,13 @@ void CGameFramework::ProcessInput()
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
 					q_mouseInput.push(lclick);//s
 				}
-				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay > 0.02)
+				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay > 0.05)
 				{
 					gamesound.shootingSound(true);
 					ShootKey = false;
-					if (m_nMode == SCENE1STAGE)
+					/*if (m_nMode == SCENE1STAGE)
 						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)
-						->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+						->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);*/
 				}
 			}
 
@@ -809,7 +809,8 @@ void CGameFramework::ProcessInput()
 				if (cxDelta || cyDelta)
 				{
 
-					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(0.0f, cxDelta, 0.0f);
+					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(0.0, cxDelta, 0.0f);
+					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, 0.0, 0.0f);
 					MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
 					q_mouseInput.push(mousemove);//s
 
@@ -836,7 +837,8 @@ void CGameFramework::AnimateObjects()
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed());
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 
-
+		if(m_pCamera->GetMode()==THIRD_PERSON_CAMERA)
+			m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera(CLOSEUP_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
 		//if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
 		if (m_nMode == SCENE1STAGE)
 		{
@@ -1339,9 +1341,8 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			//CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, ((Stage1*)m_pScene)->m_pTerrain);
 			m_pScene->m_pPlayer = ((Stage1*)m_pScene)->m_ppPlayerObjects[0];
 			m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetCamera();
-
 			m_pScene->SetCurScene(SCENE1STAGE);
-
+			
 			m_pd3dCommandList->Close();
 			ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 			m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);

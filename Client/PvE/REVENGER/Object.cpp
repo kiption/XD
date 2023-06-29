@@ -1768,7 +1768,7 @@ void CNpcHelicopterObject::Animate(float fTimeElapsed)
 #include "MissileObject.h"
 CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,  CGameObject* pmodel, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(10)
 {
-	SetChild(pmodel, true);
+	SetChild(pmodel, false);
 	pmodel->AddRef();
 
 	pBCBulletEffectShader = new CBulletEffectShader();
