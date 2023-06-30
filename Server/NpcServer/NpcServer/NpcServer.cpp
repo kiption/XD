@@ -47,9 +47,8 @@ using namespace DirectX::PackedVector;
 using namespace std;
 using namespace chrono;
 
-system_clock::time_point g_s_start_time;	// 서버 시작시간  (단위: ms)
-milliseconds g_curr_servertime;
-mutex servertime_lock;	// 서버시간 lock
+system_clock::time_point last_send_checkpos_time;	// 마지막으로 check_pos패킷 보낸 시간
+mutex time_lock;	// 서버시간 lock
 
 enum NPCState { NPC_IDLE, NPC_CHASE, NPC_ST_ATK, NPC_DEATH };
 enum Hit_target { g_none, g_body, g_profeller };
@@ -302,6 +301,8 @@ public:
 	bool m_DeathCheck = false;
 	bool PrintRayCast = false;
 
+	bool m_UpdateTurn = false;
+
 	vector<int>path;
 	BoundingFrustum m_frustum;
 	XMFLOAT3 m_VectorMAX = { -9999.f, -9999.f, -9999.f };
@@ -420,7 +421,160 @@ public:
 	void		A_NPC_Death_motion();																// HP 0
 
 };
+array<NPC, MAX_NPCS> npcsInfo;
 
+//======================================================================
+enum PACKET_PROCESS_TYPE { OP_RECV, OP_SEND, OP_CONNECT };
+
+class OVER_EX {
+public:
+	WSAOVERLAPPED overlapped;
+	WSABUF wsabuf;
+	char send_buf[BUF_SIZE];
+	PACKET_PROCESS_TYPE process_type;
+
+	OVER_EX()
+	{
+		wsabuf.len = BUF_SIZE;
+		wsabuf.buf = send_buf;
+		process_type = OP_RECV;
+		ZeroMemory(&overlapped, sizeof(overlapped));
+	}
+
+	OVER_EX(char* packet)
+	{
+		wsabuf.len = packet[0];
+		wsabuf.buf = send_buf;
+		ZeroMemory(&overlapped, sizeof(overlapped));
+		process_type = OP_SEND;
+		memcpy(send_buf, packet, packet[0]);
+	}
+};
+
+//======================================================================
+class SERVER {
+public:
+	OVER_EX recv_over;
+	int remain_size;
+	int id;
+	SOCKET sock;
+	mutex s_lock;
+
+public:
+	SERVER() { remain_size = 0; id = -1; sock = 0; }
+
+public:
+	void do_recv()
+	{
+		DWORD recv_flag = 0;
+		memset(&recv_over.overlapped, 0, sizeof(recv_over.overlapped));
+		recv_over.wsabuf.len = BUF_SIZE - remain_size;
+		recv_over.wsabuf.buf = recv_over.send_buf + remain_size;
+
+		int ret = WSARecv(sock, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.overlapped, 0);
+		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
+			cout << "WSARecv Error - " << ret << endl;
+			cout << GetLastError() << endl;
+		}
+	}
+
+	void do_send(void* packet)
+	{
+		OVER_EX* s_data = new OVER_EX{ reinterpret_cast<char*>(packet) };
+		ZeroMemory(&s_data->overlapped, sizeof(s_data->overlapped));
+
+		int ret = WSASend(sock, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, 0);
+		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
+			cout << "WSASend Error - " << ret << endl;
+			cout << GetLastError() << endl;
+		}
+	}
+
+	void send_npc_init_packet(int npc_id);
+	void send_npc_rotate_packet(int npc_id);
+	void send_check_pos_packet(int npc_id);
+	void send_npc_attack_packet(int npc_id);
+};
+
+HANDLE h_iocp;											// IOCP 핸들
+int a_lgcsvr_num;										// Active상태인 메인서버
+array<SERVER, MAX_LOGIC_SERVER> g_logicservers;			// 로직서버 정보
+
+void SERVER::send_npc_init_packet(int npc_id) {
+	NPC_FULL_INFO_PACKET npc_init_packet;
+	npc_init_packet.size = sizeof(NPC_FULL_INFO);
+	npc_init_packet.type = NPC_FULL_INFO;
+	npc_init_packet.n_id = npc_id;
+	npc_init_packet.speed = npcsInfo[npc_id].GetSpeed();
+	npc_init_packet.ishuman = npcsInfo[npc_id].type;
+	strcpy_s(npc_init_packet.name, npcsInfo[npc_id].name);
+	npc_init_packet.hp = npcsInfo[npc_id].hp;
+	npc_init_packet.x = npcsInfo[npc_id].pos.x;
+	npc_init_packet.y = npcsInfo[npc_id].pos.y;
+	npc_init_packet.z = npcsInfo[npc_id].pos.z;
+	npc_init_packet.right_x = npcsInfo[npc_id].m_rightvec.x;
+	npc_init_packet.right_y = npcsInfo[npc_id].m_rightvec.y;
+	npc_init_packet.right_z = npcsInfo[npc_id].m_rightvec.z;
+	npc_init_packet.up_x = npcsInfo[npc_id].m_upvec.x;
+	npc_init_packet.up_y = npcsInfo[npc_id].m_upvec.y;
+	npc_init_packet.up_z = npcsInfo[npc_id].m_upvec.z;
+	npc_init_packet.look_x = npcsInfo[npc_id].m_lookvec.x;
+	npc_init_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
+	npc_init_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
+
+	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
+	g_logicservers[a_lgcsvr_num].do_send(&npc_init_packet);
+}
+void SERVER::send_npc_rotate_packet(int npc_id) {
+	NPC_ROTATE_PACKET npc_rotate_packet;
+	npc_rotate_packet.size = sizeof(NPC_ROTATE_PACKET);
+	npc_rotate_packet.type = NPC_ROTATE;
+	npc_rotate_packet.n_id = npc_id;
+	npc_rotate_packet.x = npcsInfo[npc_id].pos.x;
+	npc_rotate_packet.y = npcsInfo[npc_id].pos.y;
+	npc_rotate_packet.z = npcsInfo[npc_id].pos.z;
+	npc_rotate_packet.right_x = npcsInfo[npc_id].m_rightvec.x;
+	npc_rotate_packet.right_y = npcsInfo[npc_id].m_rightvec.y;
+	npc_rotate_packet.right_z = npcsInfo[npc_id].m_rightvec.z;
+	npc_rotate_packet.up_x = npcsInfo[npc_id].m_upvec.x;
+	npc_rotate_packet.up_y = npcsInfo[npc_id].m_upvec.y;
+	npc_rotate_packet.up_z = npcsInfo[npc_id].m_upvec.z;
+	npc_rotate_packet.look_x = npcsInfo[npc_id].m_lookvec.x;
+	npc_rotate_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
+	npc_rotate_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
+	npc_rotate_packet.server_time = 0;	// 메인서버에서 정해줄 예정.
+
+	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
+	g_logicservers[a_lgcsvr_num].do_send(&npc_rotate_packet);
+}
+void SERVER::send_check_pos_packet(int npc_id) {
+	NPC_CHECK_POS_PACKET npc_pos_packet;
+	npc_pos_packet.size = sizeof(NPC_CHECK_POS_PACKET);
+	npc_pos_packet.type = NPC_CHECK_POS;
+	npc_pos_packet.n_id = npc_id;
+	npc_pos_packet.x = npcsInfo[npc_id].pos.x;
+	npc_pos_packet.y = npcsInfo[npc_id].pos.y;
+	npc_pos_packet.z = npcsInfo[npc_id].pos.z;
+
+	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
+	g_logicservers[a_lgcsvr_num].do_send(&npc_pos_packet);
+}
+
+void SERVER::send_npc_attack_packet(int npc_id)
+{
+	NPC_ATTACK_PACKET npc_attack_packet;
+	npc_attack_packet.size = sizeof(NPC_ATTACK_PACKET);
+	npc_attack_packet.type = NPC_ATTACK;
+	npc_attack_packet.n_id = npc_id;
+	npc_attack_packet.atklook_x = npcsInfo[npc_id].GetAttackVec().x;
+	npc_attack_packet.atklook_y = npcsInfo[npc_id].GetAttackVec().y;
+	npc_attack_packet.atklook_z = npcsInfo[npc_id].GetAttackVec().z;
+
+	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
+	g_logicservers[a_lgcsvr_num].do_send(&npc_attack_packet);
+}
+
+//======================================================================
 float NPC::CalculateYawToTarget(const XMFLOAT3& targetPosition) const
 {
 	// NPC의 현재 위치와 목표 위치 간의 벡터를 계산합니다.
@@ -703,25 +857,33 @@ void NPC::H_MoveToNode()
 	float t = 0.3f; // 보간 시간 (조정 가능)
 	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
 
-	int section = m_currentNodeIndex % 4;
+	if (m_UpdateTurn) {
+		int section = m_currentNodeIndex % 4;
 
-	switch (section)
-	{
-	case 0:
-		yaw = 0.0f;
-		break;
-	case 1:
-		yaw = 270.0f;
-		break;
-	case 2:
-		yaw = 180.0f;
-		break;
-	case 3:
-		yaw = 90.0f;
-		break;
+		switch (section)
+		{
+		case 0:
+			yaw = 0.0f;
+			break;
+		case 1:
+			yaw = 270.0f;
+			break;
+		case 2:
+			yaw = 180.0f;
+			break;
+		case 3:
+			yaw = 90.0f;
+			break;
+		}
+		m_rightvec = NPCcalcRightRotate();
+		m_lookvec = NPCcalcLookRotate();
+
+		if (ConnectingServer) {
+			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+		}
+
+		m_UpdateTurn = false;
 	}
-	m_rightvec = NPCcalcRightRotate();
-	m_lookvec = NPCcalcLookRotate();
 
 	pos = interpolatedPos;
 }
@@ -730,6 +892,7 @@ void NPC::H_UpdateCurrentNodeIndex()
 	const int cityNum = m_currentNodeIndex / 4;
 	const int nextSection = m_currentNodeIndex + 1;
 	m_currentNodeIndex = (cityNum * 4) + (nextSection % 4);
+	m_UpdateTurn = true;
 }
 void NPC::H_MoveChangeIdle()
 {
@@ -772,6 +935,8 @@ void NPC::H_IsPathMove()
 	if (path.empty() || path.size() < 2)
 		return;
 
+	float Curr_yaw = yaw;
+
 	NodeMesh currentNode = MeshInfo[path[0]];
 	NodeMesh nextNode = MeshInfo[path[1]];
 
@@ -786,6 +951,8 @@ void NPC::H_IsPathMove()
 		pos.z += isMovingForward ? speed : -speed;
 		yaw = isMovingForward ? 0.0f : 180.0f;
 
+		if (Curr_yaw != yaw) m_UpdateTurn = true;
+
 		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) m_currentNodeIndex = nextNode.GetIndex();
 	}
 	else {
@@ -793,14 +960,19 @@ void NPC::H_IsPathMove()
 		pos.x += isMovingForward ? speed : -speed;
 		yaw = isMovingForward ? 90.0f : 270.0f;
 
-		if ((isMovingForward && pos.x >= destination) || (!isMovingForward && pos.x <= destination)) m_currentNodeIndex = nextNode.GetIndex();
+		if (Curr_yaw != yaw) m_UpdateTurn = true;
+
+		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) m_currentNodeIndex = nextNode.GetIndex();
 	}
 	float t = 0.3f; // 보간 시간 (조정 가능)
 	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
 
+	if (m_UpdateTurn) {
+		m_rightvec = NPCcalcRightRotate();
+		m_lookvec = NPCcalcLookRotate();
 
-	m_rightvec = NPCcalcRightRotate();
-	m_lookvec = NPCcalcLookRotate();
+		m_UpdateTurn = false;
+	}
 
 	pos = interpolatedPos;
 }
@@ -816,31 +988,36 @@ void NPC::H_PlayerChasing()
 
 	// 노드 검색 후 같은 섹션에 있는 지 판별
 	if (user_node == m_currentNodeIndex) {
+
+		// 내 포지션과 유저의 포지션이 이루는 벡터를 구함
+		XMFLOAT3 prevPos = pos;
+		XMFLOAT3 positionToUser = { m_User_Pos[m_chaseID].x - pos.x, m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
+		XMFLOAT3 DefaultTemp = { 0.0f, 0.0f, 1.0f };
+
+		// xz 평면으로 투영
+		XMFLOAT3 projectedPositionToUser = { positionToUser.x, 0.0f, positionToUser.z };
+		NPCNormalize(projectedPositionToUser);
+
+		// DefalutTemp, 가야하는 방향 사이의 각도 구하기
+		float angleRadian = atan2(DefaultTemp.z, DefaultTemp.x) - atan2(projectedPositionToUser.z, projectedPositionToUser.x);
+		float angleDegree = XMConvertToDegrees(angleRadian);
+
+		yaw = angleDegree;
+
+		if (yaw > 360.0f)
+			yaw -= 360.0f;
+		if (yaw < 0.0f)
+			yaw += 360.0f;
+
+		// 회전한 look 벡터를 통해 이동 (look은 계산하기 전에 노멀라이즈)
+		m_lookvec = NPCcalcLookRotate();
+		m_rightvec = NPCcalcRightRotate();
+
+		if (ConnectingServer) {
+			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+		}
+
 		if (m_Distance[m_chaseID] >= 150.0f) {
-			// 내 포지션과 유저의 포지션이 이루는 벡터를 구함
-			XMFLOAT3 prevPos = pos;
-			XMFLOAT3 positionToUser = { m_User_Pos[m_chaseID].x - pos.x, m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
-			XMFLOAT3 DefaultTemp = { 0.0f, 0.0f, 1.0f };
-
-			// xz 평면으로 투영
-			XMFLOAT3 projectedPositionToUser = { positionToUser.x, 0.0f, positionToUser.z };
-			NPCNormalize(projectedPositionToUser);
-
-			// DefalutTemp, 가야하는 방향 사이의 각도 구하기
-			float angleRadian = atan2(DefaultTemp.z, DefaultTemp.x) - atan2(projectedPositionToUser.z, projectedPositionToUser.x);
-			float angleDegree = XMConvertToDegrees(angleRadian);
-
-			yaw = angleDegree;
-
-			if (yaw > 360.0f)
-				yaw -= 360.0f;
-			if (yaw < 0.0f)
-				yaw += 360.0f;
-
-			// 회전한 look 벡터를 통해 이동 (look은 계산하기 전에 노멀라이즈)
-			m_lookvec = NPCcalcLookRotate();
-			m_rightvec = NPCcalcRightRotate();
-
 			pos.x += m_lookvec.x * m_Speed;
 			pos.z += m_lookvec.z * m_Speed;
 
@@ -1045,7 +1222,7 @@ void NPC::A_MoveToNode()
 		if (isMovingForward) pos.z += speed;
 		else pos.z -= speed;
 
-		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) H_UpdateCurrentNodeIndex();
+		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) A_UpdateCurrentNodeIndex();
 	}
 	else {
 		const float destination = isMovingForward ? currentNode.GetSmallX() + m_destinationRange : currentNode.GetLargeX() - m_destinationRange;
@@ -1053,30 +1230,38 @@ void NPC::A_MoveToNode()
 		if (isMovingForward) pos.x -= speed;
 		else pos.x += speed;
 
-		if ((isMovingForward && pos.x <= destination) || (!isMovingForward && pos.x >= destination)) H_UpdateCurrentNodeIndex();
+		if ((isMovingForward && pos.x <= destination) || (!isMovingForward && pos.x >= destination)) A_UpdateCurrentNodeIndex();
 	}
 	float t = 0.3f; // 보간 시간 (조정 가능)
 	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
 
-	int section = m_currentNodeIndex % 4;
+	if (m_UpdateTurn) {
+		int section = m_currentNodeIndex % 4;
 
-	switch (section)
-	{
-	case 0:
-		yaw = 0.0f;
-		break;
-	case 1:
-		yaw = 270.0f;
-		break;
-	case 2:
-		yaw = 180.0f;
-		break;
-	case 3:
-		yaw = 90.0f;
-		break;
+		switch (section)
+		{
+		case 0:
+			yaw = 0.0f;
+			break;
+		case 1:
+			yaw = 270.0f;
+			break;
+		case 2:
+			yaw = 180.0f;
+			break;
+		case 3:
+			yaw = 90.0f;
+			break;
+		}
+		m_rightvec = NPCcalcRightRotate();
+		m_lookvec = NPCcalcLookRotate();
+
+		if (ConnectingServer) {
+			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+		}
+
+		m_UpdateTurn = false;
 	}
-	m_rightvec = NPCcalcRightRotate();
-	m_lookvec = NPCcalcLookRotate();
 
 	pos = interpolatedPos;
 }
@@ -1085,6 +1270,7 @@ void NPC::A_UpdateCurrentNodeIndex()
 	const int cityNum = m_currentNodeIndex / 4;
 	const int nextSection = m_currentNodeIndex + 1;
 	m_currentNodeIndex = (cityNum * 4) + (nextSection % 4);
+	m_UpdateTurn = true;
 }
 void NPC::A_MoveChangeIdle()
 {
@@ -1135,12 +1321,13 @@ void NPC::A_IsPathMove()
 	const float speed = m_Speed;
 
 	XMFLOAT3 prevPos = pos;
-
+	float Curr_yaw = yaw;
 	float destination;
 	if (isMovingInZ) {
 		destination = isMovingForward ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
 		pos.z += isMovingForward ? speed : -speed;
 		yaw = isMovingForward ? 0.0f : 180.0f;
+		if (Curr_yaw != yaw) m_UpdateTurn = true;
 
 		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) m_currentNodeIndex = nextNode.GetIndex();
 	}
@@ -1148,14 +1335,19 @@ void NPC::A_IsPathMove()
 		destination = isMovingForward ? currentNode.GetLargeX() - m_destinationRange : currentNode.GetSmallX() + m_destinationRange;
 		pos.x += isMovingForward ? speed : -speed;
 		yaw = isMovingForward ? 90.0f : 270.0f;
+		if (Curr_yaw != yaw) m_UpdateTurn = true;
 
 		if ((isMovingForward && pos.x >= destination) || (!isMovingForward && pos.x <= destination)) m_currentNodeIndex = nextNode.GetIndex();
 	}
 	float t = 0.3f; // 보간 시간 (조정 가능)
 	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
 
-	m_rightvec = NPCcalcRightRotate();
-	m_lookvec = NPCcalcLookRotate();
+	if (m_UpdateTurn) {
+		m_rightvec = NPCcalcRightRotate();
+		m_lookvec = NPCcalcLookRotate();
+
+		m_UpdateTurn = false;
+	}
 
 	pos = interpolatedPos;
 }
@@ -1171,31 +1363,35 @@ void NPC::A_PlayerChasing()
 
 	// 노드 검색 후 같은 섹션에 있는 지 판별
 	if (user_node == m_currentNodeIndex) {
-		if (m_Distance[m_chaseID] >= 150.0f) {
-			XMFLOAT3 prevPos = pos;
-			// 내 포지션과 유저의 포지션이 이루는 벡터를 구함
-			XMFLOAT3 positionToUser = { m_User_Pos[m_chaseID].x - pos.x, m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
-			XMFLOAT3 DefaultTemp = { 0.0f, 0.0f, 1.0f };
+		XMFLOAT3 prevPos = pos;
+		// 내 포지션과 유저의 포지션이 이루는 벡터를 구함
+		XMFLOAT3 positionToUser = { m_User_Pos[m_chaseID].x - pos.x, m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
+		XMFLOAT3 DefaultTemp = { 0.0f, 0.0f, 1.0f };
 
-			// xz 평면으로 투영
-			XMFLOAT3 projectedPositionToUser = { positionToUser.x, 0.0f, positionToUser.z };
-			NPCNormalize(projectedPositionToUser);
+		// xz 평면으로 투영
+		XMFLOAT3 projectedPositionToUser = { positionToUser.x, 0.0f, positionToUser.z };
+		NPCNormalize(projectedPositionToUser);
 
-			// DefalutTemp, 가야하는 방향 사이의 각도 구하기
-			float angleRadian = atan2(DefaultTemp.z, DefaultTemp.x) - atan2(projectedPositionToUser.z, projectedPositionToUser.x);
-			float angleDegree = XMConvertToDegrees(angleRadian);
+		// DefalutTemp, 가야하는 방향 사이의 각도 구하기
+		float angleRadian = atan2(DefaultTemp.z, DefaultTemp.x) - atan2(projectedPositionToUser.z, projectedPositionToUser.x);
+		float angleDegree = XMConvertToDegrees(angleRadian);
 
-			yaw = angleDegree;
+		yaw = angleDegree;
 
-			if (yaw > 360.0f)
-				yaw -= 360.0f;
-			if (yaw < 0.0f)
-				yaw += 360.0f;
+		if (yaw > 360.0f)
+			yaw -= 360.0f;
+		if (yaw < 0.0f)
+			yaw += 360.0f;
 
-			// 회전한 look 벡터를 통해 이동 (look은 계산하기 전에 노멀라이즈)
-			m_lookvec = NPCcalcLookRotate();
-			m_rightvec = NPCcalcRightRotate();
+		// 회전한 look 벡터를 통해 이동 (look은 계산하기 전에 노멀라이즈)
+		m_lookvec = NPCcalcLookRotate();
+		m_rightvec = NPCcalcRightRotate();
 
+		if (ConnectingServer) {
+			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+		}
+
+		if (m_Distance[m_chaseID] >= 30.0f) {
 			pos.x += m_lookvec.x * m_Speed;
 			pos.z += m_lookvec.z * m_Speed;
 
@@ -1384,160 +1580,6 @@ void NPC::A_NPC_Death_motion()
 	m_lookvec = NPCcalcLookRotate();
 }
 
-array<NPC, MAX_NPCS> npcsInfo;
-
-//======================================================================
-enum PACKET_PROCESS_TYPE { OP_RECV, OP_SEND, OP_CONNECT };
-
-class OVER_EX {
-public:
-	WSAOVERLAPPED overlapped;
-	WSABUF wsabuf;
-	char send_buf[BUF_SIZE];
-	PACKET_PROCESS_TYPE process_type;
-
-	OVER_EX()
-	{
-		wsabuf.len = BUF_SIZE;
-		wsabuf.buf = send_buf;
-		process_type = OP_RECV;
-		ZeroMemory(&overlapped, sizeof(overlapped));
-	}
-
-	OVER_EX(char* packet)
-	{
-		wsabuf.len = packet[0];
-		wsabuf.buf = send_buf;
-		ZeroMemory(&overlapped, sizeof(overlapped));
-		process_type = OP_SEND;
-		memcpy(send_buf, packet, packet[0]);
-	}
-};
-
-//======================================================================
-class SERVER {
-public:
-	OVER_EX recv_over;
-	int remain_size;
-	int id;
-	SOCKET sock;
-	mutex s_lock;
-
-public:
-	SERVER() { remain_size = 0; id = -1; sock = 0; }
-
-public:
-	void do_recv()
-	{
-		DWORD recv_flag = 0;
-		memset(&recv_over.overlapped, 0, sizeof(recv_over.overlapped));
-		recv_over.wsabuf.len = BUF_SIZE - remain_size;
-		recv_over.wsabuf.buf = recv_over.send_buf + remain_size;
-
-		int ret = WSARecv(sock, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.overlapped, 0);
-		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "WSARecv Error - " << ret << endl;
-			cout << GetLastError() << endl;
-		}
-	}
-
-	void do_send(void* packet)
-	{
-		OVER_EX* s_data = new OVER_EX{ reinterpret_cast<char*>(packet) };
-		ZeroMemory(&s_data->overlapped, sizeof(s_data->overlapped));
-
-		int ret = WSASend(sock, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, 0);
-		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "WSASend Error - " << ret << endl;
-			cout << GetLastError() << endl;
-		}
-	}
-
-	void send_npc_init_packet(int npc_id);
-	void send_npc_move_packet(int npc_id);
-	void send_npc_rotate_packet(int npc_id);
-	void send_npc_move_rotate_packet(int npc_id);
-	void send_npc_attack_packet(int npc_id);
-};
-
-HANDLE h_iocp;											// IOCP 핸들
-int a_lgcsvr_num;										// Active상태인 메인서버
-array<SERVER, MAX_LOGIC_SERVER> g_logicservers;			// 로직서버 정보
-bool b_lgcserver_conn;
-
-void SERVER::send_npc_init_packet(int npc_id) {
-	NPC_FULL_INFO_PACKET npc_init_packet;
-	npc_init_packet.size = sizeof(NPC_FULL_INFO);
-	npc_init_packet.type = NPC_FULL_INFO;
-	npc_init_packet.n_id = npc_id;
-	npc_init_packet.ishuman = npcsInfo[npc_id].type;
-	strcpy_s(npc_init_packet.name, npcsInfo[npc_id].name);
-	npc_init_packet.hp = npcsInfo[npc_id].hp;
-	npc_init_packet.x = npcsInfo[npc_id].pos.x;
-	npc_init_packet.y = npcsInfo[npc_id].pos.y;
-	npc_init_packet.z = npcsInfo[npc_id].pos.z;
-	npc_init_packet.right_x = npcsInfo[npc_id].m_rightvec.x;
-	npc_init_packet.right_y = npcsInfo[npc_id].m_rightvec.y;
-	npc_init_packet.right_z = npcsInfo[npc_id].m_rightvec.z;
-	npc_init_packet.up_x = npcsInfo[npc_id].m_upvec.x;
-	npc_init_packet.up_y = npcsInfo[npc_id].m_upvec.y;
-	npc_init_packet.up_z = npcsInfo[npc_id].m_upvec.z;
-	npc_init_packet.look_x = npcsInfo[npc_id].m_lookvec.x;
-	npc_init_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
-	npc_init_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
-
-	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
-	g_logicservers[a_lgcsvr_num].do_send(&npc_init_packet);
-}
-void SERVER::send_npc_move_packet(int npc_id) {
-	NPC_MOVE_PACKET npc_move_packet;
-	npc_move_packet.size = sizeof(NPC_MOVE_PACKET);
-	npc_move_packet.type = NPC_MOVE;
-	npc_move_packet.n_id = npc_id;
-	npc_move_packet.x = npcsInfo[npc_id].pos.x;
-	npc_move_packet.y = npcsInfo[npc_id].pos.y;
-	npc_move_packet.z = npcsInfo[npc_id].pos.z;
-
-	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
-	g_logicservers[a_lgcsvr_num].do_send(&npc_move_packet);
-}
-void SERVER::send_npc_rotate_packet(int npc_id) {
-	NPC_ROTATE_PACKET npc_rotate_packet;
-	npc_rotate_packet.size = sizeof(NPC_ROTATE_PACKET);
-	npc_rotate_packet.type = NPC_ROTATE;
-	npc_rotate_packet.n_id = npc_id;
-	npc_rotate_packet.right_x = npcsInfo[npc_id].m_rightvec.x;
-	npc_rotate_packet.right_y = npcsInfo[npc_id].m_rightvec.y;
-	npc_rotate_packet.right_z = npcsInfo[npc_id].m_rightvec.z;
-	npc_rotate_packet.up_x = npcsInfo[npc_id].m_upvec.x;
-	npc_rotate_packet.up_y = npcsInfo[npc_id].m_upvec.y;
-	npc_rotate_packet.up_z = npcsInfo[npc_id].m_upvec.z;
-	npc_rotate_packet.look_x = npcsInfo[npc_id].m_lookvec.x;
-	npc_rotate_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
-	npc_rotate_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
-
-	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
-	g_logicservers[a_lgcsvr_num].do_send(&npc_rotate_packet);
-}
-void SERVER::send_npc_move_rotate_packet(int npc_id) {
-	send_npc_move_packet(npc_id);
-	send_npc_rotate_packet(npc_id);
-}
-
-void SERVER::send_npc_attack_packet(int npc_id)
-{
-	NPC_ATTACK_PACKET npc_attack_packet;
-	npc_attack_packet.size = sizeof(NPC_ATTACK_PACKET);
-	npc_attack_packet.type = NPC_ATTACK;
-	npc_attack_packet.n_id = npc_id;
-	npc_attack_packet.atklook_x = npcsInfo[npc_id].GetAttackVec().x;
-	npc_attack_packet.atklook_y = npcsInfo[npc_id].GetAttackVec().y;
-	npc_attack_packet.atklook_z = npcsInfo[npc_id].GetAttackVec().z;
-
-	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
-	g_logicservers[a_lgcsvr_num].do_send(&npc_attack_packet);
-}
-
 //======================================================================
 void process_packet(char* packet)
 {
@@ -1678,74 +1720,6 @@ void process_packet(char* packet)
 			npcsInfo[obj_id].obj_lock.lock();
 			npcsInfo[obj_id].state = chgstate_packet->state;
 			npcsInfo[obj_id].obj_lock.unlock();
-		}
-
-		// 2. 상태별 추가 작업이 필요하면 여기서 처리한다.
-		switch (changed_state) {
-		case PL_ST_IDLE:
-			if (chgstate_packet->target == TARGET_PLAYER) {
-
-			}
-			else if (chgstate_packet->target == TARGET_NPC) {
-
-			}
-
-			break;
-
-		case PL_ST_MOVE_FRONT:
-		case PL_ST_MOVE_BACK:
-		case PL_ST_MOVE_SIDE:
-			if (chgstate_packet->target == TARGET_PLAYER) {
-
-			}
-			else if (chgstate_packet->target == TARGET_NPC) {
-
-			}
-
-			break;
-
-		case PL_ST_FLY:
-			if (chgstate_packet->target == TARGET_PLAYER) {
-
-			}
-			else if (chgstate_packet->target == TARGET_NPC) {
-
-			}
-
-			break;
-
-		case PL_ST_CHASE:
-			if (chgstate_packet->target == TARGET_PLAYER) {
-
-			}
-			else if (chgstate_packet->target == TARGET_NPC) {
-
-			}
-
-			break;
-
-		case PL_ST_ATTACK:
-			if (chgstate_packet->target == TARGET_PLAYER) {
-
-			}
-			else if (chgstate_packet->target == TARGET_NPC) {
-
-			}
-
-			break;
-
-		case PL_ST_DEAD:
-			if (chgstate_packet->target == TARGET_PLAYER) {
-
-			}
-			else if (chgstate_packet->target == TARGET_NPC) {
-
-			}
-
-			break;
-
-		default:
-			cout << "[OBJECT_STATE Error] Unknown State Type.\n" << endl;
 		}
 
 		break;
@@ -1957,9 +1931,27 @@ void initNpc() {
 void timerFunc() {
 	while (true) {
 		auto start_t = system_clock::now();
+
 		//======================================================================
+		if (!ConnectingServer) {
+			this_thread::sleep_for(1000ms);
+			continue;
+		}
 
+		//======================================================================
+		// 1초에 한번씩 클라에게 올바른 위치를 보내줘서 오차를 바로잡게해준다.
+		milliseconds since_send_checkpos = duration_cast<milliseconds>(start_t - last_send_checkpos_time);
 
+		if (static_cast<int>(since_send_checkpos.count()) >= 1000) {
+			time_lock.lock();
+			last_send_checkpos_time = system_clock::now();
+			since_send_checkpos = 0ms;
+			time_lock.unlock();
+
+			for (int i = 0; i < MAX_NPCS; ++i) {
+				g_logicservers[a_lgcsvr_num].send_check_pos_packet(npcsInfo[i].GetID());
+			}
+		}
 
 		//======================================================================
 		auto curr_t = system_clock::now();
@@ -2031,19 +2023,16 @@ void MoveNPC()
 					//	cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
 					//}
 
-					g_logicservers[a_lgcsvr_num].send_npc_move_rotate_packet(npcsInfo[i].GetID());
-
 					if (npcsInfo[i].GetState() == NPC_ATTACK) {
 						g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
 					}
-
 				}
 			}
 
 			//======================================================================
 			auto curr_t = system_clock::now();
-			if (curr_t - start_t < 33ms)
-				this_thread::sleep_for(33ms - (curr_t - start_t));
+			if (curr_t - start_t < 16ms)
+				this_thread::sleep_for(16ms - (curr_t - start_t));
 		}
 	}
 }
@@ -2051,6 +2040,8 @@ void MoveNPC()
 //======================================================================
 int main(int argc, char* argv[])
 {
+	last_send_checkpos_time = system_clock::now();	// 서버 시작시간
+
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);

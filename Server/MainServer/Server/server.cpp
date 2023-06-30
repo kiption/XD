@@ -1506,9 +1506,37 @@ void process_packet(int client_id, char* packet)
 
 		break;
 	}// NPC_FULL_INFO end
-	case NPC_MOVE:
+	case NPC_ROTATE:
 	{
-		NPC_MOVE_PACKET* npc_move_pack = reinterpret_cast<NPC_MOVE_PACKET*>(packet);
+		NPC_ROTATE_PACKET* npc_rotate_pack = reinterpret_cast<NPC_ROTATE_PACKET*>(packet);
+
+		short npc_id = npc_rotate_pack->n_id;
+
+		npcs[npc_id].s_lock.lock();
+		npcs[npc_id].pos = { npc_rotate_pack->x, npc_rotate_pack->y, npc_rotate_pack->z };
+		npcs[npc_id].m_rightvec = { npc_rotate_pack->right_x, npc_rotate_pack->right_y, npc_rotate_pack->right_z };
+		npcs[npc_id].m_upvec = { npc_rotate_pack->up_x, npc_rotate_pack->up_y, npc_rotate_pack->up_z };
+		npcs[npc_id].m_lookvec = { npc_rotate_pack->look_x, npc_rotate_pack->look_y, npc_rotate_pack->look_z };
+		npcs[npc_id].s_lock.unlock();
+		/*cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
+			<< ") 방향으로 회전하였습니다.\n" << endl;*/
+
+		/*
+		for (auto& cl : clients) {
+			if (cl.curr_stage != 1) continue;	// Stage2 NPC 제작 전까지 사용되는 임시코드
+			if (cl.s_state != ST_INGAME) continue;
+
+			lock_guard<mutex> lg{ cl.s_lock };
+			cl.do_send(npc_rotate_pack);
+			//cl.send_rotate_packet(npc_id, TARGET_NPC);
+		}
+		*/
+
+		break;
+	}// NPC_ROTATE end
+	case NPC_CHECK_POS:
+	{
+		NPC_CHECK_POS_PACKET* npc_move_pack = reinterpret_cast<NPC_CHECK_POS_PACKET*>(packet);
 
 		short npc_id = npc_move_pack->n_id;
 
@@ -1517,6 +1545,7 @@ void process_packet(int client_id, char* packet)
 		npcs[npc_id].s_lock.unlock();
 		//cout << "NPC[" << npc_id << "]가 POS(" << npcs[npc_id].pos.x << ", " << npcs[npc_id].pos.y << ", " << npcs[npc_id].pos.z << ")로 이동하였습니다.\n" << endl;
 
+		/*
 		for (auto& cl : clients) {
 			if (cl.curr_stage != 1) continue;	// Stage2 NPC 제작 전까지 사용되는 임시코드
 			if (cl.s_state != ST_INGAME) continue;
@@ -1524,59 +1553,10 @@ void process_packet(int client_id, char* packet)
 			lock_guard<mutex> lg{ cl.s_lock };
 			cl.send_move_packet(npc_id, TARGET_NPC, MV_FRONT);//[임시코드] 나중에 npc도 이동방향을 받도록 해줘야함
 		}
+		*/
 
 		break;
 	}// NPC_MOVE end
-	case NPC_ROTATE:
-	{
-		NPC_ROTATE_PACKET* npc_rotate_pack = reinterpret_cast<NPC_ROTATE_PACKET*>(packet);
-
-		short npc_id = npc_rotate_pack->n_id;
-
-		npcs[npc_id].s_lock.lock();
-		npcs[npc_id].m_rightvec = { npc_rotate_pack->right_x, npc_rotate_pack->right_y, npc_rotate_pack->right_z };
-		npcs[npc_id].m_upvec = { npc_rotate_pack->up_x, npc_rotate_pack->up_y, npc_rotate_pack->up_z };
-		npcs[npc_id].m_lookvec = { npc_rotate_pack->look_x, npc_rotate_pack->look_y, npc_rotate_pack->look_z };
-		npcs[npc_id].s_lock.unlock();
-		/*cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
-			<< ") 방향으로 회전하였습니다.\n" << endl;*/
-
-		for (auto& cl : clients) {
-			if (cl.curr_stage != 1) continue;	// Stage2 NPC 제작 전까지 사용되는 임시코드
-			if (cl.s_state != ST_INGAME) continue;
-
-			lock_guard<mutex> lg{ cl.s_lock };
-			cl.send_rotate_packet(npc_id, TARGET_NPC);
-		}
-
-		break;
-	}// NPC_ROTATE end
-	case NPC_MOVE_ROTATE:
-	{
-		NPC_MOVE_ROTATE_PACKET* npc_mvrt_pack = reinterpret_cast<NPC_MOVE_ROTATE_PACKET*>(packet);
-
-		short npc_id = npc_mvrt_pack->n_id;
-
-		npcs[npc_id].s_lock.lock();
-		npcs[npc_id].pos = { npc_mvrt_pack->x, npc_mvrt_pack->y, npc_mvrt_pack->z };
-		npcs[npc_id].m_rightvec = { npc_mvrt_pack->right_x, npc_mvrt_pack->right_y, npc_mvrt_pack->right_z };
-		npcs[npc_id].m_upvec = { npc_mvrt_pack->up_x, npc_mvrt_pack->up_y, npc_mvrt_pack->up_z };
-		npcs[npc_id].m_lookvec = { npc_mvrt_pack->look_x, npc_mvrt_pack->look_y, npc_mvrt_pack->look_z };
-		npcs[npc_id].s_lock.unlock();
-		/*cout << "NPC[" << npc_id << "]가 POS(" << npcs[npc_id].pos.x << ", " << npcs[npc_id].pos.y << ", " << npcs[npc_id].pos.z << ")로 이동하였습니다.\n" << endl;
-		cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
-			<< ") 방향으로 회전하였습니다.\n" << endl;*/
-
-		for (auto& cl : clients) {
-			if (cl.curr_stage != 1) continue;	// Stage2 NPC 제작 전까지 사용되는 임시코드
-			if (cl.s_state != ST_INGAME) continue;
-
-			lock_guard<mutex> lg{ cl.s_lock };
-			cl.send_move_rotate_packet(npc_id, TARGET_NPC, MV_FRONT);//[임시코드] 나중에 npc 방향을 넣어줘야함.
-		}
-
-		break;
-	}// NPC_MOVE_ROTATE end
 	case NPC_REMOVE:
 	{
 		NPC_REMOVE_PACKET* npc_remove_pack = reinterpret_cast<NPC_REMOVE_PACKET*>(packet);
@@ -1606,6 +1586,7 @@ void process_packet(int client_id, char* packet)
 	}// NPC_REMOVE end
 	case NPC_ATTACK:
 	{
+		/*
 		NPC_ATTACK_PACKET* npc_attack_pack = reinterpret_cast<NPC_ATTACK_PACKET*>(packet);
 
 		bool b_collide = false;
@@ -1667,7 +1648,7 @@ void process_packet(int client_id, char* packet)
 			bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
 				, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 		}
-
+		*/
 		break;
 	}
 	case NPC_CHANGE_STATE:

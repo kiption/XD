@@ -80,7 +80,7 @@ enum PacketID {
 	, SC_DAMAGED, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_BULLET_COUNT, SC_MISSION, SC_MISSION_COMPLETE
 	, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
-	, NPC_FULL_INFO, NPC_MOVE, NPC_ROTATE, NPC_MOVE_ROTATE, NPC_REMOVE, NPC_ATTACK, NPC_CHANGE_STATE
+	, NPC_FULL_INFO, NPC_ROTATE, NPC_CHECK_POS, NPC_REMOVE, NPC_ATTACK, NPC_CHANGE_STATE
 };
 
 //======================================================================
@@ -381,36 +381,29 @@ struct NPC_FULL_INFO_PACKET {
 	char ishuman;	// 0: Çï±â, 1: »ç¶÷
 	char name[20];
 	int hp;
+	float speed;
 	float x, y, z;
 	float right_x, right_y, right_z;
 	float up_x, up_y, up_z;
 	float look_x, look_y, look_z;
-};
-
-struct NPC_MOVE_PACKET {
-	unsigned char size;
-	char type;
-	short n_id;
-	float x, y, z;
 };
 
 struct NPC_ROTATE_PACKET {
 	unsigned char size;
 	char type;
 	short n_id;
-	float right_x, right_y, right_z;
-	float up_x, up_y, up_z;
-	float look_x, look_y, look_z;
-};
-
-struct NPC_MOVE_ROTATE_PACKET {
-	unsigned char size;
-	char type;
-	short n_id;
 	float x, y, z;
 	float right_x, right_y, right_z;
 	float up_x, up_y, up_z;
 	float look_x, look_y, look_z;
+	int server_time;
+};
+
+struct NPC_CHECK_POS_PACKET {
+	unsigned char size;
+	char type;
+	short n_id;
+	float x, y, z;
 };
 
 struct NPC_REMOVE_PACKET {
