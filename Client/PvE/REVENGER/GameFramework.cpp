@@ -732,9 +732,7 @@ void CGameFramework::ReleaseObjects()
 bool ShootKey = false;
 void CGameFramework::ProcessInput()
 {
-	/*cout << "누르기 전 Pitch Angle: " << ((HeliPlayer*)m_pPlayer)->m_fPitch << endl;
-	cout << "누르기 전 Roll Angle: " << ((HeliPlayer*)m_pPlayer)->m_fRoll << endl;*/
-	//((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xmf3BeforeCollidedPosition = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition();
+
 
 	static UCHAR pKeysBuffer[256];
 	bool bProcessedByScene = false;
@@ -751,7 +749,7 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[KEY_Q] & 0xF0)
 		{
 
-			
+
 			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bReloadState = true;
 			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReloadState();
 			q_keyboardInput.push(SEND_KEY_UP);//S
@@ -797,8 +795,7 @@ void CGameFramework::ProcessInput()
 			}
 
 		}
-
-
+		
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
 			if (m_nMode == SCENE1STAGE) {
@@ -806,18 +803,19 @@ void CGameFramework::ProcessInput()
 				{
 					MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
 					q_mouseInput.push(mousemove);//s
+
 					if (cxDelta)
-						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(0.0, cxDelta, 0.0f); 
+						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(0.0, cxDelta, 0.0f);
 					if (cyDelta)
-						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, 0.0, 0.0f); cxDelta = 0.f;
+						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, 0.0, 0.0f);
 
 
 				}
 				if (dwDirection)
 				{
-				((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)
-					->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
-				
+					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)
+						->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
+
 				}
 			}
 
@@ -980,7 +978,7 @@ void CGameFramework::FrameAdvance()
 	if (m_nMode == SCENE1STAGE)
 	{
 		if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
-}
+	}
 	// Stage2
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -1322,7 +1320,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-}
+		}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -1414,7 +1412,7 @@ void CGameFramework::CreateDirect2DDevice()
 		D3D12_MESSAGE_ID pd3dDenyIds[] =
 		{
 			D3D12_MESSAGE_ID_INVALID_DESCRIPTOR_HANDLE,
-		};
+};
 
 		D3D12_INFO_QUEUE_FILTER d3dInforQueueFilter = { };
 		d3dInforQueueFilter.DenyList.NumSeverities = _countof(pd3dSeverities);

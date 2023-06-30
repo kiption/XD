@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "REVENGER.h"
 #include "GameFramework.h"
+#include "GameSound.h"
 #include "BillboardObjectsShader.h"
 #include "Network.h"//Server
 #include <thread>//Server
@@ -539,7 +540,7 @@ void uiThreadFunc() {
 		if (gGameFramework.m_nMode != OPENINGSCENE) {
 			// 1. 총알 업데이트
 			gGameFramework.m_currbullet = players_info[my_id].m_bullet;
-
+			
 			// 2. HP 업데이트
 			int currHP = players_info[my_id].m_hp;
 			gGameFramework.m_currHp = currHP;

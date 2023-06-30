@@ -6,9 +6,9 @@
 #define SPOT_LIGHT			2
 #define DIRECTIONAL_LIGHT	3
 
-//#define _WITH_LOCAL_VIEWER_HIGHLIGHTING
+#define _WITH_LOCAL_VIEWER_HIGHLIGHTING
 #define _WITH_THETA_PHI_CONES
-//#define _WITH_REFLECT
+#define _WITH_REFLECT
 #define MAX_DEPTH_TEXTURES		MAX_LIGHTS
 #define _WITH_PCF_FILTERING
 struct LIGHT
@@ -73,7 +73,7 @@ float Compute5x5ShadowFactor(float2 uv, float fDepth, uint nIndex)
 {
 	float fPercentLit = 0.0f;
 
-	return(fPercentLit / 25.0f);
+	return(fPercentLit / 40.0f);
 }
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)

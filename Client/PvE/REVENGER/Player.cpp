@@ -146,7 +146,7 @@ void CPlayer::Rotate(float x, float y, float z)
 	else if (nCurrentCameraMode == CLOSEUP_PERSON_CAMERA)
 	{
 		m_pCamera->Rotate(x, y, z);
-		if (x <= -0.5f)x += 0.6f; if (x >= 0.5f)x -= 0.6f;
+		if (x <= -0.5f)x += 0.51f; if (x >= 0.5f)x -= 0.51f;
 		if (x >= -0.5f && x <= 0.5f)
 		{
 

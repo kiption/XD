@@ -454,6 +454,10 @@ void processPacket(char* ptr)
     {
         SC_BULLET_COUNT_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COUNT_PACKET*>(ptr);
         players_info[my_id].m_bullet = recv_packet->bullet_cnt;
+        if (recv_packet->bullet_cnt == MAX_BULLET) {
+            gamesound.reloadSound();
+            gamesound.shootingSound(true);
+        }
         gamesound.shootingSound(false);
         break;
     }//SC_BULLET_COUNT case end

@@ -8,6 +8,7 @@
 #define WIN32_LEAN_AND_MEAN             // 거의 사용되지 않는 내용은 Windows 헤더에서 제외합니다.
 // Windows 헤더 파일:
 #include <windows.h>
+#define _HAS_STD_BYTE 0
 #include <SDKDDKVer.h>
 // C의 런타임 헤더 파일입니다.
 #include <stdlib.h>
@@ -23,6 +24,7 @@
 #include <fstream>
 #include <vector>
 #include <random>
+#include <algorithm>
 using namespace std;
 
 #include <d3d12.h>
@@ -53,14 +55,12 @@ using namespace std;
 #include <windowsx.h>
 #include <mfplay.h>
 #include <mfidl.h>
-#include "mfplay.h"
-#include <mferror.h>
-#include <shobjidl.h>   // defines IFileOpenDialog
-#include <strsafe.h>
 #include <evr.h>
 #include <cmath>
 #include <d2d1effects.h>
 #include <wincodec.h>
+
+
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -70,7 +70,7 @@ using namespace std;
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "windowscodecs.lib")
 #pragma comment(lib, "Winmm.lib")
-#pragma comment(lib, "mfplay.lib")
+
 
 
 #ifdef _DEBUG

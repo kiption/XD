@@ -18,7 +18,7 @@ protected:
 	
 	XMFLOAT3					m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	XMFLOAT3					m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-	XMFLOAT3					m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	
 
 	XMFLOAT3					m_xmf3Scale = XMFLOAT3(1.0f, 1.0f, 1.0f);
 
@@ -39,7 +39,7 @@ public:
 	CPlayer();
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual ~CPlayer();
-	
+	XMFLOAT3					m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	XMFLOAT3					m_xmf3BeforeCollidedPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float           			m_fPitch = 0.0f;
 	float           			m_fYaw = 0.0f;
@@ -102,7 +102,7 @@ public:
 	GameSound gamesound;
 	//Server
 	void SetVectorsByServer(const XMFLOAT3& xmf3right, const XMFLOAT3& xmf3up, const XMFLOAT3& xmf3look) { m_xmf3Right = xmf3right; m_xmf3Up = xmf3up; m_xmf3Look = xmf3look; }
-
+	int DeltaLimit = 0;
 };
 
 class CSoundCallbackHandler : public CAnimationCallbackHandler

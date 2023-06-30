@@ -63,9 +63,9 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 #endif
 	CAnimationCallbackHandler* pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
-	//m_pSkinnedAnimationController->SetAnimationCallbackHandler(2, pAnimationCallbackHandler);
-	//m_pSkinnedAnimationController->SetAnimationCallbackHandler(3, pAnimationCallbackHandler);
-	//m_pSkinnedAnimationController->SetAnimationCallbackHandler(4, pAnimationCallbackHandler);
+	m_pSkinnedAnimationController->SetAnimationCallbackHandler(2, pAnimationCallbackHandler);
+	m_pSkinnedAnimationController->SetAnimationCallbackHandler(3, pAnimationCallbackHandler);
+	m_pSkinnedAnimationController->SetAnimationCallbackHandler(4, pAnimationCallbackHandler);
 
 
 
