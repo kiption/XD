@@ -63,9 +63,13 @@ std::array<ObjectsInfo, 5> dummies;//[TEST] NPC 완성 전까지 임시 사용
 
 struct MapObjectsInfo
 {
-
 	XMFLOAT3 m_pos;
 	XMFLOAT3 m_scale;
+	XMFLOAT3 m_local_forward;
+	XMFLOAT3 m_local_right;
+	float m_angle_aob;
+	float m_angle_boc;
+
 	BoundingOrientedBox m_xoobb;
 
 	MapObjectsInfo() {
