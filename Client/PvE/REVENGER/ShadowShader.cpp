@@ -44,10 +44,10 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	CLoadedModelInfo* pSModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
 	for (int x = 5; x < 8; x++)
 	{
-		m_ppObjects[x] = new CHumanPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel,NULL);
+		m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel,NULL);
 		m_ppObjects[x]->SetMaterial(0, pOtherPlayerMaterial);
-		m_ppObjects[x]->SetScale(50, 50, 50);
-		m_ppObjects[x]->SetPosition(XMFLOAT3(58.0 + (x - 5) * 5, 8.0, 800.0));
+		m_ppObjects[x]->SetScale(5, 5, 5);
+		m_ppObjects[x]->SetPosition(XMFLOAT3(58.0 + (x) * 20, 8.0, 800.0));
 		pSModel->m_pModelRootObject->AddRef();
 	}
 
@@ -372,7 +372,7 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 	UpdateShaderVariables(pd3dCommandList);
 	for (int i = 0; i < m_pObjectsShader->m_nObjects; i++)
 	{
-		if (i > 21)
+		if (i > 21 || (i>=5&&i<8))
 		{
 			m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
 			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);

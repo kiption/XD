@@ -291,15 +291,6 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 	cColor += (gcGlobalAmbientLight * gMaterial.m_cAmbient);
 	cColor.a = gMaterial.m_cDiffuse.a;
 
-	// God Ray 계산
-	float3 rayOrigin = float3(0.0f, 1000.0f, 0.0f);
-	float3 rayDirection = normalize(vPosition - rayOrigin);
-	float3 godRayColor = float3(1.0f, 1.0f, 1.0f);
-	float godRayIntensity = 0.5f; // God Ray 강도
-	float godRayAmount = saturate(dot(rayDirection, vNormal));
-	godRayAmount = pow(godRayAmount, 20.0f);
-
-	cColor.rgb += godRayColor * godRayAmount * godRayIntensity;
 
 	return cColor;
 }
