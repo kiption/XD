@@ -1,0 +1,8 @@
+Object Name: City1_1 (1)
+Center: (759.00, 137.16, 552.00)
+Scale: (79.42, 274.32, 849.44)
+Local Forward: (1.00, 0.00, 0.00)
+Local Right: (0.00, 0.00, -1.00)
+Angle AOB: 10.68244
+Angle BOC: 169.3176
+

@@ -320,8 +320,12 @@ struct SC_TIME_TICKING_PACKET {
 struct SC_MAP_OBJINFO_PACKET {
 	unsigned char size;
 	char type;
-	float pos_x, pos_y, pos_z;
+	float center_x, center_y, center_z;
 	float scale_x, scale_y, scale_z;
+	float forward_x, forward_y, forward_z;
+	float right_x, right_y, right_z;
+	float aob;
+	float boc;
 };
 
 // 6) 이중화 관련 패킷

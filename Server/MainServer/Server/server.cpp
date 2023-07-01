@@ -91,12 +91,32 @@ void setOccupyAreas() {
 //======================================================================
 class Building : public MapObject
 {
-public:
-	Building() : MapObject() {}
-	Building(float px, float py, float pz, float sx, float sy, float sz) : MapObject(px, py, pz, sx, sy, sz) {}
+private:
+	XMFLOAT3 local_forward;
+	XMFLOAT3 local_right;
+	float angle_aob;
+	float angle_boc;
 
 public:
 	BoundingOrientedBox m_xoobb;
+
+public:
+	Building() : MapObject() {}
+
+public:
+	void setPos2(XMFLOAT3 p) { setPos(p.x, p.y, p.z); }
+	void setScale2(XMFLOAT3 s) { setScale(s.x, s.y, s.z); }
+	void setLocalForward(XMFLOAT3 localforward) { local_forward = localforward; }
+	void setLocalRight(XMFLOAT3 localright) { local_right = localright; }
+	void setAngleAOB(float angleaob) { angle_aob = angleaob; }
+	void setAngleBOC(float angleboc) { angle_boc = angleboc; }
+
+	XMFLOAT3 getPos2() { return XMFLOAT3{ getPosX(), getPosY(), getPosZ() }; }
+	XMFLOAT3 getScale2() { return XMFLOAT3{ getScaleX(), getScaleY(), getScaleZ() }; }
+	XMFLOAT3 getLocalForward() { return local_forward; }
+	XMFLOAT3 getLocalRight() { return local_right; }
+	float getAngleAOB() { return angle_aob; }
+	float getAngleBOC() { return angle_boc; }
 
 public:
 	void setBB() {
@@ -839,13 +859,24 @@ void process_packet(int client_id, char* packet)
 			building_packet.type = SC_MAP_OBJINFO;
 			building_packet.size = sizeof(SC_MAP_OBJINFO_PACKET);
 
-			building_packet.pos_x = building.getPosX();
-			building_packet.pos_y = building.getPosY();
-			building_packet.pos_z = building.getPosZ();
+			building_packet.center_x = building.getPosX();
+			building_packet.center_y = building.getPosY();
+			building_packet.center_z = building.getPosZ();
 
 			building_packet.scale_x = building.getScaleX();
 			building_packet.scale_y = building.getScaleY();
 			building_packet.scale_z = building.getScaleZ();
+
+			building_packet.forward_x = building.getLocalForward().x;
+			building_packet.forward_y = building.getLocalForward().y;
+			building_packet.forward_z = building.getLocalForward().z;
+
+			building_packet.right_x = building.getLocalRight().x;
+			building_packet.right_y = building.getLocalRight().y;
+			building_packet.right_z = building.getLocalRight().z;
+
+			building_packet.aob = building.getAngleAOB();
+			building_packet.boc = building.getAngleBOC();
 
 			clients[client_id].do_send(&building_packet);
 		}
@@ -2354,7 +2385,8 @@ int main(int argc, char* argv[])
 	//======================================================================
 	// [ Main ]
 
-	// [ Main - 맵 정보 로드 ]
+	// [ Main - 맵(건물) 정보 로드 ]
+	cout << "[Import Map Data...]" << endl;
 	// 1. 디렉토리 검색
 	string filename;
 	vector<string> readTargets;
@@ -2376,74 +2408,111 @@ int main(int argc, char* argv[])
 		cout << "[Directory Search Error] Unknown Directory." << endl;
 	}
 
-	// 2. 파일 읽기
+	// 파일 읽기
 	for (auto& fname : readTargets) {
-		cout << "[Map Loading...] " << fname;
+		cout << "Curr Filename: " << fname << endl;
 		//string fname = readTargets[0];
 		ifstream txtfile(fname);
 
-		string line;
+		Building tmp_bulding;
 
-		int line_cnt = 0;
+		string word;
+		int word_cnt = 0;
 
-		char b_pos = 0;
-		int pos_count = 0;
+		bool b_center = false;
+		bool b_scale = false;
+		bool b_local_forward = false;
+		bool b_local_right = false;
+		bool b_angle_aob = false;
+		bool b_angle_boc = false;
 
-		char b_scale = 0;
-		int scale_count = 0;
-
-		float tmp_pos[3] = { 0.f, 0.f, 0.f }; // 뽑은 좌표정보를 임시 저장할 공간, 3개 꽉차면 벡터에 넣어주고 비워두자.
-		float tmp_scale[3] = { 0.f, 0.f, 0.f }; // 뽑은 크기정보를 임시 저장할 공간, 3개 꽉차면 벡터에 넣어주고 비워두자.
+		float tmp_buf[3] = { 0.f, 0.f, 0.f }; // 뽑은 데이터를 임시 저장할 공간, 3개 꽉차면 벡터에 넣어주고 비워두자.
+		int buf_count = 0;
 		if (txtfile.is_open()) {
-			while (txtfile >> line) {
-				if (line == "Position:") {
-					b_pos = 1;
-					pos_count = 0;
+			while (txtfile >> word) {
+				if (word == "Center:") {
+					b_center = true;
+					buf_count = 0;
 				}
-				else if (line == "Size:") {
-					b_scale = 1;
-					scale_count = 0;
+				else if (word == "Scale:") {
+					b_scale = true;
+					buf_count = 0;
+				}
+				else if (word == "Forward:") {
+					b_local_forward = true;
+					buf_count = 0;
+				}
+				else if (word == "Right:") {
+					b_local_right = true;
+					buf_count = 0;
+				}
+				else if (word == "AOB:") {
+					b_angle_aob = true;
+					buf_count = 0;
+				}
+				else if (word == "BOC:") {
+					b_angle_boc = true;
+					buf_count = 0;
 				}
 				else {
-					if (b_pos == 1) {
-						tmp_pos[pos_count] = string2data(line);
+					if (!(b_center || b_scale || b_local_forward || b_local_right || b_angle_aob || b_angle_boc)) continue;
 
-						if (pos_count == 2) {
-							tmp_pos[pos_count] = string2data(line);
+					if (b_angle_aob || b_angle_boc) {
+						if (b_angle_aob) {
+							float aob = string2data(word);
+							cout << "New Angle AOB Data. [" << aob << "]" << endl;
+							tmp_bulding.setAngleAOB(aob);
+							b_angle_aob = false;
+						}
+						else if (b_angle_boc) {
+							float boc = string2data(word);
+							cout << "New Angle BOC Data. [" << boc << "]" << endl;
+							tmp_bulding.setAngleBOC(boc);
+							b_angle_boc = false;
 
-							b_pos = 0;
-							pos_count = 0;
+							// BOC가 건물정보의 마지막이므로 완성된 tmpbuilding 을 buildings_info에 추가
+							buildings_info.push_back(tmp_bulding);
 						}
-						else {
-							pos_count += 1;
-						}
+						continue;
 					}
-					else if (b_scale == 1) {
-						tmp_scale[scale_count] = string2data(line);
 
-						if (scale_count == 2) {
-							tmp_scale[scale_count] = string2data(line);
-							b_scale = 0;
-							scale_count = 0;
-
-							Building tmp_mapobj(tmp_pos[0], tmp_pos[1], tmp_pos[2], tmp_scale[0], tmp_scale[1], tmp_scale[2]);
-							tmp_mapobj.setBB();
-							buildings_info.push_back(tmp_mapobj);
-							memset(tmp_pos, 0, sizeof(tmp_pos));
-							memset(tmp_scale, 0, sizeof(tmp_scale));
+					tmp_buf[buf_count] = string2data(word);
+					if (buf_count == 2) {
+						XMFLOAT3 tmp_flt3(tmp_buf[0], tmp_buf[1], tmp_buf[2]);
+						if (b_center) {
+							cout << "New Position Data. [" << tmp_flt3.x << ", " << tmp_flt3.y << ", " << tmp_flt3.z << "]" << endl;
+							tmp_bulding.setPos2(tmp_flt3);
+							b_center = false;
 						}
-						else {
-							scale_count += 1;
+						else if (b_scale) {
+							cout << "New Scale Data. [" << tmp_flt3.x << ", " << tmp_flt3.y << ", " << tmp_flt3.z << "]" << endl;
+							tmp_bulding.setScale2(tmp_flt3);
+							b_scale = false;
 						}
+						else if (b_local_forward) {
+							cout << "New Local Forward Data. [" << tmp_flt3.x << ", " << tmp_flt3.y << ", " << tmp_flt3.z << "]" << endl;
+							tmp_bulding.setLocalForward(tmp_flt3);
+							b_local_forward = false;
+						}
+						else if (b_local_right) {
+							cout << "New Local Right Data. [" << tmp_flt3.x << ", " << tmp_flt3.y << ", " << tmp_flt3.z << "]" << endl;
+							tmp_bulding.setLocalRight(tmp_flt3);
+							b_local_right = false;
+						}
+						memset(tmp_buf, 0, sizeof(tmp_buf));
+						buf_count = 0;
+					}
+					else {
+						buf_count++;
 					}
 				}
-				line_cnt++;
+				word_cnt++;
 			}
-			cout << " ---- OK." << endl;
 		}
 		else {
 			cout << "[Error] Unknown File." << endl;
 		}
+		cout << "\n";
 		txtfile.close();
 	}
 

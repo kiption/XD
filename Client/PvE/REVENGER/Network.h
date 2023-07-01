@@ -506,8 +506,18 @@ void processPacket(char* ptr)
         SC_MAP_OBJINFO_PACKET* recv_packet = reinterpret_cast<SC_MAP_OBJINFO_PACKET*>(ptr);
 
         MapObjectsInfo temp;
-        temp.m_pos = { recv_packet->pos_x, recv_packet->pos_y, recv_packet->pos_z };
+        temp.m_pos = { recv_packet->center_x, recv_packet->center_y, recv_packet->center_z };
         temp.m_scale = { recv_packet->scale_x, recv_packet->scale_y, recv_packet->scale_z };
+        temp.m_local_forward = { recv_packet->forward_x, recv_packet->forward_y, recv_packet->forward_z };
+        temp.m_local_right = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+        temp.m_angle_aob = recv_packet->aob;
+        temp.m_angle_boc = recv_packet->boc;
+        cout << "Center: " << temp.m_pos.x << ", " << temp.m_pos.y << ", " << temp.m_pos.z << endl;
+        cout << "Scale: " << temp.m_scale.x << ", " << temp.m_scale.y << ", " << temp.m_scale.z << endl;
+        cout << "Local Forward: " << temp.m_local_forward.x << ", " << temp.m_local_forward.y << ", " << temp.m_local_forward.z << endl;
+        cout << "Local Right: " << temp.m_local_right.x << ", " << temp.m_local_right.y << ", " << temp.m_local_right.z << endl;
+        cout << "Angle AOB: " << temp.m_angle_aob << endl;
+        cout << "Angle BOC: " << temp.m_angle_boc << endl;
         temp.setBB();
         stage1_mapobj_info.push_back(temp);
         break;
