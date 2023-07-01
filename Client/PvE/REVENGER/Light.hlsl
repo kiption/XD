@@ -40,8 +40,8 @@ cbuffer cbLights : register(b4)
 	float4					gcGlobalAmbientLight;
 	int						gnLights;
 };
-#define FRAME_BUFFER_WIDTH		1480
-#define FRAME_BUFFER_HEIGHT		1024
+#define FRAME_BUFFER_WIDTH		1920
+#define FRAME_BUFFER_HEIGHT		1080
 
 #define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 4)
 #define _DEPTH_BUFFER_HEIGHT	(FRAME_BUFFER_HEIGHT * 4)
@@ -66,14 +66,14 @@ float Compute3x3ShadowFactor(float2 uv, float fDepth, uint nIndex)
 	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, -DELTA_Y), fDepth).r;
 	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, +DELTA_Y), fDepth).r;
 
-	return(fPercentLit / 6.0f);
+	return(fPercentLit / 9.0f);
 }
 
 float Compute5x5ShadowFactor(float2 uv, float fDepth, uint nIndex)
 {
 	float fPercentLit = 0.0f;
 
-	return(fPercentLit / 40.0f);
+	return(fPercentLit / 20.0f);
 }
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
@@ -259,7 +259,7 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 	float3 vToCamera = normalize(vCameraPosition - vPosition);
 
 	float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-[unroll]
+	[unroll]
 	for (int i = 0; i < MAX_LIGHTS; i++)
 	{
 		if (gLights[i].m_bEnable)
@@ -274,19 +274,16 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 			if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
 			{
 				cColor += DirectionalLight(i, vNormal, vToCamera) * fShadowFactor;
-			
 			}
 			else if (gLights[i].m_nType == POINT_LIGHT)
 			{
 				cColor += PointLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
-			
 			}
 			else if (gLights[i].m_nType == SPOT_LIGHT)
 			{
 				cColor += SpotLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
-
-				//cColor += SpotLight(i, vPosition, vNormal, vToCamera);
 			}
+
 			cColor += gLights[i].m_cAmbient * gMaterial.m_cAmbient;
 		}
 	}
@@ -294,8 +291,19 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 	cColor += (gcGlobalAmbientLight * gMaterial.m_cAmbient);
 	cColor.a = gMaterial.m_cDiffuse.a;
 
-	return(cColor);
+	// God Ray 계산
+	float3 rayOrigin = float3(0.0f, 1000.0f, 0.0f);
+	float3 rayDirection = normalize(vPosition - rayOrigin);
+	float3 godRayColor = float3(1.0f, 1.0f, 1.0f);
+	float godRayIntensity = 0.5f; // God Ray 강도
+	float godRayAmount = saturate(dot(rayDirection, vNormal));
+	godRayAmount = pow(godRayAmount, 20.0f);
+
+	cColor.rgb += godRayColor * godRayAmount * godRayIntensity;
+
+	return cColor;
 }
+
 
 
 

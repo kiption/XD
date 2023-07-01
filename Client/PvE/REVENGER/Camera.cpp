@@ -174,9 +174,9 @@ CSpaceShipCamera::CSpaceShipCamera(CCamera* pCamera) : CCamera(pCamera)
 
 void CSpaceShipCamera::Rotate(float x, float y, float z)
 {
-	if (x <= -0.5f)x += 0.51f; if (x >= 0.5f)x -= 0.51f;
-
-	if (m_pPlayer && (x >= -0.5f && x <= 0.5f))
+	
+	x = std::clamp(x,-0.05f,0.05f);
+	if (m_pPlayer && (x != 0.0f))
 	{
 		
 		XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
@@ -219,15 +219,12 @@ void CSpaceShipCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	if (m_pPlayer)
 	{
 		XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
-		//XMFLOAT3 xmf3Pos = m_pPlayer->GetPosition();
 		XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
 		XMFLOAT3 xmf3Up = m_pPlayer->GetUpVector();
 		XMFLOAT3 xmf3Look = m_pPlayer->GetLookVector();
 		xmf4x4Rotate._11 = xmf3Right.x; xmf4x4Rotate._21 = xmf3Up.x; xmf4x4Rotate._31 = xmf3Look.x;
 		xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
 		xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
-		//xmf4x4Rotate._41 = xmf3Pos.x; xmf4x4Rotate._42 = xmf3Pos.y; xmf4x4Rotate._43 = xmf3Pos.z;//연출
-			// 플레이어를 항상 화면의 좌측에 고정시키기 위해 카메라의 위치를 업데이트합니다.
 		XMFLOAT3 xmf3PlayerPosition = m_pPlayer->GetPosition(); // 플레이어의 위치를 얻어옵니다.
 
 		// 카메라의 위치를 플레이어 위치로 설정합니다.
@@ -256,7 +253,7 @@ void CSpaceShipCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 {
 	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(m_xmf3Position, xmf3LookAt, m_pPlayer->GetUpVector());
 	m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
-	//m_xmf3Up = XMFLOAT3(0, 1, 0);
+	m_xmf3Up = XMFLOAT3(0, 1, 0);
 	m_xmf3Look = XMFLOAT3(mtxLookAt._13 * 12, mtxLookAt._23 / 6, mtxLookAt._33 * 12);
 
 }

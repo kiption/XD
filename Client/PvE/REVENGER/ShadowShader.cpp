@@ -632,7 +632,7 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 
 			XMMATRIX xmmtxView = XMMatrixLookToLH(XMLoadFloat3(&xmf3Position), XMLoadFloat3(&xmf3Look), XMLoadFloat3(&xmf3Up));
 
-			float fNearPlaneDistance = 20.0f, fFarPlaneDistance = m_pLights[j].m_fRange;
+			float fNearPlaneDistance = 10.0f, fFarPlaneDistance = m_pLights[j].m_fRange;
 
 			XMMATRIX xmmtxProjection{};
 			if (m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
