@@ -2004,6 +2004,23 @@ void MoveNPC()
 }
 
 //======================================================================
+void npcAttack()
+{
+	while (true) {
+		auto start_t = system_clock::now();
+		//======================================================================
+		if (ConnectingServer) {
+
+		}
+
+		//======================================================================
+		auto curr_t = system_clock::now();
+		if (curr_t - start_t < 16ms)
+			this_thread::sleep_for(16ms - (curr_t - start_t));
+	}
+}
+
+//======================================================================
 int main(int argc, char* argv[])
 {
 	last_send_checkpos_time = system_clock::now();	// 서버 시작시간
@@ -2197,16 +2214,20 @@ int main(int argc, char* argv[])
 	//======================================================================
 	//						  Threads Initialize
 	//======================================================================
-	vector <thread> worker_threads;
-	for (int i = 0; i < 5; ++i)
+	vector<thread> worker_threads;
+	for (int i = 0; i < 4; ++i)
 		worker_threads.emplace_back(do_worker);			// 메인서버-npc서버 통신용 Worker스레드
 
-	thread timer_threads(MoveNPC);
+	vector<thread> timer_threads;
+	timer_threads.emplace_back(MoveNPC);
+	timer_threads.emplace_back(npcAttack);
+
 
 	for (auto& th : worker_threads)
 		th.join();
 
-	timer_threads.join();
+	for (auto& th : timer_threads)
+		th.join();
 
 
 	//closesocket(g_sc_listensock);
