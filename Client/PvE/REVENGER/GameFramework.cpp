@@ -394,7 +394,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			m_SniperOn = false;
 		((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = false;
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-		//m_pCamera->SetOffset(XMFLOAT3(-0.6f, 0.165f, 0.435f));
+		m_pCamera->SetOffset(XMFLOAT3(-0.6f, 0.165f, 0.435f));
 		break;
 
 	case WM_LBUTTONDOWN:

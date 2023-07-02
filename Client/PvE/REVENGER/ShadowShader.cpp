@@ -700,7 +700,7 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	{
 		if (m_pObjectsShader->m_ppObjects[i])
 		{
-			m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
+			//m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
 			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
 			m_pObjectsShader->m_ppObjects[i]->Render(pd3dCommandList, pCamera, true); //true
 		}
