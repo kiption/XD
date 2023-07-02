@@ -383,12 +383,18 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	case WM_RBUTTONDOWN:
 		if (m_nMode == SCENE1STAGE)
 			m_SniperOn = true;
+		((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = true;
+		m_pCamera->GenerateProjectionMatrix(1.01f, 1000.0f, ASPECT_RATIO, 40.0f);
+		//m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.165f, 0.0f));
 		break;
 		//::ReleaseCapture();
 		//break;
 	case WM_RBUTTONUP:
 		if (m_nMode == SCENE1STAGE)
 			m_SniperOn = false;
+		((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = false;
+		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		//m_pCamera->SetOffset(XMFLOAT3(-0.6f, 0.165f, 0.435f));
 		break;
 
 	case WM_LBUTTONDOWN:
@@ -808,7 +814,7 @@ void CGameFramework::ProcessInput()
 				GetCursorPos(&ptCursorPos);
 				cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 40.0f;
 
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 50.0f;
+				cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 50.0f;
 
 				SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 			}
@@ -819,7 +825,7 @@ void CGameFramework::ProcessInput()
 				if (m_nMode == SCENE1STAGE)
 				{
 
-					if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay < 0.015)
+					if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay < 0.005)
 					{
 
 						ShootKey = true;
@@ -837,13 +843,13 @@ void CGameFramework::ProcessInput()
 			if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 			{
 				if (m_nMode == SCENE1STAGE) {
-					if (cxDelta || cyDelta)
+					if (cxDelta || cyDelta|| ((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
 					{
 						MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
 						q_mouseInput.push(mousemove);//s
-
-					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
-
+					
+							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
+						
 
 					}
 					if (dwDirection)
@@ -876,24 +882,31 @@ void CGameFramework::AnimateObjects()
 		if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA)
 			m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera(CLOSEUP_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
 		//if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
-		if (m_nMode == SCENE1STAGE)
-		{
-		
-		}
-
 
 		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShootDelay += m_GameTimer.GetTimeElapsed();
-		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShootDelay > 0.25)
+		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShootDelay > 0.15)
 		{
 			ShootKey = false;
 			((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShootDelay = 0.0f;
 		}
 		if (ShootKey == true)
 		{
+			m_pCamera->m_xmf4x4View._42 += 0.15f;
+			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
+			{
+				m_pCamera->m_xmf4x4View._42 += 0.35f;
+				m_pCamera->m_xmf4x4View._43 += 0.55f;
+			}
 			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
 		}
 		if (ShootKey == false)
 		{
+			m_pCamera->m_xmf4x4View._42 -= 0.15f;
+			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
+			{
+				m_pCamera->m_xmf4x4View._42 -= 0.35f;
+				m_pCamera->m_xmf4x4View._43 -= 0.55f;
+			}
 			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
 		}
 	}
@@ -1370,7 +1383,7 @@ void CGameFramework::FrameAdvance()
 		XMFLOAT3 xmf3Position = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition();
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
-	}
+}
 }
 
 void CGameFramework::ChangeScene(DWORD nMode)
@@ -2180,7 +2193,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[51]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	// SniperAim
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/SniperAimUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Hologram_2.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);

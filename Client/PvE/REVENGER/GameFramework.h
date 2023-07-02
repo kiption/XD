@@ -104,6 +104,8 @@ public:
 	int m_LoginScene = 0;
 	float m_StartKey = 0;
 	float m_ReadyKey = 0;
+	bool m_CameraShaking = false;
+	float deltax=0.0;
 public:
 	PostProcessShader* m_pPostProcessingShader = NULL;
 #ifdef _WITH_DIRECT2D

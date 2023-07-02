@@ -132,7 +132,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppSoldiarNpcObjects[i] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, 4);
 		m_ppSoldiarNpcObjects[i]->SetMaterial(0, pSoldiarNpcMaterial);
 		m_ppSoldiarNpcObjects[i]->SetScale(5.0, 5.0, 5.0);
-		m_ppSoldiarNpcObjects[i]->SetPosition(-170.0, 6.0, 300.0 + i * 20);
+		m_ppSoldiarNpcObjects[i]->SetPosition(210.0, 6.0, 300.0 + i * 20);
 		psModel->m_pModelRootObject->AddRef();
 	}
 
