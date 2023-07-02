@@ -1768,8 +1768,8 @@ void CNpcHelicopterObject::Animate(float fTimeElapsed)
 #include "MissileObject.h"
 CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,  CGameObject* pmodel, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(10)
 {
-	SetChild(pmodel, false);
-	pmodel->AddRef();
+	/*SetChild(pmodel, false);
+	pmodel->AddRef();*/
 
 	pBCBulletEffectShader = new CBulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
@@ -1787,6 +1787,7 @@ CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		m_ppBullets[i] = pBulletObject;
 		pBulletMesh->AddRef();
 	}
+
 	OnPrepareAnimate();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -1845,12 +1846,12 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 {
 	if (m_pMainRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 8.0) * fTimeElapsed);
+		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 8.2) * fTimeElapsed);
 		m_pMainRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4ToParent);
 	}
 	if (m_pTailRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 8.0) * fTimeElapsed);
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 8.2) * fTimeElapsed);
 		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
 	}
 

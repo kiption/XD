@@ -88,29 +88,38 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	////////////////////////////////////////////////////MAP_LOAD///////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////////////////HELI_LOAD///////////////////////////////////////////////////////////////
-	m_nHeliNpcObjects = 10;
-	m_ppNpc_Heli_Objects = new CGameObject * [m_nHeliNpcObjects];
+	m_nHeliNpcObjects = 5;
+	m_ppNpc_Heli_Objects = new CHelicopterObjects * [m_nHeliNpcObjects];
 
 	CMaterial* pNpcHeliMaterial = new CMaterial(m_nHeliNpcObjects);
 	pNpcHeliMaterial->SetReflection(m_nHeliNpcObjects);
 
-	CGameObject* pNPCHelicopterModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
-	for (int i = 12; i < 17; i++)
+	for (int i = 0; i < m_nHeliNpcObjects; i++)
 	{
-		m_ppObjects[i] = new CGameObject(4);
-		m_ppObjects[i]->SetChild(pNPCHelicopterModel, false);
-		m_ppObjects[i]->SetMaterial(0, pNpcHeliMaterial);
-		m_ppObjects[i]->OnPrepareAnimate();
-		m_ppObjects[i]->SetPosition(XMFLOAT3(50.0 + i * 15, 70.0, -500.0));
+		CGameObject* pNPCHelicopterModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
+		m_ppNpc_Heli_Objects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pNPCHelicopterModel, pd3dGraphicsRootSignature);
+		m_ppNpc_Heli_Objects[i]->SetChild(pNPCHelicopterModel, false);
+		m_ppNpc_Heli_Objects[i]->SetMaterial(0, pNpcHeliMaterial);
+		m_ppNpc_Heli_Objects[i]->OnPrepareAnimate();
+		m_ppNpc_Heli_Objects[i]->SetPosition(XMFLOAT3(50.0 + i * 15, 70.0, 500.0));
 		pNPCHelicopterModel->AddRef();
 	}
+	
+	m_ppObjects[12] = m_ppNpc_Heli_Objects[0];
+	m_ppObjects[13] = m_ppNpc_Heli_Objects[1];
+	m_ppObjects[14] = m_ppNpc_Heli_Objects[2];
+	m_ppObjects[15] = m_ppNpc_Heli_Objects[3];
+	m_ppObjects[16] = m_ppNpc_Heli_Objects[4];
 	m_ppObjects[17] = new CGameObject(1);
 	m_ppObjects[18] = new CGameObject(1);
 	m_ppObjects[19] = new CGameObject(1);
 	m_ppObjects[20] = new CGameObject(1);
 	m_ppObjects[21] = new CGameObject(1);
 	////////////////////////////////////////////////////HELI_LOAD//////////////////////////////////////////////////////////////
-
+	for (int i = 0; i < 5; i++)
+	{
+		m_ppNpc_Heli_Objects[0]->m_ppBullets[i] = ((CValkanObject*)m_ppObjects[i + 17]);
+	}
 
 	////////////////////////////////////////////////SOLDIAR_NPC_LOAD///////////////////////////////////////////////////////////
 	m_nSoldiarNpcObjects = 21;

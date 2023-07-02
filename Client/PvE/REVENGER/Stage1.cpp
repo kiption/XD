@@ -157,11 +157,12 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pCrossHairShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[1] = pCrossHairShader;
 
-	ResponeEffectShader* pResponeEffectShader = new ResponeEffectShader();
-	pResponeEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
-	pResponeEffectShader->SetCurScene(SCENE1STAGE);
-	pResponeEffectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_pBillboardShader[2] = pResponeEffectShader;
+	BloodHittingBillboard* pBloodHittingBillboard = new BloodHittingBillboard();
+	pBloodHittingBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pBloodHittingBillboard->SetCurScene(SCENE1STAGE);
+	pBloodHittingBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	pBloodHittingBillboard->m_bActive = true;
+	m_pBillboardShader[2] = pBloodHittingBillboard;
 
 	SparkBillboard* pHelicopterSparkBillboard = new SparkBillboard();
 	pHelicopterSparkBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
@@ -169,6 +170,8 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pHelicopterSparkBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pHelicopterSparkBillboard->m_bActive = true;
 	m_pBillboardShader[3] = pHelicopterSparkBillboard;
+
+
 
 	m_nSpriteBillboards = 1;
 	m_ppSpriteBillboard = new CSpriteObjectsShader * [m_nSpriteBillboards];

@@ -89,4 +89,12 @@ public:
 	LIGHTS* m_pcbMappedLights = NULL;
 
 	XMFLOAT3 particlepos;
+
+
+public:
+	float m_fBulletEffectiveRange = 2000.0f;
+	CBulletEffectShader* pBCBulletEffectShader = NULL;
+	CValkanObject* pBulletObject = NULL;
+	CValkanObject* m_ppBullets[HELIBULLETS];
+	
 };
