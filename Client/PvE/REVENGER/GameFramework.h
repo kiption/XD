@@ -46,6 +46,36 @@ struct SendChat {
 	char chatData[60];
 };
 
+struct CollideMapInfo
+{
+	XMFLOAT3 m_pos;
+	XMFLOAT3 m_scale;
+	XMFLOAT3 m_local_forward;
+	XMFLOAT3 m_local_right;
+	float m_angle_aob;
+	float m_angle_boc;
+
+	BoundingOrientedBox m_xoobb;
+
+	CollideMapInfo() {
+		m_pos = { 0.0f, 0.0f, 0.0f };
+		m_scale = { 0.0f, 0.0f, 0.0f };;
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
+
+	void InfoClear() {
+		m_pos = { 0.0f, 0.0f, 0.0f };
+		m_scale = { 0.0f, 0.0f, 0.0f };
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
+
+	void setBB() {
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pos.x, m_pos.y, m_pos.z), XMFLOAT3(m_scale.x, m_scale.y, m_scale.z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
+};
+
+
+
 class CGameFramework
 {
 public:
@@ -228,6 +258,8 @@ public:
 	int m_CurrentPlayerNum;
 
 	int m_occupationnum = 0;
+	vector<CollideMapInfo> mapcol_info;
+	
 	queue<BulletPos> m_shoot_info;
 
 	queue<ChatInfo> m_chat_info;

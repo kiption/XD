@@ -848,8 +848,18 @@ void CGameFramework::ProcessInput()
 				}
 				if (dwDirection)
 				{
-					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)
-						->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
+					/*bool isCollide = false;
+					
+					for (int i{}; i < mapcol_info.size(); ++i) {
+						if (m_pPlayer->m_xoobb.Intersects(mapcol_info[i].m_xoobb)) isCollide = true;
+
+					}
+					
+					if (isCollide) {
+					
+					}*/
+					//else 
+					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
 
 				}
 			}

@@ -91,6 +91,18 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				}
 
 				if (stage1_enter_ok) {
+					for (int i{}; i < stage1_mapobj_info.size(); ++i) {
+						MapObjectsInfo origintemp = stage1_mapobj_info[i];
+						CollideMapInfo frametemp;
+						frametemp.m_pos = origintemp.m_pos;
+						frametemp.m_scale = origintemp.m_scale;
+						frametemp.m_local_forward = origintemp.m_local_forward;
+						frametemp.m_local_right = origintemp.m_local_right;
+						frametemp.m_angle_aob = origintemp.m_angle_aob;
+						frametemp.m_angle_boc = origintemp.m_angle_boc;
+						frametemp.setBB();
+						gGameFramework.mapcol_info.emplace_back(frametemp);
+					}
 					gGameFramework.ChangeScene(SCENE1STAGE);
 					gGameFramework.setPosition_Self(players_info[my_id].m_pos);
 					gGameFramework.setVectors_Self(players_info[my_id].m_right_vec, players_info[my_id].m_up_vec, players_info[my_id].m_look_vec);

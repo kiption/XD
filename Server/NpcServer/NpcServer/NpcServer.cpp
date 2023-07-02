@@ -978,11 +978,17 @@ void NPC::H_PlayerChasing()
 {
 	// 같은 도시에 있는 지 판별
 	int user_City = H_GetUserCity();
-	if (user_City == -1 || H_IsUserOnSafeZone(user_City)) return;
+	if (user_City == -1 || H_IsUserOnSafeZone(user_City)) {
+		H_MoveToNode();
+		return;
+	}
 
 	// 있다면 노드 검색
 	int user_node = H_FindUserNode(user_City);
-	if (user_node == -1) return;
+	if (user_node == -1) {
+		H_MoveToNode();
+		return;
+	}
 
 	// 노드 검색 후 같은 섹션에 있는 지 판별
 	if (user_node == m_currentNodeIndex) {
@@ -1104,7 +1110,7 @@ bool NPC::H_PlayerDetact()
 		float distance = XMVectorGetX(XMVector3Length(NPCToPlayer));
 
 		// 거리가 bounding sphere의 반지름보다 작으면 충돌했다고 판단한다.
-		if (distance < 200.0f)
+		if (distance < 100.0f)
 		{
 			return true;
 		}
@@ -1353,11 +1359,18 @@ void NPC::A_PlayerChasing()
 {
 	// 같은 도시에 있는 지 판별
 	int user_City = A_GetUserCity();
-	if (user_City == -1 || A_IsUserOnSafeZone(user_City)) return;
+	if (user_City == -1 || A_IsUserOnSafeZone(user_City)) {
+		A_MoveToNode();
+		return;
+	}
 
 	// 있다면 노드 검색
 	int user_node = A_FindUserNode(user_City);
-	if (user_node == -1) return;
+	if (user_node == -1) {
+		A_MoveToNode();
+		return;
+	}
+
 
 	// 노드 검색 후 같은 섹션에 있는 지 판별
 	if (user_node == m_currentNodeIndex) {
@@ -1478,7 +1491,7 @@ bool NPC::A_PlayerDetact()
 		float distance = XMVectorGetX(XMVector3Length(NPCToPlayer));
 
 		// 거리가 bounding sphere의 반지름보다 작으면 충돌했다고 판단한다.
-		if (distance < 200.0f)
+		if (distance < 50.0f)
 		{
 			return true;
 		}
@@ -1914,7 +1927,7 @@ void initNpc() {
 			uniform_int_distribution<int>drange(0.0f, 20.0f);
 			npcsInfo[i].SetDestinationRange(drange(dre));
 
-			uniform_real_distribution<float>SpdSet(4.0f, 7.0f);
+			uniform_real_distribution<float>SpdSet(1.2f, 2.5f);
 			float speed = SpdSet(dre);
 			npcsInfo[i].SetSpeed(speed);
 			npcsInfo[i].SetChaseID(-1);
@@ -2010,13 +2023,16 @@ void npcAttack()
 		auto start_t = system_clock::now();
 		//======================================================================
 		if (ConnectingServer) {
-
+			for (int i{}; i < MAX_NPCS; ++i) {
+				if (npcsInfo[i].GetState() == NPC_ATTACK) {
+					g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
+				}
+			}
 		}
-
 		//======================================================================
 		auto curr_t = system_clock::now();
-		if (curr_t - start_t < 16ms)
-			this_thread::sleep_for(16ms - (curr_t - start_t));
+		if (curr_t - start_t < 1000ms)
+			this_thread::sleep_for(1000ms - (curr_t - start_t));
 	}
 }
 
