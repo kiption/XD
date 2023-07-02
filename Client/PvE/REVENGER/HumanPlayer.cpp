@@ -7,7 +7,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	SetChild(playermodel->m_pModelRootObject, true);
 	playermodel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
-	SetScale(XMFLOAT3(7,7,7));
+	SetScale(XMFLOAT3(7, 7, 7));
 	m_pBulletFindFrame = playermodel->m_pModelRootObject->FindFrame("Rifle__1_");
 	m_pHeadFindFrame = playermodel->m_pModelRootObject->FindFrame("head");
 
@@ -39,7 +39,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	//m_pSkinnedAnimationController->SetTrackEnable(9, false);
 	//m_pSkinnedAnimationController->SetTrackEnable(10, false);
 	//m_pSkinnedAnimationController->SetTrackEnable(11, false);
-	m_pSkinnedAnimationController->SetTrackWeight(6,0.1f);
+	m_pSkinnedAnimationController->SetTrackWeight(6, 0.1f);
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
 	m_pSkinnedAnimationController->SetCallbackKeys(2, 2);
@@ -109,7 +109,7 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	case FIRST_PERSON_CAMERA:
 		SetFriction(400.0);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(20.0f);
+		SetMaxVelocityXZ(30.0f);
 		SetMaxVelocityY(0.0f);
 		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
@@ -237,7 +237,7 @@ void CHumanPlayer::ReloadState()
 		m_pSkinnedAnimationController->SetTrackEnable(4, false);
 		m_pSkinnedAnimationController->SetTrackEnable(5, true);
 		m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
-		
+
 	}
 
 
@@ -263,7 +263,7 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 {
 	m_bReloadState = false;
 	m_bJumeState = false;
- 
+
 	m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_LOOP;
 	if (dwDirection & DIR_FORWARD)
 	{
@@ -347,7 +347,7 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 
 void CHumanPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
-	
+
 	for (int i = 0; i < BULLETS; i++)
 	{
 		if (m_ppBullets[i]->m_bActive) {
@@ -398,11 +398,14 @@ void CHumanPlayer::Update(float fTimeElapsed)
 
 void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	CPlayer::Render(pd3dCommandList, pCamera);
+	if (m_bZoomMode == false)
+	{
+		CPlayer::Render(pd3dCommandList, pCamera);
 
-	if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
-	for (int i = 0; i < BULLETS; i++)
-		if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
+		if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
+		for (int i = 0; i < BULLETS; i++)
+			if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
+	}
 }
 
 void CHumanPlayer::FireBullet(CGameObject* pLockedObject)

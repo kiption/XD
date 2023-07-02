@@ -31,7 +31,7 @@ public:
 	
 	bool m_bReloadState = false;
 	bool m_bJumeState = false;
-
+	bool m_bZoomMode = false;
 public:
 	float m_fBulletEffectiveRange = 1600.0f;
 	CBulletObject* pBulletObject = NULL;
