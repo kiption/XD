@@ -1549,6 +1549,7 @@ void process_packet(int client_id, char* packet)
 		// 클라이언트로 NPC좌표를 보내는 것은 1초에 한번씩
 		// 클라이언트에서 보간한 좌표와의 오차를 비교하기 위해 보내는 것임.
 
+		break;
 	}// NPC_MOVE end
 	case NPC_ROTATE:
 	{
@@ -1562,8 +1563,8 @@ void process_packet(int client_id, char* packet)
 		npcs[npc_id].m_upvec = { npc_rotate_pack->up_x, npc_rotate_pack->up_y, npc_rotate_pack->up_z };
 		npcs[npc_id].m_lookvec = { npc_rotate_pack->look_x, npc_rotate_pack->look_y, npc_rotate_pack->look_z };
 		npcs[npc_id].s_lock.unlock();
-		cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
-			<< ") 방향으로 회전하였습니다.\n" << endl;
+		/*cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
+			<< ") 방향으로 회전하였습니다.\n" << endl;*/
 
 		/*
 		for (auto& cl : clients) {
