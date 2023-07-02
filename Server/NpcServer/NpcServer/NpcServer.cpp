@@ -554,7 +554,6 @@ void SERVER::send_npc_rotate_packet(int npc_id) {
 	npc_rotate_packet.look_x = npcsInfo[npc_id].m_lookvec.x;
 	npc_rotate_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
 	npc_rotate_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
-	npc_rotate_packet.server_time = 0;	// 메인서버에서 정해줄 예정.
 
 	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
 	g_logicservers[a_lgcsvr_num].do_send(&npc_rotate_packet);
@@ -2199,17 +2198,15 @@ int main(int argc, char* argv[])
 	//						  Threads Initialize
 	//======================================================================
 	vector <thread> worker_threads;
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 5; ++i)
 		worker_threads.emplace_back(do_worker);			// 메인서버-npc서버 통신용 Worker스레드
 
-	vector<thread> timer_threads;
-	for (int i = 0; i < 2; ++i)
-		timer_threads.emplace_back(MoveNPC);
+	thread timer_threads(MoveNPC);
 
 	for (auto& th : worker_threads)
 		th.join();
-	for (auto& timer_th : timer_threads)
-		timer_th.join();
+
+	timer_threads.join();
 
 
 	//closesocket(g_sc_listensock);

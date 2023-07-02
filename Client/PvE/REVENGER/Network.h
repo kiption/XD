@@ -20,17 +20,22 @@ short active_servernum = 1;
 array<SOCKET, MAX_LOGIC_SERVER> sockets;
 int my_id;
 
-int servertime_ms;
-int servertime_sec;
+//==================================================
+float servertime_ms;    // 실제 서버시간
+
+int timelimit_ms;       // 스테이지별 제한시간
+int timelimit_sec;
 
 volatile bool stage1_enter_ok;
 volatile bool stage2_enter_ok;
 
+//==================================================
 int curr_connection_num = 1;
 
 chrono::system_clock::time_point last_ping;   // ping을 서버로 보낸 시간
 chrono::system_clock::time_point last_pong;   // 서버의 ping에 대한 응답을 받은 시간
 
+//==================================================
 class Mission
 {
 public:
@@ -50,6 +55,15 @@ bool trigger_mission_complete = false;
 bool trigger_stage_clear = false;
 short curr_mission_num = 0;
 
+//==================================================
+struct message { 
+    char name[NAME_SIZE];
+    char msg[CHAT_SIZE];
+};
+constexpr int MAX_SAVED_MSG = 10;
+array<message, MAX_SAVED_MSG> chat_logs;
+
+//==================================================
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
 class OVER_EX {
@@ -498,7 +512,8 @@ void processPacket(char* ptr)
         SC_TIME_TICKING_PACKET* recv_packet = reinterpret_cast<SC_TIME_TICKING_PACKET*>(ptr);
 
         servertime_ms = recv_packet->servertime_ms;
-        servertime_sec = servertime_ms / 1000;
+        timelimit_ms = STAGE1_TIMELIMIT * 1000 - servertime_ms;
+        timelimit_sec = timelimit_ms / 1000;
         break;
     }//SC_TIME_TICKING case end
     case SC_MAP_OBJINFO:
@@ -512,12 +527,6 @@ void processPacket(char* ptr)
         temp.m_local_right = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
         temp.m_angle_aob = recv_packet->aob;
         temp.m_angle_boc = recv_packet->boc;
-        cout << "Center: " << temp.m_pos.x << ", " << temp.m_pos.y << ", " << temp.m_pos.z << endl;
-        cout << "Scale: " << temp.m_scale.x << ", " << temp.m_scale.y << ", " << temp.m_scale.z << endl;
-        cout << "Local Forward: " << temp.m_local_forward.x << ", " << temp.m_local_forward.y << ", " << temp.m_local_forward.z << endl;
-        cout << "Local Right: " << temp.m_local_right.x << ", " << temp.m_local_right.y << ", " << temp.m_local_right.z << endl;
-        cout << "Angle AOB: " << temp.m_angle_aob << endl;
-        cout << "Angle BOC: " << temp.m_angle_boc << endl;
         temp.setBB();
         stage1_mapobj_info.push_back(temp);
         break;
@@ -541,15 +550,36 @@ void processPacket(char* ptr)
         }
         break;
     }//SC_BULLET_COUNT case end
+    case NPC_MOVE:
+    {
+        NPC_MOVE_PACKET* recv_packet = reinterpret_cast<NPC_MOVE_PACKET*>(ptr);
+
+        short recv_id = recv_packet->n_id;
+        npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+
+        break;
+    }
+    case NPC_ROTATE:
+    {
+        NPC_ROTATE_PACKET* recv_packet = reinterpret_cast<NPC_ROTATE_PACKET*>(ptr);
+
+        short recv_id = recv_packet->n_id;
+        npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+        npcs_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+        npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+        npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+
+        break;
+    }
     case NPC_ATTACK:
     {
-        NPC_ATTACK_PACKET* npc_attack_pack = reinterpret_cast<NPC_ATTACK_PACKET*>(ptr);
+        NPC_ATTACK_PACKET* recv_packet = reinterpret_cast<NPC_ATTACK_PACKET*>(ptr);
         
-        short recv_id = npc_attack_pack->n_id;
+        short recv_id = recv_packet->n_id;
         
-        npcs_info[recv_id].m_attack_dir.x = npc_attack_pack->atklook_x;
-        npcs_info[recv_id].m_attack_dir.y = npc_attack_pack->atklook_y;
-        npcs_info[recv_id].m_attack_dir.z = npc_attack_pack->atklook_z;
+        npcs_info[recv_id].m_attack_dir.x = recv_packet->atklook_x;
+        npcs_info[recv_id].m_attack_dir.y = recv_packet->atklook_y;
+        npcs_info[recv_id].m_attack_dir.z = recv_packet->atklook_z;
         npcs_info[recv_id].m_attack_on = true;
         break;
     }

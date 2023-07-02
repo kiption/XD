@@ -1548,6 +1548,13 @@ void process_packet(int client_id, char* packet)
 
 		// 클라이언트로 NPC좌표를 보내는 것은 1초에 한번씩
 		// 클라이언트에서 보간한 좌표와의 오차를 비교하기 위해 보내는 것임.
+		for (auto& cl : clients) {
+			if (cl.curr_stage != 1) continue;	// Stage2 제작 전까지 사용되는 임시코드
+			if (cl.s_state != ST_INGAME) continue;
+
+			lock_guard<mutex> lg{ cl.s_lock };
+			cl.do_send(npc_move_pack);
+		}
 
 		break;
 	}// NPC_MOVE end
@@ -1557,25 +1564,24 @@ void process_packet(int client_id, char* packet)
 
 		short npc_id = npc_rotate_pack->n_id;
 
+		// 서버 내 NPC 정보 업데이트
 		npcs[npc_id].s_lock.lock();
 		npcs[npc_id].pos = { npc_rotate_pack->x, npc_rotate_pack->y, npc_rotate_pack->z };
 		npcs[npc_id].m_rightvec = { npc_rotate_pack->right_x, npc_rotate_pack->right_y, npc_rotate_pack->right_z };
 		npcs[npc_id].m_upvec = { npc_rotate_pack->up_x, npc_rotate_pack->up_y, npc_rotate_pack->up_z };
 		npcs[npc_id].m_lookvec = { npc_rotate_pack->look_x, npc_rotate_pack->look_y, npc_rotate_pack->look_z };
 		npcs[npc_id].s_lock.unlock();
-		/*cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
-			<< ") 방향으로 회전하였습니다.\n" << endl;*/
+		//cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
+		//	<< ") 방향으로 회전하였습니다.\n" << endl;
 
-		/*
+		// 클라로 패킷 전달
 		for (auto& cl : clients) {
-			if (cl.curr_stage != 1) continue;	// Stage2 NPC 제작 전까지 사용되는 임시코드
+			if (cl.curr_stage != 1) continue;	// Stage2 제작 전까지 사용되는 임시코드
 			if (cl.s_state != ST_INGAME) continue;
 
 			lock_guard<mutex> lg{ cl.s_lock };
 			cl.do_send(npc_rotate_pack);
-			//cl.send_rotate_packet(npc_id, TARGET_NPC);
 		}
-		*/
 
 		break;
 	}// NPC_ROTATE end
@@ -1994,14 +2000,29 @@ void timerFunc() {
 			servertime_lock.unlock();
 			for (auto& cl : clients) {
 				if (cl.s_state != ST_INGAME) continue;
-				if (cl.curr_stage != 1) continue;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
+				if (cl.curr_stage == 0) continue;
+
 				SC_TIME_TICKING_PACKET ticking_packet;
 				ticking_packet.size = sizeof(SC_TIME_TICKING_PACKET);
 				ticking_packet.type = SC_TIME_TICKING;
-				int left_time = STAGE1_TIMELIMIT * 1000 - static_cast<int>(g_curr_servertime.count());
-				if (left_time < 0) left_time = 0;
-				ticking_packet.servertime_ms = left_time;
-				cl.do_send(&ticking_packet);
+				int left_time;
+				switch (cl.curr_stage) {
+				case 1:
+					left_time = STAGE1_TIMELIMIT * 1000 - static_cast<int>(g_curr_servertime.count());
+					if (left_time < 0) {
+						ticking_packet.servertime_ms = STAGE1_TIMELIMIT;
+					}
+					else {
+						ticking_packet.servertime_ms = static_cast<int>(g_curr_servertime.count());
+					}
+					break;
+				default:
+					left_time = -1;
+				}
+
+				if (left_time != -1) {
+					cl.do_send(&ticking_packet);
+				}
 			}
 
 			// 만약 현재 미션이 점령 중이라면 점령 관련 계산을 한다.

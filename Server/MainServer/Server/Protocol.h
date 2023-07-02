@@ -44,6 +44,7 @@ constexpr int HA_REPLICA_CYCLE = 333;	// 서버간 데이터복제 주기 (단위: millisec)
 //======================================================================
 constexpr int BUF_SIZE = 200;
 constexpr int NAME_SIZE = 20;
+constexpr int CHAT_SIZE = 100;
 
 constexpr int MAX_USER = 3;
 constexpr int MAX_NPCS = 30;
@@ -310,6 +311,7 @@ struct SC_MISSION_COMPLETE_PACKET {
 };
 
 // 4) UI 관련 패킷
+#define STAGE1_TIMELIMIT 600 // 스테이지1 제한시간 (단위: sec)
 struct SC_TIME_TICKING_PACKET {
 	unsigned char size;
 	char type;
@@ -407,7 +409,6 @@ struct NPC_ROTATE_PACKET {
 	float right_x, right_y, right_z;
 	float up_x, up_y, up_z;
 	float look_x, look_y, look_z;
-	int server_time;
 };
 
 struct NPC_CHECK_POS_PACKET {

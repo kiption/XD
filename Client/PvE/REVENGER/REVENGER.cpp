@@ -546,10 +546,10 @@ void uiThreadFunc() {
 			gGameFramework.m_currHp = currHP;
 
 			// 3. 시간 동기화
-			gGameFramework.m_10MinOfTime = servertime_sec / 600;
-			gGameFramework.m_1MinOfTime = (servertime_sec - gGameFramework.m_10MinOfTime * 600) / 60;
-			gGameFramework.m_10SecOftime = (servertime_sec - gGameFramework.m_1MinOfTime * 60) / 10;
-			gGameFramework.m_1SecOfTime = servertime_sec % 10;
+			gGameFramework.m_10MinOfTime = timelimit_sec / 600;
+			gGameFramework.m_1MinOfTime = (timelimit_sec - gGameFramework.m_10MinOfTime * 600) / 60;
+			gGameFramework.m_10SecOftime = (timelimit_sec - gGameFramework.m_1MinOfTime * 60) / 10;
+			gGameFramework.m_1SecOfTime = timelimit_sec % 10;
 
 			// 4. 미션 진행상황 동기화
 			switch (gGameFramework.m_nMode) {
@@ -603,6 +603,12 @@ void uiThreadFunc() {
 
 			// 6. Team 인원 동기화
 			gGameFramework.m_CurrentPlayerNum = curr_connection_num;
+
+			// 7. 채팅 동기화
+			for (int i = 0; i < MAX_SAVED_MSG; ++i) {
+				chat_logs[i].name;	// 채팅친 사람 이름
+				chat_logs[i].msg;	// 채팅 내용
+			}
 		}
 
 		this_thread::yield();
