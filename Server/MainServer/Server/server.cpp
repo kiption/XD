@@ -2139,6 +2139,7 @@ void timerFunc() {
 					if (cl.pl_state != PL_ST_DEAD) continue;
 
 					if (system_clock::now() >= cl.death_time + milliseconds(RESPAWN_TIME)) {
+						// 1. 플레이어 리스폰
 						cl.s_lock.lock();
 						cl.pl_state = PL_ST_IDLE;
 						cl.hp = HELI_MAXHP;
@@ -2151,6 +2152,7 @@ void timerFunc() {
 						cout << "Player[" << cl.id << "]가 리스폰 장소에서 부활하였습니다.\n" << endl;
 						dead_player_cnt--;
 
+						// 2. 클라이언트에게 플레이어 리스폰 위치를 알려준다.
 						SC_RESPAWN_PACKET respawn_packet;
 						respawn_packet.size = sizeof(SC_RESPAWN_PACKET);
 						respawn_packet.type = SC_RESPAWN;
@@ -2177,6 +2179,14 @@ void timerFunc() {
 
 							lock_guard<mutex> lg{ send_target.s_lock };
 							send_target.do_send(&respawn_packet);
+						}
+
+						// 3. NPC 서버에게도 플레이어 리스폰 위치를 알려준다.
+						if (b_npcsvr_conn) {
+							npc_server.s_lock.lock();
+							npc_server.send_move_packet(cl.id, TARGET_PLAYER, 0);
+							npc_server.send_rotate_packet(cl.id, TARGET_PLAYER);
+							npc_server.s_lock.unlock();
 						}
 					}
 				}
