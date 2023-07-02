@@ -44,7 +44,7 @@ constexpr int HA_REPLICA_CYCLE = 333;	// 서버간 데이터복제 주기 (단위: millisec)
 //======================================================================
 constexpr int BUF_SIZE = 200;
 constexpr int NAME_SIZE = 20;
-constexpr int CHAT_SIZE = 100;
+constexpr int CHAT_SIZE = 60;
 
 constexpr int MAX_USER = 3;
 constexpr int MAX_NPCS = 30;
@@ -76,10 +76,10 @@ constexpr char INPUT_KEY_E = 0b000001;
 enum PacketID {
 	CLGN_LOGIN_REQUEST, LGNC_LOGIN_RESULT, LGNC_USER_MATCH_PACKET
 	, CLBY_MATCH_REQUEST, LBYC_MATCH_RESULT
-	, CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_PING, CS_RELOGIN
+	, CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_CHAT, CS_PING, CS_RELOGIN
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
 	, SC_DAMAGED, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_BULLET_COUNT, SC_MISSION, SC_MISSION_COMPLETE
-	, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN
+	, SC_TIME_TICKING, SC_CHAT, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
 	, NPC_FULL_INFO, NPC_MOVE, NPC_ROTATE, NPC_CHECK_POS, NPC_REMOVE, NPC_ATTACK, NPC_CHANGE_STATE
 };
@@ -182,6 +182,12 @@ struct CS_INPUT_MOUSE_PACKET {
 	char buttontype;
 	float delta_x, delta_y;
 	//float roll, pitch, yaw;
+};
+
+struct CS_CHAT_PACKET {
+	unsigned char size;
+	char type;
+	char msg[CHAT_SIZE];
 };
 
 // 3) 이중화 관련 패킷
@@ -316,6 +322,13 @@ struct SC_TIME_TICKING_PACKET {
 	unsigned char size;
 	char type;
 	int servertime_ms;	// 단위: ms
+};
+
+struct SC_CHAT_PACKET {
+	unsigned char size;
+	char type;
+	char name[NAME_SIZE];
+	char msg[CHAT_SIZE];
 };
 
 // 5) 맵 정보 관련 패킷

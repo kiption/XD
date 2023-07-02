@@ -1432,6 +1432,24 @@ void process_packet(int client_id, char* packet)
 
 		break;
 	}// CS_INPUT_MOUSE end
+	case CS_CHAT:
+	{
+		CS_CHAT_PACKET* recv_chat_pack = reinterpret_cast<CS_CHAT_PACKET*>(packet);
+		
+		for (auto& cl : clients) {
+			if (cl.s_state != ST_INGAME) continue;
+			if (cl.curr_stage == 0) continue;
+
+			SC_CHAT_PACKET send_chat_pack;
+			send_chat_pack.size = sizeof(SC_CHAT_PACKET);
+			send_chat_pack.type = SC_CHAT;
+			strcpy_s(send_chat_pack.name, cl.name);
+			strcpy_s(send_chat_pack.msg, recv_chat_pack->msg);
+			cl.do_send(&send_chat_pack);
+		}
+
+		break;
+	}
 	case CS_PING:
 	{
 		CS_PING_PACKET* re_login_pack = reinterpret_cast<CS_PING_PACKET*>(packet);
