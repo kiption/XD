@@ -52,20 +52,21 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.5f, _T("Footstep02"));
 	m_pSkinnedAnimationController->SetCallbackKey(3, 0, 0.9f, _T("Footstep03"));
 #else
-	m_pSkinnedAnimationController->SetCallbackKey(1, 0, 0.1f, _T("Sound/footStep.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.4f, _T("Sound/footStep.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(2, 0, 0.1f, _T("Sound/footStep.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(2, 1, 0.4f, _T("Sound/footStep.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(3, 0, 0.1f, _T("Sound/footStep.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(3, 1, 0.4f, _T("Sound/footStep.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(4, 0, 0.1f, _T("Sound/footStep.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(4, 1, 0.4f, _T("Sound/footStep.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(1, 0, 0.0f, _T("Sound/Footstep01.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.4f, _T("Sound/Footstep01.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(2, 0, 0.0f, _T("Sound/Footstep01.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(2, 1, 0.4f, _T("Sound/Footstep01.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(3, 0, 0.0f, _T("Sound/Footstep03.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(3, 1, 0.4f, _T("Sound/Footstep03.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(4, 0, 0.0f, _T("Sound/Footstep03.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(4, 1, 0.4f, _T("Sound/Footstep03.wav"));
 #endif
 	CAnimationCallbackHandler* pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(2, pAnimationCallbackHandler);
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(3, pAnimationCallbackHandler);
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(4, pAnimationCallbackHandler);
+
 
 
 

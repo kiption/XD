@@ -59,7 +59,7 @@ void CBulletObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-CValkanObject::CValkanObject(float fEffectiveRange) : CGameObject()
+CValkanObject::CValkanObject(float fEffectiveRange) : CGameObject(5)
 {
 	m_fBulletEffectiveRange = fEffectiveRange;
 }

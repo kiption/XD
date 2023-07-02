@@ -578,15 +578,14 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				}
 				break;
 
-			case 'C':
+			case 'R':
 				gamesound.shootSound->release();
-				break;
-				/*	case KEY_W:
-					case KEY_A:
-					case KEY_S:
-					case KEY_D:
 
-						break;*/
+				((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bReloadState = true;
+				((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReloadState();
+				q_keyboardInput.push(SEND_KEY_UP);//S
+				break;
+
 
 			case VK_SPACE:
 				((CHumanPlayer*)m_pScene->m_pPlayer)->m_bJumeState = true;
@@ -750,9 +749,6 @@ void CGameFramework::ProcessInput()
 		{
 
 
-			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bReloadState = true;
-			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReloadState();
-			q_keyboardInput.push(SEND_KEY_UP);//S
 		}
 
 		if (pKeysBuffer[KEY_E] & 0xF0) {
@@ -797,7 +793,7 @@ void CGameFramework::ProcessInput()
 			}
 
 		}
-		
+
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
 			if (m_nMode == SCENE1STAGE) {
@@ -980,7 +976,7 @@ void CGameFramework::FrameAdvance()
 	if (m_nMode == SCENE1STAGE)
 	{
 		if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
-	}
+}
 	// Stage2
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -1314,15 +1310,15 @@ void CGameFramework::FrameAdvance()
 
 	MoveToNextFrame();
 
-	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
 	if (m_nMode == SCENE1STAGE)
 	{
+		m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
 		size_t nLength = _tcslen(m_pszFrameRate);
 		XMFLOAT3 xmf3Position = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition();
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-		}
+}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -1414,7 +1410,7 @@ void CGameFramework::CreateDirect2DDevice()
 		D3D12_MESSAGE_ID pd3dDenyIds[] =
 		{
 			D3D12_MESSAGE_ID_INVALID_DESCRIPTOR_HANDLE,
-};
+		};
 
 		D3D12_INFO_QUEUE_FILTER d3dInforQueueFilter = { };
 		d3dInforQueueFilter.DenyList.NumSeverities = _countof(pd3dSeverities);
