@@ -53,6 +53,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	uiThread.detach();
 	//==
 
+	strcpy_s(chat_logs.name, sizeof(chat_logs.name), "kirew");
+	strcpy_s(chat_logs.msg, sizeof(chat_logs.msg), "hello");
+
 	while (1)
 	{
 
@@ -534,13 +537,26 @@ void networkThreadFunc()
 	}
 }
 
+// Chat UI 관련 (convert char to wchat_t)
+wchar_t* ConvertToWideChar(const char* str) {
+	if (str == nullptr)
+		return nullptr;
+
+	size_t size = 0;
+	mbstowcs_s(&size, nullptr, 0, str, 0);
+
+	wchar_t* wideStr = new wchar_t[size + 1];
+	mbstowcs_s(nullptr, wideStr, size + 1, str, size);
+
+	return wideStr;
+}
 
 void uiThreadFunc() {
 	while (1) {
 		if (gGameFramework.m_nMode != OPENINGSCENE) {
 			// 1. 총알 업데이트
 			gGameFramework.m_currbullet = players_info[my_id].m_bullet;
-			
+
 			// 2. HP 업데이트
 			int currHP = players_info[my_id].m_hp;
 			gGameFramework.m_currHp = currHP;
@@ -605,10 +621,39 @@ void uiThreadFunc() {
 			gGameFramework.m_CurrentPlayerNum = curr_connection_num;
 
 			// 7. 채팅 동기화
-			for (int i = 0; i < MAX_SAVED_MSG; ++i) {
-				chat_logs[i].name;	// 채팅친 사람 이름
-				chat_logs[i].msg;	// 채팅 내용
+			if (chat_comeTome) {
+				ChatInfo textinfo;
+
+				char temptext[80];
+				char* name = chat_logs.name;
+				char* msg = chat_logs.msg;
+
+				size_t nameLength = strlen(name);
+				size_t msgLength = strlen(msg);
+
+				if (nameLength < 80 - 2) { // tempText의 크기에서 ": "를 뺀 값보다 작은지 확인
+					strcpy_s(temptext, sizeof(temptext) / sizeof(temptext[0]), name);
+					strcat_s(temptext, sizeof(temptext) / sizeof(temptext[0]), ": "); // ":" 추가
+					strncat_s(temptext, sizeof(temptext) / sizeof(temptext[0]), msg, _TRUNCATE);
+
+					cout << temptext << endl;
+
+					wchar_t* converttext = ConvertToWideChar(temptext);
+
+					wcscpy_s(textinfo.chatData, converttext);
+
+					gGameFramework.m_chat_info.push(textinfo);
+				}
+
+				chat_comeTome = false;
+				if (gGameFramework.m_chat_info.size() > 8) {
+					while (true) {
+						gGameFramework.m_chat_info.pop();
+						if (gGameFramework.m_chat_info.size() <= 8) break;
+					}
+				}
 			}
+
 		}
 
 		this_thread::yield();
