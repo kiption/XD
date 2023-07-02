@@ -516,6 +516,14 @@ void processPacket(char* ptr)
 		timelimit_sec = timelimit_ms / 1000;
 		break;
 	}//SC_TIME_TICKING case end
+	case SC_CHAT:
+	{
+		SC_CHAT_PACKET* recv_packet = reinterpret_cast<SC_CHAT_PACKET*>(ptr);
+
+		chat_comeTome = true;
+		strcpy_s(chat_logs.name, recv_packet->name);
+		strcpy_s(chat_logs.msg, recv_packet->msg);
+	}
 	case SC_MAP_OBJINFO:
 	{
 		SC_MAP_OBJINFO_PACKET* recv_packet = reinterpret_cast<SC_MAP_OBJINFO_PACKET*>(ptr);

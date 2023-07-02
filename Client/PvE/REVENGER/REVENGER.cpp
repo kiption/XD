@@ -533,6 +533,17 @@ void networkThreadFunc()
 				break;
 			}
 		}
+
+		// 3. 채팅
+		while (!gGameFramework.m_mychat_log.empty()) {
+			CS_CHAT_PACKET chat_msg_packet;
+			chat_msg_packet.size = sizeof(CS_CHAT_PACKET);
+			chat_msg_packet.type = CS_CHAT;
+			strcpy_s(chat_msg_packet.msg, gGameFramework.m_mychat_log.front().chatData);
+			gGameFramework.m_mychat_log.pop();
+			sendPacket(&chat_msg_packet, active_servernum);
+		}
+
 		this_thread::yield();
 	}
 }
