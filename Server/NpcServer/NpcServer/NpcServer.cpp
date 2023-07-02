@@ -491,8 +491,8 @@ public:
 	}
 
 	void send_npc_init_packet(int npc_id);
+	void send_npc_move_packet(int npc_id);
 	void send_npc_rotate_packet(int npc_id);
-	void send_check_pos_packet(int npc_id);
 	void send_npc_attack_packet(int npc_id);
 };
 
@@ -525,6 +525,18 @@ void SERVER::send_npc_init_packet(int npc_id) {
 	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
 	g_logicservers[a_lgcsvr_num].do_send(&npc_init_packet);
 }
+void SERVER::send_npc_move_packet(int npc_id) {
+	NPC_MOVE_PACKET npc_move_packet;
+	npc_move_packet.size = sizeof(NPC_MOVE_PACKET);
+	npc_move_packet.type = NPC_MOVE;
+	npc_move_packet.n_id = npc_id;
+	npc_move_packet.x = npcsInfo[npc_id].pos.x;
+	npc_move_packet.y = npcsInfo[npc_id].pos.y;
+	npc_move_packet.z = npcsInfo[npc_id].pos.z;
+
+	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
+	g_logicservers[a_lgcsvr_num].do_send(&npc_move_packet);
+}
 void SERVER::send_npc_rotate_packet(int npc_id) {
 	NPC_ROTATE_PACKET npc_rotate_packet;
 	npc_rotate_packet.size = sizeof(NPC_ROTATE_PACKET);
@@ -547,19 +559,6 @@ void SERVER::send_npc_rotate_packet(int npc_id) {
 	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
 	g_logicservers[a_lgcsvr_num].do_send(&npc_rotate_packet);
 }
-void SERVER::send_check_pos_packet(int npc_id) {
-	NPC_CHECK_POS_PACKET npc_pos_packet;
-	npc_pos_packet.size = sizeof(NPC_CHECK_POS_PACKET);
-	npc_pos_packet.type = NPC_CHECK_POS;
-	npc_pos_packet.n_id = npc_id;
-	npc_pos_packet.x = npcsInfo[npc_id].pos.x;
-	npc_pos_packet.y = npcsInfo[npc_id].pos.y;
-	npc_pos_packet.z = npcsInfo[npc_id].pos.z;
-
-	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
-	g_logicservers[a_lgcsvr_num].do_send(&npc_pos_packet);
-}
-
 void SERVER::send_npc_attack_packet(int npc_id)
 {
 	NPC_ATTACK_PACKET npc_attack_packet;
@@ -1928,40 +1927,6 @@ void initNpc() {
 }
 
 //======================================================================
-void timerFunc() {
-	while (true) {
-		auto start_t = system_clock::now();
-
-		//======================================================================
-		if (!ConnectingServer) {
-			this_thread::sleep_for(1000ms);
-			continue;
-		}
-
-		//======================================================================
-		// 1초에 한번씩 클라에게 올바른 위치를 보내줘서 오차를 바로잡게해준다.
-		milliseconds since_send_checkpos = duration_cast<milliseconds>(start_t - last_send_checkpos_time);
-
-		if (static_cast<int>(since_send_checkpos.count()) >= 1000) {
-			time_lock.lock();
-			last_send_checkpos_time = system_clock::now();
-			since_send_checkpos = 0ms;
-			time_lock.unlock();
-
-			for (int i = 0; i < MAX_NPCS; ++i) {
-				g_logicservers[a_lgcsvr_num].send_check_pos_packet(npcsInfo[i].GetID());
-			}
-		}
-
-		//======================================================================
-		auto curr_t = system_clock::now();
-		if (curr_t - start_t < 33ms) {
-			this_thread::sleep_for(33ms - (curr_t - start_t));
-		}
-	}
-}
-
-//======================================================================
 void MoveNPC()
 {
 	while (true) {
@@ -2005,8 +1970,10 @@ void MoveNPC()
 						npcsInfo[i].SetUser_Pos(playersInfo[npcsInfo[i].GetChaseID()].pos, npcsInfo[i].GetChaseID());
 					}
 
-					// npc pos 확인
+					// 메인서버로 변경된 NPC좌표 전달
+					g_logicservers[a_lgcsvr_num].send_npc_move_packet(npcsInfo[i].GetID());
 
+					// npc pos 확인
 					/*if (i < 4) {
 
 						cout << "=============" << endl;
@@ -2232,12 +2199,12 @@ int main(int argc, char* argv[])
 	//						  Threads Initialize
 	//======================================================================
 	vector <thread> worker_threads;
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 4; ++i)
 		worker_threads.emplace_back(do_worker);			// 메인서버-npc서버 통신용 Worker스레드
 
 	vector<thread> timer_threads;
-	//timer_threads.emplace_back(timerFunc);				// npc 로직 타이머스레드
-	timer_threads.emplace_back(MoveNPC);
+	for (int i = 0; i < 2; ++i)
+		timer_threads.emplace_back(MoveNPC);
 
 	for (auto& th : worker_threads)
 		th.join();

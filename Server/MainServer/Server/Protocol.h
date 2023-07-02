@@ -2,8 +2,8 @@
 //======================================================================
 // IP 주소
 const char* IPADDR_LOOPBACK = "127.0.0.1";		// 루프백
-const char* IPADDR_LOGIC0 = "127.0.0.1"; //"112.152.39.13";	// 원격 접속
-const char* IPADDR_LOGIC1 = "127.0.0.1";	// 원격 접속
+const char* IPADDR_LOGIC0 = "127.0.0.1"; //"112.152.39.13";		// 원격 접속
+const char* IPADDR_LOGIC1 = "127.0.0.1"; //"218.101.227.89";	// 원격 접속
 
 //======================================================================
 // 포트 번호
@@ -80,7 +80,7 @@ enum PacketID {
 	, SC_DAMAGED, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_BULLET_COUNT, SC_MISSION, SC_MISSION_COMPLETE
 	, SC_TIME_TICKING, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
-	, NPC_FULL_INFO, NPC_ROTATE, NPC_CHECK_POS, NPC_REMOVE, NPC_ATTACK, NPC_CHANGE_STATE
+	, NPC_FULL_INFO, NPC_MOVE, NPC_ROTATE, NPC_CHECK_POS, NPC_REMOVE, NPC_ATTACK, NPC_CHANGE_STATE
 };
 
 //======================================================================
@@ -390,6 +390,13 @@ struct NPC_FULL_INFO_PACKET {
 	float right_x, right_y, right_z;
 	float up_x, up_y, up_z;
 	float look_x, look_y, look_z;
+};
+
+struct NPC_MOVE_PACKET {
+	unsigned char size;
+	char type;
+	short n_id;
+	float x, y, z;
 };
 
 struct NPC_ROTATE_PACKET {
