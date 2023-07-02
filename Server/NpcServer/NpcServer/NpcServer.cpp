@@ -1531,7 +1531,7 @@ void NPC::A_PlayerAttack()
 	// Look
 	A_PlayerChasing();
 
-	XMFLOAT3 AttackVec = { m_User_Pos[m_chaseID].x - pos.x,m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
+	XMFLOAT3 AttackVec = m_lookvec;
 	m_AttackVec = NPCNormalize(AttackVec);
 }
 void NPC::A_NPC_Damege_Calc(int id)
