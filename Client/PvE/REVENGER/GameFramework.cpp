@@ -558,10 +558,11 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			}
 			else if (wParam == VK_ESCAPE) {
 				UI_Switch = false;
+				m_InsertChat[0] = L'\0';
 			}
 			else if (wParam == VK_RETURN) {
-				//SendChatLog(m_InsertChat);  // Enter 키를 누르면 채팅 로그를 보내는 함수를 호출합니다.
-				m_InsertChat[0] = L'\0';  // 입력된 채팅 내용을 초기화합니다.
+				//SendChatLog(m_InsertChat);  
+				m_InsertChat[0] = L'\0';
 			}
 			else {
 				WCHAR IDchar = static_cast<WCHAR>(wParam);
