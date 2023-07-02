@@ -646,15 +646,8 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				break;
 			case VK_SPACE:
 				break;
-			case 'M':
-				if (m_nMode == SCENE1STAGE) {
 
-					((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-					((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-					((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 
-				}
-				break;
 			default:
 				break;
 			}
@@ -774,18 +767,19 @@ void CGameFramework::ReleaseObjects()
 bool ShootKey = false;
 void CGameFramework::ProcessInput()
 {
-	if (!UI_Switch) {
 
 
 
 
-		static UCHAR pKeysBuffer[256];
-		bool bProcessedByScene = false;
-		if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
-		//GetKeyboardState(pKeysBuffer);
-		if (!bProcessedByScene)
-		{
+
+	static UCHAR pKeysBuffer[256];
+	bool bProcessedByScene = false;
+	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
+	//GetKeyboardState(pKeysBuffer);
+	if (!bProcessedByScene)
+	{
 			DWORD dwDirection = 0;
+		if (!UI_Switch) {
 			if (pKeysBuffer[KEY_W] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_W); dwDirection |= DIR_FORWARD; }
 			if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; }
 
@@ -796,76 +790,76 @@ void CGameFramework::ProcessInput()
 
 
 			}
+		}
+		if (pKeysBuffer[KEY_E] & 0xF0) {
+			q_keyboardInput.push(SEND_KEY_DOWN);//S
+		}
 
-			if (pKeysBuffer[KEY_E] & 0xF0) {
-				q_keyboardInput.push(SEND_KEY_DOWN);//S
-			}
-
-			if (pKeysBuffer[VK_SPACE] & 0xF0) {
-				q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
-			}
+		if (pKeysBuffer[VK_SPACE] & 0xF0) {
+			q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
+		}
 
 
-			float cxDelta = 0.0f, cyDelta = 0.0f;
-			POINT ptCursorPos;
-			if (GetCapture() == m_hWnd)
+		float cxDelta = 0.0f, cyDelta = 0.0f;
+		POINT ptCursorPos;
+		if (GetCapture() == m_hWnd)
+		{
+			SetCursor(NULL);
+			GetCursorPos(&ptCursorPos);
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 40.0f;
+
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 50.0f;
+
+			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+		}
+
+		if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
+
+
+			if (m_nMode == SCENE1STAGE)
 			{
-				SetCursor(NULL);
-				GetCursorPos(&ptCursorPos);
-				cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 40.0f;
 
-				cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 50.0f;
-
-				SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-			}
-
-			if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
-
-
-				if (m_nMode == SCENE1STAGE)
+				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay < 0.005)
 				{
 
-					if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay < 0.005)
-					{
+					ShootKey = true;
+					if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pScene->m_pPlayer)->ShootState(m_GameTimer.GetTimeElapsed());
+					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->FireBullet(NULL);
 
-						ShootKey = true;
-						if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pScene->m_pPlayer)->ShootState(m_GameTimer.GetTimeElapsed());
-						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->FireBullet(NULL);
-
-						MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
-						q_mouseInput.push(lclick);//s
-					}
-
+					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
+					q_mouseInput.push(lclick);//s
 				}
 
 			}
 
-			if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
-			{
-				if (m_nMode == SCENE1STAGE) {
-					if (cxDelta || cyDelta|| ((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
-					{
-						MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
-						q_mouseInput.push(mousemove);//s
-					
-							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
-						
-
-					}
-					if (dwDirection)
-					{
-						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)
-							->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
-
-					}
-				}
-
-
-			}
 		}
-		if (m_nMode == SCENE1STAGE)
-			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Update(m_GameTimer.GetTimeElapsed());
+
+		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+		{
+			if (m_nMode == SCENE1STAGE) {
+				if (cxDelta || cyDelta || ((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
+				{
+					MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
+					q_mouseInput.push(mousemove);//s
+
+					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
+
+
+				}
+				if (dwDirection)
+				{
+					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)
+						->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
+
+				}
+			}
+
+
+		}
 	}
+	if (m_nMode == SCENE1STAGE)
+		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Update(m_GameTimer.GetTimeElapsed());
+
 }
 
 
@@ -1383,8 +1377,8 @@ void CGameFramework::FrameAdvance()
 		XMFLOAT3 xmf3Position = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition();
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
-}
-}
+	}
+		}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -1445,8 +1439,8 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			break;
 		}
 		}
-	}
-}
+		}
+		}
 
 #ifdef _WITH_DIRECT2D
 void CGameFramework::CreateDirect2DDevice()
@@ -1485,7 +1479,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-	}
+}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -2213,7 +2207,7 @@ void CGameFramework::CreateDirect2DDevice()
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
 #endif
-}
+	}
 #endif
 
 
