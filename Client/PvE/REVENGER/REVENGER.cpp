@@ -657,10 +657,10 @@ void uiThreadFunc() {
 				}
 
 				chat_comeTome = false;
-				if (gGameFramework.m_chat_info.size() > 8) {
+				if (gGameFramework.m_chat_info.size() > 10) {
 					while (true) {
 						gGameFramework.m_chat_info.pop();
-						if (gGameFramework.m_chat_info.size() <= 8) break;
+						if (gGameFramework.m_chat_info.size() <= 10) break;
 					}
 				}
 			}

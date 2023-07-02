@@ -1294,7 +1294,7 @@ void CGameFramework::FrameAdvance()
 		}
 
 		if (UI_Switch) {
-			D2D_RECT_F D2_ChatLogText[8];
+			D2D_RECT_F D2_ChatLogText[10];
 			for (int i{}; i < m_chat_info.size(); ++i) {
 				int resultY = 430 + 24 * i;
 				float textypos = (((float)FRAME_BUFFER_HEIGHT) / ((float)resultY));
