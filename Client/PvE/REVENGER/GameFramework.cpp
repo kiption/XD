@@ -768,7 +768,7 @@ void CGameFramework::ProcessInput()
 			GetCursorPos(&ptCursorPos);
 			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 40.0f;
 
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 50.0f;
 
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
@@ -802,10 +802,7 @@ void CGameFramework::ProcessInput()
 					MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
 					q_mouseInput.push(mousemove);//s
 
-					if (cxDelta)
-						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(0.0, cxDelta, 0.0f);
-					if (cyDelta)
-						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, 0.0, 0.0f);
+					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
 
 
 				}
@@ -840,29 +837,7 @@ void CGameFramework::AnimateObjects()
 		//if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
 		if (m_nMode == SCENE1STAGE)
 		{
-			((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->SetActive(true);
-			((Stage1*)m_pScene)->m_pBillboardShader[3]->SetActive(true);
-
-
-			((Stage1*)m_pScene)->m_pBillboardShader[3]->ParticlePosition = XMFLOAT3(
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[23]->GetPosition().x
-				, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[23]->GetPosition().y + 10.0,
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[23]->GetPosition().z);
-
-			((Stage1*)m_pScene)->m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[24]->GetPosition().x
-				, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[24]->GetPosition().y + 10.0,
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[24]->GetPosition().z);
-
-			((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[0]->SetPosition(
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[25]->GetPosition().x
-				, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[25]->GetPosition().y + 10.0,
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[25]->GetPosition().z);
-
-			((Stage1*)m_pScene)->m_ppSpriteBillboard[0]->m_ppObjects[1]->SetPosition(
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[26]->GetPosition().x
-				, ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[26]->GetPosition().y + 10.0,
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[26]->GetPosition().z);
+		
 		}
 
 

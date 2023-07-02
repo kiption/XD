@@ -1888,8 +1888,7 @@ CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
 		pBulletObject = new CNPCbulletObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, false);
-		pBulletObject->SetMovingSpeed(1000.0f);
-		pBulletObject->SetMovingSpeed(100.0f);
+		pBulletObject->SetMovingSpeed(200.0f);
 		pBulletObject->SetActive(false);
 		pBulletObject->SetCurScene(SCENE1STAGE);
 		m_ppBullets[i] = pBulletObject;
@@ -1899,16 +1898,18 @@ CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	SetChild(pModel->m_pModelRootObject, true);
 	pModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
 
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 4, pModel);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 5, pModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4);
 
 	m_pSkinnedAnimationController->SetTrackEnable(0, true);
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1933,36 +1934,36 @@ void CSoldiarNpcObjects::MoveForward(float EleapsedTime)
 	CGameObject::Animate(EleapsedTime);
 }
 
-void CSoldiarNpcObjects::MoveSide(float EleapsedTime)
+void CSoldiarNpcObjects::HittingState(float EleapsedTime)
 {
 
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	m_pSkinnedAnimationController->SetTrackEnable(1, true);
+	m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	m_pSkinnedAnimationController->SetTrackEnable(3, true);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	CGameObject::Animate(EleapsedTime);
 }
 
 void CSoldiarNpcObjects::ReloadState(float EleapsedTime)
 {
 
-	m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
-	CGameObject::Animate(EleapsedTime);
+	//m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	//m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+	//CGameObject::Animate(EleapsedTime);
 }
 
 void CSoldiarNpcObjects::JumpState(float EleapsedTime)
 {
-	m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
-	CGameObject::Animate(EleapsedTime);
+	//m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	//m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	//m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
+	//CGameObject::Animate(EleapsedTime);
 }
 
 void CSoldiarNpcObjects::DieState(float EleapsedTime)
@@ -1971,7 +1972,8 @@ void CSoldiarNpcObjects::DieState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
+	m_pSkinnedAnimationController->SetTrackEnable(4, true);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 	CGameObject::Animate(EleapsedTime);
 }
 
@@ -1979,9 +1981,9 @@ void CSoldiarNpcObjects::ShootState(float EleapsedTime)
 {
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	m_pSkinnedAnimationController->SetTrackEnable(3, true);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
+	m_pSkinnedAnimationController->SetTrackEnable(2, true);
+	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	CGameObject::Animate(EleapsedTime);
 }
 
@@ -2007,7 +2009,7 @@ void CSoldiarNpcObjects::Animate(float fTimeElapsed)
 
 		}
 	}
-	//MoveForward(fTimeElapsed);
+	MoveForward(fTimeElapsed);
 	CGameObject::Animate(fTimeElapsed);
 }
 

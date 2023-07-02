@@ -573,7 +573,7 @@ void SparkBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		ParticlePosition = XMFLOAT3(58.0f,12.0f,800.0f);
+		//ParticlePosition = XMFLOAT3(58.0f,12.0f,800.0f);
 		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0, 1.0f));
 
 	}
@@ -701,7 +701,7 @@ void BloodHittingBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, C
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		ParticlePosition = XMFLOAT3(58.0f, 12.0f, 900.0f);
+		//ParticlePosition = XMFLOAT3(58.0f, 12.0f, 900.0f);
 		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0, 0.0f));
 
 	}

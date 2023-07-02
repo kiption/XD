@@ -56,9 +56,9 @@
 #define HUMAN_BBSIZE_Y 30.0f
 #define HUMAN_BBSIZE_Z 4.0f
 
-#define RESPAWN_POS_X 40.0f
+#define RESPAWN_POS_X -15.0f
 #define RESPAWN_POS_Y 6.0f
-#define RESPAWN_POS_Z 680.0f
+#define RESPAWN_POS_Z 750.0f
 
 #define HUMAN_VIEW_RANGE 500.0f
 

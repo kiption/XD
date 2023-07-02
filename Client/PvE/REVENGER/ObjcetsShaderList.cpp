@@ -339,7 +339,7 @@ void CBloodFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 		m_ppObjects[i]->SetChild(pFragmentModel, false);
 		m_ppObjects[i]->SetScale(0.2, 0.1, 0.2);
 		pFragmentModel->AddRef();
-		ParticlePosition = m_ppObjects[i]->GetPosition();
+		//ParticlePosition = m_ppObjects[i]->GetPosition();
 	}
 	for (int i = 0; i < BLOODEXPLOSION_DEBRISES; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomBlood());
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -362,7 +362,7 @@ void CBloodFragmentsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, C
 	{
 		if (m_ppObjects[j])
 		{
-			ParticlePosition = XMFLOAT3(81.0f, 12.0f, 800.0f);
+			//ParticlePosition = XMFLOAT3(81.0f, 12.0f, 800.0f);
 			m_ppObjects[j]->UpdateTransform(NULL);
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera, false);
 		}

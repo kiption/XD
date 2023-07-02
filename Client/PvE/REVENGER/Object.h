@@ -632,7 +632,7 @@ public:
 	CSoldiarNpcObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks);
 	virtual ~CSoldiarNpcObjects();
 	void MoveForward(float EleapsedTime);
-	void MoveSide(float EleapsedTime);
+	void HittingState(float EleapsedTime);
 	void ReloadState(float EleapsedTime);
 	void JumpState(float EleapsedTime);
 	void DieState(float EleapsedTime);

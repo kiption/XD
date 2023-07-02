@@ -83,7 +83,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_ppBullets[i] = pBulletObject;
 		pBulletMesh->AddRef();
 	}
-	//SetPosition(XMFLOAT3(58.0f, 8.0f, 1000.0));
+	//SetPosition(XMFLOAT3(.0f, 8.0f, 1000.0));
 	SetPlayerUpdatedContext(pContext);
 	//SetCameraUpdatedContext(pContext);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);

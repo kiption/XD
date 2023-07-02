@@ -38,7 +38,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3, 0.3, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-800, 800.0f, 1000.0f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-880, 850.0f, 950.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+1.0f, -1.0f, -0.5f);
 
 
@@ -856,11 +856,27 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 
 	((CSpriteObjectsShader*)m_ppSpriteBillboard[0])->m_bActive = true;
 	((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveMark = true;
+	((BloodHittingBillboard*)m_pBillboardShader[2])->m_bActive = true;
 	((CFragmentsShader*)m_ppFragShaders[0])->m_bActive = true;
 	((CBloodFragmentsShader*)m_ppFragShaders[1])->m_bActive = true;
-	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(81.f, 12.0, 800.f);
+
+	((CFragmentsShader*)m_ppFragShaders[0])->ParticlePosition = m_ppShaders[0]->m_ppObjects[13]->GetPosition();
+	//((BloodHittingBillboard*)m_ppFragShaders[2])->m_bActive = true;
+	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(m_ppShaders[0]->m_ppObjects[30]->GetPosition());
+	((CBloodFragmentsShader*)m_ppFragShaders[1])->ParticlePosition =
+		XMFLOAT3(m_ppShaders[0]->m_ppObjects[30]->GetPosition().x,
+			m_ppShaders[0]->m_ppObjects[30]->GetPosition().y + 8.0,
+			m_ppShaders[0]->m_ppObjects[30]->GetPosition().z);
+
+	((SparkBillboard*)m_pBillboardShader[3])->ParticlePosition = m_ppShaders[0]->m_ppObjects[13]->GetPosition();
+
+	((BloodHittingBillboard*)m_pBillboardShader[2])->ParticlePosition =
+		XMFLOAT3(m_ppShaders[0]->m_ppObjects[24]->GetPosition().x,
+			m_ppShaders[0]->m_ppObjects[24]->GetPosition().y + 8.0,
+			m_ppShaders[0]->m_ppObjects[24]->GetPosition().z);
 
 	CBulletObject** ppBullets = ((CHumanPlayer*)m_ppPlayerObjects[0])->m_ppBullets;
+
 	for (int k = 22; k < 40; k++)
 		m_ppShaders[0]->m_ppObjects[k]->m_xoobb = BoundingOrientedBox(m_ppShaders[0]->m_ppObjects[k]->GetPosition(), XMFLOAT3(5.0, 9.0, 5.0), XMFLOAT4(0, 0, 0, 1));
 
@@ -917,6 +933,14 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (i != 1 && m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
+	for (int k = 0; k < 5; k++)
+	{
+		for (int i = 0; i < HELIBULLETS; i++)
+		{
+			((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[12+k])->m_ppBullets[i]->Render(pd3dCommandList, pCamera, false);
+		}
+	}
+
 
 	for (int i = 0; i < m_nPlayerObjects; i++)
 	{

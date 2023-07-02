@@ -47,7 +47,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel,NULL);
 		m_ppObjects[x]->SetMaterial(0, pOtherPlayerMaterial);
 		m_ppObjects[x]->SetScale(5, 5, 5);
-		m_ppObjects[x]->SetPosition(XMFLOAT3(58.0 + (x) * 20, 8.0, 800.0));
+		m_ppObjects[x]->SetPosition(XMFLOAT3(70.0 + (x) * 20, 8.0, 800.0));
 		pSModel->m_pModelRootObject->AddRef();
 	}
 
@@ -102,6 +102,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppNpc_Heli_Objects[i]->SetMaterial(0, pNpcHeliMaterial);
 		m_ppNpc_Heli_Objects[i]->OnPrepareAnimate();
 		m_ppNpc_Heli_Objects[i]->SetPosition(XMFLOAT3(50.0 + i * 15, 70.0, 500.0));
+		
 		pNPCHelicopterModel->AddRef();
 	}
 	
@@ -110,16 +111,14 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[14] = m_ppNpc_Heli_Objects[2];
 	m_ppObjects[15] = m_ppNpc_Heli_Objects[3];
 	m_ppObjects[16] = m_ppNpc_Heli_Objects[4];
-	m_ppObjects[17] = new CGameObject(1);
-	m_ppObjects[18] = new CGameObject(1);
-	m_ppObjects[19] = new CGameObject(1);
-	m_ppObjects[20] = new CGameObject(1);
-	m_ppObjects[21] = new CGameObject(1);
+	m_ppObjects[17] = new CValkanObject(1);
+	m_ppObjects[18] = new CValkanObject(1);
+	m_ppObjects[19] = new CValkanObject(1);
+	m_ppObjects[20] = new CValkanObject(1);
+	m_ppObjects[21] = new CValkanObject(1);
+
 	////////////////////////////////////////////////////HELI_LOAD//////////////////////////////////////////////////////////////
-	for (int i = 0; i < 5; i++)
-	{
-		m_ppNpc_Heli_Objects[0]->m_ppBullets[i] = ((CValkanObject*)m_ppObjects[i + 17]);
-	}
+	
 
 	////////////////////////////////////////////////SOLDIAR_NPC_LOAD///////////////////////////////////////////////////////////
 	m_nSoldiarNpcObjects = 21;
@@ -127,7 +126,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	pSoldiarNpcMaterial->SetReflection(21);
 
 	m_ppSoldiarNpcObjects = new CGameObject * [m_nSoldiarNpcObjects];
-	CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
+	CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/fixed.bin", NULL);
 	for (int i = 0; i < m_nSoldiarNpcObjects; i++)
 	{
 		m_ppSoldiarNpcObjects[i] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, 4);
@@ -389,7 +388,7 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 		}
 		else
 		{
-
+			m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
 			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
 			m_pObjectsShader->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera, true, this);
 		}
@@ -701,6 +700,7 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	{
 		if (m_pObjectsShader->m_ppObjects[i])
 		{
+			m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
 			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
 			m_pObjectsShader->m_ppObjects[i]->Render(pd3dCommandList, pCamera, true); //true
 		}
