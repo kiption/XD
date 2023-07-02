@@ -142,7 +142,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pSkyBox->SetCurScene(SCENE1STAGE);
-	m_nBillboardShaders = 4;
+	m_nBillboardShaders = 5;
 	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
 
 	BillboardParticleShader* pBillboardParticleShader = new BillboardParticleShader();
@@ -171,7 +171,11 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pHelicopterSparkBillboard->m_bActive = true;
 	m_pBillboardShader[3] = pHelicopterSparkBillboard;
 
-
+	BulletMarkBillboard* pBulletMarkBillboard = new BulletMarkBillboard();
+	pBulletMarkBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pBulletMarkBillboard->SetCurScene(SCENE1STAGE);
+	pBulletMarkBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_pBillboardShader[4] = pBulletMarkBillboard;
 
 	m_nSpriteBillboards = 1;
 	m_ppSpriteBillboard = new CSpriteObjectsShader * [m_nSpriteBillboards];
@@ -291,7 +295,7 @@ void Stage1::ReleaseObjects()
 	}
 
 	if (m_pShadowShader)delete m_pShadowShader;
-	
+
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
 	ReleaseShaderVariables();
@@ -855,7 +859,30 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	((CFragmentsShader*)m_ppFragShaders[0])->m_bActive = true;
 	((CBloodFragmentsShader*)m_ppFragShaders[1])->m_bActive = true;
 	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(81.f, 12.0, 800.f);
-	CBulletObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
+
+	CBulletObject** ppBullets = ((CHumanPlayer*)m_ppPlayerObjects[0])->m_ppBullets;
+	for (int k = 22; k < 40; k++)
+		m_ppShaders[0]->m_ppObjects[k]->m_xoobb = BoundingOrientedBox(m_ppShaders[0]->m_ppObjects[k]->GetPosition(), XMFLOAT3(5.0, 9.0, 5.0), XMFLOAT4(0, 0, 0, 1));
+
+	for (int i = 0; i < BULLETS; i++)
+	{
+		ppBullets[i]->m_xoobb = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
+		for (int k = 22; k < 40; k++)
+		{
+
+			if (ppBullets[i]->m_xoobb.Intersects(m_ppShaders[0]->m_ppObjects[k]->m_xoobb))
+			{
+
+				((BulletMarkBillboard*)m_pBillboardShader[4])->m_bActive = true;
+				XMFLOAT3 HittingPoint = ppBullets[i]->GetPosition();
+
+				((BulletMarkBillboard*)m_pBillboardShader[4])->ParticlePosition = HittingPoint;
+				ppBullets[i]->Reset();
+			}
+		}
+	}
+
+
 	XMFLOAT3 Position2P = m_ppShaders[0]->m_ppObjects[5]->GetPosition();
 	XMFLOAT3 Look2P = m_ppShaders[0]->m_ppObjects[5]->GetLook();
 	if (m_pLights)
@@ -890,7 +917,7 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (i != 1 && m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
-	
+
 	for (int i = 0; i < m_nPlayerObjects; i++)
 	{
 		if (m_ppPlayerObjects[i])
@@ -934,7 +961,9 @@ void Stage1::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 
 void Stage1::BillBoardRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[1]) m_pBillboardShader[1]->Render(pd3dCommandList, pCamera, 0);
+	//for (int i = 0; i < m_nBillboardShaders; i++)
+	if (m_pBillboardShader[1]) m_pBillboardShader[1]->Render(pd3dCommandList, pCamera, 0);
+	if (m_pBillboardShader[4]) m_pBillboardShader[4]->Render(pd3dCommandList, pCamera, 0);
 
 }
 

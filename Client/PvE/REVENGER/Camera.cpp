@@ -175,7 +175,7 @@ CSpaceShipCamera::CSpaceShipCamera(CCamera* pCamera) : CCamera(pCamera)
 void CSpaceShipCamera::Rotate(float x, float y, float z)
 {
 	
-	x = std::clamp(x,-0.05f,0.05f);
+	x = std::clamp(x,-0.1f,0.1f);
 	if (m_pPlayer && (x != 0.0f))
 	{
 		

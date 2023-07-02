@@ -68,10 +68,6 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(4, pAnimationCallbackHandler);
 
 
-
-
-
-
 	pBCBulletEffectShader = new CBulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
 	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
@@ -132,7 +128,7 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(0.0f);
 		m_pCamera = OnChangeCamera(CLOSEUP_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(-0.5f, 0.165f, 0.435f));
+		m_pCamera->SetOffset(XMFLOAT3(-0.6f, 0.165f, 0.435f));
 		m_pCamera->SetPosition(Vector3::Add(
 			XMFLOAT3(m_pHeadFindFrame->GetPosition().x, m_pHeadFindFrame->GetPosition().y, m_pHeadFindFrame->GetPosition().z)
 			, m_pCamera->GetOffset()));
