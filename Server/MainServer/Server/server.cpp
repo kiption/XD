@@ -1614,7 +1614,6 @@ void process_packet(int client_id, char* packet)
 	}// NPC_REMOVE end
 	case NPC_ATTACK:
 	{
-		/*
 		NPC_ATTACK_PACKET* npc_attack_pack = reinterpret_cast<NPC_ATTACK_PACKET*>(packet);
 
 		bool b_collide = false;
@@ -1676,7 +1675,7 @@ void process_packet(int client_id, char* packet)
 			bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
 				, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 		}
-		*/
+
 		break;
 	}
 	case NPC_CHANGE_STATE:
