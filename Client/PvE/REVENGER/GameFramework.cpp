@@ -381,12 +381,18 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	switch (nMessageID)
 	{
 	case WM_RBUTTONDOWN:
+		if (m_nMode == SCENE1STAGE)
+			m_SniperOn = true;
+		break;
 		//::ReleaseCapture();
 		//break;
+	case WM_RBUTTONUP:
+		if (m_nMode == SCENE1STAGE)
+			m_SniperOn = false;
+		break;
 
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
-	case WM_RBUTTONUP:
 	{
 		switch (m_LoginScene)
 		{
@@ -541,6 +547,37 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			break;
 		}
 	}
+	else if (UI_Switch) {
+		switch (nMessageID) {
+		case WM_KEYUP:
+			if (wParam == VK_BACK) {
+				size_t idLength = wcslen(m_InsertChat);
+				if (idLength > 0) {
+					m_InsertChat[idLength - 1] = L'\0';
+				}
+			}
+			else if (wParam == VK_ESCAPE) {
+				UI_Switch = false;
+			}
+			else if (wParam == VK_RETURN) {
+				//SendChatLog(m_InsertChat);  // Enter 키를 누르면 채팅 로그를 보내는 함수를 호출합니다.
+				m_InsertChat[0] = L'\0';  // 입력된 채팅 내용을 초기화합니다.
+			}
+			else {
+				WCHAR IDchar = static_cast<WCHAR>(wParam);
+				if (IDchar == L'.') {
+					IDchar = L'*';
+				}
+				size_t idLength = wcslen(m_InsertChat);
+				size_t remainingSpace = sizeof(m_InsertChat) / sizeof(m_InsertChat[0]) - idLength - 1;
+
+				if (remainingSpace > 0) {
+					wcsncat_s(m_InsertChat, sizeof(m_InsertChat) / sizeof(m_InsertChat[0]), &IDchar, remainingSpace);
+				}
+			}
+			break;
+		}
+	}
 	else {
 		switch (nMessageID)
 		{
@@ -551,6 +588,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				::PostQuitMessage(0);
 				break;
 			case VK_RETURN:
+				if (m_nMode == SCENE1STAGE) {
+					UI_Switch = !UI_Switch;
+				}
 				break;
 			case VK_F1:
 			case VK_F2:
@@ -569,13 +609,13 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case '2':
 			{
 				q_keyboardInput.push(SEND_KEY_NUM2);//S
-				UI_Switch = false;
+				//UI_Switch = false;
 				break;
 			}
 			case '3':
-				if (m_nMode == SCENE1STAGE) {
+				/*if (m_nMode == SCENE1STAGE) {
 					UI_Switch = !UI_Switch;
-				}
+				}*/
 				break;
 
 			case 'R':
@@ -731,97 +771,101 @@ void CGameFramework::ReleaseObjects()
 bool ShootKey = false;
 void CGameFramework::ProcessInput()
 {
+	if (!UI_Switch) {
 
 
-	static UCHAR pKeysBuffer[256];
-	bool bProcessedByScene = false;
-	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
-	//GetKeyboardState(pKeysBuffer);
-	if (!bProcessedByScene)
-	{
-		DWORD dwDirection = 0;
-		if (pKeysBuffer[KEY_W] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_W); dwDirection |= DIR_FORWARD; }
-		if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; }
 
-		if (pKeysBuffer[KEY_A] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_A); dwDirection |= DIR_LEFT; }
-		if (pKeysBuffer[KEY_D] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT; }
-		if (pKeysBuffer[KEY_Q] & 0xF0)
+
+		static UCHAR pKeysBuffer[256];
+		bool bProcessedByScene = false;
+		if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
+		//GetKeyboardState(pKeysBuffer);
+		if (!bProcessedByScene)
 		{
+			DWORD dwDirection = 0;
+			if (pKeysBuffer[KEY_W] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_W); dwDirection |= DIR_FORWARD; }
+			if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; }
 
-
-		}
-
-		if (pKeysBuffer[KEY_E] & 0xF0) {
-			q_keyboardInput.push(SEND_KEY_DOWN);//S
-		}
-
-		if (pKeysBuffer[VK_SPACE] & 0xF0) {
-			q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
-		}
-
-
-		float cxDelta = 0.0f, cyDelta = 0.0f;
-		POINT ptCursorPos;
-		if (GetCapture() == m_hWnd)
-		{
-			SetCursor(NULL);
-			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 40.0f;
-
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
-
-			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-		}
-
-		if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
-
-
-			if (m_nMode == SCENE1STAGE)
+			if (pKeysBuffer[KEY_A] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_A); dwDirection |= DIR_LEFT; }
+			if (pKeysBuffer[KEY_D] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT; }
+			if (pKeysBuffer[KEY_Q] & 0xF0)
 			{
 
-				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay < 0.015)
+
+			}
+
+			if (pKeysBuffer[KEY_E] & 0xF0) {
+				q_keyboardInput.push(SEND_KEY_DOWN);//S
+			}
+
+			if (pKeysBuffer[VK_SPACE] & 0xF0) {
+				q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
+			}
+
+
+			float cxDelta = 0.0f, cyDelta = 0.0f;
+			POINT ptCursorPos;
+			if (GetCapture() == m_hWnd)
+			{
+				SetCursor(NULL);
+				GetCursorPos(&ptCursorPos);
+				cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 40.0f;
+
+				cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
+
+				SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+			}
+
+			if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
+
+
+				if (m_nMode == SCENE1STAGE)
 				{
 
-					ShootKey = true;
-					if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pScene->m_pPlayer)->ShootState(m_GameTimer.GetTimeElapsed());
-					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->FireBullet(NULL);
+					if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay < 0.015)
+					{
 
-					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
-					q_mouseInput.push(lclick);//s
+						ShootKey = true;
+						if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pScene->m_pPlayer)->ShootState(m_GameTimer.GetTimeElapsed());
+						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->FireBullet(NULL);
+
+						MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
+						q_mouseInput.push(lclick);//s
+					}
+
 				}
 
 			}
 
-		}
+			if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+			{
+				if (m_nMode == SCENE1STAGE) {
+					if (cxDelta || cyDelta)
+					{
+						MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
+						q_mouseInput.push(mousemove);//s
 
-		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
-		{
-			if (m_nMode == SCENE1STAGE) {
-				if (cxDelta || cyDelta)
-				{
-					MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
-					q_mouseInput.push(mousemove);//s
-
-					if (cxDelta)
-						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(0.0, cxDelta, 0.0f);
-					if (cyDelta)
-						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, 0.0, 0.0f);
+						if (cxDelta)
+							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(0.0, cxDelta, 0.0f);
+						if (cyDelta)
+							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, 0.0, 0.0f);
 
 
+					}
+					if (dwDirection)
+					{
+						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)
+							->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
+
+					}
 				}
-				if (dwDirection)
-				{
-					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)
-						->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
 
-				}
+
 			}
-
-
 		}
+		if (m_nMode == SCENE1STAGE)
+			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Update(m_GameTimer.GetTimeElapsed());
 	}
-	if (m_nMode == SCENE1STAGE)
-		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Update(m_GameTimer.GetTimeElapsed());
 }
 
 
@@ -976,7 +1020,7 @@ void CGameFramework::FrameAdvance()
 	if (m_nMode == SCENE1STAGE)
 	{
 		if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
-}
+	}
 	// Stage2
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -1080,46 +1124,46 @@ void CGameFramework::FrameAdvance()
 		// Time 
 		D2D_POINT_2F D2_RemainTime = { FRAME_BUFFER_WIDTH / 128, FRAME_BUFFER_HEIGHT / 128 };
 		D2D_RECT_F D2_RemainTimeRect = { 0.0f, 0.0f, 182.0f, 47.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[0] : m_pd2dfxGaussianBlur[0], &D2_RemainTime, &D2_RemainTimeRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[0], &D2_RemainTime, &D2_RemainTimeRect);
 
 		D2D_POINT_2F D2_RemainTimeDot = { D2_RemainTime.x + 70.0f ,D2_RemainTime.y + 52.5f };
 		D2D_RECT_F D2_RemainTimeDotRect = { 56.0f, 64.0f, 63.0f, 108.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[1] : m_pd2dfxGaussianBlur[1], &D2_RemainTimeDot, &D2_RemainTimeDotRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[1], &D2_RemainTimeDot, &D2_RemainTimeDotRect);
 
 		D2D_POINT_2F D2_RemainTime10Min = { D2_RemainTime.x, D2_RemainTime.y + 50.0f };
 		D2D_RECT_F D2_RemainTime10MinRect = { m_10MinOfTime * 31.3f, 0.0f, 31.3f + m_10MinOfTime * 31.3f, 50.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[2] : m_pd2dfxGaussianBlur[2], &D2_RemainTime10Min, &D2_RemainTime10MinRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[2], &D2_RemainTime10Min, &D2_RemainTime10MinRect);
 
 		D2D_POINT_2F D2_RemainTime1Min = { D2_RemainTime10Min.x + 31.3f, D2_RemainTime.y + 50.0f };
 		D2D_RECT_F D2_RemainTime1MinRect = { m_1MinOfTime * 31.3f, 0.0f, 31.3f + m_1MinOfTime * 31.3f, 50.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[3] : m_pd2dfxGaussianBlur[3], &D2_RemainTime1Min, &D2_RemainTime1MinRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[3], &D2_RemainTime1Min, &D2_RemainTime1MinRect);
 
 		D2D_POINT_2F D2_RemainTime10Sec = { D2_RemainTimeDot.x + 14.4f, D2_RemainTime.y + 50.0f };
 		D2D_RECT_F D2_RemainTime10SecRect = { m_10SecOftime * 31.3f, 0.0f, 31.3f + m_10SecOftime * 31.3f, 50.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[4] : m_pd2dfxGaussianBlur[4], &D2_RemainTime10Sec, &D2_RemainTime10SecRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[4], &D2_RemainTime10Sec, &D2_RemainTime10SecRect);
 
 		D2D_POINT_2F D2_RemainTime1Sec = { D2_RemainTime10Sec.x + 31.3f, D2_RemainTime.y + 50.0f };
 		D2D_RECT_F D2_RemainTime1SecRect = { m_1SecOfTime * 31.3f, 0.0f, 31.3f + m_1SecOfTime * 31.3f, 50.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[5] : m_pd2dfxGaussianBlur[5], &D2_RemainTime1Sec, &D2_RemainTime1SecRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[5], &D2_RemainTime1Sec, &D2_RemainTime1SecRect);
 
 		// Progress
 		if (m_mainmissionnum == 1) {
 			D2D_POINT_2F D2_ProgressUI = { FRAME_BUFFER_WIDTH / 2 - 325.0f, 160.0f };
 			D2D_RECT_F D2_ProgressUIRect = { 0.0f, 0.0f, 67.0f, 36.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[6] : m_pd2dfxGaussianBlur[6], &D2_ProgressUI, &D2_ProgressUIRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[6], &D2_ProgressUI, &D2_ProgressUIRect);
 
 			D2D_POINT_2F D2_ProgressBG = { FRAME_BUFFER_WIDTH / 2 - 251.0f, 160.0f };
 			D2D_RECT_F D2_ProgressBGRect = { 0.0f, 0.0f, 502.0f, 36.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[7] : m_pd2dfxGaussianBlur[7], &D2_ProgressBG, &D2_ProgressBGRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[7], &D2_ProgressBG, &D2_ProgressBGRect);
 
 			D2D_POINT_2F D2_CurrentProgress = { FRAME_BUFFER_WIDTH / 2 - 250.0f, 160.5f };
 			D2D_RECT_F D2_CurrentProgressRect = { 0.0f, 0.0f, (500.0f / 100 * m_occupationnum), 36.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[8] : m_pd2dfxGaussianBlur[8], &D2_CurrentProgress, &D2_CurrentProgressRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[8], &D2_CurrentProgress, &D2_CurrentProgressRect);
 		}
 		// Compress
 		D2D_POINT_2F D2_CompressArrow = { FRAME_BUFFER_WIDTH / 2 - 61.0f, 0.0f };
 		D2D_RECT_F D2_CompressArrowRect = { 0.0f, 0.0f, 122.0f, 115.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[9] : m_pd2dfxGaussianBlur[9], &D2_CompressArrow, &D2_CompressArrowRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[9], &D2_CompressArrow, &D2_CompressArrowRect);
 
 		float myAngle = abs(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fYaw);
 		if (myAngle > 315.0f) {
@@ -1128,73 +1172,94 @@ void CGameFramework::FrameAdvance()
 
 		D2D_POINT_2F D2_Compress = { FRAME_BUFFER_WIDTH / 2 - 150.5f, D2_CompressArrow.y + 50.0f };
 		D2D_RECT_F D2_CompressRect = { 75.3f + (myAngle * 1.6741f) , 0.0f, 376.3f + (myAngle * 1.6741f), 150.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[10] : m_pd2dfxGaussianBlur[10], &D2_Compress, &D2_CompressRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[10], &D2_Compress, &D2_CompressRect);
 
 		// My
 		D2D_POINT_2F D2_BulletUIBG = { FRAME_BUFFER_WIDTH - 420.0f, FRAME_BUFFER_HEIGHT / 4 * 3 };
 		D2D_RECT_F D2_BulletUIBGRect = { 0.0f, 0.0f, 402.0f, 65.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[11] : m_pd2dfxGaussianBlur[11], &D2_BulletUIBG, &D2_BulletUIBGRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[11], &D2_BulletUIBG, &D2_BulletUIBGRect);
 
 		D2D_POINT_2F D2_HPUIBG = { D2_BulletUIBG.x, D2_BulletUIBG.y + D2_BulletUIBGRect.bottom };
 		D2D_RECT_F D2_HPUIBGRect = { 0.0f, 0.0f, 402.0f, 48.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[12] : m_pd2dfxGaussianBlur[12], &D2_HPUIBG, &D2_HPUIBGRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[12], &D2_HPUIBG, &D2_HPUIBGRect);
 
 		D2D_POINT_2F D2_BulletIcon = { FRAME_BUFFER_WIDTH / 16 * 13, D2_BulletUIBG.y + (D2_BulletUIBGRect.bottom / 2) - 16.0f };
 		D2D_RECT_F D2_BulletIconRect = { 0.0f, 0.0f, 32.0f, 32.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[13] : m_pd2dfxGaussianBlur[13], &D2_BulletIcon, &D2_BulletIconRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[13], &D2_BulletIcon, &D2_BulletIconRect);
 
 		D2D_POINT_2F D2_Bullet10Num = { FRAME_BUFFER_WIDTH - 255.3f, D2_BulletUIBG.y + (D2_BulletUIBGRect.bottom / 2) - 30.0f };
 		D2D_RECT_F D2_Bullet10NumRect = { 45.3f * (m_currbullet / 10), 0.0f, 45.3f + (m_currbullet / 10) * 45.3f, 60.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[14] : m_pd2dfxGaussianBlur[14], &D2_Bullet10Num, &D2_Bullet10NumRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[14], &D2_Bullet10Num, &D2_Bullet10NumRect);
 
 		D2D_POINT_2F D2_Bullet1Num = { D2_Bullet10Num.x + 45.3f, D2_BulletUIBG.y + (D2_BulletUIBGRect.bottom / 2) - 30.0f };
 		D2D_RECT_F D2_Bullet1NumRect = { 45.3f * (m_currbullet % 10), 0.0f, 45.3f + (m_currbullet % 10) * 45.3f, 60.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[15] : m_pd2dfxGaussianBlur[15], &D2_Bullet1Num, &D2_Bullet1NumRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[15], &D2_Bullet1Num, &D2_Bullet1NumRect);
 
 		D2D_POINT_2F D2_HPBar = { D2_HPUIBG.x + 2.5f, D2_HPUIBG.y + (D2_HPUIBGRect.bottom / 2) - 20.0f };
 		D2D_RECT_F D2_HPBarRect = { 0.0f, 0.0f, 3.97f * m_currHp, 40.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[16] : m_pd2dfxGaussianBlur[16], &D2_HPBar, &D2_HPBarRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[16], &D2_HPBar, &D2_HPBarRect);
 
 		// Remain NPC
 		D2D_POINT_2F D2_RemainNPCBG = { FRAME_BUFFER_WIDTH - 191.0f, FRAME_BUFFER_HEIGHT / 128 };
 		D2D_RECT_F D2_RemainNPCBGRect = { 0.0f, 0.0f, 135.0f, 50.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[17] : m_pd2dfxGaussianBlur[17], &D2_RemainNPCBG, &D2_RemainNPCBGRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[17], &D2_RemainNPCBG, &D2_RemainNPCBGRect);
 
 		// Mission
 		D2D_POINT_2F D2_MainMissionUI = { FRAME_BUFFER_WIDTH - 300.0f, D2_RemainNPCBG.y + 65.0f };
 		D2D_RECT_F D2_MainMissionUIRect = { 271.5f * m_mainmissionnum, 0.0f, 271.5f + (271.5f * m_mainmissionnum), 167.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[18] : m_pd2dfxGaussianBlur[18], &D2_MainMissionUI, &D2_MainMissionUIRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[18], &D2_MainMissionUI, &D2_MainMissionUIRect);
 
-		if (UI_Switch) {
+		/*if (UI_Switch) {
 			D2D_POINT_2F D2_SubMissionUI = { FRAME_BUFFER_WIDTH - 300.0f, D2_MainMissionUI.y + 200.0f };
 			D2D_RECT_F D2_SubMissionUIRect = { 265.7f * m_submissionnum, 0.0f, 265.7f + (265.7f * m_submissionnum), 159.5f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[19] : m_pd2dfxGaussianBlur[19], &D2_SubMissionUI, &D2_SubMissionUIRect);
-		}
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[19], &D2_SubMissionUI, &D2_SubMissionUIRect);
+		}*/
 
 		// Cross Hair
-		D2D_POINT_2F D2_CrossHairUI = { (FRAME_BUFFER_WIDTH / 2) - 30.0f, (FRAME_BUFFER_HEIGHT / 2) - 30.0f };
-		D2D_RECT_F D2_CrossHairRect = { 0.0f, 0.0f, 60.0f, 60.0f };
-		m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[20] : m_pd2dfxGaussianBlur[20], &D2_CrossHairUI, &D2_CrossHairRect);
+		if (!m_SniperOn) {
+			D2D_POINT_2F D2_CrossHairUI = { (FRAME_BUFFER_WIDTH / 2) - 30.0f, (FRAME_BUFFER_HEIGHT / 2) - 30.0f };
+			D2D_RECT_F D2_CrossHairRect = { 0.0f, 0.0f, 60.0f, 60.0f };
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[20], &D2_CrossHairUI, &D2_CrossHairRect);
+		}
 
 		// Team
 		if (m_CurrentPlayerNum > 1) {
 			D2D_POINT_2F D2_Team1UI = { FRAME_BUFFER_WIDTH / 128, FRAME_BUFFER_HEIGHT / 5 * 3 };
 			D2D_RECT_F D2_Team1UIRect = { 0.0f, 0.0f, 323.0f, 60.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[21] : m_pd2dfxGaussianBlur[21], &D2_Team1UI, &D2_Team1UIRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[21], &D2_Team1UI, &D2_Team1UIRect);
 
 			D2D_POINT_2F D2_Team1UIHP = { FRAME_BUFFER_WIDTH / 128 + 14.0f, D2_Team1UI.y + 44.0f };
 			D2D_RECT_F D2_Team1UIHPRect = { 0.0f, 0.0f, 295.0f, 11.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[23] : m_pd2dfxGaussianBlur[23], &D2_Team1UIHP, &D2_Team1UIHPRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[23], &D2_Team1UIHP, &D2_Team1UIHPRect);
 		}
 
 		if (m_CurrentPlayerNum > 2) {
 			D2D_POINT_2F D2_Team2UI = { FRAME_BUFFER_WIDTH / 128, FRAME_BUFFER_HEIGHT / 5 * 3 + 75.0f };
 			D2D_RECT_F D2_Team2UIRect = { 0.0f, 0.0f, 323.0f, 60.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[22] : m_pd2dfxGaussianBlur[22], &D2_Team2UI, &D2_Team2UIRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[22], &D2_Team2UI, &D2_Team2UIRect);
 
 			D2D_POINT_2F D2_Team2UIHP = { FRAME_BUFFER_WIDTH / 128 + 14.0f, D2_Team2UI.y + 44.0f };
 			D2D_RECT_F D2_Team2UIHPRect = { 0.0f, 0.0f, 295.0f, 11.0f };
-			m_pd2dDeviceContext->DrawImage((m_nDrawEffectImage == 0) ? m_pd2dfxGaussianBlur[24] : m_pd2dfxGaussianBlur[24], &D2_Team2UIHP, &D2_Team2UIHPRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[24], &D2_Team2UIHP, &D2_Team2UIHPRect);
+		}
+
+		// Chat UI
+		if (UI_Switch) {
+			D2D_POINT_2F D2_ChatUI = { FRAME_BUFFER_WIDTH - 782.0f, (FRAME_BUFFER_HEIGHT / 2) - 145.5f };
+			D2D_RECT_F D2_ChatUIRect = { 0.0f, 0.0f, 782.0f, 291.0f };
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[50], &D2_ChatUI, &D2_ChatUIRect);
+
+			D2D_POINT_2F D2_InsertChatUI = { FRAME_BUFFER_WIDTH - 782.0f, D2_ChatUI.y + D2_ChatUIRect.bottom + 5.0f };
+			D2D_RECT_F D2_InsertChatUIRect = { 0.0f, 0.0f, 782.0f, 69.0f };
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[51], &D2_InsertChatUI, &D2_InsertChatUIRect);
+		}
+
+		// Sniper UI
+		if (m_SniperOn) {
+			D2D_POINT_2F D2_SniperAimUI = { FRAME_BUFFER_WIDTH / 2 - 457.5f, FRAME_BUFFER_HEIGHT - 725.0f };
+			D2D_RECT_F D2_SniperAimUIRect = { 0.0f, 0.0f, 950.0f, 720.0f };
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[52], &D2_SniperAimUI, &D2_SniperAimUIRect);
+
 		}
 	}
 
@@ -1250,6 +1315,22 @@ void CGameFramework::FrameAdvance()
 		}
 
 		if (UI_Switch) {
+			D2D_RECT_F D2_ChatLogText[8];
+			for (int i{}; i < m_chat_info.size(); ++i) {
+				int resultY = 430 + 24 * i;
+				float textypos = (((float)FRAME_BUFFER_HEIGHT) / ((float)resultY));
+				ChatInfo temp;
+				wcsncpy_s(temp.chatData, m_chat_info.front().chatData, _TRUNCATE);
+				m_chat_info.pop();
+
+				D2_ChatLogText[i] = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.6f), (FRAME_BUFFER_HEIGHT / textypos), FRAME_BUFFER_WIDTH, (FRAME_BUFFER_HEIGHT / textypos)); //2.7, 2.37, 2.12, 1.92
+				m_pd2dDeviceContext->DrawTextW(temp.chatData, (UINT32)wcslen(temp.chatData), m_pdwFont[3], &D2_ChatLogText[i], m_pd2dbrText[3]);
+				m_chat_info.push(temp);
+			}
+			D2D_RECT_F D2_ChatInsertText = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.6f), FRAME_BUFFER_HEIGHT * 0.67f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT * 0.69f);
+			m_pd2dDeviceContext->DrawTextW(m_InsertChat, (UINT32)wcslen(m_InsertChat), m_pdwFont[3], &D2_ChatInsertText, m_pd2dbrText[3]);
+		}
+		/*if (UI_Switch) {
 			switch (m_submissionnum)
 			{
 			case 0:
@@ -1274,7 +1355,7 @@ void CGameFramework::FrameAdvance()
 			}
 			break;
 			}
-		}
+		}*/
 
 		if (m_CurrentPlayerNum > 1) {
 			D2D1_RECT_F Friend1Text = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 1, (FRAME_BUFFER_HEIGHT / 64) * 42, (FRAME_BUFFER_WIDTH / 64) * 7, (FRAME_BUFFER_HEIGHT / 64) * 42);
@@ -1454,6 +1535,13 @@ void CGameFramework::CreateDirect2DDevice()
 	hResult = m_pdwFont[2]->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White, 5.0f), &m_pd2dbrText[2]);
 	hResult = m_pdWriteFactory->CreateTextLayout(L"텍스트 레이아웃", 6, m_pdwFont[2], 1024, 1024, &m_pdwTextLayout[2]);
+
+	hResult = m_pdWriteFactory->CreateTextFormat(L"NanumSquare_acEB.ttf", NULL, DWRITE_FONT_WEIGHT_DEMI_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 24.0f, L"ko-kr", &m_pdwFont[3]);
+	hResult = m_pdwFont[3]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+	hResult = m_pdwFont[3]->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White, 5.0f), &m_pd2dbrText[3]);
+	hResult = m_pdWriteFactory->CreateTextLayout(L"텍스트 레이아웃", 6, m_pdwFont[3], 1024, 1024, &m_pdwTextLayout[3]);
+
 
 	float fDpi = (float)GetDpiForWindow(m_hWnd);
 	D2D1_BITMAP_PROPERTIES1 d2dBitmapProperties = D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW, D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED), fDpi, fDpi);
@@ -2082,6 +2170,60 @@ void CGameFramework::CreateDirect2DDevice()
 		m_pd2dfxEdgeDetection[48 + i]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 		m_pd2dfxEdgeDetection[48 + i]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 	}
+
+	// Room Ready Status UI
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/ChattingUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[50]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[50]->SetInputEffect(0, m_pd2dfxBitmapSource[50]);
+	m_pd2dfxGaussianBlur[50]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[50]->SetInputEffect(0, m_pd2dfxBitmapSource[50]);
+	m_pd2dfxEdgeDetection[50]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[50]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[50]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[50]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[50]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// InsertChattingUI
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/InsertChattingUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[51]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[51]->SetInputEffect(0, m_pd2dfxBitmapSource[51]);
+	m_pd2dfxGaussianBlur[51]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[51]->SetInputEffect(0, m_pd2dfxBitmapSource[51]);
+	m_pd2dfxEdgeDetection[51]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[51]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[51]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[51]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[51]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// SniperAim
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/SniperAimUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[52]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[52]->SetInputEffect(0, m_pd2dfxBitmapSource[52]);
+	m_pd2dfxGaussianBlur[52]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[52]->SetInputEffect(0, m_pd2dfxBitmapSource[52]);
+	m_pd2dfxEdgeDetection[52]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[52]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[52]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[52]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[52]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();

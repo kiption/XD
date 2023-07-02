@@ -38,7 +38,10 @@ struct LoginSceneInfo {
 	float sx, sy, lx, ly;
 };
 
-
+struct ChatInfo
+{
+	WCHAR chatData[80];
+};
 
 class CGameFramework
 {
@@ -60,12 +63,12 @@ public:
 
 	void ChangeSwapChainState();
 
-    void BuildObjects();
-    void ReleaseObjects();
+	void BuildObjects();
+	void ReleaseObjects();
 
-    void ProcessInput();
-    void AnimateObjects();
-    void FrameAdvance();
+	void ProcessInput();
+	void AnimateObjects();
+	void FrameAdvance();
 
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
@@ -81,13 +84,14 @@ public:
 	DWORD						m_nMode = OPENINGSCENE;
 
 	GameSound gamesound;
-	int m_NumOfUI = 50;
+	int m_NumOfUI = 53;
 	bool UI_Switch = false;
 	bool m_bRollState = false;
 	bool m_LoginClick[4]{ false };
 	bool m_GameClick[3]{ false };
 	bool m_LobbyClick[2]{ false };
 	bool m_RoomClick[2]{ false };
+	bool m_SniperOn = false;
 	LoginSceneInfo loginpos[4];
 	LoginSceneInfo gamepos[3];
 	LoginSceneInfo lobbypos[2];
@@ -117,15 +121,15 @@ public:
 
 	ID2D1SolidColorBrush* m_pd2dbrBackground = NULL;
 	ID2D1SolidColorBrush* m_pd2dbrBorder = NULL;
-	IDWriteTextFormat* m_pdwFont[3];
-	IDWriteTextLayout* m_pdwTextLayout[3];
-	ID2D1SolidColorBrush* m_pd2dbrText[3];
+	IDWriteTextFormat* m_pdwFont[4];
+	IDWriteTextLayout* m_pdwTextLayout[4];
+	ID2D1SolidColorBrush* m_pd2dbrText[4];
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
-	ID2D1Effect* m_pd2dfxBitmapSource[50];
-	ID2D1Effect* m_pd2dfxGaussianBlur[50];
-	ID2D1Effect* m_pd2dfxEdgeDetection[50];
+	ID2D1Effect* m_pd2dfxBitmapSource[53];
+	ID2D1Effect* m_pd2dfxGaussianBlur[53];
+	ID2D1Effect* m_pd2dfxEdgeDetection[53];
 	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState = NULL;
 	IWICFormatConverter* m_pwicFormatConverter = NULL;
 	int							m_nDrawEffectImage = 0;
@@ -133,56 +137,56 @@ public:
 #endif
 private:
 	HINSTANCE					m_hInstance;
-	HWND						m_hWnd; 
+	HWND						m_hWnd;
 
 	int							m_nWndClientWidth;
 	int							m_nWndClientHeight;
-        
-	IDXGIFactory4				*m_pdxgiFactory = NULL;
-	IDXGISwapChain3				*m_pdxgiSwapChain = NULL;
-	ID3D12Device				*m_pd3dDevice = NULL;
+
+	IDXGIFactory4* m_pdxgiFactory = NULL;
+	IDXGISwapChain3* m_pdxgiSwapChain = NULL;
+	ID3D12Device* m_pd3dDevice = NULL;
 
 	bool						m_bMsaa4xEnable = false;
 	UINT						m_nMsaa4xQualityLevels = 0;
 
 	UINT						m_nSwapChainBufferIndex;
 
-	ID3D12Resource				*m_ppd3dSwapChainBackBuffers[m_nSwapChainBuffers];
+	ID3D12Resource* m_ppd3dSwapChainBackBuffers[m_nSwapChainBuffers];
 	D3D12_CPU_DESCRIPTOR_HANDLE		m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBuffers];
-	ID3D12DescriptorHeap		*m_pd3dRtvDescriptorHeap = NULL;
+	ID3D12DescriptorHeap* m_pd3dRtvDescriptorHeap = NULL;
 	D3D12_CPU_DESCRIPTOR_HANDLE		m_d3dDsvDescriptorCPUHandle;
-	ID3D12Resource				*m_pd3dDepthStencilBuffer = NULL;
-	ID3D12DescriptorHeap		*m_pd3dDsvDescriptorHeap = NULL;
+	ID3D12Resource* m_pd3dDepthStencilBuffer = NULL;
+	ID3D12DescriptorHeap* m_pd3dDsvDescriptorHeap = NULL;
 
-	ID3D12CommandAllocator		*m_pd3dCommandAllocator = NULL;
-	ID3D12CommandQueue			*m_pd3dCommandQueue = NULL;
-	ID3D12GraphicsCommandList	*m_pd3dCommandList = NULL;
+	ID3D12CommandAllocator* m_pd3dCommandAllocator = NULL;
+	ID3D12CommandQueue* m_pd3dCommandQueue = NULL;
+	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;
 
-	ID3D12Fence					*m_pd3dFence = NULL;
+	ID3D12Fence* m_pd3dFence = NULL;
 	UINT64						m_nFenceValues[m_nSwapChainBuffers];
 	HANDLE						m_hFenceEvent;
 	D3D12_VIEWPORT				m_d3dViewport;
 	D3D12_RECT					m_d3dScissorRect;
 
 #if defined(_DEBUG)
-	ID3D12Debug					*m_pd3dDebugController;
+	ID3D12Debug* m_pd3dDebugController;
 #endif
 
 	CGameTimer					m_GameTimer;
 
 public:
 	XMFLOAT3	PrevPosition;
-	CPlayer						*m_pPlayer = NULL;
-	CCamera						*m_pCamera = NULL;
+	CPlayer* m_pPlayer = NULL;
+	CCamera* m_pCamera = NULL;
 	CGameObject* m_pGameObject = NULL;
 	POINT						m_ptOldCursorPos;
 	CMaterial* m_pMaterial = NULL;
 	_TCHAR						m_pszFrameRate[70];
 	float ShootCnt = 0.0;
 
-//==================================================
-//			  서버 통신을 위한 것들...
-//==================================================
+	//==================================================
+	//			  서버 통신을 위한 것들...
+	//==================================================
 public:
 	SceneManager* m_pScene = NULL;
 	// 서버로 보낼 키보드 입력값
@@ -193,17 +197,18 @@ public:
 
 	// 서버에서 받은 총알 개수
 	WCHAR m_remainNPCPrint[20];
-	
+
 	WCHAR m_LoginID[20];
 	WCHAR m_LoginPW[20];
 	WCHAR m_LoginIP[20];
+	WCHAR m_InsertChat[80];
 
 	int m_mainmissionnum = 0;
 	int m_submissionnum = 0;
 
 	int m_currHp;
 	int m_currbullet;
-	
+
 	int m_10MinOfTime;
 	int m_1MinOfTime;
 	int m_10SecOftime;
@@ -220,6 +225,8 @@ public:
 	int m_occupationnum = 0;
 	queue<BulletPos> m_shoot_info;
 
+	queue<ChatInfo> m_chat_info;
+
 	wchar_t killNPCprint[100];
 	wchar_t occupationPrint[100];
 	wchar_t SurviveSecPrint[20];
@@ -227,12 +234,12 @@ public:
 	wchar_t KillArmyPrint[20];
 
 
-	bool W_KEY, A_KEY, S_KEY, D_KEY, SPACE_KEY,SHOOT_KEY = false;
-//==================================================
+	bool W_KEY, A_KEY, S_KEY, D_KEY, SPACE_KEY, SHOOT_KEY = false;
+	//==================================================
 
-//==================================================
-//			  서버 통신에 필요한 함수들
-//==================================================
+	//==================================================
+	//			  서버 통신에 필요한 함수들
+	//==================================================
 public:
 	// 새로운 입력이 있는지 확인하는 함수입니다.
 	bool checkNewInput_Keyboard();
@@ -271,9 +278,9 @@ public:
 	bool m_bDamageOn = false;
 	float m_pPlayerRotate_z = 0.0f;
 	float m_pPlayerRotate_x = 0.0f;
-//==================================================
-	// 서버에서 받은 Bound 값과의 충돌설정 함수입니다.
-	//player - map
+	//==================================================
+		// 서버에서 받은 Bound 값과의 충돌설정 함수입니다.
+		//player - map
 	bool CollisionMap_by_PLAYER(XMFLOAT3 mappos, XMFLOAT3 mapextents, CGameObject* pTargetGameObject);
 	//bullet - map
 	void CollisionMap_by_BULLET(XMFLOAT3 mappos, XMFLOAT3 mapextents);
@@ -287,10 +294,10 @@ public:
 	bool HeliCollsiion = false;
 	void CollisionDummiesObjects(int id);
 
-//=================================================
-	// 충돌 모션과 이펙트 처리 함수입니다.
+	//=================================================
+		// 충돌 모션과 이펙트 처리 함수입니다.
 
-	//void Motion_BulletbyPlayer(int id, XMFLOAT3 mappos, XMFLOAT3 mapextents);
+		//void Motion_BulletbyPlayer(int id, XMFLOAT3 mappos, XMFLOAT3 mapextents);
 	BoundingOrientedBox m_mapxmoobb;
 	BoundingOrientedBox m_mapStorexmoobb;
 	BoundingOrientedBox m_npcoobb;
@@ -298,8 +305,8 @@ public:
 	bool m_bCollisionCheck = false;
 
 	float m_fResponCount = 0.0;
-//=================================================
-	//NPC Attack
+	//=================================================
+		//NPC Attack
 	void HeliNpcUnderAttack(int id, XMFLOAT3 ToLook);
 };
 
