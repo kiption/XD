@@ -39,7 +39,7 @@
 //						공격 관련 상수
 //============================================================
 #define SHOOT_COOLDOWN_BULLET 33		// 총알 발사 쿨타임(ms)
-#define RELOAD_TIME 1500				// 장전완료까지 걸리는 시간(ms)
+#define RELOAD_TIME 2000				// 장전완료까지 걸리는 시간(ms)
 
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
 #define BULLET_DAMAGE 10				// 총알 피격데미지
@@ -52,13 +52,15 @@
 //============================================================
 #define HUMAN_MAXHP 100
 
-#define HUMAN_BBSIZE_X 4.0f				// 인간 BB크기 (CollideBox)
+#define HUMAN_BBSIZE_X 4.0f			// 인간 BB크기 (CollideBox)
 #define HUMAN_BBSIZE_Y 30.0f
 #define HUMAN_BBSIZE_Z 4.0f
 
 #define RESPAWN_POS_X -15.0f
 #define RESPAWN_POS_Y 6.0f
 #define RESPAWN_POS_Z 750.0f
+
+#define RESPAWN_TIME 5000			// 리스폰 시간 (ms)
 
 #define HUMAN_VIEW_RANGE 500.0f
 
@@ -80,7 +82,7 @@
 #define STAGE1_MISSION1_GOAL 5.0f		// 스테이지1 미션 목표
 #define STAGE1_MISSION2_GOAL 10.0f
 
-#define ST1_OCCUPY_AREA_POS_X 68.25f		// 스테이지1 점령지역 좌표
-#define ST1_OCCUPY_AREA_POS_Z -1007.5f
-#define ST1_OCCUPY_AREA_SIZE_X 136.5f		// 스테이지1 점령지역 크기
-#define ST1_OCCUPY_AREA_SIZE_Z 125.0f
+#define ST1_OCCUPY_AREA_POS_X -90.0f		// 스테이지1 점령지역 좌표
+#define ST1_OCCUPY_AREA_POS_Z -795.0f
+#define ST1_OCCUPY_AREA_SIZE_X 100.0f		// 스테이지1 점령지역 크기
+#define ST1_OCCUPY_AREA_SIZE_Z 130.0f

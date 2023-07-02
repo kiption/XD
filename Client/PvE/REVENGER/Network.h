@@ -29,6 +29,8 @@ int timelimit_sec;
 volatile bool stage1_enter_ok;
 volatile bool stage2_enter_ok;
 
+volatile bool respawn_trigger = false;
+
 //==================================================
 int curr_connection_num = 1;
 
@@ -63,6 +65,7 @@ struct message {
 constexpr int MAX_SAVED_MSG = 8;
 message chat_logs;
 bool chat_comeTome = true;
+
 //==================================================
 enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME };
@@ -464,6 +467,21 @@ void processPacket(char* ptr)
 
 		break;
 	}//SC_OBJECT_STATE case end
+	case SC_RESPAWN:
+	{
+		SC_RESPAWN_PACKET* recv_packet = reinterpret_cast<SC_RESPAWN_PACKET*>(ptr);
+
+		short recv_id = recv_packet->id;
+		players_info[recv_id].m_hp = recv_packet->hp;
+		players_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+		players_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+		players_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
+		players_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+		players_info[recv_id].m_ingame_state = recv_packet->state;
+
+		respawn_trigger = true;
+		break;
+	}//SC_RESPAWN case end
 	case SC_BULLET_COUNT:
 	{
 		SC_BULLET_COUNT_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COUNT_PACKET*>(ptr);
@@ -504,7 +522,6 @@ void processPacket(char* ptr)
 			//
 		}
 
-
 		break;
 	}//SC_MISSION_COMPLETE case end
 	case SC_TIME_TICKING:
@@ -523,6 +540,8 @@ void processPacket(char* ptr)
 		chat_comeTome = true;
 		strcpy_s(chat_logs.name, recv_packet->name);
 		strcpy_s(chat_logs.msg, recv_packet->msg);
+
+		break;
 	}
 	case SC_MAP_OBJINFO:
 	{

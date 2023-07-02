@@ -153,6 +153,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					//((Stage1*)gGameFramework.m_pScene)->m_pBillboardShader[3]->ParticlePosition = npcs_info[i].m_pos;
 				}
 
+				// 3. 리스폰할 때는 자기 자신을 움직여줘야합니다.
+				if (respawn_trigger) {
+					gGameFramework.setPosition_Self(players_info[my_id].m_pos);
+					gGameFramework.setVectors_Self(players_info[my_id].m_right_vec, players_info[my_id].m_up_vec, players_info[my_id].m_look_vec);
+					respawn_trigger = false;
+				}
+
 				//==================================================
 				// 2. 객체 인게임 상태 업데이트 (자기 자신 제외, 자기 자신은 클라 독자적으로 돌아가기 때문)
 				//  1) Other Players

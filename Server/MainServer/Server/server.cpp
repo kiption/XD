@@ -267,6 +267,7 @@ public:
 array<SESSION, MAX_USER> clients;
 SESSION npc_server;
 array<SESSION, MAX_NPCS> npcs;
+int dead_player_cnt;
 
 void SESSION::send_login_packet() {
 	SC_LOGIN_INFO_PACKET login_info_packet;
@@ -925,6 +926,8 @@ void process_packet(int client_id, char* packet)
 	case CS_MOVE:
 	{
 		if (!b_active_server) break;
+		if (clients[client_id].pl_state == PL_ST_DEAD) break;	// 죽은 자는 움직일 수 없다.
+
 		CS_MOVE_PACKET* cl_move_packet = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 
 		// 1. 충돌체크를 한다. -> 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
@@ -1020,6 +1023,8 @@ void process_packet(int client_id, char* packet)
 	case CS_ROTATE:
 	{
 		if (!b_active_server) break;
+		if (clients[client_id].pl_state == PL_ST_DEAD) break;	// 죽은 자는 움직일 수 없다.
+
 		CS_ROTATE_PACKET* cl_rotate_packet = reinterpret_cast<CS_ROTATE_PACKET*>(packet);
 
 		// 1. 세션 정보를 업데이트 한다.
@@ -1054,47 +1059,44 @@ void process_packet(int client_id, char* packet)
 	{
 		if (!b_active_server) break;
 		if (clients[client_id].curr_stage == 0) break;
-		CS_ATTACK_PACKET* cl_attack_packet = reinterpret_cast<CS_ATTACK_PACKET*>(packet);
+		if (clients[client_id].pl_state == PL_ST_DEAD) break;	// 죽은 자는 움직일 수 없다.
 
+		CS_ATTACK_PACKET* cl_attack_packet = reinterpret_cast<CS_ATTACK_PACKET*>(packet);
 		//==============================
 		// 1. 총알
-		// Bullet 쿨타임 체크
-		//milliseconds shoot_term = duration_cast<milliseconds>(chrono::system_clock::now() - clients[client_id].shoot_time);
-		//if (shoot_term < milliseconds(SHOOT_COOLDOWN_BULLET)) break;	// 쿨타임이 끝나지 않았다면 발사하지 않습니다.
-		
-		//// Bullet 개수 체크
-		//bool enough_bullet = true;
-		//if (clients[client_id].remain_bullet <= 0) {
-		//	// Bullet 장전 중 여부 체크
-		//	milliseconds reload_term = duration_cast<milliseconds>(chrono::system_clock::now() - clients[client_id].reload_time);
-		//	if (reload_term < milliseconds(RELOAD_TIME)) {
-		//		enough_bullet = false;
-		//	}
-		//	else {
-		//		clients[client_id].s_lock.lock();
-		//		clients[client_id].remain_bullet = MAX_BULLET;
-		//		clients[client_id].s_lock.unlock();
+		// Bullet 개수 체크
+		bool enough_bullet = true;
+		if (clients[client_id].remain_bullet <= 0) {
+			// Bullet 장전 중 여부 체크
+			milliseconds reload_term = duration_cast<milliseconds>(chrono::system_clock::now() - clients[client_id].reload_time);
+			if (reload_term < milliseconds(RELOAD_TIME)) {
+				enough_bullet = false;
+			}
+			else {
+				clients[client_id].s_lock.lock();
+				clients[client_id].remain_bullet = MAX_BULLET;
+				clients[client_id].s_lock.unlock();
 
-		//		if (clients[client_id].s_state == ST_INGAME) {
-		//			SC_BULLET_COUNT_PACKET reload_done_pack;
-		//			reload_done_pack.type = SC_BULLET_COUNT;
-		//			reload_done_pack.size = sizeof(SC_BULLET_COUNT_PACKET);
-		//			reload_done_pack.bullet_cnt = MAX_BULLET;
+				if (clients[client_id].s_state == ST_INGAME) {
+					SC_BULLET_COUNT_PACKET reload_done_pack;
+					reload_done_pack.type = SC_BULLET_COUNT;
+					reload_done_pack.size = sizeof(SC_BULLET_COUNT_PACKET);
+					reload_done_pack.bullet_cnt = MAX_BULLET;
 
-		//			lock_guard<mutex> lg{ clients[client_id].s_lock };
-		//			clients[client_id].do_send(&reload_done_pack);
-		//		}
-		//	}
-		//}
-		//if (!enough_bullet) break;
+					lock_guard<mutex> lg{ clients[client_id].s_lock };
+					clients[client_id].do_send(&reload_done_pack);
+				}
+			}
+		}
+		if (!enough_bullet) break;
 
 		// 총알 개수 업데이트
 		clients[client_id].s_lock.lock();
 		//clients[client_id].shoot_time = chrono::system_clock::now(); // 발사 시간 업데이트
 		clients[client_id].remain_bullet -= 1;
 		if (clients[client_id].remain_bullet <= 0) { // 장전 시작
-			clients[client_id].remain_bullet = MAX_BULLET/*0*/;
-			//clients[client_id].reload_time = chrono::system_clock::now();
+			clients[client_id].remain_bullet = 0;
+			clients[client_id].reload_time = chrono::system_clock::now();
 		}
 		clients[client_id].s_lock.unlock();
 
@@ -1353,26 +1355,9 @@ void process_packet(int client_id, char* packet)
 			cout << stage1_missions[0].curr << " / " << stage1_missions[0].goal << "\n" << endl;
 			break;
 		case PACKET_KEY_NUM2:
-			if (clients[client_id].curr_stage == 2) break;
-
-			clients[client_id].s_lock.lock();
-			clients[client_id].curr_stage = 2;
-			cout << "Client[" << client_id << "] Stage2로 전환." << endl;
-			clients[client_id].s_lock.unlock();
-
-			SC_CHANGE_SCENE_PACKET chg_scene2_pack;
-			chg_scene2_pack.type = SC_CHANGE_SCENE;
-			chg_scene2_pack.size = sizeof(SC_CHANGE_SCENE_PACKET);
-			chg_scene2_pack.id = client_id;
-			chg_scene2_pack.scene_num = 2;
-			for (auto& cl : clients) {
-				if (cl.s_state != ST_INGAME) continue;
-
-				lock_guard<mutex> lg{ cl.s_lock };
-				cl.do_send(&chg_scene2_pack);
-			}
 			break;
 		case PACKET_KEYUP_MOVEKEY:
+			if (clients[client_id].pl_state == PL_ST_DEAD) break;	// 죽은 자는 움직일 수 없다.
 			if (PL_ST_MOVE_FRONT <= clients[client_id].pl_state && clients[client_id].pl_state <= PL_ST_MOVE_SIDE) {
 				clients[client_id].s_lock.lock();
 				clients[client_id].pl_state = PL_ST_IDLE;
@@ -1402,6 +1387,8 @@ void process_packet(int client_id, char* packet)
 	case CS_INPUT_MOUSE:
 	{
 		if (!b_active_server) break;		// Active 서버만 패킷을 처리합니다.
+		if (clients[client_id].pl_state == PL_ST_DEAD) break;	// 죽은 자는 움직일 수 없다.
+
 		CS_INPUT_MOUSE_PACKET* rt_p = reinterpret_cast<CS_INPUT_MOUSE_PACKET*>(packet);
 
 		if (clients[client_id].s_state == ST_FREE) {
@@ -1551,7 +1538,12 @@ void process_packet(int client_id, char* packet)
 		}
 		npcs[npc_id].s_lock.unlock();
 
-		cout << "NPC[" << npc_id << "]의 모든 정보를 받았습니다.\n" << endl;
+		if (npc_id == 0) {
+			cout << "[Init NPCs...] ";
+		}
+		else if (npc_id == MAX_NPCS - 1) {
+			cout << "---- OK." << endl;
+		}
 
 		break;
 	}// NPC_FULL_INFO end
@@ -1634,20 +1626,26 @@ void process_packet(int client_id, char* packet)
 	{
 		NPC_ATTACK_PACKET* npc_attack_pack = reinterpret_cast<NPC_ATTACK_PACKET*>(packet);
 
-		bool b_collide = false;
+		// 1. NPC공격 연출을 위해 받은 패킷 그대로 클라에게 전달
 		for (auto& cl : clients) {
-			if (cl.curr_stage != 1) continue;
 			if (cl.s_state != ST_INGAME) continue;
+			if (cl.curr_stage == 0) continue;
 
-			// 1. NPC공격 연출을 위해 받은 패킷 그대로 클라에게 전달
 			{
 				lock_guard<mutex> lg{ cl.s_lock };
 				cl.do_send(npc_attack_pack);
 			}
+		}
 
-			// 2. NPC공격 - Player 충돌 검사
+		// 2. NPC공격 - Player 충돌 검사
+		bool b_collide = false;
+		for (auto& cl : clients) {
+			if (b_collide) break;	// 이미 충돌해서 데미지계산 처리가되었으면 충돌검사는 할 필요가 없다
+
+			if (cl.s_state != ST_INGAME) continue;
+			if (cl.curr_stage == 0) continue;
+
 			// 야매방법
-			if (b_collide) continue;					// 이미 충돌해서 데미지계산 처리가되었으면 충돌검사는 할 필요가 없다
 			if (cl.pl_state == PL_ST_DEAD) continue;	// 죽은 애는 충돌검사할 필요x
 			SESSION bullet;
 			bullet.pos = clients[client_id].pos;
@@ -1656,36 +1654,54 @@ void process_packet(int client_id, char* packet)
 				, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
 			XMFLOAT3 bullet_initpos = bullet.pos;
-			while (XMF_Distance(bullet.pos, bullet_initpos) <= BULLET_RANGE) {
+			while ((XMF_Distance(bullet.pos, bullet_initpos) <= BULLET_RANGE) && (!b_collide)) {
 				if (bullet.m_xoobb.Intersects(cl.m_xoobb)) {
 					b_collide = true;
 
-					// 플레이어 데미지 처리
-					if (cl.hp <= BULLET_DAMAGE/10) {// [임시코드] NPC가 공격을 너무 잘맞춘다... NPC 너프전까지 임시로 10을 나눠주었따.
+					int after_hp = cl.hp - BULLET_DAMAGE / 10;	// Read동작이므로 lock X
+
+					if (after_hp > 0) {		// 플레이어 데미지 처리
 						cl.s_lock.lock();
-						cl.hp = 0;
-						cl.pl_state = PL_ST_DEAD;
+						cl.hp -= BULLET_DAMAGE / 10;
 						cl.s_lock.unlock();
-						//cout << "Npc[" << npc_attack_pack->n_id << "]의 공격에 Player[" << cl.id << "]가 사망하였다." << endl;
-						
-						// 플레이어 사망처리는 나중에...
-					}
-					else {
+						cout << "Npc[" << npc_attack_pack->n_id << "]의 공격에 Player[" << cl.id << "]가 맞았다. (HP: " << cl.hp << " 남음)\n" << endl;
+
 						SC_DAMAGED_PACKET damaged_packet;
 						damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
 						damaged_packet.type = SC_DAMAGED;
 						damaged_packet.target = TARGET_PLAYER;
 						damaged_packet.id = cl.id;
 						damaged_packet.damage = BULLET_DAMAGE / 10; // [임시코드] NPC가 공격을 너무 잘맞춘다... NPC 너프전까지 임시로 10을 나눠주었따.
-
-						cl.s_lock.lock();
-						cl.hp -= BULLET_DAMAGE / 10;
-						cout << "Npc[" << npc_attack_pack->n_id << "]의 공격에 Player[" << cl.id << "]가 맞았다. (HP: " << cl.hp << " 남음)\n" << endl;
-
-						cl.do_send(&damaged_packet);
-						cl.s_lock.unlock();
+						{
+							lock_guard<mutex> lg{ cl.s_lock };
+							cl.do_send(&damaged_packet);
+						}
 					}
+					else {					// 플레이어 사망 처리
+						cl.s_lock.lock();
+						cl.hp = 0;
+						cl.pl_state = PL_ST_DEAD;
+						cl.death_time = system_clock::now();
+						cl.s_lock.unlock();
+						cout << "Npc[" << npc_attack_pack->n_id << "]의 공격에 Player[" << cl.id << "]가 사망하였다." << endl;
+						dead_player_cnt++;
 
+						SC_OBJECT_STATE_PACKET death_packet;
+						death_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
+						death_packet.type = SC_OBJECT_STATE;
+						death_packet.target = TARGET_PLAYER;
+						death_packet.id = cl.id;
+						death_packet.state = PL_ST_DEAD;
+						for (auto& send_cl : clients) {
+							if (send_cl.s_state != ST_INGAME) continue;
+							if (send_cl.curr_stage == 0) continue;
+
+							{
+								lock_guard<mutex> lg{ send_cl.s_lock };
+								send_cl.do_send(&death_packet);
+							}
+						}
+					}
 					break;
 				}
 			}
@@ -1856,7 +1872,7 @@ void do_worker()
 			else if (key == CP_KEY_LISTEN_NPC) {
 				SOCKET npc_socket = reinterpret_cast<SOCKET>(ex_over->wsabuf.buf);
 				npc_server.socket = npc_socket;
-				cout << "NPC 서버의 연결요청을 받았습니다.\n" << endl;
+				cout << "NPC 서버와 연결되었습니다." << endl;
 				b_npcsvr_conn = true;
 				int new_key = CP_KEY_LOGIC2NPC;
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(npc_socket), h_iocp, new_key, 0);
@@ -2111,6 +2127,57 @@ void timerFunc() {
 						}
 					}
 					else if (cl.curr_stage == 2) {
+					}
+				}
+			}
+
+			// 죽은 플레이어가 있다면 리스폰 시간을 체크합니다.
+			if (dead_player_cnt > 0) {
+				for (auto& cl : clients) {
+					if (cl.s_state != ST_INGAME) continue;
+					if (cl.curr_stage == 0) continue;
+					if (cl.pl_state != PL_ST_DEAD) continue;
+
+					if (system_clock::now() >= cl.death_time + milliseconds(RESPAWN_TIME)) {
+						cl.s_lock.lock();
+						cl.pl_state = PL_ST_IDLE;
+						cl.hp = HELI_MAXHP;
+						cl.pos = XMFLOAT3{ RESPAWN_POS_X + 15 * cl.id, RESPAWN_POS_Y, RESPAWN_POS_Z };
+						cl.m_rightvec = XMFLOAT3{ 1.0f, 0.0f, 0.0f };
+						cl.m_upvec = XMFLOAT3{ 0.0f, 1.0f, 0.0f };
+						cl.m_lookvec = XMFLOAT3{ 0.0f, 0.0f, 1.0f };
+						cl.setBB();
+						cl.s_lock.unlock();
+						cout << "Player[" << cl.id << "]가 리스폰 장소에서 부활하였습니다.\n" << endl;
+						dead_player_cnt--;
+
+						SC_RESPAWN_PACKET respawn_packet;
+						respawn_packet.size = sizeof(SC_RESPAWN_PACKET);
+						respawn_packet.type = SC_RESPAWN;
+						respawn_packet.target = TARGET_PLAYER;
+						respawn_packet.id = cl.id;
+						respawn_packet.hp = cl.hp;
+						respawn_packet.state = PL_ST_IDLE;
+						respawn_packet.x = cl.pos.x;
+						respawn_packet.y = cl.pos.y;
+						respawn_packet.z = cl.pos.z;
+						respawn_packet.right_x = cl.m_rightvec.x;
+						respawn_packet.right_y = cl.m_rightvec.y;
+						respawn_packet.right_z = cl.m_rightvec.z;
+						respawn_packet.up_x = cl.m_upvec.x;
+						respawn_packet.up_y = cl.m_upvec.y;
+						respawn_packet.up_z = cl.m_upvec.z;
+						respawn_packet.look_x = cl.m_lookvec.x;
+						respawn_packet.look_y = cl.m_lookvec.y;
+						respawn_packet.look_z = cl.m_lookvec.z;
+
+						for (auto& send_target : clients) {
+							if (cl.s_state != ST_INGAME) continue;
+							if (cl.curr_stage == 0) continue;
+
+							lock_guard<mutex> lg{ send_target.s_lock };
+							send_target.do_send(&respawn_packet);
+						}
 					}
 				}
 			}
@@ -2439,7 +2506,7 @@ int main(int argc, char* argv[])
 
 	// 파일 읽기
 	for (auto& fname : readTargets) {
-		cout << "Curr Filename: " << fname << endl;
+		cout << "  Import From File \'" << fname << "\'... ";
 		//string fname = readTargets[0];
 		ifstream txtfile(fname);
 
@@ -2489,13 +2556,11 @@ int main(int argc, char* argv[])
 					if (b_angle_aob || b_angle_boc) {
 						if (b_angle_aob) {
 							float aob = string2data(word);
-							cout << "New Angle AOB Data. [" << aob << "]" << endl;
 							tmp_bulding.setAngleAOB(aob);
 							b_angle_aob = false;
 						}
 						else if (b_angle_boc) {
 							float boc = string2data(word);
-							cout << "New Angle BOC Data. [" << boc << "]" << endl;
 							tmp_bulding.setAngleBOC(boc);
 							b_angle_boc = false;
 
@@ -2509,22 +2574,18 @@ int main(int argc, char* argv[])
 					if (buf_count == 2) {
 						XMFLOAT3 tmp_flt3(tmp_buf[0], tmp_buf[1], tmp_buf[2]);
 						if (b_center) {
-							cout << "New Position Data. [" << tmp_flt3.x << ", " << tmp_flt3.y << ", " << tmp_flt3.z << "]" << endl;
 							tmp_bulding.setPos2(tmp_flt3);
 							b_center = false;
 						}
 						else if (b_scale) {
-							cout << "New Scale Data. [" << tmp_flt3.x << ", " << tmp_flt3.y << ", " << tmp_flt3.z << "]" << endl;
 							tmp_bulding.setScale2(tmp_flt3);
 							b_scale = false;
 						}
 						else if (b_local_forward) {
-							cout << "New Local Forward Data. [" << tmp_flt3.x << ", " << tmp_flt3.y << ", " << tmp_flt3.z << "]" << endl;
 							tmp_bulding.setLocalForward(tmp_flt3);
 							b_local_forward = false;
 						}
 						else if (b_local_right) {
-							cout << "New Local Right Data. [" << tmp_flt3.x << ", " << tmp_flt3.y << ", " << tmp_flt3.z << "]" << endl;
 							tmp_bulding.setLocalRight(tmp_flt3);
 							b_local_right = false;
 						}
@@ -2541,7 +2602,7 @@ int main(int argc, char* argv[])
 		else {
 			cout << "[Error] Unknown File." << endl;
 		}
-		cout << "\n";
+		cout << "---- OK." << endl;
 		txtfile.close();
 	}
 
