@@ -1537,6 +1537,19 @@ void process_packet(int client_id, char* packet)
 
 		break;
 	}// NPC_FULL_INFO end
+	case NPC_MOVE:
+	{
+		NPC_MOVE_PACKET* npc_move_pack = reinterpret_cast<NPC_MOVE_PACKET*>(packet);
+
+		short npc_id = npc_move_pack->n_id;
+		npcs[npc_id].s_lock.lock();
+		npcs[npc_id].pos = { npc_move_pack->x, npc_move_pack->y, npc_move_pack->z };
+		npcs[npc_id].s_lock.unlock();
+
+		// 클라이언트로 NPC좌표를 보내는 것은 1초에 한번씩
+		// 클라이언트에서 보간한 좌표와의 오차를 비교하기 위해 보내는 것임.
+
+	}// NPC_MOVE end
 	case NPC_ROTATE:
 	{
 		NPC_ROTATE_PACKET* npc_rotate_pack = reinterpret_cast<NPC_ROTATE_PACKET*>(packet);
@@ -1549,8 +1562,8 @@ void process_packet(int client_id, char* packet)
 		npcs[npc_id].m_upvec = { npc_rotate_pack->up_x, npc_rotate_pack->up_y, npc_rotate_pack->up_z };
 		npcs[npc_id].m_lookvec = { npc_rotate_pack->look_x, npc_rotate_pack->look_y, npc_rotate_pack->look_z };
 		npcs[npc_id].s_lock.unlock();
-		/*cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
-			<< ") 방향으로 회전하였습니다.\n" << endl;*/
+		cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
+			<< ") 방향으로 회전하였습니다.\n" << endl;
 
 		/*
 		for (auto& cl : clients) {
@@ -1565,29 +1578,6 @@ void process_packet(int client_id, char* packet)
 
 		break;
 	}// NPC_ROTATE end
-	case NPC_CHECK_POS:
-	{
-		NPC_CHECK_POS_PACKET* npc_move_pack = reinterpret_cast<NPC_CHECK_POS_PACKET*>(packet);
-
-		short npc_id = npc_move_pack->n_id;
-
-		npcs[npc_id].s_lock.lock();
-		npcs[npc_id].pos = { npc_move_pack->x, npc_move_pack->y, npc_move_pack->z };
-		npcs[npc_id].s_lock.unlock();
-		//cout << "NPC[" << npc_id << "]가 POS(" << npcs[npc_id].pos.x << ", " << npcs[npc_id].pos.y << ", " << npcs[npc_id].pos.z << ")로 이동하였습니다.\n" << endl;
-
-		/*
-		for (auto& cl : clients) {
-			if (cl.curr_stage != 1) continue;	// Stage2 NPC 제작 전까지 사용되는 임시코드
-			if (cl.s_state != ST_INGAME) continue;
-
-			lock_guard<mutex> lg{ cl.s_lock };
-			cl.send_move_packet(npc_id, TARGET_NPC, MV_FRONT);//[임시코드] 나중에 npc도 이동방향을 받도록 해줘야함
-		}
-		*/
-
-		break;
-	}// NPC_MOVE end
 	case NPC_REMOVE:
 	{
 		NPC_REMOVE_PACKET* npc_remove_pack = reinterpret_cast<NPC_REMOVE_PACKET*>(packet);
