@@ -778,7 +778,7 @@ void CGameFramework::ProcessInput()
 	//GetKeyboardState(pKeysBuffer);
 	if (!bProcessedByScene)
 	{
-			DWORD dwDirection = 0;
+		DWORD dwDirection = 0;
 		if (!UI_Switch) {
 			if (pKeysBuffer[KEY_W] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_W); dwDirection |= DIR_FORWARD; }
 			if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; }
@@ -1378,7 +1378,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-		}
+}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -1439,8 +1439,8 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			break;
 		}
 		}
-		}
-		}
+	}
+}
 
 #ifdef _WITH_DIRECT2D
 void CGameFramework::CreateDirect2DDevice()
@@ -1479,7 +1479,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-}
+	}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -2207,7 +2207,7 @@ void CGameFramework::CreateDirect2DDevice()
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
 #endif
-	}
+}
 #endif
 
 
@@ -2520,7 +2520,12 @@ void CGameFramework::CollisionDummiesObjects(int id)
 void CGameFramework::HeliNpcUnderAttack(int id, XMFLOAT3 ToLook)
 {
 	//========헬기 NPC========//12
-	((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->Firevalkan(ToLook);
+	if (id < 5) {
+		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->Firevalkan(ToLook);
+	}
+	else {
+		//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + id])->Firevalkan(ToLook);
+	}
 
 
 	////========휴먼
