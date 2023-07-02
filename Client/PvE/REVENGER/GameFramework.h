@@ -38,9 +38,12 @@ struct LoginSceneInfo {
 	float sx, sy, lx, ly;
 };
 
-struct ChatInfo
-{
+struct ChatInfo{
 	WCHAR chatData[80];
+};
+
+struct SendChat {
+	char chatData[60];
 };
 
 class CGameFramework
@@ -203,7 +206,7 @@ public:
 	WCHAR m_LoginID[20];
 	WCHAR m_LoginPW[20];
 	WCHAR m_LoginIP[20];
-	WCHAR m_InsertChat[80];
+	WCHAR m_InsertChat[60];
 
 	int m_mainmissionnum = 0;
 	int m_submissionnum = 0;
@@ -228,6 +231,7 @@ public:
 	queue<BulletPos> m_shoot_info;
 
 	queue<ChatInfo> m_chat_info;
+	queue<SendChat> m_mychat_log;
 
 	wchar_t killNPCprint[100];
 	wchar_t occupationPrint[100];
