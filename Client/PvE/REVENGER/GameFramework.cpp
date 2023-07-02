@@ -488,7 +488,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				if (wParam == VK_BACK) {
 					size_t idLength = wcslen(m_LoginID);
 					if (idLength > 0) {
-						m_LoginID[idLength - 1] = L'\0';  // 마지막 문자를 null 문자로 설정하여 백스페이스 효과를 구현
+						m_LoginID[idLength - 1] = L'\0';
 					}
 				}
 				else {
@@ -514,7 +514,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				else {
 					WCHAR PWchar = static_cast<WCHAR>(wParam);
 					if (PWchar == L'.') {
-						PWchar = L'*';  // . 대신 *로 대체
+						PWchar = L'*';
 					}
 					size_t pwLength = wcslen(m_LoginPW);
 					size_t remainingSpace = sizeof(m_LoginPW) / sizeof(m_LoginPW[0]) - pwLength - 1;
@@ -534,7 +534,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				else {
 					WCHAR IPchar = static_cast<WCHAR>(wParam);
 					if (IPchar == L'.') {
-						IPchar = L'*';  // . 대신 *로 대체
+						IPchar = L'*';
 					}
 					size_t ipLength = wcslen(m_LoginIP);
 					size_t remainingSpace = sizeof(m_LoginIP) / sizeof(m_LoginIP[0]) - ipLength - 1;
@@ -561,7 +561,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				m_InsertChat[0] = L'\0';
 			}
 			else if (wParam == VK_RETURN) {
-				//SendChatLog(m_InsertChat);  
+				SendChat temp;
+				wcstombs_s(nullptr, temp.chatData, sizeof(temp.chatData), m_InsertChat, sizeof(m_InsertChat));
+
+				m_mychat_log.push(temp);
 				m_InsertChat[0] = L'\0';
 			}
 			else {
@@ -610,15 +613,8 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case '2':
 			{
 				q_keyboardInput.push(SEND_KEY_NUM2);//S
-				//UI_Switch = false;
 				break;
 			}
-			case '3':
-				/*if (m_nMode == SCENE1STAGE) {
-					UI_Switch = !UI_Switch;
-				}*/
-				break;
-
 			case 'R':
 				gamesound.shootSound->release();
 
