@@ -56,7 +56,7 @@ enum NPCType { NPC_HELICOPTER, NPC_ARMY };
 
 bool ConnectingServer = false;
 constexpr int HelicopterNum = 5;
-constexpr int ArmyNum = 25;
+constexpr int ArmyNum = 20;
 
 struct Node
 {
@@ -500,7 +500,8 @@ HANDLE h_iocp;											// IOCP 핸들
 int a_lgcsvr_num;										// Active상태인 메인서버
 array<SERVER, MAX_LOGIC_SERVER> g_logicservers;			// 로직서버 정보
 
-void SERVER::send_npc_init_packet(int npc_id) {
+void SERVER::send_npc_init_packet(int npc_id)
+{
 	NPC_FULL_INFO_PACKET npc_init_packet;
 	npc_init_packet.size = sizeof(NPC_FULL_INFO);
 	npc_init_packet.type = NPC_FULL_INFO;
@@ -525,7 +526,10 @@ void SERVER::send_npc_init_packet(int npc_id) {
 	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
 	g_logicservers[a_lgcsvr_num].do_send(&npc_init_packet);
 }
-void SERVER::send_npc_move_packet(int npc_id) {
+void SERVER::send_npc_move_packet(int npc_id)
+{
+	if (npcsInfo[npc_id].state == PL_ST_DEAD) return;
+
 	NPC_MOVE_PACKET npc_move_packet;
 	npc_move_packet.size = sizeof(NPC_MOVE_PACKET);
 	npc_move_packet.type = NPC_MOVE;
@@ -537,7 +541,10 @@ void SERVER::send_npc_move_packet(int npc_id) {
 	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
 	g_logicservers[a_lgcsvr_num].do_send(&npc_move_packet);
 }
-void SERVER::send_npc_rotate_packet(int npc_id) {
+void SERVER::send_npc_rotate_packet(int npc_id)
+{
+	if (npcsInfo[npc_id].state == PL_ST_DEAD) return;
+
 	NPC_ROTATE_PACKET npc_rotate_packet;
 	npc_rotate_packet.size = sizeof(NPC_ROTATE_PACKET);
 	npc_rotate_packet.type = NPC_ROTATE;
@@ -560,6 +567,8 @@ void SERVER::send_npc_rotate_packet(int npc_id) {
 }
 void SERVER::send_npc_attack_packet(int npc_id)
 {
+	if (npcsInfo[npc_id].state == PL_ST_DEAD) return;
+
 	NPC_ATTACK_PACKET npc_attack_packet;
 	npc_attack_packet.size = sizeof(NPC_ATTACK_PACKET);
 	npc_attack_packet.type = NPC_ATTACK;
@@ -1208,6 +1217,8 @@ void NPC::H_NPC_Death_motion()
 
 	m_rightvec = NPCcalcRightRotate();
 	m_lookvec = NPCcalcLookRotate();
+
+	//g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(id);
 }
 
 // Army
@@ -1691,8 +1702,14 @@ void process_packet(char* packet)
 	case SC_REMOVE_OBJECT:
 	{
 		SC_REMOVE_OBJECT_PACKET* remove_packet = reinterpret_cast<SC_REMOVE_OBJECT_PACKET*>(packet);
-		int client_id = remove_packet->id;
-		playersInfo[client_id].memberClear();
+		int recv_id = remove_packet->id;
+		short recv_target = remove_packet->target;
+		if (recv_target == TARGET_PLAYER) {
+			playersInfo[recv_id].memberClear();
+		}
+		else if (recv_target == TARGET_NPC) {
+			npcsInfo[recv_id].state = /*NPC_DEATH*/PL_ST_DEAD;
+		}
 
 		//cout << "[Remove Player] Player[ID:" << client_id << "]가 접속을 종료하였습니다.\n" << endl;
 

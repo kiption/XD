@@ -461,6 +461,7 @@ void processPacket(char* ptr)
 
 				npcs_info[recv_id].m_hp = 0;
 				npcs_info[recv_id].m_damaged_effect_on = true;
+				cout << "NPC[" << recv_id << "] ав╬З╢ы" << endl;
 				break;
 			}
 		}

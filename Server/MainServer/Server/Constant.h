@@ -42,7 +42,7 @@
 #define RELOAD_TIME 2500				// 장전완료까지 걸리는 시간(ms)
 
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
-#define BULLET_DAMAGE 10				// 총알 피격데미지
+#define BULLET_DAMAGE 1				// 총알 피격데미지
 
 #define BULLET_RANGE 500				// 총알 최대이동거리
 
@@ -69,9 +69,9 @@
 //============================================================
 #define HELI_MAXHP 100
 
-#define HELI_BBSIZE_X 2.5f				// 헬기 BB크기
-#define HELI_BBSIZE_Y 2.7f
-#define HELI_BBSIZE_Z 2.7f
+#define HELI_BBSIZE_X 25.f				// 헬기 BB크기
+#define HELI_BBSIZE_Y 10.f
+#define HELI_BBSIZE_Z 40.f
 
 #define AUTO_LEVELOFF_TIME 3000			// 몇 초(ms)동안 키입력이 없어야 자동 수평비행 전환이 되는가
 #define RESPAWN_TIME 5000				// 리스폰 시간 (ms)
@@ -86,3 +86,6 @@
 #define ST1_OCCUPY_AREA_POS_Z -795.0f
 #define ST1_OCCUPY_AREA_SIZE_X 100.0f		// 스테이지1 점령지역 크기
 #define ST1_OCCUPY_AREA_SIZE_Z 130.0f
+
+#define STAGE1_MAX_HELI 5
+#define STAGE1_MAX_HUMAN 25

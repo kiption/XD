@@ -609,6 +609,9 @@ public:
 	virtual void OnPrepareAnimate();
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+public:
+	bool m_bDyingstate = false;
+	bool m_bDyingMotion = false;
 };
 class CCityObject : public CGameObject
 {

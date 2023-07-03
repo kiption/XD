@@ -2394,25 +2394,37 @@ void CGameFramework::remove_OtherPlayer(int id)
 
 void CGameFramework::setPosition_Npc(int id, XMFLOAT3 pos)
 {
-	/* 12~21 = 헬리콥터NPC , 22~40 = 사람NPC */
+	/* 12~16 = 헬리콥터NPC , 22~41 = 사람NPC */
 	if (m_nMode == SCENE1STAGE)
 	{
-		if (0 <= id && id < 10) ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetPosition(pos);
-		else					((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetPosition(pos);
+		if (0 <= id && id < 5) {	// 헬기
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetPosition(pos);
+		}
+		else {	// 사람
+			int indexnum = id - 5;	// id = 5 ~ 24, Object인덱스 = 22 ~ 41
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->SetPosition(pos);
+		}
 	}
 }
 
 void CGameFramework::setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
-	/* 12~21 = 헬리콥터NPC , 22~40 = 사람NPC */
+	/* 12~16 = 헬리콥터NPC , 22~41 = 사람NPC */
 	if (m_nMode == SCENE1STAGE)
 	{
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetRight(rightVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetUp(upVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetLook(lookVec);
-
-		if (0 <= id && id < 10) ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetScale(3.0, 3.0, 3.0);
-		else					((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetScale(5.0, 5.0, 5.0);
+		if (0 <= id && id < 5) {	// 헬기
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetRight(rightVec);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetUp(upVec);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetLook(lookVec);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetScale(3.0, 3.0, 3.0);
+		}
+		else {	// 사람
+			int indexnum = id - 5;	// id = 5 ~ 24, Object인덱스 = 22 ~ 41
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->SetRight(rightVec);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->SetUp(upVec);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->SetLook(lookVec);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->SetScale(5.0, 5.0, 5.0);
+		}
 	}
 }
 
@@ -2567,11 +2579,34 @@ void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
 
 void CGameFramework::DyingMotionNPC(int id)
 {
-	if (((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + id]))
-	{
-		((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + id])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
-		((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + id])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
+	/* 12~16 = 헬리콥터NPC , 22~41 = 사람NPC */
+	if (0 <= id && id < 5) {	// 헬기
+		//((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetScale(0.0, 0.0, 0.0);
+		//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->Rotate(0.0, 10.0, 10.0);
+		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->m_bDyingstate = true;
 	}
+	else {		// 사람
+		int indexnum = id - 5;	// id = 5 ~ 24, Object인덱스 = 22 ~ 41
+		if (((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]))
+		{
+			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
+			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
+		}
+	}
+
+}
+void CGameFramework::MoveMotionNPC(int id)
+{
+	/* 12~16 = 헬리콥터NPC , 22~41 = 사람NPC */
+	if (id >= 5) {	// 사람
+		int indexnum = id - 5;	// id = 5 ~ 24, Object인덱스 = 22 ~ 41
+		if (((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]))
+		{
+			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_LOOP;
+			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
+		}
+	}
+
 }
 
 

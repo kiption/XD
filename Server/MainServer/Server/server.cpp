@@ -238,6 +238,7 @@ public:
 	void send_rotate_packet(int obj_id, short obj_type);
 	void send_move_rotate_packet(int obj_id, short obj_type, short dir);
 	void send_mission_packet(short curr_stage);
+	void send_remove_packet(int obj_id, short obj_type);
 
 	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 	
@@ -498,6 +499,17 @@ void SESSION::send_mission_packet(short curr_stage)
 
 	do_send(&mission_packet);
 }
+void SESSION::send_remove_packet(int obj_id, short obj_type)
+{
+	SC_REMOVE_OBJECT_PACKET remove_packet;
+	remove_packet.size = sizeof(SC_REMOVE_OBJECT_PACKET);
+	remove_packet.type = SC_REMOVE_OBJECT;
+	remove_packet.target = obj_type;
+	remove_packet.id = obj_id;
+	
+	do_send(&remove_packet);
+}
+
 void SESSION::update_viewlist()
 {
 	// 1. 플레이어 업데이트
@@ -516,16 +528,12 @@ void SESSION::update_viewlist()
 				s_lock.lock();
 				view_list.insert(other_pl_id);
 				s_lock.unlock();
-
-				cout << "Player[" << id << "]의 ViewList에 OtherPlayer[" << other_pl.id << "]를 추가합니다.\n" << endl;
 			}
 			// 1-2) 시야에 새로 들어온 플레이어의 ViewList에 자신의 ID추가
 			if (!other_pl.view_list.count(moved_pl_id)) {
 				other_pl.s_lock.lock();
 				other_pl.view_list.insert(moved_pl_id);
 				other_pl.s_lock.unlock();
-
-				cout << "OtherPlayer[" << other_pl.id << "]의 ViewList에 Player[" << id << "]를 추가합니다.\n" << endl;
 			}
 		}
 		// 2) 움직였더니 원래는 시야에 있었던 객체가 시야에서 사라진 경우
@@ -535,16 +543,12 @@ void SESSION::update_viewlist()
 				s_lock.lock();
 				view_list.erase(other_pl_id);
 				s_lock.unlock();
-
-				cout << "Player[" << id << "]의 ViewList에서 OtherPlayer[" << other_pl.id << "]를 제거합니다.\n" << endl;
 			}
 			// 2-2) 시야에 새로 들어온 플레이어의 ViewList에 자신의 ID 제거
 			if (other_pl.view_list.count(moved_pl_id)) {
 				other_pl.s_lock.lock();
 				other_pl.view_list.erase(moved_pl_id);
 				other_pl.s_lock.unlock();
-
-				cout << "OtherPlayer[" << other_pl.id << "]의 ViewList에서 Player[" << id << "]를 제거합니다.\n" << endl;
 			}
 		}
 	}
@@ -560,8 +564,6 @@ void SESSION::update_viewlist()
 				s_lock.lock();
 				view_list.insert(npc_id);
 				s_lock.unlock();
-
-				cout << "Player[" << id << "]의 ViewList에 Npc[" << npc.id << "]를 추가합니다.\n" << endl;
 			}
 			// 더미는 View List X
 		}
@@ -572,14 +574,10 @@ void SESSION::update_viewlist()
 				s_lock.lock();
 				view_list.erase(npc_id);
 				s_lock.unlock();
-
-				cout << "Player[" << id << "]의 ViewList에서 Npc[" << npc.id << "]를 제거합니다.\n" << endl;
 			}
 			// Npc의 시야는 Npc서버에서 관리.
 		}
 	}
-	
-	// 3.
 }
 
 //======================================================================
@@ -673,26 +671,14 @@ void disconnect(int target_id, int target)
 				pl.s_lock.unlock();
 				continue;
 			}
-			SC_REMOVE_OBJECT_PACKET remove_pl_packet;
-			remove_pl_packet.target = TARGET_PLAYER;
-			remove_pl_packet.id = target_id;
-			remove_pl_packet.size = sizeof(remove_pl_packet);
-			remove_pl_packet.type = SC_REMOVE_OBJECT;
-
-			pl.do_send(&remove_pl_packet);
+			pl.send_remove_packet(target_id, TARGET_PLAYER);
 			pl.s_lock.unlock();
 		}
 
 		// NPC 서버에게도 target_id번 클라이언트가 접속 종료한 사실을 알립니다.
 		if (b_npcsvr_conn) {
-			SC_REMOVE_OBJECT_PACKET remove_pl_packet;
-			remove_pl_packet.target = TARGET_PLAYER;
-			remove_pl_packet.id = target_id;
-			remove_pl_packet.size = sizeof(remove_pl_packet);
-			remove_pl_packet.type = SC_REMOVE_OBJECT;
-
 			lock_guard<mutex> lg{ npc_server.s_lock };
-			npc_server.do_send(&remove_pl_packet);
+			npc_server.send_remove_packet(target_id, TARGET_PLAYER);
 		}
 
 		break;
@@ -1069,12 +1055,10 @@ void process_packet(int client_id, char* packet)
 
 		// 총알 개수 업데이트
 		clients[client_id].s_lock.lock();
-		//clients[client_id].shoot_time = chrono::system_clock::now(); // 발사 시간 업데이트
-		clients[client_id].remain_bullet -= 1;
-		if (clients[client_id].remain_bullet <= 0) { // 장전 시작
+		if (clients[client_id].remain_bullet > 1)
+			clients[client_id].remain_bullet -= 1;
+		else
 			clients[client_id].remain_bullet = 0;
-			clients[client_id].reload_time = chrono::system_clock::now();
-		}
 		clients[client_id].s_lock.unlock();
 
 		if (clients[client_id].s_state == ST_INGAME) {
@@ -1114,8 +1098,6 @@ void process_packet(int client_id, char* packet)
 		int collide_id = -1;
 		float min_dist = FLT_MAX;
 
-		// [TEST] 테스트용 더미 충돌검사
-
 		// 야매방법
 		SESSION bullet;
 		bullet.pos = clients[client_id].pos;
@@ -1136,28 +1118,66 @@ void process_packet(int client_id, char* packet)
 				if (bullet.m_xoobb.Intersects(npcs[npc_id].m_xoobb)) {
 					b_collide = true;
 					
-					// npc 데미지 처리
-					if (npcs[npc_id].hp <= 10) {
+					if (npcs[npc_id].hp <= BULLET_DAMAGE) {	// npc 사망 처리
 						npcs[npc_id].s_lock.lock();
 						npcs[npc_id].hp = 0;
 						npcs[npc_id].pl_state = PL_ST_DEAD;
 						npcs[npc_id].s_lock.unlock();
-
 						cout << "Player[" << client_id << "]의 공격에 Npc[" << npc_id << "]가 사망하였다." << endl;
 
-						SC_OBJECT_STATE_PACKET npc_die_packet;
-						npc_die_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
-						npc_die_packet.type = SC_OBJECT_STATE;
-						npc_die_packet.target = TARGET_NPC;
-						npc_die_packet.id = npc_id;
-						npc_die_packet.state = PL_ST_DEAD;
-						for (auto& cl : clients) {
-							if (cl.s_state != ST_INGAME) continue;
-							if (cl.curr_stage != clients[client_id].curr_stage) continue;
-							lock_guard<mutex> lg{ cl.s_lock };
-							cl.do_send(&npc_die_packet);
-						}
+						if (npc_id < STAGE1_MAX_HELI) {
+							// 1) 헬기NPC인 경우 NPC서버에게 상태패킷을 보냅니다.
+							SC_OBJECT_STATE_PACKET npc_die_packet;
+							npc_die_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
+							npc_die_packet.type = SC_OBJECT_STATE;
+							npc_die_packet.target = TARGET_NPC;
+							npc_die_packet.id = npc_id;
+							npc_die_packet.state = PL_ST_DEAD;
+							if (b_npcsvr_conn) {
+								lock_guard<mutex> lg{ npc_server.s_lock };
+								npc_server.do_send(&npc_die_packet);
+							}
 
+							// (임시) npc서버에서 헬기 낙하 모션 구현전까지 클라이언트에서 scale을 0으로 낮추는 야매방법 임시 채택
+							SC_OBJECT_STATE_PACKET temp_packet;
+							temp_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
+							temp_packet.type = SC_OBJECT_STATE;
+							temp_packet.target = TARGET_NPC;
+							temp_packet.id = npc_id;
+							temp_packet.state = PL_ST_DEAD;
+							for (auto& cl : clients) {
+								if (cl.s_state != ST_INGAME) continue;
+								if (cl.curr_stage == 0) continue;
+
+								lock_guard<mutex> lg{ cl.s_lock };
+								cl.do_send(&temp_packet);
+							}
+						}
+						else {
+							// 2) 인간NPC인 경우 NPC서버에게 제거패킷, 클라이언트에게 상태패킷을 보냅니다.
+							//   (NPC서버에선 동작을 멈추게하고, 클라에선 애니메이션을 하게됩니다.)
+
+							// 제거 패킷 (to. NPC서버)
+							if (b_npcsvr_conn) {
+								lock_guard<mutex> lg{ npc_server.s_lock };
+								npc_server.send_remove_packet(npc_id, TARGET_NPC);
+							}
+
+							// 상태패킷 (to. 클라이언트)
+							SC_OBJECT_STATE_PACKET npc_die_packet;
+							npc_die_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
+							npc_die_packet.type = SC_OBJECT_STATE;
+							npc_die_packet.target = TARGET_NPC;
+							npc_die_packet.id = npc_id;
+							npc_die_packet.state = PL_ST_DEAD;
+							for (auto& cl : clients) {
+								if (cl.s_state != ST_INGAME) continue;
+								if (cl.curr_stage == 0) continue;
+
+								lock_guard<mutex> lg{ cl.s_lock };
+								cl.do_send(&npc_die_packet);
+							}
+						}
 
 						// 미션 업데이트
 						short curr_mission = curr_mission_stage[clients[client_id].curr_stage];
@@ -1249,9 +1269,9 @@ void process_packet(int client_id, char* packet)
 						}
 
 					}
-					else {
+					else {	// npc 데미지 처리
 						npcs[npc_id].s_lock.lock();
-						npcs[npc_id].hp -= 10;
+						npcs[npc_id].hp -= BULLET_DAMAGE;
 						npcs[npc_id].s_lock.unlock();
 
 						cout << "Player[" << client_id << "]의 공격에 Npc[" << npc_id << "]가 맞았다. (HP: " << npcs[npc_id].hp << " 남음)\n" << endl;
@@ -1554,6 +1574,13 @@ void process_packet(int client_id, char* packet)
 		short npc_id = npc_move_pack->n_id;
 		npcs[npc_id].s_lock.lock();
 		npcs[npc_id].pos = { npc_move_pack->x, npc_move_pack->y, npc_move_pack->z };
+		if (npc_id < 5) {	// 헬기
+			npcs[npc_id].m_xoobb = BoundingOrientedBox(XMFLOAT3(npcs[npc_id].pos.x, npcs[npc_id].pos.y, npcs[npc_id].pos.z)
+				, XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+		}
+		else {	// 사람
+			npcs[npc_id].setBB();
+		}
 		npcs[npc_id].s_lock.unlock();
 
 		// 클라이언트로 NPC좌표를 보내는 것은 1초에 한번씩
@@ -1580,6 +1607,13 @@ void process_packet(int client_id, char* packet)
 		npcs[npc_id].m_rightvec = { npc_rotate_pack->right_x, npc_rotate_pack->right_y, npc_rotate_pack->right_z };
 		npcs[npc_id].m_upvec = { npc_rotate_pack->up_x, npc_rotate_pack->up_y, npc_rotate_pack->up_z };
 		npcs[npc_id].m_lookvec = { npc_rotate_pack->look_x, npc_rotate_pack->look_y, npc_rotate_pack->look_z };
+		if (npc_id < 5) {	// 헬기
+			npcs[npc_id].m_xoobb = BoundingOrientedBox(XMFLOAT3(npcs[npc_id].pos.x, npcs[npc_id].pos.y, npcs[npc_id].pos.z)
+				, XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+		}
+		else {	// 사람
+			npcs[npc_id].setBB();
+		}
 		npcs[npc_id].s_lock.unlock();
 		//cout << "NPC[" << npc_id << "]가 Look(" << npcs[npc_id].m_lookvec.x << ", " << npcs[npc_id].m_lookvec.y << ", " << npcs[npc_id].m_lookvec.z
 		//	<< ") 방향으로 회전하였습니다.\n" << endl;
@@ -1610,14 +1644,8 @@ void process_packet(int client_id, char* packet)
 			if (cl.curr_stage != 1) continue;	// Stage2 NPC 제작 전까지 사용되는 임시코드
 			if (cl.s_state != ST_INGAME) continue;
 
-			SC_REMOVE_OBJECT_PACKET rm_npc_pack;
-			rm_npc_pack.size = sizeof(SC_REMOVE_OBJECT_PACKET);
-			rm_npc_pack.type = SC_REMOVE_OBJECT;
-			rm_npc_pack.target = TARGET_NPC;
-			rm_npc_pack.id = npc_id;
-
 			lock_guard<mutex> lg{ cl.s_lock };
-			cl.do_send(&rm_npc_pack);
+			cl.send_remove_packet(npc_id, TARGET_NPC);
 		}
 
 		break;
@@ -1658,11 +1686,11 @@ void process_packet(int client_id, char* packet)
 				if (bullet.m_xoobb.Intersects(cl.m_xoobb)) {
 					b_collide = true;
 
-					int after_hp = cl.hp - BULLET_DAMAGE / 10;	// Read동작이므로 lock X
+					int after_hp = cl.hp - BULLET_DAMAGE;	// Read동작이므로 lock X
 
 					if (after_hp > 0) {		// 플레이어 데미지 처리
 						cl.s_lock.lock();
-						cl.hp -= BULLET_DAMAGE / 10;
+						cl.hp -= BULLET_DAMAGE;
 						cl.s_lock.unlock();
 						cout << "Npc[" << npc_attack_pack->n_id << "]의 공격에 Player[" << cl.id << "]가 맞았다. (HP: " << cl.hp << " 남음)\n" << endl;
 
@@ -1671,7 +1699,7 @@ void process_packet(int client_id, char* packet)
 						damaged_packet.type = SC_DAMAGED;
 						damaged_packet.target = TARGET_PLAYER;
 						damaged_packet.id = cl.id;
-						damaged_packet.damage = BULLET_DAMAGE / 10; // [임시코드] NPC가 공격을 너무 잘맞춘다... NPC 너프전까지 임시로 10을 나눠주었따.
+						damaged_packet.damage = BULLET_DAMAGE;
 						{
 							lock_guard<mutex> lg{ cl.s_lock };
 							cl.do_send(&damaged_packet);

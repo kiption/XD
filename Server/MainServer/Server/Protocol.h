@@ -47,7 +47,7 @@ constexpr int NAME_SIZE = 20;
 constexpr int CHAT_SIZE = 60;
 
 constexpr int MAX_USER = 3;
-constexpr int MAX_NPCS = 30;
+constexpr int MAX_NPCS = 25;
 constexpr int MAX_BULLET = 10;
 
 constexpr int PLAYER_ID_START = 1000;		// Player ID ½ÃÀÛ°ª. (ID_VALUE_PLAYER + client_id)

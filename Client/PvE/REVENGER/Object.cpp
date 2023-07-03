@@ -1862,6 +1862,18 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 
 		}
 	}
+
+	if (m_bDyingstate == true) {
+		//m_bDyingMotion = true;
+		SetScale(0, 0, 0);
+	}
+	//if (m_bDyingMotion == true)
+	//{
+	//	Rotate(0, 10, 10);
+	//	m_xmf4x4ToParent._42 -= 0.0001f;
+	//	
+	//}
+
 	CGameObject::Animate(fTimeElapsed);
 }
 
@@ -2008,7 +2020,7 @@ void CSoldiarNpcObjects::Animate(float fTimeElapsed)
 
 		}
 	}
-	MoveForward(fTimeElapsed);
+	//MoveForward(fTimeElapsed);
 	CGameObject::Animate(fTimeElapsed);
 }
 

@@ -220,23 +220,40 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					if (npcs_info[i].m_new_state_update) {
 						switch (npcs_info[i].m_ingame_state) {
 						case PL_ST_IDLE:
-							break;
 						case PL_ST_MOVE_FRONT: // 앞으로 이동
-							break;
 						case PL_ST_MOVE_BACK: // 뒤로 이동
-							break;
 						case PL_ST_MOVE_SIDE: // 옆으로 이동
+							if (i >= 5) {
+								gGameFramework.MoveMotionNPC(i);
+							}
 							break;
 						case PL_ST_ATTACK:
 							break;
 						case PL_ST_DEAD:
-							((Stage1*)gGameFramework.m_pScene)->m_ppShaders[0]->m_ppObjects[10 + i]->m_xmf4x4ToParent._42 = 0.0f;
+							//((Stage1*)gGameFramework.m_pScene)->m_ppShaders[0]->m_ppObjects[10 + i]->m_xmf4x4ToParent._42 = 0.0f;
+							gGameFramework.DyingMotionNPC(i);
 							break;
 						}
 
 						npcs_info[i].m_new_state_update = false;
 					}
 				}
+				
+				/* 더미때 썻던 코드. (* 이거 참고해서 위에 옮겨놓으면 여기 주석부분은 지워주세용 *)
+				// 3) Dummies ([TEST] NPC 완성전까지 임시 코드)
+				for (int i = 0; i < 5; ++i) {
+					if (dummies[i].m_new_state_update) {
+						if (dummies[i].m_ingame_state == PL_ST_DEAD) {
+							// 여기에 더미 죽는 모션 실행1
+							// (더미 죽는 모션이 한 사이클 완료되면 객체를 날려버리던가 scale 해주면 됨.)
+							//gGameFramework.otherPlayerDyingMotion(i);
+							gGameFramework.CollisionDummiesObjects(i);
+
+							dummies[i].m_new_state_update = false;
+						}
+					}
+				}
+				*/
 
 				//==================================================
 				//					Map 충돌 관련
