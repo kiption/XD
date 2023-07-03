@@ -331,7 +331,7 @@ public:
 
 	bool HumanCollsiion = false;
 	bool HeliCollsiion = false;
-	void CollisionDummiesObjects(int id);
+	void DyingMotionNPC(int id);
 
 	//=================================================
 		// 충돌 모션과 이펙트 처리 함수입니다.

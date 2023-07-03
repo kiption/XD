@@ -2565,12 +2565,12 @@ void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
 
 }
 
-void CGameFramework::CollisionDummiesObjects(int id)
+void CGameFramework::DyingMotionNPC(int id)
 {
-	if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17 + id])
+	if (((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + id]))
 	{
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17 + id]->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[17 + id]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
+		((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + id])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
+		((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + id])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 	}
 }
 
