@@ -172,6 +172,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					respawn_trigger = false;
 				}
 
+				// 4. 만약 죽어있는 상태면 캐릭터 조작이 불가능하게 막아야합니다.
+				if ((players_info[my_id].m_ingame_state == PL_ST_DEAD) && (!gGameFramework.player_dead)) {
+					gGameFramework.player_dead = true;
+				}
+				if ((players_info[my_id].m_ingame_state != PL_ST_DEAD) && (gGameFramework.player_dead)) {
+					gGameFramework.player_dead = false;
+				}
+
 				//==================================================
 				// 2. 객체 인게임 상태 업데이트 (자기 자신 제외, 자기 자신은 클라 독자적으로 돌아가기 때문)
 				//  1) Other Players
@@ -229,24 +237,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						npcs_info[i].m_new_state_update = false;
 					}
 				}
-
-				//  3) Dummies ([TEST] NPC 완성전까지 임시 코드)
-				//for (int i = 0; i < 5; ++i) {
-				//	if (dummies[i].m_new_state_update) {
-				//		if (dummies[i].m_ingame_state == PL_ST_DEAD) {
-				//			// 여기에 더미 죽는 모션 실행1
-				//			// (더미 죽는 모션이 한 사이클 완료되면 객체를 날려버리던가 scale 해주면 됨.)
-				//			//gGameFramework.otherPlayerDyingMotion(i);
-				//			gGameFramework.CollisionDummiesObjects(i);
-
-				//			dummies[i].m_new_state_update = false;
-				//		}
-				//	}
-				//}
-
-				//==================================================
-				//					  UI 동기화
-				//==================================================
 
 				//==================================================
 				//					Map 충돌 관련
@@ -492,9 +482,12 @@ void networkThreadFunc()
 				sendPacket(&move_side_pack, active_servernum);
 				break;
 
+			case PACKET_KEY_R:
+				// 재장전
+				break;
+
 			case PACKET_KEY_SPACEBAR:
 				// 점프
-				cout << "메인에 있는 스페이스바 \n" << endl;
 				break;
 
 			case PACKET_KEYUP_MOVEKEY:

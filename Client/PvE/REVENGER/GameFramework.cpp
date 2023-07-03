@@ -622,13 +622,14 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				break;
 			}
 			case 'R':
-				gamesound.shootSound->release();
+				if (!player_dead) {
+					gamesound.shootSound->release();
 
-				((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bReloadState = true;
-				((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReloadState();
-				q_keyboardInput.push(SEND_KEY_UP);//S
+					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bReloadState = true;
+					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReloadState();
+					q_keyboardInput.push(SEND_KEY_R);//S
+				}
 				break;
-
 
 			case VK_SPACE:
 				((CHumanPlayer*)m_pScene->m_pPlayer)->m_bJumeState = true;
@@ -767,11 +768,6 @@ void CGameFramework::ReleaseObjects()
 bool ShootKey = false;
 void CGameFramework::ProcessInput()
 {
-
-
-
-
-
 	static UCHAR pKeysBuffer[256];
 	bool bProcessedByScene = false;
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
@@ -779,7 +775,7 @@ void CGameFramework::ProcessInput()
 	if (!bProcessedByScene)
 	{
 		DWORD dwDirection = 0;
-		if (!UI_Switch) {
+		if (!UI_Switch && !player_dead) {
 			if (pKeysBuffer[KEY_W] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_W); dwDirection |= DIR_FORWARD; }
 			if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; }
 
@@ -791,12 +787,15 @@ void CGameFramework::ProcessInput()
 
 			}
 		}
-		if (pKeysBuffer[KEY_E] & 0xF0) {
-			q_keyboardInput.push(SEND_KEY_DOWN);//S
-		}
 
-		if (pKeysBuffer[VK_SPACE] & 0xF0) {
-			q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
+		if (!player_dead) {
+			if (pKeysBuffer[KEY_E] & 0xF0) {
+				q_keyboardInput.push(SEND_KEY_DOWN);//S
+			}
+
+			if (pKeysBuffer[VK_SPACE] & 0xF0) {
+				q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
+			}
 		}
 
 
@@ -836,35 +835,32 @@ void CGameFramework::ProcessInput()
 
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
-			if (m_nMode == SCENE1STAGE) {
-				if (cxDelta || cyDelta || ((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
-				{
-					MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
-					q_mouseInput.push(mousemove);//s
+			if (!player_dead) {
+				if (m_nMode == SCENE1STAGE) {
+					if (cxDelta || cyDelta || ((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
+					{
+						MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
+						q_mouseInput.push(mousemove);//s
 
-					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
-
-
-				}
-				if (dwDirection)
-				{
-					/*bool isCollide = false;
-					
-					for (int i{}; i < mapcol_info.size(); ++i) {
-						if (m_pPlayer->m_xoobb.Intersects(mapcol_info[i].m_xoobb)) isCollide = true;
-
+						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
 					}
-					
-					if (isCollide) {
-					
-					}*/
-					//else 
-					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
+					if (dwDirection)
+					{
+						/*bool isCollide = false;
 
+						for (int i{}; i < mapcol_info.size(); ++i) {
+							if (m_pPlayer->m_xoobb.Intersects(mapcol_info[i].m_xoobb)) isCollide = true;
+
+						}
+
+						if (isCollide) {
+
+						}*/
+						//else 
+						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
+					}
 				}
 			}
-
-
 		}
 	}
 	if (m_nMode == SCENE1STAGE)

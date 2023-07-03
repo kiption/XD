@@ -16,7 +16,7 @@
 enum SEND_MOUSE_BUTTON { SEND_NONCLICK, SEND_BUTTON_L, SEND_BUTTON_R };
 enum SEND_KEY_TYPE {
 	SEND_KEY_NUM1, SEND_KEY_NUM2,
-	SEND_KEY_W, SEND_KEY_A, SEND_KEY_S, SEND_KEY_D,
+	SEND_KEY_W, SEND_KEY_A, SEND_KEY_S, SEND_KEY_D, SEND_KEY_R,
 	SEND_KEY_UP, SEND_KEY_LEFT, SEND_KEY_DOWN, SEND_KEY_RIGHT,
 	SEND_KEY_SPACEBAR,
 	SEND_KEYUP_MOVEKEY
@@ -273,6 +273,8 @@ public:
 
 
 	bool W_KEY, A_KEY, S_KEY, D_KEY, SPACE_KEY, SHOOT_KEY = false;
+
+	bool player_dead = false;
 	//==================================================
 
 	//==================================================
