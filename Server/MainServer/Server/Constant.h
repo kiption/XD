@@ -39,7 +39,7 @@
 //						공격 관련 상수
 //============================================================
 #define SHOOT_COOLDOWN_BULLET 33		// 총알 발사 쿨타임(ms)
-#define RELOAD_TIME 2000				// 장전완료까지 걸리는 시간(ms)
+#define RELOAD_TIME 2500				// 장전완료까지 걸리는 시간(ms)
 
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
 #define BULLET_DAMAGE 10				// 총알 피격데미지

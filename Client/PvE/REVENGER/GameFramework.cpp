@@ -789,10 +789,6 @@ void CGameFramework::ProcessInput()
 		}
 
 		if (!player_dead) {
-			if (pKeysBuffer[KEY_E] & 0xF0) {
-				q_keyboardInput.push(SEND_KEY_DOWN);//S
-			}
-
 			if (pKeysBuffer[VK_SPACE] & 0xF0) {
 				q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
 			}

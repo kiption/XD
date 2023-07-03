@@ -1065,30 +1065,7 @@ void process_packet(int client_id, char* packet)
 		//==============================
 		// 1. 총알
 		// Bullet 개수 체크
-		bool enough_bullet = true;
-		if (clients[client_id].remain_bullet <= 0) {
-			// Bullet 장전 중 여부 체크
-			milliseconds reload_term = duration_cast<milliseconds>(chrono::system_clock::now() - clients[client_id].reload_time);
-			if (reload_term < milliseconds(RELOAD_TIME)) {
-				enough_bullet = false;
-			}
-			else {
-				clients[client_id].s_lock.lock();
-				clients[client_id].remain_bullet = MAX_BULLET;
-				clients[client_id].s_lock.unlock();
-
-				if (clients[client_id].s_state == ST_INGAME) {
-					SC_BULLET_COUNT_PACKET reload_done_pack;
-					reload_done_pack.type = SC_BULLET_COUNT;
-					reload_done_pack.size = sizeof(SC_BULLET_COUNT_PACKET);
-					reload_done_pack.bullet_cnt = MAX_BULLET;
-
-					lock_guard<mutex> lg{ clients[client_id].s_lock };
-					clients[client_id].do_send(&reload_done_pack);
-				}
-			}
-		}
-		if (!enough_bullet) break;
+		if (clients[client_id].remain_bullet <= 0) break;
 
 		// 총알 개수 업데이트
 		clients[client_id].s_lock.lock();
@@ -1318,7 +1295,7 @@ void process_packet(int client_id, char* packet)
 		switch (inputkey_p->keytype) {
 		case PACKET_KEY_NUM1:
 			if (clients[client_id].curr_stage == 1) break;
-			
+
 			clients[client_id].s_lock.lock();
 			clients[client_id].curr_stage = 1;
 			cout << "Client[" << client_id << "] Stage1로 전환." << endl;
@@ -1354,8 +1331,31 @@ void process_packet(int client_id, char* packet)
 			}
 			cout << stage1_missions[0].curr << " / " << stage1_missions[0].goal << "\n" << endl;
 			break;
+
 		case PACKET_KEY_NUM2:
 			break;
+
+		case PACKET_KEY_R:
+			milliseconds reload_term = duration_cast<milliseconds>(system_clock::now() - clients[client_id].reload_time);
+			if (reload_term < milliseconds(RELOAD_TIME)) break;
+
+			if (clients[client_id].remain_bullet == MAX_BULLET) break;
+
+			clients[client_id].s_lock.lock();
+			clients[client_id].remain_bullet = MAX_BULLET;
+			clients[client_id].reload_time = system_clock::now();
+			clients[client_id].s_lock.unlock();
+
+			SC_BULLET_COUNT_PACKET reload_packet;
+			reload_packet.size = sizeof(SC_BULLET_COUNT_PACKET);
+			reload_packet.type = SC_BULLET_COUNT;
+			reload_packet.bullet_cnt = MAX_BULLET;
+			{
+				lock_guard<mutex> lg{ clients[client_id].s_lock };
+				clients[client_id].do_send(&reload_packet);
+			}
+			break;
+
 		case PACKET_KEYUP_MOVEKEY:
 			if (clients[client_id].pl_state == PL_ST_DEAD) break;	// 죽은 자는 움직일 수 없다.
 			if (PL_ST_MOVE_FRONT <= clients[client_id].pl_state && clients[client_id].pl_state <= PL_ST_MOVE_SIDE) {

@@ -484,6 +484,13 @@ void networkThreadFunc()
 
 			case PACKET_KEY_R:
 				// 재장전
+				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+
+				CS_INPUT_KEYBOARD_PACKET input_rkey_pack;
+				input_rkey_pack.type = CS_INPUT_KEYBOARD;
+				input_rkey_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+				input_rkey_pack.keytype = PACKET_KEY_R;
+				sendPacket(&input_rkey_pack, active_servernum);
 				break;
 
 			case PACKET_KEY_SPACEBAR:
