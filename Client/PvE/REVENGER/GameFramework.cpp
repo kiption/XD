@@ -851,19 +851,20 @@ void CGameFramework::ProcessInput()
 					bool isCollide = false;
 					CollideMapInfo temp;
 					for (int i{}; i < mapcol_info.size(); ++i) {
-						if (m_pPlayer->m_xoobb.Intersects(mapcol_info[i].m_xoobb)) {
-							temp = mapcol_info[i];	
+						if (mapcol_info[i].m_xoobb.Intersects(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xoobb)) {
+							temp = mapcol_info[i];
 							isCollide = true;
 							break;
 						}
 					}
 
 					if (isCollide) {
-						XMFLOAT3 PlayertoBox = { temp.m_pos.x - m_pPlayer->GetPosition().x, 0.0f , temp.m_pos.z - m_pPlayer->GetPosition().z };
+						XMFLOAT3 PlayertoBox = { temp.m_pos.x - ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition().x, 0.0f , 
+							temp.m_pos.z - ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition().z };
 						XMVECTOR playerToBoxNormalized = XMVector3Normalize(XMLoadFloat3(&PlayertoBox));
 						XMFLOAT3 normalizedPlayerToBox;
 						XMStoreFloat3(&normalizedPlayerToBox, playerToBoxNormalized);
-						
+
 						XMFLOAT3 normalizedLocalForward;
 						XMVECTOR localForwardNormalized = XMVector3Normalize(XMLoadFloat3(&temp.m_local_forward));
 						XMStoreFloat3(&normalizedLocalForward, localForwardNormalized);
@@ -878,14 +879,14 @@ void CGameFramework::ProcessInput()
 
 						XMFLOAT3 PlayerMoveDir;
 						if (abs(cos(temp.m_angle_aob)) < abs(cos(angle))) {
-							if (temp.m_angle_aob > angle) { 
+							if (temp.m_angle_aob > angle) {
 								XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalForward));
 								XMStoreFloat3(&PlayerMoveDir, AddVector);
 							}
 							else {
 								XMVECTOR reversedLocalForward = XMVectorNegate(XMLoadFloat3(&normalizedLocalForward));
 								XMStoreFloat3(&normalizedLocalForward, reversedLocalForward);
-								
+
 								XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalForward));
 								XMStoreFloat3(&PlayerMoveDir, AddVector);
 							}
@@ -906,14 +907,14 @@ void CGameFramework::ProcessInput()
 								XMStoreFloat3(&PlayerMoveDir, AddVector);
 							}
 						}
-						
+
 						XMVECTOR PlayerMoveNormalized = XMVector3Normalize(XMLoadFloat3(&PlayerMoveDir));
 						XMStoreFloat3(&PlayerMoveDir, PlayerMoveNormalized);
 
 						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
 						//((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move();
-						m_pPlayer->SetMovingDirection(PlayerMoveDir);
-						m_pPlayer->Move
+						//m_pPlayer->SetMovingDirection(PlayerMoveDir);
+						//((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(*PlayerMoveDir, )
 					}
 					else
 						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
