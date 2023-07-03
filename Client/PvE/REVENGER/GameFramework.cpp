@@ -848,18 +848,75 @@ void CGameFramework::ProcessInput()
 				}
 				if (dwDirection)
 				{
-					/*bool isCollide = false;
-					
+					bool isCollide = false;
+					CollideMapInfo temp;
 					for (int i{}; i < mapcol_info.size(); ++i) {
-						if (m_pPlayer->m_xoobb.Intersects(mapcol_info[i].m_xoobb)) isCollide = true;
-
+						if (m_pPlayer->m_xoobb.Intersects(mapcol_info[i].m_xoobb)) {
+							temp = mapcol_info[i];	
+							isCollide = true;
+							break;
+						}
 					}
-					
+
 					if (isCollide) {
-					
-					}*/
-					//else 
-					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
+						XMFLOAT3 PlayertoBox = { temp.m_pos.x - m_pPlayer->GetPosition().x, 0.0f , temp.m_pos.z - m_pPlayer->GetPosition().z };
+						XMVECTOR playerToBoxNormalized = XMVector3Normalize(XMLoadFloat3(&PlayertoBox));
+						XMFLOAT3 normalizedPlayerToBox;
+						XMStoreFloat3(&normalizedPlayerToBox, playerToBoxNormalized);
+						
+						XMFLOAT3 normalizedLocalForward;
+						XMVECTOR localForwardNormalized = XMVector3Normalize(XMLoadFloat3(&temp.m_local_forward));
+						XMStoreFloat3(&normalizedLocalForward, localForwardNormalized);
+
+						XMFLOAT3 normalizedLocalRight;
+						XMVECTOR localRightNormalized = XMVector3Normalize(XMLoadFloat3(&temp.m_local_right));
+						XMStoreFloat3(&normalizedLocalRight, localRightNormalized);
+
+						float angle = XMVectorGetX(XMVector3AngleBetweenNormals(playerToBoxNormalized, localForwardNormalized));
+
+						angle = XMConvertToDegrees(angle);
+
+						XMFLOAT3 PlayerMoveDir;
+						if (abs(cos(temp.m_angle_aob)) < abs(cos(angle))) {
+							if (temp.m_angle_aob > angle) { 
+								XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalForward));
+								XMStoreFloat3(&PlayerMoveDir, AddVector);
+							}
+							else {
+								XMVECTOR reversedLocalForward = XMVectorNegate(XMLoadFloat3(&normalizedLocalForward));
+								XMStoreFloat3(&normalizedLocalForward, reversedLocalForward);
+								
+								XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalForward));
+								XMStoreFloat3(&PlayerMoveDir, AddVector);
+							}
+						}
+						else {
+							float angle = XMVectorGetX(XMVector3AngleBetweenNormals(playerToBoxNormalized, localRightNormalized));
+							angle = XMConvertToDegrees(angle);
+							if (temp.m_angle_boc > angle) {
+								XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalRight));
+								XMStoreFloat3(&PlayerMoveDir, AddVector);
+
+							}
+							else {
+								XMVECTOR reversedLocalRight = XMVectorNegate(XMLoadFloat3(&normalizedLocalRight));
+								XMStoreFloat3(&normalizedLocalRight, reversedLocalRight);
+
+								XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalRight));
+								XMStoreFloat3(&PlayerMoveDir, AddVector);
+							}
+						}
+						
+						XMVECTOR PlayerMoveNormalized = XMVector3Normalize(XMLoadFloat3(&PlayerMoveDir));
+						XMStoreFloat3(&PlayerMoveDir, PlayerMoveNormalized);
+
+						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
+						//((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move();
+						m_pPlayer->SetMovingDirection(PlayerMoveDir);
+						m_pPlayer->Move
+					}
+					else
+						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
 
 				}
 			}
@@ -1489,7 +1546,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-	}
+}
 	pd3dInfoQueue->Release();
 #endif
 
