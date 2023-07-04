@@ -98,6 +98,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						frametemp.m_scale = origintemp.m_scale;
 						frametemp.m_local_forward = origintemp.m_local_forward;
 						frametemp.m_local_right = origintemp.m_local_right;
+						frametemp.m_local_rotate = origintemp.m_local_rotate;
 						frametemp.m_angle_aob = origintemp.m_angle_aob;
 						frametemp.m_angle_boc = origintemp.m_angle_boc;
 						frametemp.setBB();

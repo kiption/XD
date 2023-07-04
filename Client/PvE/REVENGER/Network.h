@@ -553,6 +553,7 @@ void processPacket(char* ptr)
 		temp.m_scale = { recv_packet->scale_x, recv_packet->scale_y, recv_packet->scale_z };
 		temp.m_local_forward = { recv_packet->forward_x, recv_packet->forward_y, recv_packet->forward_z };
 		temp.m_local_right = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
+		temp.m_local_rotate = { recv_packet->rotate_x, recv_packet->rotate_y, recv_packet->rotate_z };
 		temp.m_angle_aob = recv_packet->aob;
 		temp.m_angle_boc = recv_packet->boc;
 		temp.setBB();

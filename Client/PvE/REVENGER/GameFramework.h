@@ -51,6 +51,7 @@ struct CollideMapInfo
 	XMFLOAT3 m_scale;
 	XMFLOAT3 m_local_forward;
 	XMFLOAT3 m_local_right;
+	XMFLOAT3 m_local_rotate;
 	float m_angle_aob;
 	float m_angle_boc;
 
@@ -69,7 +70,8 @@ struct CollideMapInfo
 	}
 
 	void setBB() {
-		m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pos.x, m_pos.y, m_pos.z), XMFLOAT3(m_scale.x, m_scale.y, m_scale.z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+		XMFLOAT4 oriented(m_local_rotate.x, m_local_rotate.y, m_local_rotate.z, 1.f);
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pos.x, m_pos.y, m_pos.z), XMFLOAT3(m_scale.x, m_scale.y, m_scale.z), oriented);
 	}
 };
 

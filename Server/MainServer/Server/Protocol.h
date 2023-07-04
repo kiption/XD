@@ -351,6 +351,7 @@ struct SC_MAP_OBJINFO_PACKET {
 	float scale_x, scale_y, scale_z;
 	float forward_x, forward_y, forward_z;
 	float right_x, right_y, right_z;
+	float rotate_x, rotate_y, rotate_z;
 	float aob;
 	float boc;
 };

@@ -1,287 +1,324 @@
 Object Name: CollideBox1
-Center: (254.00, 137.16, 31.00)
+Center: (254.00, -115.15, 31.00)
 Scale: (462.91, 504.61, 174.27)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 138.7397
-Angle BOC: 41.2603
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 138.7398
+Angle BOC: 41.2602
 
 Object Name: CollideBox2
-Center: (63.00, 137.16, 439.00)
+Center: (63.00, 0.00, 439.00)
 Scale: (62.50, 274.32, 806.02)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 8.868491
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 8.868446
 Angle BOC: 171.1315
 
 Object Name: CollideBox3
-Center: (-134.00, 137.16, 448.00)
+Center: (-134.00, 0.00, 448.00)
 Scale: (62.50, 274.32, 806.02)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 8.868491
-Angle BOC: 171.1315
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 8.868358
+Angle BOC: 171.1317
 
 Object Name: CollideBox4
-Center: (-38.00, 137.16, 589.00)
+Center: (-38.00, 0.00, 589.00)
 Scale: (135.83, 274.32, 65.00)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 128.8559
-Angle BOC: 51.14407
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 128.8562
+Angle BOC: 51.14381
 
 Object Name: CollideBox5
-Center: (-327.00, 137.16, 4.00)
+Center: (-327.00, -115.15, 4.00)
 Scale: (476.21, 504.61, 181.81)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 138.208
-Angle BOC: 41.79203
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 138.2081
+Angle BOC: 41.79192
 
 Object Name: CollideBox6
-Center: (-139.00, 137.16, -400.00)
+Center: (-139.00, 0.00, -400.00)
 Scale: (71.32, 274.32, 808.96)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
 Angle AOB: 10.07611
 Angle BOC: 169.9239
 
 Object Name: CollideBox7
-Center: (52.00, 137.16, -419.00)
+Center: (52.00, 0.00, -419.00)
 Scale: (71.32, 274.32, 808.96)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
 Angle AOB: 10.07611
 Angle BOC: 169.9239
 
 Object Name: CollideBox8
-Center: (-38.00, 137.16, -619.00)
+Center: (-38.00, 0.00, -619.00)
 Scale: (135.83, 274.32, 65.00)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 128.8559
-Angle BOC: 51.14407
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 128.8562
+Angle BOC: 51.14381
 
 Object Name: CollideBox9
-Center: (-731.00, 137.16, 28.00)
+Center: (-731.00, 0.00, 28.00)
 Scale: (81.94, 274.32, 2107.83)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 4.452499
-Angle BOC: 175.5475
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 4.452587
+Angle BOC: 175.5474
 
 Object Name: CollideBox10
-Center: (653.00, 137.16, 28.00)
+Center: (653.00, 0.00, 28.00)
 Scale: (81.94, 274.32, 2107.83)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 4.452499
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 4.452587
 Angle BOC: 175.5475
 
 Object Name: CollideBox11
-Center: (-25.99, 137.16, -999.00)
+Center: (-26.00, 0.00, -999.00)
 Scale: (1543.35, 274.32, 81.94)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 173.9216
-Angle BOC: 6.078413
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 173.9215
+Angle BOC: 6.078477
 
 Object Name: CollideBox12
-Center: (-25.99, 137.16, 1033.00)
+Center: (-26.00, 0.00, 1033.00)
 Scale: (1543.35, 274.32, 81.94)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 173.9216
-Angle BOC: 6.078413
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 173.9222
+Angle BOC: 6.077832
 
 Object Name: CollideBox13
-Center: (344.00, 137.16, 836.00)
+Center: (344.00, 0.00, 836.00)
 Scale: (306.92, 274.32, 128.73)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 134.4926
-Angle BOC: 45.50745
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 134.493
+Angle BOC: 45.50696
 
 Object Name: CollideBox14
-Center: (332.00, 137.16, 668.00)
-Scale: (233.29, 274.32, 233.29)
-Local Forward: (-0.71, 0.00, -0.71)
-Local Right: (-0.71, 0.00, 0.71)
-Angle AOB: 160.9822
-Angle BOC: 19.01779
-
-Object Name: CollideBox15
-Center: (467.90, 137.16, 662.60)
-Scale: (51.92, 274.32, 230.83)
-Local Forward: (0.00, 0.00, 1.00)
-Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 25.35295
-Angle BOC: 154.647
-
-Object Name: CollideBox16
-Center: (298.80, 137.16, 253.00)
-Scale: (202.48, 274.32, 74.19)
-Local Forward: (0.00, 0.00, 1.00)
-Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 139.7554
-Angle BOC: 40.24464
-
-Object Name: CollideBox17
-Center: (357.50, 137.16, 384.50)
-Scale: (233.29, 274.32, 233.29)
-Local Forward: (-0.71, 0.00, -0.71)
-Local Right: (-0.71, 0.00, 0.71)
-Angle AOB: 160.9822
-Angle BOC: 19.01779
-
-Object Name: CollideBox18
-Center: (223.00, 137.16, 409.00)
-Scale: (51.92, 274.32, 242.60)
-Local Forward: (0.00, 0.00, 1.00)
-Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 24.15971
-Angle BOC: 155.8403
-
-Object Name: CollideBox19
-Center: (344.10, 137.16, -232.60)
-Scale: (306.92, 274.32, 128.73)
-Local Forward: (0.00, 0.00, 1.00)
-Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 134.4926
-Angle BOC: 45.50742
-
-Object Name: CollideBox20
-Center: (332.10, 137.16, -400.60)
-Scale: (233.29, 274.32, 233.29)
-Local Forward: (-0.71, 0.00, -0.71)
-Local Right: (-0.71, 0.00, 0.71)
-Angle AOB: 160.9822
-Angle BOC: 19.01779
-
-Object Name: CollideBox21
-Center: (468.00, 137.16, -406.00)
-Scale: (51.92, 274.32, 230.83)
-Local Forward: (0.00, 0.00, 1.00)
-Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 25.35295
-Angle BOC: 154.647
-
-Object Name: CollideBox22
-Center: (298.90, 137.16, -815.60)
-Scale: (202.48, 274.32, 74.19)
-Local Forward: (0.00, 0.00, 1.00)
-Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 139.7554
-Angle BOC: 40.24464
-
-Object Name: CollideBox23
-Center: (357.60, 137.16, -684.10)
-Scale: (233.29, 274.32, 233.29)
-Local Forward: (-0.71, 0.00, -0.71)
-Local Right: (-0.71, 0.00, 0.71)
-Angle AOB: 160.9822
-Angle BOC: 19.01779
-
-Object Name: CollideBox24
-Center: (223.10, 137.16, -659.60)
-Scale: (51.92, 274.32, 242.60)
-Local Forward: (0.00, 0.00, 1.00)
-Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 24.15971
-Angle BOC: 155.8403
-
-Object Name: CollideBox25
-Center: (-415.00, 137.16, -803.00)
-Scale: (306.92, 274.32, 128.73)
-Local Forward: (0.00, 0.00, 1.00)
-Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 134.4926
-Angle BOC: 45.50745
-
-Object Name: CollideBox26
-Center: (-403.00, 137.16, -635.00)
+Center: (332.00, 0.00, 668.00)
 Scale: (233.29, 274.32, 233.29)
 Local Forward: (0.71, 0.00, 0.71)
 Local Right: (0.71, 0.00, -0.71)
-Angle AOB: 160.9822
-Angle BOC: 19.01779
+Local Rotate: (0.00, 45.00, 0.00)
+Angle AOB: 160.9812
+Angle BOC: 19.01875
 
-Object Name: CollideBox27
-Center: (-538.90, 137.16, -629.60)
+Object Name: CollideBox15
+Center: (467.90, 0.00, 662.60)
 Scale: (51.92, 274.32, 230.83)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 25.35292
-Angle BOC: 154.6471
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 25.35308
+Angle BOC: 154.6469
 
-Object Name: CollideBox28
-Center: (-369.80, 137.16, -220.00)
+Object Name: CollideBox16
+Center: (298.80, 0.00, 253.00)
 Scale: (202.48, 274.32, 74.19)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 139.7554
-Angle BOC: 40.24464
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 139.7549
+Angle BOC: 40.24514
+
+Object Name: CollideBox17
+Center: (357.50, 0.00, 384.50)
+Scale: (233.29, 274.32, 233.29)
+Local Forward: (0.71, 0.00, 0.71)
+Local Right: (0.71, 0.00, -0.71)
+Local Rotate: (0.00, 45.00, 0.00)
+Angle AOB: 160.983
+Angle BOC: 19.01702
+
+Object Name: CollideBox18
+Center: (223.00, 0.00, 409.00)
+Scale: (51.92, 274.32, 242.60)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 24.15983
+Angle BOC: 155.8402
+
+Object Name: CollideBox19
+Center: (344.10, 0.00, -232.60)
+Scale: (306.92, 274.32, 128.73)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 134.4923
+Angle BOC: 45.50766
+
+Object Name: CollideBox20
+Center: (332.10, 0.00, -400.60)
+Scale: (233.29, 274.32, 233.29)
+Local Forward: (0.71, 0.00, 0.71)
+Local Right: (0.71, 0.00, -0.71)
+Local Rotate: (0.00, 45.00, 0.00)
+Angle AOB: 160.983
+Angle BOC: 19.01702
+
+Object Name: CollideBox21
+Center: (468.00, 0.00, -406.00)
+Scale: (51.92, 274.32, 230.83)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 25.35308
+Angle BOC: 154.6469
+
+Object Name: CollideBox22
+Center: (298.90, 0.00, -815.60)
+Scale: (202.48, 274.32, 74.19)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 139.757
+Angle BOC: 40.24295
+
+Object Name: CollideBox23
+Center: (357.60, 0.00, -684.10)
+Scale: (233.29, 274.32, 233.29)
+Local Forward: (0.71, 0.00, 0.71)
+Local Right: (0.71, 0.00, -0.71)
+Local Rotate: (0.00, 45.00, 0.00)
+Angle AOB: 160.9812
+Angle BOC: 19.01875
+
+Object Name: CollideBox24
+Center: (223.10, 0.00, -659.60)
+Scale: (51.92, 274.32, 242.60)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 24.16024
+Angle BOC: 155.8398
+
+Object Name: CollideBox25
+Center: (-415.00, 0.00, -803.00)
+Scale: (306.92, 274.32, 128.73)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 134.493
+Angle BOC: 45.50696
+
+Object Name: CollideBox26
+Center: (-403.00, 0.00, -635.00)
+Scale: (233.29, 274.32, 233.29)
+Local Forward: (0.71, 0.00, 0.71)
+Local Right: (0.71, 0.00, -0.71)
+Local Rotate: (0.00, 45.00, 0.00)
+Angle AOB: 160.9812
+Angle BOC: 19.01875
+
+Object Name: CollideBox27
+Center: (-538.90, 0.00, -629.60)
+Scale: (51.92, 274.32, 230.83)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 25.35098
+Angle BOC: 154.649
+
+Object Name: CollideBox28
+Center: (-369.80, 0.00, -220.00)
+Scale: (202.48, 274.32, 74.19)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 139.7549
+Angle BOC: 40.24514
 
 Object Name: CollideBox29
-Center: (-421.00, 137.16, -344.00)
+Center: (-421.00, 0.00, -344.00)
 Scale: (252.05, 274.32, 252.05)
 Local Forward: (0.71, 0.00, 0.71)
 Local Right: (0.71, 0.00, -0.71)
-Angle AOB: 150.703
-Angle BOC: 29.29703
+Local Rotate: (0.00, 45.00, 0.00)
+Angle AOB: 150.7034
+Angle BOC: 29.29663
 
 Object Name: CollideBox30
-Center: (-294.00, 137.16, -376.00)
+Center: (-294.00, 0.00, -376.00)
 Scale: (51.92, 274.32, 242.60)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 24.15971
-Angle BOC: 155.8403
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 24.15983
+Angle BOC: 155.8402
 
 Object Name: CollideBox31
-Center: (-415.10, 137.16, 265.60)
+Center: (-415.10, 0.00, 265.60)
 Scale: (306.92, 274.32, 128.73)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 134.4926
-Angle BOC: 45.50742
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 134.493
+Angle BOC: 45.50696
 
 Object Name: CollideBox32
-Center: (-403.10, 137.16, 433.60)
+Center: (-403.10, 0.00, 433.60)
 Scale: (233.29, 274.32, 233.29)
 Local Forward: (0.71, 0.00, 0.71)
 Local Right: (0.71, 0.00, -0.71)
-Angle AOB: 160.9822
-Angle BOC: 19.0178
+Local Rotate: (0.00, 45.00, 0.00)
+Angle AOB: 160.983
+Angle BOC: 19.01702
 
 Object Name: CollideBox33
-Center: (-539.00, 137.16, 443.00)
+Center: (-539.00, 0.00, 443.00)
 Scale: (51.92, 274.32, 230.83)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 25.35292
-Angle BOC: 154.6471
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 25.35098
+Angle BOC: 154.649
 
 Object Name: CollideBox34
-Center: (-369.90, 137.16, 856.00)
+Center: (-369.90, 0.00, 856.00)
 Scale: (202.48, 274.32, 74.19)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 139.7554
-Angle BOC: 40.24464
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 139.757
+Angle BOC: 40.24295
 
 Object Name: CollideBox35
-Center: (-423.00, 137.16, 728.00)
+Center: (-423.00, 0.00, 728.00)
 Scale: (251.13, 274.32, 251.13)
 Local Forward: (0.71, 0.00, 0.71)
 Local Right: (0.71, 0.00, -0.71)
-Angle AOB: 151.1926
-Angle BOC: 28.80742
+Local Rotate: (0.00, 45.00, 0.00)
+Angle AOB: 151.1937
+Angle BOC: 28.80627
 
 Object Name: CollideBox36
-Center: (-294.10, 137.16, 697.00)
+Center: (-294.10, 0.00, 697.00)
 Scale: (51.92, 274.32, 242.60)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
-Angle AOB: 24.15971
-Angle BOC: 155.8403
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 24.16024
+Angle BOC: 155.8398
+

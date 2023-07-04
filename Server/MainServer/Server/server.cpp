@@ -94,6 +94,7 @@ class Building : public MapObject
 private:
 	XMFLOAT3 local_forward;
 	XMFLOAT3 local_right;
+	XMFLOAT3 local_rotate;
 	float angle_aob;
 	float angle_boc;
 
@@ -108,6 +109,7 @@ public:
 	void setScale2(XMFLOAT3 s) { setScale(s.x, s.y, s.z); }
 	void setLocalForward(XMFLOAT3 localforward) { local_forward = localforward; }
 	void setLocalRight(XMFLOAT3 localright) { local_right = localright; }
+	void setLocalRotate(XMFLOAT3 localrotate) { local_rotate = localrotate; }
 	void setAngleAOB(float angleaob) { angle_aob = angleaob; }
 	void setAngleBOC(float angleboc) { angle_boc = angleboc; }
 
@@ -115,14 +117,17 @@ public:
 	XMFLOAT3 getScale2() { return XMFLOAT3{ getScaleX(), getScaleY(), getScaleZ() }; }
 	XMFLOAT3 getLocalForward() { return local_forward; }
 	XMFLOAT3 getLocalRight() { return local_right; }
+	XMFLOAT3 getLocalRotate() { return local_rotate; }
 	float getAngleAOB() { return angle_aob; }
 	float getAngleBOC() { return angle_boc; }
 
 public:
 	void setBB() {
+		XMFLOAT4 orientation(local_rotate.x, local_rotate.y, local_rotate.z, 1.f);
+
 		m_xoobb = BoundingOrientedBox(XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()),
 			XMFLOAT3(this->getScaleX(), this->getScaleY(), this->getScaleZ()),
-			XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+			orientation);
 	}
 	XMFLOAT3 getPos() { return XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()); }
 };
@@ -241,7 +246,7 @@ public:
 	void send_remove_packet(int obj_id, short obj_type);
 
 	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
-	
+
 	void update_viewlist();
 
 	void sessionClear() {
@@ -465,11 +470,11 @@ void SESSION::send_move_rotate_packet(int obj_id, short obj_type, short dir)
 		update_pl_packet.right_x = npcs[obj_id].m_rightvec.x;
 		update_pl_packet.right_y = npcs[obj_id].m_rightvec.y;
 		update_pl_packet.right_z = npcs[obj_id].m_rightvec.z;
-		
+
 		update_pl_packet.up_x = npcs[obj_id].m_upvec.x;
 		update_pl_packet.up_y = npcs[obj_id].m_upvec.y;
 		update_pl_packet.up_z = npcs[obj_id].m_upvec.z;
-		
+
 		update_pl_packet.look_x = npcs[obj_id].m_lookvec.x;
 		update_pl_packet.look_y = npcs[obj_id].m_lookvec.y;
 		update_pl_packet.look_z = npcs[obj_id].m_lookvec.z;
@@ -506,7 +511,7 @@ void SESSION::send_remove_packet(int obj_id, short obj_type)
 	remove_packet.type = SC_REMOVE_OBJECT;
 	remove_packet.target = obj_type;
 	remove_packet.id = obj_id;
-	
+
 	do_send(&remove_packet);
 }
 
@@ -818,8 +823,8 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].pos.z = RESPAWN_POS_Z;
 
 		clients[client_id].m_rightvec = XMFLOAT3{ 1.0f, 0.0f, 0.0f };
-		clients[client_id].m_upvec =    XMFLOAT3{ 0.0f, 1.0f, 0.0f };
-		clients[client_id].m_lookvec =  XMFLOAT3{ 0.0f, 0.0f, 1.0f };
+		clients[client_id].m_upvec = XMFLOAT3{ 0.0f, 1.0f, 0.0f };
+		clients[client_id].m_lookvec = XMFLOAT3{ 0.0f, 0.0f, 1.0f };
 
 		clients[client_id].setBB();
 
@@ -862,6 +867,10 @@ void process_packet(int client_id, char* packet)
 			building_packet.right_y = building.getLocalRight().y;
 			building_packet.right_z = building.getLocalRight().z;
 
+			building_packet.rotate_x = building.getLocalRotate().x;
+			building_packet.rotate_y = building.getLocalRotate().y;
+			building_packet.rotate_z = building.getLocalRotate().z;
+
 			building_packet.aob = building.getAngleAOB();
 			building_packet.boc = building.getAngleBOC();
 
@@ -899,7 +908,7 @@ void process_packet(int client_id, char* packet)
 			lock_guard<mutex> lg{ clients[client_id].s_lock};
 			clients[client_id].send_add_obj_packet(npc.id, TARGET_NPC);
 		}
-		
+
 		//  3) NPC서버로 새로 접속한 클라이언트의 정보를 전송합니다.
 		if (b_npcsvr_conn) {
 			lock_guard<mutex> lg{ npc_server.s_lock };
@@ -1114,10 +1123,10 @@ void process_packet(int client_id, char* packet)
 
 				int npc_id = vl_key - NPC_ID_START;
 				if (npcs[npc_id].pl_state == PL_ST_DEAD) continue;
-				
+
 				if (bullet.m_xoobb.Intersects(npcs[npc_id].m_xoobb)) {
 					b_collide = true;
-					
+
 					if (npcs[npc_id].hp <= BULLET_DAMAGE) {	// npc 사망 처리
 						npcs[npc_id].s_lock.lock();
 						npcs[npc_id].hp = 0;
@@ -1193,7 +1202,7 @@ void process_packet(int client_id, char* packet)
 							//stage2_missions[clients[client_id].curr_mission].curr++;
 						}
 
-						for (auto& cl: clients) {
+						for (auto& cl : clients) {
 							if (cl.s_state != ST_INGAME) continue;
 							if (cl.curr_stage != clients[client_id].curr_stage) continue;
 							lock_guard<mutex> lg{ cl.s_lock };
@@ -1210,7 +1219,7 @@ void process_packet(int client_id, char* packet)
 								mission_complete.size = sizeof(SC_MISSION_COMPLETE_PACKET);
 								mission_complete.stage_num = clients[client_id].curr_stage;
 								mission_complete.mission_num = curr_mission;
-								for (auto& cl:clients) {
+								for (auto& cl : clients) {
 									if (cl.s_state != ST_INGAME) continue;
 									if (cl.curr_stage != clients[client_id].curr_stage) continue;
 									lock_guard<mutex> lg{ cl.s_lock };
@@ -1442,7 +1451,7 @@ void process_packet(int client_id, char* packet)
 	case CS_CHAT:
 	{
 		CS_CHAT_PACKET* recv_chat_pack = reinterpret_cast<CS_CHAT_PACKET*>(packet);
-		
+
 		for (auto& cl : clients) {
 			if (cl.s_state != ST_INGAME) continue;
 			if (cl.curr_stage == 0) continue;
@@ -1539,7 +1548,7 @@ void process_packet(int client_id, char* packet)
 		NPC_FULL_INFO_PACKET* npc_info_pack = reinterpret_cast<NPC_FULL_INFO_PACKET*>(packet);
 
 		short npc_id = npc_info_pack->n_id;
-		
+
 		npcs[npc_id].s_lock.lock();
 		npcs[npc_id].hp = npc_info_pack->hp;
 		strcpy_s(npcs[npc_id].name, npc_info_pack->name);
@@ -1554,7 +1563,7 @@ void process_packet(int client_id, char* packet)
 		}
 		else {
 			npcs[npc_id].m_xoobb = BoundingOrientedBox(XMFLOAT3(npcs[npc_id].pos.x, npcs[npc_id].pos.y, npcs[npc_id].pos.z)
-								 , XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+				, XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 		}
 		npcs[npc_id].s_lock.unlock();
 
@@ -2557,6 +2566,7 @@ int main(int argc, char* argv[])
 		bool b_scale = false;
 		bool b_local_forward = false;
 		bool b_local_right = false;
+		bool b_local_rotate = false;
 		bool b_angle_aob = false;
 		bool b_angle_boc = false;
 
@@ -2580,6 +2590,10 @@ int main(int argc, char* argv[])
 					b_local_right = true;
 					buf_count = 0;
 				}
+				else if (word == "Rotate:") {
+					b_local_rotate = true;
+					buf_count = 0;
+				}
 				else if (word == "AOB:") {
 					b_angle_aob = true;
 					buf_count = 0;
@@ -2589,7 +2603,7 @@ int main(int argc, char* argv[])
 					buf_count = 0;
 				}
 				else {
-					if (!(b_center || b_scale || b_local_forward || b_local_right || b_angle_aob || b_angle_boc)) continue;
+					if (!(b_center || b_scale || b_local_forward || b_local_right || b_local_rotate || b_angle_aob || b_angle_boc)) continue;
 
 					if (b_angle_aob || b_angle_boc) {
 						if (b_angle_aob) {
@@ -2626,6 +2640,10 @@ int main(int argc, char* argv[])
 						else if (b_local_right) {
 							tmp_bulding.setLocalRight(tmp_flt3);
 							b_local_right = false;
+						}
+						else if (b_local_rotate) {
+							tmp_bulding.setLocalRotate(tmp_flt3);
+							b_local_rotate = false;
 						}
 						memset(tmp_buf, 0, sizeof(tmp_buf));
 						buf_count = 0;
