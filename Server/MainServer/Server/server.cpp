@@ -560,6 +560,7 @@ void SESSION::update_viewlist()
 
 	// 2. NPC 업데이트 (임시로 더미로 대체함.)
 	for (auto& npc : npcs) {
+		if (npc.id == -1) continue;
 		int npc_id = npc.id + NPC_ID_START;
 
 		// 1) 움직였더니 새로운 객체가 시야 안에 생긴 경우
