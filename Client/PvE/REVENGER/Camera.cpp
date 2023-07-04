@@ -175,10 +175,10 @@ CSpaceShipCamera::CSpaceShipCamera(CCamera* pCamera) : CCamera(pCamera)
 void CSpaceShipCamera::Rotate(float x, float y, float z)
 {
 	
-	x = std::clamp(x,-0.1f,0.1f);
+	x = std::clamp(x, -0.3f, 0.3f);
 	if (m_pPlayer && (x != 0.0f))
 	{
-		
+
 		XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Right), XMConvertToRadians(x));
 		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
@@ -190,6 +190,8 @@ void CSpaceShipCamera::Rotate(float x, float y, float z)
 	}
 	if (m_pPlayer && (y != 0.0f))
 	{
+		x = 0.0f;
+		z = 0.0f;
 		XMFLOAT3 xmf3Up = m_pPlayer->GetUpVector();
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Up), XMConvertToRadians(y));
 		m_xmf3Right = XMFLOAT3(1, 0, 0);

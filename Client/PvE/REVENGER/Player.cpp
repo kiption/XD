@@ -145,17 +145,19 @@ void CPlayer::Rotate(float x, float y, float z)
 	}
 	else if (nCurrentCameraMode == CLOSEUP_PERSON_CAMERA)
 	{
-		x = std::clamp(x, -0.1f, 0.1f);
+		x = std::clamp(x, -0.3f, 0.3f);
 		m_pCamera->Rotate(x, y, z);
 		if (x!=0.0f)
 		{
-
+	
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(x));
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
 		}
 		if (y != 0.0f)
 		{
+			x = 0.0f;
+			z = 0.0f;
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 			m_xmf3Right = XMFLOAT3(1, 0, 0);

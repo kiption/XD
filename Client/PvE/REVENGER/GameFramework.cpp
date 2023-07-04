@@ -394,7 +394,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			m_SniperOn = false;
 		((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = false;
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-		m_pCamera->SetOffset(XMFLOAT3(-0.6f, 0.165f, 0.435f));
+		//m_pCamera->SetOffset(XMFLOAT3(-0.6f, 0.165f, 0.435f));
 		break;
 
 	case WM_LBUTTONDOWN:
@@ -801,9 +801,9 @@ void CGameFramework::ProcessInput()
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 40.0f;
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 70.0f;
 
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 50.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 90.0f;
 
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
