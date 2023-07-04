@@ -70,8 +70,17 @@ struct CollideMapInfo
 	}
 
 	void setBB() {
-		XMFLOAT4 oriented(m_local_rotate.x, m_local_rotate.y, m_local_rotate.z, 1.f);
+		// 회전 값을 XMVECTOR로 변환
+		XMVECTOR rotation = XMQuaternionRotationRollPitchYaw(m_local_rotate.x, m_local_rotate.y, m_local_rotate.z);
+
+		// XMVECTOR를 XMFLOAT4로 변환
+		XMFLOAT4 oriented;
+		XMStoreFloat4(&oriented, rotation);
+
+		// BoundingOrientedBox 생성
 		m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pos.x, m_pos.y, m_pos.z), XMFLOAT3(m_scale.x, m_scale.y, m_scale.z), oriented);
+
+
 	}
 };
 

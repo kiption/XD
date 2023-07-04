@@ -844,13 +844,22 @@ void CGameFramework::ProcessInput()
 					{
 						bool isCollide = false;
 						CollideMapInfo temp;
-						for (int i{}; i < mapcol_info.size(); ++i) {
-							if (mapcol_info[i].m_xoobb.Intersects(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xoobb)) {
-								temp = mapcol_info[i];
-								isCollide = true;
-								break;
-							}
-						}
+						//for (int i{}; i < mapcol_info.size(); ++i) {
+						//	if (mapcol_info[i].m_xoobb.Intersects(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xoobb)) {
+						//		temp = mapcol_info[i];
+						//		isCollide = true;
+						//		break;
+						//	}
+						//	/*if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xoobb.Intersects(mapcol_info[i].m_xoobb)) {
+						//		temp = mapcol_info[i];
+						//		isCollide = true;
+						//		break;
+						//	}*/
+
+
+
+						//	cout << i <<"check" << endl;
+						//}
 
 						if (isCollide) {
 							XMFLOAT3 PlayertoBox = { temp.m_pos.x - ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition().x, 0.0f ,
@@ -904,6 +913,7 @@ void CGameFramework::ProcessInput()
 							XMStoreFloat3(&PlayerMoveDir, PlayerMoveNormalized);
 
 							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
+							cout << "collide!" << endl;
 							//((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move();
 							//m_pPlayer->SetMovingDirection(PlayerMoveDir);
 							//((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(*PlayerMoveDir, )
