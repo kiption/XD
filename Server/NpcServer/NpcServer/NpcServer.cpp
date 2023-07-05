@@ -286,10 +286,6 @@ private:
 	XMFLOAT3 m_AttackVec;
 	short m_Hit;
 	short m_state;
-	int m_attack;
-	int m_defence;
-	int m_ProfellerHP;
-	int m_BodyHP;
 	int m_chaseID;
 	int m_currentNodeIndex;
 	int m_targetNodeIndex;
@@ -308,8 +304,6 @@ public:
 	XMFLOAT3 m_VectorMAX = { -9999.f, -9999.f, -9999.f };
 public:
 	NPC() : OBJECT() {
-		m_ProfellerHP = HELI_MAXHP;
-		m_BodyHP = HELI_MAXHP;
 		m_state = NPC_IDLE;
 		m_chaseID = -1;
 		for (int i{}; i < MAX_USER; ++i) {
@@ -388,7 +382,6 @@ public:
 
 	// State
 		// Death
-	void		H_NPC_Damege_Calc(int id);															// 플레이어 ID 값 받아서 데미지 계산
 	void		H_NPC_Check_HP();																	// HP 계산
 	void		H_NPC_Death_motion();																// HP 0
 
@@ -416,7 +409,6 @@ public:
 
 	// State
 		// Death
-	void		A_NPC_Damege_Calc(int id);															// 플레이어 ID 값 받아서 데미지 계산
 	void		A_NPC_Check_HP();																	// HP 계산
 	void		A_NPC_Death_motion();																// HP 0
 
@@ -1175,36 +1167,10 @@ void NPC::H_PlayerAttack()
 	XMFLOAT3 AttackVec = { m_User_Pos[m_chaseID].x - pos.x,m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
 	m_AttackVec = NPCNormalize(AttackVec);
 }
-void NPC::H_NPC_Damege_Calc(int id)
-{
-	if (m_Hit == g_body) {
-		int distance_damege = 0;
-		if (((int)(m_Distance[id])) > 2000) {
-			distance_damege = (2000 / 100) * 5;
-		}
-		else {
-			distance_damege = ((((int)(m_Distance[id])) / 100) * 5);
-		}
-		int damege = (20 * distance_damege) / m_defence;
-		m_BodyHP -= damege;
-		m_Hit = g_none;
-	}
-	else if (m_Hit == g_profeller) {
-		int distance_damege = 0;
-		if (((int)(m_Distance[id])) > 2000) {
-			distance_damege = (2000 / 100) * 5;
-		}
-		else {
-			distance_damege = ((((int)(m_Distance[id])) / 100) * 5);
-		}
-		int damege = (20 * distance_damege) / m_defence;
-		m_ProfellerHP -= damege;
-		m_Hit = g_none;
-	}
-}
+
 void NPC::H_NPC_Check_HP()
 {
-	if ((m_BodyHP <= 0) || (m_ProfellerHP <= 0)) {
+	if (hp <= 0) {
 		m_state = NPC_DEATH;
 	}
 }
@@ -1213,7 +1179,7 @@ void NPC::H_NPC_Death_motion()
 	pos.y -= 6.0f;
 
 	// 빙글빙글 돌며 추락
-	pitch += 3.0f;
+	yaw += 3.0f;
 
 	m_rightvec = NPCcalcRightRotate();
 	m_lookvec = NPCcalcLookRotate();
@@ -1558,36 +1524,10 @@ void NPC::A_PlayerAttack()
 	XMFLOAT3 AttackVec = m_lookvec;
 	m_AttackVec = NPCNormalize(AttackVec);
 }
-void NPC::A_NPC_Damege_Calc(int id)
-{
-	if (m_Hit == g_body) {
-		int distance_damege = 0;
-		if (((int)(m_Distance[id])) > 2000) {
-			distance_damege = (2000 / 100) * 5;
-		}
-		else {
-			distance_damege = ((((int)(m_Distance[id])) / 100) * 5);
-		}
-		int damege = (20 * distance_damege) / m_defence;
-		m_BodyHP -= damege;
-		m_Hit = g_none;
-	}
-	else if (m_Hit == g_profeller) {
-		int distance_damege = 0;
-		if (((int)(m_Distance[id])) > 2000) {
-			distance_damege = (2000 / 100) * 5;
-		}
-		else {
-			distance_damege = ((((int)(m_Distance[id])) / 100) * 5);
-		}
-		int damege = (20 * distance_damege) / m_defence;
-		m_ProfellerHP -= damege;
-		m_Hit = g_none;
-	}
-}
+
 void NPC::A_NPC_Check_HP()
 {
-	if ((m_BodyHP <= 0) || (m_ProfellerHP <= 0)) {
+	if (hp <= 0) {
 		m_state = NPC_DEATH;
 	}
 }
@@ -1596,7 +1536,7 @@ void NPC::A_NPC_Death_motion()
 	pos.y -= 6.0f;
 
 	// 빙글빙글 돌며 추락
-	pitch += 3.0f;
+	yaw += 3.0f;
 
 	m_rightvec = NPCcalcRightRotate();
 	m_lookvec = NPCcalcLookRotate();
@@ -1752,6 +1692,15 @@ void process_packet(char* packet)
 
 		break;
 	}// SC_OBJECT_STATE end
+	// SC_Obejct_HP
+
+	//npcsInfo[obj_id].SetHp() 해주면됨.
+	// HP가 0인 경우 리무브 패킷을 보낼거면 H_NPC_Check_HP, A_NPC_Check_HP에서 보내주면 될 듯?
+	// 애니메이션 클라에서 할거면 H_NPC_Death_motion, A_NPC_Death_motion가 필요 없으니, 지워도 됨.
+	// 해당 기록 확인하고 지워주세요.
+
+
+
 	}
 }
 
@@ -1915,6 +1864,7 @@ void initNpc() {
 		npcsInfo[i].SetChaseID(-1);
 		npcsInfo[i].path.clear();
 		npcsInfo[i].SetTargetNodeIndex(-1);
+		npcsInfo[i].SetHp(500);
 		g_logicservers[a_lgcsvr_num].send_npc_init_packet(npc_id);
 	}
 
@@ -1950,6 +1900,7 @@ void initNpc() {
 			npcsInfo[i].SetChaseID(-1);
 			npcsInfo[i].path.clear();
 			npcsInfo[i].SetTargetNodeIndex(-1);
+			npcsInfo[i].SetHp(250);
 			g_logicservers[a_lgcsvr_num].send_npc_init_packet(npc_id);
 		}
 	}
@@ -1964,17 +1915,7 @@ void MoveNPC()
 		if (ConnectingServer) {
 			for (int i = 0; i < MAX_NPCS; ++i) {
 				// 클라이언트들과 NPC 사이의 거리 계산
-
-				if (npcsInfo[i].GetState() == NPC_DEATH && npcsInfo[i].GetPosition().y < 0) {
-					NPC_REMOVE_PACKET npc_remove_packet;
-
-					npc_remove_packet.size = sizeof(NPC_REMOVE_PACKET);
-					npc_remove_packet.type = SC_REMOVE_OBJECT;
-					npc_remove_packet.n_id = npcsInfo[i].GetID();
-
-					npcsInfo[i].m_DeathCheck = true;
-				}
-				if (npcsInfo[i].GetPosition().y > 0)
+				if (npcsInfo[i].GetState() != NPC_DEATH)
 				{
 					float temp_min = numeric_limits<float>::infinity();
 					int temp_id = -1;
