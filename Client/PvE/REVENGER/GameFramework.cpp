@@ -2364,7 +2364,7 @@ void CGameFramework::setVectors_Self(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->SetUp(upVec);
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->SetRight(rightVec);
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->SetLook(lookVec);
-		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->SetScale(XMFLOAT3(5.0, 5.0, 5.0));
+		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->SetScale(XMFLOAT3(4.0, 4.0, 4.0));
 	}
 
 }

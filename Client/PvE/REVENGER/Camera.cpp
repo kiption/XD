@@ -174,11 +174,13 @@ CSpaceShipCamera::CSpaceShipCamera(CCamera* pCamera) : CCamera(pCamera)
 
 void CSpaceShipCamera::Rotate(float x, float y, float z)
 {
+	m_fPitch += x;
+	if (m_fPitch > +20.0f) { x -= (m_fPitch - 20.0f); m_fPitch = +20.0f; }
+	if (m_fPitch < -10.0f) { x -= (m_fPitch + 10.0f); m_fPitch = -10.0f; }
 	if (m_pPlayer && (x != 0.0f))
 	{
-		m_fPitch += x;
-		if (m_fPitch > +20.0f) { x -= (m_fPitch - 20.0f); m_fPitch = +20.0f; }
-		if (m_fPitch < -10.0f) { x -= (m_fPitch + 10.0f); m_fPitch = -10.0f; }		XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
+
+		XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Right), XMConvertToRadians(x));
 		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
@@ -189,6 +191,7 @@ void CSpaceShipCamera::Rotate(float x, float y, float z)
 	}
 	if (m_pPlayer && (y != 0.0f))
 	{
+	
 		XMFLOAT3 xmf3Up = m_pPlayer->GetUpVector();
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Up), XMConvertToRadians(y));
 		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
@@ -234,9 +237,9 @@ void CSpaceShipCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 void CSpaceShipCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 {
 	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(m_xmf3Position, xmf3LookAt, m_pPlayer->GetUpVector());
-	//m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
+
 	m_xmf3Up = XMFLOAT3(0,1,0);
-	//m_xmf3Look = XMFLOAT3(mtxLookAt._13 , mtxLookAt._23 , mtxLookAt._33 );
+	
 
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
