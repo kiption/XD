@@ -34,71 +34,65 @@ void Stage1::BuildDefaultLightsAndMaterials()
 
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[0].m_fRange = 30000.0f;
-	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3, 0.3, 1.0f);
+	m_pLights->m_pLights[0].m_fRange = 40000.0f;
+	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5, 0.5, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-880, 850.0f, 950.0f);
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+1.0f, -1.0f, -0.5f);
-
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-0, 920.0f, 1200.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+0.1f, -0.75f, -1.0f);
 
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 30000.0f;
-	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3, 0.3, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5, 0.5, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-800, 800.0f, 0.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(+1.0f, -1.0f, -0.5f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-80, 300.0f, 950.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(+0.15f, -0.3f, -1.0f);
 
 	m_pLights->m_pLights[2].m_bEnable = true;
 	m_pLights->m_pLights[2].m_nType = SPOT_LIGHT;
-	m_pLights->m_pLights[2].m_fRange = 100.0f;
+	m_pLights->m_pLights[2].m_fRange = 300.0f;
 	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
 	m_pLights->m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, -0.2f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights->m_pLights[2].m_fFalloff = 3.0f;
+	m_pLights->m_pLights[2].m_fFalloff = 6.0f;
 	m_pLights->m_pLights[2].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights->m_pLights[2].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
 	m_pLights->m_pLights[3].m_bEnable = true;
 	m_pLights->m_pLights[3].m_nType = SPOT_LIGHT;
-	m_pLights->m_pLights[3].m_fRange = 100.0f;
+	m_pLights->m_pLights[3].m_fRange = 500.0f;
 	m_pLights->m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
 	m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
 	m_pLights->m_pLights[3].m_xmf3Direction = XMFLOAT3(0.0f, -0.2f, 1.0f);
 	m_pLights->m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights->m_pLights[3].m_fFalloff = 4.0f;
-	m_pLights->m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	m_pLights->m_pLights[3].m_fFalloff = 10.0f;
+	m_pLights->m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(60.0f));
 	m_pLights->m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
 	m_pLights->m_pLights[4].m_bEnable = false;
 	m_pLights->m_pLights[4].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[4].m_fRange = 10.0f;
-	m_pLights->m_pLights[4].m_xmf4Ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-	m_pLights->m_pLights[4].m_xmf4Diffuse = XMFLOAT4(0.53f, 0.53f, 0.53f, 1.0f);
-	m_pLights->m_pLights[4].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
-	m_pLights->m_pLights[4].m_xmf3Position = XMFLOAT3(0.0f, 128.0f, 0.0f);
-	m_pLights->m_pLights[4].m_xmf3Direction = XMFLOAT3(+1.0f, -1.0f, 0.0f);
+	m_pLights->m_pLights[4].m_fRange = 30000.0f;
+	m_pLights->m_pLights[4].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
+	m_pLights->m_pLights[4].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5, 0.5, 1.0f);
+	m_pLights->m_pLights[4].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
+	m_pLights->m_pLights[4].m_xmf3Position = XMFLOAT3(-600, 300.0f, 900.0f);
+	m_pLights->m_pLights[4].m_xmf3Direction = XMFLOAT3(+0.4f, -0.3f, -1.0f);
 
 	m_pLights->m_pLights[5].m_bEnable = false;
-	m_pLights->m_pLights[5].m_nType = SPOT_LIGHT;
-	m_pLights->m_pLights[5].m_fRange = 50.0f;
-	m_pLights->m_pLights[5].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 0.0f);
-	m_pLights->m_pLights[5].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
-	m_pLights->m_pLights[5].m_xmf4Specular = XMFLOAT4(0.8f, 0.1f, 0.1f, 0.0f);
-	m_pLights->m_pLights[5].m_xmf4Emissive = XMFLOAT4(0.9f, 0.2f, 0.2f, 1.0f);
-	m_pLights->m_pLights[5].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_pLights->m_pLights[5].m_xmf3Direction = XMFLOAT3(0.5f, -1.0f, 0.5f);
-	m_pLights->m_pLights[5].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights->m_pLights[5].m_fFalloff = 1.0f;
-	m_pLights->m_pLights[5].m_fPhi = (float)cos(XMConvertToRadians(359.0f));
-	m_pLights->m_pLights[5].m_fTheta = (float)cos(XMConvertToRadians(1.0));
+	m_pLights->m_pLights[5].m_nType = DIRECTIONAL_LIGHT;
+	m_pLights->m_pLights[5].m_fRange = 35000.0f;
+	m_pLights->m_pLights[5].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
+	m_pLights->m_pLights[5].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6, 0.6, 1.0f);
+	m_pLights->m_pLights[5].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
+	m_pLights->m_pLights[5].m_xmf3Position = XMFLOAT3(-600, 300.0f, 900.0f);
+	m_pLights->m_pLights[5].m_xmf3Direction = XMFLOAT3(+0.2f, -0.3f, -1.0f);
 
 	m_pLights->m_pLights[6].m_bEnable = false;
 	m_pLights->m_pLights[6].m_nType = SPOT_LIGHT;
@@ -418,7 +412,7 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dDescriptorRanges[17].RegisterSpace = 0;
 	pd3dDescriptorRanges[17].OffsetInDescriptorsFromTableStart = 0;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[25];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[24];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 1; //Camera
@@ -426,7 +420,7 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[1].Constants.Num32BitValues = 33;
+	pd3dRootParameters[1].Constants.Num32BitValues = 34;
 	pd3dRootParameters[1].Constants.ShaderRegister = 2; //GameObject
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
@@ -541,10 +535,7 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dRootParameters[23].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[23].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[24].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	pd3dRootParameters[24].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[24].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[16]; //Depth Buffer
-	pd3dRootParameters[24].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
 
 
 
@@ -557,7 +548,7 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dSamplerDescs[0].MipLODBias = 0;
 	pd3dSamplerDescs[0].MaxAnisotropy = 1;
 	pd3dSamplerDescs[0].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
-	//pd3dSamplerDescs[0].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+	//pd3dSamplerDescs[0].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
 	pd3dSamplerDescs[0].MinLOD = 0;
 	pd3dSamplerDescs[0].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[0].ShaderRegister = 0;
@@ -584,9 +575,8 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dSamplerDescs[2].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	pd3dSamplerDescs[2].MipLODBias = 0.0f;
 	pd3dSamplerDescs[2].MaxAnisotropy = 1;
-
 	pd3dSamplerDescs[2].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;// D3D12_COMPARISON_FUNC_LESS;
-	pd3dSamplerDescs[2].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;//  D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+	pd3dSamplerDescs[2].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;//  D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
 	pd3dSamplerDescs[2].MinLOD = 0;
 	pd3dSamplerDescs[2].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[2].ShaderRegister = 2;
@@ -903,12 +893,12 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	XMFLOAT3 Look2P = m_ppShaders[0]->m_ppObjects[5]->GetLook();
 	if (m_pLights)
 	{
-		m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(Position2P.x, Position2P.y + 8.0, Position2P.z);
+		m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(Position2P.x, Position2P.y + 6.0, Position2P.z);
 		m_pLights->m_pLights[2].m_xmf3Direction = Look2P;
-		m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(xmfPosition.x, xmfPosition.y + 8.0, xmfPosition.z);
+		m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(xmfPosition.x, xmfPosition.y + 6.0, xmfPosition.z);
 		m_pLights->m_pLights[3].m_xmf3Direction = m_pPlayer->GetLook();
 
-		m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.4, 0.4, 0.4, 1.0);
+		m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
 		m_pLights->m_pLights[5].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[0]->GetPosition();
 	}
 	//m_fLightRotationAngle += fTimeElapsed;

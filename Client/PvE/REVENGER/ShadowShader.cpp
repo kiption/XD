@@ -44,7 +44,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	CLoadedModelInfo* pSModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
 	for (int x = 5; x < 8; x++)
 	{
-		m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel,NULL);
+		m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
 		m_ppObjects[x]->SetMaterial(0, pOtherPlayerMaterial);
 		m_ppObjects[x]->SetScale(5, 5, 5);
 		m_ppObjects[x]->SetPosition(XMFLOAT3(70.0 + (x) * 20, 8.0, 800.0));
@@ -102,10 +102,10 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppNpc_Heli_Objects[i]->SetMaterial(0, pNpcHeliMaterial);
 		m_ppNpc_Heli_Objects[i]->OnPrepareAnimate();
 		m_ppNpc_Heli_Objects[i]->SetPosition(XMFLOAT3(50.0 + i * 15, 70.0, 500.0));
-		
+
 		pNPCHelicopterModel->AddRef();
 	}
-	
+
 	m_ppObjects[12] = m_ppNpc_Heli_Objects[0];
 	m_ppObjects[13] = m_ppNpc_Heli_Objects[1];
 	m_ppObjects[14] = m_ppNpc_Heli_Objects[2];
@@ -118,21 +118,21 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[21] = new CValkanObject(1);
 
 	////////////////////////////////////////////////////HELI_LOAD//////////////////////////////////////////////////////////////
-	
+
 
 	////////////////////////////////////////////////SOLDIAR_NPC_LOAD///////////////////////////////////////////////////////////
 	m_nSoldiarNpcObjects = 21;
-	CMaterial* pSoldiarNpcMaterial = new CMaterial(21);
-	pSoldiarNpcMaterial->SetReflection(21);
-
+	CMaterial* pSoldiarNpcMaterial = new CMaterial(m_nSoldiarNpcObjects);
+	pSoldiarNpcMaterial->SetReflection(m_nSoldiarNpcObjects);
 	m_ppSoldiarNpcObjects = new CGameObject * [m_nSoldiarNpcObjects];
+
 	CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/fixed.bin", NULL);
 	for (int i = 0; i < m_nSoldiarNpcObjects; i++)
 	{
 		m_ppSoldiarNpcObjects[i] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, 4);
 		m_ppSoldiarNpcObjects[i]->SetMaterial(0, pSoldiarNpcMaterial);
 		m_ppSoldiarNpcObjects[i]->SetScale(5.0, 5.0, 5.0);
-		m_ppSoldiarNpcObjects[i]->SetPosition(210.0, 6.0, 300.0 + i * 20);
+		m_ppSoldiarNpcObjects[i]->SetPosition(210.0, 6.3, 300.0 + i * 20);
 		psModel->m_pModelRootObject->AddRef();
 	}
 
@@ -158,10 +158,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[41] = m_ppSoldiarNpcObjects[20];
 	if (psModel) delete psModel;
 	////////////////////////////////////////////////SOLDIAR_NPC_LOAD////////////////////////////////////////////
-	
 
-	pSkinnongStandardShader = new CSkinnedAnimationStandardShader;
-	pSkinnongStandardShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -170,7 +167,6 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
-
 		m_ppObjects[j]->Animate(fTimeElapsed);
 	}
 }
@@ -380,18 +376,10 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 	UpdateShaderVariables(pd3dCommandList);
 	for (int i = 0; i < m_pObjectsShader->m_nObjects; i++)
 	{
-		if (i > 21 || (i>=5&&i<8))
-		{
-			m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
-			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
-			m_pObjectsShader->m_ppObjects[i]->Render(pd3dCommandList, pCamera, false);
-		}
-		else
-		{
-			m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
-			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
-			m_pObjectsShader->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera, true, this);
-		}
+		m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
+		m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
+		m_pObjectsShader->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera, true, this);
+		//m_pObjectsShader->m_ppObjects[i]->Render(pd3dCommandList, pCamera, false);
 	}
 }
 
@@ -650,9 +638,11 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 			}
 			else if (m_pLights[j].m_nType == SPOT_LIGHT)
 			{
+				float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
 				/*float fFovAngle = 60.0f; */m_pLights[j].m_fPhi = cos(60.0f);
 				float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
-				xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(m_pLights[j].m_fPhi), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
+			//	xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(m_pLights[j].m_fPhi), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
+				xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
 			}
 			else if (m_pLights[j].m_nType == POINT_LIGHT)
 			{
@@ -662,7 +652,7 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 			m_ppDepthRenderCameras[j]->SetPosition(xmf3Position);
 			XMStoreFloat4x4(&m_ppDepthRenderCameras[j]->m_xmf4x4View, xmmtxView);
 			XMStoreFloat4x4(&m_ppDepthRenderCameras[j]->m_xmf4x4Projection, xmmtxProjection);
-			//
+		
 			XMMATRIX xmmtxToTexture = XMMatrixTranspose(xmmtxView * xmmtxProjection * m_xmProjectionToTexture);
 			XMStoreFloat4x4(&m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4x4ToTexture, xmmtxToTexture);
 
@@ -696,11 +686,11 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
-	for (int i = 0; i < 22; i++)
+	for (int i = 0; i < m_pObjectsShader->m_nObjects; i++)
 	{
 		if (m_pObjectsShader->m_ppObjects[i])
 		{
-			//m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
+			m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
 			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
 			m_pObjectsShader->m_ppObjects[i]->Render(pd3dCommandList, pCamera, true); //true
 		}

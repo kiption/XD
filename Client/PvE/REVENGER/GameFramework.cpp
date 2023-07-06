@@ -783,7 +783,7 @@ void CGameFramework::ProcessInput()
 			if (pKeysBuffer[KEY_D] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT; }
 			if (pKeysBuffer[KEY_Q] & 0xF0)
 			{
-
+				dwDirection |= DIR_UP;
 
 			}
 		}
@@ -882,7 +882,6 @@ void CGameFramework::ProcessInput()
 							float angle = XMVectorGetX(XMVector3AngleBetweenNormals(playerToBoxNormalized, localForwardNormalized));
 
 							angle = XMConvertToDegrees(angle);
-
 							XMFLOAT3 PlayerMoveDir;
 							if (abs(cos(temp.m_angle_aob)) < abs(cos(angle))) {
 								if (temp.m_angle_aob > angle) {
@@ -1449,7 +1448,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-	}
+}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {

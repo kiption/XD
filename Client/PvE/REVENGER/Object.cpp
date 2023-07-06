@@ -322,8 +322,8 @@ void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList)
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &m_xmf4SpecularColor, 24);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &m_xmf4EmissiveColor, 28);
 
-	//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_isAnimationShader, 33);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nType, 32);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_isAnimationShader, 33);
 
 
 	for (int i = 0; i < m_nTextures; i++)
@@ -1046,15 +1046,15 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 		m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
 	OnPrepareRender();
-	if (m_pShaderInfo != NULL)
-	{
-		m_pShaderInfo->Render(pd3dCommandList, pCamera, 0, bPrerender);
-		m_pShaderInfo->UpdateShaderVariables(pd3dCommandList);
-		if (m_pTextureInfo != NULL)
-		{
-			m_pTextureInfo->UpdateShaderVariables(pd3dCommandList);
-		}
-	}
+	//if (m_pShaderInfo != NULL)
+	//{
+	//	m_pShaderInfo->Render(pd3dCommandList, pCamera, 0, bPrerender);
+	//	m_pShaderInfo->UpdateShaderVariables(pd3dCommandList);
+	//	if (m_pTextureInfo != NULL)
+	//	{
+	//		m_pTextureInfo->UpdateShaderVariables(pd3dCommandList);
+	//	}
+	//}
 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 	if (m_pMesh)
@@ -1069,7 +1069,7 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 
 						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, false);
 						pShaderComponent->SetPipelineState(pd3dCommandList, 0);
-						m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, m_ppMaterials[i]);
+						//m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, m_ppMaterials[i]);
 						UpdateShaderVariables(pd3dCommandList);
 					}
 
@@ -1400,7 +1400,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 					if (nMeshType & VERTEXT_BONE_INDEX_WEIGHT)
 					{
 						pMaterial->SetSkinnedAnimationShader();
-						pMaterial->m_isAnimationShader = true;
+						
 
 					}
 					else

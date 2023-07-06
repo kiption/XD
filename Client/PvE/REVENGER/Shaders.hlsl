@@ -33,6 +33,7 @@ cbuffer cbGameObjectInfo : register(b2)
 	matrix					gmtxGameObject : packoffset(c0);
 	MATERIAL				gMaterial : packoffset(c4);
 	uint					gnTexturesMask : packoffset(c8);
+	uint					bAnimationShader : packoffset(c8.y);
 	uint					gnMaterial : packoffset(c12);
 
 };
@@ -44,7 +45,7 @@ cbuffer cbFrameworkInfo : register(b11)
 	int			gnFlareParticlesToEmit : packoffset(c0.w);;
 	float3		gf3Gravity : packoffset(c1.x);
 	int			gnMaxFlareType2Particles : packoffset(c1.w);;
-	bool		bAnimationShader : packoffset(c2);
+
 };
 cbuffer cbStreamGameObjectInfo : register(b9)
 {
