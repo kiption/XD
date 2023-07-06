@@ -1822,8 +1822,8 @@ void do_worker()
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_logicservers[a_lgcsvr_num].sock), h_iocp, NULL, 0);
 				delete ex_over;
 				g_logicservers[a_lgcsvr_num].do_recv();
-				ConnectingServer = true;
 				initNpc();
+				ConnectingServer = true;
 			}
 
 		}//OP_CONN end
