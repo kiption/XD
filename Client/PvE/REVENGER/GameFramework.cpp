@@ -801,9 +801,9 @@ void CGameFramework::ProcessInput()
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 70.0f;
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
 
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 90.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
 
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
@@ -837,8 +837,11 @@ void CGameFramework::ProcessInput()
 					{
 						MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
 						q_mouseInput.push(mousemove);//s
+						if(cxDelta)
+						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(0.0, cxDelta, 0.0f);
 
-						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
+						if(cyDelta)
+						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, 0.0f, 0.0f);
 					}
 					if (dwDirection)
 					{
