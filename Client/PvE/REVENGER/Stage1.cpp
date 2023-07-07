@@ -43,7 +43,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 40000.0f;
+	m_pLights->m_pLights[1].m_fRange = 10000.0f;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7, 0.7, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
@@ -858,7 +858,6 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		ppBullets[i]->m_xoobb = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
 		for (int k = 22; k < 40; k++)
 		{
-
 			if (ppBullets[i]->m_xoobb.Intersects(m_ppShaders[0]->m_ppObjects[k]->m_xoobb))
 			{
 
@@ -871,7 +870,6 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		}
 	}
 
-
 	XMFLOAT3 Position2P = m_ppShaders[0]->m_ppObjects[5]->GetPosition();
 	XMFLOAT3 Look2P = m_ppShaders[0]->m_ppObjects[5]->GetLook();
 	if (m_pLights)
@@ -881,8 +879,6 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(xmfPosition.x, xmfPosition.y + 6.0, xmfPosition.z);
 		m_pLights->m_pLights[3].m_xmf3Direction = m_pPlayer->GetLook();
 		m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
-
-	
 	}
 	//m_fLightRotationAngle += fTimeElapsed;
 	//XMMATRIX xmmtxRotation = XMMatrixRotationY(fTimeElapsed * 0.02f);

@@ -382,19 +382,20 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	{
 	case WM_RBUTTONDOWN:
 		if (m_nMode == SCENE1STAGE)
+		{
 			m_SniperOn = true;
-		((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = true;
-		m_pCamera->GenerateProjectionMatrix(1.01f, 1000.0f, ASPECT_RATIO, 40.0f);
-		//m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.165f, 0.0f));
+			((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = true;
+			m_pCamera->GenerateProjectionMatrix(1.01f, 1000.0f, ASPECT_RATIO, 60.0f);
+		}
 		break;
 		//::ReleaseCapture();
-		//break;
 	case WM_RBUTTONUP:
 		if (m_nMode == SCENE1STAGE)
+		{
 			m_SniperOn = false;
-		((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = false;
-		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-		//m_pCamera->SetOffset(XMFLOAT3(-0.6f, 0.165f, 0.435f));
+			((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = false;
+			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		}
 		break;
 
 	case WM_LBUTTONDOWN:
@@ -1528,17 +1529,13 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_nMode = nMode;
 			m_pScene = new Stage1();
 			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
-			//CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, ((Stage1*)m_pScene)->m_pTerrain);
 			m_pScene->m_pPlayer = ((CHumanPlayer*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]);
 			m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetCamera();
 			m_pScene->SetCurScene(SCENE1STAGE);
-
 			m_pd3dCommandList->Close();
 			ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 			m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
-
 			WaitForGpuComplete();
-
 			if (m_pScene) m_pScene->ReleaseUploadBuffers();
 			if (m_pScene->m_pPlayer) ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReleaseUploadBuffers();
 			m_GameTimer.Reset();
