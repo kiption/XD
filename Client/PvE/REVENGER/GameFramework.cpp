@@ -488,25 +488,52 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 {
 	if (m_pScene) m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 	if (m_LoginScene == 0) {
-		switch (nMessageID) {
+
+
+
+		switch (nMessageID)
+		{
+		case WM_IME_COMPOSITION:
+			cout << "trail" << endl;
+			break;
+
 		case WM_KEYUP:
+		{
 			if (m_LoginClick[0]) {
+
 				if (wParam == VK_BACK) {
 					size_t idLength = wcslen(m_LoginID);
 					if (idLength > 0) {
 						m_LoginID[idLength - 1] = L'\0';
 					}
 				}
+				else if (wParam == VK_HANGEUL) {
+					break;
+				}
 				else {
-					WCHAR IDchar = static_cast<WCHAR>(wParam);
-					if (IDchar == L'.') {
-						IDchar = L'*';  // . 대신 *로 대체
-					}
-					size_t idLength = wcslen(m_LoginID);
-					size_t remainingSpace = sizeof(m_LoginID) / sizeof(m_LoginID[0]) - idLength - 1;
+					if (nMessageID == WM_CHAR) {
+						wchar_t IDchar[2] = { static_cast<wchar_t>(wParam), L'\0' };
+						wprintf(L"%ls\n", IDchar);
 
-					if (remainingSpace > 0) {
-						wcsncat_s(m_LoginID, sizeof(m_LoginID) / sizeof(m_LoginID[0]), &IDchar, remainingSpace);
+						std::wstring IDstring(IDchar);
+						size_t idLength = wcslen(m_LoginID);
+						size_t remainingSpace = sizeof(m_LoginID) / sizeof(m_LoginID[0]) - idLength - 1;
+
+						if (remainingSpace > 0) {
+							wcsncat_s(m_LoginID, sizeof(m_LoginID) / sizeof(m_LoginID[0]), IDstring.c_str(), remainingSpace);
+						}
+					}
+					else if (nMessageID == WM_IME_COMPOSITION) {
+						wchar_t IDchar[2] = { static_cast<wchar_t>(wParam), L'\0' };
+						wprintf(L"%ls\n", IDchar);
+
+						std::wstring IDstring(IDchar);
+						size_t idLength = wcslen(m_LoginID);
+						size_t remainingSpace = sizeof(m_LoginID) / sizeof(m_LoginID[0]) - idLength - 1;
+
+						if (remainingSpace > 0) {
+							wcsncat_s(m_LoginID, sizeof(m_LoginID) / sizeof(m_LoginID[0]), IDstring.c_str(), remainingSpace);
+						}
 					}
 				}
 			}
@@ -550,8 +577,33 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 					}
 				}
 			}
-			break;
+
+
 		}
+		break;
+
+
+
+
+
+
+
+
+
+
+
+		}
+
+
+
+
+
+
+
+
+
+
+
 	}
 	else if (UI_Switch) {
 		switch (nMessageID) {
@@ -779,7 +831,7 @@ void CGameFramework::ProcessInput()
 	if (!bProcessedByScene)
 	{
 		DWORD dwDirection = 0;
-		if (!UI_Switch) {
+		if (!UI_Switch && !player_dead) {
 			if (pKeysBuffer[KEY_W] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_W); dwDirection |= DIR_FORWARD; }
 			if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; }
 
@@ -791,12 +843,11 @@ void CGameFramework::ProcessInput()
 
 			}
 		}
-		if (pKeysBuffer[KEY_E] & 0xF0) {
-			q_keyboardInput.push(SEND_KEY_DOWN);//S
-		}
 
-		if (pKeysBuffer[VK_SPACE] & 0xF0) {
-			q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
+		if (!player_dead) {
+			if (pKeysBuffer[VK_SPACE] & 0xF0) {
+				q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
+			}
 		}
 
 
@@ -806,9 +857,9 @@ void CGameFramework::ProcessInput()
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 40.0f;
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
 
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 50.0f;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
 
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
@@ -836,27 +887,38 @@ void CGameFramework::ProcessInput()
 
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
-			if (m_nMode == SCENE1STAGE) {
-				if (cxDelta || cyDelta || ((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
-				{
-					MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
-					q_mouseInput.push(mousemove);//s
+			if (!player_dead) {
+				if (m_nMode == SCENE1STAGE) {
+					if (cxDelta || cyDelta || ((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
+					{
+						MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
+						q_mouseInput.push(mousemove);//s
+						if (cxDelta)
+							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(0.0, cxDelta, 0.0f);
 
-					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
-
-
-				}
-				if (dwDirection)
-				{
-					bool isCollide = false;
-					CollideMapInfo temp;
-					for (int i{}; i < mapcol_info.size(); ++i) {
-						if (mapcol_info[i].m_xoobb.Intersects(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xoobb)) {
-							temp = mapcol_info[i];
-							isCollide = true;
-							break;
-						}
+						if (cyDelta)
+							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, 0.0f, 0.0f);
 					}
+					if (dwDirection)
+					{
+						bool isCollide = false;
+						CollideMapInfo temp;
+						for (int i{}; i < mapcol_info.size(); ++i) {
+							if (mapcol_info[i].m_xoobb.Intersects(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xoobb)) {
+								temp = mapcol_info[i];
+								isCollide = true;
+								cout << i << "collide" << endl;
+								break;
+							}
+							/*if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xoobb.Intersects(mapcol_info[i].m_xoobb)) {
+								temp = mapcol_info[i];
+								isCollide = true;
+								break;
+							}*/
+
+
+
+						}
 
 					if (isCollide) {
 						XMFLOAT3 PlayertoBox = { temp.m_pos.x - ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition().x, 0.0f , 
@@ -877,52 +939,54 @@ void CGameFramework::ProcessInput()
 
 						angle = XMConvertToDegrees(angle);
 
-						XMFLOAT3 PlayerMoveDir;
-						if (abs(cos(temp.m_angle_aob)) < abs(cos(angle))) {
-							if (temp.m_angle_aob > angle) {
-								XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalForward));
-								XMStoreFloat3(&PlayerMoveDir, AddVector);
+							XMFLOAT3 PlayerMoveDir;
+							if (abs(cos(temp.m_angle_aob)) < abs(cos(angle))) {
+								if (temp.m_angle_aob < angle) {
+									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalForward));
+									XMStoreFloat3(&PlayerMoveDir, AddVector);
+								}
+								else {
+									XMVECTOR reversedLocalForward = XMVectorNegate(XMLoadFloat3(&normalizedLocalForward));
+									XMStoreFloat3(&normalizedLocalForward, reversedLocalForward);
+
+									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalForward));
+									XMStoreFloat3(&PlayerMoveDir, AddVector);
+								}
 							}
 							else {
-								XMVECTOR reversedLocalForward = XMVectorNegate(XMLoadFloat3(&normalizedLocalForward));
-								XMStoreFloat3(&normalizedLocalForward, reversedLocalForward);
+								float angle = XMVectorGetX(XMVector3AngleBetweenNormals(playerToBoxNormalized, localRightNormalized));
+								angle = XMConvertToDegrees(angle);
+								if (temp.m_angle_boc < angle) {
+									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalRight));
+									XMStoreFloat3(&PlayerMoveDir, AddVector);
 
-								XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalForward));
-								XMStoreFloat3(&PlayerMoveDir, AddVector);
-							}
-						}
-						else {
-							float angle = XMVectorGetX(XMVector3AngleBetweenNormals(playerToBoxNormalized, localRightNormalized));
-							angle = XMConvertToDegrees(angle);
-							if (temp.m_angle_boc > angle) {
-								XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalRight));
-								XMStoreFloat3(&PlayerMoveDir, AddVector);
+								}
+								else {
+									XMVECTOR reversedLocalRight = XMVectorNegate(XMLoadFloat3(&normalizedLocalRight));
+									XMStoreFloat3(&normalizedLocalRight, reversedLocalRight);
 
-							}
-							else {
-								XMVECTOR reversedLocalRight = XMVectorNegate(XMLoadFloat3(&normalizedLocalRight));
-								XMStoreFloat3(&normalizedLocalRight, reversedLocalRight);
+									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalRight));
+									XMStoreFloat3(&PlayerMoveDir, AddVector);
 
-								XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalRight));
-								XMStoreFloat3(&PlayerMoveDir, AddVector);
+								}
 							}
-						}
 
 						XMVECTOR PlayerMoveNormalized = XMVector3Normalize(XMLoadFloat3(&PlayerMoveDir));
 						XMStoreFloat3(&PlayerMoveDir, PlayerMoveNormalized);
 
-						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
-						//((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move();
-						//m_pPlayer->SetMovingDirection(PlayerMoveDir);
-						//((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(*PlayerMoveDir, )
-					}
-					else
-						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true);
+							//((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
+							//cout << "collide!" << endl;
+							//((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move();
+							//m_pPlayer->SetMovingDirection(PlayerMoveDir);
+							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
 
+						}
+						else ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
+
+						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
+					}
 				}
 			}
-
-
 		}
 	}
 	if (m_nMode == SCENE1STAGE)

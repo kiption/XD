@@ -22,7 +22,7 @@ void SoldiarPlayerObject::OnCameraUpdateCallback(float fTimeElapsed)
 {
 }
 
-void SoldiarPlayerObject::Move(ULONG nDirection, float fDistance, bool bVelocity)
+void SoldiarPlayerObject::Move(ULONG nDirection, float fDistance, bool bVelocity, XMFLOAT3 slideVec)
 {
 }
 

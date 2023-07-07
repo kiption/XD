@@ -57,7 +57,7 @@ void CPlayer::ReleaseShaderVariables()
 	if (m_pCamera) m_pCamera->ReleaseShaderVariables();
 }
 
-void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
+void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, XMFLOAT3 slideVec)
 {
 	if (dwDirection)
 	{
@@ -68,6 +68,10 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
 		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, 0);
 		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up,0);
+		
+		
+		if (dwDirection == DIR_SLIDEVEC) xmf3Shift = slideVec;
+
 
 		Move(xmf3Shift, bUpdateVelocity);
 	}
@@ -90,6 +94,10 @@ void CPlayer:: Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 		m_pCamera->Move(xmf3Shift);
 	}
+}
+
+void CPlayer::Move(float fxOffset, float fyOffset, float fzOffset)
+{
 }
 
 void CPlayer::Rotate(float x, float y, float z)

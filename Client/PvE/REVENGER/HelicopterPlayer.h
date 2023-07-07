@@ -28,7 +28,7 @@ public:
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
 	virtual void OnCameraUpdateCallback(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
-	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
+	void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, XMFLOAT3 slideVec);
 	//virtual void Animate(float fTimeElapsed);
 	virtual void Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent);
 	virtual void Update(float fTimeElapsed);
