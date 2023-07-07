@@ -259,7 +259,7 @@ void CHumanPlayer::ShootState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 	CPlayer::Animate(EleapsedTime, pxmf4x4Parent);
 }
 
-void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
+void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, XMFLOAT3 slideVec)
 {
 	m_bReloadState = false;
 	m_bJumeState = false;
@@ -340,7 +340,7 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 
 	}
 
-	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
+	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity, slideVec);
 }
 
 

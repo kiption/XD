@@ -11,7 +11,7 @@ public:
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
 	virtual void OnCameraUpdateCallback(float fTimeElapsed);
-	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
+	void Move(ULONG nDirection, float fDistance, bool bVelocity, XMFLOAT3 slideVec);
 	void ReloadState();
 	virtual void ShootState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);

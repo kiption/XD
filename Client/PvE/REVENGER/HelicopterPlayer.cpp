@@ -240,9 +240,9 @@ void HeliPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 
 }
 
-void HeliPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
+void HeliPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, XMFLOAT3 slideVec)
 {
-	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
+	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity, slideVec);
 }
 
 
