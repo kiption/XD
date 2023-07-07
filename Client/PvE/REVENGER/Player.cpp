@@ -151,12 +151,12 @@ void CPlayer::Rotate(float x, float y, float z)
 		if (x!=0.0f)
 		{
 			m_fPitch += x;
-			if (m_fPitch > +30.0f) { x -= (m_fPitch - 30.0f); m_fPitch = +30.0f; }
-			if (m_fPitch < -10.0f) { x -= (m_fPitch + 10.0f); m_fPitch = -10.0f; }
+			if (m_fPitch > +8.0f) { x -= (m_fPitch - 8.0f); m_fPitch = +8.0f; }
+			if (m_fPitch < -16.0f) { x -= (m_fPitch + 16.0f); m_fPitch = -16.0f; }
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(x));
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
-			//m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+			
 		}
 		if (y != 0.0f)
 		{

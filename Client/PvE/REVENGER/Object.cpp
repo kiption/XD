@@ -2307,6 +2307,7 @@ void CSoldiarOtherPlayerObjects::IdleState(float EleapsedTime)
 
 void CSoldiarOtherPlayerObjects::Animate(float fTimeElapsed)
 {
+	m_xmf4x4World._32 = 0.0f;
 	CGameObject::Animate(fTimeElapsed);
 }
 

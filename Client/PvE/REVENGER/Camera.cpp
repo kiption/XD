@@ -178,8 +178,8 @@ void CSpaceShipCamera::Rotate(float x, float y, float z)
 	if (m_pPlayer && (x != 0.0f))
 	{
 		m_fPitch += x;
-		if (m_fPitch > +30.0f) { x -= (m_fPitch - 30.0f); m_fPitch = +30.0f; }
-		if (m_fPitch < -10.0f) { x -= (m_fPitch + 10.0f); m_fPitch = -10.0f; }
+		if (m_fPitch > +8.0f) { x -= (m_fPitch - 8.0f); m_fPitch = +8.0f; }
+		if (m_fPitch < -16.0f) { x -= (m_fPitch + 16.0f); m_fPitch = -16.0f; }
 		XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Right), XMConvertToRadians(x));
 		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);

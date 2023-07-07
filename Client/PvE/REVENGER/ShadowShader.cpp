@@ -29,9 +29,9 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[0]->SetMaterial(0, pPlaneMaterial);
 	m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 3.0, 100.0f));
 
-	m_ppObjects[1] = new CGameObject(1);
 	m_ppObjects[2] = new CGameObject(1);
 	m_ppObjects[3] = new CGameObject(1);
+	m_ppObjects[4] = new CGameObject(1);
 
 	/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
 
@@ -39,9 +39,8 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	pOtherPlayerMaterial->SetReflection(4);
 
 	CLoadedModelInfo* pSModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
-	
-	m_ppObjects[4]=new CHumanPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
-	m_ppObjects[4]->SetMaterial(0, pOtherPlayerMaterial);
+	m_ppObjects[1] = new CHumanPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
+	m_ppObjects[1]->SetMaterial(0, pOtherPlayerMaterial);
 
 	pSModel->m_pModelRootObject->AddRef();
 	for (int x = 5; x < 8; x++)
@@ -378,7 +377,7 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 	UpdateShaderVariables(pd3dCommandList);
 	for (int i = 0; i < m_pObjectsShader->m_nObjects; i++)
 	{
-		if (i != 5)
+		if (i != 1)
 		{
 			m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
 			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
@@ -386,11 +385,11 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 		}
 		
 	}
-	if (((CHumanPlayer*)m_pObjectsShader->m_ppObjects[5])->m_bZoomMode == false)
+	if (((CHumanPlayer*)m_pObjectsShader->m_ppObjects[1])->m_bZoomMode == false)
 	{
-		m_pObjectsShader->m_ppObjects[5]->Animate(m_fElapsedTime);
-		m_pObjectsShader->m_ppObjects[5]->UpdateShaderVariables(pd3dCommandList);
-		m_pObjectsShader->m_ppObjects[5]->ShadowRender(pd3dCommandList, pCamera, true, this);
+		m_pObjectsShader->m_ppObjects[1]->Animate(m_fElapsedTime);
+		m_pObjectsShader->m_ppObjects[1]->UpdateShaderVariables(pd3dCommandList);
+		m_pObjectsShader->m_ppObjects[1]->ShadowRender(pd3dCommandList, pCamera, true, this);
 	}
 }
 

@@ -848,27 +848,27 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 			m_ppShaders[0]->m_ppObjects[24]->GetPosition().y + 8.0,
 			m_ppShaders[0]->m_ppObjects[24]->GetPosition().z);
 
-	CBulletObject** ppBullets = ((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_ppBullets;
+	//CBulletObject** ppBullets = ((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_ppBullets;
 
-	for (int k = 22; k < 40; k++)
-		m_ppShaders[0]->m_ppObjects[k]->m_xoobb = BoundingOrientedBox(m_ppShaders[0]->m_ppObjects[k]->GetPosition(), XMFLOAT3(5.0, 9.0, 5.0), XMFLOAT4(0, 0, 0, 1));
+	//for (int k = 22; k < 40; k++)
+	//	m_ppShaders[0]->m_ppObjects[k]->m_xoobb = BoundingOrientedBox(m_ppShaders[0]->m_ppObjects[k]->GetPosition(), XMFLOAT3(5.0, 9.0, 5.0), XMFLOAT4(0, 0, 0, 1));
 
-	for (int i = 0; i < BULLETS; i++)
-	{
-		ppBullets[i]->m_xoobb = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
-		for (int k = 22; k < 40; k++)
-		{
-			if (ppBullets[i]->m_xoobb.Intersects(m_ppShaders[0]->m_ppObjects[k]->m_xoobb))
-			{
+	//for (int i = 0; i < BULLETS; i++)
+	//{
+	//	ppBullets[i]->m_xoobb = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
+	//	for (int k = 22; k < 40; k++)
+	//	{
+	//		if (ppBullets[i]->m_xoobb.Intersects(m_ppShaders[0]->m_ppObjects[k]->m_xoobb))
+	//		{
 
-				((BulletMarkBillboard*)m_pBillboardShader[4])->m_bActive = true;
-				XMFLOAT3 HittingPoint = ppBullets[i]->GetPosition();
+	//			((BulletMarkBillboard*)m_pBillboardShader[4])->m_bActive = true;
+	//			XMFLOAT3 HittingPoint = ppBullets[i]->GetPosition();
 
-				((BulletMarkBillboard*)m_pBillboardShader[4])->ParticlePosition = HittingPoint;
-				ppBullets[i]->Reset();
-			}
-		}
-	}
+	//			((BulletMarkBillboard*)m_pBillboardShader[4])->ParticlePosition = HittingPoint;
+	//			ppBullets[i]->Reset();
+	//		}
+	//	}
+	//}
 
 	XMFLOAT3 Position2P = m_ppShaders[0]->m_ppObjects[5]->GetPosition();
 	XMFLOAT3 Look2P = m_ppShaders[0]->m_ppObjects[5]->GetLook();
