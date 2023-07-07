@@ -244,7 +244,7 @@ void Stage1::ReleaseObjects()
 		}
 		delete[] m_ppSpriteBillboard;
 	}
-	if (m_ppShaders)
+	/*if (m_ppShaders)
 	{
 		for (int i = 0; i < m_nShaders; i++)
 		{
@@ -252,9 +252,9 @@ void Stage1::ReleaseObjects()
 			m_ppShaders[i]->ReleaseObjects();
 			m_ppShaders[i]->Release();
 		}
-		delete[] m_ppShaders;
-	}
+	}*/
 
+	if (m_ppShaders)delete m_ppShaders;
 	if (m_ppFragShaders)
 	{
 		for (int i = 0; i < m_nFragShaders; i++)

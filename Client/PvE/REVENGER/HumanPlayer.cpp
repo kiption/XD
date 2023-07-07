@@ -23,9 +23,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pSkinnedAnimationController->SetTrackAnimationSet(6, 6);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(7, 7);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(8, 8);
-	//m_pSkinnedAnimationController->SetTrackAnimationSet(9, 9);
-	//m_pSkinnedAnimationController->SetTrackAnimationSet(10, 10);
-	//m_pSkinnedAnimationController->SetTrackAnimationSet(11, 11);
+
 
 	m_pSkinnedAnimationController->SetTrackEnable(0, true);
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
@@ -36,9 +34,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pSkinnedAnimationController->SetTrackEnable(6, false);
 	m_pSkinnedAnimationController->SetTrackEnable(7, false);
 	m_pSkinnedAnimationController->SetTrackEnable(8, false);
-	//m_pSkinnedAnimationController->SetTrackEnable(9, false);
-	//m_pSkinnedAnimationController->SetTrackEnable(10, false);
-	//m_pSkinnedAnimationController->SetTrackEnable(11, false);
+
 	m_pSkinnedAnimationController->SetTrackWeight(6, 0.1f);
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
@@ -53,19 +49,23 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pSkinnedAnimationController->SetCallbackKey(3, 0, 0.9f, _T("Footstep03"));
 #else
 	m_pSkinnedAnimationController->SetCallbackKey(1, 0, 0.0f, _T("Sound/Footstep01.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.4f, _T("Sound/Footstep01.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.3f, _T("Sound/Footstep01.wav"));
 	m_pSkinnedAnimationController->SetCallbackKey(2, 0, 0.0f, _T("Sound/Footstep01.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(2, 1, 0.4f, _T("Sound/Footstep01.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(2, 1, 0.3f, _T("Sound/Footstep01.wav"));
 	m_pSkinnedAnimationController->SetCallbackKey(3, 0, 0.0f, _T("Sound/Footstep03.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(3, 1, 0.4f, _T("Sound/Footstep03.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(3, 1, 0.3f, _T("Sound/Footstep03.wav"));
 	m_pSkinnedAnimationController->SetCallbackKey(4, 0, 0.0f, _T("Sound/Footstep03.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(4, 1, 0.4f, _T("Sound/Footstep03.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(4, 1, 0.3f, _T("Sound/Footstep03.wav"));
 #endif
 	CAnimationCallbackHandler* pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
+	pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(2, pAnimationCallbackHandler);
+	pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(3, pAnimationCallbackHandler);
+	pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(4, pAnimationCallbackHandler);
+
 
 
 	pBCBulletEffectShader = new CBulletEffectShader();

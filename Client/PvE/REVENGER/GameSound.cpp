@@ -4,26 +4,26 @@ GameSound::GameSound()
 {
 	result = FMOD::System_Create(&soundSystem);
 
-	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_LOOP_NORMAL, 0, &shootSound);
-	result = shootSound->setMode(FMOD_LOOP_NORMAL);
+	result = soundSystem->init(60, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
+	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_UNIQUE, 0, &shootSound);
+	shootSound->setMode(FMOD_UNIQUE);
 
 
-	result = soundSystem->init(64, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("Sound/CollisionSound.wav", FMOD_3D, 0, &ColliSound);
+	result = soundSystem->init(64, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
+	result = soundSystem->createSound("Sound/CollisionSound.wav", FMOD_DEFAULT, 0, &ColliSound);
 	result = ColliSound->setMode(FMOD_LOOP_OFF);
 
-	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("Sound/Birl.wav", FMOD_DEFAULT, 0, &speakSound);
+	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
+	result = soundSystem->createSound("Sound/helicopterfieldwithbirds.wav", FMOD_DEFAULT, 0, &speakSound);
 	result = speakSound->setMode(FMOD_LOOP_NORMAL);
 
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
 	result = soundSystem->createSound("Sound/footStep.wav", FMOD_DEFAULT, 0, &bgmSound);
 	result = bgmSound->setMode(FMOD_LOOP_OFF);
 
-	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("Sound/Reload.wav", FMOD_DEFAULT, 0, &reloadSounds);
-	result = bossSound->setMode(FMOD_LOOP_OFF);
+	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
+	result = soundSystem->createSound("Sound/Reload.wav", FMOD_UNIQUE, 0, &reloadSounds);
+	result = bossSound->setMode(FMOD_UNIQUE);
 
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
 	result = soundSystem->createSound("sound_walk.mp3", FMOD_DEFAULT, 0, &walkSound);
@@ -47,12 +47,12 @@ GameSound::GameSound()
 	bossChannel->setVolume(0.3f);
 	bossChannel->setPaused(true);
 
-	// 총 발사 사운드 채널 생성
-	result = soundSystem->playSound(shootSound, 0, false, &shootChannel);
-	shootChannel->setVolume(0.04f);
-	shootChannel->setMode(FMOD_LOOP_NORMAL);
-	shootChannel->setLoopCount(0);
-	shootChannel->setPaused(true);
+	//// 총 발사 사운드 채널 생성
+	//result = soundSystem->playSound(shootSound, 0, false, &shootChannel);
+	//shootChannel->setVolume(0.04f);
+	//shootChannel->setMode(FMOD_LOOP_NORMAL);
+	//shootChannel->setLoopCount(0);
+	//shootChannel->setPaused(true);
 }
 
 GameSound::~GameSound()
@@ -68,26 +68,25 @@ GameSound::~GameSound()
 	result = soundSystem->close();
 	result = soundSystem->release();
 
-	
+
 	//Common_Close();
 }
 
 void GameSound::shootingSound(bool Stop)
 {
-	bool isPlaying = false;
-	//if (shootChannel != nullptr && shootChannel->isPlaying(&isPlaying))
-	//{
+	bool isPlaying = true;
+
 	//	shootChannel->stop();
 	//	shootChannel->setMode(FMOD_LOOP_NORMAL);
 	//	result = soundSystem->playSound(shootSound, 0, false, &shootChannel);
 	//	shootChannel->setVolume(0.04f);
 	//}
 
-		result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_LOOP_NORMAL, 0, &shootSound);
-		shootSound->setMode(FMOD_LOOP_NORMAL);
-		result = soundSystem->playSound(shootSound, 0, Stop, &shootChannel);
-		shootChannel->setVolume(0.04f);
-		shootChannel->setMode(FMOD_LOOP_OFF);
+
+	result = soundSystem->playSound(shootSound, 0, false, &shootChannel);
+	shootChannel->setVolume(0.04f);
+
+
 
 }
 void GameSound::backGroundMusic()
@@ -97,7 +96,7 @@ void GameSound::backGroundMusic()
 }
 void GameSound::SpeakMusic()
 {
-	
+
 	result = soundSystem->playSound(speakSound, 0, false, &speakChannel);
 	speakChannel->setVolume(0.1f);
 }
@@ -115,6 +114,8 @@ void GameSound::reloadSound()
 {
 	result = soundSystem->playSound(reloadSounds, 0, false, &reloadChannel);
 	reloadChannel->setVolume(0.3f);
+	shootChannel->setPaused(true);
+
 }
 void GameSound::pauseWalking()
 {
