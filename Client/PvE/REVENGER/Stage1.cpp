@@ -39,16 +39,16 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5, 0.5, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-0, 920.0f, 1200.0f);
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+0.1f, -0.75f, -1.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+0.1f, -0.65f, -1.0f);
 
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 30000.0f;
+	m_pLights->m_pLights[1].m_fRange = 40000.0f;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5, 0.5, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7, 0.7, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-80, 300.0f, 950.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(+0.15f, -0.3f, -1.0f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-80, 350.0f, 950.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(+0.1f, -0.30f, -1.1f);
 
 	m_pLights->m_pLights[2].m_bEnable = true;
 	m_pLights->m_pLights[2].m_nType = SPOT_LIGHT;
@@ -72,8 +72,8 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
 	m_pLights->m_pLights[3].m_xmf3Direction = XMFLOAT3(0.0f, -0.2f, 1.0f);
 	m_pLights->m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights->m_pLights[3].m_fFalloff = 10.0f;
-	m_pLights->m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(60.0f));
+	m_pLights->m_pLights[3].m_fFalloff = 6.0f;
+	m_pLights->m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights->m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
 	m_pLights->m_pLights[4].m_bEnable = false;
@@ -213,20 +213,6 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
 
-
-	m_nPlayerObjects = 1;
-	CMaterial* pPlayerMaterial = new CMaterial(2);
-	pPlayerMaterial->SetReflection(2);
-	m_ppPlayerObjects = new CGameObject * [m_nPlayerObjects];
-	CLoadedModelInfo* pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
-	for (int i = 0; i < m_nPlayerObjects; i++)
-	{
-		m_ppPlayerObjects[i] = new CHumanPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pPlayerModel, NULL);
-		m_ppPlayerObjects[i]->SetMaterial(0, pPlayerMaterial);
-		pPlayerModel->m_pModelRootObject->AddRef();
-	}
-	if (pPlayerModel) delete pPlayerModel;
-
 	gamesound.SpeakMusic();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -269,7 +255,6 @@ void Stage1::ReleaseObjects()
 		delete[] m_ppShaders;
 	}
 
-	if (m_ppPlayerObjects)delete[] m_ppPlayerObjects;
 	if (m_ppFragShaders)
 	{
 		for (int i = 0; i < m_nFragShaders; i++)
@@ -665,7 +650,6 @@ void Stage1::ReleaseUploadBuffers()
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nHumanShaders; i++) m_ppHumanShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->ReleaseUploadBuffers();
-	for (int i = 0; i < m_nPlayerObjects; i++) if (m_ppPlayerObjects[i]) m_ppPlayerObjects[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->ReleaseUploadBuffers();
 
@@ -837,7 +821,6 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->AnimateObjects(fTimeElapsed);
-	for (int i = 0; i < m_nPlayerObjects; i++) if (m_ppPlayerObjects[i]) m_ppPlayerObjects[i]->Animate(fTimeElapsed);
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
@@ -865,7 +848,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 			m_ppShaders[0]->m_ppObjects[24]->GetPosition().y + 8.0,
 			m_ppShaders[0]->m_ppObjects[24]->GetPosition().z);
 
-	CBulletObject** ppBullets = ((CHumanPlayer*)m_ppPlayerObjects[0])->m_ppBullets;
+	CBulletObject** ppBullets = ((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[5])->m_ppBullets;
 
 	for (int k = 22; k < 40; k++)
 		m_ppShaders[0]->m_ppObjects[k]->m_xoobb = BoundingOrientedBox(m_ppShaders[0]->m_ppObjects[k]->GetPosition(), XMFLOAT3(5.0, 9.0, 5.0), XMFLOAT4(0, 0, 0, 1));
@@ -897,9 +880,9 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		m_pLights->m_pLights[2].m_xmf3Direction = Look2P;
 		m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(xmfPosition.x, xmfPosition.y + 6.0, xmfPosition.z);
 		m_pLights->m_pLights[3].m_xmf3Direction = m_pPlayer->GetLook();
-
 		m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
-		m_pLights->m_pLights[5].m_xmf3Position = m_ppFragShaders[0]->m_ppObjects[0]->GetPosition();
+
+	
 	}
 	//m_fLightRotationAngle += fTimeElapsed;
 	//XMMATRIX xmmtxRotation = XMMatrixRotationY(fTimeElapsed * 0.02f);
@@ -927,20 +910,10 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	{
 		for (int i = 0; i < HELIBULLETS; i++)
 		{
-			((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[12+k])->m_ppBullets[i]->Render(pd3dCommandList, pCamera, false);
+			((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[12 + k])->m_ppBullets[i]->Render(pd3dCommandList, pCamera, false);
 		}
 	}
 
-
-	for (int i = 0; i < m_nPlayerObjects; i++)
-	{
-		if (m_ppPlayerObjects[i])
-		{
-			((CHumanPlayer*)m_ppPlayerObjects[i])->Animate(m_fElapsedTime);
-			((CHumanPlayer*)m_ppPlayerObjects[i])->UpdateTransform(NULL);
-			((CHumanPlayer*)m_ppPlayerObjects[i])->Render(pd3dCommandList, pCamera);
-		}
-	}
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);

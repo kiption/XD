@@ -27,7 +27,7 @@ public:
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	virtual void Update(float fTimeElapsed);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList,CShader* pShader, CCamera* pCamera);
 	
 	bool m_bReloadState = false;
 	bool m_bJumeState = false;

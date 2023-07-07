@@ -266,9 +266,9 @@ void CPlayer::OnPrepareRender()
 	UpdateTransform(NULL);
 }
 
-void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, CCamera* pCamera)
 {
-	CGameObject::Render(pd3dCommandList, pCamera,false);
+	CGameObject::ShadowRender(pd3dCommandList, pCamera,true, pShader);
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 	if (nCameraMode == THIRD_PERSON_CAMERA || nCameraMode == CLOSEUP_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
 }

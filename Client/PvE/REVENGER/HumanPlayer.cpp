@@ -128,11 +128,11 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(0.0f);
 		m_pCamera = OnChangeCamera(CLOSEUP_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(-0.5f, 0.16f, 0.235f-0.05));
+		m_pCamera->SetOffset(XMFLOAT3(-0.6f, 0.16f, 0.235f-0.05));
 		m_pCamera->SetPosition(Vector3::Add(
 			XMFLOAT3(m_pHeadFindFrame->GetPosition().x, m_pHeadFindFrame->GetPosition().y, m_pHeadFindFrame->GetPosition().z)
 			, m_pCamera->GetOffset()));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 70.0f);
+		m_pCamera->GenerateProjectionMatrix(1.01f, 4500.0f, ASPECT_RATIO, 70.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
@@ -369,7 +369,7 @@ void CHumanPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	{
 		m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	}*/
-
+	
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
@@ -396,15 +396,15 @@ void CHumanPlayer::Update(float fTimeElapsed)
 
 }
 
-void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, CCamera* pCamera)
 {
 	if (m_bZoomMode == false)
 	{
-		CPlayer::Render(pd3dCommandList, pCamera);
+		CPlayer::Render(pd3dCommandList, pShader,pCamera);
 
-		if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
+		if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, false);
 		for (int i = 0; i < BULLETS; i++)
-			if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
+			if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->ShadowRender(pd3dCommandList, pCamera,true, pShader); }
 	}
 }
 

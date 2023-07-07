@@ -42,7 +42,11 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	pOtherPlayerMaterial->SetReflection(4);
 
 	CLoadedModelInfo* pSModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
-	for (int x = 5; x < 8; x++)
+	
+	m_ppObjects[5]=new CHumanPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
+	m_ppObjects[5]->SetMaterial(0, pOtherPlayerMaterial);
+	pSModel->m_pModelRootObject->AddRef();
+	for (int x = 6; x < 8; x++)
 	{
 		m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
 		m_ppObjects[x]->SetMaterial(0, pOtherPlayerMaterial);
@@ -376,10 +380,19 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 	UpdateShaderVariables(pd3dCommandList);
 	for (int i = 0; i < m_pObjectsShader->m_nObjects; i++)
 	{
-		m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
-		m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
-		m_pObjectsShader->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera, true, this);
-		//m_pObjectsShader->m_ppObjects[i]->Render(pd3dCommandList, pCamera, false);
+		if (i != 5)
+		{
+			m_pObjectsShader->m_ppObjects[i]->Animate(m_fElapsedTime);
+			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
+			m_pObjectsShader->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera, true, this);
+		}
+		
+	}
+	if (((CHumanPlayer*)m_pObjectsShader->m_ppObjects[5])->m_bZoomMode == false)
+	{
+		m_pObjectsShader->m_ppObjects[5]->Animate(m_fElapsedTime);
+		m_pObjectsShader->m_ppObjects[5]->UpdateShaderVariables(pd3dCommandList);
+		m_pObjectsShader->m_ppObjects[5]->ShadowRender(pd3dCommandList, pCamera, true, this);
 	}
 }
 

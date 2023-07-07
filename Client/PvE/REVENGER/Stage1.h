@@ -63,7 +63,7 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUSrvDescriptorNextHandle() { return(m_d3dSrvCPUDescriptorNextHandle); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUSrvDescriptorNextHandle() { return(m_d3dSrvGPUDescriptorNextHandle); }
 	float								m_fElapsedTime = 0.0f;
-
+	float								m_fSunTime=0.0f;
 	int									m_nPlayerObjects = 0;
 	CGameObject** m_ppPlayerObjects = NULL;
 

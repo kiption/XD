@@ -232,7 +232,7 @@ void HeliPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 void HeliPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	CPlayer::Render(pd3dCommandList, pCamera);
+	CPlayer::Render(pd3dCommandList, NULL,pCamera);
 
 	if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < BULLETS; i++)if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }

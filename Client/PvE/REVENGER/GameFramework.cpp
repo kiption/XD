@@ -933,7 +933,7 @@ void CGameFramework::ProcessInput()
 
 							float angle = XMVectorGetX(XMVector3AngleBetweenNormals(playerToBoxNormalized, localForwardNormalized));
 
-						angle = XMConvertToDegrees(angle);
+							angle = XMConvertToDegrees(angle);
 
 							XMFLOAT3 PlayerMoveDir;
 							if (abs(cos(temp.m_angle_aob)) < abs(cos(angle))) {
@@ -1126,7 +1126,10 @@ void CGameFramework::FrameAdvance()
 #endif
 	if (m_nMode == SCENE1STAGE)
 	{
-		if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == false)
+		{
+			if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pScene->m_pShadowShader, m_pCamera);
+		}
 	}
 	// Stage2
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
@@ -1436,7 +1439,7 @@ void CGameFramework::FrameAdvance()
 			}
 			D2D_RECT_F D2_ChatInsertText = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.6f), FRAME_BUFFER_HEIGHT * 0.67f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT * 0.69f);
 			m_pd2dDeviceContext->DrawTextW(m_InsertChat, (UINT32)wcslen(m_InsertChat), m_pdwFont[3], &D2_ChatInsertText, m_pd2dbrText[3]);
-			}
+		}
 		/*if (UI_Switch) {
 			switch (m_submissionnum)
 			{
@@ -1473,7 +1476,7 @@ void CGameFramework::FrameAdvance()
 			D2D1_RECT_F Friend2Text = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 1, (FRAME_BUFFER_HEIGHT / 128) * 93, (FRAME_BUFFER_WIDTH / 64) * 7, (FRAME_BUFFER_HEIGHT / 128) * 93);
 			m_pd2dDeviceContext->DrawTextW(L"Other 2", (UINT32)wcslen(L"Other 2"), m_pdwFont[0], &Friend2Text, m_pd2dbrText[0]);
 		}
-		}
+	}
 
 	m_pd2dDeviceContext->EndDraw();
 
@@ -1526,7 +1529,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_pScene = new Stage1();
 			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
 			//CHumanPlayer* pPlayer = new CHumanPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL, ((Stage1*)m_pScene)->m_pTerrain);
-			m_pScene->m_pPlayer = ((Stage1*)m_pScene)->m_ppPlayerObjects[0];
+			m_pScene->m_pPlayer = ((CHumanPlayer*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]);
 			m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetCamera();
 			m_pScene->SetCurScene(SCENE1STAGE);
 
@@ -1566,8 +1569,8 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_GameTimer.Reset();
 			break;
 		}
+		}
 	}
-}
 }
 
 #ifdef _WITH_DIRECT2D
@@ -1607,7 +1610,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-	}
+}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -2443,10 +2446,10 @@ void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 
 	/* 5~8 다른플레이어 */
 	if (id < 0 || id > 5) return;   // 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE) {
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(5.0, 5.0, 5.0);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + id]->SetRight(rightVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + id]->SetUp(upVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + id]->SetLook(lookVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + id]->SetScale(5.0, 5.0, 5.0);
 	}
 }
 
@@ -2455,8 +2458,8 @@ void CGameFramework::remove_OtherPlayer(int id)
 	/* 5~8 다른플레이어 */
 	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE) {
-		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
+		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + id]) {
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + id]->SetScale(0.0, 0.0, 0.0);
 		}
 	}
 
