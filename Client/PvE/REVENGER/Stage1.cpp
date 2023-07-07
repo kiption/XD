@@ -848,7 +848,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 			m_ppShaders[0]->m_ppObjects[24]->GetPosition().y + 8.0,
 			m_ppShaders[0]->m_ppObjects[24]->GetPosition().z);
 
-	CBulletObject** ppBullets = ((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[5])->m_ppBullets;
+	CBulletObject** ppBullets = ((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_ppBullets;
 
 	for (int k = 22; k < 40; k++)
 		m_ppShaders[0]->m_ppObjects[k]->m_xoobb = BoundingOrientedBox(m_ppShaders[0]->m_ppObjects[k]->GetPosition(), XMFLOAT3(5.0, 9.0, 5.0), XMFLOAT4(0, 0, 0, 1));

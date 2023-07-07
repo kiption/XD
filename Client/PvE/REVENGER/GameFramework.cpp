@@ -1529,13 +1529,15 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_nMode = nMode;
 			m_pScene = new Stage1();
 			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
-			m_pScene->m_pPlayer = ((CHumanPlayer*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5]);
+			m_pScene->m_pPlayer = ((CHumanPlayer*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4]);
 			m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetCamera();
 			m_pScene->SetCurScene(SCENE1STAGE);
 			m_pd3dCommandList->Close();
 			ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
 			m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+
 			WaitForGpuComplete();
+
 			if (m_pScene) m_pScene->ReleaseUploadBuffers();
 			if (m_pScene->m_pPlayer) ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReleaseUploadBuffers();
 			m_GameTimer.Reset();
@@ -2382,7 +2384,7 @@ MouseInputVal CGameFramework::popInputVal_Mouse()
 XMFLOAT3 CGameFramework::getMyPosition()
 {
 	if (m_nMode == SCENE1STAGE) {
-		return m_pScene->m_pPlayer->GetPosition();
+		return ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition();
 	}
 
 }
@@ -2431,9 +2433,9 @@ void CGameFramework::setPosition_OtherPlayer(int id, XMFLOAT3 pos)
 	/* 5~8 다른플레이어 */
 	if (id < 0 || id > 5) return;   // 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE) {
-		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + id])
+		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])
 		{
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + id]->SetPosition(pos);
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetPosition(pos);
 		}
 	}
 
@@ -2443,10 +2445,10 @@ void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 
 	/* 5~8 다른플레이어 */
 	if (id < 0 || id > 5) return;   // 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE) {
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + id]->SetRight(rightVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + id]->SetUp(upVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + id]->SetLook(lookVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + id]->SetScale(5.0, 5.0, 5.0);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(5.0, 5.0, 5.0);
 	}
 }
 
@@ -2455,8 +2457,8 @@ void CGameFramework::remove_OtherPlayer(int id)
 	/* 5~8 다른플레이어 */
 	if (id < 0 || id > 5) return;	// 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE) {
-		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + id]) {
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + id]->SetScale(0.0, 0.0, 0.0);
+		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]) {
+			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(0.0, 0.0, 0.0);
 		}
 	}
 
@@ -2582,14 +2584,14 @@ void CGameFramework::otherPlayerReturnToIdle(int p_id)
 {
 	if (m_nMode == SCENE1STAGE)
 	{
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + p_id])->IdleState(m_GameTimer.GetTimeElapsed());
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->IdleState(m_GameTimer.GetTimeElapsed());
 	}
 }
 void CGameFramework::otherPlayerForwardMotion(int p_id)
 {
 	if (m_nMode == SCENE1STAGE) {
 
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + p_id])->MoveForward(m_GameTimer.GetTimeElapsed());
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->MoveForward(m_GameTimer.GetTimeElapsed());
 	}
 
 }
@@ -2597,7 +2599,7 @@ void CGameFramework::otherPlayerBackwardMotion(int p_id)
 {
 	if (m_nMode == SCENE1STAGE) {
 
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + p_id])->MoveBackward(m_GameTimer.GetTimeElapsed());
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->MoveBackward(m_GameTimer.GetTimeElapsed());
 	}
 }
 
@@ -2605,14 +2607,14 @@ void CGameFramework::otherPlayerSfrateMotion(int p_id)
 {
 	if (m_nMode == SCENE1STAGE) {
 
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + p_id])->MoveLeft(m_GameTimer.GetTimeElapsed());
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->MoveLeft(m_GameTimer.GetTimeElapsed());
 	}
 }
 void CGameFramework::otherPlayerShootingMotion(int p_id)
 {
 	if (m_nMode == SCENE1STAGE) {
 
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + p_id])->ShootState(m_GameTimer.GetTimeElapsed());
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->ShootState(m_GameTimer.GetTimeElapsed());
 	}
 
 
@@ -2621,11 +2623,11 @@ void CGameFramework::otherPlayerDyingMotion(int p_id)
 {
 	if (m_nMode == SCENE1STAGE) {
 
-		if (((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + p_id]))
+		if (((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id]))
 		{
-			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + p_id])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType
+			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType
 				= ANIMATION_TYPE_ONCE;
-			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[6 + p_id])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
+			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
 		}
 	}
 
