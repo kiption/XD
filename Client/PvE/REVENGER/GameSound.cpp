@@ -14,7 +14,7 @@ GameSound::GameSound()
 	result = ColliSound->setMode(FMOD_LOOP_OFF);
 
 	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
-	result = soundSystem->createSound("Sound/helicopterfieldwithbirds.wav", FMOD_DEFAULT, 0, &speakSound);
+	result = soundSystem->createSound("Sound/helicopterfieldwithbirds.mp3", FMOD_DEFAULT, 0, &speakSound);
 	result = speakSound->setMode(FMOD_LOOP_NORMAL);
 
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
