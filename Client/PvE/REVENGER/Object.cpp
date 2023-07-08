@@ -1988,7 +1988,7 @@ void CSoldiarNpcObjects::DieState(float EleapsedTime)
 	CGameObject::Animate(EleapsedTime);
 }
 
-void CSoldiarNpcObjects::ShootState(float EleapsedTime)
+void CSoldiarNpcObjects::ShotState(float EleapsedTime)
 {
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
@@ -2281,7 +2281,7 @@ void CSoldiarOtherPlayerObjects::DieState(float EleapsedTime)
 	CGameObject::Animate(EleapsedTime);
 }
 
-void CSoldiarOtherPlayerObjects::ShootState(float EleapsedTime)
+void CSoldiarOtherPlayerObjects::ShotState(float EleapsedTime)
 {
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);

@@ -639,7 +639,7 @@ public:
 	void ReloadState(float EleapsedTime);
 	void JumpState(float EleapsedTime);
 	void DieState(float EleapsedTime);
-	void ShootState(float EleapsedTime);
+	void ShotState(float EleapsedTime);
 	void IdleState(float EleapsedTime);
 	virtual void Animate(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
@@ -665,7 +665,7 @@ public:
 	void ReloadState(float EleapsedTime);
 	void JumpState(float EleapsedTime);
 	void DieState(float EleapsedTime);
-	void ShootState(float EleapsedTime);
+	void ShotState(float EleapsedTime);
 	void IdleState(float EleapsedTime);
 	virtual void Animate(float fTimeElapsed);
 

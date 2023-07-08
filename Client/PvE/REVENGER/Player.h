@@ -77,7 +77,7 @@ public:
 
 	virtual void JumpState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL) {};
 	
-	virtual void ShootState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL) {};
+	virtual void ShotState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL) {};
 
 	void Rotate(float x, float y, float z);
 

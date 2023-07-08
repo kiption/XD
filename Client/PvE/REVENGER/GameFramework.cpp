@@ -577,29 +577,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 
 		}
 		break;
-
-
-
-
-
-
-
-
-
-
-
 		}
-
-
-
-
-
-
-
-
-
-
-
 	}
 	else if (UI_Switch) {
 		switch (nMessageID) {
@@ -671,8 +649,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			}
 			case 'R':
 				if (!player_dead) {
-					gamesound.shootSound->release();
-
+					gamesound.shotSound->release();
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bReloadState = true;
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReloadState();
 					q_keyboardInput.push(SEND_KEY_R);//S
@@ -813,7 +790,7 @@ void CGameFramework::ReleaseObjects()
 	if (m_pScene) m_pScene->ReleaseObjects();
 }
 
-bool ShootKey = false;
+bool ShotKey = false;
 void CGameFramework::ProcessInput()
 {
 	static UCHAR pKeysBuffer[256];
@@ -829,18 +806,10 @@ void CGameFramework::ProcessInput()
 
 			if (pKeysBuffer[KEY_A] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_A); dwDirection |= DIR_LEFT; }
 			if (pKeysBuffer[KEY_D] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT; }
-			if (pKeysBuffer[KEY_Q] & 0xF0)
-			{
-				dwDirection |= DIR_UP;
-
-			}
+			if (pKeysBuffer[KEY_Q] & 0xF0) { dwDirection |= DIR_UP; }
 		}
 
-		if (!player_dead) {
-			if (pKeysBuffer[VK_SPACE] & 0xF0) {
-				q_keyboardInput.push(SEND_KEY_SPACEBAR);//S
-			}
-		}
+		if (!player_dead) { if (pKeysBuffer[VK_SPACE] & 0xF0) { q_keyboardInput.push(SEND_KEY_SPACEBAR); } }
 
 
 		float cxDelta = 0.0f, cyDelta = 0.0f;
@@ -850,27 +819,21 @@ void CGameFramework::ProcessInput()
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
 			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
-
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
-
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
 		if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
-
-
 			if (m_nMode == SCENE1STAGE)
 			{
-
-				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShootDelay < 0.005)
+				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.02)
 				{
-
-					ShootKey = true;
-					if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pScene->m_pPlayer)->ShootState(m_GameTimer.GetTimeElapsed());
-					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->FireBullet(NULL);
-
+					ShotKey = true;
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
 					q_mouseInput.push(lclick);//s
+					if (m_nMode == SCENE1STAGE)((CHumanPlayer*)m_pScene->m_pPlayer)->ShotState(m_GameTimer.GetTimeElapsed());
+					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->FireBullet(NULL);
+
 				}
 
 			}
@@ -885,11 +848,7 @@ void CGameFramework::ProcessInput()
 					{
 						MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
 						q_mouseInput.push(mousemove);//s
-						if (cxDelta)
-							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(0.0, cxDelta, 0.0f);
-
-						if (cyDelta)
-							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, 0.0f, 0.0f);
+						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
 					}
 					if (dwDirection)
 					{
@@ -907,9 +866,6 @@ void CGameFramework::ProcessInput()
 								isCollide = true;
 								break;
 							}*/
-
-
-
 						}
 
 						if (isCollide) {
@@ -1000,32 +956,44 @@ void CGameFramework::AnimateObjects()
 		if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA)
 			m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera(CLOSEUP_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
 		//if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
+		if (((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->m_bActive == true)
+		{
+			((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->ParticlePosition = 
+				XMFLOAT3(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().x,
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().y + 8.0,
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().z);
 
-		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShootDelay += m_GameTimer.GetTimeElapsed();
-		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShootDelay > 0.15)
-		{
-			ShootKey = false;
-			((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShootDelay = 0.0f;
+			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42])->m_pSkinnedAnimationController->SetTrackAnimationSet(0,3);
 		}
-		if (ShootKey == true)
+
+		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay += m_GameTimer.GetTimeElapsed();
+		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay > 0.2)
 		{
-			m_pCamera->m_xmf4x4View._42 += 0.15f;
+			ShotKey = false;
+			((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay = 0.0f;
+		}
+		if (ShotKey == false)
+		{
+			m_pCamera->m_xmf4x4View._43 += 0.15f;
 			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
 			{
-				m_pCamera->m_xmf4x4View._42 += 0.35f;
-				m_pCamera->m_xmf4x4View._43 += 0.55f;
-			}
-			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
-		}
-		if (ShootKey == false)
-		{
-			m_pCamera->m_xmf4x4View._42 -= 0.15f;
-			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
-			{
-				m_pCamera->m_xmf4x4View._42 -= 0.35f;
-				m_pCamera->m_xmf4x4View._43 -= 0.55f;
+				m_pCamera->m_xmf4x4View._42 += 0.20f;
+				m_pCamera->m_xmf4x4View._43 += 0.75f;
 			}
 			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
+			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
+		}
+		if (ShotKey == true)
+		{
+			m_pCamera->m_xmf4x4View._43 -= 0.15f;
+			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
+			{
+				m_pCamera->m_xmf4x4View._42 -= 0.20f;
+				m_pCamera->m_xmf4x4View._43 -= 0.75f;
+			}
+			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
+			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
+
 		}
 	}
 }
@@ -2609,7 +2577,7 @@ void CGameFramework::otherPlayerShootingMotion(int p_id)
 {
 	if (m_nMode == SCENE1STAGE) {
 
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->ShootState(m_GameTimer.GetTimeElapsed());
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->ShotState(m_GameTimer.GetTimeElapsed());
 	}
 
 

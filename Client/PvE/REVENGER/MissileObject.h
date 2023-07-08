@@ -45,7 +45,7 @@ public:
 	CGameObject* m_pLockedObject = NULL;
 	CCamera* m_pCamera = NULL;
 	CPlayer* m_pPlayer = NULL;
-	float m_fShootDelay = 0.f;
+	float m_fShotDelay = 0.f;
 	void SetFirePosition(XMFLOAT3 xmf3FirePosition);
 	void Reset();
 };
@@ -70,7 +70,7 @@ public:
 	CGameObject* m_pLockedObject = NULL;
 	CCamera* m_pCamera = NULL;
 	CPlayer* m_pPlayer = NULL;
-	float m_fShootDelay = 0.f;
+	float m_fShotDelay = 0.f;
 	void SetFirePosition(XMFLOAT3 xmf3FirePosition);
 	void Reset();
 };

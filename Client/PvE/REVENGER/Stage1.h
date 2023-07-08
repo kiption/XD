@@ -75,7 +75,7 @@ public:
 	int									m_nBillboardShaders = 0;
 	BillboardShader** m_pBillboardShader = NULL;
 	bool Start = false;
-
+	bool Hit = false;
 	int m_nSpriteBillboards = 0;
 	CSpriteObjectsShader** m_ppSpriteBillboard = NULL;
 	CSkyBox* m_pSkyBox = NULL;

@@ -35,7 +35,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pSkinnedAnimationController->SetTrackEnable(7, false);
 	m_pSkinnedAnimationController->SetTrackEnable(8, false);
 
-	m_pSkinnedAnimationController->SetTrackWeight(6, 0.1f);
+	m_pSkinnedAnimationController->SetTrackSpeed(6, 0.5f);
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
 	m_pSkinnedAnimationController->SetCallbackKeys(2, 2);
@@ -128,7 +128,7 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(0.0f);
 		m_pCamera = OnChangeCamera(CLOSEUP_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(-0.6f, 0.16f, 0.235f-0.05));
+		m_pCamera->SetOffset(XMFLOAT3(-0.6f, 0.16f, 0.24f));
 		m_pCamera->SetPosition(Vector3::Add(
 			XMFLOAT3(m_pHeadFindFrame->GetPosition().x, m_pHeadFindFrame->GetPosition().y, m_pHeadFindFrame->GetPosition().z)
 			, m_pCamera->GetOffset()));
@@ -244,7 +244,7 @@ void CHumanPlayer::ReloadState()
 
 }
 
-void CHumanPlayer::ShootState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
+void CHumanPlayer::ShotState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 {
 
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);

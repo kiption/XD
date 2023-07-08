@@ -18,7 +18,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 {
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 
-	m_nObjects = 42;
+	m_nObjects = 43;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
@@ -122,7 +122,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 
 	////////////////////////////////////////////////SOLDIAR_NPC_LOAD///////////////////////////////////////////////////////////
-	m_nSoldiarNpcObjects = 21;
+	m_nSoldiarNpcObjects = 22;
 	CMaterial* pSoldiarNpcMaterial = new CMaterial(m_nSoldiarNpcObjects);
 	pSoldiarNpcMaterial->SetReflection(m_nSoldiarNpcObjects);
 	m_ppSoldiarNpcObjects = new CGameObject * [m_nSoldiarNpcObjects];
@@ -133,7 +133,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppSoldiarNpcObjects[i] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, 4);
 		m_ppSoldiarNpcObjects[i]->SetMaterial(0, pSoldiarNpcMaterial);
 		m_ppSoldiarNpcObjects[i]->SetScale(5.0, 5.0, 5.0);
-		m_ppSoldiarNpcObjects[i]->SetPosition(210.0, 6.3, 300.0 + i * 20);
+		if(i!=21)m_ppSoldiarNpcObjects[i]->SetPosition(210.0, 6.3, 300.0 + i * 20);
 		psModel->m_pModelRootObject->AddRef();
 	}
 
@@ -157,6 +157,8 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[39] = m_ppSoldiarNpcObjects[18];
 	m_ppObjects[40] = m_ppSoldiarNpcObjects[19];
 	m_ppObjects[41] = m_ppSoldiarNpcObjects[20];
+	m_ppObjects[42] = m_ppSoldiarNpcObjects[21];
+	m_ppObjects[42]->SetPosition(139.0,6.1,600.0);
 	if (psModel) delete psModel;
 	////////////////////////////////////////////////SOLDIAR_NPC_LOAD////////////////////////////////////////////
 

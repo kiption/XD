@@ -166,7 +166,7 @@ void HeliPlayer::OnPrepareAnimate()
 void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 {
 	CPlayer::Animate(fTimeElapse, pxmf4x4Parent);
-	m_fShootDelay += 0.1f;
+	m_fShotDelay += 0.1f;
 	for (int i = 0; i < BULLETS; i++)
 	{
 			if (m_ppBullets[i]->m_bActive)

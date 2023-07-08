@@ -169,7 +169,7 @@ public:
 	XMFLOAT4X4					m_pxmf4x4Transforms[EXPLOSION_SPARK];
 
 	float						m_fElapsedTimes = 1.0f;
-	float						m_fDuration = 1.2;
+	float						m_fDuration = 0.5;
 	float						m_fExplosionSpeed = 10.0f;
 	float						m_fExplosionRotation = 720.0f;
 	XMFLOAT3 m_pxmf3SphereVectors[EXPLOSION_SPARK];

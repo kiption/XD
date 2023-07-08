@@ -32,7 +32,7 @@ public:
 	//virtual void Animate(float fTimeElapsed);
 	virtual void Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent);
 	virtual void Update(float fTimeElapsed);
-	float m_fShootDelay = 0.f;
+	float m_fShotDelay = 0.f;
 	BoundingOrientedBox m_xoobb = BoundingOrientedBox(XMFLOAT3(),XMFLOAT3(),XMFLOAT4());
 
 private:

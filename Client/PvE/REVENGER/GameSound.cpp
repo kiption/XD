@@ -4,9 +4,9 @@ GameSound::GameSound()
 {
 	result = FMOD::System_Create(&soundSystem);
 
-	result = soundSystem->init(60, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
-	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_UNIQUE, 0, &shootSound);
-	shootSound->setMode(FMOD_UNIQUE);
+	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
+	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_CREATESTREAM, 0, &shotSound);
+	shotSound->setMode(FMOD_CREATESTREAM);
 
 
 	result = soundSystem->init(64, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
@@ -57,7 +57,7 @@ GameSound::GameSound()
 
 GameSound::~GameSound()
 {
-	result = shootSound->release();
+	result = shotSound->release();
 	result = ColliSound->release();
 	result = speakSound->release();
 	result = bgmSound->release();
@@ -83,7 +83,7 @@ void GameSound::shootingSound(bool Stop)
 	//}
 
 
-	result = soundSystem->playSound(shootSound, 0, false, &shootChannel);
+	result = soundSystem->playSound(shotSound, 0, false, &shootChannel);
 	shootChannel->setVolume(0.04f);
 
 

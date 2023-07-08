@@ -23,7 +23,7 @@ public:
 	void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, XMFLOAT3 slideVec);
 	void JumpState();
 	void ReloadState();
-	virtual void ShootState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL);
+	virtual void ShotState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 
 	virtual void Update(float fTimeElapsed);
@@ -37,5 +37,5 @@ public:
 	CBulletObject* pBulletObject = NULL;
 	CBulletObject* m_ppBullets[BULLETS];
 	void FireBullet(CGameObject* pLockedObject);
-	float m_fShootDelay = 0.0f;
+	float m_fShotDelay = 0.0f;
 };

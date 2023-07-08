@@ -489,9 +489,9 @@ void processPacket(char* ptr)
 		players_info[my_id].m_bullet = recv_packet->bullet_cnt;
 		if (recv_packet->bullet_cnt == MAX_BULLET) {
 			gamesound.reloadSound();
-			gamesound.shootingSound(true);
 		}
-		gamesound.shootingSound(false);
+		else
+			gamesound.shootingSound(false);
 		break;
 	}//SC_BULLET_COUNT case end
 	case SC_MISSION:

@@ -28,7 +28,7 @@ XMVECTOR RandomHittingVectorOnSphereBillboard()
 
 	while (true)
 	{
-		XMVECTOR v = XMVectorSet(RandFm(-1.0f,-1.0f), RandFm(-1.0f, 1.0f), RandFm(-0.0f, 0.0f), 0.1f);
+		XMVECTOR v = XMVectorSet(RandFm(-1.0f,-1.0f), RandFm(-3.0f, 3.0f), RandFm(-0.0f, 0.0f), 0.1f);
 		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
 	}
 }
@@ -663,12 +663,12 @@ D3D12_SHADER_BYTECODE BloodHittingBillboard::CreateVertexShader(ID3DBlob** ppd3d
 void BloodHittingBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/BloodSplatter.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/blood.dds", RESOURCE_TEXTURE2D, 0);
 	CMaterial* pSpriteMaterial = new CMaterial(1);
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 8.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	m_nObjects = 3;
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.5f, 5.5f, 0.0f, 0.0f, 0.0f, 0.0f);
+	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures, 0, 15);
@@ -712,14 +712,14 @@ void BloodHittingBillboard::AnimateObjects(float fTimeElapsed)
 {
 	if (m_bActive == true)
 	{
-		XMFLOAT3 gravity = XMFLOAT3(-9.8f, 9.8f, 0);
-		m_fElapsedTimes += fTimeElapsed * 5.0f;
+		XMFLOAT3 gravity = XMFLOAT3(-8.8f, 9.8f, 0);
+		m_fElapsedTimes += fTimeElapsed * 7.0f;
 		if (m_fElapsedTimes <= m_fDuration)
 		{
 			for (int i = 0; i < m_nObjects; i++)
 			{
 				gravity=XMFLOAT3(-9.8f, 9.8f, 0);
-				m_fExplosionSpeed = +RandomBillboard(3.0f, 4.1f);
+				m_fExplosionSpeed = +RandomBillboard(3.0f, 8.1f);
 
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
 				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.x * m_fElapsedTimes * m_fElapsedTimes;;
@@ -736,11 +736,14 @@ void BloodHittingBillboard::AnimateObjects(float fTimeElapsed)
 		else
 		{
 			m_fElapsedTimes = 0.0f;
+			
 		}
 	}
 
 
-	BillboardShader::AnimateObjects(fTimeElapsed);
+
+
+	
 }
 
 void BloodHittingBillboard::ReleaseUploadBuffers()

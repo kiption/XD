@@ -30,7 +30,7 @@ void SoldiarPlayerObject::ReloadState()
 {
 }
 
-void SoldiarPlayerObject::ShootState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
+void SoldiarPlayerObject::ShotState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 {
 }
 

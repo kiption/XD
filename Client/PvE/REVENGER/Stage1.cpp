@@ -155,7 +155,6 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pBloodHittingBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pBloodHittingBillboard->SetCurScene(SCENE1STAGE);
 	pBloodHittingBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	pBloodHittingBillboard->m_bActive = true;
 	m_pBillboardShader[2] = pBloodHittingBillboard;
 
 	SparkBillboard* pHelicopterSparkBillboard = new SparkBillboard();
@@ -829,46 +828,25 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 
 	((CSpriteObjectsShader*)m_ppSpriteBillboard[0])->m_bActive = true;
 	((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveMark = true;
-	((BloodHittingBillboard*)m_pBillboardShader[2])->m_bActive = true;
 	((CFragmentsShader*)m_ppFragShaders[0])->m_bActive = true;
 	((CBloodFragmentsShader*)m_ppFragShaders[1])->m_bActive = true;
-
 	((CFragmentsShader*)m_ppFragShaders[0])->ParticlePosition = m_ppShaders[0]->m_ppObjects[13]->GetPosition();
-	//((BloodHittingBillboard*)m_ppFragShaders[2])->m_bActive = true;
 	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(m_ppShaders[0]->m_ppObjects[30]->GetPosition());
-	((CBloodFragmentsShader*)m_ppFragShaders[1])->ParticlePosition =
-		XMFLOAT3(m_ppShaders[0]->m_ppObjects[30]->GetPosition().x,
-			m_ppShaders[0]->m_ppObjects[30]->GetPosition().y + 8.0,
-			m_ppShaders[0]->m_ppObjects[30]->GetPosition().z);
-
+	((CBloodFragmentsShader*)m_ppFragShaders[1])->ParticlePosition =XMFLOAT3(m_ppShaders[0]->m_ppObjects[30]->GetPosition().x,m_ppShaders[0]->m_ppObjects[30]->GetPosition().y + 8.0,m_ppShaders[0]->m_ppObjects[30]->GetPosition().z);
 	((SparkBillboard*)m_pBillboardShader[3])->ParticlePosition = m_ppShaders[0]->m_ppObjects[13]->GetPosition();
 
-	((BloodHittingBillboard*)m_pBillboardShader[2])->ParticlePosition =
-		XMFLOAT3(m_ppShaders[0]->m_ppObjects[24]->GetPosition().x,
-			m_ppShaders[0]->m_ppObjects[24]->GetPosition().y + 8.0,
-			m_ppShaders[0]->m_ppObjects[24]->GetPosition().z);
+	CBulletObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
+	m_ppShaders[0]->m_ppObjects[42]->m_xoobb = BoundingOrientedBox(m_ppShaders[0]->m_ppObjects[42]->GetPosition(), XMFLOAT3(5.0, 9.0, 5.0), XMFLOAT4(0, 0, 0, 1));
+	for (int i = 0; i < BULLETS; i++)
+	{
+		ppBullets[i]->m_xoobb = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(2.0, 2.0, 4.0), XMFLOAT4(0, 0, 0, 1));
+		if (ppBullets[i]->m_xoobb.Intersects(m_ppShaders[0]->m_ppObjects[42]->m_xoobb))
+		{
+			((BloodHittingBillboard*)m_pBillboardShader[2])->m_bActive = true;
+			ppBullets[i]->Reset();
+		}
+	}
 
-	//CBulletObject** ppBullets = ((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_ppBullets;
-
-	//for (int k = 22; k < 40; k++)
-	//	m_ppShaders[0]->m_ppObjects[k]->m_xoobb = BoundingOrientedBox(m_ppShaders[0]->m_ppObjects[k]->GetPosition(), XMFLOAT3(5.0, 9.0, 5.0), XMFLOAT4(0, 0, 0, 1));
-
-	//for (int i = 0; i < BULLETS; i++)
-	//{
-	//	ppBullets[i]->m_xoobb = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
-	//	for (int k = 22; k < 40; k++)
-	//	{
-	//		if (ppBullets[i]->m_xoobb.Intersects(m_ppShaders[0]->m_ppObjects[k]->m_xoobb))
-	//		{
-
-	//			((BulletMarkBillboard*)m_pBillboardShader[4])->m_bActive = true;
-	//			XMFLOAT3 HittingPoint = ppBullets[i]->GetPosition();
-
-	//			((BulletMarkBillboard*)m_pBillboardShader[4])->ParticlePosition = HittingPoint;
-	//			ppBullets[i]->Reset();
-	//		}
-	//	}
-	//}
 
 	XMFLOAT3 Position2P = m_ppShaders[0]->m_ppObjects[5]->GetPosition();
 	XMFLOAT3 Look2P = m_ppShaders[0]->m_ppObjects[5]->GetLook();

@@ -11,7 +11,7 @@ class GameSound
 public:	
 	FMOD::System* soundSystem;
 
-	FMOD::Sound* shootSound;
+	FMOD::Sound* shotSound;
 	FMOD::Channel* shootChannel;
 
 	FMOD::Sound* ColliSound;
