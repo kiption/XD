@@ -211,6 +211,21 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pShadowShader->SetCurScene(SCENE1STAGE);
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
+	pBCBulletEffectShader = new CBulletEffectShader();
+	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
+
+	for (int i = 0; i < HELIBULLETS; i++)
+	{
+		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
+		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
+		pBulletObject->SetChild(pBulletMesh, false);
+		pBulletObject->SetMovingSpeed(200.0f);
+		pBulletObject->SetActive(false);
+		pBulletObject->SetCurScene(SCENE1STAGE);
+		m_ppBullets[i] = pBulletObject;
+		pBulletMesh->AddRef();
+	}
 
 	gamesound.SpeakMusic();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -222,7 +237,7 @@ void Stage1::ReleaseObjects()
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
 	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
 	//if (m_pBoundingBoxShader) m_pBoundingBoxShader->Release();
-
+	for (int i = 0; i < HELIBULLETS; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
 	if (m_pBillboardShader)
 	{
 		for (int i = 0; i < m_nBillboardShaders; i++)
@@ -765,6 +780,42 @@ void Stage1::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pText
 	for (int j = 0; j < nRootParameters; j++) pTexture->SetRootParameterIndex(j, nRootParameterStartIndex + j);
 }
 
+void Stage1::Firevalkan(CGameObject* Objects, XMFLOAT3 ToPlayerLook)
+{
+	CValkanObject* pBulletObject = NULL;
+	for (int i = 0; i < HELIBULLETS; i++)
+	{
+		if (!m_ppBullets[i]->m_bActive)
+		{
+			pBulletObject = m_ppBullets[i];
+			pBulletObject->Reset();
+			break;
+		}
+	}
+
+	if (pBulletObject)
+	{
+		XMFLOAT3 PlayerLook = ToPlayerLook;
+
+		XMFLOAT3 xmf3Position = Objects->GetPosition();
+		XMFLOAT3 xmf3Direction = PlayerLook;
+
+		pBulletObject->m_xmf4x4ToParent = Objects->m_xmf4x4World;
+
+
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
+		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+		pBulletObject->m_xmf4x4ToParent._31 = ToPlayerLook.x;
+		pBulletObject->m_xmf4x4ToParent._32 = ToPlayerLook.y;
+		pBulletObject->m_xmf4x4ToParent._33 = ToPlayerLook.z;
+		pBulletObject->Rotate(90.0, 0.0, 0.0);
+		pBulletObject->SetMovingDirection(xmf3Direction);
+		pBulletObject->SetScale(0.5, 6.0, 0.5);
+		pBulletObject->SetActive(true);
+
+	}
+}
+
 
 
 bool Stage1::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -847,6 +898,14 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		}
 	}
 
+	for (int i = 0; i < HELIBULLETS; i++)
+	{
+		if (m_ppBullets[i]->m_bActive)
+		{
+			m_ppBullets[i]->Animate(fTimeElapsed);
+
+		}
+	}
 
 	XMFLOAT3 Position2P = m_ppShaders[0]->m_ppObjects[5]->GetPosition();
 	XMFLOAT3 Look2P = m_ppShaders[0]->m_ppObjects[5]->GetLook();
@@ -862,6 +921,8 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	//XMMATRIX xmmtxRotation = XMMatrixRotationY(fTimeElapsed * 0.02f);
 	//XMStoreFloat3(&m_pLights->m_pLights[0].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction), xmmtxRotation));
 	//XMStoreFloat3(&m_pLights->m_pLights[1].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[1].m_xmf3Direction), xmmtxRotation));
+
+
 	ParticleAnimation();
 }
 
@@ -880,13 +941,8 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nBillboardShaders; i++) if (i != 1 && m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
-	for (int k = 0; k < 5; k++)
-	{
-		for (int i = 0; i < HELIBULLETS; i++)
-		{
-			((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[12 + k])->m_ppBullets[i]->Render(pd3dCommandList, pCamera, false);
-		}
-	}
+	if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
+	for (int i = 0; i < HELIBULLETS; i++)if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
 
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);

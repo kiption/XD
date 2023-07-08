@@ -201,12 +201,6 @@ void CSpaceShipCamera::Rotate(float x, float y, float z)
 		m_xmf3Position = Vector3::Subtract(m_xmf3Position, m_pPlayer->GetPosition());
 		m_xmf3Position = Vector3::TransformCoord(m_xmf3Position, xmmtxRotate);
 		m_xmf3Position = Vector3::Add(m_xmf3Position, m_pPlayer->GetPosition());
-
-		//XMFLOAT3 xmf3Up = m_pPlayer->GetUpVector();
-		//XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Up), XMConvertToRadians(y));
-		//m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-		//m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
-		//m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 	}
 }
 void CSpaceShipCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)

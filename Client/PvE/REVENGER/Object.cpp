@@ -1770,22 +1770,9 @@ CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	/*SetChild(pmodel, false);
 	pmodel->AddRef();*/
 
-	pBCBulletEffectShader = new CBulletEffectShader();
-	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
-	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
 
 
-	for (int i = 0; i < HELIBULLETS; i++)
-	{
-		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
-		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
-		pBulletObject->SetChild(pBulletMesh, false);
-		pBulletObject->SetMovingSpeed(200.0f);
-		pBulletObject->SetActive(false);
-		pBulletObject->SetCurScene(SCENE1STAGE);
-		m_ppBullets[i] = pBulletObject;
-		pBulletMesh->AddRef();
-	}
+
 
 	OnPrepareAnimate();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1793,43 +1780,12 @@ CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 CHelicopterObjects::~CHelicopterObjects()
 {
-	for (int i = 0; i < HELIBULLETS; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
+	
 }
 
 void CHelicopterObjects::Firevalkan(XMFLOAT3 ToPlayerLook)
 {
-	CValkanObject* pBulletObject = NULL;
-	for (int i = 0; i < HELIBULLETS; i++)
-	{
-		if (!m_ppBullets[i]->m_bActive)
-		{
-			pBulletObject = m_ppBullets[i];
-			pBulletObject->Reset();
-			break;
-		}
-	}
-
-	if (pBulletObject)
-	{
-		XMFLOAT3 PlayerLook = ToPlayerLook;
-
-		XMFLOAT3 xmf3Position = GetPosition();
-		XMFLOAT3 xmf3Direction = PlayerLook;
-
-		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
-
-
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
-		pBulletObject->m_xmf4x4ToParent._31 = ToPlayerLook.x;
-		pBulletObject->m_xmf4x4ToParent._32 = ToPlayerLook.y;
-		pBulletObject->m_xmf4x4ToParent._33 = ToPlayerLook.z;
-		pBulletObject->Rotate(90.0, 0.0, 0.0);
-		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->SetScale(4.0, 7.0, 4.0);
-		pBulletObject->SetActive(true);
-
-	}
+	
 }
 
 void CHelicopterObjects::OnPrepareAnimate()
@@ -1854,14 +1810,6 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
 	}
 
-	for (int i = 0; i < HELIBULLETS; i++)
-	{
-		if (m_ppBullets[i]->m_bActive)
-		{
-			m_ppBullets[i]->Animate(fTimeElapsed);
-
-		}
-	}
 
 	if (m_bDyingstate == true) {
 		//m_bDyingMotion = true;
@@ -1881,8 +1829,7 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 void CHelicopterObjects::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	CGameObject::Render(pd3dCommandList, pCamera);
-	if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
-	for (int i = 0; i < HELIBULLETS; i++)if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
+	
 
 }
 
@@ -1890,22 +1837,6 @@ void CHelicopterObjects::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 //
 CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(21)
 {
-	pBCBulletEffectShader = new CBulletEffectShader();
-	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
-	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
-	for (int i = 0; i < HUMANBULLETS; i++)
-	{
-
-		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
-		pBulletObject = new CNPCbulletObject(m_fBulletEffectiveRange);
-		pBulletObject->SetChild(pBulletMesh, false);
-		pBulletObject->SetMovingSpeed(200.0f);
-		pBulletObject->SetActive(false);
-		pBulletObject->SetCurScene(SCENE1STAGE);
-		m_ppBullets[i] = pBulletObject;
-		pBulletMesh->AddRef();
-	}
-
 	SetChild(pModel->m_pModelRootObject, true);
 	pModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
 
@@ -1929,7 +1860,7 @@ CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 CSoldiarNpcObjects::~CSoldiarNpcObjects()
 {
-	for (int i = 0; i < HUMANBULLETS; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
+	
 }
 
 void CSoldiarNpcObjects::MoveForward(float EleapsedTime)
@@ -2011,15 +1942,6 @@ void CSoldiarNpcObjects::IdleState(float EleapsedTime)
 
 void CSoldiarNpcObjects::Animate(float fTimeElapsed)
 {
-
-	for (int i = 0; i < HUMANBULLETS; i++)
-	{
-		if (m_ppBullets[i]->m_bActive)
-		{
-			m_ppBullets[i]->Animate(fTimeElapsed);
-
-		}
-	}
 	//MoveForward(fTimeElapsed);
 	CGameObject::Animate(fTimeElapsed);
 }
@@ -2033,38 +1955,7 @@ void CSoldiarNpcObjects::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 
 void CSoldiarNpcObjects::Firevalkan(XMFLOAT3 ToPlayerLook)
 {
-	CNPCbulletObject* pBulletObject = NULL;
-	for (int i = 0; i < HUMANBULLETS; i++)
-	{
-		if (!m_ppBullets[i]->m_bActive)
-		{
-			pBulletObject = m_ppBullets[i];
-			pBulletObject->Reset();
-			break;
-		}
-	}
 
-	if (pBulletObject)
-	{
-		XMFLOAT3 PlayerLook = ToPlayerLook;
-
-		XMFLOAT3 xmf3Position = GetPosition();
-		XMFLOAT3 xmf3Direction = PlayerLook;
-
-		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
-
-
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
-		pBulletObject->m_xmf4x4ToParent._31 = ToPlayerLook.x;
-		pBulletObject->m_xmf4x4ToParent._32 = ToPlayerLook.y;
-		pBulletObject->m_xmf4x4ToParent._33 = ToPlayerLook.z;
-		pBulletObject->Rotate(90.0, 0.0, 0.0);
-		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->SetScale(4.0, 7.0, 4.0);
-		pBulletObject->SetActive(true);
-
-	}
 }
 
 CEthanAnimationController::CEthanAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel) : CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pModel)

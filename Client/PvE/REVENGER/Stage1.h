@@ -90,7 +90,7 @@ public:
 
 	XMFLOAT3 particlepos;
 
-
+	void Firevalkan(CGameObject* Objects,XMFLOAT3 ToPlayerLook);
 public:
 	float m_fBulletEffectiveRange = 2000.0f;
 	CBulletEffectShader* pBCBulletEffectShader = NULL;
