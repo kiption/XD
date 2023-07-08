@@ -11,13 +11,11 @@ GameSound gamesound;
 #pragma comment (lib, "WS2_32.LIB")
 #pragma comment(lib, "MSWSock.lib")
 
-const char* SERVER_ADDR = IPADDR_LOOPBACK;   // 루프백 용
-const char* LOGIC0_ADDR = IPADDR_LOGIC0;   // 리모트 용
-const char* LOGIC1_ADDR = IPADDR_LOGIC1;   // 리모트 용
-
+enum SERVER_TYPE { SERVER_LOGIN, SERVER_LOBBY, SERVER_LOGIC };
+short curr_servertype = -1;
 SOCKET s_socket;
 short active_servernum = 1;
-array<SOCKET, MAX_LOGIC_SERVER> sockets;
+//array<SOCKET, MAX_LOGIC_SERVER> sockets;
 int my_id;
 
 //==================================================
@@ -97,7 +95,7 @@ public:
 void CALLBACK recvCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED lp_over, DWORD s_flag);
 void CALLBACK sendCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED lp_over, DWORD s_flag);
 OVER_EX g_recv_over;
-void recvPacket(short servernum)
+void recvPacket()
 {
 	//cout << "Do RECV" << endl;
 	DWORD recv_flag = 0;
@@ -105,33 +103,41 @@ void recvPacket(short servernum)
 	memset(&g_recv_over.overlapped, 0, sizeof(g_recv_over.overlapped));
 	g_recv_over.wsabuf.len = BUF_SIZE;
 	g_recv_over.wsabuf.buf = g_recv_over.send_buf;
-	if (WSARecv(sockets[servernum], &g_recv_over.wsabuf, 1, 0, &recv_flag, &g_recv_over.overlapped, recvCallback) == SOCKET_ERROR) {
+
+	if (WSARecv(s_socket, &g_recv_over.wsabuf, 1, 0, &recv_flag, &g_recv_over.overlapped, recvCallback) == SOCKET_ERROR) {
 		if (GetLastError() != WSA_IO_PENDING)
 			cout << "[WSARecv Error] code: " << GetLastError() << "\n" << endl;
 	}
 }
-void sendPacket(void* packet, short servernum)
+void sendPacket(void* packet)
 {
 	//cout << "Do SEND" << endl;
 	OVER_EX* s_data = new OVER_EX{ reinterpret_cast<char*>(packet) };
-	if (WSASend(sockets[servernum], &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback) == SOCKET_ERROR) {
+	if (WSASend(s_socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback) == SOCKET_ERROR) {
 		int err_no = GetLastError();
 		if (err_no == WSAECONNRESET) {   // 서버가 끊어진 상황
-			closesocket(sockets[active_servernum]);
+			closesocket(s_socket);
 
 			int new_portnum = 0;
-			switch (servernum) {
-			case 0:   // Active: 0 -> 1
-				active_servernum = 1;
-				new_portnum = PORTNUM_LOGIC_1;
+			switch (curr_servertype) {
+			case SERVER_LOGIN:
 				break;
-			case 1:   // Active: 1 -> 0
-				active_servernum = 0;
-				new_portnum = PORTNUM_LOGIC_0;
+			case SERVER_LOBBY:
+				break;
+			case SERVER_LOGIC:
+				if (active_servernum == 0) {		// Active: 0 -> 1
+					active_servernum = 1;
+					new_portnum = PORTNUM_LOGIC_1;
+				}
+				else if (active_servernum == 1) {	// Active: 1 -> 0
+					active_servernum = 0;
+					new_portnum = PORTNUM_LOGIC_0;
+				}
+
 				break;
 			}
 
-			sockets[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+			s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 			SOCKADDR_IN newserver_addr;
 			ZeroMemory(&newserver_addr, sizeof(newserver_addr));
 			newserver_addr.sin_family = AF_INET;
@@ -139,20 +145,29 @@ void sendPacket(void* packet, short servernum)
 			//inet_pton(AF_INET, SERVER_ADDR, &newserver_addr.sin_addr);//루프백
 
 			// REMOTE
-			if (active_servernum == 0) {
-				inet_pton(AF_INET, IPADDR_LOGIC0, &newserver_addr.sin_addr);
+			switch (curr_servertype) {
+			case SERVER_LOGIN:
+				break;
+			case SERVER_LOBBY:
+				break;
+			case SERVER_LOGIC:
+				if (active_servernum == 0) {
+					inet_pton(AF_INET, IPADDR_LOGIC0, &newserver_addr.sin_addr);
+				}
+				else if (active_servernum == 1) {
+					inet_pton(AF_INET, IPADDR_LOGIC1, &newserver_addr.sin_addr);
+				}
+
+				break;
 			}
-			else if (active_servernum == 1) {
-				inet_pton(AF_INET, IPADDR_LOGIC1, &newserver_addr.sin_addr);
-			}
-			connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&newserver_addr), sizeof(newserver_addr));
+			connect(s_socket, reinterpret_cast<sockaddr*>(&newserver_addr), sizeof(newserver_addr));
 
 			CS_RELOGIN_PACKET re_login_pack;
 			re_login_pack.size = sizeof(CS_RELOGIN_PACKET);
 			re_login_pack.type = CS_RELOGIN;
 			re_login_pack.id = my_id;
-			sendPacket(&re_login_pack, active_servernum);
-			recvPacket(active_servernum);
+			sendPacket(&re_login_pack);
+			recvPacket();
 		}
 		cout << "[WSASend Error] code: " << err_no << "\n" << endl;
 	}
@@ -168,7 +183,7 @@ void CALLBACK recvCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWO
 
 	processData(g_recv_over.send_buf, num_bytes);
 
-	recvPacket(active_servernum);
+	recvPacket();
 }
 void CALLBACK sendCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flag)
 {

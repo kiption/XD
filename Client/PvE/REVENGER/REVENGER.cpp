@@ -46,6 +46,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LABPROJECT0797ANIMATION));
 
 	// Server Code
+	wcout.imbue(locale("korean"));
+	WSADATA WSAData;
+	WSAStartup(MAKEWORD(2, 2), &WSAData);
+
 	thread networkThread(networkThreadFunc);
 	networkThread.detach();
 
@@ -125,7 +129,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					CS_PING_PACKET ping_packet;
 					ping_packet.type = CS_PING;
 					ping_packet.size = sizeof(CS_PING_PACKET);
-					sendPacket(&ping_packet, active_servernum);
+					sendPacket(&ping_packet);
 					last_ping = chrono::system_clock::now();
 					//cout << "ping" << endl;
 				}
@@ -399,10 +403,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 void networkThreadFunc()
 {
-	wcout.imbue(locale("korean"));
-	WSADATA WSAData;
-	WSAStartup(MAKEWORD(2, 2), &WSAData);
-
+	curr_servertype = SERVER_LOGIC;
 	active_servernum = MAX_LOGIC_SERVER - 1;
 
 	CS_LOGIN_PACKET login_pack;
@@ -411,18 +412,18 @@ void networkThreadFunc()
 	strcpy_s(login_pack.name, "COPTER");
 
 	// Active Server에 연결
-	sockets[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 	SOCKADDR_IN server0_addr;
 	ZeroMemory(&server0_addr, sizeof(server0_addr));
 	server0_addr.sin_family = AF_INET;
 	int new_portnum = PORTNUM_LOGIC_0 + active_servernum;
 	server0_addr.sin_port = htons(new_portnum);
 	//inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);// 루프백
-	inet_pton(AF_INET, LOGIC1_ADDR, &server0_addr.sin_addr);
-	connect(sockets[active_servernum], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
+	inet_pton(AF_INET, IPADDR_LOGIC1, &server0_addr.sin_addr);
+	connect(s_socket, reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
 
-	sendPacket(&login_pack, active_servernum);
-	recvPacket(active_servernum);
+	sendPacket(&login_pack);
+	recvPacket();
 
 	stage1_enter_ok = false;
 	stage2_enter_ok = false;
@@ -448,7 +449,7 @@ void networkThreadFunc()
 					keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
 					keyinput_pack.type = CS_INPUT_KEYBOARD;
 					keyinput_pack.keytype = keyValue;
-					sendPacket(&keyinput_pack, active_servernum);
+					sendPacket(&keyinput_pack);
 					break;
 				}
 			case PACKET_KEY_NUM2:
@@ -457,7 +458,7 @@ void networkThreadFunc()
 					keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
 					keyinput_pack.type = CS_INPUT_KEYBOARD;
 					keyinput_pack.keytype = keyValue;
-					sendPacket(&keyinput_pack, active_servernum);
+					sendPacket(&keyinput_pack);
 					break;
 				}
 			case PACKET_KEY_W:
@@ -470,7 +471,7 @@ void networkThreadFunc()
 				move_front_pack.y = gGameFramework.getMyPosition().y;
 				move_front_pack.z = gGameFramework.getMyPosition().z;
 				move_front_pack.direction = MV_FRONT;
-				sendPacket(&move_front_pack, active_servernum);
+				sendPacket(&move_front_pack);
 				break;
 
 			case PACKET_KEY_S:
@@ -483,7 +484,7 @@ void networkThreadFunc()
 				move_back_pack.y = gGameFramework.getMyPosition().y;
 				move_back_pack.z = gGameFramework.getMyPosition().z;
 				move_back_pack.direction = MV_BACK;
-				sendPacket(&move_back_pack, active_servernum);
+				sendPacket(&move_back_pack);
 				break;
 
 			case PACKET_KEY_A:
@@ -497,7 +498,7 @@ void networkThreadFunc()
 				move_side_pack.y = gGameFramework.getMyPosition().y;
 				move_side_pack.z = gGameFramework.getMyPosition().z;
 				move_side_pack.direction = MV_SIDE;
-				sendPacket(&move_side_pack, active_servernum);
+				sendPacket(&move_side_pack);
 				break;
 
 			case PACKET_KEY_R:
@@ -508,7 +509,7 @@ void networkThreadFunc()
 				input_rkey_pack.type = CS_INPUT_KEYBOARD;
 				input_rkey_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
 				input_rkey_pack.keytype = PACKET_KEY_R;
-				sendPacket(&input_rkey_pack, active_servernum);
+				sendPacket(&input_rkey_pack);
 				break;
 
 			case PACKET_KEY_SPACEBAR:
@@ -522,7 +523,7 @@ void networkThreadFunc()
 				mv_keyup_pack.type = CS_INPUT_KEYBOARD;
 				mv_keyup_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
 				mv_keyup_pack.keytype = PACKET_KEYUP_MOVEKEY;
-				sendPacket(&mv_keyup_pack, active_servernum);
+				sendPacket(&mv_keyup_pack);
 				break;
 
 			default:
@@ -551,7 +552,7 @@ void networkThreadFunc()
 				yaw_rotate_pack.look_x = gGameFramework.getMyLookVec().x;
 				yaw_rotate_pack.look_y = gGameFramework.getMyLookVec().y;
 				yaw_rotate_pack.look_z = gGameFramework.getMyLookVec().z;
-				sendPacket(&yaw_rotate_pack, active_servernum);
+				sendPacket(&yaw_rotate_pack);
 				break;
 			case SEND_BUTTON_L:
 				if (gGameFramework.m_nMode == OPENINGSCENE) break;
@@ -559,7 +560,7 @@ void networkThreadFunc()
 				CS_ATTACK_PACKET attack_pack;
 				attack_pack.size = sizeof(CS_ATTACK_PACKET);
 				attack_pack.type = CS_ATTACK;
-				sendPacket(&attack_pack, active_servernum);
+				sendPacket(&attack_pack);
 				break;
 			case SEND_BUTTON_R:
 				if (gGameFramework.m_nMode == OPENINGSCENE) break;
@@ -576,7 +577,7 @@ void networkThreadFunc()
 			chat_msg_packet.type = CS_CHAT;
 			strcpy_s(chat_msg_packet.msg, gGameFramework.m_mychat_log.front().chatData);
 			gGameFramework.m_mychat_log.pop();
-			sendPacket(&chat_msg_packet, active_servernum);
+			sendPacket(&chat_msg_packet);
 		}
 
 		this_thread::yield();

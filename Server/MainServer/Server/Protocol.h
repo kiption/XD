@@ -48,7 +48,7 @@ constexpr int CHAT_SIZE = 60;
 
 constexpr int MAX_USER = 3;
 constexpr int MAX_NPCS = 25;
-constexpr int MAX_BULLET = 10;
+constexpr int MAX_BULLET = 30;
 
 constexpr int PLAYER_ID_START = 1000;		// Player ID 시작값. (ID_VALUE_PLAYER + client_id)
 constexpr int PLAYER_ID_END   = 1999;		// Player ID 끝값
