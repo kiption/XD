@@ -18,7 +18,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 {
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 
-	m_nObjects = 43;
+	m_nObjects = 44;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
@@ -133,7 +133,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppSoldiarNpcObjects[i] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, 4);
 		m_ppSoldiarNpcObjects[i]->SetMaterial(0, pSoldiarNpcMaterial);
 		m_ppSoldiarNpcObjects[i]->SetScale(5.0, 5.0, 5.0);
-		if(i!=21)m_ppSoldiarNpcObjects[i]->SetPosition(210.0, 6.3, 300.0 + i * 20);
+		if (i != 21)m_ppSoldiarNpcObjects[i]->SetPosition(210.0, 6.3, 300.0 + i * 20);
 		psModel->m_pModelRootObject->AddRef();
 	}
 
@@ -158,8 +158,20 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[40] = m_ppSoldiarNpcObjects[19];
 	m_ppObjects[41] = m_ppSoldiarNpcObjects[20];
 	m_ppObjects[42] = m_ppSoldiarNpcObjects[21];
-	m_ppObjects[42]->SetPosition(139.0,6.1,600.0);
+	m_ppObjects[42]->SetPosition(139.0, 6.1, 600.0);
 	if (psModel) delete psModel;
+
+
+	CMaterial* pHeliMaterial = new CMaterial(1);
+	pHeliMaterial->SetReflection(1);
+	CGameObject* pHelicopterModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
+	m_ppObjects[43] = new HeliPlayer(pd3dDevice, pd3dCommandList, pHelicopterModel, pd3dGraphicsRootSignature);
+	m_ppObjects[43]->SetMaterial(0, pHeliMaterial);
+	m_ppObjects[43]->OnPrepareAnimate();
+
+	pHelicopterModel->AddRef();
+
+
 	////////////////////////////////////////////////SOLDIAR_NPC_LOAD////////////////////////////////////////////
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -385,7 +397,7 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
 			m_pObjectsShader->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera, true, this);
 		}
-		
+
 	}
 	if (((CHumanPlayer*)m_pObjectsShader->m_ppObjects[1])->m_bZoomMode == false)
 	{
@@ -653,7 +665,7 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 				float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
 				/*float fFovAngle = 60.0f; */m_pLights[j].m_fPhi = cos(60.0f);
 				float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
-			//	xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(m_pLights[j].m_fPhi), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
+				//	xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(m_pLights[j].m_fPhi), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
 				xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
 			}
 			else if (m_pLights[j].m_nType == POINT_LIGHT)
@@ -664,7 +676,7 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 			m_ppDepthRenderCameras[j]->SetPosition(xmf3Position);
 			XMStoreFloat4x4(&m_ppDepthRenderCameras[j]->m_xmf4x4View, xmmtxView);
 			XMStoreFloat4x4(&m_ppDepthRenderCameras[j]->m_xmf4x4Projection, xmmtxProjection);
-		
+
 			XMMATRIX xmmtxToTexture = XMMatrixTranspose(xmmtxView * xmmtxProjection * m_xmProjectionToTexture);
 			XMStoreFloat4x4(&m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4x4ToTexture, xmmtxToTexture);
 

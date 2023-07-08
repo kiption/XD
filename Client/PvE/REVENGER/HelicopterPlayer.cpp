@@ -5,7 +5,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
-HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* model,ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
@@ -119,15 +119,15 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
 	case CLOSEUP_PERSON_CAMERA:
-		SetFriction(5.0f);
-		SetGravity(XMFLOAT3(0.0f, -0.0f, 0.0f));
-		SetMaxVelocityXZ(300.0f);
-		SetMaxVelocityY(400.0f);
+		SetFriction(0.0f);
+		SetGravity(XMFLOAT3(0.0f, -1.0f, 0.0f));
+		SetMaxVelocityXZ(10.0f);
+		SetMaxVelocityY(0.0f);
 		m_pCamera = OnChangeCamera(CLOSEUP_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 1.5, 2.6f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 6.5, 5.6f));
 		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z), m_pCamera->GetOffset()));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 4000.0f, ASPECT_RATIO, 60.0f);
+		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;

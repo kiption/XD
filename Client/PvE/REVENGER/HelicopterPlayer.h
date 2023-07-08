@@ -9,7 +9,7 @@
 class HeliPlayer : public CPlayer
 {
 public:
-	HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
+	HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,CGameObject* model, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual ~HeliPlayer();
 	CGameObject* m_pMainRotorFrame = NULL;
 	CGameObject* m_pTail2RotorFrame = NULL;

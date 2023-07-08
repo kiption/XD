@@ -764,7 +764,7 @@ void CGameFramework::BuildObjects()
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
 
 
-	HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL);
+	HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList,NULL ,m_pScene->GetGraphicsRootSignature(), NULL);
 
 	CreateShaderVariables();
 	//m_pScene->m_pPlayer = m_pScene->m_pPlayer = pPlayer;
@@ -849,6 +849,8 @@ void CGameFramework::ProcessInput()
 						MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
 						q_mouseInput.push(mousemove);//s
 						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
+						//---------- HeliPlayer
+						//((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
 					}
 					if (dwDirection)
 					{
@@ -926,19 +928,30 @@ void CGameFramework::ProcessInput()
 							//cout << "collide!" << endl;
 							//((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move();
 							//m_pPlayer->SetMovingDirection(PlayerMoveDir);
+							
+							//--------Heli Player-----------// 
+							//((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
+							//--------Human Player-----------// 
 							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
 
-						}
+						} 	//--------Human Player-----------// 
 						else ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
+							//--------Heli Player-----------// 
+					//	else ((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
 
+						//--------Heli Player-----------// 
+						//((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
+					 	//--------Human Player-----------// 
 						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
 					}
 				}
 			}
 		}
 	}
-	if (m_nMode == SCENE1STAGE)
-		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Update(m_GameTimer.GetTimeElapsed());
+	if (m_nMode == SCENE1STAGE)				 	//--------Human Player-----------// 
+		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Update(m_GameTimer.GetTimeElapsed());
+												//--------Heli Player-----------// 
+	//	((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Update(m_GameTimer.GetTimeElapsed());
 
 }
 
@@ -974,7 +987,8 @@ void CGameFramework::AnimateObjects()
 		}
 		if (ShotKey == false)
 		{
-			m_pCamera->m_xmf4x4View._43 += 0.15f;
+			m_pCamera->m_xmf4x4View._43 += 0.1f;
+		
 			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
 			{
 				m_pCamera->m_xmf4x4View._42 += 0.20f;
@@ -985,7 +999,8 @@ void CGameFramework::AnimateObjects()
 		}
 		if (ShotKey == true)
 		{
-			m_pCamera->m_xmf4x4View._43 -= 0.15f;
+			m_pCamera->m_xmf4x4View._43 -= 0.1f;
+	
 			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
 			{
 				m_pCamera->m_xmf4x4View._42 -= 0.20f;
@@ -1493,7 +1508,11 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			m_pScene = new Stage1();
 			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
 			m_pScene->m_pPlayer = ((CHumanPlayer*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[1]);
+			//-----HeliPlayer
+			//m_pScene->m_pPlayer = ((HeliPlayer*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[43]);
 			m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetCamera();
+			//-----HeliPlayer
+			//m_pCamera = ((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetCamera();
 			m_pScene->SetCurScene(SCENE1STAGE);
 			m_pd3dCommandList->Close();
 			ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
