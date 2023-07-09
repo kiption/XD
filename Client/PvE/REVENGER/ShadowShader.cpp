@@ -18,12 +18,12 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 {
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 
-	m_nObjects = 44;
+	m_nObjects = 46;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
 	CMaterial* pPlaneMaterial = new CMaterial(2);
-	pPlaneMaterial->SetReflection(2);
+	pPlaneMaterial->SetReflection(3);
 	m_ppObjects[0] = new CGameObject(1);
 	m_ppObjects[0]->SetMesh(pPlaneMesh);
 	m_ppObjects[0]->SetMaterial(0, pPlaneMaterial);
@@ -32,6 +32,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[2] = new CGameObject(1);
 	m_ppObjects[3] = new CGameObject(1);
 	m_ppObjects[4] = new CGameObject(1);
+
 
 	/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
 
@@ -171,7 +172,22 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	pHelicopterModel->AddRef();
 
-
+	CGameObject* psCarModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Car_A.bin", NULL);
+	m_ppObjects[44] = new CCityObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_ppObjects[44]->SetChild(psCarModel, true);
+	m_ppObjects[44]->SetMaterial(0, pPlaneMaterial);
+	m_ppObjects[44]->OnPrepareAnimate();
+	m_ppObjects[44]->SetScale(0.5, 0.5, 0.5);
+	m_ppObjects[44]->SetPosition(XMFLOAT3(130.0, 6.0, 800.0));
+	psCarModel->AddRef();
+	CGameObject* psCarModelB = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Car_B.bin", NULL);
+	m_ppObjects[45] = new CCityObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_ppObjects[45]->SetChild(psCarModelB, true);
+	m_ppObjects[45]->SetMaterial(0, pPlaneMaterial);
+	m_ppObjects[45]->OnPrepareAnimate();
+	m_ppObjects[45]->SetScale(0.5, 0.5, 0.5);
+	m_ppObjects[45]->SetPosition(XMFLOAT3(130.0, 6.0, 830.0));
+	psCarModelB->AddRef();
 	////////////////////////////////////////////////SOLDIAR_NPC_LOAD////////////////////////////////////////////
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
