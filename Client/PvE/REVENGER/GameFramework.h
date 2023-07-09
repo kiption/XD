@@ -37,12 +37,30 @@ struct LoginSceneInfo {
 	float sx, sy, lx, ly;
 };
 
-struct ChatInfo{
+struct ChatInfo {
 	WCHAR chatData[80];
 };
 
 struct SendChat {
 	char chatData[60];
+};
+
+struct LobbyRoom {
+	int num;
+	WCHAR* name;
+	int currnum_of_people; // current number of people
+	int ready_state;
+};
+
+struct MYRoomUser {
+	int ready_state;
+	WCHAR* User_name;
+};
+
+struct Roomname {
+	WCHAR* str1 = L"즐겁지 않은 졸작";
+	WCHAR* str2 = L"빠른 게임 고고";
+	WCHAR* str3 = L"즐거운 게임 해요";
 };
 
 struct CollideMapInfo
@@ -70,17 +88,12 @@ struct CollideMapInfo
 	}
 
 	void setBB() {
-		// 회전 값을 XMVECTOR로 변환
 		XMVECTOR rotation = XMQuaternionRotationRollPitchYaw(m_local_rotate.x, m_local_rotate.y, m_local_rotate.z);
 
-		// XMVECTOR를 XMFLOAT4로 변환
 		XMFLOAT4 oriented;
 		XMStoreFloat4(&oriented, rotation);
 
-		// BoundingOrientedBox 생성
 		m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pos.x, m_pos.y, m_pos.z), XMFLOAT3(m_scale.x, m_scale.y, m_scale.z), oriented);
-
-
 	}
 };
 
@@ -127,25 +140,26 @@ public:
 	DWORD						m_nMode = OPENINGSCENE;
 
 	GameSound gamesound;
-	int m_NumOfUI = 53;
+	int m_NumOfUI = 54;
 	bool UI_Switch = false;
 	bool m_bRollState = false;
 	bool m_LoginClick[4]{ false };
 	bool m_GameClick[3]{ false };
-	bool m_LobbyClick[2]{ false };
-	bool m_RoomClick[2]{ false };
+	bool m_LobbyClick[3]{ false };
+	bool m_RoomClick[3]{ false };
 	bool m_SniperOn = false;
 	LoginSceneInfo loginpos[4];
 	LoginSceneInfo gamepos[3];
-	LoginSceneInfo lobbypos[2];
-	LoginSceneInfo roompos[2];
+	LoginSceneInfo lobbypos[3];
+	LoginSceneInfo roompos[3];
+	LoginSceneInfo createpos[2];
 
 	bool m_bLoginInfoSend = false;
 	int m_LoginScene = 0;
 	float m_StartKey = 0;
 	float m_ReadyKey = 0;
 	bool m_CameraShaking = false;
-	float deltax=0.0;
+	float deltax = 0.0;
 public:
 	PostProcessShader* m_pPostProcessingShader = NULL;
 #ifdef _WITH_DIRECT2D
@@ -166,15 +180,15 @@ public:
 
 	ID2D1SolidColorBrush* m_pd2dbrBackground = NULL;
 	ID2D1SolidColorBrush* m_pd2dbrBorder = NULL;
-	IDWriteTextFormat* m_pdwFont[4];
-	IDWriteTextLayout* m_pdwTextLayout[4];
-	ID2D1SolidColorBrush* m_pd2dbrText[4];
+	IDWriteTextFormat* m_pdwFont[6];
+	IDWriteTextLayout* m_pdwTextLayout[6];
+	ID2D1SolidColorBrush* m_pd2dbrText[6];
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
-	ID2D1Effect* m_pd2dfxBitmapSource[53];
-	ID2D1Effect* m_pd2dfxGaussianBlur[53];
-	ID2D1Effect* m_pd2dfxEdgeDetection[53];
+	ID2D1Effect* m_pd2dfxBitmapSource[54];
+	ID2D1Effect* m_pd2dfxGaussianBlur[54];
+	ID2D1Effect* m_pd2dfxEdgeDetection[54];
 	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState = NULL;
 	IWICFormatConverter* m_pwicFormatConverter = NULL;
 	int							m_nDrawEffectImage = 0;
@@ -242,15 +256,16 @@ public:
 
 	// 서버에서 받은 총알 개수
 	WCHAR m_remainNPCPrint[20];
-
+	Roomname RoomnameList;
 	WCHAR m_LoginID[20];
 	WCHAR m_LoginPW[20];
 	WCHAR m_LoginIP[20];
 	WCHAR m_InsertChat[60];
+	WCHAR* createRoomName;
+	int m_myRoomNum = 13;
 
 	int m_mainmissionnum = 0;
 	int m_submissionnum = 0;
-
 	int m_currHp;
 	int m_currbullet;
 
@@ -268,8 +283,10 @@ public:
 	int m_CurrentPlayerNum;
 
 	int m_occupationnum = 0;
+	int m_LobbyPage = 0;
 	vector<CollideMapInfo> mapcol_info;
-	
+	vector<LobbyRoom>m_LobbyRoom_Info;
+	vector<MYRoomUser> m_MyRoom_Info;
 	queue<BulletPos> m_shoot_info;
 
 	queue<ChatInfo> m_chat_info;

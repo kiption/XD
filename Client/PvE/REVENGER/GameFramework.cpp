@@ -90,6 +90,11 @@ CGameFramework::CGameFramework()
 	lobbypos[1].lx = 1541.0f;
 	lobbypos[1].ly = 291.0f;
 
+	lobbypos[2].sx = 1555.0f;
+	lobbypos[2].sy = 170.0f;
+	lobbypos[2].lx = 1595.0f;
+	lobbypos[2].ly = 210.0f;
+
 	roompos[0].sx = 975.0f;
 	roompos[0].sy = 390.0f;
 	roompos[0].lx = 1225.0f;
@@ -99,6 +104,54 @@ CGameFramework::CGameFramework()
 	roompos[1].sy = 390.0f;
 	roompos[1].lx = 1545.0f;
 	roompos[1].ly = 485.0f;
+
+	roompos[2].sx = 1560.0f;
+	roompos[2].sy = 350.0f;
+	roompos[2].lx = 1605.0f;
+	roompos[2].ly = 390.0f;
+
+	createpos[0].sx = 1200.0f;
+	createpos[0].sy = 640.0f;
+	createpos[0].lx = 1335.0f;
+	createpos[0].ly = 700.0f;
+
+	createpos[1].sx = 1355.0f;
+	createpos[1].sy = 640.0f;
+	createpos[1].lx = 1490.0f;
+	createpos[1].ly = 700.0f;
+
+	// 아래는 지워도 되는 구간 - ui표시 상태 보려고 하는 것
+	LobbyRoom temp;
+	temp.currnum_of_people = 1;
+	WCHAR* tempname = L"빠르게 시작";
+	temp.name = tempname;
+	
+	temp.num = 12;
+	temp.ready_state = 2;
+
+	m_LobbyRoom_Info.emplace_back(temp);
+
+	MYRoomUser u_temp;
+	u_temp.ready_state = 1;
+	WCHAR* readytemp = L"kirew";
+	u_temp.User_name = readytemp;
+
+	m_MyRoom_Info.emplace_back(u_temp);
+
+	MYRoomUser k_temp;
+	k_temp.ready_state = 1;
+	WCHAR* tried = L"zepew";
+	k_temp.User_name = tried;
+
+	m_MyRoom_Info.emplace_back(k_temp);
+
+	MYRoomUser t_temp;
+	t_temp.ready_state = 1;
+	WCHAR* fix = L"fatal";
+	t_temp.User_name = fix;
+
+	m_MyRoom_Info.emplace_back(t_temp);
+
 }
 
 CGameFramework::~CGameFramework()
@@ -383,94 +436,156 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	case WM_RBUTTONDOWN:
 		if (m_nMode == SCENE1STAGE)
 			m_SniperOn = true;
-			((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = true;
-			m_pCamera->GenerateProjectionMatrix(1.01f, 1000.0f, ASPECT_RATIO, 40.0f);
-		
+		((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = true;
+		m_pCamera->GenerateProjectionMatrix(1.01f, 1000.0f, ASPECT_RATIO, 40.0f);
+
 		break;
 		//::ReleaseCapture();
 	case WM_RBUTTONUP:
 		if (m_nMode == SCENE1STAGE)
 			m_SniperOn = false;
-			((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = false;
-			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-		
+		((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = false;
+		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+
 		break;
 
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
 	{
-		switch (m_LoginScene)
-		{
-		case 0:
-			if (loginpos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[0].lx && loginpos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[0].ly) {
-				memset(m_LoginClick, 0, sizeof(m_LoginClick));
-				m_LoginClick[0] = true;
-			}
-			else if (loginpos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[1].lx && loginpos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[1].ly) {
-				memset(m_LoginClick, 0, sizeof(m_LoginClick));
-				m_LoginClick[1] = true;
-			}
-			else if (loginpos[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[2].lx && loginpos[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[2].ly) {
-				memset(m_LoginClick, 0, sizeof(m_LoginClick));
-				m_LoginClick[2] = true;
-			}
-			else if (loginpos[3].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[3].lx && loginpos[3].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[3].ly) {
-				memset(m_LoginClick, 0, sizeof(m_LoginClick));
-				m_LoginClick[3] = true;
+		if (m_nMode == OPENINGSCENE) {
+			cout << "x: " << m_ptOldCursorPos.x << ", y: " << m_ptOldCursorPos.y << endl;
+			switch (m_LoginScene)
+			{
+			case 0: // 로그인 클릭 창
+				if (loginpos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[0].lx && loginpos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[0].ly) {
+					memset(m_LoginClick, 0, sizeof(m_LoginClick));
+					m_LoginClick[0] = true; // ID 입력 활성화
+				}
+				else if (loginpos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[1].lx && loginpos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[1].ly) {
+					memset(m_LoginClick, 0, sizeof(m_LoginClick));
+					m_LoginClick[1] = true; // PW 입력 활성화
+				}
+				else if (loginpos[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[2].lx && loginpos[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[2].ly) {
+					memset(m_LoginClick, 0, sizeof(m_LoginClick));
+					m_LoginClick[2] = true; // IP 입력 활성화 --> 서버 선택으로 변경 예정
+				}
+				else if (loginpos[3].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[3].lx && loginpos[3].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[3].ly) {
+					memset(m_LoginClick, 0, sizeof(m_LoginClick));
+					m_LoginClick[3] = true;
 
-				m_bLoginInfoSend = true;
+					m_bLoginInfoSend = true;
 
-				m_LoginScene = 1;
+					m_LoginScene = 1; // Login 클릭, 다음 UI 전환
+				}
+				else {
+					memset(m_LoginClick, 0, sizeof(m_LoginClick));
+				}
+				break;
+			case 1: // 게임 시작, 설정, 종료 
+				if (gamepos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < gamepos[0].lx && gamepos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < gamepos[0].ly) {
+					memset(m_GameClick, 0, sizeof(m_GameClick));
+					m_GameClick[0] = true;
+					m_LoginScene = 2; // 게임 시작 클릭
+				}
+				else if (gamepos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < gamepos[1].lx && gamepos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < gamepos[1].ly) {
+					memset(m_GameClick, 0, sizeof(m_GameClick));
+					m_GameClick[1] = true; // 설정 클릭
+				}
+				else if (gamepos[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < gamepos[2].lx && gamepos[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < gamepos[2].ly) {
+					memset(m_GameClick, 0, sizeof(m_GameClick));
+					m_GameClick[2] = true; // 종료 클릭 --> 종료되는 프로그램 넣어야 함.
+				}
+				else {
+					memset(m_GameClick, 0, sizeof(m_GameClick));
+				}
+				break;
+			case 2: // 로비 UI
+				if (lobbypos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[0].lx && lobbypos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[0].ly) {
+					m_LoginScene = 3; // 빠른시작 누름
+					
+					random_device rd;
+					default_random_engine dre(rd());
+					uniform_int_distribution <int> uid(1, 3);
+
+					int ran = uid(dre);
+					switch (ran)
+					{
+					case 1:
+						createRoomName = RoomnameList.str1;
+						break;
+					case 2:
+						createRoomName = RoomnameList.str2;
+						break;
+					case 3:
+						createRoomName = RoomnameList.str3;
+						break;
+					}
+
+				}
+				else if (lobbypos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[1].lx && lobbypos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[1].ly) {
+					m_LoginScene = 4; // 방만들기 누름
+					
+					random_device rd;
+					default_random_engine dre(rd());
+					uniform_int_distribution <int> uid(1, 3);
+					
+					int ran = uid(dre);
+					switch (ran)
+					{
+					case 1:
+						createRoomName = RoomnameList.str1;
+						break;
+					case 2:
+						createRoomName = RoomnameList.str2;
+						break;
+					case 3:
+						createRoomName = RoomnameList.str3;
+						break;
+					}
+
+				}
+				else if (lobbypos[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[2].lx && lobbypos[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[2].ly) {
+					m_LoginScene = 1; // 뒤로가기 누름
+				}
+				else {
+					memset(m_LobbyClick, 0, sizeof(m_LobbyClick));
+				}
+				break;
+			case 3: // 방 내부
+				if (roompos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[0].lx && roompos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[0].ly) {
+					bool in_game = true;
+					for (int i{}; i < m_MyRoom_Info.size(); ++i) {
+						if (m_MyRoom_Info[i].ready_state != 2) {
+							in_game = false;
+							break;
+						}
+					}
+					m_RoomClick[0] = in_game;
+
+				}
+				else if (roompos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[1].lx && roompos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[1].ly) {
+					m_RoomClick[1] = true; // Ready
+				}
+				else if (roompos[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[2].lx && roompos[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[2].ly) {
+					memset(m_RoomClick, 0, sizeof(m_RoomClick)); // Back
+					m_LoginScene = 2;
+				}
+				else {
+					memset(m_RoomClick, 0, sizeof(m_RoomClick));
+				}
+				break;
+			case 4:
+				if (createpos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < createpos[0].lx && createpos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < createpos[0].ly) {
+					m_LoginScene = 3; // 확인 누름
+				}
+				else if (createpos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < createpos[1].lx && createpos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < createpos[1].ly) {
+					m_LoginScene = 2; // 취소 누름
+					
+				}
+				break;
 			}
-			else {
-				memset(m_LoginClick, 0, sizeof(m_LoginClick));
-			}
-			break;
-		case 1:
-			if (gamepos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < gamepos[0].lx && gamepos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < gamepos[0].ly) {
-				memset(m_GameClick, 0, sizeof(m_GameClick));
-				m_GameClick[0] = true;
-				m_LoginScene = 2;
-			}
-			else if (gamepos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < gamepos[1].lx && gamepos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < gamepos[1].ly) {
-				memset(m_GameClick, 0, sizeof(m_GameClick));
-				m_GameClick[1] = true;
-			}
-			else if (gamepos[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < gamepos[2].lx && gamepos[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < gamepos[2].ly) {
-				memset(m_GameClick, 0, sizeof(m_GameClick));
-				m_GameClick[2] = true;
-			}
-			else {
-				memset(m_GameClick, 0, sizeof(m_GameClick));
-			}
-			break;
-		case 2:
-			if (lobbypos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[0].lx && lobbypos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[0].ly) {
-				memset(m_LobbyClick, 0, sizeof(m_LobbyClick));
-				m_LobbyClick[0] = true;
-				m_LoginScene = 3;
-			}
-			else if (lobbypos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[1].lx && lobbypos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[1].ly) {
-				memset(m_LobbyClick, 0, sizeof(m_LobbyClick));
-				m_LobbyClick[1] = true;
-			}
-			else {
-				memset(m_LobbyClick, 0, sizeof(m_LobbyClick));
-			}
-			break;
-		case 3:
-			if (roompos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[0].lx && roompos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[0].ly) {
-				m_RoomClick[0] = true;
-			}
-			else if (roompos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[1].lx && roompos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[1].ly) {
-				m_RoomClick[1] = true;
-			}
-			else {
-				memset(m_RoomClick, 0, sizeof(m_RoomClick));
-			}
-			break;
+
 		}
-
 	}
 	if (m_nMode == SCENE1STAGE) ::SetCapture(hWnd);
 	::GetCursorPos(&m_ptOldCursorPos);
@@ -764,7 +879,7 @@ void CGameFramework::BuildObjects()
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
 
 
-	HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList,NULL ,m_pScene->GetGraphicsRootSignature(), NULL);
+	HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, NULL, m_pScene->GetGraphicsRootSignature(), NULL);
 
 	CreateShaderVariables();
 	//m_pScene->m_pPlayer = m_pScene->m_pPlayer = pPlayer;
@@ -890,16 +1005,16 @@ void CGameFramework::ProcessInput()
 							float forwardDotResultAbs = abs(forwardDotResult);
 							float rightDotResultAbs = abs(rightDotResult);
 
-							float radian = XMConvertToRadians(temp.m_angle_aob/2);
+							float radian = XMConvertToRadians(temp.m_angle_aob / 2);
 
 							XMFLOAT3 PlayerMoveDir;
-							
+
 							if (abs(cos(radian)) < forwardDotResultAbs) {
 								if (forwardDotResult < 0) {
 									cout << "1" << endl;
 									XMVECTOR reversedLocalForward = XMVectorNegate(XMLoadFloat3(&normalizedLocalForward));
 									XMStoreFloat3(&normalizedLocalForward, reversedLocalForward);
-									
+
 									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2PlayerVector), XMLoadFloat3(&normalizedLocalForward));
 									XMStoreFloat3(&PlayerMoveDir, AddVector);
 								}
@@ -933,12 +1048,12 @@ void CGameFramework::ProcessInput()
 
 						} 	//--------Human Player-----------// 
 						else ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
-							//--------Heli Player-----------// 
-					//	else ((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
-
 						//--------Heli Player-----------// 
-						//((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
-					 	//--------Human Player-----------// 
+				//	else ((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
+
+					//--------Heli Player-----------// 
+					//((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
+					//--------Human Player-----------// 
 						((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
 					}
 				}
@@ -947,8 +1062,8 @@ void CGameFramework::ProcessInput()
 	}
 	if (m_nMode == SCENE1STAGE)				 	//--------Human Player-----------// 
 		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Update(m_GameTimer.GetTimeElapsed());
-												//--------Heli Player-----------// 
-	//	((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Update(m_GameTimer.GetTimeElapsed());
+	//--------Heli Player-----------// 
+//	((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Update(m_GameTimer.GetTimeElapsed());
 
 }
 
@@ -968,12 +1083,12 @@ void CGameFramework::AnimateObjects()
 		//if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
 		if (((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->m_bActive == true)
 		{
-			((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->ParticlePosition = 
+			((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->ParticlePosition =
 				XMFLOAT3(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().x,
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().y + 8.0,
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().z);
+					((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().y + 8.0,
+					((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().z);
 
-			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42])->m_pSkinnedAnimationController->SetTrackAnimationSet(0,3);
+			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 		}
 
 		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay += m_GameTimer.GetTimeElapsed();
@@ -985,7 +1100,7 @@ void CGameFramework::AnimateObjects()
 		if (ShotKey == false)
 		{
 			m_pCamera->m_xmf4x4View._43 += 0.1f;
-		
+
 			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
 			{
 				m_pCamera->m_xmf4x4View._42 += 0.20f;
@@ -997,7 +1112,7 @@ void CGameFramework::AnimateObjects()
 		if (ShotKey == true)
 		{
 			m_pCamera->m_xmf4x4View._43 -= 0.1f;
-	
+
 			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
 			{
 				m_pCamera->m_xmf4x4View._42 -= 0.20f;
@@ -1153,19 +1268,22 @@ void CGameFramework::FrameAdvance()
 			D2D_POINT_2F D2_RobbyReadyUI[8];
 			D2D_RECT_F D2_RobbyReadyUIRect[8];
 
-			int infosize = 8;
-			for (int i = 0; i < infosize; ++i) {
+			for (int i = 0; i < m_LobbyRoom_Info.size(); ++i) {
+				int numberRoom = i;
+				if (m_LobbyPage != 0) {
+					numberRoom = m_LobbyPage * 8 + i;
+				}
 				int resulty = 375 + 54 * i;
 				float textypos = (((float)(FRAME_BUFFER_HEIGHT)) / ((float)(resulty)));
 
 				// 각 방 현재 인원
 				D2_RobbyPeopleUI[i] = { FRAME_BUFFER_WIDTH / 1.60f, FRAME_BUFFER_HEIGHT / textypos };
-				D2_RobbyPeopleUIRect[i] = { 0.0f, 0.0f,120.0f, 48.0f };
+				D2_RobbyPeopleUIRect[i] = { 0.0f, (m_LobbyRoom_Info[numberRoom].currnum_of_people - 1) * 48.0f, 120.0f, m_LobbyRoom_Info[numberRoom].currnum_of_people * 48.0f };
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[28 + i], &D2_RobbyPeopleUI[i], &D2_RobbyPeopleUIRect[i]);
 
 				// 각 방 준비 상태
 				D2_RobbyReadyUI[i] = { FRAME_BUFFER_WIDTH / 1.42f, FRAME_BUFFER_HEIGHT / textypos };
-				D2_RobbyReadyUIRect[i] = { 0.0f, 0.0f,225.0f, 50.0f };
+				D2_RobbyReadyUIRect[i] = { 0.0f, (m_LobbyRoom_Info[numberRoom].ready_state - 1) * 50.0f,225.0f, m_LobbyRoom_Info[numberRoom].ready_state * 50.0f };
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[36 + i], &D2_RobbyReadyUI[i], &D2_RobbyReadyUIRect[i]);
 			}
 			if (m_LoginScene == 3) {
@@ -1194,15 +1312,20 @@ void CGameFramework::FrameAdvance()
 				D2D_POINT_2F D2_RoomReadyNumUI[3];
 				D2D_RECT_F D2_RoomReadyNumUIRect[3];
 
-				int rinfosize = 3;
-				for (int i = 0; i < rinfosize; ++i) {
+				for (int i = 0; i < m_MyRoom_Info.size(); ++i) {
 					int resulty = 560 + 58 * i;
 					float textypos = (((float)(FRAME_BUFFER_HEIGHT)) / ((float)(resulty)));
 
 					D2_RoomReadyNumUI[i] = { FRAME_BUFFER_WIDTH / 1.48f, FRAME_BUFFER_HEIGHT / textypos };
-					D2_RoomReadyNumUIRect[i] = { 0.0f, 0.0f, 284.0f, 58.6f };
+					D2_RoomReadyNumUIRect[i] = { 0.0f, (m_MyRoom_Info[i].ready_state - 1) * 60.0f, 284.0f, m_MyRoom_Info[i].ready_state * 60.0f };
 					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[47 + i], &D2_RoomReadyNumUI[i], &D2_RoomReadyNumUIRect[i]);
 				}
+			}
+			if (m_LoginScene == 4) {
+				D2D_POINT_2F D2_RoomUI = { D2_OpeningUI.x + 100.0f, FRAME_BUFFER_HEIGHT / 2 - 146.5f };
+				D2D_RECT_F D2_RoomUIRect = { 0.0f, 0.0f, 1080.0f, 293.0f };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[53], &D2_RoomUI, &D2_RoomUIRect);
+			
 			}
 		}
 	}
@@ -1365,16 +1488,46 @@ void CGameFramework::FrameAdvance()
 			int roomsize = 8;
 			D2D_RECT_F D2_LoginRoomNumText[8];
 			D2D_RECT_F D2_LoginRoomNameText[8];
-			for (int i{}; i < roomsize; ++i) {
+			for (int i{}; i < m_LobbyRoom_Info.size(); ++i) {
 				int resultY = 400 + 55 * i;
 				float textypos = (((float)FRAME_BUFFER_HEIGHT) / ((float)resultY));
 
+				wchar_t roomnum[20];
+				_itow_s(m_LobbyRoom_Info[i].num, roomnum, sizeof(roomnum), 10);
+
 				D2_LoginRoomNumText[i] = D2D1::RectF((FRAME_BUFFER_WIDTH / 5.2), (FRAME_BUFFER_HEIGHT / textypos), (FRAME_BUFFER_WIDTH / 4.0), (FRAME_BUFFER_HEIGHT / textypos)); //2.7, 2.37, 2.12, 1.92
-				m_pd2dDeviceContext->DrawTextW(m_LoginID, (UINT32)wcslen(m_LoginID), m_pdwFont[2], &D2_LoginRoomNumText[i], m_pd2dbrText[2]);
+				m_pd2dDeviceContext->DrawTextW(roomnum, (UINT32)wcslen(roomnum), m_pdwFont[2], &D2_LoginRoomNumText[i], m_pd2dbrText[2]);
 
 				D2_LoginRoomNameText[i] = D2D1::RectF((FRAME_BUFFER_WIDTH / 4.1), (FRAME_BUFFER_HEIGHT / textypos), (FRAME_BUFFER_WIDTH / 1.61), (FRAME_BUFFER_HEIGHT / textypos));
-				m_pd2dDeviceContext->DrawTextW(m_LoginIP, (UINT32)wcslen(m_LoginIP), m_pdwFont[2], &D2_LoginRoomNameText[i], m_pd2dbrText[2]);
+				m_pd2dDeviceContext->DrawTextW(m_LobbyRoom_Info[i].name, (UINT32)wcslen(m_LobbyRoom_Info[i].name), m_pdwFont[2], &D2_LoginRoomNameText[i], m_pd2dbrText[2]);
 			}
+		}
+		else if (m_LoginScene == 3) {
+			wchar_t roomnum[20];
+			_itow_s(m_myRoomNum, roomnum, sizeof(roomnum), 10);
+			D2D_RECT_F D2_RoomnumText = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.22f), (FRAME_BUFFER_HEIGHT * 0.3f), (FRAME_BUFFER_WIDTH * 0.25f), (FRAME_BUFFER_HEIGHT * 0.35f));
+			m_pd2dDeviceContext->DrawTextW(roomnum, (UINT32)wcslen(roomnum), m_pdwFont[2], &D2_RoomnumText, m_pd2dbrText[2]);
+
+			D2D_RECT_F D2_RoomNameText = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.22f), (FRAME_BUFFER_HEIGHT * 0.4f), (FRAME_BUFFER_WIDTH * 0.5f), (FRAME_BUFFER_HEIGHT * 0.4f));
+			m_pd2dDeviceContext->DrawTextW(createRoomName, (UINT32)wcslen(createRoomName), m_pdwFont[5], &D2_RoomNameText, m_pd2dbrText[5]);
+		
+			D2D_RECT_F D2_UserNameText[3];
+			for (int i{}; i < m_MyRoom_Info.size(); ++i) {
+				int resultY = 590 + 60 * i;
+				float textypos = (((float)FRAME_BUFFER_HEIGHT) / ((float)resultY));
+
+				wchar_t roomnum[20];
+				_itow_s(m_LobbyRoom_Info[i].num, roomnum, sizeof(roomnum), 10);
+
+				D2_UserNameText[i] = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.26f), (FRAME_BUFFER_HEIGHT / textypos), (FRAME_BUFFER_WIDTH * 0.5f), (FRAME_BUFFER_HEIGHT / textypos));
+				m_pd2dDeviceContext->DrawTextW(m_MyRoom_Info[i].User_name, (UINT32)wcslen(m_MyRoom_Info[i].User_name), m_pdwFont[2], &D2_UserNameText[i], m_pd2dbrText[2]);
+			
+			}
+
+		}
+		else if (m_LoginScene == 4) {
+			D2D_RECT_F D2_CreateRoomText = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.34), (FRAME_BUFFER_HEIGHT * 0.44f), (FRAME_BUFFER_WIDTH * 0.6), (FRAME_BUFFER_HEIGHT * 0.54f));
+			m_pd2dDeviceContext->DrawTextW(createRoomName, (UINT32)wcslen(createRoomName), m_pdwFont[4], &D2_CreateRoomText, m_pd2dbrText[4]);
 		}
 	}
 	else if (m_nMode == SCENE1STAGE) {
@@ -1629,6 +1782,18 @@ void CGameFramework::CreateDirect2DDevice()
 	hResult = m_pdwFont[3]->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
 	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White, 5.0f), &m_pd2dbrText[3]);
 	hResult = m_pdWriteFactory->CreateTextLayout(L"텍스트 레이아웃", 6, m_pdwFont[3], 1024, 1024, &m_pdwTextLayout[3]);
+
+	hResult = m_pdWriteFactory->CreateTextFormat(L"NanumSquare_acEB.ttf", NULL, DWRITE_FONT_WEIGHT_DEMI_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 36.0f, L"ko-kr", &m_pdwFont[4]);
+	hResult = m_pdwFont[4]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+	hResult = m_pdwFont[4]->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black, 5.0f), &m_pd2dbrText[4]);
+	hResult = m_pdWriteFactory->CreateTextLayout(L"텍스트 레이아웃", 6, m_pdwFont[4], 1024, 1024, &m_pdwTextLayout[4]);
+
+	hResult = m_pdWriteFactory->CreateTextFormat(L"NanumSquare_acEB.ttf", NULL, DWRITE_FONT_WEIGHT_DEMI_BOLD, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, 36.0f, L"ko-kr", &m_pdwFont[5]);
+	hResult = m_pdwFont[5]->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+	hResult = m_pdwFont[5]->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+	m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White, 5.0f), &m_pd2dbrText[5]);
+	hResult = m_pdWriteFactory->CreateTextLayout(L"텍스트 레이아웃", 6, m_pdwFont[5], 1024, 1024, &m_pdwTextLayout[5]);
 
 
 	float fDpi = (float)GetDpiForWindow(m_hWnd);
@@ -2313,6 +2478,24 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[52]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[52]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
+	// Create Room UI
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/CreateRoomUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[53]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[53]->SetInputEffect(0, m_pd2dfxBitmapSource[53]);
+	m_pd2dfxGaussianBlur[53]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[53]->SetInputEffect(0, m_pd2dfxBitmapSource[53]);
+	m_pd2dfxEdgeDetection[53]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[53]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[53]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[53]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[53]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
 #endif
@@ -2665,7 +2848,7 @@ void CGameFramework::HeliNpcUnderAttack(int id, XMFLOAT3 ToLook)
 {
 	//========헬기 NPC========//12
 	if (id < 5) {
-		((Stage1*)m_pScene)->Firevalkan(((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]),ToLook);
+		((Stage1*)m_pScene)->Firevalkan(((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]), ToLook);
 	}
 	else {
 		//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + id])->Firevalkan(ToLook);
