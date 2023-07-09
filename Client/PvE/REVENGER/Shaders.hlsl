@@ -237,7 +237,7 @@ float4 PSBloodParticleStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
 	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
 	float3 normalW;
-	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
+	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor+ cMetallicColor;
 
 	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	{
@@ -252,9 +252,8 @@ float4 PSBloodParticleStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
 
 	float4 uvs[MAX_LIGHTS];
 	float4 cIllumination = ParticleLighting(input.positionW, normalize(input.normalW), false, uvs);
-	cColor.w = 0.5f;
-	cColor.r += 0.2f;
-	return(lerp(cColor, cIllumination, 0.4f));
+	cColor.r += 0.6;
+	return(lerp(cColor, cIllumination, 0.5f));
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float4 PSBulletStandard(VS_STANDARD_OUTPUT input) : SV_TARGET

@@ -49,7 +49,7 @@ struct CB_GAMEOBJECT_INFO
 	XMINT2							m_xmi2TextureTiling;
 	XMFLOAT2						m_xmf2TextureOffset;
 	UINT							m_nType;
-	bool							m_bAnimateshader;
+
 };
 
 class CShader;

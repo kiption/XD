@@ -189,14 +189,14 @@ XMVECTOR RandomUnitVectorOnSphere()
 		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
 	}
 }
-XMVECTOR RandomBlood()
+XMVECTOR RandomMarkDir()
 {
 	XMVECTOR xmvOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
 	XMVECTOR xmvZero = XMVectorZero();
 
 	while (true)
 	{
-		XMVECTOR v = XMVectorSet(RandF(-1.0f, 1.0f), RandF(-0.1f, 0.1f), RandF(-0.3f, 0.2f), 0.0f);
+		XMVECTOR v = XMVectorSet(RandF(-0.2f, 0.2f), RandF(-1.f, 1.5f), RandF(-0.2f, 0.2f), 0.0f);
 		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
 	}
 }
@@ -325,7 +325,7 @@ void CFragmentsShader::ReleaseUploadBuffers()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void CBloodFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+void CHelicopterBulletMarkParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
@@ -337,15 +337,15 @@ void CBloodFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	{
 		m_ppObjects[i] = new CExplosiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pFragmentModel, false);
-		m_ppObjects[i]->SetScale(0.2, 0.1, 0.2);
+		m_ppObjects[i]->SetScale(0.1, 0.1, 0.1);
 		pFragmentModel->AddRef();
 		//ParticlePosition = m_ppObjects[i]->GetPosition();
 	}
-	for (int i = 0; i < BLOODEXPLOSION_DEBRISES; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomBlood());
+	for (int i = 0; i < BLOODEXPLOSION_DEBRISES; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomMarkDir());
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
-void CBloodFragmentsShader::ReleaseObjects()
+void CHelicopterBulletMarkParticleShader::ReleaseObjects()
 {
 	if (m_ppObjects)
 	{
@@ -354,7 +354,7 @@ void CBloodFragmentsShader::ReleaseObjects()
 	}
 }
 
-void CBloodFragmentsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+void CHelicopterBulletMarkParticleShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
 	CShader::Render(pd3dCommandList, pCamera, 0, false);
 
@@ -369,7 +369,7 @@ void CBloodFragmentsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, C
 	}
 
 }
-D3D12_BLEND_DESC CBloodFragmentsShader::CreateBlendState(int nPipelineState)
+D3D12_BLEND_DESC CHelicopterBulletMarkParticleShader::CreateBlendState(int nPipelineState)
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
 	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
@@ -388,7 +388,7 @@ D3D12_BLEND_DESC CBloodFragmentsShader::CreateBlendState(int nPipelineState)
 
 	return(d3dBlendDesc);
 }
-D3D12_INPUT_LAYOUT_DESC CBloodFragmentsShader::CreateInputLayout(int nPipelineState)
+D3D12_INPUT_LAYOUT_DESC CHelicopterBulletMarkParticleShader::CreateInputLayout(int nPipelineState)
 {
 	UINT nInputElementDescs = 5;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
@@ -406,13 +406,13 @@ D3D12_INPUT_LAYOUT_DESC CBloodFragmentsShader::CreateInputLayout(int nPipelineSt
 	return(d3dInputLayoutDesc);
 }
 
-D3D12_SHADER_BYTECODE CBloodFragmentsShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE CHelicopterBulletMarkParticleShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSParticleStandard", "vs_5_1", ppd3dShaderBlob));
 
 }
 
-D3D12_SHADER_BYTECODE CBloodFragmentsShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE CHelicopterBulletMarkParticleShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBloodParticleStandard", "ps_5_1", ppd3dShaderBlob));
 
@@ -420,13 +420,13 @@ D3D12_SHADER_BYTECODE CBloodFragmentsShader::CreatePixelShader(ID3DBlob** ppd3dS
 
 
 
-void CBloodFragmentsShader::AnimateObjects(float fTimeElapsed)
+void CHelicopterBulletMarkParticleShader::AnimateObjects(float fTimeElapsed)
 {
 	
 	if (m_bActive == true)
 	{
 
-		XMFLOAT3 gravity = XMFLOAT3(0.0, -10.8, 0);
+		XMFLOAT3 gravity = XMFLOAT3(0.0, 8.8, 0);
 		m_fElapsedTimes += fTimeElapsed * 2.05f;
 		if (m_fElapsedTimes <= m_fDuration)
 		{
@@ -434,7 +434,7 @@ void CBloodFragmentsShader::AnimateObjects(float fTimeElapsed)
 			{
 				m_fExplosionSpeed = Random(1.0f, 6.0f);
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
-				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.x * m_fElapsedTimes * m_fElapsedTimes;;
+				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + gravity.x;
 				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;;
 				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes + gravity.z;
 				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
@@ -442,7 +442,6 @@ void CBloodFragmentsShader::AnimateObjects(float fTimeElapsed)
 				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
 				m_ppObjects[i]->m_xmf4x4ToParent._42 = m_pxmf4x4Transforms[i]._42;
 				m_ppObjects[i]->m_xmf4x4ToParent._43 = m_pxmf4x4Transforms[i]._43;
-				m_ppObjects[i]->Rotate(0, 0, 90);
 			}
 		}
 		else
@@ -454,7 +453,7 @@ void CBloodFragmentsShader::AnimateObjects(float fTimeElapsed)
 	}
 }
 
-void CBloodFragmentsShader::ReleaseUploadBuffers()
+void CHelicopterBulletMarkParticleShader::ReleaseUploadBuffers()
 {
 	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
 }

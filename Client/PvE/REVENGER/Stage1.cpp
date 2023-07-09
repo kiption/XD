@@ -136,7 +136,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pSkyBox->SetCurScene(SCENE1STAGE);
-	m_nBillboardShaders = 5;
+	m_nBillboardShaders = 6;
 	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
 
 	BillboardParticleShader* pBillboardParticleShader = new BillboardParticleShader();
@@ -170,6 +170,13 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pBulletMarkBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[4] = pBulletMarkBillboard;
 
+	HeliHittingMarkBillboard* pHeliHittingMarkBillboard = new HeliHittingMarkBillboard();
+	pHeliHittingMarkBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pHeliHittingMarkBillboard->SetCurScene(SCENE1STAGE);
+	pHeliHittingMarkBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	pHeliHittingMarkBillboard->m_bActive = true;
+	m_pBillboardShader[5] = pHeliHittingMarkBillboard;
+	
 	m_nSpriteBillboards = 1;
 	m_ppSpriteBillboard = new CSpriteObjectsShader * [m_nSpriteBillboards];
 	SpriteAnimationBillboard* pSpriteAnimationBillboard = new SpriteAnimationBillboard();
@@ -187,7 +194,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pFragmentsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppFragShaders[0] = pFragmentsShader;
 
-	CBloodFragmentsShader* pBloodFragmentsShader = new CBloodFragmentsShader();
+	CHelicopterBulletMarkParticleShader* pBloodFragmentsShader = new CHelicopterBulletMarkParticleShader();
 	pBloodFragmentsShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pBloodFragmentsShader->SetCurScene(SCENE1STAGE);
 	pBloodFragmentsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
@@ -877,13 +884,19 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nHumanShaders; i++) if (m_ppHumanShaders[i]) m_ppHumanShaders[i]->AnimateObjects(fTimeElapsed);
 	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();
 
-	((CSpriteObjectsShader*)m_ppSpriteBillboard[0])->m_bActive = true;
 	((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveMark = true;
 	((CFragmentsShader*)m_ppFragShaders[0])->m_bActive = true;
-	((CBloodFragmentsShader*)m_ppFragShaders[1])->m_bActive = true;
+	((CHelicopterBulletMarkParticleShader*)m_ppFragShaders[1])->m_bActive = true;
 	((CFragmentsShader*)m_ppFragShaders[0])->ParticlePosition = m_ppShaders[0]->m_ppObjects[13]->GetPosition();
 	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(m_ppShaders[0]->m_ppObjects[30]->GetPosition());
-	((CBloodFragmentsShader*)m_ppFragShaders[1])->ParticlePosition =XMFLOAT3(m_ppShaders[0]->m_ppObjects[30]->GetPosition().x,m_ppShaders[0]->m_ppObjects[30]->GetPosition().y + 8.0,m_ppShaders[0]->m_ppObjects[30]->GetPosition().z);
+	((CHelicopterBulletMarkParticleShader*)m_ppFragShaders[1])->ParticlePosition = XMFLOAT3(120.0,6.1,800.0);
+	((HeliHittingMarkBillboard*)m_pBillboardShader[5])->m_bActive = true;
+	((HeliHittingMarkBillboard*)m_pBillboardShader[5])->ParticlePosition = XMFLOAT3(120.0, 6.1, 800.0);
+
+
+	((CSpriteObjectsShader*)m_ppSpriteBillboard[0])->m_bActive = true;
+
+
 	((SparkBillboard*)m_pBillboardShader[3])->ParticlePosition = m_ppShaders[0]->m_ppObjects[13]->GetPosition();
 
 	CBulletObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
@@ -922,7 +935,20 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	//XMStoreFloat3(&m_pLights->m_pLights[0].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction), xmmtxRotation));
 	//XMStoreFloat3(&m_pLights->m_pLights[1].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[1].m_xmf3Direction), xmmtxRotation));
 
+	for (int i = 22; i < 42; i++)
+	{
 
+		XMFLOAT3 xmf3PlayerPosition = m_ppShaders[0]->m_ppObjects[i]->GetPosition();
+		float fHeight = 6.15f + 0.05f;
+		if (xmf3PlayerPosition.y < fHeight)
+		{
+			//XMFLOAT3 xmf3PlayerVelocity = GetVelocity();
+			xmf3PlayerPosition.y = 0.0f;
+			//SetVelocity(xmf3PlayerVelocity);
+			xmf3PlayerPosition.y = fHeight;
+			m_ppShaders[0]->m_ppObjects[i]->SetPosition(xmf3PlayerPosition);
+		}
+	}
 	ParticleAnimation();
 }
 

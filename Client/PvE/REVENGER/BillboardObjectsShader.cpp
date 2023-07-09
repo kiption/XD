@@ -28,7 +28,7 @@ XMVECTOR RandomHittingVectorOnSphereBillboard()
 
 	while (true)
 	{
-		XMVECTOR v = XMVectorSet(RandFm(-1.0f,-1.0f), RandFm(-3.0f, 3.0f), RandFm(-0.0f, 0.0f), 0.1f);
+		XMVECTOR v = XMVectorSet(RandFm(-1.0f,1.0f), RandFm(-3.0f, 3.0f), RandFm(-1.0f, 1.0f), 0.5f);
 		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
 	}
 }
@@ -736,7 +736,7 @@ void BloodHittingBillboard::AnimateObjects(float fTimeElapsed)
 		else
 		{
 			m_fElapsedTimes = 0.0f;
-			
+			m_bActive = false;
 		}
 	}
 
@@ -884,3 +884,137 @@ void BulletMarkBillboard::ReleaseUploadBuffers()
 {
 	BillboardShader::ReleaseUploadBuffers();
 }
+
+
+
+//
+D3D12_BLEND_DESC HeliHittingMarkBillboard::CreateBlendState(int nPipelineState)
+{
+	D3D12_BLEND_DESC d3dBlendDesc;
+	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
+	d3dBlendDesc.AlphaToCoverageEnable = TRUE;
+	d3dBlendDesc.IndependentBlendEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	return(d3dBlendDesc);
+}
+
+void HeliHittingMarkBillboard::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
+{
+	m_nPipelineStates = 1;
+	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+
+}
+
+
+D3D12_SHADER_BYTECODE HeliHittingMarkBillboard::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSmokeBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
+}
+
+D3D12_SHADER_BYTECODE HeliHittingMarkBillboard::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
+}
+void HeliHittingMarkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/40Smoke.dds", RESOURCE_TEXTURE2D, 0);
+	CMaterial* pSpriteMaterial = new CMaterial(1);
+	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
+	CTexturedRectMesh* pSpriteMesh;
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.8f, 0.8f, 0.0f, 0.0f, 0.0f, 0.0f);
+	m_nObjects = HITTINGMARKS;
+	m_ppObjects = new CGameObject * [m_nObjects];
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures, 0, 15);
+
+	CBillboardObject** pSparkObject = new CBillboardObject * [m_nObjects];
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		pSparkObject[j] = new CBillboardObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		pSparkObject[j]->SetMesh(pSpriteMesh);
+		pSparkObject[j]->SetMaterial(0, pSpriteMaterial);
+		m_ppObjects[j] = pSparkObject[j];
+
+	}
+
+	for (int i = 0; i < m_nObjects; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomHittingVectorOnSphereBillboard());
+}
+
+void HeliHittingMarkBillboard::ReleaseObjects()
+{
+	BillboardShader::ReleaseObjects();
+}
+
+void HeliHittingMarkBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+{
+	CPlayer* pPlayer = pCamera->GetPlayer();
+	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
+	XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
+	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
+	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 0.0f, false));
+
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		//ParticlePosition = XMFLOAT3(58.0f, 12.0f, 900.0f);
+		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0, 0.0f));
+
+	}
+	BillboardShader::Render(pd3dCommandList, pCamera, 0);
+}
+
+void HeliHittingMarkBillboard::AnimateObjects(float fTimeElapsed)
+{
+	if (m_bActive == true)
+	{
+		XMFLOAT3 gravity = XMFLOAT3(0.0f, 9.8f, 0);
+		m_fElapsedTimes += fTimeElapsed * 2.0f;
+		if (m_fElapsedTimes <= m_fDuration)
+		{
+			for (int i = 0; i < m_nObjects; i++)
+			{
+				gravity = XMFLOAT3(0.0f, 9.8f, 0);
+				m_fExplosionSpeed = +RandomBillboard(3.0f, 5.1f);
+
+				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
+				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes;
+				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;
+				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes;
+				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
+
+				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
+				m_ppObjects[i]->m_xmf4x4ToParent._42 = m_pxmf4x4Transforms[i]._42;
+				m_ppObjects[i]->m_xmf4x4ToParent._43 = m_pxmf4x4Transforms[i]._43;
+
+			}
+		}
+		else
+		{
+			m_fElapsedTimes = 0.0f;
+			m_bActive = false;
+		}
+	}
+
+
+
+
+
+}
+
+void HeliHittingMarkBillboard::ReleaseUploadBuffers()
+{
+	BillboardShader::ReleaseUploadBuffers();
+}
+

@@ -68,11 +68,11 @@ public:
 	XMFLOAT3 m_pxmf3SphereVectors[EXPLOSION_DEBRISES];
 };
 
-class CBloodFragmentsShader : public CFragmentsShader
+class CHelicopterBulletMarkParticleShader : public CFragmentsShader
 {
 public:
-	CBloodFragmentsShader() {};
-	virtual ~CBloodFragmentsShader() {};
+	CHelicopterBulletMarkParticleShader() {};
+	virtual ~CHelicopterBulletMarkParticleShader() {};
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual void ReleaseObjects();
@@ -89,7 +89,7 @@ public:
 	XMFLOAT4X4					m_pxmf4x4Transforms[BLOODEXPLOSION_DEBRISES];
 
 	float						m_fElapsedTimes = 0.0f;
-	float						m_fDuration = 1.0f;
+	float						m_fDuration = 0.6f;
 	float						m_fExplosionSpeed = 3.0f;
 	float						m_fExplosionRotation = 720.0f;
 	XMFLOAT3 m_pxmf3SphereVectors[BLOODEXPLOSION_DEBRISES];

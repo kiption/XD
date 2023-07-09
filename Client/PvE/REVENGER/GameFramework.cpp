@@ -2666,6 +2666,7 @@ void CGameFramework::HeliNpcUnderAttack(int id, XMFLOAT3 ToLook)
 	//========헬기 NPC========//12
 	if (id < 5) {
 		((Stage1*)m_pScene)->Firevalkan(((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]),ToLook);
+		gamesound.shootingSound();
 	}
 	else {
 		//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + id])->Firevalkan(ToLook);
