@@ -1176,7 +1176,7 @@ float g_reverse_time = 0.0f;
 void CGameFramework::FrameAdvance()
 {
 
-	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick(60.0f);
+	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick();
 
 
 

@@ -1,63 +1,29 @@
-#pragma once
+#pragma once/*
 #include "Shader.h"
-#include "IlluminateMesh.h"
-#include "MissileObject.h"
-#include "Terrain.h"
-#include "Skybox.h"
-class CFragmentsShader;
-#define _WITH_BATCH_MATERIAL
-class CSkinnedAnimationStandardShader;
-class CObjectsShader : public CShader
+#include "Scene.h"
+class TreeObjectsShader : public CShader
 {
 public:
-	CObjectsShader();
-	virtual ~CObjectsShader();
+	TreeObjectsShader() {};
+	virtual ~TreeObjectsShader() {};
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
-	BoundingBox CalculateBoundingBox();
 	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
 		int nPipelineState);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
-
-	CSkinnedAnimationStandardShader* pSkinnongStandardShader=NULL;
 public:
-	CHeightMapTerrain* m_pTerrain = NULL;
-	int	m_nHierarchicalGameObjects = 0;
-	CGameObject** m_ppHierarchicalGameObjects = NULL;
-	CGameObject** m_ppCityGameObjects = NULL;
-
-	int	m_nHeliNpcObjects = 0;
-	int	m_nSoldiarNpcObjects = 0;
-	CGameObject** m_ppSoldiarNpcObjects = 0;
-	CHelicopterObjects** m_ppNpc_Heli_Objects = NULL;
-	int									m_nFragShaders = 0;
-
-	CFragmentsShader** m_ppFragShaders = NULL;
-	
-	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-
-	////////////////////////////////////////////
-
-	ID3D12Resource* m_pd3dcbGameObjects = NULL;
-	CB_GAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
-#ifdef _WITH_BATCH_MATERIAL
-	CMaterial** m_ppMaterials = NULL;
-#endif
+	CGameObject** m_ppTreeObjectList = NULL;
+	int m_nTreeObjectList = NULL;
 };
-
-
-
-
-class CDepthRenderShader : public CShader
+class TreeDepthRenderShader : public CShader
 {
 public:
-	CDepthRenderShader(CObjectsShader* pObjectsShader, LIGHT* pLights);
-	virtual ~CDepthRenderShader();
-
+	TreeDepthRenderShader(TreeObjectsShader* pObjectsShader, LIGHT* pLights);
+	virtual ~TreeDepthRenderShader();
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState);
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState(int nPipelineState);
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
@@ -65,18 +31,13 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 	virtual DXGI_FORMAT GetRTVFormat(int nPipelineState, int nRenderTarget) { return(DXGI_FORMAT_R32_FLOAT); }
 	virtual DXGI_FORMAT GetDSVFormat(int nPipelineState) { return(DXGI_FORMAT_D32_FLOAT); }
-
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
-
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual void ReleaseObjects();
-
 	void PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList);
-
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
-
 	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
 		int nPipelineState);
 
@@ -91,7 +52,6 @@ public:
 	ID3D12DescriptorHeap* m_pd3dDsvDescriptorHeap = NULL;
 	ID3D12Resource* m_pd3dDepthBuffer = NULL;
 	D3D12_CPU_DESCRIPTOR_HANDLE		m_d3dDsvDescriptorCPUHandle;
-
 	XMMATRIX						m_xmProjectionToTexture;
 
 public:
@@ -99,7 +59,7 @@ public:
 	ID3D12Resource* GetDepthTextureResource(UINT nIndex) { return(m_pDepthTexture->GetResource(nIndex)); }
 
 public:
-	CObjectsShader* m_pObjectsShader = NULL;
+	TreeObjectsShader* m_pObjectsShader = NULL;
 
 
 public:
@@ -110,11 +70,11 @@ public:
 	ID3D12Resource* m_pd3dcbToLightSpaces = NULL;
 	TOLIGHTSPACES* m_pcbMappedToLightSpaces = NULL;
 };
-class CShadowMapShader : public CShader
+class TreeShadowMapShader : public CShader
 {
 public:
-	CShadowMapShader(CObjectsShader* pObjectsShader);
-	virtual ~CShadowMapShader();
+	TreeShadowMapShader(TreeObjectsShader* pObjectsShader);
+	virtual ~TreeShadowMapShader();
 	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState);
@@ -124,49 +84,17 @@ public:
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
-
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual void AnimateObjects(float fTimeElapsed) { }
 	virtual void ReleaseObjects();
-
 	virtual void ReleaseUploadBuffers();
-
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 
 	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
 		int nPipelineState);
 
 public:
-	CObjectsShader* m_pObjectsShader = NULL;
+	TreeObjectsShader* m_pObjectsShader = NULL;
 	CTexture* m_pDepthTexture = NULL;
 };
-class CTreeBlendingShadowShader : public CShader
-{
-public:
-	CTreeBlendingShadowShader(CObjectsShader* pObjectsShader);
-	virtual ~CTreeBlendingShadowShader();
-	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
-	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState);
-	virtual D3D12_RASTERIZER_DESC CreateRasterizerState(int nPipelineState);
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
-	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void ReleaseShaderVariables();
-
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
-	virtual void AnimateObjects(float fTimeElapsed) { }
-	virtual void ReleaseObjects();
-
-	virtual void ReleaseUploadBuffers();
-
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
-
-	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
-		int nPipelineState);
-
-public:
-	CObjectsShader* m_pObjectsShader = NULL;
-	CTexture* m_pDepthTexture = NULL;
-};
+*/

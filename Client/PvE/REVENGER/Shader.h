@@ -7,6 +7,17 @@
 #include "Object.h"
 #include "Camera.h"
 
+struct TOOBJECTSPACEINFO
+{
+	XMFLOAT4X4						m_xmf4x4ToTexture;
+
+	XMFLOAT4						m_xmf4Position;
+};
+
+struct TOLIGHTSPACES
+{
+	TOOBJECTSPACEINFO				m_pToLightSpaces[MAX_LIGHTS];
+};
 struct LIGHT;
 
 class CShader

@@ -187,6 +187,9 @@
     <ClInclude Include="SoldiarPlayerObject.h">
       <Filter>Client\Player</Filter>
     </ClInclude>
+    <ClInclude Include="TreeShader.h">
+      <Filter>Client\Shader\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameSound.cpp">
@@ -302,6 +305,9 @@
     </ClCompile>
     <ClCompile Include="SoldiarPlayerObject.cpp">
       <Filter>Client\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeShader.cpp">
+      <Filter>Client\Shader\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

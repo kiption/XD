@@ -23,7 +23,7 @@
 #include "MissileObject.h"
 #include "ParticleObject.h"
 #include "GameSound.h"
-
+#include "TreeShader.h"
 //struct MATERIAL
 //{
 //	XMFLOAT4						m_xmf4Ambient;
@@ -151,10 +151,10 @@ public:
 
 public:
 	CShadowMapShader* m_pShadowShader = NULL;
-	
+
 	CDepthRenderShader* m_pDepthRenderShader = NULL;
-	
-	
+	CTreeBlendingShadowShader* m_pTreeBlendShadowShader = NULL;
+
 	int count = 0;
 	BoundingBox						m_xmBoundingBox;
 public:
@@ -180,7 +180,7 @@ public:
 
 	CShader* m_pShader = NULL;
 	CBulletEffectShader* m_pBulletEffect = NULL;
-	
+
 	int									m_nMapShaders = 0;
 	int									m_nStageMapShaders = 0;
 	int									m_nFragShaders = 0;

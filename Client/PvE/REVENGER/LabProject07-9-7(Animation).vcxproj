@@ -196,6 +196,7 @@
     <ClInclude Include="TerrainMesh.h" />
     <ClInclude Include="TerrainShader.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="TreeShader.h" />
     <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
   <ItemGroup>
@@ -241,6 +242,7 @@
     <ClCompile Include="TerrainMesh.cpp" />
     <ClCompile Include="TerrainShader.cpp" />
     <ClCompile Include="Timer.cpp" />
+    <ClCompile Include="TreeShader.cpp" />
     <ClCompile Include="WICTextureLoader12.cpp" />
   </ItemGroup>
   <ItemGroup>

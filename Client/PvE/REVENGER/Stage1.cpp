@@ -32,16 +32,17 @@ void Stage1::BuildDefaultLightsAndMaterials()
 
 	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 
+	// 방향 조절 -> 2개 쓰면 프레임 떨어짐
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[0].m_fRange = 40000.0f;
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5, 0.5, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4, 0.4, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-0, 920.0f, 1200.0f);
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+0.1f, -0.65f, -1.0f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-0, 800.0f, 1000.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+0.1f, -0.5f, -1.2f);
 
-	m_pLights->m_pLights[1].m_bEnable = true;
+	m_pLights->m_pLights[1].m_bEnable = false;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 10000.0f;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
@@ -219,10 +220,16 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pDepthRenderShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	m_pDepthRenderShader->SetCurScene(SCENE1STAGE);
 	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+
 	m_pShadowShader = new CShadowMapShader(pObjectShader);
 	m_pShadowShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	m_pShadowShader->SetCurScene(SCENE1STAGE);
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
+
+	m_pTreeBlendShadowShader = new CTreeBlendingShadowShader(pObjectShader);
+	m_pTreeBlendShadowShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	m_pTreeBlendShadowShader->SetCurScene(SCENE1STAGE);
+	m_pTreeBlendShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
 	pBCBulletEffectShader = new CBulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
@@ -271,15 +278,15 @@ void Stage1::ReleaseObjects()
 		}
 		delete[] m_ppSpriteBillboard;
 	}
-	/*if (m_ppShaders)
+	if (m_ppTreeObjectShader)
 	{
-		for (int i = 0; i < m_nShaders; i++)
+		for (int i = 0; i < 1; i++)
 		{
-			m_ppShaders[i]->ReleaseShaderVariables();
-			m_ppShaders[i]->ReleaseObjects();
-			m_ppShaders[i]->Release();
+			m_ppTreeObjectShader[i]->ReleaseShaderVariables();
+			m_ppTreeObjectShader[i]->ReleaseObjects();
+			m_ppTreeObjectShader[i]->Release();
 		}
-	}*/
+	}
 
 	if (m_ppShaders)delete m_ppShaders;
 	if (m_ppFragShaders)
@@ -301,6 +308,7 @@ void Stage1::ReleaseObjects()
 	}
 
 	if (m_pShadowShader)delete m_pShadowShader;
+	if (m_pTreeBlendShadowShader)delete m_pTreeBlendShadowShader;
 
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
@@ -674,7 +682,7 @@ void Stage1::ReleaseUploadBuffers()
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 
-	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
+	
 	for (int i = 0; i < m_nHumanShaders; i++) m_ppHumanShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->ReleaseUploadBuffers();
@@ -977,6 +985,7 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (int i = 0; i < HELIBULLETS; i++)if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
 
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
+	if (m_pTreeBlendShadowShader) m_pTreeBlendShadowShader->Render(pd3dCommandList, pCamera, 0);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 
