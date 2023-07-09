@@ -943,6 +943,7 @@ void CGameFramework::ProcessInput()
 			{
 				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.02)
 				{
+					
 					ShotKey = true;
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
 					q_mouseInput.push(lclick);//s
@@ -1083,6 +1084,7 @@ void CGameFramework::AnimateObjects()
 		//if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
 		if (((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->m_bActive == true)
 		{
+		
 			((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->ParticlePosition =
 				XMFLOAT3(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().x,
 					((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().y + 8.0,
@@ -1090,6 +1092,7 @@ void CGameFramework::AnimateObjects()
 
 			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 		}
+	
 
 		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay += m_GameTimer.GetTimeElapsed();
 		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay > 0.2)
@@ -1100,7 +1103,7 @@ void CGameFramework::AnimateObjects()
 		if (ShotKey == false)
 		{
 			m_pCamera->m_xmf4x4View._43 += 0.1f;
-
+			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
 			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
 			{
 				m_pCamera->m_xmf4x4View._42 += 0.20f;
@@ -1112,7 +1115,7 @@ void CGameFramework::AnimateObjects()
 		if (ShotKey == true)
 		{
 			m_pCamera->m_xmf4x4View._43 -= 0.1f;
-
+			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = true;
 			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
 			{
 				m_pCamera->m_xmf4x4View._42 -= 0.20f;

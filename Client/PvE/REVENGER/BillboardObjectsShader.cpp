@@ -28,7 +28,7 @@ XMVECTOR RandomHittingVectorOnSphereBillboard()
 
 	while (true)
 	{
-		XMVECTOR v = XMVectorSet(RandFm(-1.0f,1.0f), RandFm(-3.0f, 3.0f), RandFm(-1.0f, 1.0f), 0.5f);
+		XMVECTOR v = XMVectorSet(RandFm(-1.0f, 1.0f), RandFm(-3.0f, 3.0f), RandFm(-1.0f, 1.0f), 0.5f);
 		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
 	}
 }
@@ -91,7 +91,7 @@ D3D12_BLEND_DESC BloodMarkShader::CreateBlendState(int nPipelineState)
 
 
 
-void BloodMarkShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,int nPipelineState)
+void BloodMarkShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
@@ -232,7 +232,7 @@ D3D12_DEPTH_STENCIL_DESC BillboardParticleShader::CreateDepthStencilState(int nP
 	return(d3dDepthStencilDesc);
 }
 
-void BillboardParticleShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,  int nPipelineState)
+void BillboardParticleShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
@@ -386,7 +386,7 @@ void BillboardParticleShader::ReleaseUploadBuffers()
 }
 
 
-D3D12_BLEND_DESC ResponeEffectShader::CreateBlendState(int nPipelineState)
+D3D12_BLEND_DESC MuzzleFrameBillboard::CreateBlendState(int nPipelineState)
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
 	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
@@ -406,30 +406,30 @@ D3D12_BLEND_DESC ResponeEffectShader::CreateBlendState(int nPipelineState)
 	return(d3dBlendDesc);
 }
 
-void ResponeEffectShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
+void MuzzleFrameBillboard::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,nPipelineState);
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 
 }
 
 
-D3D12_SHADER_BYTECODE ResponeEffectShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE MuzzleFrameBillboard::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSmokeBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
 }
 
-D3D12_SHADER_BYTECODE ResponeEffectShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE MuzzleFrameBillboard::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
 }
 
-void ResponeEffectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+void MuzzleFrameBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Respown.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/MuzzleFrame.dds", RESOURCE_TEXTURE2D, 0);
 
 
 	CMaterial* pSpriteMaterial = new CMaterial(1);
@@ -437,9 +437,9 @@ void ResponeEffectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.0f, 3.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
-	m_nObjects = 30;
+	m_nObjects = 1;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures, 0, 15);
 
@@ -450,41 +450,45 @@ void ResponeEffectShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		pResponObject[j] = new CResponeObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		pResponObject[j]->SetMesh(pSpriteMesh);
 		pResponObject[j]->SetMaterial(0, pSpriteMaterial);
-		pResponObject[j]->SetPosition(XMFLOAT3(RandomBillboardPositionInSphere(XMFLOAT3(180.0, -1.0, -240.0), 20, 2.5, 2.5)));
-
 		m_ppObjects[j] = pResponObject[j];
 	}
 
 
 }
 
-void ResponeEffectShader::ReleaseObjects()
+void MuzzleFrameBillboard::ReleaseObjects()
 {
 	BillboardShader::ReleaseObjects();
 }
 
-void ResponeEffectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+void MuzzleFrameBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, XMFLOAT3 Look, XMFLOAT3 Position)
 {
-	CPlayer* pPlayer = pCamera->GetPlayer();
-	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
-	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
-	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 0.0f, false));
-
-	for (int j = 0; j < m_nObjects; j++)
+	if (m_bShotActive == true)
 	{
 
-		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3Position, XMFLOAT3(1.0f, 1.0, 1.0f));
+		CPlayer* pPlayer = pCamera->GetPlayer();
+		XMFLOAT3 CameraPosition = pCamera->GetPosition();
+		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
+		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
+		XMFLOAT3 xmf3Position = Vector3::Add(Position, Vector3::ScalarProduct(Look, 4.0f, false));
+		xmf3Position.y += 3.65f;
+		for (int j = 0; j < m_nObjects; j++)
+		{
 
+			if (m_ppObjects[j])m_ppObjects[j]->SetPosition(xmf3Position);
+			if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(CameraPosition, XMFLOAT3(0.0f, 1.0, 1.0f));
+
+			BillboardShader::Render(pd3dCommandList, pCamera, 0);
+		}
 	}
-	BillboardShader::Render(pd3dCommandList, pCamera, 0);
 }
 
-void ResponeEffectShader::AnimateObjects(float fTimeElapsed)
+void MuzzleFrameBillboard::AnimateObjects(float fTimeElapsed)
 {
 	BillboardShader::AnimateObjects(fTimeElapsed);
 }
 
-void ResponeEffectShader::ReleaseUploadBuffers()
+void MuzzleFrameBillboard::ReleaseUploadBuffers()
 {
 	BillboardShader::ReleaseUploadBuffers();
 }
@@ -511,12 +515,12 @@ D3D12_BLEND_DESC SparkBillboard::CreateBlendState(int nPipelineState)
 	return(d3dBlendDesc);
 }
 
-void SparkBillboard::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,int nPipelineState)
+void SparkBillboard::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,nPipelineState);
+	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 
 }
 
@@ -718,7 +722,7 @@ void BloodHittingBillboard::AnimateObjects(float fTimeElapsed)
 		{
 			for (int i = 0; i < m_nObjects; i++)
 			{
-				gravity=XMFLOAT3(-9.8f, 9.8f, 0);
+				gravity = XMFLOAT3(-9.8f, 9.8f, 0);
 				m_fExplosionSpeed = +RandomBillboard(3.0f, 8.1f);
 
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
@@ -743,7 +747,7 @@ void BloodHittingBillboard::AnimateObjects(float fTimeElapsed)
 
 
 
-	
+
 }
 
 void BloodHittingBillboard::ReleaseUploadBuffers()
@@ -843,7 +847,7 @@ void BulletMarkBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 		m_ppObjects[0]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0, 1, 0));
 		BillboardShader::Render(pd3dCommandList, pCamera, nPipelineState);
 	}
-	
+
 }
 
 void BulletMarkBillboard::AnimateObjects(float fTimeElapsed)

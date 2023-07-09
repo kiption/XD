@@ -93,11 +93,11 @@ public:
 
 
 
-class ResponeEffectShader : public BillboardShader
+class MuzzleFrameBillboard : public BillboardShader
 {
 public:
-	ResponeEffectShader() {};
-	virtual ~ResponeEffectShader() {};
+	MuzzleFrameBillboard() {};
+	virtual ~MuzzleFrameBillboard() {};
 
 
 	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);
@@ -107,11 +107,11 @@ public:
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual void ReleaseObjects();
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState,XMFLOAT3 Look,XMFLOAT3 Position);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void ReleaseUploadBuffers();
 
-	bool m_bResponeAnimation = false;
+	bool m_bShotActive= false;
 
 };
 

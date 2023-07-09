@@ -136,7 +136,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pSkyBox->SetCurScene(SCENE1STAGE);
-	m_nBillboardShaders = 6;
+	m_nBillboardShaders = 7;
 	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
 
 	BillboardParticleShader* pBillboardParticleShader = new BillboardParticleShader();
@@ -177,6 +177,12 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pHeliHittingMarkBillboard->m_bActive = true;
 	m_pBillboardShader[5] = pHeliHittingMarkBillboard;
 	
+	MuzzleFrameBillboard* pMuzzleFrameBillboard = new MuzzleFrameBillboard();
+	pMuzzleFrameBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pMuzzleFrameBillboard->SetCurScene(SCENE1STAGE);
+	pMuzzleFrameBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_pBillboardShader[6] = pMuzzleFrameBillboard;
+
 	m_nSpriteBillboards = 1;
 	m_ppSpriteBillboard = new CSpriteObjectsShader * [m_nSpriteBillboards];
 	SpriteAnimationBillboard* pSpriteAnimationBillboard = new SpriteAnimationBillboard();
@@ -965,7 +971,7 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->Render(pd3dCommandList, pCamera, 0);
-	for (int i = 0; i < m_nBillboardShaders; i++) if (i != 1 && m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
+	for (int i = 0; i < m_nBillboardShaders; i++) if (i != 1 && i != 6 && m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
 	if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < HELIBULLETS; i++)if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
@@ -1004,9 +1010,13 @@ void Stage1::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 
 void Stage1::BillBoardRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	XMFLOAT3 MuzzleFrameLook = pCamera->GetLookVector();
+	XMFLOAT3 MuzzleFramePosition = pCamera->GetPosition();
 	//for (int i = 0; i < m_nBillboardShaders; i++)
 	if (m_pBillboardShader[1]) m_pBillboardShader[1]->Render(pd3dCommandList, pCamera, 0);
 	if (m_pBillboardShader[4]) m_pBillboardShader[4]->Render(pd3dCommandList, pCamera, 0);
+	if (((MuzzleFrameBillboard*)m_pBillboardShader[6])) ((MuzzleFrameBillboard*)m_pBillboardShader[6])
+		->Render(pd3dCommandList, pCamera, 0, MuzzleFrameLook,((CHumanPlayer*)m_pPlayer)->m_pBulletFindFrame->GetPosition());
 
 }
 
