@@ -68,9 +68,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, XMF
 		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
 		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, 0);
 		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up,0);
-		
-		
-		if (dwDirection == DIR_SLIDEVEC) xmf3Shift = slideVec;
+		if (dwDirection & DIR_SLIDEVEC) xmf3Shift = Vector3::Add(xmf3Shift, slideVec, fDistance);
 
 
 		Move(xmf3Shift, bUpdateVelocity);

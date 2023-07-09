@@ -385,7 +385,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			m_SniperOn = true;
 		((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = true;
 		m_pCamera->GenerateProjectionMatrix(1.01f, 1000.0f, ASPECT_RATIO, 40.0f);
-		//m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.165f, 0.0f));
+
 		break;
 		//::ReleaseCapture();
 		//break;
@@ -394,7 +394,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			m_SniperOn = false;
 		((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = false;
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-		m_pCamera->SetOffset(XMFLOAT3(-0.6f, 0.165f, 0.435f));
+
 		break;
 
 	case WM_LBUTTONDOWN:
@@ -907,17 +907,8 @@ void CGameFramework::ProcessInput()
 							if (mapcol_info[i].m_xoobb.Intersects(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xoobb)) {
 								temp = mapcol_info[i];
 								isCollide = true;
-								cout << i << "collide" << endl;
 								break;
 							}
-							/*if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xoobb.Intersects(mapcol_info[i].m_xoobb)) {
-								temp = mapcol_info[i];
-								isCollide = true;
-								break;
-							}*/
-
-
-
 						}
 
 					if (isCollide) {
@@ -935,50 +926,57 @@ void CGameFramework::ProcessInput()
 						XMVECTOR localRightNormalized = XMVector3Normalize(XMLoadFloat3(&temp.m_local_right));
 						XMStoreFloat3(&normalizedLocalRight, localRightNormalized);
 
-						float angle = XMVectorGetX(XMVector3AngleBetweenNormals(playerToBoxNormalized, localForwardNormalized));
+							XMFLOAT3 Center2PlayerVector = Vector3::Subtract(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition(), temp.m_xoobb.Center);//벡터
+							float Center2PlayerDisrtance = Vector3::Length(Center2PlayerVector);//거리
+							Center2PlayerVector = Vector3::Normalize(Center2PlayerVector);
 
-						angle = XMConvertToDegrees(angle);
+
+							float forwardDotResult = Vector3::DotProduct(Center2PlayerVector, temp.m_local_forward); //객체의 center와 플레이어와 normal간의 cos값   
+							float rightDotResult = Vector3::DotProduct(Center2PlayerVector, temp.m_local_right);
+
+							float forwardDotResultAbs = abs(forwardDotResult);
+							float rightDotResultAbs = abs(rightDotResult);
+
+							float radian = XMConvertToRadians(temp.m_angle_aob/2);
 
 							XMFLOAT3 PlayerMoveDir;
-							if (abs(cos(temp.m_angle_aob)) < abs(cos(angle))) {
-								if (temp.m_angle_aob < angle) {
-									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalForward));
+							
+							if (abs(cos(radian)) < forwardDotResultAbs) {
+								if (forwardDotResult < 0) {
+									cout << "1" << endl;
+									XMVECTOR reversedLocalForward = XMVectorNegate(XMLoadFloat3(&normalizedLocalForward));
+									XMStoreFloat3(&normalizedLocalForward, reversedLocalForward);
+									
+									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2PlayerVector), XMLoadFloat3(&normalizedLocalForward));
 									XMStoreFloat3(&PlayerMoveDir, AddVector);
 								}
 								else {
-									XMVECTOR reversedLocalForward = XMVectorNegate(XMLoadFloat3(&normalizedLocalForward));
-									XMStoreFloat3(&normalizedLocalForward, reversedLocalForward);
-
-									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalForward));
+									cout << "2" << endl;
+									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2PlayerVector), XMLoadFloat3(&normalizedLocalForward));
 									XMStoreFloat3(&PlayerMoveDir, AddVector);
 								}
 							}
 							else {
-								float angle = XMVectorGetX(XMVector3AngleBetweenNormals(playerToBoxNormalized, localRightNormalized));
-								angle = XMConvertToDegrees(angle);
-								if (temp.m_angle_boc < angle) {
-									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalRight));
-									XMStoreFloat3(&PlayerMoveDir, AddVector);
-
-								}
-								else {
+								if (rightDotResult < 0) {
+									cout << "3" << endl;
 									XMVECTOR reversedLocalRight = XMVectorNegate(XMLoadFloat3(&normalizedLocalRight));
 									XMStoreFloat3(&normalizedLocalRight, reversedLocalRight);
 
-									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&normalizedPlayerToBox), XMLoadFloat3(&normalizedLocalRight));
+									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2PlayerVector), XMLoadFloat3(&normalizedLocalRight));
 									XMStoreFloat3(&PlayerMoveDir, AddVector);
-
+								}
+								else {
+									cout << "4" << endl;
+									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2PlayerVector), XMLoadFloat3(&normalizedLocalRight));
+									XMStoreFloat3(&PlayerMoveDir, AddVector);
 								}
 							}
+							XMVECTOR PlayerMoveNormalized = XMVector3Normalize(XMLoadFloat3(&PlayerMoveDir));
+							XMStoreFloat3(&PlayerMoveDir, PlayerMoveNormalized);
 
-						XMVECTOR PlayerMoveNormalized = XMVector3Normalize(XMLoadFloat3(&PlayerMoveDir));
-						XMStoreFloat3(&PlayerMoveDir, PlayerMoveNormalized);
+							dwDirection = DIR_SLIDEVEC;
 
-							//((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
-							//cout << "collide!" << endl;
-							//((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move();
-							//m_pPlayer->SetMovingDirection(PlayerMoveDir);
-							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
+							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
 
 						}
 						else ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
@@ -1611,7 +1609,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-}
+	}
 	pd3dInfoQueue->Release();
 #endif
 
