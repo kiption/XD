@@ -1429,8 +1429,8 @@ void CGameFramework::FrameAdvance()
 
 		// Cross Hair
 		if (!m_SniperOn) {
-			D2D_POINT_2F D2_CrossHairUI = { (FRAME_BUFFER_WIDTH / 2) - 30.0f, (FRAME_BUFFER_HEIGHT / 2) - 30.0f };
-			D2D_RECT_F D2_CrossHairRect = { 0.0f, 0.0f, 60.0f, 60.0f };
+			D2D_POINT_2F D2_CrossHairUI = { (FRAME_BUFFER_WIDTH / 2) - 6.5f, (FRAME_BUFFER_HEIGHT / 2) - 6.5f };
+			D2D_RECT_F D2_CrossHairRect = { 0.0f, 0.0f, 13.0f, 13.0f };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[20], &D2_CrossHairUI, &D2_CrossHairRect);
 		}
 
@@ -1469,7 +1469,7 @@ void CGameFramework::FrameAdvance()
 		// Sniper UI
 		if (m_SniperOn) {
 			D2D_POINT_2F D2_SniperAimUI = { FRAME_BUFFER_WIDTH / 2 - 457.5f, FRAME_BUFFER_HEIGHT - 725.0f };
-			D2D_RECT_F D2_SniperAimUIRect = { 0.0f, 0.0f, 950.0f, 720.0f };
+			D2D_RECT_F D2_SniperAimUIRect = { 0.0f, 0.0f, 950.0f, 787.0f };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[52], &D2_SniperAimUI, &D2_SniperAimUIRect);
 
 		}
@@ -2151,7 +2151,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[19]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	// Cross hair
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/CrossHair.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/DotAim.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
