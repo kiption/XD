@@ -142,18 +142,6 @@ CResponeObject::~CResponeObject()
 void CResponeObject::Animate(float fTimeElapsed)
 {
 
-	if (m_xmf4x4ToParent._42 < 0.0f)
-	{
-		m_bResponeAnimation = true;
-	}
-	if (m_bResponeAnimation == true)
-	{
-		m_xmf4x4ToParent._42 = 10.0f;
-		m_bResponeAnimation = false;
-	}
-	if (m_bResponeAnimation == false)
-	{
-		m_xmf4x4ToParent._42 -= 20.0f* fTimeElapsed;
-	}
+	
 	CGameObject::Animate(fTimeElapsed);
 }

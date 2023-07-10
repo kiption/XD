@@ -429,7 +429,7 @@ D3D12_SHADER_BYTECODE MuzzleFrameBillboard::CreateVertexShader(ID3DBlob** ppd3dS
 void MuzzleFrameBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/MuzzleFrame.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/MuzzleFlame.dds", RESOURCE_TEXTURE2D, 0);
 
 
 	CMaterial* pSpriteMaterial = new CMaterial(1);
@@ -437,7 +437,7 @@ void MuzzleFrameBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.5f, 1.5f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	m_nObjects = 1;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -468,15 +468,17 @@ void MuzzleFrameBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, CC
 
 		CPlayer* pPlayer = pCamera->GetPlayer();
 		XMFLOAT3 CameraPosition = pCamera->GetPosition();
+		XMFLOAT3 CameraLook = pCamera->GetLookVector();
 		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
-		XMFLOAT3 xmf3Position = Vector3::Add(Position, Vector3::ScalarProduct(Look, 4.0f, false));
-		xmf3Position.y += 3.65f;
+		XMFLOAT3 xmf3Position = Vector3::Add(Position, Vector3::ScalarProduct(CameraLook, 4.0f, false));
+		xmf3Position.y += 0.4f;
+		xmf3Position.x -= 0.02f;
 		for (int j = 0; j < m_nObjects; j++)
 		{
 
 			if (m_ppObjects[j])m_ppObjects[j]->SetPosition(xmf3Position);
-			if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(CameraPosition, XMFLOAT3(0.0f, 1.0, 1.0f));
+			if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(CameraPosition, XMFLOAT3(0.0f, 1.0, 0.0f));
 
 			BillboardShader::Render(pd3dCommandList, pCamera, 0);
 		}
