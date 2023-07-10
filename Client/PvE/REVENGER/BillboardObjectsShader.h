@@ -93,11 +93,11 @@ public:
 
 
 
-class MuzzleFrameBillboard : public BillboardShader
+class MuzzleFlameBillboard : public BillboardShader
 {
 public:
-	MuzzleFrameBillboard() {};
-	virtual ~MuzzleFrameBillboard() {};
+	MuzzleFlameBillboard() {};
+	virtual ~MuzzleFlameBillboard() {};
 
 
 	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);

@@ -16,19 +16,17 @@ CObjectsShader::~CObjectsShader()
 
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 
 	m_nObjects = 45;
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
-	CMaterial* pPlaneMaterial = new CMaterial(2);
-	pPlaneMaterial->SetReflection(3);
+	CMaterial* pMaterials = new CMaterial(45);
+	pMaterials->SetReflection(45);
 	m_ppObjects[0] = new CGameObject(1);
 	m_ppObjects[0]->SetMesh(pPlaneMesh);
-	m_ppObjects[0]->SetMaterial(0, pPlaneMaterial);
+	m_ppObjects[0]->SetMaterial(0, pMaterials);
 	m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 3.0, 100.0f));
-
 	m_ppObjects[2] = new CGameObject(1);
 	m_ppObjects[3] = new CGameObject(1);
 	m_ppObjects[4] = new CGameObject(1);
@@ -36,31 +34,24 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
 
-	CMaterial* pOtherPlayerMaterial = new CMaterial(4);
-	pOtherPlayerMaterial->SetReflection(4);
-
 	CLoadedModelInfo* pSModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
 	m_ppObjects[1] = new CHumanPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
-	m_ppObjects[1]->SetMaterial(0, pOtherPlayerMaterial);
-
+	m_ppObjects[1]->SetMaterial(0, pMaterials);
 	pSModel->m_pModelRootObject->AddRef();
+
 	for (int x = 5; x < 8; x++)
 	{
 		m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
-		m_ppObjects[x]->SetMaterial(0, pOtherPlayerMaterial);
+		m_ppObjects[x]->SetMaterial(0, pMaterials);
 		m_ppObjects[x]->SetScale(5, 5, 5);
 		m_ppObjects[x]->SetPosition(XMFLOAT3(70.0 + (x) * 20, 8.0, 800.0));
 		pSModel->m_pModelRootObject->AddRef();
 	}
-
 	if (pSModel) delete pSModel;
 
 	/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
 
 	////////////////////////////////////////////////////MAP_LOAD///////////////////////////////////////////////////////////////
-	CMaterial* pCityMaterial;
-	pCityMaterial = new CMaterial(4);
-	pCityMaterial->SetReflection(4);
 	int Cities = 4;
 	m_ppCityGameObjects = new CGameObject * [Cities];
 	for (int i = 0; i < Cities; i++)
@@ -75,7 +66,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 		m_ppCityGameObjects[i] = new CCityObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppCityGameObjects[i]->SetChild(pGeneratorModel, false);
-		m_ppCityGameObjects[i]->SetMaterial(0, pCityMaterial);
+		m_ppCityGameObjects[i]->SetMaterial(0, pMaterials);
 		m_ppCityGameObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
 		m_ppCityGameObjects[i]->SetScale(1.0f, 1.0f, 1.0f);
 		m_ppCityGameObjects[i]->OnPrepareAnimate();
@@ -92,19 +83,14 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	////////////////////////////////////////////////////HELI_LOAD///////////////////////////////////////////////////////////////
 	m_nHeliNpcObjects = 5;
 	m_ppNpc_Heli_Objects = new CHelicopterObjects * [m_nHeliNpcObjects];
-
-	CMaterial* pNpcHeliMaterial = new CMaterial(m_nHeliNpcObjects);
-	pNpcHeliMaterial->SetReflection(m_nHeliNpcObjects);
-
 	for (int i = 0; i < m_nHeliNpcObjects; i++)
 	{
 		CGameObject* pNPCHelicopterModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 		m_ppNpc_Heli_Objects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pNPCHelicopterModel, pd3dGraphicsRootSignature);
 		m_ppNpc_Heli_Objects[i]->SetChild(pNPCHelicopterModel, false);
-		m_ppNpc_Heli_Objects[i]->SetMaterial(0, pNpcHeliMaterial);
+		m_ppNpc_Heli_Objects[i]->SetMaterial(0, pMaterials);
 		m_ppNpc_Heli_Objects[i]->OnPrepareAnimate();
 		m_ppNpc_Heli_Objects[i]->SetPosition(XMFLOAT3(50.0 + i * 15, 70.0, 500.0));
-
 		pNPCHelicopterModel->AddRef();
 	}
 
@@ -124,17 +110,15 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 	////////////////////////////////////////////////SOLDIAR_NPC_LOAD///////////////////////////////////////////////////////////
 	m_nSoldiarNpcObjects = 22;
-	CMaterial* pSoldiarNpcMaterial = new CMaterial(m_nSoldiarNpcObjects);
-	pSoldiarNpcMaterial->SetReflection(m_nSoldiarNpcObjects);
 	m_ppSoldiarNpcObjects = new CGameObject * [m_nSoldiarNpcObjects];
 
 	CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/fixed.bin", NULL);
 	for (int i = 0; i < m_nSoldiarNpcObjects; i++)
 	{
 		m_ppSoldiarNpcObjects[i] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, 4);
-		m_ppSoldiarNpcObjects[i]->SetMaterial(0, pSoldiarNpcMaterial);
+		m_ppSoldiarNpcObjects[i]->SetMaterial(0, pMaterials);
 		m_ppSoldiarNpcObjects[i]->SetScale(5.0, 5.0, 5.0);
-		if (i != 21)m_ppSoldiarNpcObjects[i]->SetPosition(210.0, 6.3, 300.0 + i * 20);
+		if (i != 21) m_ppSoldiarNpcObjects[i]->SetPosition(210.0, 6.3, 300.0 + i * 20);
 		psModel->m_pModelRootObject->AddRef();
 	}
 
@@ -162,23 +146,20 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[42]->SetPosition(139.0, 6.1, 600.0);
 	if (psModel) delete psModel;
 
-
-	CMaterial* pHeliMaterial = new CMaterial(1);
-	pHeliMaterial->SetReflection(1);
 	CGameObject* pHelicopterModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 	m_ppObjects[43] = new HeliPlayer(pd3dDevice, pd3dCommandList, pHelicopterModel, pd3dGraphicsRootSignature);
-	m_ppObjects[43]->SetMaterial(0, pHeliMaterial);
+	m_ppObjects[43]->SetMaterial(0, pMaterials);
 	m_ppObjects[43]->OnPrepareAnimate();
 	pHelicopterModel->AddRef();
 
 	CGameObject* pTreeModels = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/ALL_Tree.bin", NULL);
-	m_ppObjects[44] = new CCityObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_ppObjects[44] = new CTreeObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_ppObjects[44]->SetChild(pTreeModels, false);
-	m_ppObjects[44]->SetMaterial(0, pPlaneMaterial);
+	m_ppObjects[44]->SetMaterial(0, pMaterials);
 	m_ppObjects[44]->OnPrepareAnimate();
-	m_ppObjects[44]->SetScale(0.6, 0.6, 0.6);
-	m_ppObjects[44]->SetPosition(0,3.5,0);
+	m_ppObjects[44]->SetScale(0.5,0.5,0.5);
 	pTreeModels->AddRef();
+
 
 	////////////////////////////////////////////////SOLDIAR_NPC_LOAD////////////////////////////////////////////
 
@@ -686,16 +667,18 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 			XMMATRIX xmmtxProjection{};
 			if (m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
 			{
-				float fWidth = 2000, fHeight = 2000;
+				float fWidth = _PLANE_WIDTH + 500.0, fHeight = _PLANE_HEIGHT +100.0;
 				xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
+			
+
 			}
 			else if (m_pLights[j].m_nType == SPOT_LIGHT)
 			{
-				float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
+				float fWidth = _PLANE_WIDTH+500.0, fHeight = _PLANE_HEIGHT + 500.0;
 				/*float fFovAngle = 60.0f; */m_pLights[j].m_fPhi = cos(60.0f);
 				float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
-				//	xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(m_pLights[j].m_fPhi), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
-				xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
+				float fLeft = -(_PLANE_WIDTH * 0.5f), fRight = +(_PLANE_WIDTH * 0.5f), fTop = +(_PLANE_HEIGHT * 0.5f), fBottom = -(_PLANE_HEIGHT * 0.5f);
+				xmmtxProjection = XMMatrixOrthographicOffCenterLH(fLeft * 6.0f, fRight * 6.0f, fBottom * 6.0f, fTop * 6.0f, 0, 0);
 			}
 			else if (m_pLights[j].m_nType == POINT_LIGHT)
 			{

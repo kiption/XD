@@ -2023,7 +2023,7 @@ CBilldingObject::~CBilldingObject()
 {
 }
 
-CCityObject::CCityObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(5)
+CCityObject::CCityObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(6)
 {
 }
 
@@ -2213,5 +2213,21 @@ CEthanObject::CEthanObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 }
 
 CEthanObject::~CEthanObject()
+{
+}
+
+CTreeObject::CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(1)
+{
+}
+
+CTreeObject::~CTreeObject()
+{
+}
+
+void CTreeObject::OnPrepareAnimate()
+{
+}
+
+void CTreeObject::Animate(float fTimeElapsed)
 {
 }

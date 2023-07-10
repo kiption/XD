@@ -445,6 +445,9 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		if (m_nMode == SCENE1STAGE)
 			m_SniperOn = false;
 		((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = false;
+		m_pCamera->m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		m_pCamera->m_xmf3Right = Vector3::Normalize(m_pCamera->m_xmf3Right);
+		m_pCamera->m_xmf3Look = Vector3::Normalize(m_pCamera->m_xmf3Look);
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 
 		break;
@@ -1103,7 +1106,7 @@ void CGameFramework::AnimateObjects()
 		if (ShotKey == false)
 		{
 			m_pCamera->m_xmf4x4View._43 += 0.1f;
-			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
+			((MuzzleFlameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
 			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
 			{
 				m_pCamera->m_xmf4x4View._42 += 0.20f;
@@ -1115,7 +1118,7 @@ void CGameFramework::AnimateObjects()
 		if (ShotKey == true)
 		{
 			m_pCamera->m_xmf4x4View._43 -= 0.1f;
-			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = true;
+			((MuzzleFlameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = true;
 			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
 			{
 				m_pCamera->m_xmf4x4View._42 -= 0.20f;

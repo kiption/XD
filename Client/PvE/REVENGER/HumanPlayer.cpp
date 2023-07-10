@@ -41,6 +41,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pSkinnedAnimationController->SetCallbackKeys(2, 2);
 	m_pSkinnedAnimationController->SetCallbackKeys(3, 2);
 	m_pSkinnedAnimationController->SetCallbackKeys(4, 2);
+	m_pSkinnedAnimationController->SetCallbackKeys(6, 2);
 
 
 #ifdef _WITH_SOUND_RESOURCE
@@ -56,6 +57,8 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pSkinnedAnimationController->SetCallbackKey(3, 1, 0.3f, _T("Sound/Footstep03.wav"));
 	m_pSkinnedAnimationController->SetCallbackKey(4, 0, 0.0f, _T("Sound/Footstep03.wav"));
 	m_pSkinnedAnimationController->SetCallbackKey(4, 1, 0.3f, _T("Sound/Footstep03.wav"));
+	m_pSkinnedAnimationController->SetCallbackKey(6, 0, 0.05f, _T("Sound/Shooting.mp3"));
+	m_pSkinnedAnimationController->SetCallbackKey(6, 1, 0.35f, _T("Sound/Shooting.mp3"));
 #endif
 	CAnimationCallbackHandler* pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
@@ -65,7 +68,8 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(3, pAnimationCallbackHandler);
 	pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(4, pAnimationCallbackHandler);
-
+	pAnimationCallbackHandler = new CSoundCallbackHandler();
+	m_pSkinnedAnimationController->SetAnimationCallbackHandler(6, pAnimationCallbackHandler);
 
 
 	pBCBulletEffectShader = new CBulletEffectShader();

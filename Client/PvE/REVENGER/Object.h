@@ -624,7 +624,17 @@ public:
 	virtual void Animate(float fTimeElapsed);
 
 };
+class CTreeObject : public CGameObject
+{
+public:
+	CTreeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CTreeObject();
 
+public:
+	virtual void OnPrepareAnimate();
+	virtual void Animate(float fTimeElapsed);
+
+};
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
