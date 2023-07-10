@@ -19,8 +19,8 @@ inline float RandD(float fMin, float fMax)
 DirectX::XMFLOAT3 RandomDirection(float fMin, float fMax)
 {
 	float x = RandD(-2.0f, 2.0f);
-	float y = RandD(-0.2f, 0.2f);
-	float z = RandD(-0.3f, 0.3f);
+	float y = RandD(0.1f, 0.3f);
+	float z = RandD(0.1f, 0.2f);
 
 	DirectX::XMVECTOR direction = DirectX::XMVectorSet(x, y, z, 0.0f);
 	direction = DirectX::XMVector3Normalize(direction);
@@ -280,7 +280,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 		CGameObject* pCartrudgetMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet4.bin", pBCBulletEffectShader);
 		pCartridge = new CValkanObject(1.5);
 		pCartridge->SetChild(pCartrudgetMesh, false);
-		pCartridge->SetMovingSpeed(3.5f);
+		pCartridge->SetMovingSpeed(6.5f);
 		pCartridge->SetActive(false);
 		pCartridge->SetCurScene(SCENE1STAGE);
 		m_ppCartridge[i] = pCartridge;
@@ -899,7 +899,7 @@ void Stage1::Reflectcartridgecase(CGameObject* Objects)
 
 		pBulletObject->m_xmf4x4ToParent = m_pPlayer->m_xmf4x4World;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
-		xmf3FirePosition.y += 0.6f;
+		xmf3FirePosition.y += 0.7f;
 		//xmf3FirePosition.z += 0.8f;
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->SetMovingDirection(xmf3Direction);
@@ -1010,7 +1010,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		if (m_ppCartridge[i]->m_bActive)
 		{
 			m_ppCartridge[i]->Animate(fTimeElapsed);
-			m_ppCartridge[i]->Rotate(8, 5, 5);
+			m_ppCartridge[i]->Rotate(8, 5, 0);
 		}
 	}
 	XMFLOAT3 Position2P = m_ppShaders[0]->m_ppObjects[5]->GetPosition();

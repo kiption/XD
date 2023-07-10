@@ -135,7 +135,8 @@ static int FRAME_BUFFER_HEIGHT = GetSystemMetrics(SM_CYSCREEN);
 #define POINT_LIGHT						1
 #define SPOT_LIGHT						2
 #define DIRECTIONAL_LIGHT				3
-
+const int VK_OPEN_BRACKET = 0xDB;
+const int VK_CLOSE_BRACKET = 0xDD;
 #define OPENINGSCENE 0x00
 #define SCENE1STAGE 0x01
 #define SCENE2STAGE 0x02

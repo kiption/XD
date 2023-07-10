@@ -125,7 +125,7 @@ CGameFramework::CGameFramework()
 	temp.currnum_of_people = 1;
 	WCHAR* tempname = L"빠르게 시작";
 	temp.name = tempname;
-	
+
 	temp.num = 12;
 	temp.ready_state = 2;
 
@@ -502,7 +502,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			case 2: // 로비 UI
 				if (lobbypos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[0].lx && lobbypos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[0].ly) {
 					m_LoginScene = 3; // 빠른시작 누름
-					
+
 					random_device rd;
 					default_random_engine dre(rd());
 					uniform_int_distribution <int> uid(1, 3);
@@ -524,11 +524,11 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				}
 				else if (lobbypos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[1].lx && lobbypos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[1].ly) {
 					m_LoginScene = 4; // 방만들기 누름
-					
+
 					random_device rd;
 					default_random_engine dre(rd());
 					uniform_int_distribution <int> uid(1, 3);
-					
+
 					int ran = uid(dre);
 					switch (ran)
 					{
@@ -580,7 +580,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				}
 				else if (createpos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < createpos[1].lx && createpos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < createpos[1].ly) {
 					m_LoginScene = 2; // 취소 누름
-					
+
 				}
 				break;
 			}
@@ -688,8 +688,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 					}
 				}
 			}
-
-
 		}
 		break;
 		}
@@ -764,16 +762,18 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			}
 			case 'R':
 				if (!player_dead) {
-					gamesound.shotSound->release();
+					//gamesound.shotSound->release();
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bReloadState = true;
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReloadState();
 					q_keyboardInput.push(SEND_KEY_R);//S
 				}
 				break;
 
-			case VK_SPACE:
-				((CHumanPlayer*)m_pScene->m_pPlayer)->m_bJumeState = true;
-				((CHumanPlayer*)m_pScene->m_pPlayer)->JumpState();
+			case '9':
+				if (MouseResponsiveness > 500 && MouseResponsiveness < 1000) MouseResponsiveness -= 40.0f;
+				break;
+			case '0':
+				if (MouseResponsiveness > 500 && MouseResponsiveness < 1000) MouseResponsiveness += 40.0f;
 				break;
 			default:
 				break;
@@ -933,8 +933,8 @@ void CGameFramework::ProcessInput()
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / MouseResponsiveness;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / MouseResponsiveness;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
@@ -1084,7 +1084,7 @@ void CGameFramework::AnimateObjects()
 		//if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
 		if (((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->m_bActive == true)
 		{
-		
+
 			((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->ParticlePosition =
 				XMFLOAT3(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().x,
 					((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().y + 8.0,
@@ -1092,7 +1092,7 @@ void CGameFramework::AnimateObjects()
 
 			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 		}
-	
+
 
 		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay += m_GameTimer.GetTimeElapsed();
 		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay > 0.2)
@@ -1328,7 +1328,7 @@ void CGameFramework::FrameAdvance()
 				D2D_POINT_2F D2_RoomUI = { D2_OpeningUI.x + 100.0f, FRAME_BUFFER_HEIGHT / 2 - 146.5f };
 				D2D_RECT_F D2_RoomUIRect = { 0.0f, 0.0f, 1080.0f, 293.0f };
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[53], &D2_RoomUI, &D2_RoomUIRect);
-			
+
 			}
 		}
 	}
@@ -1513,7 +1513,7 @@ void CGameFramework::FrameAdvance()
 
 			D2D_RECT_F D2_RoomNameText = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.22f), (FRAME_BUFFER_HEIGHT * 0.4f), (FRAME_BUFFER_WIDTH * 0.5f), (FRAME_BUFFER_HEIGHT * 0.4f));
 			m_pd2dDeviceContext->DrawTextW(createRoomName, (UINT32)wcslen(createRoomName), m_pdwFont[5], &D2_RoomNameText, m_pd2dbrText[5]);
-		
+
 			D2D_RECT_F D2_UserNameText[3];
 			for (int i{}; i < m_MyRoom_Info.size(); ++i) {
 				int resultY = 590 + 60 * i;
@@ -1524,7 +1524,7 @@ void CGameFramework::FrameAdvance()
 
 				D2_UserNameText[i] = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.26f), (FRAME_BUFFER_HEIGHT / textypos), (FRAME_BUFFER_WIDTH * 0.5f), (FRAME_BUFFER_HEIGHT / textypos));
 				m_pd2dDeviceContext->DrawTextW(m_MyRoom_Info[i].User_name, (UINT32)wcslen(m_MyRoom_Info[i].User_name), m_pdwFont[2], &D2_UserNameText[i], m_pd2dbrText[2]);
-			
+
 			}
 
 		}
