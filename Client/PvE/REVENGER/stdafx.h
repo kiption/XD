@@ -141,6 +141,7 @@ static int FRAME_BUFFER_HEIGHT = GetSystemMetrics(SM_CYSCREEN);
 #define SCENE2STAGE 0x02
 #define BULLETS					30
 #define HELIBULLETS				30
+#define CARTRIDGES				10
 #define HUMANBULLETS			1
 
 #define EXPLOSION_SPARK 30

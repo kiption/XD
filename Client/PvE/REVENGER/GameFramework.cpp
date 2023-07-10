@@ -943,7 +943,7 @@ void CGameFramework::ProcessInput()
 			{
 				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.02)
 				{
-					
+					((Stage1*)m_pScene)->Reflectcartridgecase(NULL);
 					ShotKey = true;
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
 					q_mouseInput.push(lclick);//s

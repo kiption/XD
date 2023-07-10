@@ -270,10 +270,6 @@ float4 PSBulletStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
 
 	float3 normalW;
-	cEmissionColor = float4(0.9,0.2,0.1,1.0);
-	cSpecularColor = float4(0.9,0.2,0.1,1.0);
-	cAlbedoColor = float4(0.9,0.2,0.1,1.0);
-	cMetallicColor = float4(0.9,0.2,0.1,1.0);
 	float4 cColor = cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
 
 	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
@@ -290,7 +286,7 @@ float4 PSBulletStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	float4 uvs[MAX_LIGHTS];
 	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
 
-	return(lerp(cColor, cIllumination, 0.5f));
+	return(lerp(cColor, cIllumination, 0.4f));
 }
 
 
