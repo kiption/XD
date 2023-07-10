@@ -35,16 +35,14 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	// 방향 조절 -> 2개 쓰면 프레임 떨어짐
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[0].m_fRange = 30000.0f;
-	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5, 0.5f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7, 0.7, 1.0f);
-	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.5f, 0.5, 0.5, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(0, 700.0f, 1000.0f);
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+0.2f, -0.9f, -1.0f);
+	m_pLights->m_pLights[0].m_fRange = 40000.0f;
+	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4, 0.4, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-0, 800.0f, 1000.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+0.1f, -0.5f, -1.2f);
 
-
-
-	m_pLights->m_pLights[1].m_bEnable = true;
+	m_pLights->m_pLights[1].m_bEnable = false;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 10000.0f;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
@@ -130,8 +128,10 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1000);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 800);
+
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
 	BuildDefaultLightsAndMaterials();
 
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
@@ -178,11 +178,11 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pHeliHittingMarkBillboard->m_bActive = true;
 	m_pBillboardShader[5] = pHeliHittingMarkBillboard;
 	
-	MuzzleFlameBillboard* pMuzzleFlameBillboard = new MuzzleFlameBillboard();
-	pMuzzleFlameBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
-	pMuzzleFlameBillboard->SetCurScene(SCENE1STAGE);
-	pMuzzleFlameBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_pBillboardShader[6] = pMuzzleFlameBillboard;
+	MuzzleFrameBillboard* pMuzzleFrameBillboard = new MuzzleFrameBillboard();
+	pMuzzleFrameBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pMuzzleFrameBillboard->SetCurScene(SCENE1STAGE);
+	pMuzzleFrameBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_pBillboardShader[6] = pMuzzleFrameBillboard;
 
 	m_nSpriteBillboards = 1;
 	m_ppSpriteBillboard = new CSpriteObjectsShader * [m_nSpriteBillboards];
@@ -1024,7 +1024,7 @@ void Stage1::BillBoardRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	//for (int i = 0; i < m_nBillboardShaders; i++)
 	if (m_pBillboardShader[1]) m_pBillboardShader[1]->Render(pd3dCommandList, pCamera, 0);
 	if (m_pBillboardShader[4]) m_pBillboardShader[4]->Render(pd3dCommandList, pCamera, 0);
-	if (((MuzzleFlameBillboard*)m_pBillboardShader[6])) ((MuzzleFlameBillboard*)m_pBillboardShader[6])
+	if (((MuzzleFrameBillboard*)m_pBillboardShader[6])) ((MuzzleFrameBillboard*)m_pBillboardShader[6])
 		->Render(pd3dCommandList, pCamera, 0, MuzzleFrameLook,((CHumanPlayer*)m_pPlayer)->m_pBulletFindFrame->GetPosition());
 
 }

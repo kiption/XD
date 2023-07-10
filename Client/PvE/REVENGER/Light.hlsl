@@ -66,41 +66,14 @@ float Compute3x3ShadowFactor(float2 uv, float fDepth, uint nIndex)
 	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, -DELTA_Y), fDepth).r;
 	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, +DELTA_Y), fDepth).r;
 
-	return(fPercentLit / 9.0f);
+	return(fPercentLit / 4.0f);
 }
 
 float Compute5x5ShadowFactor(float2 uv, float fDepth, uint nIndex)
 {
 	float fPercentLit = 0.0f;
 
-	// Sample the center pixel
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv, fDepth).r;
-
-	// Sample the 4 neighboring pixels
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, 0.0f), fDepth).r;
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, 0.0f), fDepth).r;
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, -DELTA_Y), fDepth).r;
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, +DELTA_Y), fDepth).r;
-
-	// Sample the 8 corner pixels
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, -DELTA_Y), fDepth).r;
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, +DELTA_Y), fDepth).r;
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, -DELTA_Y), fDepth).r;
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, +DELTA_Y), fDepth).r;
-
-	// Sample the 4 additional pixels
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-2.0f * DELTA_X, 0.0f), fDepth).r;
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+2.0f * DELTA_X, 0.0f), fDepth).r;
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, -2.0f * DELTA_Y), fDepth).r;
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, +2.0f * DELTA_Y), fDepth).r;
-
-	// Sample the 4 diagonal pixels
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, -DELTA_Y), fDepth).r;
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, +DELTA_Y), fDepth).r;
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, -DELTA_Y), fDepth).r;
-	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, +DELTA_Y), fDepth).r;
-
-	return (fPercentLit / 25.0f);
+	return(fPercentLit / 10.0f);
 }
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
@@ -108,7 +81,6 @@ float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
 	float3 vToLight = -gLights[nIndex].m_vDirection;
 	float fDiffuseFactor = dot(vToLight, vNormal);
 	float fSpecularFactor = 0.0f;
-
 	if (fDiffuseFactor > 0.0f)
 	{
 		if (gMaterial.m_cSpecular.a != 0.0f)
@@ -294,7 +266,7 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 		{
 			float fShadowFactor = 1.0f;
 #ifdef _WITH_PCF_FILTERING
-			if (bShadow) fShadowFactor = Compute5x5ShadowFactor(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
+			if (bShadow) fShadowFactor = Compute3x3ShadowFactor(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
 #else
 			if (bShadow) fShadowFactor = gtxtDepthTextures[i].SampleCmpLevelZero(gssComparisonPCFShadow, uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w).r;
 #endif

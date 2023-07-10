@@ -69,8 +69,8 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1000);
-	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1500);
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
