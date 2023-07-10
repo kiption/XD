@@ -140,7 +140,7 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetFriction(600);
 		SetGravity(XMFLOAT3(0.0f, -3.f, 0.0f));
 		SetMaxVelocityXZ(40.0);
-		SetMaxVelocityY(0.0f);
+		SetMaxVelocityY(2.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 8.0f, -12.0f));
