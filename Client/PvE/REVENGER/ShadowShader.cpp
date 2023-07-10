@@ -157,7 +157,8 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[44]->SetChild(pTreeModels, false);
 	m_ppObjects[44]->SetMaterial(0, pMaterials);
 	m_ppObjects[44]->OnPrepareAnimate();
-	m_ppObjects[44]->SetScale(0.5,0.5,0.5);
+	m_ppObjects[44]->SetScale(1.0, 1.0, 1.0);
+	m_ppObjects[44]->SetPosition(0,0,0);
 	pTreeModels->AddRef();
 
 
