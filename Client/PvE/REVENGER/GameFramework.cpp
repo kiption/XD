@@ -770,10 +770,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				break;
 
 			case '9':
-				if (MouseResponsiveness > 500 && MouseResponsiveness < 1000) MouseResponsiveness -= 40.0f;
+				if (MouseResponsiveness > 500 && MouseResponsiveness < 900) MouseResponsiveness -= 50.0f;
 				break;
 			case '0':
-				if (MouseResponsiveness > 500 && MouseResponsiveness < 1000) MouseResponsiveness += 40.0f;
+				if (MouseResponsiveness > 500 && MouseResponsiveness < 900) MouseResponsiveness += 50.0f;
 				break;
 			default:
 				break;
