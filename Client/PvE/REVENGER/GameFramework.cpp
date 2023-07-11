@@ -761,11 +761,11 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				break;
 			}
 			case 'R':
-				if (!player_dead) {
-					//gamesound.shotSound->release();
+				if (!player_dead && ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bMoveUpdate==false)
+				{
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bReloadState = true;
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReloadState();
-					q_keyboardInput.push(SEND_KEY_R);//S
+					q_keyboardInput.push(SEND_KEY_R);
 				}
 				break;
 
