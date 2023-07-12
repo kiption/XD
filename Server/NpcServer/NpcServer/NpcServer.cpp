@@ -971,6 +971,10 @@ void NPC::H_IsPathMove()
 		m_lookvec = NPCcalcLookRotate();
 
 		m_UpdateTurn = false;
+
+		if (ConnectingServer) {
+			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+		}
 	}
 
 	pos = interpolatedPos;
@@ -1164,8 +1168,56 @@ void NPC::H_PlayerAttack()
 	// Look
 	H_PlayerChasing();
 
-	XMFLOAT3 AttackVec = { m_User_Pos[m_chaseID].x - pos.x,m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
-	m_AttackVec = NPCNormalize(AttackVec);
+	XMFLOAT3 NPCtoPlayerLook = { m_User_Pos[m_chaseID].x - pos.x,m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
+	float distance = sqrtf(pow((m_User_Pos[m_chaseID].x - pos.x), 2) + pow((m_User_Pos[m_chaseID].y - pos.y), 2) + pow((m_User_Pos[m_chaseID].z - pos.z), 2));
+	
+	XMVECTOR NPCtoPlayerLookNormal = XMVector3Normalize(XMLoadFloat3(&NPCtoPlayerLook));
+	XMStoreFloat3(&NPCtoPlayerLook, NPCtoPlayerLookNormal);
+
+	cout << "NPCtoPlayerLook x: " << NPCtoPlayerLook.x << ", y: " << NPCtoPlayerLook.y << ", z: " << NPCtoPlayerLook.z << endl;
+
+	XMFLOAT3 NPCtoPlayerUpTemp = { 0.0f, 1.0f, 0.0f };
+
+	XMVECTOR NPCtoPlayerLookMat = XMLoadFloat3(&NPCtoPlayerLook);
+	XMVECTOR NPCtoPlayerUpTempMat = XMLoadFloat3(&NPCtoPlayerUpTemp);
+
+	XMVECTOR NPCtoPlayerRightMat = XMVector3Normalize(XMVector3Cross(NPCtoPlayerUpTempMat, NPCtoPlayerLookMat));
+
+	XMFLOAT3 NPCtoPlayerRight;
+	XMStoreFloat3(&NPCtoPlayerRight, NPCtoPlayerRightMat);
+
+	XMVECTOR NPCtoPlayerUpMat = XMVector3Normalize(XMVector3Cross(NPCtoPlayerLookMat, NPCtoPlayerRightMat));
+
+	XMFLOAT3 NPCtoPlayerUp;
+	XMStoreFloat3(&NPCtoPlayerUp, NPCtoPlayerUpMat);
+
+	random_device rd;
+	default_random_engine dre(rd());
+	uniform_real_distribution<float> ShackingAttackRange(-3, 3);
+
+	float UpShaking = ShackingAttackRange(dre);
+	float UpshakingDevide = UpShaking / distance;
+
+	float RightShaking = ShackingAttackRange(dre);
+	float RightshakingDevide = UpShaking / distance;
+
+	XMVECTOR ShakeUPMatrix = XMVectorScale(XMLoadFloat3(&NPCtoPlayerUp), UpshakingDevide);
+	XMVECTOR ShakeRightMatrix = XMVectorScale(XMLoadFloat3(&NPCtoPlayerRight), RightshakingDevide);
+
+	XMFLOAT3 ShakeUpVec;
+	XMStoreFloat3(&ShakeUpVec, ShakeUPMatrix);
+	
+	XMFLOAT3 ShakeRightVec;
+	XMStoreFloat3(&ShakeRightVec, ShakeRightMatrix);
+
+	XMVECTOR ShakeUpRightVec = XMVectorAdd(XMLoadFloat3(&ShakeUpVec), XMLoadFloat3(&ShakeRightVec));
+	XMVECTOR ShakeMat = XMVectorAdd(ShakeUpRightVec, NPCtoPlayerLookNormal);
+	XMStoreFloat3(&m_AttackVec, ShakeMat);
+
+	m_AttackVec = NPCNormalize(m_AttackVec);
+
+	cout << "m_AttackVec x: " << m_AttackVec.x << ", y: " << m_AttackVec.y << ", z: " << m_AttackVec.z << endl;
+
 }
 
 void NPC::H_NPC_Check_HP()
@@ -1328,6 +1380,10 @@ void NPC::A_IsPathMove()
 		m_lookvec = NPCcalcLookRotate();
 
 		m_UpdateTurn = false;
+
+		if (ConnectingServer) {
+			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+		}
 	}
 
 	pos = interpolatedPos;
@@ -1960,9 +2016,9 @@ void MoveNPC()
 					//	cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
 					//}
 
-					if (npcsInfo[i].GetState() == NPC_ATTACK) {
+					/*if (npcsInfo[i].GetState() == NPC_ATTACK) {
 						g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
-					}
+					}*/
 				}
 			}
 
