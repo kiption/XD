@@ -176,6 +176,9 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_ppObjects[44]->SetChild(pTreeModels, false);
 	m_ppObjects[44]->SetMaterial(0, pPlaneMaterial);
 	m_ppObjects[44]->OnPrepareAnimate();
+
+	m_ppObjects[44]->SetScale(1.0, 1.0, 1.0);
+	m_ppObjects[44]->SetPosition(0,0,0);
 	m_ppObjects[44]->SetScale(1.0, 1.0, 1.0);
 	m_ppObjects[44]->SetPosition(0,0,0);
 	pTreeModels->AddRef();
@@ -489,10 +492,10 @@ D3D12_RASTERIZER_DESC CDepthRenderShader::CreateRasterizerState(int nPipelineSta
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
 	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
 	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
-	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_FRONT;
 	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
 #ifdef _WITH_RASTERIZER_DEPTH_BIAS
-	d3dRasterizerDesc.DepthBias = 250000;
+	d3dRasterizerDesc.DepthBias = 10000;
 #endif
 	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
 	d3dRasterizerDesc.SlopeScaledDepthBias = 1.0f;
@@ -694,8 +697,8 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 				float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
 				/*float fFovAngle = 60.0f; */m_pLights[j].m_fPhi = cos(60.0f);
 				float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
-				//	xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(m_pLights[j].m_fPhi), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
-				xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
+				xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(m_pLights[j].m_fPhi), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
+				//xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
 			}
 			else if (m_pLights[j].m_nType == POINT_LIGHT)
 			{
@@ -774,15 +777,14 @@ D3D12_BLEND_DESC CTreeBlendingShadowShader::CreateBlendState(int nPipelineState)
 	d3dBlendDesc.IndependentBlendEnable = FALSE;
 	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
 	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
-	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_INV_SRC_ALPHA;
-	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_SRC_COLOR;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
 	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
 	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
 	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
-	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_SUBTRACT;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
 	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-
 
 	return(d3dBlendDesc);
 }

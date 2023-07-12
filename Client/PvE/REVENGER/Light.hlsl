@@ -66,7 +66,7 @@ float Compute3x3ShadowFactor(float2 uv, float fDepth, uint nIndex)
 	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, -DELTA_Y), fDepth).r;
 	fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, +DELTA_Y), fDepth).r;
 
-	return(fPercentLit / 4.0f);
+	return(fPercentLit / 9.0f);
 }
 
 float Compute5x5ShadowFactor(float2 uv, float fDepth, uint nIndex)

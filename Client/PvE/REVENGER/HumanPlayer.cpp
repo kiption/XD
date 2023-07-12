@@ -140,7 +140,7 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetFriction(600);
 		SetGravity(XMFLOAT3(0.0f, -3.f, 0.0f));
 		SetMaxVelocityXZ(40.0);
-		SetMaxVelocityY(0.0f);
+		SetMaxVelocityY(2.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 8.0f, -12.0f));
@@ -237,7 +237,7 @@ void CHumanPlayer::ReloadState()
 		m_pSkinnedAnimationController->SetTrackEnable(4, false);
 		m_pSkinnedAnimationController->SetTrackEnable(5, true);
 		m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
-
+		m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
 	}
 
 
@@ -263,7 +263,7 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 {
 	m_bReloadState = false;
 	m_bJumeState = false;
-
+	m_bMoveUpdate = true;
 	m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_LOOP;
 	if (dwDirection & DIR_FORWARD)
 	{
@@ -375,12 +375,14 @@ void CHumanPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 
 void CHumanPlayer::Update(float fTimeElapsed)
 {
+	
 	CPlayer::Update(fTimeElapsed);
 	if (m_pSkinnedAnimationController)
 	{
 		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
 		if (::IsZero(fLength))
 		{
+			m_bMoveUpdate = false;
 			m_pSkinnedAnimationController->SetTrackEnable(0, true);
 			m_pSkinnedAnimationController->SetTrackEnable(1, false);
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);

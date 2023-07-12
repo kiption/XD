@@ -1,6 +1,35 @@
 #include "stdafx.h"
 #include "Stage1.h"
+float RandomDir(float fMin, float fMax)
+{
+	float fRandomValue = (float)rand();
+	if (fRandomValue < fMin) fRandomValue = fMin;
+	if (fRandomValue > fMax) fRandomValue = fMax;
+	return(fRandomValue);
+}
 
+float RandomDir()
+{
+	return(rand() / float(RAND_MAX));
+}
+inline float RandD(float fMin, float fMax)
+{
+	return(fMin + ((float)rand() / (float)RAND_MAX) * (fMax - fMin));
+}
+DirectX::XMFLOAT3 RandomDirection(float fMin, float fMax)
+{
+	float x = RandD(-2.0f, 2.0f);
+	float y = RandD(0.1f, 0.3f);
+	float z = RandD(0.1f, 0.2f);
+
+	DirectX::XMVECTOR direction = DirectX::XMVectorSet(x, y, z, 0.0f);
+	direction = DirectX::XMVector3Normalize(direction);
+
+	DirectX::XMFLOAT3 result;
+	DirectX::XMStoreFloat3(&result, direction);
+
+	return result;
+}
 ID3D12DescriptorHeap* Stage1::m_pd3dCbvSrvDescriptorHeap = NULL;
 
 D3D12_CPU_DESCRIPTOR_HANDLE	Stage1::m_d3dCbvCPUDescriptorStartHandle;
@@ -33,23 +62,23 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 
 	// 방향 조절 -> 2개 쓰면 프레임 떨어짐
-	m_pLights->m_pLights[0].m_bEnable = true;
+	m_pLights->m_pLights[0].m_bEnable = false;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[0].m_fRange = 40000.0f;
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
-	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4, 0.4, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6, 0.6, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-0, 800.0f, 1000.0f);
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(+0.1f, -0.5f, -1.2f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-210, 400.0f, 1000.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.3f, -1.0f, -1.0f);
 
-	m_pLights->m_pLights[1].m_bEnable = false;
+	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 10000.0f;
+	m_pLights->m_pLights[1].m_fRange = 30000.0f;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7, 0.7, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6, 0.6, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-80, 350.0f, 950.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(+0.1f, -0.30f, -1.1f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-210, 170.0f, 1000.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(-0.15f, -0.6f, -1.0f);
 
 	m_pLights->m_pLights[2].m_bEnable = true;
 	m_pLights->m_pLights[2].m_nType = SPOT_LIGHT;
@@ -177,7 +206,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pHeliHittingMarkBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pHeliHittingMarkBillboard->m_bActive = true;
 	m_pBillboardShader[5] = pHeliHittingMarkBillboard;
-	
+
 	MuzzleFrameBillboard* pMuzzleFrameBillboard = new MuzzleFrameBillboard();
 	pMuzzleFrameBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pMuzzleFrameBillboard->SetCurScene(SCENE1STAGE);
@@ -240,13 +269,23 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
 		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, false);
-		pBulletObject->SetMovingSpeed(200.0f);
+		pBulletObject->SetMovingSpeed(1000.0f);
 		pBulletObject->SetActive(false);
 		pBulletObject->SetCurScene(SCENE1STAGE);
 		m_ppBullets[i] = pBulletObject;
 		pBulletMesh->AddRef();
 	}
-
+	for (int i = 0; i < CARTRIDGES; i++)
+	{
+		CGameObject* pCartrudgetMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet4.bin", pBCBulletEffectShader);
+		pCartridge = new CValkanObject(1.5);
+		pCartridge->SetChild(pCartrudgetMesh, false);
+		pCartridge->SetMovingSpeed(6.5f);
+		pCartridge->SetActive(false);
+		pCartridge->SetCurScene(SCENE1STAGE);
+		m_ppCartridge[i] = pCartridge;
+		pCartrudgetMesh->AddRef();
+	}
 	gamesound.SpeakMusic();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -257,7 +296,9 @@ void Stage1::ReleaseObjects()
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
 	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
 	//if (m_pBoundingBoxShader) m_pBoundingBoxShader->Release();
-	for (int i = 0; i < HELIBULLETS; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
+	for (int i = 0; i < HELIBULLETS; i++) if (m_ppBullets[i]) delete[] m_ppBullets[i];
+	for (int i = 0; i < CARTRIDGES; i++) if (m_ppCartridge[i]) delete[] m_ppCartridge[i];
+
 	if (m_pBillboardShader)
 	{
 		for (int i = 0; i < m_nBillboardShaders; i++)
@@ -561,14 +602,14 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[4];
 
-	pd3dSamplerDescs[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	pd3dSamplerDescs[0].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pd3dSamplerDescs[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pd3dSamplerDescs[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pd3dSamplerDescs[0].MipLODBias = 0;
 	pd3dSamplerDescs[0].MaxAnisotropy = 1;
-	pd3dSamplerDescs[0].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
-	//pd3dSamplerDescs[0].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+	pd3dSamplerDescs[0].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	pd3dSamplerDescs[0].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
 	pd3dSamplerDescs[0].MinLOD = 0;
 	pd3dSamplerDescs[0].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[0].ShaderRegister = 0;
@@ -581,15 +622,15 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dSamplerDescs[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 	pd3dSamplerDescs[1].MipLODBias = 0;
 	pd3dSamplerDescs[1].MaxAnisotropy = 1;
-	pd3dSamplerDescs[1].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
-	//pd3dSamplerDescs[1].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+	pd3dSamplerDescs[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	pd3dSamplerDescs[1].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
 	pd3dSamplerDescs[1].MinLOD = 0;
 	pd3dSamplerDescs[1].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[1].ShaderRegister = 1;
 	pd3dSamplerDescs[1].RegisterSpace = 0;
 	pd3dSamplerDescs[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-	pd3dSamplerDescs[2].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	pd3dSamplerDescs[2].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[2].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	pd3dSamplerDescs[2].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	pd3dSamplerDescs[2].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
@@ -603,14 +644,14 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dSamplerDescs[2].RegisterSpace = 0;
 	pd3dSamplerDescs[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dSamplerDescs[3].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	pd3dSamplerDescs[3].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[3].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	pd3dSamplerDescs[3].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	pd3dSamplerDescs[3].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	pd3dSamplerDescs[3].MipLODBias = 0.0f;
 	pd3dSamplerDescs[3].MaxAnisotropy = 1;
-	pd3dSamplerDescs[3].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
-	pd3dSamplerDescs[3].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+	pd3dSamplerDescs[3].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	pd3dSamplerDescs[3].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
 	pd3dSamplerDescs[3].MinLOD = 0;
 	pd3dSamplerDescs[3].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[3].ShaderRegister = 3;
@@ -682,7 +723,7 @@ void Stage1::ReleaseUploadBuffers()
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 
-	
+
 	for (int i = 0; i < m_nHumanShaders; i++) m_ppHumanShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->ReleaseUploadBuffers();
@@ -837,6 +878,37 @@ void Stage1::Firevalkan(CGameObject* Objects, XMFLOAT3 ToPlayerLook)
 	}
 }
 
+void Stage1::Reflectcartridgecase(CGameObject* Objects)
+{
+	CValkanObject* pBulletObject = NULL;
+	for (int i = 0; i < CARTRIDGES; i++)
+	{
+		if (!m_ppCartridge[i]->m_bActive)
+		{
+			pBulletObject = m_ppCartridge[i];
+			pBulletObject->Reset();
+			break;
+		}
+	}
+
+	if (pBulletObject)
+	{
+		XMFLOAT3 PlayerLook = ((CHumanPlayer*)m_pPlayer)->m_pBulletFindFrame->GetRight();
+		XMFLOAT3 xmf3Position = ((CHumanPlayer*)m_pPlayer)->m_pBulletFindFrame->GetPosition();
+		XMFLOAT3 xmf3Direction = RandomDirection(1,5);
+
+		pBulletObject->m_xmf4x4ToParent = m_pPlayer->m_xmf4x4World;
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
+		xmf3FirePosition.y += 0.7f;
+		//xmf3FirePosition.z += 0.8f;
+		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+		pBulletObject->SetMovingDirection(xmf3Direction);
+		pBulletObject->SetScale(0.05, 0.05, 0.05);
+		pBulletObject->SetActive(true);
+
+	}
+}
+
 
 
 bool Stage1::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
@@ -857,7 +929,7 @@ bool Stage1::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			m_ppSpriteBillboard[0]->SetActive(!m_ppSpriteBillboard[0]->GetActive());
 			break;
 		case 'K':
-			((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveMark = true;
+			
 			break;
 		case 'J':
 			((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveMark = false;
@@ -903,7 +975,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	((CHelicopterBulletMarkParticleShader*)m_ppFragShaders[1])->m_bActive = true;
 	((CFragmentsShader*)m_ppFragShaders[0])->ParticlePosition = m_ppShaders[0]->m_ppObjects[13]->GetPosition();
 	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(m_ppShaders[0]->m_ppObjects[30]->GetPosition());
-	((CHelicopterBulletMarkParticleShader*)m_ppFragShaders[1])->ParticlePosition = XMFLOAT3(120.0,6.1,800.0);
+	((CHelicopterBulletMarkParticleShader*)m_ppFragShaders[1])->ParticlePosition = XMFLOAT3(120.0, 6.1, 800.0);
 	((HeliHittingMarkBillboard*)m_pBillboardShader[5])->m_bActive = true;
 	((HeliHittingMarkBillboard*)m_pBillboardShader[5])->ParticlePosition = XMFLOAT3(120.0, 6.1, 800.0);
 
@@ -933,7 +1005,14 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 
 		}
 	}
-
+	for (int i = 0; i < CARTRIDGES; i++)
+	{
+		if (m_ppCartridge[i]->m_bActive)
+		{
+			m_ppCartridge[i]->Animate(fTimeElapsed);
+			m_ppCartridge[i]->Rotate(8, 5, 0);
+		}
+	}
 	XMFLOAT3 Position2P = m_ppShaders[0]->m_ppObjects[5]->GetPosition();
 	XMFLOAT3 Look2P = m_ppShaders[0]->m_ppObjects[5]->GetLook();
 	if (m_pLights)
@@ -944,10 +1023,10 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		m_pLights->m_pLights[3].m_xmf3Direction = m_pPlayer->GetLook();
 		m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.5, 0.5, 0.5, 1.0);
 	}
-	//m_fLightRotationAngle += fTimeElapsed;
-	//XMMATRIX xmmtxRotation = XMMatrixRotationY(fTimeElapsed * 0.02f);
+	m_fLightRotationAngle += fTimeElapsed;
+	XMMATRIX xmmtxRotation = XMMatrixRotationY(fTimeElapsed * 0.02f);
 	//XMStoreFloat3(&m_pLights->m_pLights[0].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction), xmmtxRotation));
-	//XMStoreFloat3(&m_pLights->m_pLights[1].m_xmf3Direction, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[1].m_xmf3Direction), xmmtxRotation));
+	//XMStoreFloat3(&m_pLights->m_pLights[1].m_xmf3Position, XMVector3TransformNormal(XMLoadFloat3(&m_pLights->m_pLights[1].m_xmf3Position), xmmtxRotation));
 
 	for (int i = 22; i < 42; i++)
 	{
@@ -956,9 +1035,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		float fHeight = 6.15f + 0.05f;
 		if (xmf3PlayerPosition.y < fHeight)
 		{
-			//XMFLOAT3 xmf3PlayerVelocity = GetVelocity();
 			xmf3PlayerPosition.y = 0.0f;
-			//SetVelocity(xmf3PlayerVelocity);
 			xmf3PlayerPosition.y = fHeight;
 			m_ppShaders[0]->m_ppObjects[i]->SetPosition(xmf3PlayerPosition);
 		}
@@ -983,6 +1060,7 @@ void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
 	if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < HELIBULLETS; i++)if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
+	for (int i = 0; i < CARTRIDGES; i++)if (m_ppCartridge[i]->m_bActive) { m_ppCartridge[i]->Render(pd3dCommandList, pCamera); }
 
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
 	if (m_pTreeBlendShadowShader) m_pTreeBlendShadowShader->Render(pd3dCommandList, pCamera, 0);
@@ -1025,7 +1103,7 @@ void Stage1::BillBoardRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	if (m_pBillboardShader[1]) m_pBillboardShader[1]->Render(pd3dCommandList, pCamera, 0);
 	if (m_pBillboardShader[4]) m_pBillboardShader[4]->Render(pd3dCommandList, pCamera, 0);
 	if (((MuzzleFrameBillboard*)m_pBillboardShader[6])) ((MuzzleFrameBillboard*)m_pBillboardShader[6])
-		->Render(pd3dCommandList, pCamera, 0, MuzzleFrameLook,((CHumanPlayer*)m_pPlayer)->m_pBulletFindFrame->GetPosition());
+		->Render(pd3dCommandList, pCamera, 0, MuzzleFrameLook, ((CHumanPlayer*)m_pPlayer)->m_pBulletFindFrame->GetPosition());
 
 }
 

@@ -29,6 +29,7 @@ public:
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList,CShader* pShader, CCamera* pCamera);
 	
+	bool m_bMoveUpdate = false;
 	bool m_bReloadState = false;
 	bool m_bJumeState = false;
 	bool m_bZoomMode = false;

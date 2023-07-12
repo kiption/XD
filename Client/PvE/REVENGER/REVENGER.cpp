@@ -245,7 +245,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 					if (trigger_stage1_playerinfo_load && trigger_stage1_mapinfo_load) { // 로직 서버에서 스테이지1 관련 정보를 모두 받아야 Stage1 씬으로 넘어갈 수 있다.
 						for (int i{}; i < stage1_mapobj_info.size(); ++i) {
-							cout << i << endl;
 							MapObjectsInfo origintemp = stage1_mapobj_info[i];
 							CollideMapInfo frametemp;
 							frametemp.m_pos = origintemp.m_pos;

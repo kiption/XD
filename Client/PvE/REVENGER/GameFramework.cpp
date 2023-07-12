@@ -125,7 +125,7 @@ CGameFramework::CGameFramework()
 	temp.currnum_of_people = 1;
 	WCHAR* tempname = L"빠르게 시작";
 	temp.name = tempname;
-	
+
 	temp.num = 12;
 	temp.ready_state = 2;
 
@@ -658,8 +658,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 					}
 				}
 			}
-
-
 		}
 		break;
 		}
@@ -733,17 +731,19 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				break;
 			}
 			case 'R':
-				if (!player_dead) {
-					gamesound.shotSound->release();
+				if (!player_dead && ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bMoveUpdate==false)
+				{
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bReloadState = true;
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReloadState();
-					q_keyboardInput.push(SEND_KEY_R);//S
+					q_keyboardInput.push(SEND_KEY_R);
 				}
 				break;
 
-			case VK_SPACE:
-				((CHumanPlayer*)m_pScene->m_pPlayer)->m_bJumeState = true;
-				((CHumanPlayer*)m_pScene->m_pPlayer)->JumpState();
+			case '9':
+				if (MouseResponsiveness > 500 && MouseResponsiveness < 900) MouseResponsiveness -= 50.0f;
+				break;
+			case '0':
+				if (MouseResponsiveness > 500 && MouseResponsiveness < 900) MouseResponsiveness += 50.0f;
 				break;
 			default:
 				break;
@@ -903,8 +903,8 @@ void CGameFramework::ProcessInput()
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 80.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 80.0f;
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / MouseResponsiveness;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / MouseResponsiveness;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
@@ -913,7 +913,7 @@ void CGameFramework::ProcessInput()
 			{
 				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.02)
 				{
-					
+					((Stage1*)m_pScene)->Reflectcartridgecase(NULL);
 					ShotKey = true;
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
 					q_mouseInput.push(lclick);//s
@@ -1054,7 +1054,7 @@ void CGameFramework::AnimateObjects()
 		//if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
 		if (((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->m_bActive == true)
 		{
-		
+
 			((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->ParticlePosition =
 				XMFLOAT3(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().x,
 					((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().y + 8.0,
@@ -1062,7 +1062,7 @@ void CGameFramework::AnimateObjects()
 
 			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 		}
-	
+
 
 		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay += m_GameTimer.GetTimeElapsed();
 		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay > 0.2)
@@ -1298,7 +1298,7 @@ void CGameFramework::FrameAdvance()
 				D2D_POINT_2F D2_RoomUI = { D2_OpeningUI.x + 100.0f, FRAME_BUFFER_HEIGHT / 2 - 146.5f };
 				D2D_RECT_F D2_RoomUIRect = { 0.0f, 0.0f, 1080.0f, 293.0f };
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[53], &D2_RoomUI, &D2_RoomUIRect);
-			
+
 			}
 		}
 	}
@@ -1483,7 +1483,7 @@ void CGameFramework::FrameAdvance()
 
 			D2D_RECT_F D2_RoomNameText = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.22f), (FRAME_BUFFER_HEIGHT * 0.4f), (FRAME_BUFFER_WIDTH * 0.5f), (FRAME_BUFFER_HEIGHT * 0.4f));
 			m_pd2dDeviceContext->DrawTextW(createRoomName, (UINT32)wcslen(createRoomName), m_pdwFont[5], &D2_RoomNameText, m_pd2dbrText[5]);
-		
+
 			D2D_RECT_F D2_UserNameText[3];
 			for (int i{}; i < m_MAX_USER; ++i) {
 				int resultY = 590 + 60 * i;

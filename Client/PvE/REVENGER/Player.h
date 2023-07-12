@@ -101,6 +101,7 @@ public:
 	bool m_bCollisionTerrain = false;
 	bool m_bBulletAnimationActive = false;
 	GameSound gamesound;
+	XMFLOAT3 xmf3Shift;
 	//Server
 	void SetVectorsByServer(const XMFLOAT3& xmf3right, const XMFLOAT3& xmf3up, const XMFLOAT3& xmf3look) { m_xmf3Right = xmf3right; m_xmf3Up = xmf3up; m_xmf3Look = xmf3look; }
 	int DeltaLimit = 0;

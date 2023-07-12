@@ -664,7 +664,7 @@ void disconnect(int target_id, int target)
 		clients[target_id].s_state = ST_FREE;
 		clients[target_id].s_lock.unlock();
 
-		cout << "Player[ID: " << clients[target_id].id << ", name: " << clients[target_id].name << " is log out\n" << endl;	// server message
+		cout << "Player[ID: " << clients[target_id].id << ", name: " << clients[target_id].name << "] is log out\n" << endl;	// server message
 
 		// 남아있는 모든 클라이언트들에게 target_id번 클라이언트가 접속 종료한 사실을 알립니다.
 		for (int i = 0; i < MAX_USER; i++) {
@@ -811,14 +811,11 @@ void process_packet(int client_id, char* packet)
 			g_s_start_time = system_clock::now();
 			b_isfirstplayer = false;
 		}
-		else {
-			cout << "815" << endl;
-		}
 
 		// 새로 접속한 플레이어의 초기 정보를 설정합니다.
 		clients[client_id].s_state = ST_INGAME;
 		clients[client_id].pl_state = PL_ST_IDLE;
-		clients[client_id].curr_stage = 0;
+		clients[client_id].curr_stage = 1;
 		clients[client_id].hp = HELI_MAXHP;
 		strcpy_s(clients[client_id].name, login_packet->name);
 
@@ -834,7 +831,6 @@ void process_packet(int client_id, char* packet)
 
 		clients[client_id].send_login_packet();
 		clients[client_id].s_lock.unlock();
-
 		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "]이(가) 접속하였습니다." << endl;	// server message
 
 		if (!b_active_server) {
@@ -846,6 +842,25 @@ void process_packet(int client_id, char* packet)
 			<< "," << clients[client_id].pos.y << "," << clients[client_id].pos.z << ").\n" << endl;
 
 		clients[client_id].update_viewlist();
+
+		//====================
+		// 스테이지1 미션 전달
+		{
+			lock_guard<mutex> lg{ clients[client_id].s_lock };
+			clients[client_id].send_mission_packet(clients[client_id].curr_stage);
+		}
+
+		stage1_missions[0].start = static_cast<int>(g_curr_servertime.count());
+		cout << "[" << stage1_missions[0].start << "]  새로운 미션 추가: ";
+		switch (stage1_missions[0].type) {
+		case MISSION_KILL:
+			cout << "[처치] ";
+			break;
+		case MISSION_OCCUPY:
+			cout << "[점령] ";
+			break;
+		}
+		cout << stage1_missions[0].curr << " / " << stage1_missions[0].goal << "\n" << endl;
 
 		//====================
 		// 1. 맵 정보
