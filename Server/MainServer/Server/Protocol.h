@@ -2,6 +2,10 @@
 //======================================================================
 // IP 주소
 const char* IPADDR_LOOPBACK = "127.0.0.1";		// 루프백
+
+const char* IPADDR_LOBBY0 = "127.0.0.1";	// 원격 접속
+const char* IPADDR_LOBBY1 = "127.0.0.1";	// 원격 접속
+
 const char* IPADDR_LOGIC0 = "127.0.0.1"; //"112.152.39.13";		// 원격 접속
 const char* IPADDR_LOGIC1 = "127.0.0.1"; //"218.101.227.89";	// 원격 접속
 
@@ -43,9 +47,11 @@ constexpr int HA_REPLICA_CYCLE = 333;	// 서버간 데이터복제 주기 (단위: millisec)
 
 //======================================================================
 constexpr int BUF_SIZE = 200;
-constexpr int NAME_SIZE = 20;
+constexpr int NAME_SIZE = 12;
 constexpr int CHAT_SIZE = 60;
+constexpr int ROOM_NAME_SIZE = 20;
 
+constexpr int MAX_ROOM = 100;
 constexpr int MAX_USER = 3;
 constexpr int MAX_NPCS = 25;
 constexpr int MAX_BULLET = 30;
@@ -74,8 +80,10 @@ constexpr char INPUT_KEY_E = 0b000001;
 //======================================================================
 // Packet ID
 enum PacketID {
-	CLGN_LOGIN_REQUEST, LGNC_LOGIN_RESULT, LGNC_USER_MATCH_PACKET
-	, CLBY_MATCH_REQUEST, LBYC_MATCH_RESULT
+	CLGN_LOGIN_REQUEST
+	, LGNC_LOGIN_RESULT
+	, CLBY_CONNECT, CLBY_CREATE_ROOM, CLBY_QUICK_MATCH, CLBY_LEAVE_ROOM, CLBY_GAME_READY, CLBY_GAME_START
+	, LBYC_MATCH_FAIL, LBYC_ROOM_JOIN, LBYC_ADD_ROOM, LBYC_ROOM_USERCOUNT, LBYC_ROOM_NEW_MEMBER, LBYC_ROOM_LEFT_MEMBER, LBYC_LOBBY_CLEAR, LBYC_MEMBER_STATE, LBYC_GAME_START
 	, CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_CHAT, CS_PING, CS_RELOGIN
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
 	, SC_DAMAGED, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_RESPAWN, SC_BULLET_COUNT, SC_MISSION, SC_MISSION_COMPLETE
@@ -88,7 +96,13 @@ enum PacketID {
 enum PLAYER_STATE { PL_ST_IDLE, PL_ST_MOVE_FRONT, PL_ST_MOVE_BACK, PL_ST_MOVE_SIDE, PL_ST_FLY, PL_ST_CHASE, PL_ST_ATTACK, PL_ST_DEAD };
 
 //======================================================================
-enum TargetType { TARGET_PLAYER, TARGET_BULLET, TARGET_NPC, TARGET_DUMMY };	//[TEST] DUMMY는 임시로 넣었다. NPC 구현 다 되면 빼자.
+enum ROOM_STATE { R_ST_WAIT, R_ST_FULL, R_ST_INGAME };
+
+//======================================================================
+enum TargetType { TARGET_PLAYER, TARGET_BULLET, TARGET_NPC };
+
+//======================================================================
+enum EnumFor1ByteBoolean { b_FALSE, b_TRUE };
 
 //======================================================================
 // Packets ( CS: Client->Server, SC: Server->Client, SS: Server->Other Server )
@@ -116,16 +130,111 @@ struct LGNC_LOGIN_RESULT_PACKET {
 //      클라이언트 - 로비서버
 //================================
 // 1. 클라 -> 로비서버
-struct CLBY_MATCH_REQUEST_PACKET {
+struct CLBY_CONNECT_PACKET {
+	unsigned char size;
+	char type;
+	char name[NAME_SIZE];
+};
+
+struct CLBY_CREATE_ROOM_PACKET {
+	unsigned char size;
+	char type;
+	char room_name[ROOM_NAME_SIZE];
+};
+
+struct CLBY_QUICK_MATCH_PACKET {
+	unsigned char size;
+	char type;
+};
+
+struct CLBY_LEAVE_ROOM_PACKET {
+	unsigned char size;
+	char type;
+};
+
+struct CLBY_GAME_READY_PACKET {
+	unsigned char size;
+	char type;
+};
+
+struct CLBY_GAME_START_PACKET {
 	unsigned char size;
 	char type;
 };
 
 // 2. 로비서버 -> 클라
-struct LBYC_MATCH_RESULT_PACKET {
+enum MATCH_FAIL_REASON { MATCH_FAIL_UNKNOWN, MATCH_FAIL_NOEMPTYROOM };
+struct LBYC_MATCH_FAIL_PACKET {
 	unsigned char size;
 	char type;
-	char result;	// 0: fail, 1: success
+	char fail_reason;	// 0: Unknown, 1: No Empty Room
+};
+
+enum ROOM_MEMBER_STATE { RM_ST_EMPTY, RM_ST_NONREADY, RM_ST_READY, RM_ST_MANAGER }; // 빈칸, 준비X, 준비O, 방장
+struct LBYC_ROOM_JOIN_PACKET {
+	unsigned char size;
+	char type;
+	short room_id;
+	char room_name[ROOM_NAME_SIZE];
+	short member_count;
+	char member_name[MAX_USER][NAME_SIZE];
+	char member_state[MAX_USER];
+	short your_roomindex;
+	char b_manager;	// 너가 방장인지 (0: 아님, 1: 맞음)
+};
+
+struct LBYC_ADD_ROOM_PACKET {
+	unsigned char size;
+	char type;
+	short room_id;
+	char room_name[ROOM_NAME_SIZE];
+};
+
+struct LBYC_ROOM_USERCOUNT_PACKET {
+	unsigned char size;
+	char type;
+	short room_id;
+	short user_count;
+};
+
+struct LBYC_ROOM_NEW_MEMBER_PACKET {
+	unsigned char size;
+	char type;
+	short new_member_roomindex;
+	char new_member_name[NAME_SIZE];
+};
+
+struct LBYC_ROOM_LEFT_MEMBER_PACKET {
+	unsigned char size;
+	char type;
+	short left_member_roomindex;
+	char left_member_name[NAME_SIZE];
+};
+
+struct LBYC_LOBBY_CLEAR_PACKET {
+	unsigned char size;
+	char type;
+};
+
+struct LBYC_ROOM_INFO_PACKET {
+	unsigned char size;
+	char type;
+	short room_id;
+	char room_name[ROOM_NAME_SIZE];
+	char room_state;
+	short user_count;
+};
+
+struct LBYC_MEMBER_STATE_PACKET {
+	unsigned char size;
+	char type;
+	short member_id;
+	char member_state;
+};
+
+struct LBYC_GAME_START_PACKET {
+	unsigned char size;
+	char type;
 };
 
 

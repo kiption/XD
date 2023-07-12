@@ -11,11 +11,16 @@ GameSound gamesound;
 #pragma comment (lib, "WS2_32.LIB")
 #pragma comment(lib, "MSWSock.lib")
 
+//==================================================
 enum SERVER_TYPE { SERVER_LOGIN, SERVER_LOBBY, SERVER_LOGIC };
 short curr_servertype = -1;
-SOCKET s_socket;
-short active_servernum = 1;
-//array<SOCKET, MAX_LOGIC_SERVER> sockets;
+short active_servernum = -1;
+
+SOCKET lgn_socket;	// 로그인서버 소켓
+SOCKET lby_socket;	// 로비서버 소켓
+SOCKET lgc_socket;	// 로직서버 소켓
+
+//==================================================
 int my_id;
 
 //==================================================
@@ -24,9 +29,30 @@ float servertime_ms;    // 실제 서버시간
 int timelimit_ms;       // 스테이지별 제한시간
 int timelimit_sec;
 
+//==================================================
+// 씬 전환 관련
 volatile bool stage1_enter_ok;
 volatile bool stage2_enter_ok;
 
+bool trigger_stage1_playerinfo_load = false;
+bool trigger_stage1_mapinfo_load = false;
+
+//==================================================
+// 로그인씬 UI 관련
+bool ls_login_enter_ok = false;
+bool ls_opening_enter_ok = false;
+bool ls_lobby_enter_ok = false;
+bool ls_room_enter_ok = false;
+bool ls_create_room_enter_ok = false;
+
+bool trigger_new_member = false; // 새로운 유저 방 입장 트리거
+bool trigger_leave_member = false; // 새로운 유저 방 입장 트리거
+bool trigger_room_update = false; // 방 내부 데이터 변경 트리거 (방 데이터 전체를 업데이트하기 위함)
+
+int new_member_id = -1;
+int left_member_id = -1;
+
+//==================================================
 volatile bool respawn_trigger = false;
 
 //==================================================
@@ -92,6 +118,12 @@ public:
 	}
 };
 
+void disconnect() {
+	curr_servertype = -1;
+	active_servernum = -1;
+	lby_socket = 0;
+}
+
 void CALLBACK recvCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED lp_over, DWORD s_flag);
 void CALLBACK sendCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED lp_over, DWORD s_flag);
 OVER_EX g_recv_over;
@@ -104,27 +136,80 @@ void recvPacket()
 	g_recv_over.wsabuf.len = BUF_SIZE;
 	g_recv_over.wsabuf.buf = g_recv_over.send_buf;
 
-	if (WSARecv(s_socket, &g_recv_over.wsabuf, 1, 0, &recv_flag, &g_recv_over.overlapped, recvCallback) == SOCKET_ERROR) {
-		if (GetLastError() != WSA_IO_PENDING)
-			cout << "[WSARecv Error] code: " << GetLastError() << "\n" << endl;
+	switch (curr_servertype) {
+	case SERVER_LOGIN:
+		break;
+	case SERVER_LOBBY:
+		if (WSARecv(lby_socket, &g_recv_over.wsabuf, 1, 0, &recv_flag, &g_recv_over.overlapped, recvCallback) == SOCKET_ERROR) {
+			if (GetLastError() != WSA_IO_PENDING)
+				cout << "[WSARecv Error] code: " << GetLastError() << "\n" << endl;
+		}
+		break;
+	case SERVER_LOGIC:
+		if (WSARecv(lgc_socket, &g_recv_over.wsabuf, 1, 0, &recv_flag, &g_recv_over.overlapped, recvCallback) == SOCKET_ERROR) {
+			if (GetLastError() != WSA_IO_PENDING)
+				cout << "[WSARecv Error] code: " << GetLastError() << "\n" << endl;
+		}
+		break;
 	}
 }
 void sendPacket(void* packet)
 {
 	//cout << "Do SEND" << endl;
 	OVER_EX* s_data = new OVER_EX{ reinterpret_cast<char*>(packet) };
-	if (WSASend(s_socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback) == SOCKET_ERROR) {
-		int err_no = GetLastError();
-		if (err_no == WSAECONNRESET) {   // 서버가 끊어진 상황
-			closesocket(s_socket);
 
-			int new_portnum = 0;
-			switch (curr_servertype) {
-			case SERVER_LOGIN:
-				break;
-			case SERVER_LOBBY:
-				break;
-			case SERVER_LOGIC:
+	switch (curr_servertype) {
+	case SERVER_LOGIN:
+		break;
+	case SERVER_LOBBY:
+		if (WSASend(lby_socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback) == SOCKET_ERROR) {
+			int err_no = GetLastError();
+			if (err_no == WSAECONNRESET) {   // 서버가 끊어진 상황
+				closesocket(lby_socket);
+
+				int new_portnum = 0;
+				if (active_servernum == 0) {		// Active: 0 -> 1
+					active_servernum = 1;
+					new_portnum = PORTNUM_LOBBY_1;
+				}
+				else if (active_servernum == 1) {	// Active: 1 -> 0
+					active_servernum = 0;
+					new_portnum = PORTNUM_LOBBY_0;
+				}
+
+				lby_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+				SOCKADDR_IN newserver_addr;
+				ZeroMemory(&newserver_addr, sizeof(newserver_addr));
+				newserver_addr.sin_family = AF_INET;
+				newserver_addr.sin_port = htons(new_portnum);
+				//inet_pton(AF_INET, SERVER_ADDR, &newserver_addr.sin_addr);//루프백
+
+				// REMOTE
+				if (active_servernum == 0) {
+					inet_pton(AF_INET, IPADDR_LOGIC0, &newserver_addr.sin_addr);
+				}
+				else if (active_servernum == 1) {
+					inet_pton(AF_INET, IPADDR_LOGIC1, &newserver_addr.sin_addr);
+				}
+				connect(lby_socket, reinterpret_cast<sockaddr*>(&newserver_addr), sizeof(newserver_addr));
+
+				CS_RELOGIN_PACKET re_login_pack;
+				re_login_pack.size = sizeof(CS_RELOGIN_PACKET);
+				re_login_pack.type = CS_RELOGIN;
+				re_login_pack.id = my_id;
+				sendPacket(&re_login_pack);
+				recvPacket();
+			}
+			cout << "[WSASend Error] code: " << err_no << "\n" << endl;
+		}
+		break;
+	case SERVER_LOGIC:
+		if (WSASend(lgc_socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback) == SOCKET_ERROR) {
+			int err_no = GetLastError();
+			if (err_no == WSAECONNRESET) {   // 서버가 끊어진 상황
+				closesocket(lgc_socket);
+
+				int new_portnum = 0;
 				if (active_servernum == 0) {		// Active: 0 -> 1
 					active_servernum = 1;
 					new_portnum = PORTNUM_LOGIC_1;
@@ -134,42 +219,32 @@ void sendPacket(void* packet)
 					new_portnum = PORTNUM_LOGIC_0;
 				}
 
-				break;
-			}
+				lgc_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+				SOCKADDR_IN newserver_addr;
+				ZeroMemory(&newserver_addr, sizeof(newserver_addr));
+				newserver_addr.sin_family = AF_INET;
+				newserver_addr.sin_port = htons(new_portnum);
+				//inet_pton(AF_INET, SERVER_ADDR, &newserver_addr.sin_addr);//루프백
 
-			s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-			SOCKADDR_IN newserver_addr;
-			ZeroMemory(&newserver_addr, sizeof(newserver_addr));
-			newserver_addr.sin_family = AF_INET;
-			newserver_addr.sin_port = htons(new_portnum);
-			//inet_pton(AF_INET, SERVER_ADDR, &newserver_addr.sin_addr);//루프백
-
-			// REMOTE
-			switch (curr_servertype) {
-			case SERVER_LOGIN:
-				break;
-			case SERVER_LOBBY:
-				break;
-			case SERVER_LOGIC:
+				// REMOTE
 				if (active_servernum == 0) {
 					inet_pton(AF_INET, IPADDR_LOGIC0, &newserver_addr.sin_addr);
 				}
 				else if (active_servernum == 1) {
 					inet_pton(AF_INET, IPADDR_LOGIC1, &newserver_addr.sin_addr);
 				}
+				connect(lby_socket, reinterpret_cast<sockaddr*>(&newserver_addr), sizeof(newserver_addr));
 
-				break;
+				CS_RELOGIN_PACKET re_login_pack;
+				re_login_pack.size = sizeof(CS_RELOGIN_PACKET);
+				re_login_pack.type = CS_RELOGIN;
+				re_login_pack.id = my_id;
+				sendPacket(&re_login_pack);
+				recvPacket();
 			}
-			connect(s_socket, reinterpret_cast<sockaddr*>(&newserver_addr), sizeof(newserver_addr));
-
-			CS_RELOGIN_PACKET re_login_pack;
-			re_login_pack.size = sizeof(CS_RELOGIN_PACKET);
-			re_login_pack.type = CS_RELOGIN;
-			re_login_pack.id = my_id;
-			sendPacket(&re_login_pack);
-			recvPacket();
+			cout << "[WSASend Error] code: " << err_no << "\n" << endl;
 		}
-		cout << "[WSASend Error] code: " << err_no << "\n" << endl;
+		break;
 	}
 }
 
@@ -194,11 +269,214 @@ void CALLBACK sendCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWO
 
 void processPacket(char* ptr)
 {
-	static bool first_time = true;
 	switch (ptr[1])
 	{
+	//==========
+	// 로비서버
+	case LBYC_MATCH_FAIL:
+	{
+		if (curr_servertype != SERVER_LOBBY) break;
+		LBYC_MATCH_FAIL_PACKET* recv_packet = reinterpret_cast<LBYC_MATCH_FAIL_PACKET*>(ptr);
+
+		// Error Message
+		switch (recv_packet->fail_reason) {
+		case MATCH_FAIL_NOEMPTYROOM:
+			cout << "비어있는 방이 없어 매칭에 실패하였습니다. 방을 새로 생성해주세요.\n" << endl;
+			break;
+		default:
+			cout << "알 수 없는 이유로 매칭에 실패하였습니다.\n" << endl;
+		}
+
+		break;
+	}// LBYC_MATCH_FAIL case end
+	case LBYC_ROOM_JOIN:
+	{
+		if (curr_servertype != SERVER_LOBBY) break;
+		LBYC_ROOM_JOIN_PACKET* recv_packet = reinterpret_cast<LBYC_ROOM_JOIN_PACKET*>(ptr);
+
+		// 자신이 참가할 방의 정보를 업데이트합니다.
+		curr_room_id = recv_packet->room_id;
+		curr_room.room_id = recv_packet->room_id;
+		strcpy_s(curr_room.room_name, recv_packet->room_name);
+		curr_room.user_count = recv_packet->member_count;
+		if (curr_room.user_count == MAX_USER) curr_room.room_state = R_ST_FULL;
+		else								  curr_room.room_state = R_ST_WAIT;
+
+		for (int i = 0; i < MAX_USER;++i) {
+			curr_room.user_state[i] = recv_packet->member_state[i];
+		}
+
+		// 참가할 방에 있는 유저 정보를 업데이트합니다.
+		for (int i = 0; i < MAX_USER; ++i) {
+			if (recv_packet->member_state[i] == RM_ST_EMPTY) continue;
+
+			players_info[i].m_state = ST_INGAME;
+			players_info[i].m_id = i;
+			strcpy_s(players_info[i].m_name, recv_packet->member_name[i]);
+		}
+
+		// 방과 관련된 그 외 정보를 업데이트합니다.
+		my_room_index = recv_packet->your_roomindex;
+		if (recv_packet->b_manager == b_TRUE) b_room_manager = true;
+		else								  b_room_manager = false;
+
+		// Debug
+		cout << "Room[ID: " << curr_room.room_id << ", Name: " << curr_room.room_name << "]에 입장합니다. (방 참여인원: " << curr_room.user_count << "명)" << endl;
+		cout << "당신의 Room Index는 " << my_room_index << "입니다." << endl;
+		if (b_room_manager) cout << "당신은 이 방의 방장입니다." << endl;
+		if (recv_packet->member_count != 1) {
+			cout << "당신이 참가하기 전부터 방에 있던 유저 정보입니다." << endl;
+			for (int i = 0; i < MAX_USER; ++i) {
+				if (players_info[i].m_state != ST_INGAME) continue;
+				if (i == my_room_index) continue;
+				cout << "  - [" << i << "] ID: " << players_info[i].m_id << ", Name: " << players_info[i].m_name << endl;
+			}
+		}
+		cout << "\n";
+
+		// 로그인씬의 방 UI를 띄우는 트리거를 true로 만듭니다.
+		ls_room_enter_ok = true;
+
+		// 방 UI 내부 새로운 유저 트리거를 true로 만듭니다 (원래 방에 있던 유저들 추가를 위함)
+		trigger_room_update = true;
+
+		break;
+	}// LBYC_ROOM_JOIN case end
+	case LBYC_ADD_ROOM:
+	{
+		if (curr_servertype != SERVER_LOBBY) break;
+		LBYC_ADD_ROOM_PACKET* recv_packet = reinterpret_cast<LBYC_ADD_ROOM_PACKET*>(ptr);
+
+		RoomInfo new_room;
+		new_room.room_id = recv_packet->room_id;
+		strcpy_s(new_room.room_name, recv_packet->room_name);
+		new_room.room_state = R_ST_WAIT;
+		new_room.user_count = 1;	// 막 만들어진 방이므로 1명 (방 생성 유저)
+		new_room.user_state[0] = RM_ST_MANAGER;
+		for (int i = 1; i < MAX_USER; ++i) { new_room.user_state[i] = RM_ST_EMPTY; }
+		lobby_rooms.push_back(new_room);
+
+		cout << "새로운 Room을 추가합니다. [ID: " << new_room.room_id << ", Name: " << new_room.room_name << "]\n" << endl;
+
+		break;
+	}// LBYC_ADD_ROOM case end
+	case LBYC_ROOM_USERCOUNT:
+	{
+		if (curr_servertype != SERVER_LOBBY) break;
+		LBYC_ROOM_USERCOUNT_PACKET* recv_packet = reinterpret_cast<LBYC_ROOM_USERCOUNT_PACKET*>(ptr);
+
+		// 로비에 표시될 방 정보를 업데이트합니다.
+		int recv_room_id = recv_packet->room_id;
+		for (auto& room : lobby_rooms) {
+			if (room.room_id == recv_room_id) {
+				room.user_count = recv_packet->user_count;
+				cout << "Room[" << recv_room_id << "]의 현재 인원이 " << room.user_count << "명이 되었습니다.\n" << endl;
+
+				if ((room.room_state != R_ST_FULL) && (room.user_count == MAX_USER)) {
+					room.room_state = R_ST_FULL;
+				}
+				if ((room.room_state == R_ST_FULL) && (room.user_count != MAX_USER)) {
+					room.room_state = R_ST_WAIT;
+				}
+			}
+		}
+
+		break;
+	}// LBYC_ROOM_USERCOUNT case end
+	case LBYC_ROOM_NEW_MEMBER:
+	{
+		if (curr_servertype != SERVER_LOBBY) break;
+		LBYC_ROOM_NEW_MEMBER_PACKET* recv_packet = reinterpret_cast<LBYC_ROOM_NEW_MEMBER_PACKET*>(ptr);
+
+		int new_member_index = recv_packet->new_member_roomindex;
+
+		// 현재 방 정보 업데이트 (전체 방 정보 lobby_room 은 업데이트할 필요가 없음. lobby_room은 로비에 있을때만 업데이트한다.)
+		curr_room.user_count++;
+		if (curr_room.user_count >= MAX_USER) {
+			curr_room.room_state = R_ST_FULL;
+			cout << "Room[" << curr_room_id << "] 정원 도달.\n" << endl;
+		}
+
+		curr_room.user_state[new_member_index] = RM_ST_NONREADY;
+
+		// 유저 정보 업데이트
+		players_info[new_member_index].m_state = ST_INGAME;
+		players_info[new_member_index].m_id = new_member_index;
+		strcpy_s(players_info[new_member_index].m_name, recv_packet->new_member_name);
+
+		// 방 UI 내부 새로운 유저 트리거를 true로 만듭니다
+		trigger_new_member = true;
+		new_member_id = new_member_index;
+
+		// Debug
+		cout << "Room[" << curr_room_id << "]에 새로운 유저[ID: " << players_info[new_member_index].m_id
+			<< ", Name: " << players_info[new_member_index].m_name << "]가 입장하였습니다.\n" << endl;
+
+		break;
+	}// LBYC_ROOM_NEW_MEMBER case end
+	case LBYC_ROOM_LEFT_MEMBER:
+	{
+		if (curr_servertype != SERVER_LOBBY) break;
+		LBYC_ROOM_LEFT_MEMBER_PACKET* recv_packet = reinterpret_cast<LBYC_ROOM_LEFT_MEMBER_PACKET*>(ptr);
+
+		int left_member_index = recv_packet->left_member_roomindex;
+
+		// Debug
+		cout << "Room[" << curr_room_id << "]에서 유저[ID: " << players_info[left_member_index].m_id
+			<< ", Name: " << players_info[left_member_index].m_name << "]가 퇴장하였습니다.\n" << endl;
+
+		// 현재 방 정보 업데이트 (전체 방 정보 lobby_room 은 업데이트할 필요가 없음. lobby_room은 로비에 있을때만 업데이트한다.)
+		curr_room.user_count--;
+
+		// 유저 정보 업데이트
+		players_info[left_member_index].InfoClear();
+
+		// 방 UI 내부 유저 퇴장 트리거를 true로 만듭니다
+		trigger_leave_member = true;
+		left_member_id = left_member_index;
+
+		break;
+	}// LBYC_ROOM_LEFT_MEMBER case end
+	case LBYC_LOBBY_CLEAR:
+	{
+		if (curr_servertype != SERVER_LOBBY) break;
+		LBYC_LOBBY_CLEAR_PACKET* recv_packet = reinterpret_cast<LBYC_LOBBY_CLEAR_PACKET*>(ptr);
+
+		cout << "로비에 보일 방 정보 전체를 초기화합니다." << endl;
+		lobby_rooms.clear();
+
+		break;
+	}// LBYC_LOBBY_CLEAR case end
+	case LBYC_MEMBER_STATE:
+	{
+		if (curr_servertype != SERVER_LOBBY) break;
+		LBYC_MEMBER_STATE_PACKET* recv_packet = reinterpret_cast<LBYC_MEMBER_STATE_PACKET*>(ptr);
+
+		curr_room.user_state[recv_packet->member_id] = recv_packet->member_state;
+		if (recv_packet->member_state == RM_ST_NONREADY)
+			cout << "Client[" << recv_packet->member_id << "]가 준비 해제되었음.\n" << endl;
+		else if (recv_packet->member_state == RM_ST_READY)
+			cout << "Client[" << recv_packet->member_id << "]가 준비 완료되었음.\n" << endl;
+
+		trigger_room_update = true;
+
+		break;
+	}// LBYC_MEMBER_STATE case end
+	case LBYC_GAME_START:
+	{
+		if (curr_servertype != SERVER_LOBBY) break;
+		LBYC_GAME_START_PACKET* recv_packet = reinterpret_cast<LBYC_GAME_START_PACKET*>(ptr);
+
+		cout << "게임 진입을 허가받았습니다.\n" << endl;
+		stage1_enter_ok = true;
+
+		break;
+	}// LBYC_GAME_START case end
+	//==========
+	// 로직서버
 	case SC_LOGIN_INFO:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_LOGIN_INFO_PACKET* recv_packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(ptr);
 		// Player 초기정보 설정
 		my_id = recv_packet->id;
@@ -212,10 +490,13 @@ void processPacket(char* ptr)
 		players_info[my_id].m_state = OBJ_ST_RUNNING;
 		players_info[my_id].m_ingame_state = PL_ST_IDLE;
 		players_info[my_id].m_new_state_update = true;
+
+		trigger_stage1_playerinfo_load = true;
 		break;
 	}// SC_LOGIN_INFO case end
 	case SC_ADD_OBJECT:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_ADD_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_ADD_OBJECT_PACKET*>(ptr);
 		int recv_id = recv_packet->id;
 
@@ -260,6 +541,7 @@ void processPacket(char* ptr)
 	}// SC_ADD_OBJECT case end
 	case SC_MOVE_OBJECT:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_MOVE_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_MOVE_OBJECT_PACKET*>(ptr);
 		int recv_id = recv_packet->id;
 
@@ -294,6 +576,7 @@ void processPacket(char* ptr)
 	}// SC_MOVE_OBJECT case end
 	case SC_ROTATE_OBJECT:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_ROTATE_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_ROTATE_OBJECT_PACKET*>(ptr);
 		int recv_id = recv_packet->id;
 
@@ -321,6 +604,7 @@ void processPacket(char* ptr)
 	}// SC_ROTATE_PLAYER case end
 	case SC_MOVE_ROTATE_OBJECT:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_MOVE_ROTATE_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_MOVE_ROTATE_OBJECT_PACKET*>(ptr);
 		int recv_id = recv_packet->id;
 
@@ -365,6 +649,7 @@ void processPacket(char* ptr)
 	}// SC_MOVE_ROTATE_PLAYER case end
 	case SC_REMOVE_OBJECT:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_REMOVE_OBJECT_PACKET* recv_packet = reinterpret_cast<SC_REMOVE_OBJECT_PACKET*>(ptr);
 		int recv_id = recv_packet->id;
 
@@ -398,6 +683,7 @@ void processPacket(char* ptr)
 	}//SC_REMOVE_PLAYER case end
 	case SC_DAMAGED:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_DAMAGED_PACKET* recv_packet = reinterpret_cast<SC_DAMAGED_PACKET*>(ptr);
 		int recv_id = recv_packet->id;
 
@@ -421,6 +707,7 @@ void processPacket(char* ptr)
 	}//SC_DAMAGED case end
 	case SC_CHANGE_SCENE:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_CHANGE_SCENE_PACKET* recv_packet = reinterpret_cast<SC_CHANGE_SCENE_PACKET*>(ptr);
 
 		int recv_id = recv_packet->id;
@@ -439,6 +726,7 @@ void processPacket(char* ptr)
 	}//SC_CHANGE_SCENE case end
 	case SC_OBJECT_STATE:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_OBJECT_STATE_PACKET* recv_packet = reinterpret_cast<SC_OBJECT_STATE_PACKET*>(ptr);
 
 		int recv_id = recv_packet->id;
@@ -485,6 +773,7 @@ void processPacket(char* ptr)
 	}//SC_OBJECT_STATE case end
 	case SC_RESPAWN:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_RESPAWN_PACKET* recv_packet = reinterpret_cast<SC_RESPAWN_PACKET*>(ptr);
 
 		short recv_id = recv_packet->id;
@@ -511,6 +800,7 @@ void processPacket(char* ptr)
 	}//SC_BULLET_COUNT case end
 	case SC_MISSION:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_MISSION_PACKET* recv_packet = reinterpret_cast<SC_MISSION_PACKET*>(ptr);
 
 		short stage_num = recv_packet->stage_num;
@@ -522,6 +812,7 @@ void processPacket(char* ptr)
 	}//SC_MISSION case end
 	case SC_MISSION_COMPLETE:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_MISSION_COMPLETE_PACKET* recv_packet = reinterpret_cast<SC_MISSION_COMPLETE_PACKET*>(ptr);
 
 		if (recv_packet->stage_num == 1) {
@@ -542,6 +833,7 @@ void processPacket(char* ptr)
 	}//SC_MISSION_COMPLETE case end
 	case SC_TIME_TICKING:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_TIME_TICKING_PACKET* recv_packet = reinterpret_cast<SC_TIME_TICKING_PACKET*>(ptr);
 
 		servertime_ms = recv_packet->servertime_ms;
@@ -551,6 +843,7 @@ void processPacket(char* ptr)
 	}//SC_TIME_TICKING case end
 	case SC_CHAT:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_CHAT_PACKET* recv_packet = reinterpret_cast<SC_CHAT_PACKET*>(ptr);
 
 		chat_comeTome = true;
@@ -561,6 +854,7 @@ void processPacket(char* ptr)
 	}
 	case SC_MAP_OBJINFO:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_MAP_OBJINFO_PACKET* recv_packet = reinterpret_cast<SC_MAP_OBJINFO_PACKET*>(ptr);
 
 		MapObjectsInfo temp;
@@ -573,10 +867,13 @@ void processPacket(char* ptr)
 		temp.m_angle_boc = recv_packet->boc;
 		temp.setBB();
 		stage1_mapobj_info.push_back(temp);
+
+		trigger_stage1_mapinfo_load = true;
 		break;
 	}//SC_MAP_OBJINFO case end
 	case SC_PING_RETURN:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_PING_RETURN_PACKET* recv_packet = reinterpret_cast<SC_PING_RETURN_PACKET*>(ptr);
 
 		if (recv_packet->ping_sender_id == my_id) {
@@ -587,6 +884,7 @@ void processPacket(char* ptr)
 	}//SC_PING_RETURN case end
 	case SC_ACTIVE_DOWN:
 	{
+		if (curr_servertype != SERVER_LOGIC) break;
 		SC_ACTIVE_DOWN_PACKET* recv_packet = reinterpret_cast<SC_ACTIVE_DOWN_PACKET*>(ptr);
 
 		if (recv_packet->prev_s_id == active_servernum) {
@@ -594,6 +892,8 @@ void processPacket(char* ptr)
 		}
 		break;
 	}//SC_BULLET_COUNT case end
+	//==========
+	// NPC서버
 	case NPC_MOVE:
 	{
 		NPC_MOVE_PACKET* recv_packet = reinterpret_cast<NPC_MOVE_PACKET*>(ptr);

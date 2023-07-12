@@ -811,6 +811,9 @@ void process_packet(int client_id, char* packet)
 			g_s_start_time = system_clock::now();
 			b_isfirstplayer = false;
 		}
+		else {
+			cout << "815" << endl;
+		}
 
 		// 새로 접속한 플레이어의 초기 정보를 설정합니다.
 		clients[client_id].s_state = ST_INGAME;

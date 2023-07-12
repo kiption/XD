@@ -4,10 +4,12 @@
 #include "../../../Server/MainServer/Server/Protocol.h"
 
 enum OBJECT_STATE { OBJ_ST_EMPTY, OBJ_ST_STANDBY, OBJ_ST_LOGOUT, OBJ_ST_RUNNING };
+enum INGAME_ROLE { ROLE_RIFLE, ROLE_HELI };
 struct ObjectsInfo
 {
 	short m_id;
 	char m_name[20];
+	int m_role;
 	int m_hp;
 	int m_bullet;
 	XMFLOAT3 m_pos;
@@ -26,6 +28,7 @@ struct ObjectsInfo
 	ObjectsInfo() {
 		m_id = -1;
 		m_name[0] = '\n';
+		m_role = ROLE_RIFLE;
 		m_hp = 100;
 		m_bullet = MAX_BULLET;
 		m_pos = { 0.0f, 0.0f, 0.0f };
@@ -42,6 +45,7 @@ struct ObjectsInfo
 	void InfoClear() {
 		m_id = -1;
 		m_name[0] = '\n';
+		m_role = ROLE_RIFLE;
 		m_hp = 100;
 		m_bullet = MAX_BULLET;
 		m_pos = { 0.0f, 0.0f, 0.0f };
@@ -59,8 +63,7 @@ std::array<ObjectsInfo, MAX_USER> players_info;
 std::array<ObjectsInfo, MAX_NPCS> npcs_info;
 int left_npc = 0;
 
-std::array<ObjectsInfo, 5> dummies;//[TEST] NPC 완성 전까지 임시 사용
-
+//==================================================
 struct MapObjectsInfo
 {
 	XMFLOAT3 m_pos;
@@ -93,6 +96,7 @@ struct MapObjectsInfo
 
 std::vector<MapObjectsInfo> stage1_mapobj_info;
 
+//==================================================
 enum DeadObjType { D_OBJ_PLAYER, D_OBJ_NPC };
 struct DeathInfo
 {
@@ -103,3 +107,47 @@ struct DeathInfo
 	DeathInfo(char type, int id) { obj_type = type; obj_id = id; }
 };
 std::queue<DeathInfo> new_death_objs;
+
+//==================================================
+struct RoomInfo
+{
+	int room_id;
+	char room_name[ROOM_NAME_SIZE];
+	int room_state;
+	int user_count;
+	int user_state[MAX_USER];
+
+	RoomInfo() {
+		room_id = -1;
+		strcpy_s(room_name, "\0");
+		room_state = R_ST_WAIT;
+		user_count = 0;
+		for (int i = 0; i < MAX_USER;++i)
+			user_state[i] = RM_ST_EMPTY;
+	}
+};
+std::vector<RoomInfo> lobby_rooms;
+RoomInfo curr_room;
+int curr_room_id = -1;
+bool b_room_manager = false;
+int my_room_index = -1;
+
+void CurrRoomInfoClear() {	// Room에서 나와 Lobby로 이동할 때 그동안 있었던 방에 대한 정보를 초기화하는 함수입니다.
+	curr_room.room_id = -1;
+	strcpy_s(curr_room.room_name, "\0");
+	curr_room.room_state = R_ST_WAIT;
+	curr_room.user_count = 0;
+	for (int i = 0; i < MAX_USER; ++i) {
+		curr_room.user_state[i] = RM_ST_EMPTY;
+	}
+
+	curr_room_id = -1;
+	b_room_manager = false;
+	my_room_index = -1;
+}
+
+int removeRoom(int target_room_id) {
+	lobby_rooms.erase(remove_if(lobby_rooms.begin(), lobby_rooms.end(), [target_room_id](RoomInfo room){return room.room_id == target_room_id;}), lobby_rooms.end());
+	cout << "Room[" << target_room_id << "]가 제거되었습니다." << endl;
+	return 0;
+}

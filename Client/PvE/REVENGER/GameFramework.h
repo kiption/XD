@@ -13,6 +13,8 @@
 #include "PostProcessShader.h"
 // Server
 #include <queue>
+#include <array>
+
 enum SEND_MOUSE_BUTTON { SEND_NONCLICK, SEND_BUTTON_L, SEND_BUTTON_R };
 enum SEND_KEY_TYPE {
 	SEND_KEY_NUM1, SEND_KEY_NUM2,
@@ -54,7 +56,12 @@ struct LobbyRoom {
 
 struct MYRoomUser {
 	int ready_state;
-	WCHAR* User_name;
+	WCHAR User_name[12];
+
+	MYRoomUser() {
+		ready_state = 0;
+		ZeroMemory(User_name, 24);
+	}
 };
 
 struct Roomname {
@@ -155,7 +162,10 @@ public:
 	LoginSceneInfo createpos[2];
 
 	bool m_bLoginInfoSend = false;
+	enum LOGINSCENE { LS_LOGIN, LS_OPENING, LS_LOBBY, LS_ROOM, LS_CREATE_ROOM };
 	int m_LoginScene = 0;
+	bool m_CreateRoomOkButton = false;
+	bool m_RoomBackButton = false;
 	float m_StartKey = 0;
 	float m_ReadyKey = 0;
 	bool m_CameraShaking = false;
@@ -247,6 +257,8 @@ public:
 	//			  서버 통신을 위한 것들...
 	//==================================================
 public:
+	int m_MAX_USER;
+
 	SceneManager* m_pScene = NULL;
 	// 서버로 보낼 키보드 입력값
 	queue<short> q_keyboardInput;
@@ -286,7 +298,7 @@ public:
 	int m_LobbyPage = 0;
 	vector<CollideMapInfo> mapcol_info;
 	vector<LobbyRoom>m_LobbyRoom_Info;
-	vector<MYRoomUser> m_MyRoom_Info;
+	array<MYRoomUser, 3> m_MyRoom_Info;
 	queue<BulletPos> m_shoot_info;
 
 	queue<ChatInfo> m_chat_info;
@@ -345,6 +357,13 @@ public:
 	bool m_bDamageOn = false;
 	float m_pPlayerRotate_z = 0.0f;
 	float m_pPlayerRotate_x = 0.0f;
+
+	// MYRoomUser
+	void setRoomUserInfo(int index, wchar_t* user_name, int user_state) {
+		m_MyRoom_Info[index].ready_state = user_state;
+		memcpy(m_MyRoom_Info[index].User_name, user_name, 24);
+	}
+
 	//==================================================
 		// 서버에서 받은 Bound 값과의 충돌설정 함수입니다.
 		//player - map

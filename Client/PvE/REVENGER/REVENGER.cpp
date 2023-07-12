@@ -50,19 +50,48 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 
+	stage1_enter_ok = false;
+	stage2_enter_ok = false;
+	
+	gGameFramework.m_MAX_USER = MAX_USER;
+
+	// 로비 서버에 연결
+	curr_servertype = SERVER_LOBBY;
+	active_servernum = 0;
+
+	lby_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	SOCKADDR_IN lby_addr;
+	ZeroMemory(&lby_addr, sizeof(lby_addr));
+	lby_addr.sin_family = AF_INET;
+	int new_portnum = PORTNUM_LOBBY_0 + active_servernum;
+	lby_addr.sin_port = htons(new_portnum);
+	inet_pton(AF_INET, IPADDR_LOBBY0, &lby_addr.sin_addr);
+	connect(lby_socket, reinterpret_cast<sockaddr*>(&lby_addr), sizeof(lby_addr));
+
+	CLBY_CONNECT_PACKET conn_packet;
+	conn_packet.size = sizeof(CLBY_CONNECT_PACKET);
+	conn_packet.type = CLBY_CONNECT;
+	srand(time(NULL));
+	int randnum = rand() % 100;
+	string static_str = "Player";
+	string variable_str = to_string(randnum);
+	string full_name = static_str + variable_str;
+	strcpy_s(conn_packet.name, full_name.c_str());
+
+	sendPacket(&conn_packet);
+	recvPacket();
+
+	// 스레드 생성
 	thread networkThread(networkThreadFunc);
 	networkThread.detach();
 
 	thread uiThread(uiThreadFunc);
 	uiThread.detach();
-	//==
-
-	strcpy_s(chat_logs.name, sizeof(chat_logs.name), "kirew");
-	strcpy_s(chat_logs.msg, sizeof(chat_logs.msg), "hello");
+	//====
 
 	while (1)
 	{
-
+		SleepEx(0, TRUE);//S
 
 		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -94,33 +123,174 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					gGameFramework.m_bLoginInfoSend = false;
 				}
 
-				if (stage1_enter_ok) {
-					for (int i{}; i < stage1_mapobj_info.size(); ++i) {
-						MapObjectsInfo origintemp = stage1_mapobj_info[i];
-						CollideMapInfo frametemp;
-						frametemp.m_pos = origintemp.m_pos;
-						frametemp.m_scale = { origintemp.m_scale.x / 2, origintemp.m_scale.y / 2, origintemp.m_scale.z / 2 };
-						frametemp.m_local_forward = origintemp.m_local_forward;
-						frametemp.m_local_right = origintemp.m_local_right;
-						frametemp.m_local_rotate = origintemp.m_local_rotate;
-						frametemp.m_angle_aob = origintemp.m_angle_aob;
-						frametemp.m_angle_boc = origintemp.m_angle_boc;
-						frametemp.setBB();
-						gGameFramework.mapcol_info.emplace_back(frametemp);
+				// UI를 통한 조작 구현
+				switch (gGameFramework.m_LoginScene) {
+				case gGameFramework.LS_LOGIN:	// ID/PW 입력 창
+					break;
+
+				case gGameFramework.LS_OPENING: // 게임 시작, 설정, 종료 
+					break;
+
+				case gGameFramework.LS_LOBBY:	// 로비
+					// 빠른시작
+					if (gGameFramework.m_LobbyClick[0]) {
+						CLBY_QUICK_MATCH_PACKET quick_match_pack;
+						quick_match_pack.size = sizeof(CLBY_QUICK_MATCH_PACKET);
+						quick_match_pack.type = CLBY_QUICK_MATCH;
+						sendPacket(&quick_match_pack);
+
+						gGameFramework.m_LobbyClick[0] = false;
 					}
-					gGameFramework.ChangeScene(SCENE1STAGE);
-					gGameFramework.setPosition_Self(players_info[my_id].m_pos);
-					gGameFramework.setVectors_Self(players_info[my_id].m_right_vec, players_info[my_id].m_up_vec, players_info[my_id].m_look_vec);
-				}
+					if (ls_room_enter_ok) {										// 서버에서 방 진입을 허락해줘야
+						gGameFramework.m_LoginScene = gGameFramework.LS_ROOM;	// 방으로 이동함.
+						ls_room_enter_ok = false;
+					}
+
+					break;
+
+				case gGameFramework.LS_ROOM: // 게임 방
+					// 방나가기
+					if (gGameFramework.m_RoomBackButton) {
+						CLBY_LEAVE_ROOM_PACKET leave_room_pack;
+						leave_room_pack.size = sizeof(CLBY_LEAVE_ROOM_PACKET);
+						leave_room_pack.type = CLBY_LEAVE_ROOM;
+						sendPacket(&leave_room_pack);
+						
+						CurrRoomInfoClear();
+						gGameFramework.m_LoginScene = gGameFramework.LS_LOBBY;	// 로비으로 이동함.
+
+						gGameFramework.m_RoomBackButton = false;
+					}
+
+					// 게임시작
+					if (gGameFramework.m_RoomClick[0]) {
+						// 방장만 시작 패킷을 보낼 수 있다
+						if (!b_room_manager) {	
+							gGameFramework.m_RoomClick[0] = false;
+							break;
+						}
+
+						/* [치트키] 작업 편의성을 위해 1명만 접속해도 게임 시작이 가능하도록 주석처리하였음.
+						// 방에 사람이 세 명이 있는지 확인합니다.
+						if (curr_room.user_count < MAX_USER) {
+							gGameFramework.m_RoomClick[0] = false;
+							break;
+						}
+						*/
+
+						// 모든 사람이 준비가 되어있는지 확인합니다.
+						bool all_ready = true;
+						/* [치트키] 작업 편의성을 위해 1명만 접속해도 게임 시작이 가능하도록 주석처리하였음.
+						for (int i = 0; i < MAX_USER; ++i) {
+							if (curr_room.user_state[i] == RM_ST_MANAGER) continue;	// 방장은 준비상태가 없다.
+							if (curr_room.user_state[i] == RM_ST_NONREADY) {
+								all_ready = false;
+								break;
+							}
+						}
+						if (!all_ready) {	// 세 명 모두 준비되어있어야 시작이 가능하다.
+							gGameFramework.m_RoomClick[0] = false;
+							break;
+						}
+						*/
+
+						CLBY_GAME_START_PACKET start_packet;
+						start_packet.size = sizeof(CLBY_GAME_START_PACKET);
+						start_packet.type = CLBY_GAME_START;
+						sendPacket(&start_packet);
+
+						gGameFramework.m_RoomClick[0] = false;
+					}
+
+					// 준비
+					if (gGameFramework.m_RoomClick[1]) {
+						if (b_room_manager) {
+							// 방장은 준비 상태가 없습니다.
+							gGameFramework.m_RoomClick[1] = false;
+							break;
+						}
+
+						CLBY_GAME_READY_PACKET ready_packet;
+						ready_packet.size = sizeof(CLBY_GAME_READY_PACKET);
+						ready_packet.type = CLBY_GAME_READY;
+						sendPacket(&ready_packet);
+
+						gGameFramework.m_RoomClick[1] = false;
+					}
+
+					// 다음 스테이지로 전환
+					if (stage1_enter_ok) {
+						// 로직 서버에 연결
+						curr_servertype = SERVER_LOGIC;
+						active_servernum = MAX_LOGIC_SERVER - 1;
+
+						lgc_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+						SOCKADDR_IN server0_addr;
+						ZeroMemory(&server0_addr, sizeof(server0_addr));
+						server0_addr.sin_family = AF_INET;
+						int new_portnum = PORTNUM_LOGIC_0 + active_servernum;
+						server0_addr.sin_port = htons(new_portnum);
+						//inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);// 루프백
+						inet_pton(AF_INET, IPADDR_LOGIC1, &server0_addr.sin_addr);
+						connect(lgc_socket, reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
+
+						CS_LOGIN_PACKET login_pack;
+						login_pack.size = sizeof(CS_LOGIN_PACKET);
+						login_pack.type = CS_LOGIN;
+						strcpy_s(login_pack.name, full_name.c_str());
+						sendPacket(&login_pack);
+						recvPacket();
+
+						stage1_enter_ok = false;
+					}
+					if (trigger_stage1_playerinfo_load && trigger_stage1_mapinfo_load) { // 로직 서버에서 스테이지1 관련 정보를 모두 받아야 Stage1 씬으로 넘어갈 수 있다.
+						for (int i{}; i < stage1_mapobj_info.size(); ++i) {
+							cout << i << endl;
+							MapObjectsInfo origintemp = stage1_mapobj_info[i];
+							CollideMapInfo frametemp;
+							frametemp.m_pos = origintemp.m_pos;
+							frametemp.m_scale = { origintemp.m_scale.x / 2, origintemp.m_scale.y / 2, origintemp.m_scale.z / 2 };
+							frametemp.m_local_forward = origintemp.m_local_forward;
+							frametemp.m_local_right = origintemp.m_local_right;
+							frametemp.m_local_rotate = origintemp.m_local_rotate;
+							frametemp.m_angle_aob = origintemp.m_angle_aob;
+							frametemp.m_angle_boc = origintemp.m_angle_boc;
+							frametemp.setBB();
+							gGameFramework.mapcol_info.emplace_back(frametemp);
+						}
+
+						trigger_stage1_playerinfo_load = false;
+						trigger_stage1_mapinfo_load = false;
+
+						gGameFramework.ChangeScene(SCENE1STAGE);
+						gGameFramework.setPosition_Self(players_info[my_id].m_pos);
+						gGameFramework.setVectors_Self(players_info[my_id].m_right_vec, players_info[my_id].m_up_vec, players_info[my_id].m_look_vec);
+					}
+
+					break;
+
+				case gGameFramework.LS_CREATE_ROOM:	// 방 생성 창
+					// 방 생성 확인버튼
+					if (gGameFramework.m_CreateRoomOkButton) {
+						CLBY_CREATE_ROOM_PACKET create_room_pack;
+						create_room_pack.size = sizeof(CLBY_CREATE_ROOM_PACKET);
+						create_room_pack.type = CLBY_CREATE_ROOM;
+						strcpy_s(create_room_pack.room_name, "This is Room Name");
+						sendPacket(&create_room_pack);
+
+						gGameFramework.m_CreateRoomOkButton = false;
+					}
+					if (ls_room_enter_ok) {								// 서버에서 방 생성을 끝내면
+						gGameFramework.m_LoginScene = gGameFramework.LS_ROOM;	// 방으로 이동함.
+
+						ls_room_enter_ok = false;
+					}
+
+					break;
+				}// switch end
 			}
 			else
 			{
-				//if (gGameFramework.m_nMode == SCENE1STAGE) {
-				//	if (stage2_enter_ok) {
-				//		gGameFramework.ChangeScene(SCENE2STAGE);
-				//	}
-				//}
-
 				//==================================================
 				//					서버 연결 확인
 				//==================================================
@@ -243,22 +413,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						npcs_info[i].m_new_state_update = false;
 					}
 				}
-				
-				/* 더미때 썻던 코드. (* 이거 참고해서 위에 옮겨놓으면 여기 주석부분은 지워주세용 *)
-				// 3) Dummies ([TEST] NPC 완성전까지 임시 코드)
-				for (int i = 0; i < 5; ++i) {
-					if (dummies[i].m_new_state_update) {
-						if (dummies[i].m_ingame_state == PL_ST_DEAD) {
-							// 여기에 더미 죽는 모션 실행1
-							// (더미 죽는 모션이 한 사이클 완료되면 객체를 날려버리던가 scale 해주면 됨.)
-							//gGameFramework.otherPlayerDyingMotion(i);
-							gGameFramework.CollisionDummiesObjects(i);
-
-							dummies[i].m_new_state_update = false;
-						}
-					}
-				}
-				*/
 
 				//==================================================
 				//					Map 충돌 관련
@@ -403,38 +557,11 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 void networkThreadFunc()
 {
-	curr_servertype = SERVER_LOGIC;
-	active_servernum = MAX_LOGIC_SERVER - 1;
-
-	CS_LOGIN_PACKET login_pack;
-	login_pack.size = sizeof(CS_LOGIN_PACKET);
-	login_pack.type = CS_LOGIN;
-	strcpy_s(login_pack.name, "COPTER");
-
-	// Active Server에 연결
-	s_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	SOCKADDR_IN server0_addr;
-	ZeroMemory(&server0_addr, sizeof(server0_addr));
-	server0_addr.sin_family = AF_INET;
-	int new_portnum = PORTNUM_LOGIC_0 + active_servernum;
-	server0_addr.sin_port = htons(new_portnum);
-	//inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);// 루프백
-	inet_pton(AF_INET, IPADDR_LOGIC1, &server0_addr.sin_addr);
-	connect(s_socket, reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
-
-	sendPacket(&login_pack);
-	recvPacket();
-
-	stage1_enter_ok = false;
-	stage2_enter_ok = false;
 	last_ping = last_pong = chrono::system_clock::now();
 
 	//==================================================
 	// thread loop
 	while (1) {
-		// Recv Callback호출을 위한 SleepEX
-		SleepEx(1, TRUE);
-
 		//==================================================
 		//		새로운 키 입력을 서버에게 전달합니다.
 		//==================================================
@@ -598,9 +725,64 @@ wchar_t* ConvertToWideChar(const char* str) {
 	return wideStr;
 }
 
+wchar_t* charToWchar(char* str) {	// char -> wchar
+	size_t cn;
+	wchar_t wchar_arr[100] = L"";
+
+	setlocale(LC_ALL, "Korean");//로케일 설정
+	mbstowcs_s(&cn, wchar_arr, 100, str, 100);
+	return wchar_arr;
+}
 void uiThreadFunc() {
 	while (1) {
-		if (gGameFramework.m_nMode != OPENINGSCENE) {
+		if (gGameFramework.m_nMode == OPENINGSCENE) {
+			// UI를 통한 조작 구현
+			switch (gGameFramework.m_LoginScene) {
+			case gGameFramework.LS_LOGIN:	// ID/PW 입력 창
+				break;
+
+			case gGameFramework.LS_OPENING: // 게임 시작, 설정, 종료 
+				break;
+
+			case gGameFramework.LS_LOBBY:	// 로비
+				break;
+
+			case gGameFramework.LS_ROOM: // 게임 방
+				if (trigger_new_member) {	// 새로운 유저 방 입장 트리거
+					if (0 <= new_member_id && new_member_id < MAX_USER) {
+						//gGameFramework.newUserJoinRoom(L"\0");
+						gGameFramework.setRoomUserInfo(new_member_id, charToWchar(players_info[new_member_id].m_name), RM_ST_NONREADY);
+
+						cout << "[" << new_member_id << "] Name: " << players_info[new_member_id].m_name << " is Update." << endl;
+					}
+					new_member_id = -1;
+					trigger_new_member = false;
+				}
+
+				if (trigger_leave_member) {	// 다른 유저 방 퇴장 트리거
+					if (0 <= left_member_id && left_member_id < MAX_USER) {
+						gGameFramework.setRoomUserInfo(left_member_id, L"\0", RM_ST_EMPTY);
+					}
+					left_member_id = -1;
+					trigger_leave_member = false;
+				}
+
+				if (trigger_room_update) {	// 방 데이터 전체 업데이트 트리거
+					for (int i = 0; i < MAX_USER; ++i) {
+						if (curr_room.user_state[i] == RM_ST_EMPTY) continue;
+						gGameFramework.setRoomUserInfo(i, charToWchar(players_info[i].m_name), curr_room.user_state[i]);
+						cout << "[" << i << "] Name: " << players_info[i].m_name << " is Update." << endl;\
+					}
+
+					trigger_room_update = false;
+				}
+				break;
+
+			case gGameFramework.LS_CREATE_ROOM:	// 방 생성 창
+				break;
+			}
+		}
+		else {
 			// 1. 총알 업데이트
 			gGameFramework.m_currbullet = players_info[my_id].m_bullet;
 

@@ -130,28 +130,6 @@ CGameFramework::CGameFramework()
 	temp.ready_state = 2;
 
 	m_LobbyRoom_Info.emplace_back(temp);
-
-	MYRoomUser u_temp;
-	u_temp.ready_state = 1;
-	WCHAR* readytemp = L"kirew";
-	u_temp.User_name = readytemp;
-
-	m_MyRoom_Info.emplace_back(u_temp);
-
-	MYRoomUser k_temp;
-	k_temp.ready_state = 1;
-	WCHAR* tried = L"zepew";
-	k_temp.User_name = tried;
-
-	m_MyRoom_Info.emplace_back(k_temp);
-
-	MYRoomUser t_temp;
-	t_temp.ready_state = 1;
-	WCHAR* fix = L"fatal";
-	t_temp.User_name = fix;
-
-	m_MyRoom_Info.emplace_back(t_temp);
-
 }
 
 CGameFramework::~CGameFramework()
@@ -456,7 +434,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			cout << "x: " << m_ptOldCursorPos.x << ", y: " << m_ptOldCursorPos.y << endl;
 			switch (m_LoginScene)
 			{
-			case 0: // 로그인 클릭 창
+			case LS_LOGIN: // 로그인 클릭 창
 				if (loginpos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[0].lx && loginpos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[0].ly) {
 					memset(m_LoginClick, 0, sizeof(m_LoginClick));
 					m_LoginClick[0] = true; // ID 입력 활성화
@@ -475,17 +453,17 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 
 					m_bLoginInfoSend = true;
 
-					m_LoginScene = 1; // Login 클릭, 다음 UI 전환
+					m_LoginScene = LS_OPENING; // Login 클릭, 다음 UI 전환
 				}
 				else {
 					memset(m_LoginClick, 0, sizeof(m_LoginClick));
 				}
 				break;
-			case 1: // 게임 시작, 설정, 종료 
+			case LS_OPENING: // 게임 시작, 설정, 종료 
 				if (gamepos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < gamepos[0].lx && gamepos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < gamepos[0].ly) {
 					memset(m_GameClick, 0, sizeof(m_GameClick));
 					m_GameClick[0] = true;
-					m_LoginScene = 2; // 게임 시작 클릭
+					m_LoginScene = LS_LOBBY; // 게임 시작 클릭
 				}
 				else if (gamepos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < gamepos[1].lx && gamepos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < gamepos[1].ly) {
 					memset(m_GameClick, 0, sizeof(m_GameClick));
@@ -499,10 +477,10 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 					memset(m_GameClick, 0, sizeof(m_GameClick));
 				}
 				break;
-			case 2: // 로비 UI
+			case LS_LOBBY: // 로비 UI
 				if (lobbypos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[0].lx && lobbypos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[0].ly) {
-					m_LoginScene = 3; // 빠른시작 누름
-					
+					m_LobbyClick[0] = true;		// '빠른시작' 서버전송용 트리거
+
 					random_device rd;
 					default_random_engine dre(rd());
 					uniform_int_distribution <int> uid(1, 3);
@@ -523,12 +501,12 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 
 				}
 				else if (lobbypos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[1].lx && lobbypos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[1].ly) {
-					m_LoginScene = 4; // 방만들기 누름
-					
+					m_LoginScene = LS_CREATE_ROOM;	// 방 생성 UI를 띄운다.
+
 					random_device rd;
 					default_random_engine dre(rd());
 					uniform_int_distribution <int> uid(1, 3);
-					
+
 					int ran = uid(dre);
 					switch (ran)
 					{
@@ -545,42 +523,34 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 
 				}
 				else if (lobbypos[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[2].lx && lobbypos[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[2].ly) {
-					m_LoginScene = 1; // 뒤로가기 누름
+					m_LoginScene = LS_OPENING; // 뒤로가기 누름
 				}
 				else {
 					memset(m_LobbyClick, 0, sizeof(m_LobbyClick));
 				}
 				break;
-			case 3: // 방 내부
+			case LS_ROOM: // 방 내부
 				if (roompos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[0].lx && roompos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[0].ly) {
-					bool in_game = true;
-					for (int i{}; i < m_MyRoom_Info.size(); ++i) {
-						if (m_MyRoom_Info[i].ready_state != 2) {
-							in_game = false;
-							break;
-						}
-					}
-					m_RoomClick[0] = in_game;
-
+					m_RoomClick[0] = true;//Start
 				}
 				else if (roompos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[1].lx && roompos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[1].ly) {
 					m_RoomClick[1] = true; // Ready
 				}
 				else if (roompos[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[2].lx && roompos[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[2].ly) {
 					memset(m_RoomClick, 0, sizeof(m_RoomClick)); // Back
-					m_LoginScene = 2;
+					m_RoomBackButton = true;
 				}
 				else {
 					memset(m_RoomClick, 0, sizeof(m_RoomClick));
 				}
 				break;
-			case 4:
+			case LS_CREATE_ROOM:
 				if (createpos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < createpos[0].lx && createpos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < createpos[0].ly) {
-					m_LoginScene = 3; // 확인 누름
+					m_CreateRoomOkButton = true;
 				}
 				else if (createpos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < createpos[1].lx && createpos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < createpos[1].ly) {
-					m_LoginScene = 2; // 취소 누름
-					
+					m_LoginScene = LS_LOBBY; // 취소 누름
+
 				}
 				break;
 			}
@@ -1315,7 +1285,7 @@ void CGameFramework::FrameAdvance()
 				D2D_POINT_2F D2_RoomReadyNumUI[3];
 				D2D_RECT_F D2_RoomReadyNumUIRect[3];
 
-				for (int i = 0; i < m_MyRoom_Info.size(); ++i) {
+				for (int i = 0; i < m_MAX_USER; ++i) {
 					int resulty = 560 + 58 * i;
 					float textypos = (((float)(FRAME_BUFFER_HEIGHT)) / ((float)(resulty)));
 
@@ -1495,11 +1465,11 @@ void CGameFramework::FrameAdvance()
 				int resultY = 400 + 55 * i;
 				float textypos = (((float)FRAME_BUFFER_HEIGHT) / ((float)resultY));
 
-				wchar_t roomnum[20];
-				_itow_s(m_LobbyRoom_Info[i].num, roomnum, sizeof(roomnum), 10);
+				wchar_t roomnum1[20];
+				_itow_s(m_LobbyRoom_Info[i].num, roomnum1, 20, 10);
 
 				D2_LoginRoomNumText[i] = D2D1::RectF((FRAME_BUFFER_WIDTH / 5.2), (FRAME_BUFFER_HEIGHT / textypos), (FRAME_BUFFER_WIDTH / 4.0), (FRAME_BUFFER_HEIGHT / textypos)); //2.7, 2.37, 2.12, 1.92
-				m_pd2dDeviceContext->DrawTextW(roomnum, (UINT32)wcslen(roomnum), m_pdwFont[2], &D2_LoginRoomNumText[i], m_pd2dbrText[2]);
+				m_pd2dDeviceContext->DrawTextW(roomnum1, (UINT32)wcslen(roomnum1), m_pdwFont[2], &D2_LoginRoomNumText[i], m_pd2dbrText[2]);
 
 				D2_LoginRoomNameText[i] = D2D1::RectF((FRAME_BUFFER_WIDTH / 4.1), (FRAME_BUFFER_HEIGHT / textypos), (FRAME_BUFFER_WIDTH / 1.61), (FRAME_BUFFER_HEIGHT / textypos));
 				m_pd2dDeviceContext->DrawTextW(m_LobbyRoom_Info[i].name, (UINT32)wcslen(m_LobbyRoom_Info[i].name), m_pdwFont[2], &D2_LoginRoomNameText[i], m_pd2dbrText[2]);
@@ -1507,7 +1477,7 @@ void CGameFramework::FrameAdvance()
 		}
 		else if (m_LoginScene == 3) {
 			wchar_t roomnum[20];
-			_itow_s(m_myRoomNum, roomnum, sizeof(roomnum), 10);
+			_itow_s(m_myRoomNum, roomnum, 20, 10);
 			D2D_RECT_F D2_RoomnumText = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.22f), (FRAME_BUFFER_HEIGHT * 0.3f), (FRAME_BUFFER_WIDTH * 0.25f), (FRAME_BUFFER_HEIGHT * 0.35f));
 			m_pd2dDeviceContext->DrawTextW(roomnum, (UINT32)wcslen(roomnum), m_pdwFont[2], &D2_RoomnumText, m_pd2dbrText[2]);
 
@@ -1515,16 +1485,15 @@ void CGameFramework::FrameAdvance()
 			m_pd2dDeviceContext->DrawTextW(createRoomName, (UINT32)wcslen(createRoomName), m_pdwFont[5], &D2_RoomNameText, m_pd2dbrText[5]);
 		
 			D2D_RECT_F D2_UserNameText[3];
-			for (int i{}; i < m_MyRoom_Info.size(); ++i) {
+			for (int i{}; i < m_MAX_USER; ++i) {
 				int resultY = 590 + 60 * i;
 				float textypos = (((float)FRAME_BUFFER_HEIGHT) / ((float)resultY));
 
-				wchar_t roomnum[20];
-				_itow_s(m_LobbyRoom_Info[i].num, roomnum, sizeof(roomnum), 10);
+				//wchar_t roomnum_tmp[20];
+				//_itow_s(m_LobbyRoom_Info[i].num, roomnum_tmp, 20, 10);
 
 				D2_UserNameText[i] = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.26f), (FRAME_BUFFER_HEIGHT / textypos), (FRAME_BUFFER_WIDTH * 0.5f), (FRAME_BUFFER_HEIGHT / textypos));
 				m_pd2dDeviceContext->DrawTextW(m_MyRoom_Info[i].User_name, (UINT32)wcslen(m_MyRoom_Info[i].User_name), m_pdwFont[2], &D2_UserNameText[i], m_pd2dbrText[2]);
-			
 			}
 
 		}
