@@ -52,7 +52,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 	stage1_enter_ok = false;
 	stage2_enter_ok = false;
-	
+
 	gGameFramework.m_MAX_USER = MAX_USER;
 
 	// 로비 서버에 연결
@@ -155,7 +155,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						leave_room_pack.size = sizeof(CLBY_LEAVE_ROOM_PACKET);
 						leave_room_pack.type = CLBY_LEAVE_ROOM;
 						sendPacket(&leave_room_pack);
-						
+
 						CurrRoomInfoClear();
 						gGameFramework.m_LoginScene = gGameFramework.LS_LOBBY;	// 로비으로 이동함.
 
@@ -165,7 +165,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					// 게임시작
 					if (gGameFramework.m_RoomClick[0]) {
 						// 방장만 시작 패킷을 보낼 수 있다
-						if (!b_room_manager) {	
+						if (!b_room_manager) {
 							gGameFramework.m_RoomClick[0] = false;
 							break;
 						}
@@ -242,6 +242,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						recvPacket();
 
 						stage1_enter_ok = false;
+						gGameFramework.m_Max_NPCs = MAX_NPCS;
 					}
 					if (trigger_stage1_playerinfo_load && trigger_stage1_mapinfo_load) { // 로직 서버에서 스테이지1 관련 정보를 모두 받아야 Stage1 씬으로 넘어갈 수 있다.
 						for (int i{}; i < stage1_mapobj_info.size(); ++i) {
@@ -254,7 +255,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							frametemp.m_local_rotate = origintemp.m_local_rotate;
 							frametemp.m_angle_aob = origintemp.m_angle_aob;
 							frametemp.m_angle_boc = origintemp.m_angle_boc;
+							frametemp.id = i;
 							frametemp.setBB();
+
 							gGameFramework.mapcol_info.emplace_back(frametemp);
 						}
 
@@ -770,7 +773,7 @@ void uiThreadFunc() {
 					for (int i = 0; i < MAX_USER; ++i) {
 						if (curr_room.user_state[i] == RM_ST_EMPTY) continue;
 						gGameFramework.setRoomUserInfo(i, charToWchar(players_info[i].m_name), curr_room.user_state[i]);
-						cout << "[" << i << "] Name: " << players_info[i].m_name << " is Update." << endl;\
+						cout << "[" << i << "] Name: " << players_info[i].m_name << " is Update." << endl; \
 					}
 
 					trigger_room_update = false;
