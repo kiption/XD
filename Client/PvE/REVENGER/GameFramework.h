@@ -170,7 +170,8 @@ public:
 	float m_ReadyKey = 0;
 	bool m_CameraShaking = false;
 	float deltax = 0.0;
-	float MouseResponsiveness = 700.0f;
+	float MouseResponsivenessX = 350.0f;
+	float MouseResponsivenessY = 550.0f;
 public:
 	PostProcessShader* m_pPostProcessingShader = NULL;
 #ifdef _WITH_DIRECT2D

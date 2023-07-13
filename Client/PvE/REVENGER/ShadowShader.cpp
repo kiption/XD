@@ -24,11 +24,13 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
 	CMaterial* pPlaneMaterial = new CMaterial(2);
 	pPlaneMaterial->SetReflection(3);
-	m_ppObjects[0] = new CGameObject(1);
-	m_ppObjects[0]->SetMesh(pPlaneMesh);
-	m_ppObjects[0]->SetMaterial(0, pPlaneMaterial);
-	m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 3.0, 100.0f));
 
+	//m_ppObjects[0] = new CGameObject(1);
+	//m_ppObjects[0]->SetMesh(NULL);
+	//m_ppObjects[0]->SetMaterial(0, pPlaneMaterial);
+	//m_ppObjects[0]->SetPosition(XMFLOAT3(100.0f, 3.0, 100.0f));
+
+	m_ppObjects[0] = new CGameObject(1);
 	m_ppObjects[2] = new CGameObject(1);
 	m_ppObjects[3] = new CGameObject(1);
 	m_ppObjects[4] = new CGameObject(1);

@@ -740,10 +740,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				break;
 
 			case '9':
-				if (MouseResponsiveness > 500 && MouseResponsiveness < 900) MouseResponsiveness -= 50.0f;
+				if (MouseResponsivenessY > 400 && MouseResponsivenessY < 600) MouseResponsivenessY -= 50.0f;
 				break;
 			case '0':
-				if (MouseResponsiveness > 500 && MouseResponsiveness < 900) MouseResponsiveness += 50.0f;
+				if (MouseResponsivenessY > 400 && MouseResponsivenessY < 600) MouseResponsivenessY += 50.0f;
 				break;
 			default:
 				break;
@@ -903,15 +903,15 @@ void CGameFramework::ProcessInput()
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / MouseResponsiveness;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / MouseResponsiveness;
+			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / MouseResponsivenessX;
+			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / MouseResponsivenessY;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
 		if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
 			if (m_nMode == SCENE1STAGE)
 			{
-				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.02)
+				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.01)
 				{
 					((Stage1*)m_pScene)->Reflectcartridgecase(NULL);
 					ShotKey = true;
@@ -1084,7 +1084,8 @@ void CGameFramework::AnimateObjects()
 		}
 		if (ShotKey == true)
 		{
-			m_pCamera->m_xmf4x4View._43 -= 0.1f;
+			((CHumanPlayer*)m_pScene->m_pPlayer)->Rotate(-0.07,0.0,0.0);
+			m_pCamera->m_xmf4x4View._43 -= 0.07f;
 			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = true;
 			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
 			{

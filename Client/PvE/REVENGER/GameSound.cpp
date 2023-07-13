@@ -10,8 +10,8 @@ GameSound::GameSound()
 
 
 	result = soundSystem->init(64, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
-	result = soundSystem->createSound("Sound/CollisionSound.wav", FMOD_DEFAULT, 0, &ColliSound);
-	result = ColliSound->setMode(FMOD_LOOP_OFF);
+	result = soundSystem->createSound("Sound/PlayerHittingSound.wav", FMOD_UNIQUE, 0, &ColliSound);
+	result = ColliSound->setMode(FMOD_UNIQUE);
 
 	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
 	result = soundSystem->createSound("Sound/helicopterfieldwithbirds.mp3", FMOD_DEFAULT, 0, &speakSound);
@@ -108,7 +108,7 @@ void GameSound::walkingSound()
 void GameSound::collisionSound()
 {
 	result = soundSystem->playSound(ColliSound, 0, false, &ColliChannel);
-	ColliChannel->setVolume(0.02f);
+	ColliChannel->setVolume(0.32f);
 }
 void GameSound::reloadSound()
 {

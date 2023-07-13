@@ -77,8 +77,8 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6, 0.6, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-210, 170.0f, 1000.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(-0.15f, -0.6f, -1.0f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-210, 240.0f, 1000.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(-0.15f, -0.7f, -1.0f);
 
 	m_pLights->m_pLights[2].m_bEnable = true;
 	m_pLights->m_pLights[2].m_nType = SPOT_LIGHT;
@@ -269,7 +269,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
 		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, false);
-		pBulletObject->SetMovingSpeed(1000.0f);
+		pBulletObject->SetMovingSpeed(500.0f);
 		pBulletObject->SetActive(false);
 		pBulletObject->SetCurScene(SCENE1STAGE);
 		m_ppBullets[i] = pBulletObject;
