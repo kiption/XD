@@ -731,7 +731,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				break;
 			}
 			case 'R':
-				if (!player_dead && ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bMoveUpdate==false)
+				if (!player_dead && ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bMoveUpdate == false)
 				{
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bReloadState = true;
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReloadState();
@@ -847,14 +847,11 @@ void CGameFramework::BuildObjects()
 
 	m_pScene = new SceneManager();
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
-
-
 	HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, NULL, m_pScene->GetGraphicsRootSignature(), NULL);
-
 	CreateShaderVariables();
-	//m_pScene->m_pPlayer = m_pScene->m_pPlayer = pPlayer;
-	//m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetCamera();
-	//m_pCamera->SetMode(CLOSEUP_PERSON_CAMERA);
+	m_pScene->m_pPlayer = m_pScene->m_pPlayer = pPlayer;
+	m_pCamera = ((HeliPlayer*)((SceneManager*)m_pScene)->m_pPlayer)->GetCamera();
+	m_pCamera->SetMode(CLOSEUP_PERSON_CAMERA);
 
 
 
@@ -865,7 +862,7 @@ void CGameFramework::BuildObjects()
 	WaitForGpuComplete();
 
 	if (m_pScene) m_pScene->ReleaseUploadBuffers();
-	if (m_pScene->m_pPlayer) ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReleaseUploadBuffers();
+	if (m_pScene->m_pPlayer) m_pScene->m_pPlayer->ReleaseUploadBuffers();
 	m_GameTimer.Reset();
 }
 
@@ -1041,10 +1038,16 @@ void CGameFramework::ProcessInput()
 
 void CGameFramework::AnimateObjects()
 {
+
+
+	if (m_nMode == OPENINGSCENE)
+	{
+		//if (m_pScene) m_pScene->AnimateObjects(m_pCamera, m_GameTimer.GetTimeElapsed());
+		if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
+	}
 	if (m_nMode == SCENE1STAGE)
 	{
-
-		if (m_pScene) m_pScene->AnimateObjects(m_pCamera, m_GameTimer.GetTimeElapsed());
+		//if (m_pScene) m_pScene->AnimateObjects(m_pCamera, m_GameTimer.GetTimeElapsed());
 		if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed());
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
@@ -1062,8 +1065,6 @@ void CGameFramework::AnimateObjects()
 
 			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 		}
-
-
 		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay += m_GameTimer.GetTimeElapsed();
 		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay > 0.2)
 		{
@@ -1084,7 +1085,7 @@ void CGameFramework::AnimateObjects()
 		}
 		if (ShotKey == true)
 		{
-			((CHumanPlayer*)m_pScene->m_pPlayer)->Rotate(-0.07,0.0,0.0);
+			((CHumanPlayer*)m_pScene->m_pPlayer)->Rotate(-0.07, 0.0, 0.0);
 			m_pCamera->m_xmf4x4View._43 -= 0.07f;
 			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = true;
 			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
@@ -1147,10 +1148,7 @@ float g_reverse_time = 0.0f;
 void CGameFramework::FrameAdvance()
 {
 
-	if (m_nMode == SCENE1STAGE)m_GameTimer.Tick();
-
-
-
+	m_GameTimer.Tick(60.0);
 	AnimateObjects();
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
@@ -1159,12 +1157,12 @@ void CGameFramework::FrameAdvance()
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
 	//::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	if (m_nMode == SCENE1STAGE)
-	{
-		m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
-		m_pScene->OnPreRender(m_pd3dCommandList, m_pCamera);
-		UpdateShaderVariables();
-	}
+	//if (m_nMode == SCENE1STAGE)
+	//{
+	m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
+	m_pScene->OnPreRender(m_pd3dCommandList, m_pCamera);
+	UpdateShaderVariables();
+	//}
 	//m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
@@ -1195,7 +1193,7 @@ void CGameFramework::FrameAdvance()
 		{
 			if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pScene->m_pShadowShader, m_pCamera);
 		}
-	}
+}
 	// Stage2
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -1602,7 +1600,14 @@ void CGameFramework::FrameAdvance()
 #endif
 
 	MoveToNextFrame();
-
+	if (m_nMode == OPENINGSCENE)
+	{
+		m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
+		size_t nLength = _tcslen(m_pszFrameRate);
+		XMFLOAT3 xmf3Position = ((HeliPlayer*)((SceneManager*)m_pScene)->m_pPlayer)->GetPosition();
+		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
+		::SetWindowText(m_hWnd, m_pszFrameRate);
+	}
 	if (m_nMode == SCENE1STAGE)
 	{
 		m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
@@ -2196,7 +2201,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[24]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	// Opening
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Opening.jpg", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/CrossHair.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	//hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Opening.jpg", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);

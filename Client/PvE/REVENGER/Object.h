@@ -652,7 +652,14 @@ public:
 	void Firevalkan(XMFLOAT3 ToPlayerLook);
 	
 };
+class COpeningHuman : public CGameObject
+{
+public:
+	COpeningHuman(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks);
+	virtual ~COpeningHuman();
+	virtual void Animate(float fTimeElapsed);
 
+};
 class CSoldiarOtherPlayerObjects : public CGameObject
 {
 public:
@@ -695,7 +702,7 @@ public:
 class CBilldingObject : public CGameObject
 {
 public:
-	CBilldingObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks);
+	CBilldingObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual ~CBilldingObject();
 };
 

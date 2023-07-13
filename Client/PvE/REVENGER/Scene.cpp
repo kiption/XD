@@ -43,7 +43,14 @@ bool SceneManager::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARA
 
 void SceneManager::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256의 배수
+	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
+
+	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256의 배수
+	m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbMaterialBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbMaterials->Map(0, NULL, (void**)&m_pcbMappedMaterials);
+
 
 
 }
@@ -51,17 +58,74 @@ void SceneManager::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graphic
 void SceneManager::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 
-	
+	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
+	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
+	::memcpy(m_pcbMappedMaterials, &m_pMaterials, sizeof(MATERIALS));
+
 }
 
 void SceneManager::ReleaseShaderVariables()
 {
+	if (m_pd3dcbLights)
+	{
+		m_pd3dcbLights->Unmap(0, NULL);
+		m_pd3dcbLights->Release();
+	}
+	if (m_pd3dcbMaterials)
+	{
+		m_pd3dcbMaterials->Unmap(0, NULL);
+		m_pd3dcbMaterials->Release();
+	}
 	
 }
 
 void SceneManager::BuildDefaultLightsAndMaterials()
 {
-	
+	m_nLights = 2;
+	m_pLights = new LIGHTS[m_nLights];
+	::ZeroMemory(m_pLights, sizeof(LIGHTS) * m_nLights);
+
+
+	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+
+	// 방향 조절 -> 2개 쓰면 프레임 떨어짐
+	m_pLights->m_pLights[0].m_bEnable = true;
+	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
+	m_pLights->m_pLights[0].m_fRange = 10000.0f;
+	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
+	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6, 0.6, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-100, 450.0f, 450.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(00.5f, -1.0f, -1.0f);
+
+	m_pLights->m_pLights[1].m_bEnable = true;
+	m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
+	m_pLights->m_pLights[1].m_fRange = 1000.0f;
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.9f, 0.5f, 0.1f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.5f, 0.1f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.8f, 0.5f, 0.1f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Emissive = XMFLOAT4(0.9f, 0.5f, 0.1f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(20.0, 15, 50);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, -0.0f);
+	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.001f);
+	m_pLights->m_pLights[1].m_fFalloff = 80.0f;
+	m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(359.0f));
+	m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0));
+
+
+	m_pMaterials = new MATERIALS;
+	::ZeroMemory(m_pMaterials, sizeof(MATERIALS));
+
+	m_pMaterials->m_pReflections[0] = { XMFLOAT4(0.128f, 0.128f, 0.128f, 1.0f), XMFLOAT4(0.8f, 0.18f, 0.18f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 10.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[1] = { XMFLOAT4(0.28f, 0.28f, 0.28f, 1.0f), XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 10.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[2] = { XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 15.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[3] = { XMFLOAT4(0.5f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 20.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[4] = { XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 25.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[5] = { XMFLOAT4(0.0f, 0.5f, 0.5f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 30.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[6] = { XMFLOAT4(0.5f, 0.5f, 1.0f, 1.0f), XMFLOAT4(0.5f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 35.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+	m_pMaterials->m_pReflections[7] = { XMFLOAT4(1.0f, 0.5f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 40.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f) };
+
+
 }
 
 void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle, ID3D12Resource* pd3dDepthStencilBuffer)
@@ -69,7 +133,30 @@ void SceneManager::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandL
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1500);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 100);
+	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	BuildDefaultLightsAndMaterials();
+
+	m_pSkyBox = new COpeningBackScene(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pSkyBox->SetCurScene(OPENINGSCENE);
+	
+	m_nShaders = 1;
+	m_ppShaders = new CObjectsShader * [m_nShaders];
+	CObjectsShader* pObjectShader = new CObjectsShader();
+	pObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pObjectShader->SetCurScene(OPENINGSCENE);
+	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
+	m_ppShaders[0] = pObjectShader;
+
+	m_pDepthRenderShader = new CDepthRenderShader(pObjectShader, m_pLights->m_pLights);
+	m_pDepthRenderShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	m_pDepthRenderShader->SetCurScene(OPENINGSCENE);
+	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+
+	m_pShadowShader = new CShadowMapShader(pObjectShader);
+	m_pShadowShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	m_pShadowShader->SetCurScene(OPENINGSCENE);
+	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -79,20 +166,25 @@ void SceneManager::ReleaseObjects()
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
 	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
 	
-	
-	if (m_ppShaders)
+	if (m_pDepthRenderShader)
 	{
-		for (int i = 0; i < m_nShaders; i++)
-		{
-			m_ppShaders[i]->ReleaseShaderVariables();
-			m_ppShaders[i]->ReleaseObjects();
-			m_ppShaders[i]->Release();
-		}
-		delete[] m_ppShaders;
-	}
-	
-	if (m_pSkyBox) delete m_pSkyBox;
+		m_pDepthRenderShader->ReleaseShaderVariables();
+		m_pDepthRenderShader->ReleaseObjects();
+		m_pDepthRenderShader->Release();
 
+	}
+	if (m_ppFragShaders)
+	{
+		for (int i = 0; i < m_nFragShaders; i++)
+		{
+			m_ppFragShaders[i]->ReleaseShaderVariables();
+			m_ppFragShaders[i]->ReleaseObjects();
+			m_ppFragShaders[i]->Release();
+		}
+		delete[] m_ppFragShaders;
+	}
+	if (m_pShadowShader)delete m_pShadowShader;
+	if (m_pSkyBox) delete m_pSkyBox;
 	ReleaseShaderVariables();
 	if (m_pLights) delete[] m_pLights;
 	if (m_pMaterials) delete m_pMaterials;
@@ -102,7 +194,7 @@ ID3D12RootSignature* SceneManager::CreateGraphicsRootSignature(ID3D12Device* pd3
 {
 	ID3D12RootSignature* pd3dGraphicsRootSignature = NULL;
 
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[16];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[18];
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 1;
@@ -192,13 +284,25 @@ ID3D12RootSignature* SceneManager::CreateGraphicsRootSignature(ID3D12Device* pd3
 	pd3dDescriptorRanges[14].NumDescriptors = MAX_DEPTH_TEXTURES;
 	pd3dDescriptorRanges[14].BaseShaderRegister = 18; //t18~34 (18+MAX LIGHT): Depth Buffer
 	pd3dDescriptorRanges[14].RegisterSpace = 0;
-	pd3dDescriptorRanges[14].OffsetInDescriptorsFromTableStart = 0;
+	pd3dDescriptorRanges[14].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	pd3dDescriptorRanges[15].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
 	pd3dDescriptorRanges[15].NumDescriptors = 1;
-	pd3dDescriptorRanges[15].BaseShaderRegister = 9; // GameObject b6
+	pd3dDescriptorRanges[15].BaseShaderRegister = 9; // SpriteAnimation b9
 	pd3dDescriptorRanges[15].RegisterSpace = 0;
 	pd3dDescriptorRanges[15].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	pd3dDescriptorRanges[16].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[16].NumDescriptors = 1;
+	pd3dDescriptorRanges[16].BaseShaderRegister = 27; //t27: Texture2DArray
+	pd3dDescriptorRanges[16].RegisterSpace = 0;
+	pd3dDescriptorRanges[16].OffsetInDescriptorsFromTableStart = 0;
+
+	pd3dDescriptorRanges[17].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	pd3dDescriptorRanges[17].NumDescriptors = 1;
+	pd3dDescriptorRanges[17].BaseShaderRegister = 28; //t28: Texture2D<float4>
+	pd3dDescriptorRanges[17].RegisterSpace = 0;
+	pd3dDescriptorRanges[17].OffsetInDescriptorsFromTableStart = 0;
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[24];
 
@@ -208,7 +312,7 @@ ID3D12RootSignature* SceneManager::CreateGraphicsRootSignature(ID3D12Device* pd3
 	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[1].Constants.Num32BitValues = 33;
+	pd3dRootParameters[1].Constants.Num32BitValues = 34;
 	pd3dRootParameters[1].Constants.ShaderRegister = 2; //GameObject
 	pd3dRootParameters[1].Constants.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
@@ -299,7 +403,7 @@ ID3D12RootSignature* SceneManager::CreateGraphicsRootSignature(ID3D12Device* pd3
 	pd3dRootParameters[18].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[19].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	pd3dRootParameters[19].DescriptorTable.NumDescriptorRanges = 1; // ParticleObject b9
+	pd3dRootParameters[19].DescriptorTable.NumDescriptorRanges = 1; // SpriteAnimation b9
 	pd3dRootParameters[19].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[15];
 	pd3dRootParameters[19].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 
@@ -316,50 +420,54 @@ ID3D12RootSignature* SceneManager::CreateGraphicsRootSignature(ID3D12Device* pd3
 	pd3dRootParameters[22].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[22].DescriptorTable.NumDescriptorRanges = 1;
 	pd3dRootParameters[22].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[14]; //Depth Buffer
-	pd3dRootParameters[22].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dRootParameters[22].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	pd3dRootParameters[23].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[23].Descriptor.ShaderRegister = 12; //toshadow
 	pd3dRootParameters[23].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[23].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
+
+
+
+
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[4];
 
-	pd3dSamplerDescs[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	pd3dSamplerDescs[0].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pd3dSamplerDescs[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pd3dSamplerDescs[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pd3dSamplerDescs[0].MipLODBias = 0;
 	pd3dSamplerDescs[0].MaxAnisotropy = 1;
-	pd3dSamplerDescs[0].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
-	pd3dSamplerDescs[0].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+	pd3dSamplerDescs[0].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	pd3dSamplerDescs[0].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
 	pd3dSamplerDescs[0].MinLOD = 0;
 	pd3dSamplerDescs[0].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[0].ShaderRegister = 0;
 	pd3dSamplerDescs[0].RegisterSpace = 0;
-	pd3dSamplerDescs[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dSamplerDescs[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	pd3dSamplerDescs[1].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-	pd3dSamplerDescs[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	pd3dSamplerDescs[1].AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 	pd3dSamplerDescs[1].AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
-	pd3dSamplerDescs[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	pd3dSamplerDescs[1].AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
 	pd3dSamplerDescs[1].MipLODBias = 0;
 	pd3dSamplerDescs[1].MaxAnisotropy = 1;
-	pd3dSamplerDescs[1].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	pd3dSamplerDescs[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 	pd3dSamplerDescs[1].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
 	pd3dSamplerDescs[1].MinLOD = 0;
 	pd3dSamplerDescs[1].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[1].ShaderRegister = 1;
 	pd3dSamplerDescs[1].RegisterSpace = 0;
-	pd3dSamplerDescs[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dSamplerDescs[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-	pd3dSamplerDescs[2].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	pd3dSamplerDescs[2].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[2].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	pd3dSamplerDescs[2].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	pd3dSamplerDescs[2].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	pd3dSamplerDescs[2].MipLODBias = 0.0f;
 	pd3dSamplerDescs[2].MaxAnisotropy = 1;
-	pd3dSamplerDescs[2].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS;// D3D12_COMPARISON_FUNC_LESS;
+	pd3dSamplerDescs[2].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;// D3D12_COMPARISON_FUNC_LESS;
 	pd3dSamplerDescs[2].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;//  D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
 	pd3dSamplerDescs[2].MinLOD = 0;
 	pd3dSamplerDescs[2].MaxLOD = D3D12_FLOAT32_MAX;
@@ -367,19 +475,19 @@ ID3D12RootSignature* SceneManager::CreateGraphicsRootSignature(ID3D12Device* pd3
 	pd3dSamplerDescs[2].RegisterSpace = 0;
 	pd3dSamplerDescs[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dSamplerDescs[3].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	pd3dSamplerDescs[3].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[3].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	pd3dSamplerDescs[3].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	pd3dSamplerDescs[3].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	pd3dSamplerDescs[3].MipLODBias = 0.0f;
 	pd3dSamplerDescs[3].MaxAnisotropy = 1;
-	pd3dSamplerDescs[3].ComparisonFunc = D3D12_COMPARISON_FUNC_ALWAYS;
-	pd3dSamplerDescs[3].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+	pd3dSamplerDescs[3].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	pd3dSamplerDescs[3].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
 	pd3dSamplerDescs[3].MinLOD = 0;
 	pd3dSamplerDescs[3].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[3].ShaderRegister = 3;
 	pd3dSamplerDescs[3].RegisterSpace = 0;
-	pd3dSamplerDescs[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+	pd3dSamplerDescs[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
@@ -412,41 +520,78 @@ bool SceneManager::ProcessInput(UCHAR* pKeysBuffer)
 void SceneManager::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
+	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 
-	
-	
+	lightCounter += 0.1;
+	if (lightCounter > 0.5f)
+	{
+		m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.9f, 0.5f, 0.1f, 1.0f);
+		m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.5f, 0.1f, 1.0f);
+		m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.9f, 0.5f, 0.1f, 1.0f);
+		m_pLights->m_pLights[1].m_xmf4Emissive = XMFLOAT4(0.9f, 0.5f, 0.1f, 1.0f);
+		
+	}
+	if (lightCounter > 0.95)
+	{
+		lightCounter = 0.0f;
 
+	}
+	if (lightCounter < 0.25)
+	{
+		m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+		m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+		//m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+		//m_pLights->m_pLights[1].m_xmf4Emissive = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	}
 }
 
-void SceneManager::AnimateObjects(CCamera* pCamera, float fTimeElapsed)
-{
-}
+
 
 void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 
-	//if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
-	//if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+	UpdateShaderVariables(pd3dCommandList);
 
-	//UpdateShaderVariables(pd3dCommandList);
+	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
+	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
 
 }
 
 void SceneManager::ReleaseUploadBuffers()
 {
-	//if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
-	//for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
+	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
+
 
 
 }
 
 void SceneManager::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	m_pDepthRenderShader->PrepareShadowMap(pd3dCommandList);
 }
 
 void SceneManager::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	
+	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	if (m_pd3dcbLights)
+	{
+		D3D12_GPU_VIRTUAL_ADDRESS d3dcbLightsGpuVirtualAddress = m_pd3dcbLights->GetGPUVirtualAddress();
+		pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
+	}
+	if (m_pd3dcbMaterials)
+	{
+		D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
+		pd3dCommandList->SetGraphicsRootConstantBufferView(20, d3dcbMaterialsGpuVirtualAddress); //Materials
+	}
 }
 
 void SceneManager::RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -557,7 +702,6 @@ void SceneManager::CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture*
 		m_d3dShadowGPUDescriptorHandle = m_d3dSrvGPUDescriptorNextHandle;
 	}
 }
-
 
 void SceneManager::CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews)
 {

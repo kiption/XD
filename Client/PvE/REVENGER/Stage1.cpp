@@ -163,7 +163,6 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 
 	BuildDefaultLightsAndMaterials();
 
-	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pSkyBox->SetCurScene(SCENE1STAGE);
 	m_nBillboardShaders = 7;
@@ -722,9 +721,7 @@ void Stage1::ReleaseUploadBuffers()
 {
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
-
-
-	for (int i = 0; i < m_nHumanShaders; i++) m_ppHumanShaders[i]->ReleaseUploadBuffers();
+	for (int i = 0; i <m_nHumanShaders; i++) m_ppHumanShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nBillboardShaders; i++) if (m_pBillboardShader[i]) m_pBillboardShader[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->ReleaseUploadBuffers();

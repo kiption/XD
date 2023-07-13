@@ -218,7 +218,7 @@ float4 PSParticleStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
 	{
 		normalW = normalize(input.normalW);
 	}
-
+	cColor.r += 5.0f;
 	float4 uvs[MAX_LIGHTS];
 	float4 cIllumination = ParticleLighting(input.positionW, normalize(input.normalW), false, uvs);
 	return(lerp(cColor, cIllumination, 0.2f));

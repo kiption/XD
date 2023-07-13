@@ -79,7 +79,7 @@ public:
 	ID3D12RootSignature* GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 	bool ProcessInput(UCHAR* pKeysBuffer);
 	virtual void AnimateObjects(float fTimeElapsed);
-	virtual void AnimateObjects(CCamera* pCamera, float fTimeElapsed);
+	//virtual void AnimateObjects(CCamera* pCamera, float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 
 	virtual void ReleaseUploadBuffers();
@@ -95,11 +95,12 @@ public:
 
 	BoundingWireShader* m_pBoundingBoxShader = NULL;
 
-
+	float lightCounter = 0.0f;
 	XMFLOAT3 SmokePosition;
 	XMFLOAT3 ExplosingPosition;
 	GameSound gamesound;
-
+	CGameObject** m_ppGameObject = NULL;
+	int m_nObjects = 0;
 	CParticleObject** m_ppParticleObjects = NULL;
 	int							m_nParticleObjects;
 	ID3D12Resource* m_pd3dcbMaterials = NULL;

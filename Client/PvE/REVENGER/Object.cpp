@@ -2014,7 +2014,7 @@ void CEthanAnimationController::OnRootMotion(CGameObject* pRootGameObject)
 }
 
 
-CBilldingObject::CBilldingObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks)
+CBilldingObject::CBilldingObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(2)
 {
 
 }
@@ -2101,7 +2101,6 @@ void CSoldiarOtherPlayerObjects::MoveBackward(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	CGameObject::Animate(EleapsedTime);
 }
-
 void CSoldiarOtherPlayerObjects::MoveLeft(float EleapsedTime)
 {
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
@@ -2114,7 +2113,6 @@ void CSoldiarOtherPlayerObjects::MoveLeft(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	CGameObject::Animate(EleapsedTime);
 }
-
 void CSoldiarOtherPlayerObjects::MoveRight(float EleapsedTime)
 {
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
@@ -2127,9 +2125,6 @@ void CSoldiarOtherPlayerObjects::MoveRight(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 	CGameObject::Animate(EleapsedTime);
 }
-
-
-
 void CSoldiarOtherPlayerObjects::ReloadState(float EleapsedTime)
 {
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
@@ -2142,7 +2137,6 @@ void CSoldiarOtherPlayerObjects::ReloadState(float EleapsedTime)
 
 	CGameObject::Animate(EleapsedTime);
 }
-
 void CSoldiarOtherPlayerObjects::JumpState(float EleapsedTime)
 {
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
@@ -2155,7 +2149,6 @@ void CSoldiarOtherPlayerObjects::JumpState(float EleapsedTime)
 
 	CGameObject::Animate(EleapsedTime);
 }
-
 void CSoldiarOtherPlayerObjects::DieState(float EleapsedTime)
 {
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
@@ -2171,7 +2164,6 @@ void CSoldiarOtherPlayerObjects::DieState(float EleapsedTime)
 
 	CGameObject::Animate(EleapsedTime);
 }
-
 void CSoldiarOtherPlayerObjects::ShotState(float EleapsedTime)
 {
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
@@ -2184,7 +2176,6 @@ void CSoldiarOtherPlayerObjects::ShotState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 6);
 	CGameObject::Animate(EleapsedTime);
 }
-
 void CSoldiarOtherPlayerObjects::IdleState(float EleapsedTime)
 {
 	m_pSkinnedAnimationController->SetTrackEnable(0, true);
@@ -2195,10 +2186,8 @@ void CSoldiarOtherPlayerObjects::IdleState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackPosition(0, 0);
 	CGameObject::Animate(EleapsedTime);
 }
-
 void CSoldiarOtherPlayerObjects::Animate(float fTimeElapsed)
 {
-	m_xmf4x4World._32 = 0.0f;
 	CGameObject::Animate(fTimeElapsed);
 }
 
@@ -2214,4 +2203,37 @@ CEthanObject::CEthanObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 CEthanObject::~CEthanObject()
 {
+}
+
+COpeningHuman::COpeningHuman(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(1)
+{
+	SetChild(pModel->m_pModelRootObject, true);
+	pModel->m_pModelRootObject->SetCurScene(OPENINGSCENE);
+
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 3, pModel);
+
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
+
+	m_pSkinnedAnimationController->SetTrackEnable(0, true);
+	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+COpeningHuman::~COpeningHuman()
+{
+}
+
+void COpeningHuman::Animate(float fTimeElapsed)
+{
+
+	m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	m_pSkinnedAnimationController->SetTrackEnable(1, true);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_pSkinnedAnimationController->SetTrackPosition(0, 1);
+
+	CGameObject::Animate(fTimeElapsed);
 }
