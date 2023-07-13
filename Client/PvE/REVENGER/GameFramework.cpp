@@ -431,7 +431,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	case WM_LBUTTONUP:
 	{
 		if (m_nMode == OPENINGSCENE) {
-			cout << "x: " << m_ptOldCursorPos.x << ", y: " << m_ptOldCursorPos.y << endl;
+			//cout << "x: " << m_ptOldCursorPos.x << ", y: " << m_ptOldCursorPos.y << endl;
 			switch (m_LoginScene)
 			{
 			case LS_LOGIN: // 로그인 클릭 창
@@ -575,7 +575,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		switch (nMessageID)
 		{
 		case WM_IME_COMPOSITION:
-			cout << "trail" << endl;
+			//cout << "trail" << endl;
 			break;
 
 		case WM_KEYUP:
@@ -982,7 +982,6 @@ void CGameFramework::ProcessInput()
 
 							if (abs(cos(radian)) < forwardDotResultAbs) {
 								if (forwardDotResult < 0) {
-									cout << "1" << endl;
 									XMVECTOR reversedLocalForward = XMVectorNegate(XMLoadFloat3(&normalizedLocalForward));
 									XMStoreFloat3(&normalizedLocalForward, reversedLocalForward);
 
@@ -990,22 +989,19 @@ void CGameFramework::ProcessInput()
 									XMStoreFloat3(&PlayerMoveDir, AddVector);
 								}
 								else {
-									cout << "2" << endl;
 									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2PlayerVector), XMLoadFloat3(&normalizedLocalForward));
 									XMStoreFloat3(&PlayerMoveDir, AddVector);
 								}
 							}
 							else {
 								if (rightDotResult < 0) {
-									cout << "3" << endl;
 									XMVECTOR reversedLocalRight = XMVectorNegate(XMLoadFloat3(&normalizedLocalRight));
 									XMStoreFloat3(&normalizedLocalRight, reversedLocalRight);
 
 									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2PlayerVector), XMLoadFloat3(&normalizedLocalRight));
 									XMStoreFloat3(&PlayerMoveDir, AddVector);
 								}
-								else {
-									cout << "4" << endl;
+								else {									
 									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2PlayerVector), XMLoadFloat3(&normalizedLocalRight));
 									XMStoreFloat3(&PlayerMoveDir, AddVector);
 								}
@@ -1400,8 +1396,8 @@ void CGameFramework::FrameAdvance()
 
 		// Cross Hair
 		if (!m_SniperOn) {
-			D2D_POINT_2F D2_CrossHairUI = { (FRAME_BUFFER_WIDTH / 2) - 6.5f, (FRAME_BUFFER_HEIGHT / 2) - 6.5f };
-			D2D_RECT_F D2_CrossHairRect = { 0.0f, 0.0f, 13.0f, 13.0f };
+			D2D_POINT_2F D2_CrossHairUI = { (FRAME_BUFFER_WIDTH / 2) - 166.5f, (FRAME_BUFFER_HEIGHT / 2) - 125.0f };
+			D2D_RECT_F D2_CrossHairRect = { 0.0f, 0.0f, 333.0f, 250.0f };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[20], &D2_CrossHairUI, &D2_CrossHairRect);
 		}
 
@@ -1511,7 +1507,7 @@ void CGameFramework::FrameAdvance()
 		{
 		case 0:
 		{
-			int killNPC = 20 - m_remainNPC;
+			int killNPC = m_Max_NPCs - m_remainNPC;
 			_itow_s(killNPC, killNPCprint, sizeof(killNPCprint), 10);
 			D2D1_RECT_F D2_KillNPCText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 59, (FRAME_BUFFER_HEIGHT / 16) * 3, (FRAME_BUFFER_WIDTH / 64) * 61, (FRAME_BUFFER_HEIGHT / 16) * 3);
 			m_pd2dDeviceContext->DrawTextW(killNPCprint, (UINT32)wcslen(killNPCprint), m_pdwFont[0], &D2_KillNPCText, m_pd2dbrText[0]);
@@ -2121,7 +2117,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[19]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	// Cross hair
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/DotAim.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/CrossHair2.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);

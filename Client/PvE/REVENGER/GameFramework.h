@@ -79,6 +79,7 @@ struct CollideMapInfo
 	XMFLOAT3 m_local_rotate;
 	float m_angle_aob;
 	float m_angle_boc;
+	int id;
 
 	BoundingOrientedBox m_xoobb;
 
@@ -293,7 +294,7 @@ public:
 	int m_killArmy;
 	int m_AttackFly;
 	int m_survive = 12;
-
+	int m_Max_NPCs;
 	int m_CurrentPlayerNum;
 
 	int m_occupationnum = 0;

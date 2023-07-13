@@ -1174,7 +1174,7 @@ void NPC::H_PlayerAttack()
 	XMVECTOR NPCtoPlayerLookNormal = XMVector3Normalize(XMLoadFloat3(&NPCtoPlayerLook));
 	XMStoreFloat3(&NPCtoPlayerLook, NPCtoPlayerLookNormal);
 
-	cout << "NPCtoPlayerLook x: " << NPCtoPlayerLook.x << ", y: " << NPCtoPlayerLook.y << ", z: " << NPCtoPlayerLook.z << endl;
+	//cout << "NPCtoPlayerLook x: " << NPCtoPlayerLook.x << ", y: " << NPCtoPlayerLook.y << ", z: " << NPCtoPlayerLook.z << endl;
 
 	XMFLOAT3 NPCtoPlayerUpTemp = { 0.0f, 1.0f, 0.0f };
 
@@ -1216,7 +1216,7 @@ void NPC::H_PlayerAttack()
 
 	m_AttackVec = NPCNormalize(m_AttackVec);
 
-	cout << "m_AttackVec x: " << m_AttackVec.x << ", y: " << m_AttackVec.y << ", z: " << m_AttackVec.z << endl;
+	//cout << "m_AttackVec x: " << m_AttackVec.x << ", y: " << m_AttackVec.y << ", z: " << m_AttackVec.z << endl;
 
 }
 
@@ -1576,9 +1576,57 @@ void NPC::A_PlayerAttack()
 {
 	// Look
 	A_PlayerChasing();
+	
+	XMFLOAT3 NPCtoPlayerLook = m_lookvec;
+	float distance = m_Distance[m_chaseID];
 
-	XMFLOAT3 AttackVec = m_lookvec;
-	m_AttackVec = NPCNormalize(AttackVec);
+	XMVECTOR NPCtoPlayerLookNormal = XMVector3Normalize(XMLoadFloat3(&NPCtoPlayerLook));
+	XMStoreFloat3(&NPCtoPlayerLook, NPCtoPlayerLookNormal);
+
+	//cout << "NPCtoPlayerLook x: " << NPCtoPlayerLook.x << ", y: " << NPCtoPlayerLook.y << ", z: " << NPCtoPlayerLook.z << endl;
+
+	XMFLOAT3 NPCtoPlayerUpTemp = { 0.0f, 1.0f, 0.0f };
+
+	XMVECTOR NPCtoPlayerLookMat = XMLoadFloat3(&NPCtoPlayerLook);
+	XMVECTOR NPCtoPlayerUpTempMat = XMLoadFloat3(&NPCtoPlayerUpTemp);
+
+	XMVECTOR NPCtoPlayerRightMat = XMVector3Normalize(XMVector3Cross(NPCtoPlayerUpTempMat, NPCtoPlayerLookMat));
+
+	XMFLOAT3 NPCtoPlayerRight;
+	XMStoreFloat3(&NPCtoPlayerRight, NPCtoPlayerRightMat);
+
+	XMVECTOR NPCtoPlayerUpMat = XMVector3Normalize(XMVector3Cross(NPCtoPlayerLookMat, NPCtoPlayerRightMat));
+
+	XMFLOAT3 NPCtoPlayerUp;
+	XMStoreFloat3(&NPCtoPlayerUp, NPCtoPlayerUpMat);
+
+	random_device rd;
+	default_random_engine dre(rd());
+	uniform_real_distribution<float> ShackingAttackRange(-3, 3);
+
+	float UpShaking = ShackingAttackRange(dre);
+	float UpshakingDevide = UpShaking / distance;
+
+	float RightShaking = ShackingAttackRange(dre);
+	float RightshakingDevide = UpShaking / distance;
+
+	XMVECTOR ShakeUPMatrix = XMVectorScale(XMLoadFloat3(&NPCtoPlayerUp), UpshakingDevide);
+	XMVECTOR ShakeRightMatrix = XMVectorScale(XMLoadFloat3(&NPCtoPlayerRight), RightshakingDevide);
+
+	XMFLOAT3 ShakeUpVec;
+	XMStoreFloat3(&ShakeUpVec, ShakeUPMatrix);
+
+	XMFLOAT3 ShakeRightVec;
+	XMStoreFloat3(&ShakeRightVec, ShakeRightMatrix);
+
+	XMVECTOR ShakeUpRightVec = XMVectorAdd(XMLoadFloat3(&ShakeUpVec), XMLoadFloat3(&ShakeRightVec));
+	XMVECTOR ShakeMat = XMVectorAdd(ShakeUpRightVec, NPCtoPlayerLookNormal);
+	XMStoreFloat3(&m_AttackVec, ShakeMat);
+
+	m_AttackVec = NPCNormalize(m_AttackVec);
+
+	//cout << "m_AttackVec x: " << m_AttackVec.x << ", y: " << m_AttackVec.y << ", z: " << m_AttackVec.z << endl;
+
 }
 
 void NPC::A_NPC_Check_HP()
@@ -2038,7 +2086,7 @@ void npcAttack()
 		//======================================================================
 		if (ConnectingServer) {
 			for (int i{}; i < MAX_NPCS; ++i) {
-				if (npcsInfo[i].GetState() == NPC_ATTACK) {
+				if (npcsInfo[i].GetState() == NPC_ATTACK && npcsInfo[i].type == NPC_ARMY) {
 					g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
 				}
 			}
