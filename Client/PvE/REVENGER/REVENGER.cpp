@@ -417,6 +417,28 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				}
 
 				//==================================================
+				//				공격(총알) 충돌 관련
+				//==================================================
+				// 1. 총알 - 맵 오브젝트 (건물, 자동차, 나무, ...)
+
+				// 2. 총알 - 지면
+
+				// 3. 총알 - 헬기 객체 (플레이어, NPC 구분X)
+				if (!q_bullet_hit_pos_heli.empty()) {
+					XMFLOAT3 heli_hit_pos = q_bullet_hit_pos_heli.front();
+					q_bullet_hit_pos_heli.pop();
+					cout << "헬기: " << heli_hit_pos.x << ", " << heli_hit_pos.y << ", " << heli_hit_pos.z << endl;
+				}
+
+				// 4. 총알 - 사람 객체 (플레이어, NPC 구분X)
+				if (!q_bullet_hit_pos_human.empty()) {
+					XMFLOAT3 human_hit_pos = q_bullet_hit_pos_human.front();
+					q_bullet_hit_pos_human.pop();
+					cout << "사람: " << human_hit_pos.x << ", " << human_hit_pos.y << ", " << human_hit_pos.z << endl;
+				}
+
+
+				//==================================================
 				//					Map 충돌 관련
 				//==================================================
 				for (auto& mapobj : stage1_mapobj_info) {

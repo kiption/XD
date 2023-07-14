@@ -577,7 +577,7 @@ array<SERVER, MAX_LOGIC_SERVER> g_logicservers;			// 로직서버 정보
 void SERVER::send_npc_init_packet(int npc_id)
 {
 	NPC_FULL_INFO_PACKET npc_init_packet;
-	npc_init_packet.size = sizeof(NPC_FULL_INFO);
+	npc_init_packet.size = sizeof(NPC_FULL_INFO_PACKET);
 	npc_init_packet.type = NPC_FULL_INFO;
 	npc_init_packet.n_id = npc_id;
 	npc_init_packet.speed = npcsInfo[npc_id].GetSpeed();
@@ -596,7 +596,6 @@ void SERVER::send_npc_init_packet(int npc_id)
 	npc_init_packet.look_x = npcsInfo[npc_id].m_lookvec.x;
 	npc_init_packet.look_y = npcsInfo[npc_id].m_lookvec.y;
 	npc_init_packet.look_z = npcsInfo[npc_id].m_lookvec.z;
-
 	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
 	g_logicservers[a_lgcsvr_num].do_send(&npc_init_packet);
 }

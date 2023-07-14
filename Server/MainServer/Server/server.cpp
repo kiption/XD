@@ -1121,11 +1121,6 @@ void process_packet(int client_id, char* packet)
 		// 2. 충돌검사
 		bool b_collide = false;
 
-		enum CollideTarget { CT_PLAYER, CT_NPC, CT_BUILDING };
-		int collide_target = -1;
-		int collide_id = -1;
-		float min_dist = FLT_MAX;
-
 		// 야매방법 (추후에 반드시 레이캐스트로 바꿔야함!!!)
 		SESSION bullet;
 		bullet.pos = clients[client_id].pos;
@@ -1137,7 +1132,6 @@ void process_packet(int client_id, char* packet)
 
 		XMFLOAT3 bullet_initpos = bullet.pos;
 		XMFLOAT3 collide_pos = XMF_fault;
-		enum C_OBJ_TYPE { C_OBJ_NONCOLLIDE, C_OBJ_MAPOBJ, C_OBJ_NPC };
 		int collided_obj = C_OBJ_NONCOLLIDE;
 		int collided_npc_id = -1;
 		while (XMF_Distance(bullet.pos, bullet_initpos) <= BULLET_RANGE) {
@@ -1174,17 +1168,20 @@ void process_packet(int client_id, char* packet)
 				if (bullet.m_xoobb.Intersects(npcs[npc_id].m_xoobb)) {
 					if (collide_pos == XMF_fault) {	// 첫 검사는 무조건 업데이트
 						collide_pos = bullet.pos;
-						collided_obj = C_OBJ_NPC;
-						//cout << "NPC[" << npc_id << "]와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+						if (npc_id < MAX_NPC_HELI)
+							collided_obj = C_OBJ_HELI;
+						else
+							collided_obj = C_OBJ_HUMAN;
 					}
 					else {
 						if (XMF_Distance(bullet.pos, bullet_initpos) < XMF_Distance(collide_pos, bullet_initpos)) {	// 저장해둔 충돌점보다 가까이에 있으면 업데이트
 							collide_pos = bullet.pos;
-							collided_obj = C_OBJ_NPC;
-							//cout << "NPC[" << npc_id << "]와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+							if (npc_id < MAX_NPC_HELI)
+								collided_obj = C_OBJ_HELI;
+							else
+								collided_obj = C_OBJ_HUMAN;
 						}
 						else {
-							//cout << "NPC[" << npc_id << "]는 기존 충돌지점보다 멀리 있습니다. 충돌점 업데이트X.\n" << endl;
 							continue;
 						}
 					}
@@ -1199,10 +1196,46 @@ void process_packet(int client_id, char* packet)
 					cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
 					break;
 
-				case C_OBJ_NPC:
+				case C_OBJ_HUMAN:
+				case C_OBJ_HELI:
 					cout << "NPC[" << collided_npc_id << "]와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
-					// NPC 데미지 계산
-					if (npcs[collided_npc_id].hp <= BULLET_DAMAGE) {	// npc 사망
+
+					// 우선 맞아서 죽든 안죽든 피격 위치를 클라이언트에게 알려줍니다. (피터지는? 연출을 위함)
+					SC_BULLET_COLLIDE_POS_PACKET collide_pos_pack;
+					collide_pos_pack.size = sizeof(SC_BULLET_COLLIDE_POS_PACKET);
+					collide_pos_pack.type = SC_BULLET_COLLIDE_POS;
+					collide_pos_pack.attacker = TARGET_PLAYER;
+					collide_pos_pack.collide_target = collided_obj;
+					collide_pos_pack.x = collide_pos.x;
+					collide_pos_pack.y = collide_pos.y;
+					collide_pos_pack.z = collide_pos.z;
+					for (auto& cl : clients) {
+						if (cl.s_state != ST_INGAME) continue;
+						if (cl.curr_stage != clients[client_id].curr_stage) continue;
+						lock_guard<mutex> lg{ cl.s_lock };
+						cl.do_send(&collide_pos_pack);
+					}
+
+					// 데미지 계산
+					float dec_damage = static_cast<float>(BULLET_DAMAGE);
+					if (collided_npc_id < MAX_NPC_HELI) {	// 헬기는 좀 덜 아프게 맞는다.
+						dec_damage = dec_damage / 10.f * 2.f;
+					}
+					if (XMF_Distance(npcs[collided_npc_id].pos, bullet_initpos) > 10) {	// 멀리 떨어질 수록 데미지가 조금씩 감소한다.
+						float dist = static_cast<int>(XMF_Distance(npcs[collided_npc_id].pos, collide_pos));
+						dec_damage = dec_damage / 100.f * dist * 10.f;
+					}
+					int damage = static_cast<int>(BULLET_DAMAGE - dec_damage);
+
+					// npc 데미지 처리
+					if (npcs[collided_npc_id].hp > damage) {
+						npcs[collided_npc_id].s_lock.lock();
+						npcs[collided_npc_id].hp -= damage;
+						npcs[collided_npc_id].s_lock.unlock();
+
+						cout << "Player[" << client_id << "]의 공격에 Npc[" << collided_npc_id << "]가 맞았다. (HP: " << npcs[collided_npc_id].hp << " 남음)\n" << endl;
+					}
+					else {	// npc 사망
 						npcs[collided_npc_id].s_lock.lock();
 						npcs[collided_npc_id].hp = 0;
 						npcs[collided_npc_id].pl_state = PL_ST_DEAD;
@@ -1352,13 +1385,6 @@ void process_packet(int client_id, char* packet)
 							}
 						}
 
-					}
-					else {	// npc 데미지 처리
-						npcs[collided_npc_id].s_lock.lock();
-						npcs[collided_npc_id].hp -= BULLET_DAMAGE;
-						npcs[collided_npc_id].s_lock.unlock();
-
-						cout << "Player[" << client_id << "]의 공격에 Npc[" << collided_npc_id << "]가 맞았다. (HP: " << npcs[collided_npc_id].hp << " 남음)\n" << endl;
 					}
 
 					break;

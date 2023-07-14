@@ -151,3 +151,8 @@ int removeRoom(int target_room_id) {
 	cout << "Room[" << target_room_id << "]가 제거되었습니다." << endl;
 	return 0;
 }
+
+//==================================================
+queue<XMFLOAT3> q_bullet_hit_pos_mapobj;
+queue<XMFLOAT3> q_bullet_hit_pos_human;
+queue<XMFLOAT3> q_bullet_hit_pos_heli;

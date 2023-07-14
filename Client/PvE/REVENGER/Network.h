@@ -798,6 +798,28 @@ void processPacket(char* ptr)
 			gamesound.shootingSound(false);
 		break;
 	}//SC_BULLET_COUNT case end
+	case SC_BULLET_COLLIDE_POS:
+	{
+		SC_BULLET_COLLIDE_POS_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COLLIDE_POS_PACKET*>(ptr);
+
+		XMFLOAT3 collide_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+		switch (recv_packet->collide_target) {
+		case C_OBJ_MAPOBJ:
+			break;
+		case C_OBJ_GROUND:
+			break;
+		case C_OBJ_HUMAN:
+			q_bullet_hit_pos_human.push(collide_pos);
+			//cout << "사람이 맞았다. POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << endl;
+			break;
+		case C_OBJ_HELI:
+			q_bullet_hit_pos_heli.push(collide_pos);
+			//cout << "헬기가 맞았다. POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << endl;
+			break;
+		}
+
+		break;
+	}//SC_BULLET_COLLIDE_POS case end
 	case SC_MISSION:
 	{
 		if (curr_servertype != SERVER_LOGIC) break;
