@@ -154,5 +154,3 @@ int removeRoom(int target_room_id) {
 
 //==================================================
 queue<XMFLOAT3> q_bullet_hit_pos_mapobj;
-queue<XMFLOAT3> q_bullet_hit_pos_human;
-queue<XMFLOAT3> q_bullet_hit_pos_heli;

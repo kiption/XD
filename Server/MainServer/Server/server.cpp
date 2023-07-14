@@ -1168,18 +1168,12 @@ void process_packet(int client_id, char* packet)
 				if (bullet.m_xoobb.Intersects(npcs[npc_id].m_xoobb)) {
 					if (collide_pos == XMF_fault) {	// 첫 검사는 무조건 업데이트
 						collide_pos = bullet.pos;
-						if (npc_id < MAX_NPC_HELI)
-							collided_obj = C_OBJ_HELI;
-						else
-							collided_obj = C_OBJ_HUMAN;
+						collided_obj = C_OBJ_NPC;
 					}
 					else {
 						if (XMF_Distance(bullet.pos, bullet_initpos) < XMF_Distance(collide_pos, bullet_initpos)) {	// 저장해둔 충돌점보다 가까이에 있으면 업데이트
 							collide_pos = bullet.pos;
-							if (npc_id < MAX_NPC_HELI)
-								collided_obj = C_OBJ_HELI;
-							else
-								collided_obj = C_OBJ_HUMAN;
+							collided_obj = C_OBJ_NPC;
 						}
 						else {
 							continue;
@@ -1196,25 +1190,8 @@ void process_packet(int client_id, char* packet)
 					cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
 					break;
 
-				case C_OBJ_HUMAN:
-				case C_OBJ_HELI:
+				case C_OBJ_NPC:
 					cout << "NPC[" << collided_npc_id << "]와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
-
-					// 우선 맞아서 죽든 안죽든 피격 위치를 클라이언트에게 알려줍니다. (피터지는? 연출을 위함)
-					SC_BULLET_COLLIDE_POS_PACKET collide_pos_pack;
-					collide_pos_pack.size = sizeof(SC_BULLET_COLLIDE_POS_PACKET);
-					collide_pos_pack.type = SC_BULLET_COLLIDE_POS;
-					collide_pos_pack.attacker = TARGET_PLAYER;
-					collide_pos_pack.collide_target = collided_obj;
-					collide_pos_pack.x = collide_pos.x;
-					collide_pos_pack.y = collide_pos.y;
-					collide_pos_pack.z = collide_pos.z;
-					for (auto& cl : clients) {
-						if (cl.s_state != ST_INGAME) continue;
-						if (cl.curr_stage != clients[client_id].curr_stage) continue;
-						lock_guard<mutex> lg{ cl.s_lock };
-						cl.do_send(&collide_pos_pack);
-					}
 
 					// 데미지 계산
 					float dec_damage = static_cast<float>(BULLET_DAMAGE);
@@ -1226,6 +1203,20 @@ void process_packet(int client_id, char* packet)
 						dec_damage = dec_damage / 100.f * dist * 10.f;
 					}
 					int damage = static_cast<int>(BULLET_DAMAGE - dec_damage);
+
+					// 우선 맞아서 죽든 안죽든 피격 위치를 클라이언트에게 알려줍니다. (피터지는? 연출을 위함)
+					SC_DAMAGED_PACKET npc_damaged_pack;
+					npc_damaged_pack.size = sizeof(SC_DAMAGED_PACKET);
+					npc_damaged_pack.type = SC_DAMAGED;
+					npc_damaged_pack.target = TARGET_NPC;
+					npc_damaged_pack.id = collided_npc_id;
+					npc_damaged_pack.damage = damage;
+					for (auto& cl : clients) {
+						if (cl.s_state != ST_INGAME) continue;
+						if (cl.curr_stage != clients[client_id].curr_stage) continue;
+						lock_guard<mutex> lg{ cl.s_lock };
+						cl.do_send(&npc_damaged_pack);
+					}
 
 					// npc 데미지 처리
 					if (npcs[collided_npc_id].hp > damage) {

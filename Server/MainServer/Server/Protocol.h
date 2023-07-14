@@ -422,7 +422,7 @@ struct SC_BULLET_COUNT_PACKET {
 	int bullet_cnt;
 };
 
-enum C_OBJ_TYPE { C_OBJ_NONCOLLIDE, C_OBJ_MAPOBJ, C_OBJ_GROUND, C_OBJ_HUMAN, C_OBJ_HELI };
+enum C_OBJ_TYPE { C_OBJ_NONCOLLIDE, C_OBJ_MAPOBJ, C_OBJ_GROUND, C_OBJ_NPC };
 struct SC_BULLET_COLLIDE_POS_PACKET {
 	unsigned char size;
 	char type;
