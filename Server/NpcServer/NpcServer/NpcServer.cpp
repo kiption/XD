@@ -1884,7 +1884,7 @@ void process_packet(char* packet)
 
 		MapObject temp;
 		temp.setPos(mapobj_packet->center_x, mapobj_packet->center_y, mapobj_packet->center_z);
-		temp.setScale(mapobj_packet->scale_x / 2.0f, mapobj_packet->scale_y / 2.0f, mapobj_packet->scale_z / 2.0f);
+		temp.setScale(mapobj_packet->scale_x, mapobj_packet->scale_y, mapobj_packet->scale_z);
 		temp.setLocalForward(XMFLOAT3{ mapobj_packet->forward_x, mapobj_packet->forward_y, mapobj_packet->forward_z });
 		temp.setLocalRight(XMFLOAT3{ mapobj_packet->right_x, mapobj_packet->right_y, mapobj_packet->right_z });
 		temp.setLocalRotate(XMFLOAT3{ mapobj_packet->rotate_x, mapobj_packet->rotate_y, mapobj_packet->rotate_z });

@@ -1137,7 +1137,7 @@ void process_packet(int client_id, char* packet)
 
 		XMFLOAT3 bullet_initpos = bullet.pos;
 		while (XMF_Distance(bullet.pos, bullet_initpos) <= BULLET_RANGE) {
-			/*
+			
 			XMFLOAT3 collide_pos = XMF_fault;
 			enum C_OBJ_TYPE { C_OBJ_NONCOLLIDE, C_OBJ_MAPOBJ, C_OBJ_NPC };
 			int collided_obj = C_OBJ_NONCOLLIDE;
@@ -1154,7 +1154,7 @@ void process_packet(int client_id, char* packet)
 					}
 				}
 			}
-			*/
+			/*
 			// 1. NPC랑 검사
 			for (auto& vl_key : clients[client_id].view_list) {
 				if (!(NPC_ID_START <= vl_key && vl_key <= NPC_ID_END)) continue;
@@ -1327,7 +1327,7 @@ void process_packet(int client_id, char* packet)
 					break;
 				}
 			}
-			
+			*/
 			if (b_collide) break;
 
 			bullet.pos = XMF_Add(bullet.pos, XMF_MultiplyScalar(bullet.m_lookvec, 1.f));
@@ -2628,7 +2628,7 @@ int main(int argc, char* argv[])
 		//string fname = readTargets[0];
 		ifstream txtfile(fname);
 
-		Building tmp_bulding;
+		Building tmp_mapobj;
 
 		string word;
 		int word_cnt = 0;
@@ -2679,16 +2679,19 @@ int main(int argc, char* argv[])
 					if (b_angle_aob || b_angle_boc) {
 						if (b_angle_aob) {
 							float aob = string2data(word);
-							tmp_bulding.setAngleAOB(aob);
+							tmp_mapobj.setAngleAOB(aob);
 							b_angle_aob = false;
 						}
 						else if (b_angle_boc) {
 							float boc = string2data(word);
-							tmp_bulding.setAngleBOC(boc);
+							tmp_mapobj.setAngleBOC(boc);
 							b_angle_boc = false;
 
-							// BOC가 건물정보의 마지막이므로 완성된 tmpbuilding 을 mapobj_info에 추가
-							mapobj_info.push_back(tmp_bulding);
+							// BOC가 건물정보의 마지막이므로 마지막 정보는 BoundingBox 업데이트
+							tmp_mapobj.setBB();
+
+							// 그리고 완성된 tmpbuilding 을 mapobj_info에 추가
+							mapobj_info.push_back(tmp_mapobj);
 						}
 						continue;
 					}
@@ -2697,23 +2700,23 @@ int main(int argc, char* argv[])
 					if (buf_count == 2) {
 						XMFLOAT3 tmp_flt3(tmp_buf[0], tmp_buf[1], tmp_buf[2]);
 						if (b_center) {
-							tmp_bulding.setPos2(tmp_flt3);
+							tmp_mapobj.setPos2(tmp_flt3);
 							b_center = false;
 						}
 						else if (b_scale) {
-							tmp_bulding.setScale2(tmp_flt3);
+							tmp_mapobj.setScale(tmp_flt3.x / 2.0f, tmp_flt3.y / 2.0f, tmp_flt3.z / 2.0f);
 							b_scale = false;
 						}
 						else if (b_local_forward) {
-							tmp_bulding.setLocalForward(tmp_flt3);
+							tmp_mapobj.setLocalForward(tmp_flt3);
 							b_local_forward = false;
 						}
 						else if (b_local_right) {
-							tmp_bulding.setLocalRight(tmp_flt3);
+							tmp_mapobj.setLocalRight(tmp_flt3);
 							b_local_right = false;
 						}
 						else if (b_local_rotate) {
-							tmp_bulding.setLocalRotate(tmp_flt3);
+							tmp_mapobj.setLocalRotate(tmp_flt3);
 							b_local_rotate = false;
 						}
 						memset(tmp_buf, 0, sizeof(tmp_buf));

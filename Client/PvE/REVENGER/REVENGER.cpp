@@ -249,7 +249,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							MapObjectsInfo origintemp = stage1_mapobj_info[i];
 							CollideMapInfo frametemp;
 							frametemp.m_pos = origintemp.m_pos;
-							frametemp.m_scale = { origintemp.m_scale.x / 2, origintemp.m_scale.y / 2, origintemp.m_scale.z / 2 };
+							frametemp.m_scale = { origintemp.m_scale.x, origintemp.m_scale.y, origintemp.m_scale.z };
 							frametemp.m_local_forward = origintemp.m_local_forward;
 							frametemp.m_local_right = origintemp.m_local_right;
 							frametemp.m_local_rotate = origintemp.m_local_rotate;
