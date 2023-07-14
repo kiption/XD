@@ -69,9 +69,9 @@
 //============================================================
 #define HELI_MAXHP 100
 
-#define HELI_BBSIZE_X 25.f				// 헬기 BB크기
-#define HELI_BBSIZE_Y 10.f
-#define HELI_BBSIZE_Z 40.f
+#define HELI_BBSIZE_X 20.0f				// 헬기 BB크기
+#define HELI_BBSIZE_Y 10.0f
+#define HELI_BBSIZE_Z 20.0f
 
 #define AUTO_LEVELOFF_TIME 3000			// 몇 초(ms)동안 키입력이 없어야 자동 수평비행 전환이 되는가
 #define RESPAWN_TIME 5000				// 리스폰 시간 (ms)

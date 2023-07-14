@@ -374,13 +374,14 @@ private:
 	float m_Speed;
 	float m_Distance[MAX_USER];
 	float m_destinationRange;
+	float m_PrevYaw;
 
 public:
 	bool m_DeathCheck = false;
 	bool PrintRayCast = false;
 
 	bool m_UpdateTurn = false;
-
+	MapObject m_CollideMap;
 	vector<int>path;
 	BoundingFrustum m_frustum;
 	XMFLOAT3 m_VectorMAX = { -9999.f, -9999.f, -9999.f };
@@ -493,6 +494,13 @@ public:
 		// Death
 	void		A_NPC_Check_HP();																	// HP 계산
 	void		A_NPC_Death_motion();																// HP 0
+
+	// 3. Common
+	bool		NPC_CollideByMap();																	// 맵이랑 충돌인지 판단
+	void		NPC_CalculationCollide();															// 충돌된 경우 위치 및 회전 정보 재설정
+
+	void		H_setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
+	void		A_setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 
 };
 array<NPC, MAX_NPCS> npcsInfo;
@@ -637,6 +645,11 @@ void SERVER::send_npc_rotate_packet(int npc_id)
 
 	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
 	g_logicservers[a_lgcsvr_num].do_send(&npc_rotate_packet);
+
+	if (npc_id < 20 && npc_id > 17) {
+		cout << npc_id << "Rotate Packet Call" << endl;
+		cout << "===========================" << endl;
+	}
 }
 void SERVER::send_npc_attack_packet(int npc_id)
 {
@@ -818,6 +831,7 @@ bool NPC::CheckChaseState()
 }
 void NPC::NPC_State_Manegement(int state)
 {
+	m_PrevYaw = yaw;
 	switch (type)
 	{
 	case NPC_HELICOPTER:
@@ -858,6 +872,7 @@ void NPC::NPC_State_Manegement(int state)
 
 		H_NPC_Check_HP();
 		H_SetFrustum();
+		H_setBB();
 		break;
 	}
 	case NPC_ARMY:
@@ -898,10 +913,24 @@ void NPC::NPC_State_Manegement(int state)
 
 		A_NPC_Check_HP();
 		A_SetFrustum();
+		A_setBB();
 		break;
 		break;
 	}
 	}
+
+	if (NPC_CollideByMap()) {
+		NPC_CalculationCollide();
+	}
+	if (yaw != m_PrevYaw) {
+		m_rightvec = NPCcalcRightRotate();
+		m_lookvec = NPCcalcLookRotate();
+
+		if (ConnectingServer) {
+			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+		}
+	}
+
 }
 void NPC::Caculation_Distance(XMFLOAT3 vec, int id) // 서버에서 따로 부를 것.
 {
@@ -1065,6 +1094,7 @@ void NPC::H_PlayerChasing()
 	// 같은 도시에 있는 지 판별
 	int user_City = H_GetUserCity();
 	if (user_City == -1 || H_IsUserOnSafeZone(user_City)) {
+		m_UpdateTurn = true;
 		H_MoveToNode();
 		return;
 	}
@@ -1072,6 +1102,7 @@ void NPC::H_PlayerChasing()
 	// 있다면 노드 검색
 	int user_node = H_FindUserNode(user_City);
 	if (user_node == -1) {
+		m_UpdateTurn = true;
 		H_MoveToNode();
 		return;
 	}
@@ -1251,7 +1282,7 @@ void NPC::H_PlayerAttack()
 
 	XMFLOAT3 NPCtoPlayerLook = { m_User_Pos[m_chaseID].x - pos.x,m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
 	float distance = sqrtf(pow((m_User_Pos[m_chaseID].x - pos.x), 2) + pow((m_User_Pos[m_chaseID].y - pos.y), 2) + pow((m_User_Pos[m_chaseID].z - pos.z), 2));
-	
+
 	XMVECTOR NPCtoPlayerLookNormal = XMVector3Normalize(XMLoadFloat3(&NPCtoPlayerLook));
 	XMStoreFloat3(&NPCtoPlayerLook, NPCtoPlayerLookNormal);
 
@@ -1287,7 +1318,7 @@ void NPC::H_PlayerAttack()
 
 	XMFLOAT3 ShakeUpVec;
 	XMStoreFloat3(&ShakeUpVec, ShakeUPMatrix);
-	
+
 	XMFLOAT3 ShakeRightVec;
 	XMStoreFloat3(&ShakeRightVec, ShakeRightMatrix);
 
@@ -1474,6 +1505,7 @@ void NPC::A_PlayerChasing()
 	// 같은 도시에 있는 지 판별
 	int user_City = A_GetUserCity();
 	if (user_City == -1 || A_IsUserOnSafeZone(user_City)) {
+		m_UpdateTurn = true;
 		A_MoveToNode();
 		return;
 	}
@@ -1481,6 +1513,7 @@ void NPC::A_PlayerChasing()
 	// 있다면 노드 검색
 	int user_node = A_FindUserNode(user_City);
 	if (user_node == -1) {
+		m_UpdateTurn = true;
 		A_MoveToNode();
 		return;
 	}
@@ -1657,7 +1690,7 @@ void NPC::A_PlayerAttack()
 {
 	// Look
 	A_PlayerChasing();
-	
+
 	XMFLOAT3 NPCtoPlayerLook = m_lookvec;
 	float distance = m_Distance[m_chaseID];
 
@@ -1725,6 +1758,51 @@ void NPC::A_NPC_Death_motion()
 
 	m_rightvec = NPCcalcRightRotate();
 	m_lookvec = NPCcalcLookRotate();
+}
+
+bool NPC::NPC_CollideByMap()
+{
+	bool collide = false;
+	for (int i{}; i < mapobjects_info.size(); ++i) {
+		if (mapobjects_info[i].m_xoobb.Intersects(m_xoobb)) {
+			m_CollideMap = mapobjects_info[i];
+			collide = true;
+			break;
+		}
+	}
+
+	return collide;
+}
+
+void NPC::NPC_CalculationCollide()
+{
+	int currNode = m_currentNodeIndex % 4;
+	XMFLOAT3 prevPos = pos;
+
+
+	switch (currNode)
+	{
+	case 0:
+		yaw = 270.0f;
+		pos.x -= m_Speed;
+		break;
+	case 1:
+		yaw = 180.0f;
+		pos.z -= m_Speed;
+		break;
+	case 2:
+		yaw = 90.0f;
+		pos.x += m_Speed;
+		break;
+	case 3:
+		yaw = 0.0f;
+		pos.z += m_Speed;
+		break;
+	}
+	m_UpdateTurn = true;
+	float t = 0.3f; // 보간 시간 (조정 가능)
+	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
+	pos = interpolatedPos;
 }
 
 //======================================================================
@@ -1891,26 +1969,7 @@ void process_packet(char* packet)
 		temp.setAngleBOC(mapobj_packet->boc);
 		temp.setBB();
 		mapobjects_info.push_back(temp);
-		//cout << "====" << endl;
-		//cout << "새로운 맵 오브젝트" << endl;
-		//cout << "Center: " << temp.getPos().x << ", " << temp.getPos().y << ", " << temp.getPos().z << endl;
-		//cout << "Scale: " << temp.getScaleX() << ", " << temp.getScaleY() << ", " << temp.getScaleZ() << endl;
-		//cout << "LForward: " << temp.getLocalForward().x << ", " << temp.getLocalForward().y << ", " << temp.getLocalForward().z << endl;
-		//cout << "LRight: " << temp.getLocalRight().x << ", " << temp.getLocalRight().y << ", " << temp.getLocalRight().z << endl;
-		//cout << "LRotate: " << temp.getLocalRotate().x << ", " << temp.getLocalRotate().y << ", " << temp.getLocalRotate().z << endl;
-		//cout << "AOB: " << temp.getAngleAOB() << endl;
-		//cout << "BOC: " << temp.getAngleBOC() << endl;
-		//cout << "\n";
 	}
-	// SC_Obejct_HP
-
-	//npcsInfo[obj_id].SetHp() 해주면됨.
-	// HP가 0인 경우 리무브 패킷을 보낼거면 H_NPC_Check_HP, A_NPC_Check_HP에서 보내주면 될 듯?
-	// 애니메이션 클라에서 할거면 H_NPC_Death_motion, A_NPC_Death_motion가 필요 없으니, 지워도 됨.
-	// 해당 기록 확인하고 지워주세요.
-
-
-
 	}
 }
 
@@ -2170,9 +2229,9 @@ void MoveNPC()
 					//	cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
 					//}
 
-					/*if (npcsInfo[i].GetState() == NPC_ATTACK) {
+					if (npcsInfo[i].GetState() == NPC_ATTACK && npcsInfo[i].type == NPC_HELICOPTER) {
 						g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
-					}*/
+					}
 				}
 			}
 
