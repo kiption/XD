@@ -434,6 +434,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				if (!q_bullet_hit_pos_human.empty()) {
 					XMFLOAT3 human_hit_pos = q_bullet_hit_pos_human.front();
 					q_bullet_hit_pos_human.pop();
+					
 					cout << "사람: " << human_hit_pos.x << ", " << human_hit_pos.y << ", " << human_hit_pos.z << endl;
 				}
 

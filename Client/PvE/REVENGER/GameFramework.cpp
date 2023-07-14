@@ -1065,16 +1065,7 @@ void CGameFramework::AnimateObjects()
 		if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA)
 			m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera(CLOSEUP_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
 
-		if (((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->m_bActive == true)
-		{
 
-			((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->ParticlePosition =
-				XMFLOAT3(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().x,
-					((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().y + 8.0,
-					((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().z);
-
-			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
-		}
 		ShotDelay();
 	}
 }
@@ -1095,7 +1086,7 @@ void CGameFramework::ShotDelay()
 			m_pCamera->m_xmf4x4View._42 += 0.20f;
 			m_pCamera->m_xmf4x4View._43 += 0.75f;
 		}
-		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
+		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.7, 0.7, 0.7, 1.0);
 		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
 	}
 	if (ShotKey == true)
@@ -1109,8 +1100,7 @@ void CGameFramework::ShotDelay()
 			m_pCamera->m_xmf4x4View._43 -= 0.75f;
 		}
 		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
-		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
-
+		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
 	}
 }
 
@@ -1315,7 +1305,7 @@ void CGameFramework::FrameAdvance()
 			// 오른쪽 페이지
 			D2D_POINT_2F D2_RightPageUI = { FRAME_BUFFER_WIDTH / 2 + 26.0f, FRAME_BUFFER_HEIGHT / 2 + 315.0f };
 			D2D_RECT_F D2_RightPageUIRect = { 0.0f, 0.0f, 46.0f, 50.0f };
-			
+
 			if (!RightOn) m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[60], &D2_RightPageUI, &D2_RightPageUIRect);
 			else m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[61], &D2_RightPageUI, &D2_RightPageUIRect);
 
@@ -1797,7 +1787,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-}
+	}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -2994,6 +2984,25 @@ void CGameFramework::otherPlayerDyingMotion(int p_id)
 		}
 	}
 
+
+}
+
+void CGameFramework::SoldiarNpcHittingMotion(int p_id)
+{
+	if (m_nMode == SCENE1STAGE)
+	{
+		((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->m_bActive = true;
+
+		int indexnum = p_id;	// id = 5 ~ 24, Object인덱스 = 22 ~ 41
+		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType =
+			ANIMATION_TYPE_ONCE;
+		((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->HittingState(m_GameTimer.GetTimeElapsed());
+
+		((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->ParticlePosition =
+			XMFLOAT3(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().x,
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().y + 8.0,
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().z);
+	}
 
 }
 

@@ -360,10 +360,10 @@ public:
 	void otherPlayerSfrateMotion(int p_id);
 	void otherPlayerShootingMotion(int p_id);
 	void otherPlayerDyingMotion(int p_id);
+	void SoldiarNpcHittingMotion(int p_id);
 	bool m_bDamageOn = false;
 	float m_pPlayerRotate_z = 0.0f;
 	float m_pPlayerRotate_x = 0.0f;
-
 	// MYRoomUser
 	void setRoomUserInfo(int index, wchar_t* user_name, int user_state) {
 		m_MyRoom_Info[index].ready_state = user_state;
