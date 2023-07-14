@@ -1884,23 +1884,24 @@ void process_packet(char* packet)
 
 		MapObject temp;
 		temp.setPos(mapobj_packet->center_x, mapobj_packet->center_y, mapobj_packet->center_z);
-		temp.setScale(mapobj_packet->scale_x, mapobj_packet->scale_y, mapobj_packet->scale_z);
+		temp.setScale(mapobj_packet->scale_x / 2.0f, mapobj_packet->scale_y / 2.0f, mapobj_packet->scale_z / 2.0f);
 		temp.setLocalForward(XMFLOAT3{ mapobj_packet->forward_x, mapobj_packet->forward_y, mapobj_packet->forward_z });
 		temp.setLocalRight(XMFLOAT3{ mapobj_packet->right_x, mapobj_packet->right_y, mapobj_packet->right_z });
 		temp.setLocalRotate(XMFLOAT3{ mapobj_packet->rotate_x, mapobj_packet->rotate_y, mapobj_packet->rotate_z });
 		temp.setAngleAOB(mapobj_packet->aob);
 		temp.setAngleBOC(mapobj_packet->boc);
+		temp.setBB();
 		mapobjects_info.push_back(temp);
-		cout << "====" << endl;
-		cout << "새로운 맵 오브젝트" << endl;
-		cout << "Center: " << temp.getPos().x << ", " << temp.getPos().y << ", " << temp.getPos().z << endl;
-		cout << "Scale: " << temp.getScaleX() << ", " << temp.getScaleY() << ", " << temp.getScaleZ() << endl;
-		cout << "LForward: " << temp.getLocalForward().x << ", " << temp.getLocalForward().y << ", " << temp.getLocalForward().z << endl;
-		cout << "LRight: " << temp.getLocalRight().x << ", " << temp.getLocalRight().y << ", " << temp.getLocalRight().z << endl;
-		cout << "LRotate: " << temp.getLocalRotate().x << ", " << temp.getLocalRotate().y << ", " << temp.getLocalRotate().z << endl;
-		cout << "AOB: " << temp.getAngleAOB() << endl;
-		cout << "BOC: " << temp.getAngleBOC() << endl;
-		cout << "\n";
+		//cout << "====" << endl;
+		//cout << "새로운 맵 오브젝트" << endl;
+		//cout << "Center: " << temp.getPos().x << ", " << temp.getPos().y << ", " << temp.getPos().z << endl;
+		//cout << "Scale: " << temp.getScaleX() << ", " << temp.getScaleY() << ", " << temp.getScaleZ() << endl;
+		//cout << "LForward: " << temp.getLocalForward().x << ", " << temp.getLocalForward().y << ", " << temp.getLocalForward().z << endl;
+		//cout << "LRight: " << temp.getLocalRight().x << ", " << temp.getLocalRight().y << ", " << temp.getLocalRight().z << endl;
+		//cout << "LRotate: " << temp.getLocalRotate().x << ", " << temp.getLocalRotate().y << ", " << temp.getLocalRotate().z << endl;
+		//cout << "AOB: " << temp.getAngleAOB() << endl;
+		//cout << "BOC: " << temp.getAngleBOC() << endl;
+		//cout << "\n";
 	}
 	// SC_Obejct_HP
 
