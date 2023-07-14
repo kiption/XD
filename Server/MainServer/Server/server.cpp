@@ -131,7 +131,7 @@ public:
 	}
 	XMFLOAT3 getPos() { return XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()); }
 };
-vector<Building> buildings_info;	// Map Buildings CollideBox
+vector<Building> mapobj_info;	// Map Buildings CollideBox
 
 //======================================================================
 class OVER_EX {
@@ -221,7 +221,7 @@ public:
 
 		int ret = WSARecv(socket, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.overlapped, 0);
 		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "[Line: 143] WSARecv Error - " << GetLastError() << endl;
+			cout << "[Line: 224] WSARecv Error - " << GetLastError() << endl;
 		}
 	}
 
@@ -233,7 +233,7 @@ public:
 		//cout << "[do_send] Target ID: " << id << "\n" << endl;
 		int ret = WSASend(socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, 0);
 		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "[Line: 155] WSASend Error - " << GetLastError() << endl;
+			cout << "[Line: 236] WSASend Error - " << GetLastError() << endl;
 		}
 	}
 
@@ -865,7 +865,7 @@ void process_packet(int client_id, char* packet)
 		//====================
 		// 1. 맵 정보
 		// 새로 접속한 클라이언트에게 맵 정보를 보내줍니다.
-		for (auto& building : buildings_info) {
+		for (auto& building : mapobj_info) {
 			SC_MAP_OBJINFO_PACKET building_packet;
 			building_packet.type = SC_MAP_OBJINFO;
 			building_packet.size = sizeof(SC_MAP_OBJINFO_PACKET);
@@ -1126,7 +1126,7 @@ void process_packet(int client_id, char* packet)
 		int collide_id = -1;
 		float min_dist = FLT_MAX;
 
-		// 야매방법
+		// 야매방법 (추후에 반드시 레이캐스트로 바꿔야함!!!)
 		SESSION bullet;
 		bullet.pos = clients[client_id].pos;
 		bullet.m_rightvec = clients[client_id].m_rightvec;
@@ -1137,6 +1137,25 @@ void process_packet(int client_id, char* packet)
 
 		XMFLOAT3 bullet_initpos = bullet.pos;
 		while (XMF_Distance(bullet.pos, bullet_initpos) <= BULLET_RANGE) {
+			/*
+			XMFLOAT3 collide_pos = XMF_fault;
+			enum C_OBJ_TYPE { C_OBJ_NONCOLLIDE, C_OBJ_MAPOBJ, C_OBJ_NPC };
+			int collided_obj = C_OBJ_NONCOLLIDE;
+			// 1. 맵 지형(건물, 나무, 박스, 차, ...)과 검사
+			for (auto& mapobj : mapobj_info) {
+				// 거리가 너무 멀면 검사 X
+				if (XMF_Distance(bullet.pos, mapobj.getPos()) > BULLET_RANGE) continue;
+
+				if (bullet.m_xoobb.Intersects(mapobj.m_xoobb)) {
+					if ((collide_pos == XMF_fault) || (XMF_Distance(bullet.pos, mapobj.getPos()) < XMF_Distance(bullet.pos, collide_pos))) {
+						collide_pos = bullet.pos;
+						collided_obj = C_OBJ_MAPOBJ;
+						cout << "[총알 충돌계산중...] 총알 충돌정보 업데이트. (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+					}
+				}
+			}
+			*/
+			// 1. NPC랑 검사
 			for (auto& vl_key : clients[client_id].view_list) {
 				if (!(NPC_ID_START <= vl_key && vl_key <= NPC_ID_END)) continue;
 
@@ -1308,6 +1327,7 @@ void process_packet(int client_id, char* packet)
 					break;
 				}
 			}
+			
 			if (b_collide) break;
 
 			bullet.pos = XMF_Add(bullet.pos, XMF_MultiplyScalar(bullet.m_lookvec, 1.f));
@@ -1939,6 +1959,38 @@ void do_worker()
 				ex_over->wsabuf.buf = reinterpret_cast<CHAR*>(npc_socket);
 				int addr_size = sizeof(SOCKADDR_IN);
 				AcceptEx(g_npc_listensock, npc_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
+
+				// NPC서버에게 맵 정보를 보내줍니다.
+				for (auto& mapobj : mapobj_info) {
+					SC_MAP_OBJINFO_PACKET mapobj_packet;
+					mapobj_packet.type = SC_MAP_OBJINFO;
+					mapobj_packet.size = sizeof(SC_MAP_OBJINFO_PACKET);
+
+					mapobj_packet.center_x = mapobj.getPosX();
+					mapobj_packet.center_y = mapobj.getPosY();
+					mapobj_packet.center_z = mapobj.getPosZ();
+					
+					mapobj_packet.scale_x = mapobj.getScaleX();
+					mapobj_packet.scale_y = mapobj.getScaleY();
+					mapobj_packet.scale_z = mapobj.getScaleZ();
+					
+					mapobj_packet.forward_x = mapobj.getLocalForward().x;
+					mapobj_packet.forward_y = mapobj.getLocalForward().y;
+					mapobj_packet.forward_z = mapobj.getLocalForward().z;
+					
+					mapobj_packet.right_x = mapobj.getLocalRight().x;
+					mapobj_packet.right_y = mapobj.getLocalRight().y;
+					mapobj_packet.right_z = mapobj.getLocalRight().z;
+					
+					mapobj_packet.rotate_x = mapobj.getLocalRotate().x;
+					mapobj_packet.rotate_y = mapobj.getLocalRotate().y;
+					mapobj_packet.rotate_z = mapobj.getLocalRotate().z;
+					
+					mapobj_packet.aob = mapobj.getAngleAOB();
+					mapobj_packet.boc = mapobj.getAngleBOC();
+
+					npc_server.do_send(&mapobj_packet);
+				}
 			}
 			// 3. Ex_Server Accept
 			else if (key == CP_KEY_LISTEN_EXLOGIC) {
@@ -2635,8 +2687,8 @@ int main(int argc, char* argv[])
 							tmp_bulding.setAngleBOC(boc);
 							b_angle_boc = false;
 
-							// BOC가 건물정보의 마지막이므로 완성된 tmpbuilding 을 buildings_info에 추가
-							buildings_info.push_back(tmp_bulding);
+							// BOC가 건물정보의 마지막이므로 완성된 tmpbuilding 을 mapobj_info에 추가
+							mapobj_info.push_back(tmp_bulding);
 						}
 						continue;
 					}

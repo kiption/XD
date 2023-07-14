@@ -572,24 +572,6 @@ void networkThreadFunc()
 			short keyValue = gGameFramework.popInputVal_Keyboard();
 
 			switch (keyValue) {
-			case PACKET_KEY_NUM1:
-				if (gGameFramework.m_nMode == OPENINGSCENE) {
-					CS_INPUT_KEYBOARD_PACKET keyinput_pack;
-					keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
-					keyinput_pack.type = CS_INPUT_KEYBOARD;
-					keyinput_pack.keytype = keyValue;
-					sendPacket(&keyinput_pack);
-					break;
-				}
-			case PACKET_KEY_NUM2:
-				if (gGameFramework.m_nMode == SCENE1STAGE) {
-					CS_INPUT_KEYBOARD_PACKET keyinput_pack;
-					keyinput_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
-					keyinput_pack.type = CS_INPUT_KEYBOARD;
-					keyinput_pack.keytype = keyValue;
-					sendPacket(&keyinput_pack);
-					break;
-				}
 			case PACKET_KEY_W:
 				if (gGameFramework.m_nMode == OPENINGSCENE) break;
 

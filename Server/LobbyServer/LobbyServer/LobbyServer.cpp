@@ -554,6 +554,7 @@ void process_packet(int client_id, char* packet)
 				// 그 방에 있는 사람 모두에게 게임 시작 패킷을 보낸다.
 				for (int i = 0; i < MAX_USER; ++i) {
 					int member_id = room.users[i];
+					if (member_id == -1) continue;
 					if (clients[member_id].s_state != ST_INGAME) continue;
 
 					LBYC_GAME_START_PACKET gamestart_pack;
