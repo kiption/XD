@@ -339,17 +339,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						npcs_info[i].m_attack_on = false;
 					}
 
-					if (npcs_info[i].m_damaged_effect_on) {
-						// 여기서 피격 연출!
-						// 여기서 피격 연출!
-						// 여기서 피격 연출!
-						// 여기서 피격 연출!
-						// 여기서 피격 연출!
-						// 여기서 피격 연출!
-
-						npcs_info[i].m_damaged_effect_on = false;
-					}
-
 					//((Stage1*)gGameFramework.m_pScene)->m_pBillboardShader[3]->ParticlePosition = npcs_info[i].m_pos;
 				}
 
@@ -395,6 +384,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						case PL_ST_DEAD:
 							gGameFramework.otherPlayerDyingMotion(i);
 							break;
+						case PL_ST_DAMAGED:
+							break;
 						}
 
 						players_info[i].m_new_state_update = false;
@@ -420,6 +411,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						case PL_ST_DEAD:
 							//((Stage1*)gGameFramework.m_pScene)->m_ppShaders[0]->m_ppObjects[10 + i]->m_xmf4x4ToParent._42 = 0.0f;
 							gGameFramework.DyingMotionNPC(i);
+							break;
+						case PL_ST_DAMAGED:
+							// 여기서 피격 연출!!!
+							// 여기서 피격 연출!!!
+							// 여기서 피격 연출!!!
+							// 여기서 피격 연출!!!
+							// 여기서 피격 연출!!!
+							cout << "피격 연출!" << endl;
 							break;
 						}
 						npcs_info[i].m_new_state_update = false;

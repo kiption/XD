@@ -1205,12 +1205,12 @@ void process_packet(int client_id, char* packet)
 					int damage = static_cast<int>(BULLET_DAMAGE - dec_damage);
 
 					// 우선 맞아서 죽든 안죽든 피격 위치를 클라이언트에게 알려줍니다. (피터지는? 연출을 위함)
-					SC_DAMAGED_PACKET npc_damaged_pack;
-					npc_damaged_pack.size = sizeof(SC_DAMAGED_PACKET);
-					npc_damaged_pack.type = SC_DAMAGED;
+					SC_OBJECT_STATE_PACKET npc_damaged_pack;
+					npc_damaged_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
+					npc_damaged_pack.type = SC_OBJECT_STATE;
 					npc_damaged_pack.target = TARGET_NPC;
 					npc_damaged_pack.id = collided_npc_id;
-					npc_damaged_pack.damage = damage;
+					npc_damaged_pack.state = PL_ST_DAMAGED;
 					for (auto& cl : clients) {
 						if (cl.s_state != ST_INGAME) continue;
 						if (cl.curr_stage != clients[client_id].curr_stage) continue;

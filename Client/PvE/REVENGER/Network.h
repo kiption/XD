@@ -566,7 +566,9 @@ void processPacket(char* ptr)
 		}
 		// 2. Move Npc
 		else if (recv_packet->target == TARGET_NPC) {
+			npcs_info[recv_id].m_ingame_state = PL_ST_MOVE_FRONT;
 			npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
+			npcs_info[recv_id].m_new_state_update = true;
 		}
 		else {
 			cout << "[MOVE ERROR] Unknown Target!" << endl;
@@ -690,7 +692,6 @@ void processPacket(char* ptr)
 		// Player Damaged
 		if (recv_packet->target == TARGET_PLAYER) {
 			gamesound.collisionSound();
-			players_info[recv_id].m_damaged_effect_on = true;
 			players_info[recv_id].m_hp -= recv_packet->damage;
 			if (players_info[recv_id].m_hp < 0) players_info[recv_packet->id].m_hp = 0;
 
@@ -698,7 +699,6 @@ void processPacket(char* ptr)
 		// NPC Damaged
 		else if (recv_packet->target == TARGET_NPC) {
 			gamesound.collisionSound();
-			npcs_info[recv_id].m_damaged_effect_on = true;
 			npcs_info[recv_id].m_hp -= recv_packet->damage;
 			if (npcs_info[recv_id].m_hp < 0) npcs_info[recv_packet->id].m_hp = 0;
 		}
@@ -747,6 +747,9 @@ void processPacket(char* ptr)
 				players_info[recv_id].m_hp = 0;
 				players_info[recv_id].m_damaged_effect_on = true;
 				break;
+
+			case PL_ST_DAMAGED:
+				break;
 			}
 		}
 		else if (recvd_target == TARGET_NPC) {
@@ -763,8 +766,11 @@ void processPacket(char* ptr)
 				gamesound.collisionSound();
 
 				npcs_info[recv_id].m_hp = 0;
-				npcs_info[recv_id].m_damaged_effect_on = true;
 				cout << "NPC[" << recv_id << "] ав╬З╢ы" << endl;
+				break;
+
+			case PL_ST_DAMAGED:
+
 				break;
 			}
 		}

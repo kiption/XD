@@ -95,7 +95,7 @@ enum PacketID {
 };
 
 //======================================================================
-enum PLAYER_STATE { PL_ST_IDLE, PL_ST_MOVE_FRONT, PL_ST_MOVE_BACK, PL_ST_MOVE_SIDE, PL_ST_FLY, PL_ST_CHASE, PL_ST_ATTACK, PL_ST_DEAD };
+enum PLAYER_STATE { PL_ST_IDLE, PL_ST_MOVE_FRONT, PL_ST_MOVE_BACK, PL_ST_MOVE_SIDE, PL_ST_FLY, PL_ST_CHASE, PL_ST_ATTACK, PL_ST_DEAD, PL_ST_DAMAGED };
 
 //======================================================================
 enum ROOM_STATE { R_ST_WAIT, R_ST_FULL, R_ST_INGAME };
