@@ -1211,14 +1211,19 @@ void process_packet(int client_id, char* packet)
 
 					// 데미지 계산
 					float dec_damage = static_cast<float>(BULLET_DAMAGE);
-					if (collided_npc_id < MAX_NPC_HELI) {	// 헬기는 좀 덜 아프게 맞는다.
-						dec_damage = dec_damage / 10.f * 2.f;
-					}
 					if (XMF_Distance(npcs[collided_npc_id].pos, bullet_initpos) > 10) {	// 멀리 떨어질 수록 데미지가 조금씩 감소한다.
-						float dist = static_cast<int>(XMF_Distance(npcs[collided_npc_id].pos, collide_pos));
-						dec_damage = dec_damage / 100.f * dist * 10.f;
+						float dist = static_cast<int>(XMF_Distance(npcs[collided_npc_id].pos, bullet_initpos));
+						dec_damage = dec_damage / 100.f * (dist / 10);
 					}
+					if (collided_npc_id < MAX_NPC_HELI) {	// 헬기는 좀 덜 아프게 맞는다.
+						dec_damage = dec_damage * 2;
+					}
+					if (dec_damage >= BULLET_DAMAGE - 1) {
+						dec_damage = BULLET_DAMAGE - 1;
+					}
+					cout << "감소된 데미지: " << dec_damage << endl;
 					int damage = static_cast<int>(BULLET_DAMAGE - dec_damage);
+					cout << "최종 데미지: " << damage << endl;
 
 					// 우선 맞아서 죽든 안죽든 피격 위치를 클라이언트에게 알려줍니다. (피터지는? 연출을 위함)
 					SC_OBJECT_STATE_PACKET npc_damaged_pack;

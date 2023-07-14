@@ -647,8 +647,8 @@ void SERVER::send_npc_rotate_packet(int npc_id)
 	g_logicservers[a_lgcsvr_num].do_send(&npc_rotate_packet);
 
 	if (npc_id < 20 && npc_id > 17) {
-		cout << npc_id << "Rotate Packet Call" << endl;
-		cout << "===========================" << endl;
+		//cout << npc_id << "Rotate Packet Call" << endl;
+		//cout << "===========================" << endl;
 	}
 }
 void SERVER::send_npc_attack_packet(int npc_id)
@@ -2133,7 +2133,7 @@ void initNpc() {
 		npcsInfo[i].SetChaseID(-1);
 		npcsInfo[i].path.clear();
 		npcsInfo[i].SetTargetNodeIndex(-1);
-		npcsInfo[i].SetHp(500);
+		npcsInfo[i].SetHp(250);
 		g_logicservers[a_lgcsvr_num].send_npc_init_packet(npc_id);
 	}
 
@@ -2169,7 +2169,7 @@ void initNpc() {
 			npcsInfo[i].SetChaseID(-1);
 			npcsInfo[i].path.clear();
 			npcsInfo[i].SetTargetNodeIndex(-1);
-			npcsInfo[i].SetHp(250);
+			npcsInfo[i].SetHp(100);
 			g_logicservers[a_lgcsvr_num].send_npc_init_packet(npc_id);
 		}
 	}
