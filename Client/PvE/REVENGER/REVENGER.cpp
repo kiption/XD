@@ -398,13 +398,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 					if (npcs_info[i].m_new_state_update) {
 						switch (npcs_info[i].m_ingame_state) {
-						case PL_ST_IDLE:
 						case PL_ST_MOVE_FRONT: // 앞으로 이동
-						case PL_ST_MOVE_BACK: // 뒤로 이동
-						case PL_ST_MOVE_SIDE: // 옆으로 이동
 							if (i >= 5) {
 								gGameFramework.MoveMotionNPC(i);
 							}
+							break;
+						case PL_ST_IDLE:
+						case PL_ST_MOVE_BACK: // 뒤로 이동
+						case PL_ST_MOVE_SIDE: // 옆으로 이동
 							break;
 						case PL_ST_ATTACK:
 							break;
@@ -413,12 +414,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							gGameFramework.DyingMotionNPC(i);
 							break;
 						case PL_ST_DAMAGED:
-							// 여기서 피격 연출!!!
-							// 여기서 피격 연출!!!
-							// 여기서 피격 연출!!!
-							// 여기서 피격 연출!!!
-							// 여기서 피격 연출!!!
-							cout << "피격 연출!" << endl;
+							gGameFramework.SoldiarNpcHittingMotion(i);
 							break;
 						}
 						npcs_info[i].m_new_state_update = false;

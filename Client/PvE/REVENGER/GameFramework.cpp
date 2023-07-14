@@ -2986,22 +2986,28 @@ void CGameFramework::otherPlayerDyingMotion(int p_id)
 
 
 }
-
+bool Hitting = false;
 void CGameFramework::SoldiarNpcHittingMotion(int p_id)
 {
 	if (m_nMode == SCENE1STAGE)
 	{
+		Hitting = true;
+		int indexnum = p_id - 5;	// id = 5 ~ 24, Object인덱스 = 22 ~ 41
+		if (p_id >= 5) {	// 사람
+			if (((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]))
+			{
+
+				((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_LOOP;
+				((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
+			}
+		}
 		((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->m_bActive = true;
-
-		int indexnum = p_id;	// id = 5 ~ 24, Object인덱스 = 22 ~ 41
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType =
-			ANIMATION_TYPE_ONCE;
-		((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->HittingState(m_GameTimer.GetTimeElapsed());
-
 		((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->ParticlePosition =
-			XMFLOAT3(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().x,
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().y + 8.0,
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42]->GetPosition().z);
+			XMFLOAT3(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->GetPosition().x,
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->GetPosition().y + 8.0,
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->GetPosition().z);
+
+
 	}
 
 }
@@ -3051,6 +3057,7 @@ void CGameFramework::MoveMotionNPC(int id)
 			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_LOOP;
 			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
 		}
+
 	}
 
 }
