@@ -824,7 +824,7 @@ CGameObject::~CGameObject()
 		{
 			if (m_ppMaterials[i]) m_ppMaterials[i]->Release();
 		}
-		 delete[] m_ppMaterials;
+		delete[] m_ppMaterials;
 	}
 	if (m_pMaterials) m_pMaterials->Release();
 	if (m_pSkinnedAnimationController) delete m_pSkinnedAnimationController;
@@ -1400,7 +1400,7 @@ void CGameObject::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 					if (nMeshType & VERTEXT_BONE_INDEX_WEIGHT)
 					{
 						pMaterial->SetSkinnedAnimationShader();
-						
+
 
 					}
 					else
@@ -1765,7 +1765,7 @@ void CNpcHelicopterObject::Animate(float fTimeElapsed)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "MissileObject.h"
-CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,  CGameObject* pmodel, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(10)
+CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pmodel, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(10)
 {
 	/*SetChild(pmodel, false);
 	pmodel->AddRef();*/
@@ -1780,48 +1780,122 @@ CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 CHelicopterObjects::~CHelicopterObjects()
 {
-	
+
 }
 
 void CHelicopterObjects::Firevalkan(XMFLOAT3 ToPlayerLook)
 {
-	
+
 }
 
 void CHelicopterObjects::OnPrepareAnimate()
 {
 	CGameObject::OnPrepareAnimate();
-	m_pTailRotor2Frame = FindFrame("NULL");
+	m_pFrameFragObj1 = FindFrame("glass");
+	m_pFrameFragObj2 = FindFrame("cleanser");
+	m_pFrameFragObj3 = FindFrame("left_tyre");
+	m_pFrameFragObj5 = FindFrame("helicopter");
+	m_pFrameFragObj4 = FindFrame("cleanser_1");
+	m_pFrameFragObj6 = FindFrame("right_door");
+	m_pFrameFragObj7 = FindFrame("back_door");
+	m_pFrameFragObj8 = FindFrame("left_door");
+	m_pFrameFragObj9 = FindFrame("right_tyre");
+	m_pFrameFragObj10 = FindFrame("back_tyre");
+
 
 	m_pTailRotorFrame = FindFrame("rescue_2");
 	m_pMainRotorFrame = FindFrame("rescue_1");
+
+
+	/*glass,,right_door,,left_tyre,helicopter,,cleanser,,back_door
+	* ,Military_Helicopter
+	*
+	* left_door,right_tyre,cleanser_1,back_tyre
+	*/
 }
 
 void CHelicopterObjects::Animate(float fTimeElapsed)
 {
+	XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 8.2) * fTimeElapsed);
+	
 	if (m_pMainRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 8.2) * fTimeElapsed);
 		m_pMainRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4ToParent);
 	}
 	if (m_pTailRotorFrame)
 	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 8.2) * fTimeElapsed);
 		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
 	}
-
+	
 
 	if (m_bDyingstate == true) {
-		//m_bDyingMotion = true;
-		SetScale(0, 0, 0);
-	}
-	//if (m_bDyingMotion == true)
-	//{
-	//	Rotate(0, 10, 10);
-	//	m_xmf4x4ToParent._42 -= 0.0001f;
-	//	
-	//}
+		m_bDyingMotion = true;
 
+	}
+	if (m_bDyingMotion == true)
+	{
+		/*while(m_xmf4x4ToParent._42<-0.5) */FallDown(fTimeElapsed);
+	}
+
+	CGameObject::Animate(fTimeElapsed);
+}
+inline float RandomValue(float fMin, float fMax)
+{
+	return(fMin + ((float)rand() / (float)RAND_MAX) * (fMax - fMin));
+}
+XMVECTOR RandomScatter()
+{
+	XMVECTOR xmvOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
+	XMVECTOR xmvZero = XMVectorZero();
+
+	while (true)
+	{
+		XMVECTOR v = XMVectorSet(RandomValue(-1.0f, 1.0f), RandomValue(-3.0f, 3.0f), RandomValue(-1.0f, 1.0f), 0.5f);
+		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
+	}
+}
+void CHelicopterObjects::FallDown(float fTimeElapsed)
+{
+	m_pTailRotorFrame->m_xmf4x4ToParent._41 += RandomValue(5.0, 8.0) * fTimeElapsed;
+	m_pMainRotorFrame->m_xmf4x4ToParent._41 -= RandomValue(5.0, 8.0) * fTimeElapsed;
+	m_pFrameFragObj1->m_xmf4x4ToParent._41 += RandomValue(5.0, 8.0) * fTimeElapsed;
+	m_pFrameFragObj2->m_xmf4x4ToParent._41 -= RandomValue(5.0, 4.0) * fTimeElapsed;
+	m_pFrameFragObj3->m_xmf4x4ToParent._43 += RandomValue(5.0, 8.0) * fTimeElapsed;
+	m_pFrameFragObj4->m_xmf4x4ToParent._41 -= RandomValue(5.0, 8.0) * fTimeElapsed;
+	m_pFrameFragObj5->m_xmf4x4ToParent._43 += RandomValue(5.0, 8.0) * fTimeElapsed;
+	m_pFrameFragObj6->m_xmf4x4ToParent._41 -= RandomValue(5.0, 4.0) * fTimeElapsed;
+	m_pFrameFragObj7->m_xmf4x4ToParent._41 -= RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pFrameFragObj8->m_xmf4x4ToParent._43 += RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pFrameFragObj9->m_xmf4x4ToParent._41 -= RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pFrameFragObj10->m_xmf4x4ToParent._41 += RandomValue(5.0, 6.0) * fTimeElapsed;
+
+
+
+	m_pTailRotorFrame->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pMainRotorFrame->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pFrameFragObj1->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pFrameFragObj2->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pFrameFragObj3->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pFrameFragObj4->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pFrameFragObj5->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pFrameFragObj6->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pFrameFragObj7->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pFrameFragObj8->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pFrameFragObj9->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pFrameFragObj10->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
+	XMMATRIX xmmtxRotateSub = XMMatrixRotationY(XMConvertToRadians(360.0f * 0.2) * fTimeElapsed);
+	m_pFrameFragObj1->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj1->m_xmf4x4ToParent);
+	m_pFrameFragObj2->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj2->m_xmf4x4ToParent);
+	m_pFrameFragObj3->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj3->m_xmf4x4ToParent);
+	m_pFrameFragObj4->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj4->m_xmf4x4ToParent);
+	//m_pFrameFragObj5->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pFrameFragObj5->m_xmf4x4ToParent);
+	m_pFrameFragObj6->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj6->m_xmf4x4ToParent);
+	m_pFrameFragObj7->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj7->m_xmf4x4ToParent);
+	m_pFrameFragObj8->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj8->m_xmf4x4ToParent);
+	m_pFrameFragObj9->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj9->m_xmf4x4ToParent);
+	m_pFrameFragObj10->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj10->m_xmf4x4ToParent);
+
+	Rotate(5, 5, 5);
 	CGameObject::Animate(fTimeElapsed);
 }
 
@@ -1829,7 +1903,7 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 void CHelicopterObjects::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	CGameObject::Render(pd3dCommandList, pCamera);
-	
+
 
 }
 
@@ -1860,7 +1934,7 @@ CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 CSoldiarNpcObjects::~CSoldiarNpcObjects()
 {
-	
+
 }
 
 void CSoldiarNpcObjects::MoveForward(float EleapsedTime)
@@ -1870,6 +1944,7 @@ void CSoldiarNpcObjects::MoveForward(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(1, true);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
 
 
@@ -1883,6 +1958,7 @@ void CSoldiarNpcObjects::HittingState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	m_pSkinnedAnimationController->SetTrackEnable(3, true);
+	m_pSkinnedAnimationController->SetTrackEnable(4, true);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	CGameObject::Animate(EleapsedTime);
 }
@@ -1925,6 +2001,7 @@ void CSoldiarNpcObjects::ShotState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_pSkinnedAnimationController->SetTrackEnable(2, true);
 	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	CGameObject::Animate(EleapsedTime);
 }
@@ -1935,6 +2012,7 @@ void CSoldiarNpcObjects::IdleState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	m_pSkinnedAnimationController->SetTrackEnable(3, false);
+	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 
 	CGameObject::Animate(EleapsedTime);
@@ -1942,16 +2020,10 @@ void CSoldiarNpcObjects::IdleState(float EleapsedTime)
 
 void CSoldiarNpcObjects::Animate(float fTimeElapsed)
 {
-	//MoveForward(fTimeElapsed);
 	CGameObject::Animate(fTimeElapsed);
 }
 
-void CSoldiarNpcObjects::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-{
-	CGameObject::Render(pd3dCommandList, pCamera);
-	if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
-	for (int i = 0; i < HUMANBULLETS; i++)if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
-}
+
 
 void CSoldiarNpcObjects::Firevalkan(XMFLOAT3 ToPlayerLook)
 {

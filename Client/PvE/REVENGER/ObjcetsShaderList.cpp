@@ -203,9 +203,6 @@ XMVECTOR RandomMarkDir()
 
 void CFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-
-
 	m_nObjects = EXPLOSION_DEBRISES;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	CGameObject* pFragmentModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Sphere.bin", this);
@@ -213,7 +210,7 @@ void CFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	{
 		m_ppObjects[i] = new CExplosiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pFragmentModel, false);
-		m_ppObjects[i]->SetScale(50.0, 50.0, 50.0);
+		m_ppObjects[i]->SetScale(20.0, 20.0, 20.0);
 		m_ppObjects[i]->SetPosition(0.0, 500.0, 0.0);
 		pFragmentModel->AddRef();
 		ParticlePosition = m_ppObjects[i]->GetPosition();
@@ -233,14 +230,17 @@ void CFragmentsShader::ReleaseObjects()
 
 void CFragmentsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CShader::Render(pd3dCommandList, pCamera, 0, false);
-
-	for (int j = 0; j < m_nObjects; j++)
+	if (m_bActive == true)
 	{
-		if (m_ppObjects[j])
+		CShader::Render(pd3dCommandList, pCamera, 0, false);
+
+		for (int j = 0; j < m_nObjects; j++)
 		{
-			m_ppObjects[j]->UpdateTransform(NULL);
-			m_ppObjects[j]->Render(pd3dCommandList, pCamera, false);
+			if (m_ppObjects[j])
+			{
+				m_ppObjects[j]->UpdateTransform(NULL);
+				m_ppObjects[j]->Render(pd3dCommandList, pCamera, false);
+			}
 		}
 	}
 

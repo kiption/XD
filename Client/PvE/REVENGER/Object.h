@@ -597,7 +597,17 @@ public:
 private:
 	CGameObject					*m_pMainRotorFrame = NULL;
 	CGameObject					*m_pTailRotorFrame = NULL;
-	CGameObject					*m_pTailRotor2Frame = NULL;
+	CGameObject					*m_pFrameFragObj1 = NULL;
+	CGameObject					*m_pFrameFragObj2 = NULL;
+	CGameObject					*m_pFrameFragObj3 = NULL;
+	CGameObject					*m_pFrameFragObj4 = NULL;
+	CGameObject					*m_pFrameFragObj5 = NULL;
+	CGameObject					*m_pFrameFragObj6 = NULL;
+	CGameObject					*m_pFrameFragObj7 = NULL;
+	CGameObject					*m_pFrameFragObj8 = NULL;
+	CGameObject					*m_pFrameFragObj9 = NULL;
+	CGameObject					*m_pFrameFragObj10 = NULL;
+	CGameObject					*m_pFrameFragObj11 = NULL;
 	CCamera* m_pCamera = NULL;
 public:
 	float m_fBulletEffectiveRange = 2000.0f;
@@ -608,6 +618,7 @@ public:
 public:
 	virtual void OnPrepareAnimate();
 	virtual void Animate(float fTimeElapsed);
+	virtual void FallDown(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 public:
 	bool m_bDyingstate = false;
@@ -642,7 +653,7 @@ public:
 	void ShotState(float EleapsedTime);
 	void IdleState(float EleapsedTime);
 	virtual void Animate(float fTimeElapsed);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+	
 
 public:
 	float m_fBulletEffectiveRange = 2000.0f;

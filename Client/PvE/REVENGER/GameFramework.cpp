@@ -207,7 +207,7 @@ void CGameFramework::CreateSwapChain()
 		MessageBox(NULL, L"Swap Chain Cannot be Created.", L"Error", MB_OK);
 		::PostQuitMessage(0);
 		return;
-}
+	}
 	hResult = m_pdxgiFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 
@@ -282,7 +282,7 @@ void CGameFramework::CreateDirect3DDevice()
 	m_d3dViewport.MaxDepth = 1.0f;
 
 	m_d3dScissorRect = { 0, 0, m_nWndClientWidth, m_nWndClientHeight };
-	}
+}
 
 void CGameFramework::CreateCommandQueueAndList()
 {
@@ -1029,19 +1029,24 @@ void CGameFramework::AnimateObjects()
 
 	if (m_nMode == OPENINGSCENE)
 	{
-		//if (m_pScene) m_pScene->AnimateObjects(m_pCamera, m_GameTimer.GetTimeElapsed());
 		if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
 	}
 	if (m_nMode == SCENE1STAGE)
 	{
-		//if (m_pScene) m_pScene->AnimateObjects(m_pCamera, m_GameTimer.GetTimeElapsed());
+		for (int i = 12; i < 16; i++)
+		{
+			if (((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[i])->m_bDyingstate == true && i)
+			{
+				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[i])->FallDown(m_GameTimer.GetTimeElapsed());
+			}
+		}
 		if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed());
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 
 		if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA)
 			m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera(CLOSEUP_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
-		//if (m_nMode == SCENE1STAGE) m_pPlayer->UpdateBoundingBox();
+
 		if (((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->m_bActive == true)
 		{
 
@@ -1052,38 +1057,42 @@ void CGameFramework::AnimateObjects()
 
 			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[42])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 		}
-		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay += m_GameTimer.GetTimeElapsed();
-		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay > 0.2)
+		ShotDelay();
+	}
+}
+void CGameFramework::ShotDelay()
+{
+	((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay += m_GameTimer.GetTimeElapsed();
+	if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay > 0.2)
+	{
+		ShotKey = false;
+		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay = 0.0f;
+	}
+	if (ShotKey == false)
+	{
+		m_pCamera->m_xmf4x4View._43 += 0.1f;
+		((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
+		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
 		{
-			ShotKey = false;
-			((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay = 0.0f;
+			m_pCamera->m_xmf4x4View._42 += 0.20f;
+			m_pCamera->m_xmf4x4View._43 += 0.75f;
 		}
-		if (ShotKey == false)
+		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
+		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
+	}
+	if (ShotKey == true)
+	{
+		((CHumanPlayer*)m_pScene->m_pPlayer)->Rotate(-0.07, 0.0, 0.0);
+		m_pCamera->m_xmf4x4View._43 -= 0.07f;
+		((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = true;
+		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
 		{
-			m_pCamera->m_xmf4x4View._43 += 0.1f;
-			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
-			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
-			{
-				m_pCamera->m_xmf4x4View._42 += 0.20f;
-				m_pCamera->m_xmf4x4View._43 += 0.75f;
-			}
-			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
-			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
+			m_pCamera->m_xmf4x4View._42 -= 0.20f;
+			m_pCamera->m_xmf4x4View._43 -= 0.75f;
 		}
-		if (ShotKey == true)
-		{
-			((CHumanPlayer*)m_pScene->m_pPlayer)->Rotate(-0.07, 0.0, 0.0);
-			m_pCamera->m_xmf4x4View._43 -= 0.07f;
-			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = true;
-			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
-			{
-				m_pCamera->m_xmf4x4View._42 -= 0.20f;
-				m_pCamera->m_xmf4x4View._43 -= 0.75f;
-			}
-			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
-			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
+		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
+		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
 
-		}
 	}
 }
 
@@ -1135,7 +1144,7 @@ float g_reverse_time = 0.0f;
 void CGameFramework::FrameAdvance()
 {
 
-	m_GameTimer.Tick();
+	m_GameTimer.Tick(60);
 	AnimateObjects();
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
@@ -1169,8 +1178,8 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
 	if (m_nMode == SCENE1STAGE)
-			if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, NULL, m_pCamera);
-	
+		if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, NULL, m_pCamera);
+
 	// Stage2
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -1601,7 +1610,7 @@ void CGameFramework::FrameAdvance()
 #endif
 
 	MoveToNextFrame();
-	
+
 	if (m_nMode == SCENE1STAGE)
 	{
 		m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
@@ -1610,7 +1619,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-	}
+}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -1676,6 +1685,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 	}
 }
 
+
 #ifdef _WITH_DIRECT2D
 void CGameFramework::CreateDirect2DDevice()
 {
@@ -1713,7 +1723,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-	}
+}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -2827,6 +2837,8 @@ void CGameFramework::DyingMotionNPC(int id)
 		//((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetScale(0.0, 0.0, 0.0);
 		//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->Rotate(0.0, 10.0, 10.0);
 		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->m_bDyingstate = true;
+		//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->FallDown(m_GameTimer.GetTimeElapsed());
+
 	}
 	else {		// 사람
 		int indexnum = id - 5;	// id = 5 ~ 24, Object인덱스 = 22 ~ 41

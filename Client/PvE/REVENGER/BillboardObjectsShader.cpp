@@ -472,8 +472,8 @@ void MuzzleFrameBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, CC
 		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
 		XMFLOAT3 xmf3Position = Vector3::Add(Position, Vector3::ScalarProduct(CameraLook, 4.0f, false));
-		xmf3Position.y += 0.4f;
-		xmf3Position.x -= 0.02f;
+		xmf3Position.y += 0.35f;
+		xmf3Position.x -= 0.00f;
 		for (int j = 0; j < m_nObjects; j++)
 		{
 
@@ -669,7 +669,7 @@ D3D12_SHADER_BYTECODE BloodHittingBillboard::CreateVertexShader(ID3DBlob** ppd3d
 void BloodHittingBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/blood.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/BloodTransparent40.dds", RESOURCE_TEXTURE2D, 0);
 	CMaterial* pSpriteMaterial = new CMaterial(1);
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 	CTexturedRectMesh* pSpriteMesh;
@@ -699,31 +699,34 @@ void BloodHittingBillboard::ReleaseObjects()
 
 void BloodHittingBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CPlayer* pPlayer = pCamera->GetPlayer();
-	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
-	XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
-	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
-	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 0.0f, false));
-
-	for (int j = 0; j < m_nObjects; j++)
+	if (m_bActive == true)
 	{
-		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0, 0.0f));
+		CPlayer* pPlayer = pCamera->GetPlayer();
+		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
+		XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
+		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
+		XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 0.0f, false));
+
+		for (int j = 0; j < m_nObjects; j++)
+		{
+			if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0, 0.0f));
+		}
+		BillboardShader::Render(pd3dCommandList, pCamera, 0);
 	}
-	BillboardShader::Render(pd3dCommandList, pCamera, 0);
 }
 
 void BloodHittingBillboard::AnimateObjects(float fTimeElapsed)
 {
 	if (m_bActive == true)
 	{
-		XMFLOAT3 gravity = XMFLOAT3(-8.8f, 9.8f, 0);
-		m_fElapsedTimes += fTimeElapsed * 7.0f;
+		XMFLOAT3 gravity = XMFLOAT3(-9.8f, 6.8f, 0);
+		m_fElapsedTimes += fTimeElapsed * 6.0f;
 		if (m_fElapsedTimes <= m_fDuration)
 		{
 			for (int i = 0; i < m_nObjects; i++)
 			{
-				gravity = XMFLOAT3(-9.8f, 9.8f, 0);
-				m_fExplosionSpeed = +RandomBillboard(3.0f, 8.1f);
+	
+				m_fExplosionSpeed = +RandomBillboard(3.0f, 4.1f);
 
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
 				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.x * m_fElapsedTimes * m_fElapsedTimes;;
@@ -938,7 +941,7 @@ void HeliHittingMarkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	CMaterial* pSpriteMaterial = new CMaterial(1);
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.4f, 0.0f, 0.0f, 0.0f, 0.0f);
 	m_nObjects = HITTINGMARKS;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -990,7 +993,7 @@ void HeliHittingMarkBillboard::AnimateObjects(float fTimeElapsed)
 			for (int i = 0; i < m_nObjects; i++)
 			{
 				gravity = XMFLOAT3(0.0f, 9.8f, 0);
-				m_fExplosionSpeed = +RandomBillboard(3.0f, 5.1f);
+				m_fExplosionSpeed = +RandomBillboard(3.0f, 8.1f);
 
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
 				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes;
