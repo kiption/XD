@@ -920,7 +920,8 @@ void processPacket(char* ptr)
 
 		short recv_id = recv_packet->n_id;
 		npcs_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-
+		npcs_info[recv_id].m_ingame_state = PL_ST_MOVE_FRONT;
+		npcs_info[recv_id].m_new_state_update = true;
 		break;
 	}
 	case NPC_ROTATE:
