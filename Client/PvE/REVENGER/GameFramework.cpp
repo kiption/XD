@@ -65,20 +65,15 @@ CGameFramework::CGameFramework()
 	loginpos[3].lx = 702.0f;
 	loginpos[3].ly = 1006.0f;
 
-	gamepos[0].sx = 397.0f;
-	gamepos[0].sy = 730.0f;
-	gamepos[0].lx = 541.0f;
-	gamepos[0].ly = 782.0f;
+	gamepos[0].sx = 107.0f;
+	gamepos[0].sy = 705.0f;
+	gamepos[0].lx = 280.0f;
+	gamepos[0].ly = 775.0f;
 
-	gamepos[1].sx = 397.0f;
-	gamepos[1].sy = 830.0f;
-	gamepos[1].lx = 470.0f;
-	gamepos[1].ly = 882.0f;
-
-	gamepos[2].sx = 397.0f;
-	gamepos[2].sy = 927.0f;
-	gamepos[2].lx = 541.0f;
-	gamepos[2].ly = 972.0f;
+	gamepos[1].sx = 107.0f;
+	gamepos[1].sy = 840.0f;
+	gamepos[1].lx = 280.0f;
+	gamepos[1].ly = 910.0f;
 
 	lobbypos[0].sx = 1004.0f;
 	lobbypos[0].sy = 215.0f;
@@ -212,7 +207,7 @@ void CGameFramework::CreateSwapChain()
 		MessageBox(NULL, L"Swap Chain Cannot be Created.", L"Error", MB_OK);
 		::PostQuitMessage(0);
 		return;
-	}
+}
 	hResult = m_pdxgiFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 
@@ -287,7 +282,7 @@ void CGameFramework::CreateDirect3DDevice()
 	m_d3dViewport.MaxDepth = 1.0f;
 
 	m_d3dScissorRect = { 0, 0, m_nWndClientWidth, m_nWndClientHeight };
-}
+	}
 
 void CGameFramework::CreateCommandQueueAndList()
 {
@@ -431,7 +426,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	case WM_LBUTTONUP:
 	{
 		if (m_nMode == OPENINGSCENE) {
-			//cout << "x: " << m_ptOldCursorPos.x << ", y: " << m_ptOldCursorPos.y << endl;
+			cout << "x: " << m_ptOldCursorPos.x << ", y: " << m_ptOldCursorPos.y << endl;
 			switch (m_LoginScene)
 			{
 			case LS_LOGIN: // 로그인 클릭 창
@@ -467,11 +462,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				}
 				else if (gamepos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < gamepos[1].lx && gamepos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < gamepos[1].ly) {
 					memset(m_GameClick, 0, sizeof(m_GameClick));
-					m_GameClick[1] = true; // 설정 클릭
-				}
-				else if (gamepos[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < gamepos[2].lx && gamepos[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < gamepos[2].ly) {
-					memset(m_GameClick, 0, sizeof(m_GameClick));
-					m_GameClick[2] = true; // 종료 클릭 --> 종료되는 프로그램 넣어야 함.
+					m_GameClick[1] = true; // 종료 클릭 --> 종료되는 프로그램 넣어야 함.
 				}
 				else {
 					memset(m_GameClick, 0, sizeof(m_GameClick));
@@ -998,7 +989,7 @@ void CGameFramework::ProcessInput()
 									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2PlayerVector), XMLoadFloat3(&normalizedLocalRight));
 									XMStoreFloat3(&PlayerMoveDir, AddVector);
 								}
-								else {									
+								else {
 									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2PlayerVector), XMLoadFloat3(&normalizedLocalRight));
 									XMStoreFloat3(&PlayerMoveDir, AddVector);
 								}
@@ -1203,18 +1194,42 @@ void CGameFramework::FrameAdvance()
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	if (m_nMode == OPENINGSCENE) {
-		// Opening
+		// Logo
 		D2D_POINT_2F D2_OpeningUI = { FRAME_BUFFER_WIDTH / 6, 0.0f };
 		D2D_RECT_F D2_OpeningUIRect = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
-		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[25], &D2_OpeningUI, &D2_OpeningUIRect);
+		//m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[25], &D2_OpeningUI, &D2_OpeningUIRect);
+		// -> logo 받으면 재삽입
 
-		if (!m_LoginClick[3] && m_LoginScene == 0) {
+		if (m_LoginScene == 0) {
 			D2D_POINT_2F D2_LoginUI = { D2_OpeningUI.x + 12.0f, FRAME_BUFFER_HEIGHT / 16 * 9 };
 			D2D_RECT_F D2_LoginUIRect = { 0.0f, 0.0f, 381.0f, 388.0f };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[26], &D2_LoginUI, &D2_LoginUIRect);
 		}
+		else if (m_LoginScene == 1) {
+			POINT CurrMousePoint;
+			GetCursorPos(&CurrMousePoint);
 
-		if (m_LoginScene > 1) {
+			bool StartOn = false;
+			bool ExitOn = false;
+
+			if (gamepos[0].sx < CurrMousePoint.x && CurrMousePoint.x < gamepos[0].lx && gamepos[0].sy < CurrMousePoint.y && CurrMousePoint.y < gamepos[0].ly) {
+				ExitOn = false;
+				StartOn = true;
+			}
+			else if (gamepos[1].sx < CurrMousePoint.x && CurrMousePoint.x < gamepos[1].lx && gamepos[1].sy < CurrMousePoint.y && CurrMousePoint.y < gamepos[1].ly) {
+				ExitOn = true;
+				StartOn = false;
+			}
+
+			D2D_POINT_2F D2_GameStartUI = { 100.0f, FRAME_BUFFER_HEIGHT / 8 * 5 };
+			D2D_RECT_F D2_GameStartUIRect = { 0.0f, 70.0f * StartOn, 171.0f, 70.0f * (StartOn + 1) };
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[54], &D2_GameStartUI, &D2_GameStartUIRect);
+
+			D2D_POINT_2F D2_GameExitUI = { 100.0f, FRAME_BUFFER_HEIGHT / 4 * 3 };
+			D2D_RECT_F D2_GameExitUIRect = { 0.0f, 70.0f * ExitOn, 171.0f, 70.0f * (ExitOn + 1) };
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[55], &D2_GameExitUI, &D2_GameExitUIRect);
+		}
+		else {
 			// 로비 ui
 			D2D_POINT_2F D2_RobbyUI = { D2_OpeningUI.x - 5.0f, FRAME_BUFFER_HEIGHT / 8 };
 			D2D_RECT_F D2_RobbyUIRect = { 0.0f, 0.0f, 1280.0f, 698.0f };
@@ -1595,7 +1610,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-}
+	}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -2453,6 +2468,42 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[53]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
 	m_pd2dfxEdgeDetection[53]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[53]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// Game Start Button
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/GameLoginAfterStartUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[54]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[54]->SetInputEffect(0, m_pd2dfxBitmapSource[54]);
+	m_pd2dfxGaussianBlur[54]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[54]->SetInputEffect(0, m_pd2dfxBitmapSource[54]);
+	m_pd2dfxEdgeDetection[54]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[54]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[54]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[54]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[54]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// Game Exit Button
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/GameLoginAfterExitUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[55]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[55]->SetInputEffect(0, m_pd2dfxBitmapSource[55]);
+	m_pd2dfxGaussianBlur[55]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[55]->SetInputEffect(0, m_pd2dfxBitmapSource[55]);
+	m_pd2dfxEdgeDetection[55]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[55]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[55]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[55]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[55]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
