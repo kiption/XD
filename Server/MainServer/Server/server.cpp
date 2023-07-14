@@ -1188,6 +1188,22 @@ void process_packet(int client_id, char* packet)
 				switch (collided_obj) {
 				case C_OBJ_MAPOBJ:
 					cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+
+					SC_BULLET_COLLIDE_POS_PACKET map_collide_pack;
+					map_collide_pack.size = sizeof(SC_BULLET_COLLIDE_POS_PACKET);
+					map_collide_pack.type = SC_BULLET_COLLIDE_POS;
+					map_collide_pack.attacker = TARGET_PLAYER;
+					map_collide_pack.collide_target = C_OBJ_MAPOBJ;
+					map_collide_pack.x = collide_pos.x;
+					map_collide_pack.y = collide_pos.y;
+					map_collide_pack.z = collide_pos.z;
+					for (auto& cl : clients) {
+						if (cl.s_state != ST_INGAME) continue;
+						if (cl.curr_stage != clients[client_id].curr_stage) continue;
+						lock_guard<mutex> lg{ cl.s_lock };
+						cl.do_send(&map_collide_pack);
+					}
+
 					break;
 
 				case C_OBJ_NPC:

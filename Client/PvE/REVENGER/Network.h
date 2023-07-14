@@ -811,6 +811,7 @@ void processPacket(char* ptr)
 		XMFLOAT3 collide_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 		switch (recv_packet->collide_target) {
 		case C_OBJ_MAPOBJ:
+			q_bullet_hit_pos_mapobj.push(XMFLOAT3{ recv_packet->x, recv_packet->y, recv_packet->z });
 			break;
 		case C_OBJ_GROUND:
 			break;
