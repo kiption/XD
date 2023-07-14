@@ -75,20 +75,30 @@ CGameFramework::CGameFramework()
 	gamepos[1].lx = 280.0f;
 	gamepos[1].ly = 910.0f;
 
-	lobbypos[0].sx = 1004.0f;
-	lobbypos[0].sy = 215.0f;
-	lobbypos[0].lx = 1232.0f;
-	lobbypos[0].ly = 291.0f;
+	lobbypos[0].sx = 1015.0f;
+	lobbypos[0].sy = 245.0f;
+	lobbypos[0].lx = 1275.0f;
+	lobbypos[0].ly = 350.0f;
 
-	lobbypos[1].sx = 1310.0f;
-	lobbypos[1].sy = 215.0f;
-	lobbypos[1].lx = 1541.0f;
-	lobbypos[1].ly = 291.0f;
+	lobbypos[1].sx = 1315.0f;
+	lobbypos[1].sy = 245.0f;
+	lobbypos[1].lx = 1580.0f;
+	lobbypos[1].ly = 350.0f;
 
-	lobbypos[2].sx = 1555.0f;
-	lobbypos[2].sy = 170.0f;
-	lobbypos[2].lx = 1595.0f;
-	lobbypos[2].ly = 210.0f;
+	lobbypos[2].sx = 1565.0f;
+	lobbypos[2].sy = 190.0f;
+	lobbypos[2].lx = 1605.0f;
+	lobbypos[2].ly = 230.0f;
+
+	lobbypos[3].sx = 885.0f;
+	lobbypos[3].sy = 895.0f;
+	lobbypos[3].lx = 905.0f;
+	lobbypos[3].ly = 920.0f;
+
+	lobbypos[4].sx = 1010.0f;
+	lobbypos[4].sy = 895.0f;
+	lobbypos[4].lx = 1025.0f;
+	lobbypos[4].ly = 920.0f;
 
 	roompos[0].sx = 975.0f;
 	roompos[0].sy = 390.0f;
@@ -489,7 +499,6 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 						createRoomName = RoomnameList.str3;
 						break;
 					}
-
 				}
 				else if (lobbypos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[1].lx && lobbypos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[1].ly) {
 					m_LoginScene = LS_CREATE_ROOM;	// 방 생성 UI를 띄운다.
@@ -511,10 +520,19 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 						createRoomName = RoomnameList.str3;
 						break;
 					}
-
 				}
 				else if (lobbypos[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[2].lx && lobbypos[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[2].ly) {
 					m_LoginScene = LS_OPENING; // 뒤로가기 누름
+				}
+				else if (lobbypos[3].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[3].lx && lobbypos[3].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[3].ly) {
+					memset(m_LobbyClick, 0, sizeof(m_LobbyClick)); // Left Button
+					//m_RoomBackButton = true;
+					// page--;
+				}
+				else if (lobbypos[4].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[4].lx && lobbypos[4].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[4].ly) {
+					memset(m_LobbyClick, 0, sizeof(m_LobbyClick)); // Right Button
+					//m_RoomBackButton = true;
+					// page++;
 				}
 				else {
 					memset(m_LobbyClick, 0, sizeof(m_LobbyClick));
@@ -1240,9 +1258,66 @@ void CGameFramework::FrameAdvance()
 		}
 		else {
 			// 로비 ui
-			D2D_POINT_2F D2_RobbyUI = { D2_OpeningUI.x - 5.0f, FRAME_BUFFER_HEIGHT / 8 };
-			D2D_RECT_F D2_RobbyUIRect = { 0.0f, 0.0f, 1280.0f, 698.0f };
+			D2D_POINT_2F D2_RobbyUI = { FRAME_BUFFER_WIDTH / 2 - 640.0f, FRAME_BUFFER_HEIGHT / 2 - 381.5f };
+			D2D_RECT_F D2_RobbyUIRect = { 0.0f, 0.0f, 1280.0f, 763.0f };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[27], &D2_RobbyUI, &D2_RobbyUIRect);
+
+			POINT CurrMousePoint;
+			GetCursorPos(&CurrMousePoint);
+
+			bool Roomin = false;
+			bool CreateRoom = false;
+			bool LeftOn = false;
+			bool RightOn = false;
+
+			if (lobbypos[0].sx < CurrMousePoint.x && CurrMousePoint.x < lobbypos[0].lx && lobbypos[0].sy < CurrMousePoint.y && CurrMousePoint.y < lobbypos[0].ly) {
+				Roomin = true;
+				CreateRoom = false;
+				LeftOn = false;
+				RightOn = false;
+			}
+			else if (lobbypos[1].sx < CurrMousePoint.x && CurrMousePoint.x < lobbypos[1].lx && lobbypos[1].sy < CurrMousePoint.y && CurrMousePoint.y < lobbypos[1].ly) {
+				Roomin = false;
+				CreateRoom = true;
+				LeftOn = false;
+				RightOn = false;
+			}
+			else if (lobbypos[3].sx < CurrMousePoint.x && CurrMousePoint.x < lobbypos[3].lx && lobbypos[3].sy < CurrMousePoint.y && CurrMousePoint.y < lobbypos[3].ly) {
+				Roomin = false;
+				CreateRoom = false;
+				LeftOn = true;
+				RightOn = false;
+			}
+			else if (lobbypos[4].sx < CurrMousePoint.x && CurrMousePoint.x < lobbypos[4].lx && lobbypos[4].sy < CurrMousePoint.y && CurrMousePoint.y < lobbypos[4].ly) {
+				Roomin = false;
+				CreateRoom = false;
+				LeftOn = false;
+				RightOn = true;
+			}
+
+
+			// 빠른시작
+			D2D_POINT_2F D2_RapidStartUI = { 1004.0f, 215.0f };
+			D2D_RECT_F D2_RapidStartUIRect = { 0.0f, 102.5f * Roomin, 260.0f, 102.5f * (Roomin + 1) };
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[56], &D2_RapidStartUI, &D2_RapidStartUIRect);
+
+			// 방만들기
+			D2D_POINT_2F D2_CreateRoomUI = { 1310.0f, 215.0f };
+			D2D_RECT_F D2_CreateRoomUIRect = { 0.0f, 102.5f * CreateRoom, 261.0f, 102.5f * (CreateRoom + 1) };
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[57], &D2_CreateRoomUI, &D2_CreateRoomUIRect);
+
+
+			// 왼쪽 페이지
+			D2D_POINT_2F D2_LeftPageUI = { FRAME_BUFFER_WIDTH / 2 - 100.0f, FRAME_BUFFER_HEIGHT / 2 + 315.0f };
+			D2D_RECT_F D2_LeftPageUIRect = { 0.0f, 0.0f, 46.0f, 50.0f };
+			if (!LeftOn) m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[58], &D2_LeftPageUI, &D2_LeftPageUIRect);
+			else m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[59], &D2_LeftPageUI, &D2_LeftPageUIRect);
+			// 오른쪽 페이지
+			D2D_POINT_2F D2_RightPageUI = { FRAME_BUFFER_WIDTH / 2 + 26.0f, FRAME_BUFFER_HEIGHT / 2 + 315.0f };
+			D2D_RECT_F D2_RightPageUIRect = { 0.0f, 0.0f, 46.0f, 50.0f };
+			
+			if (!RightOn) m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[60], &D2_RightPageUI, &D2_RightPageUIRect);
+			else m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[61], &D2_RightPageUI, &D2_RightPageUIRect);
 
 			D2D_POINT_2F D2_RobbyPeopleUI[8];
 			D2D_RECT_F D2_RobbyPeopleUIRect[8];
@@ -1255,11 +1330,11 @@ void CGameFramework::FrameAdvance()
 				if (m_LobbyPage != 0) {
 					numberRoom = m_LobbyPage * 8 + i;
 				}
-				int resulty = 375 + 54 * i;
+				int resulty = 400 + 54 * i;
 				float textypos = (((float)(FRAME_BUFFER_HEIGHT)) / ((float)(resulty)));
 
 				// 각 방 현재 인원
-				D2_RobbyPeopleUI[i] = { FRAME_BUFFER_WIDTH / 1.60f, FRAME_BUFFER_HEIGHT / textypos };
+				D2_RobbyPeopleUI[i] = { FRAME_BUFFER_WIDTH / 1.60f, FRAME_BUFFER_HEIGHT / textypos - 10.0f };
 				D2_RobbyPeopleUIRect[i] = { 0.0f, (m_LobbyRoom_Info[numberRoom].currnum_of_people - 1) * 48.0f, 120.0f, m_LobbyRoom_Info[numberRoom].currnum_of_people * 48.0f };
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[28 + i], &D2_RobbyPeopleUI[i], &D2_RobbyPeopleUIRect[i]);
 
@@ -1467,11 +1542,10 @@ void CGameFramework::FrameAdvance()
 			m_pd2dDeviceContext->DrawTextW(m_LoginIP, (UINT32)wcslen(m_LoginIP), m_pdwFont[1], &D2_LoginIPText, m_pd2dbrText[1]);
 		}
 		else if (m_LoginScene == 2) {
-			int roomsize = 8;
 			D2D_RECT_F D2_LoginRoomNumText[8];
 			D2D_RECT_F D2_LoginRoomNameText[8];
 			for (int i{}; i < m_LobbyRoom_Info.size(); ++i) {
-				int resultY = 400 + 55 * i;
+				int resultY = 420 + 55 * i;
 				float textypos = (((float)FRAME_BUFFER_HEIGHT) / ((float)resultY));
 
 				wchar_t roomnum1[20];
@@ -2204,7 +2278,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[24]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[24]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Opening
+	// Logo
 	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/CrossHair.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	//hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Opening.jpg", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
@@ -2514,6 +2588,114 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[55]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
 	m_pd2dfxEdgeDetection[55]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[55]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// Lobby Game in Button
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LobbyRoomInUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[56]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[56]->SetInputEffect(0, m_pd2dfxBitmapSource[56]);
+	m_pd2dfxGaussianBlur[56]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[56]->SetInputEffect(0, m_pd2dfxBitmapSource[56]);
+	m_pd2dfxEdgeDetection[56]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[56]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[56]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[56]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[56]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// Lobby Game Create Room Button
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LobbyRoomCreateUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[57]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[57]->SetInputEffect(0, m_pd2dfxBitmapSource[57]);
+	m_pd2dfxGaussianBlur[57]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[57]->SetInputEffect(0, m_pd2dfxBitmapSource[57]);
+	m_pd2dfxEdgeDetection[57]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[57]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[57]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[57]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[57]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// Lobby Game Left Page Button
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LeftPageButtonNonActiveUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[58]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[58]->SetInputEffect(0, m_pd2dfxBitmapSource[58]);
+	m_pd2dfxGaussianBlur[58]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[58]->SetInputEffect(0, m_pd2dfxBitmapSource[58]);
+	m_pd2dfxEdgeDetection[58]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[58]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[58]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[58]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[58]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// Lobby Game Left Page Button
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LeftPageButtonActiveUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[59]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[59]->SetInputEffect(0, m_pd2dfxBitmapSource[59]);
+	m_pd2dfxGaussianBlur[59]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[59]->SetInputEffect(0, m_pd2dfxBitmapSource[59]);
+	m_pd2dfxEdgeDetection[59]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[59]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[59]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[59]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[59]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// Lobby Game Right Page Button
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/RightPageButtonNonActiveUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[60]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[60]->SetInputEffect(0, m_pd2dfxBitmapSource[60]);
+	m_pd2dfxGaussianBlur[60]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[60]->SetInputEffect(0, m_pd2dfxBitmapSource[60]);
+	m_pd2dfxEdgeDetection[60]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[60]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[60]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[60]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[60]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// Lobby Game Right Page Button
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/RightPageButtonActiveUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[61]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[61]->SetInputEffect(0, m_pd2dfxBitmapSource[61]);
+	m_pd2dfxGaussianBlur[61]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[61]->SetInputEffect(0, m_pd2dfxBitmapSource[61]);
+	m_pd2dfxEdgeDetection[61]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[61]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[61]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[61]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[61]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();

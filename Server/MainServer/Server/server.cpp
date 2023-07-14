@@ -131,7 +131,7 @@ public:
 	}
 	XMFLOAT3 getPos() { return XMFLOAT3(this->getPosX(), this->getPosY(), this->getPosZ()); }
 };
-vector<Building> buildings_info;	// Map Buildings CollideBox
+vector<Building> mapobj_info;	// Map Buildings CollideBox
 
 //======================================================================
 class OVER_EX {
@@ -221,7 +221,7 @@ public:
 
 		int ret = WSARecv(socket, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.overlapped, 0);
 		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "[Line: 143] WSARecv Error - " << GetLastError() << endl;
+			cout << "[Line: 224] WSARecv Error - " << GetLastError() << endl;
 		}
 	}
 
@@ -233,7 +233,7 @@ public:
 		//cout << "[do_send] Target ID: " << id << "\n" << endl;
 		int ret = WSASend(socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, 0);
 		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "[Line: 155] WSASend Error - " << GetLastError() << endl;
+			cout << "[Line: 236] WSASend Error - " << GetLastError() << endl;
 		}
 	}
 
@@ -865,7 +865,7 @@ void process_packet(int client_id, char* packet)
 		//====================
 		// 1. 맵 정보
 		// 새로 접속한 클라이언트에게 맵 정보를 보내줍니다.
-		for (auto& building : buildings_info) {
+		for (auto& building : mapobj_info) {
 			SC_MAP_OBJINFO_PACKET building_packet;
 			building_packet.type = SC_MAP_OBJINFO;
 			building_packet.size = sizeof(SC_MAP_OBJINFO_PACKET);
@@ -1126,7 +1126,7 @@ void process_packet(int client_id, char* packet)
 		int collide_id = -1;
 		float min_dist = FLT_MAX;
 
-		// 야매방법
+		// 야매방법 (추후에 반드시 레이캐스트로 바꿔야함!!!)
 		SESSION bullet;
 		bullet.pos = clients[client_id].pos;
 		bullet.m_rightvec = clients[client_id].m_rightvec;
@@ -1136,7 +1136,35 @@ void process_packet(int client_id, char* packet)
 			, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
 		XMFLOAT3 bullet_initpos = bullet.pos;
+		XMFLOAT3 collide_pos = XMF_fault;
+		enum C_OBJ_TYPE { C_OBJ_NONCOLLIDE, C_OBJ_MAPOBJ, C_OBJ_NPC };
+		int collided_obj = C_OBJ_NONCOLLIDE;
+		int collided_npc_id = -1;
 		while (XMF_Distance(bullet.pos, bullet_initpos) <= BULLET_RANGE) {
+			
+			// 1. 맵 지형(건물, 나무, 박스, 차, ...)과 검사
+			for (auto& mapobj : mapobj_info) {
+				// 거리가 너무 멀면 검사 X
+				if (XMF_Distance(bullet.pos, mapobj.getPos()) > BULLET_RANGE) continue;
+
+				if (bullet.m_xoobb.Intersects(mapobj.m_xoobb)) {
+					if (collide_pos == XMF_fault) {	// 첫 검사는 무조건 업데이트
+						collide_pos = bullet.pos;
+						collided_obj = C_OBJ_MAPOBJ;
+						//cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+					}
+					else {
+						if (XMF_Distance(bullet.pos, bullet_initpos) < XMF_Distance(collide_pos, bullet_initpos)) {	// 저장해둔 충돌점보다 가까이에 있으면 업데이트
+							collide_pos = bullet.pos;
+							collided_obj = C_OBJ_MAPOBJ;
+							//cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+						}
+					}
+					b_collide = true;
+				}
+			}
+			
+			// 2. NPC랑 검사
 			for (auto& vl_key : clients[client_id].view_list) {
 				if (!(NPC_ID_START <= vl_key && vl_key <= NPC_ID_END)) continue;
 
@@ -1144,22 +1172,50 @@ void process_packet(int client_id, char* packet)
 				if (npcs[npc_id].pl_state == PL_ST_DEAD) continue;
 
 				if (bullet.m_xoobb.Intersects(npcs[npc_id].m_xoobb)) {
+					if (collide_pos == XMF_fault) {	// 첫 검사는 무조건 업데이트
+						collide_pos = bullet.pos;
+						collided_obj = C_OBJ_NPC;
+						//cout << "NPC[" << npc_id << "]와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+					}
+					else {
+						if (XMF_Distance(bullet.pos, bullet_initpos) < XMF_Distance(collide_pos, bullet_initpos)) {	// 저장해둔 충돌점보다 가까이에 있으면 업데이트
+							collide_pos = bullet.pos;
+							collided_obj = C_OBJ_NPC;
+							//cout << "NPC[" << npc_id << "]와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+						}
+						else {
+							//cout << "NPC[" << npc_id << "]는 기존 충돌지점보다 멀리 있습니다. 충돌점 업데이트X.\n" << endl;
+							continue;
+						}
+					}
 					b_collide = true;
+					collided_npc_id = npc_id;
+				}
+			}
 
-					if (npcs[npc_id].hp <= BULLET_DAMAGE) {	// npc 사망 처리
-						npcs[npc_id].s_lock.lock();
-						npcs[npc_id].hp = 0;
-						npcs[npc_id].pl_state = PL_ST_DEAD;
-						npcs[npc_id].s_lock.unlock();
-						cout << "Player[" << client_id << "]의 공격에 Npc[" << npc_id << "]가 사망하였다." << endl;
+			if (b_collide) {
+				switch (collided_obj) {
+				case C_OBJ_MAPOBJ:
+					cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+					break;
 
-						if (npc_id < STAGE1_MAX_HELI) {
+				case C_OBJ_NPC:
+					cout << "NPC[" << collided_npc_id << "]와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+					// NPC 데미지 계산
+					if (npcs[collided_npc_id].hp <= BULLET_DAMAGE) {	// npc 사망
+						npcs[collided_npc_id].s_lock.lock();
+						npcs[collided_npc_id].hp = 0;
+						npcs[collided_npc_id].pl_state = PL_ST_DEAD;
+						npcs[collided_npc_id].s_lock.unlock();
+						cout << "Player[" << client_id << "]의 공격에 Npc[" << collided_npc_id << "]가 사망하였다." << endl;
+
+						if (collided_npc_id < STAGE1_MAX_HELI) {
 							// 1) 헬기NPC인 경우 NPC서버에게 상태패킷을 보냅니다.
 							SC_OBJECT_STATE_PACKET npc_die_packet;
 							npc_die_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
 							npc_die_packet.type = SC_OBJECT_STATE;
 							npc_die_packet.target = TARGET_NPC;
-							npc_die_packet.id = npc_id;
+							npc_die_packet.id = collided_npc_id;
 							npc_die_packet.state = PL_ST_DEAD;
 							if (b_npcsvr_conn) {
 								lock_guard<mutex> lg{ npc_server.s_lock };
@@ -1171,7 +1227,7 @@ void process_packet(int client_id, char* packet)
 							temp_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
 							temp_packet.type = SC_OBJECT_STATE;
 							temp_packet.target = TARGET_NPC;
-							temp_packet.id = npc_id;
+							temp_packet.id = collided_npc_id;
 							temp_packet.state = PL_ST_DEAD;
 							for (auto& cl : clients) {
 								if (cl.s_state != ST_INGAME) continue;
@@ -1188,7 +1244,7 @@ void process_packet(int client_id, char* packet)
 							// 제거 패킷 (to. NPC서버)
 							if (b_npcsvr_conn) {
 								lock_guard<mutex> lg{ npc_server.s_lock };
-								npc_server.send_remove_packet(npc_id, TARGET_NPC);
+								npc_server.send_remove_packet(collided_npc_id, TARGET_NPC);
 							}
 
 							// 상태패킷 (to. 클라이언트)
@@ -1196,7 +1252,7 @@ void process_packet(int client_id, char* packet)
 							npc_die_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
 							npc_die_packet.type = SC_OBJECT_STATE;
 							npc_die_packet.target = TARGET_NPC;
-							npc_die_packet.id = npc_id;
+							npc_die_packet.id = collided_npc_id;
 							npc_die_packet.state = PL_ST_DEAD;
 							for (auto& cl : clients) {
 								if (cl.s_state != ST_INGAME) continue;
@@ -1298,21 +1354,22 @@ void process_packet(int client_id, char* packet)
 
 					}
 					else {	// npc 데미지 처리
-						npcs[npc_id].s_lock.lock();
-						npcs[npc_id].hp -= BULLET_DAMAGE;
-						npcs[npc_id].s_lock.unlock();
+						npcs[collided_npc_id].s_lock.lock();
+						npcs[collided_npc_id].hp -= BULLET_DAMAGE;
+						npcs[collided_npc_id].s_lock.unlock();
 
-						cout << "Player[" << client_id << "]의 공격에 Npc[" << npc_id << "]가 맞았다. (HP: " << npcs[npc_id].hp << " 남음)\n" << endl;
+						cout << "Player[" << client_id << "]의 공격에 Npc[" << collided_npc_id << "]가 맞았다. (HP: " << npcs[collided_npc_id].hp << " 남음)\n" << endl;
 					}
 
 					break;
 				}
+				break;
 			}
-			if (b_collide) break;
-
-			bullet.pos = XMF_Add(bullet.pos, XMF_MultiplyScalar(bullet.m_lookvec, 1.f));
-			bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
-				, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+			else {
+				bullet.pos = XMF_Add(bullet.pos, XMF_MultiplyScalar(bullet.m_lookvec, 1.f));
+				bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
+					, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+			}
 		}
 
 		/* My Raycast 원래는 raycast로 해야함.
@@ -1939,6 +1996,38 @@ void do_worker()
 				ex_over->wsabuf.buf = reinterpret_cast<CHAR*>(npc_socket);
 				int addr_size = sizeof(SOCKADDR_IN);
 				AcceptEx(g_npc_listensock, npc_socket, ex_over->send_buf, 0, addr_size + 16, addr_size + 16, 0, &ex_over->overlapped);
+
+				// NPC서버에게 맵 정보를 보내줍니다.
+				for (auto& mapobj : mapobj_info) {
+					SC_MAP_OBJINFO_PACKET mapobj_packet;
+					mapobj_packet.type = SC_MAP_OBJINFO;
+					mapobj_packet.size = sizeof(SC_MAP_OBJINFO_PACKET);
+
+					mapobj_packet.center_x = mapobj.getPosX();
+					mapobj_packet.center_y = mapobj.getPosY();
+					mapobj_packet.center_z = mapobj.getPosZ();
+					
+					mapobj_packet.scale_x = mapobj.getScaleX();
+					mapobj_packet.scale_y = mapobj.getScaleY();
+					mapobj_packet.scale_z = mapobj.getScaleZ();
+					
+					mapobj_packet.forward_x = mapobj.getLocalForward().x;
+					mapobj_packet.forward_y = mapobj.getLocalForward().y;
+					mapobj_packet.forward_z = mapobj.getLocalForward().z;
+					
+					mapobj_packet.right_x = mapobj.getLocalRight().x;
+					mapobj_packet.right_y = mapobj.getLocalRight().y;
+					mapobj_packet.right_z = mapobj.getLocalRight().z;
+					
+					mapobj_packet.rotate_x = mapobj.getLocalRotate().x;
+					mapobj_packet.rotate_y = mapobj.getLocalRotate().y;
+					mapobj_packet.rotate_z = mapobj.getLocalRotate().z;
+					
+					mapobj_packet.aob = mapobj.getAngleAOB();
+					mapobj_packet.boc = mapobj.getAngleBOC();
+
+					npc_server.do_send(&mapobj_packet);
+				}
 			}
 			// 3. Ex_Server Accept
 			else if (key == CP_KEY_LISTEN_EXLOGIC) {
@@ -2576,7 +2665,7 @@ int main(int argc, char* argv[])
 		//string fname = readTargets[0];
 		ifstream txtfile(fname);
 
-		Building tmp_bulding;
+		Building tmp_mapobj;
 
 		string word;
 		int word_cnt = 0;
@@ -2627,16 +2716,19 @@ int main(int argc, char* argv[])
 					if (b_angle_aob || b_angle_boc) {
 						if (b_angle_aob) {
 							float aob = string2data(word);
-							tmp_bulding.setAngleAOB(aob);
+							tmp_mapobj.setAngleAOB(aob);
 							b_angle_aob = false;
 						}
 						else if (b_angle_boc) {
 							float boc = string2data(word);
-							tmp_bulding.setAngleBOC(boc);
+							tmp_mapobj.setAngleBOC(boc);
 							b_angle_boc = false;
 
-							// BOC가 건물정보의 마지막이므로 완성된 tmpbuilding 을 buildings_info에 추가
-							buildings_info.push_back(tmp_bulding);
+							// BOC가 건물정보의 마지막이므로 마지막 정보는 BoundingBox 업데이트
+							tmp_mapobj.setBB();
+
+							// 그리고 완성된 tmpbuilding 을 mapobj_info에 추가
+							mapobj_info.push_back(tmp_mapobj);
 						}
 						continue;
 					}
@@ -2645,23 +2737,23 @@ int main(int argc, char* argv[])
 					if (buf_count == 2) {
 						XMFLOAT3 tmp_flt3(tmp_buf[0], tmp_buf[1], tmp_buf[2]);
 						if (b_center) {
-							tmp_bulding.setPos2(tmp_flt3);
+							tmp_mapobj.setPos2(tmp_flt3);
 							b_center = false;
 						}
 						else if (b_scale) {
-							tmp_bulding.setScale2(tmp_flt3);
+							tmp_mapobj.setScale(tmp_flt3.x / 2.0f, tmp_flt3.y / 2.0f, tmp_flt3.z / 2.0f);
 							b_scale = false;
 						}
 						else if (b_local_forward) {
-							tmp_bulding.setLocalForward(tmp_flt3);
+							tmp_mapobj.setLocalForward(tmp_flt3);
 							b_local_forward = false;
 						}
 						else if (b_local_right) {
-							tmp_bulding.setLocalRight(tmp_flt3);
+							tmp_mapobj.setLocalRight(tmp_flt3);
 							b_local_right = false;
 						}
 						else if (b_local_rotate) {
-							tmp_bulding.setLocalRotate(tmp_flt3);
+							tmp_mapobj.setLocalRotate(tmp_flt3);
 							b_local_rotate = false;
 						}
 						memset(tmp_buf, 0, sizeof(tmp_buf));
