@@ -673,7 +673,7 @@ void BloodHittingBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	CMaterial* pSpriteMaterial = new CMaterial(1);
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.5f, 5.5f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 3.0f, 3.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	m_nObjects = 10;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -707,9 +707,7 @@ void BloodHittingBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, C
 
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		//ParticlePosition = XMFLOAT3(58.0f, 12.0f, 900.0f);
 		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0, 0.0f));
-
 	}
 	BillboardShader::Render(pd3dCommandList, pCamera, 0);
 }
@@ -936,11 +934,11 @@ D3D12_SHADER_BYTECODE HeliHittingMarkBillboard::CreateVertexShader(ID3DBlob** pp
 void HeliHittingMarkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/40Smoke.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/40Smoke2.dds", RESOURCE_TEXTURE2D, 0);
 	CMaterial* pSpriteMaterial = new CMaterial(1);
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.8f, 0.8f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	m_nObjects = HITTINGMARKS;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);

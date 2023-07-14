@@ -269,7 +269,7 @@ void CPlayer::OnPrepareRender()
 
 void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, CCamera* pCamera)
 {
-	CGameObject::ShadowRender(pd3dCommandList, pCamera,true, pShader);
+	CGameObject::Render(pd3dCommandList, pCamera,false);
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 	if (nCameraMode == THIRD_PERSON_CAMERA || nCameraMode == CLOSEUP_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
 }

@@ -868,7 +868,7 @@ void CGameFramework::BuildObjects()
 
 void CGameFramework::ReleaseObjects()
 {
-	if (m_pScene->m_pPlayer) ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Release();
+	if (m_pScene->m_pPlayer) m_pScene->m_pPlayer->Release();
 	if (m_pScene) m_pScene->ReleaseObjects();
 }
 
@@ -1144,21 +1144,17 @@ float g_reverse_time = 0.0f;
 void CGameFramework::FrameAdvance()
 {
 
-	m_GameTimer.Tick(60.0);
+	m_GameTimer.Tick();
 	AnimateObjects();
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-
-	//::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	//if (m_nMode == SCENE1STAGE)
-	//{
 	m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
 	m_pScene->OnPreRender(m_pd3dCommandList, m_pCamera);
 	UpdateShaderVariables();
-	//}
+
 	//m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
@@ -1170,26 +1166,20 @@ void CGameFramework::FrameAdvance()
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
-	float pfClearColor[4] = { 0.0f, 0.0f, 0.0f, 0.5f };
+	float pfClearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], pfClearColor/*Colors::Azure*/, 0, NULL);
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], TRUE, &d3dDsvCPUDescriptorHandle);
 
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
-	//m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-
 	if (m_nMode == SCENE1STAGE)
 		((Stage1*)m_pScene)->BillBoardRender(m_pd3dCommandList, m_pCamera);
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
 	if (m_nMode == SCENE1STAGE)
-	{
-		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == false)
-		{
-			if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pScene->m_pShadowShader, m_pCamera);
-		}
-}
+			if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, NULL, m_pCamera);
+	
 	// Stage2
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -1596,14 +1586,7 @@ void CGameFramework::FrameAdvance()
 #endif
 
 	MoveToNextFrame();
-	if (m_nMode == OPENINGSCENE)
-	{
-		m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
-		size_t nLength = _tcslen(m_pszFrameRate);
-		XMFLOAT3 xmf3Position = ((HeliPlayer*)((SceneManager*)m_pScene)->m_pPlayer)->GetPosition();
-		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
-		::SetWindowText(m_hWnd, m_pszFrameRate);
-	}
+	
 	if (m_nMode == SCENE1STAGE)
 	{
 		m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
@@ -1645,7 +1628,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			WaitForGpuComplete();
 
 			if (m_pScene) m_pScene->ReleaseUploadBuffers();
-			if (m_pScene->m_pPlayer) ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReleaseUploadBuffers();
+			if (m_pScene->m_pPlayer)m_pScene->m_pPlayer->ReleaseUploadBuffers();
 			m_GameTimer.Reset();
 			break;
 		}

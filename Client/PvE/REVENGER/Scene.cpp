@@ -540,8 +540,6 @@ void SceneManager::AnimateObjects(float fTimeElapsed)
 	{
 		m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 		m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-		//m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-		//m_pLights->m_pLights[1].m_xmf4Emissive = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	}
 }
 
@@ -565,9 +563,6 @@ void SceneManager::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 void SceneManager::ReleaseUploadBuffers()
 {
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
-
-
-
 }
 
 void SceneManager::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)

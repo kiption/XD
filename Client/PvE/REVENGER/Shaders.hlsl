@@ -252,8 +252,8 @@ float4 PSBloodParticleStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
 
 	float4 uvs[MAX_LIGHTS];
 	float4 cIllumination = ParticleLighting(input.positionW, normalize(input.normalW), false, uvs);
-	cColor.r += 0.6;
-	return(lerp(cColor, cIllumination, 0.5f));
+	cColor.r += 0.87;
+	return(lerp(cColor, cIllumination, 0.4f));
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float4 PSBulletStandard(VS_STANDARD_OUTPUT input) : SV_TARGET

@@ -22,8 +22,10 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects = new CGameObject * [m_nObjects];
 		CMaterial* pMaterial = new CMaterial(4);
 		pMaterial->SetReflection(4);
+		
 		CGameObject* pModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1_(1).bin", NULL);
 		CGameObject* pChairModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Car_B.bin", NULL);
+		
 		m_ppObjects[0] = new CBilldingObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[0]->SetChild(pModel, false);
 		m_ppObjects[0]->SetMaterial(0, pMaterial);
@@ -48,17 +50,13 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[2]->SetScale(5.0, 5.0, 5.0);
 		m_ppObjects[2]->SetPosition(7.7, -7.5, -12.5);
 		m_ppObjects[2]->Rotate(0.0, -20, 0.0);
-
 		psHumanModel->m_pModelRootObject->AddRef();
-		if (psHumanModel)delete psHumanModel;
+
+		if (psHumanModel) delete psHumanModel;
 
 	}
 	if (m_nCurScene == SCENE1STAGE)
 	{
-
-
-		CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-
 		m_nObjects = 45;
 		m_ppObjects = new CGameObject * [m_nObjects];
 
@@ -214,8 +212,6 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[44]->SetChild(pTreeModels, false);
 		m_ppObjects[44]->SetMaterial(0, pPlaneMaterial);
 		m_ppObjects[44]->OnPrepareAnimate();
-		m_ppObjects[44]->SetScale(1.0, 1.0, 1.0);
-		m_ppObjects[44]->SetPosition(0, 0, 0);
 		m_ppObjects[44]->SetScale(1.0, 1.0, 1.0);
 		m_ppObjects[44]->SetPosition(0, 0, 0);
 		pTreeModels->AddRef();
