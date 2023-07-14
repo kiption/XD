@@ -148,7 +148,7 @@ public:
 	DWORD						m_nMode = OPENINGSCENE;
 
 	GameSound gamesound;
-	int m_NumOfUI = 56;
+	int m_NumOfUI = 62;
 	bool UI_Switch = false;
 	bool m_bRollState = false;
 	bool m_LoginClick[4]{ false };
@@ -157,8 +157,8 @@ public:
 	bool m_RoomClick[3]{ false };
 	bool m_SniperOn = false;
 	LoginSceneInfo loginpos[4];
-	LoginSceneInfo gamepos[3];
-	LoginSceneInfo lobbypos[3];
+	LoginSceneInfo gamepos[2];
+	LoginSceneInfo lobbypos[5];
 	LoginSceneInfo roompos[3];
 	LoginSceneInfo createpos[2];
 
@@ -199,9 +199,9 @@ public:
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
-	ID2D1Effect* m_pd2dfxBitmapSource[56];
-	ID2D1Effect* m_pd2dfxGaussianBlur[56];
-	ID2D1Effect* m_pd2dfxEdgeDetection[56];
+	ID2D1Effect* m_pd2dfxBitmapSource[62];
+	ID2D1Effect* m_pd2dfxGaussianBlur[62];
+	ID2D1Effect* m_pd2dfxEdgeDetection[62];
 	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState = NULL;
 	IWICFormatConverter* m_pwicFormatConverter = NULL;
 	int							m_nDrawEffectImage = 0;
