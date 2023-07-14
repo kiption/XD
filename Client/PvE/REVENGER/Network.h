@@ -808,14 +808,6 @@ void processPacket(char* ptr)
 			break;
 		case C_OBJ_GROUND:
 			break;
-		case C_OBJ_HUMAN:
-			q_bullet_hit_pos_human.push(collide_pos);
-			//cout << "사람이 맞았다. POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << endl;
-			break;
-		case C_OBJ_HELI:
-			q_bullet_hit_pos_heli.push(collide_pos);
-			//cout << "헬기가 맞았다. POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << endl;
-			break;
 		}
 
 		break;
