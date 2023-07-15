@@ -57,10 +57,20 @@ struct LobbyRoom {
 struct MYRoomUser {
 	int ready_state;
 	WCHAR User_name[12];
-
+	bool armyCheck = false;
+	bool HeliCheck = false;
+	int id;
 	MYRoomUser() {
 		ready_state = 0;
 		ZeroMemory(User_name, 24);
+		id = -1;
+	}
+	void clear() {
+		ready_state = 0;
+		ZeroMemory(User_name, 24);
+		id = -1;
+		armyCheck = false;
+		HeliCheck = false;
 	}
 };
 
@@ -151,7 +161,7 @@ public:
 	DWORD						m_nMode = OPENINGSCENE;
 
 	GameSound gamesound;
-	int m_NumOfUI = 62;
+	int m_NumOfUI = 68;
 	bool UI_Switch = false;
 	bool m_bRollState = false;
 	bool m_LoginClick[4]{ false };
@@ -164,6 +174,7 @@ public:
 	LoginSceneInfo lobbypos[5];
 	LoginSceneInfo roompos[3];
 	LoginSceneInfo createpos[2];
+	LoginSceneInfo choicejob[6];
 
 	bool m_bLoginInfoSend = false;
 	enum LOGINSCENE { LS_LOGIN, LS_OPENING, LS_LOBBY, LS_ROOM, LS_CREATE_ROOM };
@@ -202,9 +213,9 @@ public:
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
-	ID2D1Effect* m_pd2dfxBitmapSource[62];
-	ID2D1Effect* m_pd2dfxGaussianBlur[62];
-	ID2D1Effect* m_pd2dfxEdgeDetection[62];
+	ID2D1Effect* m_pd2dfxBitmapSource[68];
+	ID2D1Effect* m_pd2dfxGaussianBlur[68];
+	ID2D1Effect* m_pd2dfxEdgeDetection[68];
 	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState = NULL;
 	IWICFormatConverter* m_pwicFormatConverter = NULL;
 	int							m_nDrawEffectImage = 0;
@@ -264,7 +275,7 @@ public:
 	//==================================================
 public:
 	int m_MAX_USER;
-
+	int m_roominMyId;
 	SceneManager* m_pScene = NULL;
 	// 서버로 보낼 키보드 입력값
 	queue<short> q_keyboardInput;

@@ -125,6 +125,36 @@ CGameFramework::CGameFramework()
 	createpos[1].lx = 1490.0f;
 	createpos[1].ly = 700.0f;
 
+	choicejob[0].sx = 1155.0f;
+	choicejob[0].sy = 595.0f;
+	choicejob[0].lx = 1229.9f;
+	choicejob[0].ly = 645.0f;
+
+	choicejob[1].sx = 1230.0f;
+	choicejob[1].sy = 595.0f;
+	choicejob[1].lx = 1305.0f;
+	choicejob[1].ly = 645.0f;
+
+	choicejob[2].sx = 1155.0f;
+	choicejob[2].sy = 650.0f;
+	choicejob[2].lx = 1229.9f;
+	choicejob[2].ly = 700.0f;
+
+	choicejob[3].sx = 1230.0f;
+	choicejob[3].sy = 650.0f;
+	choicejob[3].lx = 1305.0f;
+	choicejob[3].ly = 700.0f;
+
+	choicejob[4].sx = 1155.0f;
+	choicejob[4].sy = 710.0f;
+	choicejob[4].lx = 1229.9f;
+	choicejob[4].ly = 760.0f;
+
+	choicejob[5].sx = 1230.0f;
+	choicejob[5].sy = 710.0f;
+	choicejob[5].lx = 1305.0f;
+	choicejob[5].ly = 760.0f;
+
 	// 아래는 지워도 되는 구간 - ui표시 상태 보려고 하는 것
 	LobbyRoom temp;
 	temp.currnum_of_people = 1;
@@ -548,6 +578,43 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				else if (roompos[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[2].lx && roompos[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[2].ly) {
 					memset(m_RoomClick, 0, sizeof(m_RoomClick)); // Back
 					m_RoomBackButton = true;
+				}
+				else if (choicejob[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[1].lx && choicejob[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[5].ly) {
+					switch (m_roominMyId)
+					{
+					case 0:
+						if (choicejob[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[0].lx && choicejob[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[0].ly) {
+							m_MyRoom_Info[0].armyCheck = true;
+							m_MyRoom_Info[0].HeliCheck = false;
+						}
+						else if (choicejob[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[1].lx && choicejob[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[1].ly) {
+							m_MyRoom_Info[0].armyCheck = false;
+							m_MyRoom_Info[0].HeliCheck = true;
+						}
+						break;
+					case 1:
+						if (choicejob[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[2].lx && choicejob[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[2].ly) {
+							m_MyRoom_Info[1].armyCheck = true;
+							m_MyRoom_Info[1].HeliCheck = false;
+						}
+						else if (choicejob[3].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[3].lx && choicejob[3].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[3].ly) {
+							m_MyRoom_Info[1].armyCheck = false;
+							m_MyRoom_Info[1].HeliCheck = true;
+						}
+						break;
+					case 2:
+						if (choicejob[4].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[4].lx && choicejob[4].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[4].ly) {
+							m_MyRoom_Info[2].armyCheck = true;
+							m_MyRoom_Info[2].HeliCheck = false;
+						}
+						else if (choicejob[5].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[5].lx && choicejob[5].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[5].ly) {
+							m_MyRoom_Info[2].armyCheck = false;
+							m_MyRoom_Info[2].HeliCheck = true;
+						}
+						break;
+					default:
+						break;
+					}
 				}
 				else {
 					memset(m_RoomClick, 0, sizeof(m_RoomClick));
@@ -1368,6 +1435,30 @@ void CGameFramework::FrameAdvance()
 					D2_RoomReadyNumUIRect[i] = { 0.0f, (m_MyRoom_Info[i].ready_state - 1) * 60.0f, 284.0f, m_MyRoom_Info[i].ready_state * 60.0f };
 					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[47 + i], &D2_RoomReadyNumUI[i], &D2_RoomReadyNumUIRect[i]);
 				}
+
+				// 역할 선택
+				D2D_POINT_2F D2_JobArmyUI[3];
+				D2D_RECT_F D2_JobArmyRect[3];
+
+				D2D_POINT_2F D2_JobHeliUI[3];
+				D2D_RECT_F D2_JobHeliRect[3];
+
+				for (int i = 0; i < m_MAX_USER; ++i) {
+					int resulty = 565 + 58 * i;
+					float textypos = (((float)(FRAME_BUFFER_HEIGHT)) / ((float)(resulty)));
+
+					D2_JobArmyUI[i] = { FRAME_BUFFER_WIDTH * 0.6f + 5.0f, FRAME_BUFFER_HEIGHT / textypos };
+					D2_JobArmyRect[i] = { 0.0f, (m_MyRoom_Info[i].armyCheck) * 50.0f, 50.0f, (m_MyRoom_Info[i].armyCheck + 1) * 50.0f };
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[62 + i], &D2_JobArmyUI[i], &D2_JobArmyRect[i]);
+
+					D2_JobHeliUI[i] = { D2_JobArmyUI[i].x + 75.0f, FRAME_BUFFER_HEIGHT / textypos };
+					D2_JobHeliRect[i] = { 0.0f, (m_MyRoom_Info[i].HeliCheck) * 50.0f, 50.0f, (m_MyRoom_Info[i].HeliCheck + 1) * 50.0f };
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[65 + i], &D2_JobHeliUI[i], &D2_JobHeliRect[i]);
+
+
+				}
+
+
 			}
 			if (m_LoginScene == 4) {
 				D2D_POINT_2F D2_RoomUI = { D2_OpeningUI.x + 100.0f, FRAME_BUFFER_HEIGHT / 2 - 146.5f };
@@ -2688,6 +2779,68 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[61]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
 	m_pd2dfxEdgeDetection[61]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[61]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// job Choice - Army
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Job_Army.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[62]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[62]->SetInputEffect(0, m_pd2dfxBitmapSource[62]);
+	m_pd2dfxGaussianBlur[62]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[62]->SetInputEffect(0, m_pd2dfxBitmapSource[62]);
+	m_pd2dfxEdgeDetection[62]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[62]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[62]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[62]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[62]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	for (int i{}; i < 2; ++i) {
+		m_pd2dfxBitmapSource[63 + i]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+		m_pd2dfxGaussianBlur[63 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[63 + i]);
+		m_pd2dfxGaussianBlur[63 + i]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+		m_pd2dfxEdgeDetection[63 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[63 + i]);
+		m_pd2dfxEdgeDetection[63 + i]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+		m_pd2dfxEdgeDetection[63 + i]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+		m_pd2dfxEdgeDetection[63 + i]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+		m_pd2dfxEdgeDetection[63 + i]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+		m_pd2dfxEdgeDetection[63 + i]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+	}
+
+	// job Choice - Helicopter
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Job_Helicopter.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[65]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[65]->SetInputEffect(0, m_pd2dfxBitmapSource[65]);
+	m_pd2dfxGaussianBlur[65]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[65]->SetInputEffect(0, m_pd2dfxBitmapSource[65]);
+	m_pd2dfxEdgeDetection[65]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[65]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[65]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[65]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[65]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	for (int i{}; i < 2; ++i) {
+		m_pd2dfxBitmapSource[66 + i]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+		m_pd2dfxGaussianBlur[66 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[66 + i]);
+		m_pd2dfxGaussianBlur[66 + i]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+		m_pd2dfxEdgeDetection[66 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[66 + i]);
+		m_pd2dfxEdgeDetection[66 + i]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+		m_pd2dfxEdgeDetection[66 + i]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+		m_pd2dfxEdgeDetection[66 + i]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+		m_pd2dfxEdgeDetection[66 + i]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+		m_pd2dfxEdgeDetection[66 + i]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+	}
 
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();

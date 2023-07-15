@@ -158,6 +158,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 						CurrRoomInfoClear();
 						gGameFramework.m_LoginScene = gGameFramework.LS_LOBBY;	// 로비으로 이동함.
+						for (int i{}; i < gGameFramework.m_MAX_USER; ++i) {
+							gGameFramework.m_MyRoom_Info[i].clear();
+						}
 
 						gGameFramework.m_RoomBackButton = false;
 					}
