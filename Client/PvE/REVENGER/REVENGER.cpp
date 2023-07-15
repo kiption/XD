@@ -143,6 +143,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 					if (ls_room_enter_ok) {										// 서버에서 방 진입을 허락해줘야
 						gGameFramework.m_LoginScene = gGameFramework.LS_ROOM;	// 방으로 이동함.
+						gGameFramework.m_roominMyId = my_room_index;
+						cout << "m_roominMyId: " << gGameFramework.m_roominMyId << endl;
+
 						ls_room_enter_ok = false;
 					}
 
@@ -163,6 +166,52 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						}
 
 						gGameFramework.m_RoomBackButton = false;
+					}
+
+					// 역할 변경
+					if (gGameFramework.role_change_h2a_click) {	// heli -> army (헬기 -> 사람)
+						if (players_info[my_id].m_role == ROLE_RIFLE) {
+							cout << "[Test] 역할(사람) 취소" << endl;
+
+							CLBY_ROLE_CHANGE_PACKET notchoose_request_pack;
+							notchoose_request_pack.size = sizeof(CLBY_ROLE_CHANGE_PACKET);
+							notchoose_request_pack.type = CLBY_ROLE_CHANGE;
+							notchoose_request_pack.role = ROLE_NOTCHOOSE;
+							sendPacket(&notchoose_request_pack);
+						}
+						else {
+							cout << "[Test] 헬기 -> 사람" << endl;
+
+							CLBY_ROLE_CHANGE_PACKET heli2human_request_pack;
+							heli2human_request_pack.size = sizeof(CLBY_ROLE_CHANGE_PACKET);
+							heli2human_request_pack.type = CLBY_ROLE_CHANGE;
+							heli2human_request_pack.role = ROLE_RIFLE;
+							sendPacket(&heli2human_request_pack);
+						}
+
+						gGameFramework.role_change_h2a_click = false;
+					}
+					if (gGameFramework.role_change_a2h_click) { // army -> heli (사람 -> 헬기)
+						if (players_info[my_id].m_role == ROLE_HELI) {
+							cout << "[Test] 역할(헬기) 취소" << endl;
+
+							CLBY_ROLE_CHANGE_PACKET notchoose_request_pack;
+							notchoose_request_pack.size = sizeof(CLBY_ROLE_CHANGE_PACKET);
+							notchoose_request_pack.type = CLBY_ROLE_CHANGE;
+							notchoose_request_pack.role = ROLE_NOTCHOOSE;
+							sendPacket(&notchoose_request_pack);
+						}
+						else {
+							cout << "[Test] 사람 -> 헬기" << endl;
+
+							CLBY_ROLE_CHANGE_PACKET human2heli_request_pack;
+							human2heli_request_pack.size = sizeof(CLBY_ROLE_CHANGE_PACKET);
+							human2heli_request_pack.type = CLBY_ROLE_CHANGE;
+							human2heli_request_pack.role = ROLE_HELI;
+							sendPacket(&human2heli_request_pack);
+						}
+
+						gGameFramework.role_change_a2h_click = false;
 					}
 
 					// 게임시작
@@ -287,6 +336,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 					if (ls_room_enter_ok) {								// 서버에서 방 생성을 끝내면
 						gGameFramework.m_LoginScene = gGameFramework.LS_ROOM;	// 방으로 이동함.
+						gGameFramework.m_roominMyId = my_room_index;
+						cout << "m_roominMyId: " << gGameFramework.m_roominMyId << endl;
 
 						ls_room_enter_ok = false;
 					}
@@ -751,6 +802,26 @@ void uiThreadFunc() {
 					}
 					new_member_id = -1;
 					trigger_new_member = false;
+				}
+
+				if (trigger_role_change) {	// 멤버 역할 변경 트리거
+					if (players_info[role_change_member_id].m_role == ROLE_NOTCHOOSE) {
+						gGameFramework.m_MyRoom_Info[role_change_member_id].armyCheck = false;
+						gGameFramework.m_MyRoom_Info[role_change_member_id].HeliCheck = false;
+						cout << "Client[" << role_change_member_id << "]의 역할이 [선택 안함]으로 바뀌었음." << endl;
+					}
+					else if (players_info[role_change_member_id].m_role == ROLE_RIFLE) {
+						gGameFramework.m_MyRoom_Info[role_change_member_id].armyCheck = true;
+						gGameFramework.m_MyRoom_Info[role_change_member_id].HeliCheck = false;
+						cout << "Client[" << role_change_member_id << "]의 역할이 [Rifle]로 바뀌었음." << endl;
+					}
+					else if (players_info[role_change_member_id].m_role == ROLE_HELI) {
+						gGameFramework.m_MyRoom_Info[role_change_member_id].armyCheck = false;
+						gGameFramework.m_MyRoom_Info[role_change_member_id].HeliCheck = true;
+						cout << "Client[" << role_change_member_id << "]의 역할이 [Heli]로 바뀌었음." << endl;
+					}
+					role_change_member_id = -1;
+					trigger_role_change = false;
 				}
 
 				if (trigger_leave_member) {	// 다른 유저 방 퇴장 트리거

@@ -583,33 +583,39 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 					switch (m_roominMyId)
 					{
 					case 0:
-						if (choicejob[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[0].lx && choicejob[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[0].ly) {
-							m_MyRoom_Info[0].armyCheck = true;
-							m_MyRoom_Info[0].HeliCheck = false;
+						if (choicejob[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[0].lx\
+							&& choicejob[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[0].ly) { 
+							// 헬기 -> 사람
+							role_change_h2a_click = true;
 						}
-						else if (choicejob[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[1].lx && choicejob[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[1].ly) {
-							m_MyRoom_Info[0].armyCheck = false;
-							m_MyRoom_Info[0].HeliCheck = true;
+						else if (choicejob[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[1].lx\
+							&& choicejob[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[1].ly) {
+							// 사람 -> 헬기
+							role_change_a2h_click = true;
 						}
 						break;
 					case 1:
-						if (choicejob[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[2].lx && choicejob[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[2].ly) {
-							m_MyRoom_Info[1].armyCheck = true;
-							m_MyRoom_Info[1].HeliCheck = false;
+						if (choicejob[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[2].lx\
+							&& choicejob[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[2].ly) {
+							// 헬기 -> 사람
+							role_change_h2a_click = true;
 						}
-						else if (choicejob[3].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[3].lx && choicejob[3].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[3].ly) {
-							m_MyRoom_Info[1].armyCheck = false;
-							m_MyRoom_Info[1].HeliCheck = true;
+						else if (choicejob[3].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[3].lx\
+							&& choicejob[3].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[3].ly) {
+							// 사람 -> 헬기
+							role_change_a2h_click = true;
 						}
 						break;
 					case 2:
-						if (choicejob[4].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[4].lx && choicejob[4].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[4].ly) {
-							m_MyRoom_Info[2].armyCheck = true;
-							m_MyRoom_Info[2].HeliCheck = false;
+						if (choicejob[4].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[4].lx\
+							&& choicejob[4].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[4].ly) {
+							// 헬기 -> 사람
+							role_change_h2a_click = true;
 						}
-						else if (choicejob[5].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[5].lx && choicejob[5].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[5].ly) {
-							m_MyRoom_Info[2].armyCheck = false;
-							m_MyRoom_Info[2].HeliCheck = true;
+						else if (choicejob[5].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[5].lx\
+							&& choicejob[5].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[5].ly) {
+							// 사람 -> 헬기
+							role_change_a2h_click = true;
 						}
 						break;
 					default:

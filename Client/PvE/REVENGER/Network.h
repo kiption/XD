@@ -48,9 +48,11 @@ bool ls_create_room_enter_ok = false;
 bool trigger_new_member = false; // 새로운 유저 방 입장 트리거
 bool trigger_leave_member = false; // 새로운 유저 방 입장 트리거
 bool trigger_room_update = false; // 방 내부 데이터 변경 트리거 (방 데이터 전체를 업데이트하기 위함)
+bool trigger_role_change = false; // 유저 역할 변경 트리거
 
 int new_member_id = -1;
 int left_member_id = -1;
+int role_change_member_id = -1;
 
 //==================================================
 volatile bool respawn_trigger = false;
@@ -462,6 +464,19 @@ void processPacket(char* ptr)
 
 		break;
 	}// LBYC_MEMBER_STATE case end
+	case LBYC_ROLE_CHANGE:
+	{
+		if (curr_servertype != SERVER_LOBBY) break;
+		LBYC_ROLE_CHANGE_PACKET* recv_packet = reinterpret_cast<LBYC_ROLE_CHANGE_PACKET*>(ptr);
+
+		int member_index = recv_packet->member_id;
+
+		players_info[member_index].m_role = recv_packet->role;
+
+		role_change_member_id = member_index;
+		trigger_role_change = true;
+		break;
+	}// LBYC_ROLE_CHANGE case end
 	case LBYC_GAME_START:
 	{
 		if (curr_servertype != SERVER_LOBBY) break;

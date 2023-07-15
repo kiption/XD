@@ -4,7 +4,6 @@
 #include "../../../Server/MainServer/Server/Protocol.h"
 
 enum OBJECT_STATE { OBJ_ST_EMPTY, OBJ_ST_STANDBY, OBJ_ST_LOGOUT, OBJ_ST_RUNNING };
-enum INGAME_ROLE { ROLE_RIFLE, ROLE_HELI };
 struct ObjectsInfo
 {
 	short m_id;
@@ -28,14 +27,16 @@ struct ObjectsInfo
 	ObjectsInfo() {
 		m_id = -1;
 		m_name[0] = '\n';
-		m_role = ROLE_RIFLE;
+		m_role = ROLE_NOTCHOOSE;
 		m_hp = 100;
 		m_bullet = MAX_BULLET;
 		m_pos = { 0.0f, 0.0f, 0.0f };
 		m_right_vec = { 1.0f, 0.0f, 0.0f };
 		m_up_vec = { 0.0f, 1.0f, 0.0f };
 		m_look_vec = { 0.0f, 0.0f, 1.0f };
+		m_attack_dir = { 0.0f, 0.0f, 1.0f };
 		m_state = OBJ_ST_EMPTY;
+		curr_scene = 0;
 		m_ingame_state = PL_ST_DEAD;
 		m_new_state_update = false;
 		m_damaged_effect_on = false;
@@ -45,13 +46,15 @@ struct ObjectsInfo
 	void InfoClear() {
 		m_id = -1;
 		m_name[0] = '\n';
-		m_role = ROLE_RIFLE;
+		m_role = ROLE_NOTCHOOSE;
 		m_hp = 100;
 		m_bullet = MAX_BULLET;
 		m_pos = { 0.0f, 0.0f, 0.0f };
 		m_right_vec = { 1.0f, 0.0f, 0.0f };
 		m_up_vec = { 0.0f, 1.0f, 0.0f };
 		m_look_vec = { 0.0f, 0.0f, 1.0f };
+		m_attack_dir = { 0.0f, 0.0f, 1.0f };
+		curr_scene = 0;
 		m_state = OBJ_ST_EMPTY;
 		m_ingame_state = PL_ST_DEAD;
 		m_new_state_update = false;

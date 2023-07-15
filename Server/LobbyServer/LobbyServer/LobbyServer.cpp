@@ -58,15 +58,16 @@ public:
 	int remain_size;
 	int id;
 	char name[NAME_SIZE];
-	int curr_room;	// -1 이면 방에 없고 로비에 있다는 뜻. (혹은 s_state가 FREE인데 -1이면 접속중이 아닌것)
+	int curr_room;		// -1 이면 방에 없고 로비에 있다는 뜻. (혹은 s_state가 FREE인데 -1이면 접속중이 아닌것)
 	int inroom_state;	// RM_ST_... (EMPTY: 로비, NONREADY: 방에 있지만 준비X, READY: 방에 있고 준비도 O, MANAGER: 방에 있고 그 방의 방장)
+	int role;			// ROLE_NOTCHOOSE, ROLE_RIFLE, ROLE_HELI
 	SESSION_STATE s_state;
 	SOCKET sock;
 
 	mutex s_lock;
 
 public:
-	SESSION() { remain_size = 0; id = -1; curr_room = -1; inroom_state = RM_ST_EMPTY; sock = 0; s_state = ST_FREE; }
+	SESSION() { remain_size = 0; id = -1; curr_room = -1; inroom_state = RM_ST_EMPTY; role = ROLE_NOTCHOOSE; sock = 0; s_state = ST_FREE; }
 
 public:
 	void do_recv()
@@ -157,17 +158,18 @@ int Game_Room::user_join(int c_id) {
 				room_state = R_ST_FULL;
 				cout << "Room[" << room_id << "]의 인원이 가득찼습니다." << endl;
 			}
-			cout << "\n";
-
 			r_lock.unlock();
 
 			clients[c_id].s_lock.lock();
 			clients[c_id].curr_room = room_id;
+			cout << "Client[" << c_id << "]는 Room[" << room_id << "]에서의 인덱스는 " << i << "입니다." << endl;
 			if (user_count == 1)
 				clients[c_id].inroom_state = RM_ST_MANAGER;
 			else
 				clients[c_id].inroom_state = RM_ST_NONREADY;
 			clients[c_id].s_lock.unlock();
+
+			cout << "\n";
 
 			return 0;
 		}
@@ -450,6 +452,99 @@ void process_packet(int client_id, char* packet)
 
 		break;
 	}// CLBY_LEAVE_ROOM case end
+	case CLBY_ROLE_CHANGE:
+	{
+		CLBY_ROLE_CHANGE_PACKET* recv_packet = reinterpret_cast<CLBY_ROLE_CHANGE_PACKET*>(packet);
+
+		int before_role = clients[client_id].role;
+		int after_role = recv_packet->role;
+		cout << "Before: " << before_role << ", After: " << after_role << endl;
+		if (before_role == after_role) break;	// 이미 같은 역할임.
+
+		int cur_room = clients[client_id].curr_room;
+		if (cur_room == -1) break;	// 비정상 요청 (나중에 접속을 끊어버리던가 하자)
+
+		// 그 방에 있는 역할 수 파악
+		int rifle_num = 0;
+		int heli_num = 0;
+		if (after_role == ROLE_NOTCHOOSE) {
+			// 역할을 바꿉니다.
+			cout << "Room[" << cur_room << "에 있는 Client[" << client_id << "]의 역할이 [선택 안함]으로 변경되었습니다.\n" << endl;
+			clients[client_id].role = ROLE_NOTCHOOSE;
+		}
+		else {
+			for (auto& room : game_rooms) {
+				if (room.room_id == cur_room) {
+					for (int i = 0; i < MAX_USER; ++i) {
+						int member_id = room.users[i];
+						if (member_id == -1) continue;
+						if (clients[member_id].curr_room != cur_room) continue;
+
+						if (clients[member_id].role == ROLE_RIFLE)
+							rifle_num++;
+						else if (clients[member_id].role == ROLE_HELI)
+							heli_num++;
+					}
+				}
+			}
+			cout << "Room[" << cur_room << "]에는 RIFLE유저가 " << rifle_num << "명, HELI유저가 " << heli_num << "명 있습니다.\n" << endl;
+
+			// 역할을 바꿉니다.
+			if (after_role == ROLE_RIFLE) {
+				if (rifle_num >= 2) {
+					cout << "Room[" << cur_room << "]에는 RIFLE유저가 이미 " << rifle_num << "명이어서 RIFLE은 선택할 수 없습니다.\n" << endl;
+					break;
+				}
+				else {
+					cout << "Room[" << cur_room << "에 있는 Client[" << client_id << "]의 역할이 [RIFLE]로 변경되었습니다.\n" << endl;
+					clients[client_id].role = ROLE_RIFLE;
+				}
+			}
+			else if (after_role == ROLE_HELI) {
+				if (heli_num >= 1) {
+					cout << "Room[" << cur_room << "]에는 HELI유저가 이미 " << heli_num << "명이어서 HELI은 선택할 수 없습니다.\n" << endl;
+					break;
+				}
+				else {
+					cout << "Room[" << cur_room << "에 있는 Client[" << client_id << "]의 역할이 [HELI]로 변경되었습니다.\n" << endl;
+					clients[client_id].role = ROLE_HELI;
+				}
+			}
+		}
+
+		// 요청한 클라이언트가 방에서의 몇번째 인덱스인지 알아냄
+		int inroom_index = -1;
+		for (int i = 0; i < MAX_USER; ++i) {
+			if (game_rooms[cur_room].users[i] == client_id) {
+				inroom_index = i;
+				break;
+			}
+		}
+		if (inroom_index == -1) {
+			cout << "[Error] Unknown Error (Line:524)" << endl;
+			break;
+		}
+
+		// 역할이 바뀌었다고 그 방에 있는 유저들에게 알려줍니다.
+		for (auto& room : game_rooms) {
+			if (room.room_id == cur_room) {
+				for (int i = 0; i < MAX_USER; ++i) {
+					int member_id = room.users[i];
+					if (member_id == -1) continue;
+					if (clients[member_id].curr_room != cur_room) continue;
+
+					LBYC_ROLE_CHANGE_PACKET role_change_packet;
+					role_change_packet.size = sizeof(LBYC_ROLE_CHANGE_PACKET);
+					role_change_packet.type = LBYC_ROLE_CHANGE;
+					role_change_packet.member_id = inroom_index;
+					role_change_packet.role = clients[client_id].role;
+					clients[member_id].do_send(&role_change_packet);
+				}
+			}
+		}
+
+		break;
+	}// CLBY_ROLE_CHANGE case end
 	case CLBY_GAME_READY:
 	{
 		CLBY_GAME_READY_PACKET* recv_packet = reinterpret_cast<CLBY_GAME_READY_PACKET*>(packet);
