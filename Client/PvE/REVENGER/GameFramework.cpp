@@ -651,7 +651,15 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		switch (nMessageID)
 		{
 		case WM_IME_COMPOSITION:
-			//cout << "trail" << endl;
+		{
+			cout << "11111" << endl;
+
+			break;
+		}
+		case WM_CHAR:
+			if (m_LoginClick[0]) {
+				cout << "trail" << endl;
+			}
 			break;
 
 		case WM_KEYUP:
@@ -848,7 +856,10 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
-	{
+	{	
+	case WM_IME_COMPOSITION:
+		OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+		break;
 	case WM_ACTIVATE:
 	{
 		if (LOWORD(wParam) == WA_INACTIVE)
@@ -1775,7 +1786,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-}
+		}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -1839,8 +1850,8 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			break;
 		}
 		}
+		}
 	}
-}
 
 
 #ifdef _WITH_DIRECT2D
@@ -1871,7 +1882,7 @@ void CGameFramework::CreateDirect2DDevice()
 		D3D12_MESSAGE_ID pd3dDenyIds[] =
 		{
 			D3D12_MESSAGE_ID_INVALID_DESCRIPTOR_HANDLE,
-		};
+};
 
 		D3D12_INFO_QUEUE_FILTER d3dInforQueueFilter = { };
 		d3dInforQueueFilter.DenyList.NumSeverities = _countof(pd3dSeverities);
@@ -1880,7 +1891,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-	}
+}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -2845,7 +2856,7 @@ void CGameFramework::CreateDirect2DDevice()
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
 #endif
-}
+	}
 #endif
 
 
@@ -3145,7 +3156,7 @@ void CGameFramework::NpcHittingMotion(int p_id)
 		if (0 <= p_id && p_id < 5) {	// 헬기
 			((SparkBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[3])->m_bActive = true;
 			((SparkBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[3])->ParticlePosition
-				= ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12+p_id]->GetPosition();
+				= ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + p_id]->GetPosition();
 		}
 		if (p_id >= 5) {	// 사람
 			int indexnum = p_id - 5;	// id = 5 ~ 24, Object인덱스 = 22 ~ 41
