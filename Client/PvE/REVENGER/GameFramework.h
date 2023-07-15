@@ -289,6 +289,7 @@ public:
 	WCHAR m_LoginID[20];
 	WCHAR m_LoginPW[20];
 	WCHAR m_LoginIP[20];
+	WCHAR m_CompleteChat[60];
 	WCHAR m_InsertChat[60];
 	WCHAR* createRoomName;
 	int m_myRoomNum = 13;
@@ -329,7 +330,7 @@ public:
 
 
 	bool W_KEY, A_KEY, S_KEY, D_KEY, SPACE_KEY, SHOOT_KEY = false;
-
+	//
 	bool player_dead = false;
 	//==================================================
 

@@ -650,55 +650,25 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	if (m_LoginScene == 0) {
 		switch (nMessageID)
 		{
-		case WM_IME_COMPOSITION:
-		{
-			cout << "11111" << endl;
-
-			break;
-		}
-		case WM_CHAR:
-			if (m_LoginClick[0]) {
-				cout << "trail" << endl;
-			}
-			break;
-
 		case WM_KEYUP:
 		{
 			if (m_LoginClick[0]) {
-
 				if (wParam == VK_BACK) {
-					size_t idLength = wcslen(m_LoginID);
-					if (idLength > 0) {
-						m_LoginID[idLength - 1] = L'\0';
+					size_t pwLength = wcslen(m_LoginPW);
+					if (pwLength > 0) {
+						m_LoginPW[pwLength - 1] = L'\0';
 					}
-				}
-				else if (wParam == VK_HANGEUL) {
-					break;
 				}
 				else {
-					if (nMessageID == WM_CHAR) {
-						wchar_t IDchar[2] = { static_cast<wchar_t>(wParam), L'\0' };
-						wprintf(L"%ls\n", IDchar);
-
-						std::wstring IDstring(IDchar);
-						size_t idLength = wcslen(m_LoginID);
-						size_t remainingSpace = sizeof(m_LoginID) / sizeof(m_LoginID[0]) - idLength - 1;
-
-						if (remainingSpace > 0) {
-							wcsncat_s(m_LoginID, sizeof(m_LoginID) / sizeof(m_LoginID[0]), IDstring.c_str(), remainingSpace);
-						}
+					WCHAR PWchar = static_cast<WCHAR>(wParam);
+					if (PWchar == L'.') {
+						PWchar = L'*';
 					}
-					else if (nMessageID == WM_IME_COMPOSITION) {
-						wchar_t IDchar[2] = { static_cast<wchar_t>(wParam), L'\0' };
-						wprintf(L"%ls\n", IDchar);
+					size_t pwLength = wcslen(m_LoginPW);
+					size_t remainingSpace = sizeof(m_LoginPW) / sizeof(m_LoginPW[0]) - pwLength - 1;
 
-						std::wstring IDstring(IDchar);
-						size_t idLength = wcslen(m_LoginID);
-						size_t remainingSpace = sizeof(m_LoginID) / sizeof(m_LoginID[0]) - idLength - 1;
-
-						if (remainingSpace > 0) {
-							wcsncat_s(m_LoginID, sizeof(m_LoginID) / sizeof(m_LoginID[0]), IDstring.c_str(), remainingSpace);
-						}
+					if (remainingSpace > 0) {
+						wcsncat_s(m_LoginPW, sizeof(m_LoginPW) / sizeof(m_LoginPW[0]), &PWchar, remainingSpace);
 					}
 				}
 			}
@@ -748,11 +718,47 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	}
 	else if (UI_Switch) {
 		switch (nMessageID) {
+		case WM_IME_COMPOSITION:
+		{
+
+			WCHAR IDchar = static_cast<WCHAR>(wParam);//어쨌든 뭔가가 조합된다
+			std::wcout << "insert Key: " << IDchar << endl;
+			bool isComplete = false;
+			if (lParam == GCS_RESULTSTR) {//얘는 확신
+				size_t completeChatLength = wcslen(m_CompleteChat);//아이디 길이
+				size_t completeremainingSpace = sizeof(m_CompleteChat) / sizeof(m_CompleteChat[0]) - completeChatLength - 1;//남은 문자					
+				if (completeremainingSpace > 0) {
+					wcsncat_s(m_CompleteChat, sizeof(m_CompleteChat) / sizeof(m_CompleteChat[0]), &IDchar, completeremainingSpace);
+					m_CompleteChat[++completeChatLength] = L'\0';  // 널 종료 문자 위치 업데이트					
+					memcpy(m_InsertChat, m_CompleteChat, completeChatLength * 2);
+				}
+				isComplete = true;
+				std::wcout << "current complete Input Key: " << IDchar << endl;
+				std::wcout << "current complete Chat: " << m_CompleteChat << endl;
+			}
+			else {
+				size_t ChatLength = wcslen(m_InsertChat);//아이디 길이
+				size_t remainingSpace = sizeof(m_InsertChat) / sizeof(m_InsertChat[0]) - ChatLength - 1;//남은 문자
+
+				if (remainingSpace > 0) {
+					if (!isComplete && ChatLength > 0) {
+						m_InsertChat[ChatLength - 1] = L'\0';
+						ChatLength -= 1;
+					}
+					wcsncat_s(m_InsertChat, sizeof(m_InsertChat) / sizeof(m_InsertChat[0]), &IDchar, remainingSpace);
+					m_InsertChat[++ChatLength] = L'\0';  // 널 종료 문자 위치 업데이트
+				}
+				isComplete = false;
+				std::wcout << "current non complete Input Key: " << IDchar << endl;
+			}
+			break;
+		}
 		case WM_KEYUP:
 			if (wParam == VK_BACK) {
 				size_t idLength = wcslen(m_InsertChat);
 				if (idLength > 0) {
 					m_InsertChat[idLength - 1] = L'\0';
+					memcpy(m_CompleteChat, m_InsertChat, idLength);
 				}
 			}
 			else if (wParam == VK_ESCAPE) {
@@ -761,22 +767,31 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			}
 			else if (wParam == VK_RETURN) {
 				SendChat temp;
-				wcstombs_s(nullptr, temp.chatData, sizeof(temp.chatData), m_InsertChat, sizeof(m_InsertChat));
+				wcstombs_s(nullptr, temp.chatData, sizeof(temp.chatData), m_CompleteChat, sizeof(m_CompleteChat));
 
-				m_mychat_log.push(temp);
-				m_InsertChat[0] = L'\0';
-			}
-			else {
-				WCHAR IDchar = static_cast<WCHAR>(wParam);
-				if (IDchar == L'.') {
-					IDchar = L'*';
+				if (temp.chatData == nullptr || temp.chatData[0] == '\0') {
+					cout << "입력된 값이 없습니다." << endl;
 				}
+				else {
+					m_mychat_log.push(temp);
+					m_InsertChat[0] = L'\0';
+					m_CompleteChat[0] = L'\0';
+				}
+			}
+			else if (wParam == VK_SPACE) {
 				size_t idLength = wcslen(m_InsertChat);
 				size_t remainingSpace = sizeof(m_InsertChat) / sizeof(m_InsertChat[0]) - idLength - 1;
 
 				if (remainingSpace > 0) {
-					wcsncat_s(m_InsertChat, sizeof(m_InsertChat) / sizeof(m_InsertChat[0]), &IDchar, remainingSpace);
+					m_CompleteChat[idLength] = L' ';
+					m_CompleteChat[idLength + 1] = L'\0';  // 널 종료 문자 위치 업데이트
+					memcpy(m_InsertChat, m_CompleteChat, idLength + 2);
+
+					//m_InsertChat[idLength] = L' ';  // m_InsertChat에 공백 문자 추가
 				}
+			}
+			else {
+
 			}
 			break;
 		}
@@ -856,7 +871,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
-	{	
+	{
 	case WM_IME_COMPOSITION:
 		OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 		break;
@@ -1786,7 +1801,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-		}
+}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -1850,8 +1865,8 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			break;
 		}
 		}
-		}
 	}
+}
 
 
 #ifdef _WITH_DIRECT2D
@@ -1882,7 +1897,7 @@ void CGameFramework::CreateDirect2DDevice()
 		D3D12_MESSAGE_ID pd3dDenyIds[] =
 		{
 			D3D12_MESSAGE_ID_INVALID_DESCRIPTOR_HANDLE,
-};
+		};
 
 		D3D12_INFO_QUEUE_FILTER d3dInforQueueFilter = { };
 		d3dInforQueueFilter.DenyList.NumSeverities = _countof(pd3dSeverities);
@@ -1891,7 +1906,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-}
+	}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -2856,7 +2871,7 @@ void CGameFramework::CreateDirect2DDevice()
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
 #endif
-	}
+}
 #endif
 
 
