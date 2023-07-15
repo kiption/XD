@@ -266,6 +266,7 @@ struct CS_ROTATE_PACKET {
 	float right_x, right_y, right_z;
 	float up_x, up_y, up_z;
 	float look_x, look_y, look_z;
+	float cam_look_x, cam_look_y, cam_look_z;
 };
 
 struct CS_ATTACK_PACKET {

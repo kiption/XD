@@ -2764,6 +2764,13 @@ XMFLOAT3 CGameFramework::getMyLookVec()
 	}
 
 }
+XMFLOAT3 CGameFramework::getMyCameraLookVec()
+{
+	if (m_nMode == SCENE1STAGE) {
+		return m_pCamera->GetLookVector();
+	}
+
+}
 
 void CGameFramework::setPosition_Self(XMFLOAT3 pos)
 {

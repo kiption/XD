@@ -667,6 +667,9 @@ void networkThreadFunc()
 				yaw_rotate_pack.look_x = gGameFramework.getMyLookVec().x;
 				yaw_rotate_pack.look_y = gGameFramework.getMyLookVec().y;
 				yaw_rotate_pack.look_z = gGameFramework.getMyLookVec().z;
+				yaw_rotate_pack.cam_look_x = gGameFramework.getMyCameraLookVec().x;
+				yaw_rotate_pack.cam_look_y = gGameFramework.getMyCameraLookVec().y;
+				yaw_rotate_pack.cam_look_z = gGameFramework.getMyCameraLookVec().z;
 				sendPacket(&yaw_rotate_pack);
 				break;
 			case SEND_BUTTON_L:
