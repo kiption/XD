@@ -177,6 +177,7 @@ public:
 	XMFLOAT3 pos;									// Position (x, y, z)
 	float pitch, yaw, roll;							// Rotated Degree
 	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;		// 현재 Look, Right, Up Vectors
+	XMFLOAT3 m_cam_lookvec;							// 카메라 룩벡터 (조준을 여기에 하고 있음)
 	chrono::system_clock::time_point death_time;
 
 	chrono::system_clock::time_point shoot_time;	// 총을 발사한 시간
@@ -205,6 +206,7 @@ public:
 		m_rightvec = { 1.0f, 0.0f, 0.0f };
 		m_upvec = { 0.0f, 1.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 1.0f };
+		m_cam_lookvec = m_lookvec;
 		curr_stage = 0;
 
 		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -264,6 +266,7 @@ public:
 		m_rightvec = { 1.0f, 0.0f, 0.0f };
 		m_upvec = { 0.0f, 1.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 1.0f };
+		m_cam_lookvec = m_lookvec;
 		curr_stage = 0;
 
 		setBB();
@@ -1046,6 +1049,7 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].m_rightvec = { cl_rotate_packet->right_x, cl_rotate_packet->right_y, cl_rotate_packet->right_z };
 		clients[client_id].m_upvec = { cl_rotate_packet->up_x, cl_rotate_packet->up_y, cl_rotate_packet->up_z };
 		clients[client_id].m_lookvec = { cl_rotate_packet->look_x, cl_rotate_packet->look_y, cl_rotate_packet->look_z };
+		clients[client_id].m_cam_lookvec = { cl_rotate_packet->cam_look_x, cl_rotate_packet->cam_look_y, cl_rotate_packet->cam_look_z };
 		clients[client_id].setBB();
 		clients[client_id].s_lock.unlock();
 
@@ -1124,11 +1128,9 @@ void process_packet(int client_id, char* packet)
 		// 야매방법 (추후에 반드시 레이캐스트로 바꿔야함!!!)
 		SESSION bullet;
 		bullet.pos = clients[client_id].pos;
-		bullet.m_rightvec = clients[client_id].m_rightvec;
-		bullet.m_upvec = clients[client_id].m_upvec;
-		bullet.m_lookvec = clients[client_id].m_lookvec;
+		bullet.m_lookvec = clients[client_id].m_cam_lookvec;
 		bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
-			, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+			, XMFLOAT3(0.1f, 0.1f, 0.4f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
 		XMFLOAT3 bullet_initpos = bullet.pos;
 		XMFLOAT3 collide_pos = XMF_fault;

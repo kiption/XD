@@ -339,6 +339,7 @@ public:
 	XMFLOAT3 getMyRightVec();
 	XMFLOAT3 getMyLookVec();
 	XMFLOAT3 getMyUpVec();
+	XMFLOAT3 getMyCameraLookVec();
 
 	// 객체 좌표,벡터 값 최신화 함수입니다.
 	void setPosition_Self(XMFLOAT3 pos);
