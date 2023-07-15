@@ -57,7 +57,7 @@ public:
 	XMFLOAT4X4					m_pxmf4x4Transforms[3];
 
 	float						m_fElapsedTimes = 1.0f;
-	float						m_fDuration = 0.7;
+	float						m_fDuration = 1.3;
 	float						m_fExplosionSpeed = 10.0f;
 	float						m_fExplosionRotation = 720.0f;
 	XMFLOAT3 m_pxmf3SphereVectors[3];

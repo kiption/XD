@@ -1174,6 +1174,7 @@ void CGameFramework::FrameAdvance()
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
+
 	float pfClearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	m_pd3dCommandList->ClearRenderTargetView(m_pd3dSwapChainBackBufferRTVCPUHandles[m_nSwapChainBufferIndex], pfClearColor/*Colors::Azure*/, 0, NULL);
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
@@ -1717,6 +1718,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 
 			if (m_pScene) m_pScene->ReleaseUploadBuffers();
 			if (m_pScene->m_pPlayer)m_pScene->m_pPlayer->ReleaseUploadBuffers();
+			if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
 			m_GameTimer.Reset();
 			break;
 		}
@@ -2874,22 +2876,11 @@ bool CGameFramework::CollisionMap_by_PLAYER(XMFLOAT3 pos, XMFLOAT3 extents, CGam
 	return(false);
 }
 
-void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos, XMFLOAT3 mapextents)
+void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos)
 {
-	m_mapxmoobb = BoundingOrientedBox(mappos, mapextents, XMFLOAT4(0, 0, 0, 1));
+	((BulletMarkBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[4])->m_bActive = true;
+	((BulletMarkBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[4])->ParticlePosition = (mappos);
 
-	CBulletObject** ppBullets = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_ppBullets;
-
-	for (int i = 0; i < BULLETS; i++)
-	{
-		ppBullets[i]->m_xoobb = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
-
-		if (ppBullets[i]->m_xoobb.Intersects(m_mapxmoobb))
-		{
-			// 충돌 모션 
-			ppBullets[i]->Reset();
-		}
-	}
 }
 
 void CGameFramework::CollisionNPC_by_PLAYER(XMFLOAT3 npcpos, XMFLOAT3 npcextents)
@@ -2987,25 +2978,29 @@ void CGameFramework::otherPlayerDyingMotion(int p_id)
 
 }
 bool Hitting = false;
-void CGameFramework::SoldiarNpcHittingMotion(int p_id)
+void CGameFramework::NpcHittingMotion(int p_id)
 {
 	if (m_nMode == SCENE1STAGE)
 	{
-		Hitting = true;
-		int indexnum = p_id - 5;	// id = 5 ~ 24, Object인덱스 = 22 ~ 41
+		if (0 <= p_id && p_id < 5) {	// 헬기
+			((SparkBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[3])->m_bActive = true;
+			((SparkBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[3])->ParticlePosition
+				= ((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12+p_id]->GetPosition();
+		}
 		if (p_id >= 5) {	// 사람
+			int indexnum = p_id - 5;	// id = 5 ~ 24, Object인덱스 = 22 ~ 41
 			if (((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]))
 			{
 
 				((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_LOOP;
 				((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 			}
+			((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->m_bActive = true;
+			((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->ParticlePosition =
+				XMFLOAT3(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->GetPosition().x,
+					((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->GetPosition().y + 8.0,
+					((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->GetPosition().z);
 		}
-		((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->m_bActive = true;
-		((BloodHittingBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[2])->ParticlePosition =
-			XMFLOAT3(((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->GetPosition().x,
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->GetPosition().y + 8.0,
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]->GetPosition().z);
 
 
 	}

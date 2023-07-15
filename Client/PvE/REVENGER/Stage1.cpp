@@ -978,7 +978,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	((CSpriteObjectsShader*)m_ppSpriteBillboard[0])->m_bActive = true;
 
 
-	((SparkBillboard*)m_pBillboardShader[3])->ParticlePosition = m_ppShaders[0]->m_ppObjects[13]->GetPosition();
+	//((SparkBillboard*)m_pBillboardShader[3])->ParticlePosition = m_ppShaders[0]->m_ppObjects[13]->GetPosition();
 
 	CBulletObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
 	m_ppShaders[0]->m_ppObjects[42]->m_xoobb = BoundingOrientedBox(m_ppShaders[0]->m_ppObjects[42]->GetPosition(), XMFLOAT3(5.0, 9.0, 5.0), XMFLOAT4(0, 0, 0, 1));
@@ -1097,7 +1097,8 @@ void Stage1::BillBoardRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	XMFLOAT3 MuzzleFramePosition = pCamera->GetPosition();
 	//for (int i = 0; i < m_nBillboardShaders; i++)
 	if (m_pBillboardShader[1]) m_pBillboardShader[1]->Render(pd3dCommandList, pCamera, 0);
-	if (m_pBillboardShader[4]) m_pBillboardShader[4]->Render(pd3dCommandList, pCamera, 0);
+	if (((BulletMarkBillboard*)m_pBillboardShader[4])) ((BulletMarkBillboard*)m_pBillboardShader[4])->Render(pd3dCommandList, pCamera, 0);
+	
 	if (((MuzzleFrameBillboard*)m_pBillboardShader[6])) ((MuzzleFrameBillboard*)m_pBillboardShader[6])
 		->Render(pd3dCommandList, pCamera, 0, MuzzleFrameLook, ((CHumanPlayer*)m_pPlayer)->m_pBulletFindFrame->GetPosition());
 

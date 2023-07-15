@@ -414,7 +414,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							gGameFramework.DyingMotionNPC(i);
 							break;
 						case PL_ST_DAMAGED:
-							gGameFramework.SoldiarNpcHittingMotion(i);
+							gGameFramework.NpcHittingMotion(i);
 							break;
 						}
 						npcs_info[i].m_new_state_update = false;
@@ -427,12 +427,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//==================================================
 				if (!q_bullet_hit_pos_mapobj.empty()) {
 					XMFLOAT3 mabobj_collide_pos = q_bullet_hit_pos_mapobj.front();
+					mabobj_collide_pos.y += 3.0f;
 					q_bullet_hit_pos_mapobj.pop();
+					gGameFramework.CollisionMap_by_BULLET(mabobj_collide_pos);
 					//cout << "맵 충 돌" << mabobj_collide_pos.x << ", " << mabobj_collide_pos.y << ", " << mabobj_collide_pos.z << endl;
 				}
 
-				//gGameFramework.CollisionEndWorldObject(XMFLOAT3(0.0, 0.0, 0.0), XMFLOAT3(1200.0, 110.0, 1200.0));
-				gGameFramework.CollisionMap_by_BULLET(XMFLOAT3(/*MAP CENTER*/), XMFLOAT3(/*MAP EXTENTS*/));
 				gGameFramework.CollisionNPC_by_BULLET(XMFLOAT3(/*NPC CENTER*/), XMFLOAT3(/*NPC EXTENTS*/));
 				gGameFramework.CollisionNPC_by_MAP(XMFLOAT3(/*NPC CENTER*/), XMFLOAT3(/*NPC EXTENTS*/), XMFLOAT3(/*MAP CENTER*/), XMFLOAT3(/*MAP EXTENTS*/));
 				gGameFramework.CollisionNPC_by_PLAYER(XMFLOAT3(/*NPC CENTER*/), XMFLOAT3(/*NPC EXTENTS*/));
