@@ -1128,6 +1128,7 @@ void process_packet(int client_id, char* packet)
 		// 야매방법 (추후에 반드시 레이캐스트로 바꿔야함!!!)
 		SESSION bullet;
 		bullet.pos = clients[client_id].pos;
+		bullet.pos.y += 2.8f;
 		bullet.m_lookvec = clients[client_id].m_cam_lookvec;
 		bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
 			, XMFLOAT3(0.1f, 0.1f, 0.4f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
