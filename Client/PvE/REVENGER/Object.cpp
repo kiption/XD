@@ -1974,16 +1974,6 @@ void CSoldiarNpcObjects::ReloadState(float EleapsedTime)
 	//CGameObject::Animate(EleapsedTime);
 }
 
-void CSoldiarNpcObjects::JumpState(float EleapsedTime)
-{
-	//m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	//m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	//m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	//m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	//m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
-	//CGameObject::Animate(EleapsedTime);
-}
-
 void CSoldiarNpcObjects::DieState(float EleapsedTime)
 {
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);

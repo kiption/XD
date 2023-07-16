@@ -21,7 +21,7 @@ public:
 	virtual void OnCameraUpdateCallback(float fTimeElapsed);
 
 	void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, XMFLOAT3 slideVec);
-	void JumpState();
+	void DieState();
 	void ReloadState();
 	virtual void ShotState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
@@ -31,7 +31,7 @@ public:
 	
 	bool m_bMoveUpdate = false;
 	bool m_bReloadState = false;
-	bool m_bJumeState = false;
+	bool m_bDieState = false;
 	bool m_bZoomMode = false;
 public:
 	float m_fBulletEffectiveRange = 1600.0f;

@@ -648,7 +648,6 @@ public:
 	void MoveForward(float EleapsedTime);
 	void HittingState(float EleapsedTime);
 	void ReloadState(float EleapsedTime);
-	void JumpState(float EleapsedTime);
 	void DieState(float EleapsedTime);
 	void ShotState(float EleapsedTime);
 	void IdleState(float EleapsedTime);

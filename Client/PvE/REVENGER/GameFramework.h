@@ -114,9 +114,6 @@ struct CollideMapInfo
 		m_xoobb = BoundingOrientedBox(XMFLOAT3(m_pos.x, m_pos.y, m_pos.z), XMFLOAT3(m_scale.x, m_scale.y, m_scale.z), oriented);
 	}
 };
-
-
-
 class CGameFramework
 {
 public:
@@ -159,7 +156,7 @@ public:
 	void ChangeScene(DWORD nMode);
 	void ShotDelay();
 	DWORD						m_nMode = OPENINGSCENE;
-
+	bool m_bDieMotion = false;
 	GameSound gamesound;
 	int m_NumOfUI = 68;
 	bool UI_Switch = false;
@@ -379,6 +376,8 @@ public:
 	void otherPlayerShootingMotion(int p_id);
 	void otherPlayerDyingMotion(int p_id);
 	void NpcHittingMotion(int p_id);
+	void MyPlayerDieMotion();
+	void MyPlayerResponeMotion();
 	bool m_bDamageOn = false;
 	float m_pPlayerRotate_z = 0.0f;
 	float m_pPlayerRotate_x = 0.0f;

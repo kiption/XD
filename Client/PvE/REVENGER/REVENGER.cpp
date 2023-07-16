@@ -393,7 +393,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						npcs_info[i].m_attack_on = false;
 					}
 
-					//((Stage1*)gGameFramework.m_pScene)->m_pBillboardShader[3]->ParticlePosition = npcs_info[i].m_pos;
 				}
 
 				// 3. 리스폰할 때는 자기 자신을 움직여줘야합니다.
@@ -405,9 +404,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 				// 4. 만약 죽어있는 상태면 캐릭터 조작이 불가능하게 막아야합니다.
 				if ((players_info[my_id].m_ingame_state == PL_ST_DEAD) && (!gGameFramework.player_dead)) {
+					gGameFramework.MyPlayerDieMotion();
 					gGameFramework.player_dead = true;
 				}
 				if ((players_info[my_id].m_ingame_state != PL_ST_DEAD) && (gGameFramework.player_dead)) {
+					gGameFramework.MyPlayerResponeMotion();
 					gGameFramework.player_dead = false;
 				}
 
