@@ -31,7 +31,8 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-	void BillBoardRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	void BillBoardRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera,XMFLOAT3 Position);
+	void NPCMuzzleFlamedRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera,XMFLOAT3 Position);
 	void ReleaseUploadBuffers();
 	void ParticleAnimation();
 public:
@@ -91,6 +92,7 @@ public:
 	XMFLOAT3 particlepos;
 
 	void Firevalkan(CGameObject* Objects,XMFLOAT3 ToPlayerLook);
+	void PlayerFirevalkan(XMFLOAT3 Look);
 	void Reflectcartridgecase(CGameObject* Objects);
 public:
 	float m_fBulletEffectiveRange = 2000.0f;
@@ -100,5 +102,7 @@ public:
 	CValkanObject* m_ppBullets[HELIBULLETS];
 	CValkanObject* pCartridge = NULL;
 	CValkanObject* m_ppCartridge[CARTRIDGES];
+	CValkanObject* pValkan = NULL;
+	CValkanObject* m_ppValkan[HELICOPTERVALKANS];
 	
 };

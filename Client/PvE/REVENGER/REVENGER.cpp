@@ -389,9 +389,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					((Stage1*)gGameFramework.m_pScene)->SmokePosition = npcs_info[i].m_pos;
 
 					if (npcs_info[i].m_attack_on) {
-						gGameFramework.HeliNpcUnderAttack(i, npcs_info[i].m_attack_dir);
+						gGameFramework.NpcUnderAttack(npcs_info[i].m_attack_dir, i);
 						npcs_info[i].m_attack_on = false;
+						gGameFramework.NpcNoneUnderAttack();
 					}
+					
 
 				}
 

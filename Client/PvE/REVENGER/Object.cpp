@@ -2299,3 +2299,35 @@ void COpeningHuman::Animate(float fTimeElapsed)
 
 	CGameObject::Animate(fTimeElapsed);
 }
+
+CInsideHelicopterHuman::CInsideHelicopterHuman(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(1)
+{
+	SetChild(pModel->m_pModelRootObject, true);
+	pModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
+
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 3, pModel);
+
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
+
+	m_pSkinnedAnimationController->SetTrackEnable(0, true);
+	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+CInsideHelicopterHuman::~CInsideHelicopterHuman()
+{
+}
+
+void CInsideHelicopterHuman::Animate(float fTimeElapsed)
+{
+	m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	m_pSkinnedAnimationController->SetTrackEnable(1, false);
+	m_pSkinnedAnimationController->SetTrackEnable(2, true);
+	m_pSkinnedAnimationController->SetTrackPosition(0, 2);
+
+	CGameObject::Animate(fTimeElapsed);
+}

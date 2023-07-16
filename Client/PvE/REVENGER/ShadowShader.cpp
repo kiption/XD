@@ -22,10 +22,10 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects = new CGameObject * [m_nObjects];
 		CMaterial* pMaterial = new CMaterial(4);
 		pMaterial->SetReflection(4);
-		
+
 		CGameObject* pModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1_(1).bin", NULL);
 		CGameObject* pChairModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Car_B.bin", NULL);
-		
+
 		m_ppObjects[0] = new CBilldingObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[0]->SetChild(pModel, false);
 		m_ppObjects[0]->SetMaterial(0, pMaterial);
@@ -194,10 +194,18 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[39] = m_ppSoldiarNpcObjects[18];
 		m_ppObjects[40] = m_ppSoldiarNpcObjects[19];
 		m_ppObjects[41] = m_ppSoldiarNpcObjects[20];
-		m_ppObjects[42] = m_ppSoldiarNpcObjects[21];
-		m_ppObjects[42]->SetPosition(139.0, 6.1, 600.0);
 		if (psModel) delete psModel;
 
+		//m_nInsideHumanObjects = 1;
+		//m_pInsideHumanbjects = new CGameObject * [m_nInsideHumanObjects];
+		//CLoadedModelInfo* psInsideSoldiarModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Soldier_Rig_Face.bin", NULL);
+		//m_pInsideHumanbjects[0] = new CInsideHelicopterHuman(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psInsideSoldiarModel, 3);
+		//m_pInsideHumanbjects[0]->SetMaterial(0, pSoldiarNpcMaterial);
+		//m_pInsideHumanbjects[0]->SetScale(4.0, 4.0, 4.0);
+		//m_pInsideHumanbjects[0]->SetPosition(120.0,6.0,800.0);
+		//psInsideSoldiarModel->m_pModelRootObject->AddRef();
+		//if (psInsideSoldiarModel) delete psInsideSoldiarModel;
+		m_ppObjects[42] = new CGameObject(1);
 
 		CMaterial* pHeliMaterial = new CMaterial(1);
 		pHeliMaterial->SetReflection(1);

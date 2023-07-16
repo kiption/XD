@@ -863,7 +863,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 					m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
 				if (m_ingame_role == R_HELI)
 					m_pCamera = ((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
-				else 
+				else
 					m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
 				break;
 			case VK_F9:
@@ -872,7 +872,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case '1':
 			{
 				q_keyboardInput.push(SEND_KEY_NUM1);//S
-
 				break;
 			}
 			case '2':
@@ -887,10 +886,8 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReloadState();
 					q_keyboardInput.push(SEND_KEY_R);
 				}
-				if (!player_dead && ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bMoveUpdate == false)
+				if (!player_dead && m_ingame_role == R_HELI)
 				{
-					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bReloadState = true;
-					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReloadState();
 					q_keyboardInput.push(SEND_KEY_R);
 				}
 				break;
@@ -1076,16 +1073,15 @@ void CGameFramework::ProcessInput()
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->FireBullet(NULL);
 				}
 			}
-			if (m_nMode == SCENE1STAGE)
+			if (m_nMode == SCENE1STAGE && m_ingame_role == R_HELI)
 			{
-				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.01)
+				if (((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.01)
 				{
 					ShotKey = true;
-					((Stage1*)m_pScene)->Reflectcartridgecase(NULL);
-					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
-					q_mouseInput.push(lclick);//s
-					((CHumanPlayer*)m_pScene->m_pPlayer)->ShotState(m_GameTimer.GetTimeElapsed());
-					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->FireBullet(NULL);
+					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };
+					q_mouseInput.push(lclick);
+					((Stage1*)m_pScene)->PlayerFirevalkan(m_pCamera->GetLookVector());
+
 				}
 			}
 		}
@@ -1101,7 +1097,7 @@ void CGameFramework::ProcessInput()
 						if (m_ingame_role == R_RIFLE)
 							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
 						//---------- HeliPlayer
-						if (m_ingame_role == R_HELI) 
+						if (m_ingame_role == R_HELI)
 							((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
 						else
 							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
@@ -1199,7 +1195,7 @@ void CGameFramework::ProcessInput()
 						}
 						//--------Heli Player-----------// 
 						if (m_ingame_role == R_HELI)
-						    ((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
+							((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
 						//--------Human Player-----------// 
 						if (m_ingame_role == R_RIFLE)
 							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
@@ -1216,9 +1212,9 @@ void CGameFramework::ProcessInput()
 		if (m_ingame_role == R_RIFLE)
 			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Update(m_GameTimer.GetTimeElapsed());
 		//--------Heli Player-----------// 
-		if (m_ingame_role == R_HELI) 
+		if (m_ingame_role == R_HELI)
 			((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Update(m_GameTimer.GetTimeElapsed());
-		else 
+		else
 			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Update(m_GameTimer.GetTimeElapsed());
 	}
 
@@ -1246,23 +1242,19 @@ void CGameFramework::AnimateObjects()
 			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 		if (m_ingame_role == R_HELI)
 			((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
-		else
-			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 
-		if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA && m_bDieMotion==false)
+
+		if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA && m_bDieMotion == false)
 		{
 			if (m_ingame_role == R_RIFLE)
 				m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera(CLOSEUP_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
-			if (m_ingame_role == R_HELI) 
+			if (m_ingame_role == R_HELI)
 				m_pCamera = ((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera(CLOSEUP_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
 			else
 			{
 				m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera(CLOSEUP_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
-			
 			}
-	
 		}
-
 		if (m_ingame_role == R_RIFLE) ShotDelay();
 		else ShotDelay();
 	}
@@ -1351,8 +1343,6 @@ void CGameFramework::FrameAdvance()
 	m_pScene->OnPreRender(m_pd3dCommandList, m_pCamera);
 	UpdateShaderVariables();
 
-	//m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
-
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
 	::ZeroMemory(&d3dResourceBarrier, sizeof(D3D12_RESOURCE_BARRIER));
 	d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -1371,18 +1361,17 @@ void CGameFramework::FrameAdvance()
 	if (m_pScene) m_pScene->Render(m_pd3dCommandList, m_pCamera);
 	if (m_nMode == SCENE1STAGE)
 	{
-		if (m_ingame_role == R_RIFLE) 
-			((Stage1*)m_pScene)->BillBoardRender(m_pd3dCommandList, m_pCamera);
-		else
-			((Stage1*)m_pScene)->BillBoardRender(m_pd3dCommandList, m_pCamera);
+		if (m_ingame_role == R_RIFLE)
+			((Stage1*)m_pScene)->BillBoardRender(m_pd3dCommandList, m_pCamera, ((CHumanPlayer*)m_pScene->m_pPlayer)->m_pBulletFindFrame->GetPosition());
+		if (m_ingame_role == R_HELI)
+			((Stage1*)m_pScene)->BillBoardRender(m_pd3dCommandList, m_pCamera, m_pCamera->GetPosition());
 	}
-		
+
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
 	if (m_nMode == SCENE1STAGE)
 		if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, NULL, m_pCamera);
-
 	// Stage2
 	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
 	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
@@ -1912,7 +1901,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-	}
+}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -2012,7 +2001,7 @@ void CGameFramework::CreateDirect2DDevice()
 		D3D12_MESSAGE_SEVERITY pd3dSeverities[] =
 		{
 			D3D12_MESSAGE_SEVERITY_INFO,
-};
+		};
 
 		D3D12_MESSAGE_ID pd3dDenyIds[] =
 		{
@@ -3360,10 +3349,9 @@ void CGameFramework::DyingMotionNPC(int id)
 {
 	/* 12~16 = 헬리콥터NPC , 22~41 = 사람NPC */
 	if (0 <= id && id < 5) {	// 헬기
-		//((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]->SetScale(0.0, 0.0, 0.0);
-		//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->Rotate(0.0, 10.0, 10.0);
+
 		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->m_bDyingstate = true;
-		//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->FallDown(m_GameTimer.GetTimeElapsed());
+
 
 	}
 	else {		// 사람
@@ -3390,13 +3378,23 @@ void CGameFramework::MoveMotionNPC(int id)
 	}
 
 }
-void CGameFramework::HeliNpcUnderAttack(int id, XMFLOAT3 ToLook)
+void CGameFramework::NpcUnderAttack(XMFLOAT3 ToLook, int npc_id)
 {
 	//========헬기 NPC========//12
-	if (id < 5) {
-		((Stage1*)m_pScene)->Firevalkan(((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id]), ToLook);
+	if (npc_id < 5) {
+		((Stage1*)m_pScene)->Firevalkan(((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + npc_id]), ToLook);
 	}
-	else {
-		//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + id])->Firevalkan(ToLook);
+	((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[7])->m_bShotActive = true;
+	int indexnum = npc_id - 5;
+	XMFLOAT3 SoldiarsPosition = ((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->GetPosition();
+	if (((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]))
+	{
+		((Stage1*)m_pScene)->NPCMuzzleFlamedRender(m_pd3dCommandList, m_pCamera, XMFLOAT3(SoldiarsPosition.x, SoldiarsPosition.y + 8.0f, SoldiarsPosition.z));
 	}
+
+}
+
+void CGameFramework::NpcNoneUnderAttack()
+{
+	((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[7])->m_bShotActive = false;
 }

@@ -418,7 +418,8 @@ public:
 	float m_fResponCount = 0.0;
 	//=================================================
 		//NPC Attack
-	void HeliNpcUnderAttack(int id, XMFLOAT3 ToLook);
+	void NpcUnderAttack(XMFLOAT3 ToLook,int npc_id);
+	void NpcNoneUnderAttack();
 };
 
 
