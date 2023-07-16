@@ -584,7 +584,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 					{
 					case 0:
 						if (choicejob[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[0].lx\
-							&& choicejob[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[0].ly) { 
+							&& choicejob[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[0].ly) {
 							// 헬기 -> 사람
 							role_change_h2a_click = true;
 						}
@@ -728,19 +728,15 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		{
 
 			WCHAR IDchar = static_cast<WCHAR>(wParam);//어쨌든 뭔가가 조합된다
-			std::wcout << "insert Key: " << IDchar << endl;
-			bool isComplete = false;
 			if (lParam == GCS_RESULTSTR) {//얘는 확신
 				size_t completeChatLength = wcslen(m_CompleteChat);//아이디 길이
 				size_t completeremainingSpace = sizeof(m_CompleteChat) / sizeof(m_CompleteChat[0]) - completeChatLength - 1;//남은 문자					
 				if (completeremainingSpace > 0) {
 					wcsncat_s(m_CompleteChat, sizeof(m_CompleteChat) / sizeof(m_CompleteChat[0]), &IDchar, completeremainingSpace);
 					m_CompleteChat[++completeChatLength] = L'\0';  // 널 종료 문자 위치 업데이트					
-					memcpy(m_InsertChat, m_CompleteChat, completeChatLength * 2);
+					wcscpy_s(m_InsertChat, sizeof(m_InsertChat) / sizeof(m_InsertChat[0]), m_CompleteChat);
 				}
 				isComplete = true;
-				std::wcout << "current complete Input Key: " << IDchar << endl;
-				std::wcout << "current complete Chat: " << m_CompleteChat << endl;
 			}
 			else {
 				size_t ChatLength = wcslen(m_InsertChat);//아이디 길이
@@ -755,21 +751,52 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 					m_InsertChat[++ChatLength] = L'\0';  // 널 종료 문자 위치 업데이트
 				}
 				isComplete = false;
-				std::wcout << "current non complete Input Key: " << IDchar << endl;
 			}
+			break;
+		}
+		case WM_CHAR:
+		{
+			WCHAR IDchar = static_cast<WCHAR>(wParam);
+
+			// 영어 대문자, 영어 소문자, 숫자를 추가합니다.
+			if ((IDchar >= L'A' && IDchar <= L'Z') || (IDchar >= L'a' && IDchar <= L'z') || (IDchar >= L'0' && IDchar <= L'9'))
+			{
+				size_t ChatLength = wcslen(m_InsertChat);
+				size_t remainingSpace = sizeof(m_InsertChat) / sizeof(m_InsertChat[0]) - ChatLength - 1;
+
+				size_t ChatCompleteLength = wcslen(m_CompleteChat);
+				size_t remainingCompleteSpace = sizeof(m_CompleteChat) / sizeof(m_CompleteChat[0]) - ChatCompleteLength - 1;
+
+				if (remainingSpace > 0) {
+					wcsncat_s(m_InsertChat, sizeof(m_InsertChat) / sizeof(m_InsertChat[0]), &IDchar, remainingSpace);
+					m_InsertChat[++ChatLength] = L'\0';  // 널 종료 문자 위치 업데이트
+				}
+
+
+				if (remainingCompleteSpace > 0) {
+					wcsncat_s(m_CompleteChat, sizeof(m_CompleteChat) / sizeof(m_CompleteChat[0]), &IDchar, remainingCompleteSpace);
+					m_CompleteChat[++ChatCompleteLength] = L'\0';  // 널 종료 문자 위치 업데이트
+				}
+			}
+
 			break;
 		}
 		case WM_KEYUP:
 			if (wParam == VK_BACK) {
-				size_t idLength = wcslen(m_InsertChat);
-				if (idLength > 0) {
-					m_InsertChat[idLength - 1] = L'\0';
-					memcpy(m_CompleteChat, m_InsertChat, idLength);
+				size_t ChatLength = wcslen(m_InsertChat);
+				size_t CompleteLength = wcslen(m_CompleteChat);
+
+				if (ChatLength > 0) {
+					m_InsertChat[ChatLength - 1] = L'\0';
+				}
+				if (CompleteLength > 0) {
+					m_CompleteChat[CompleteLength - 1] = L'\0';
 				}
 			}
 			else if (wParam == VK_ESCAPE) {
 				UI_Switch = false;
 				m_InsertChat[0] = L'\0';
+				m_CompleteChat[0] = L'\0';
 			}
 			else if (wParam == VK_RETURN) {
 				SendChat temp;
@@ -785,16 +812,25 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				}
 			}
 			else if (wParam == VK_SPACE) {
-				size_t idLength = wcslen(m_InsertChat);
-				size_t remainingSpace = sizeof(m_InsertChat) / sizeof(m_InsertChat[0]) - idLength - 1;
+				size_t ChatLength = wcslen(m_InsertChat);
+				size_t remainingChatSpace = sizeof(m_InsertChat) / sizeof(m_InsertChat[0]) - ChatLength - 1;
 
-				if (remainingSpace > 0) {
-					m_CompleteChat[idLength] = L' ';
-					m_CompleteChat[idLength + 1] = L'\0';  // 널 종료 문자 위치 업데이트
-					memcpy(m_InsertChat, m_CompleteChat, idLength + 2);
 
-					//m_InsertChat[idLength] = L' ';  // m_InsertChat에 공백 문자 추가
+				//size_t ChatLength = wcslen(m_InsertChat);
+				size_t CompleteLength = wcslen(m_CompleteChat);
+				size_t remainingCompleteSpace = sizeof(m_CompleteChat) / sizeof(m_CompleteChat[0]) - CompleteLength - 1;
+
+
+				if (remainingChatSpace > 0) {
+					m_InsertChat[ChatLength] = L' ';  // m_InsertChat에 공백 문자 추가
+					m_InsertChat[ChatLength + 1] = L'\0';  // 널 종료 문자 위치 업데이트
 				}
+
+				if (remainingCompleteSpace > 0) {
+					m_CompleteChat[CompleteLength] = L' ';  // m_CompleteChat에 공백 문자 추가
+					m_CompleteChat[CompleteLength + 1] = L'\0';
+				}
+
 			}
 			else {
 
@@ -879,6 +915,9 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	switch (nMessageID)
 	{
 	case WM_IME_COMPOSITION:
+		OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
+		break;
+	case WM_CHAR:
 		OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam);
 		break;
 	case WM_ACTIVATE:
@@ -1807,7 +1846,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-}
+	}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -1898,7 +1937,7 @@ void CGameFramework::CreateDirect2DDevice()
 		D3D12_MESSAGE_SEVERITY pd3dSeverities[] =
 		{
 			D3D12_MESSAGE_SEVERITY_INFO,
-		};
+};
 
 		D3D12_MESSAGE_ID pd3dDenyIds[] =
 		{

@@ -558,7 +558,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_IME_COMPOSITION:
 		gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
-		break;	
+		break;
+	case WM_CHAR:
+		gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
+		break;
 	case WM_SIZE:
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
