@@ -180,7 +180,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							sendPacket(&notchoose_request_pack);
 						}
 						else {
-							cout << "[Test] 헬기 -> 사람" << endl;
+							cout << "역할변경: Rifle" << endl;
 
 							CLBY_ROLE_CHANGE_PACKET heli2human_request_pack;
 							heli2human_request_pack.size = sizeof(CLBY_ROLE_CHANGE_PACKET);
@@ -202,7 +202,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							sendPacket(&notchoose_request_pack);
 						}
 						else {
-							cout << "[Test] 사람 -> 헬기" << endl;
+							cout << "역할변경: Heli" << endl;
 
 							CLBY_ROLE_CHANGE_PACKET human2heli_request_pack;
 							human2heli_request_pack.size = sizeof(CLBY_ROLE_CHANGE_PACKET);
@@ -559,7 +559,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_IME_COMPOSITION:
 		gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
-		break;	
+		break;
+	case WM_CHAR:
+		gGameFramework.OnProcessingWindowMessage(hWnd, message, wParam, lParam);
+		break;
 	case WM_SIZE:
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:

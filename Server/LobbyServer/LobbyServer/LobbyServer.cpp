@@ -95,6 +95,17 @@ public:
 			cout << GetLastError() << endl;
 		}
 	}
+
+public:
+	void sessionClear() {
+		remain_size = 0;
+		id = -1;
+		curr_room = -1;
+		inroom_state = RM_ST_EMPTY;
+		role = ROLE_NOTCHOOSE;
+		sock = 0;
+		s_state = ST_FREE;
+	}
 };
 array<SESSION, MAX_USER * MAX_ROOM> clients;						// 세션 정보
 
@@ -1033,6 +1044,9 @@ void disconnect(int target_id, int target)
 			}
 		}
 
+		// Server Message
+		cout << "Player[ID: " << clients[target_id].id << ", name: " << clients[target_id].name << "] is log out\n" << endl;	// server message
+
 		// 2. 세션 초기화
 		clients[target_id].s_lock.lock();
 		if (clients[target_id].s_state == ST_FREE) {
@@ -1040,11 +1054,9 @@ void disconnect(int target_id, int target)
 			return;
 		}
 		closesocket(clients[target_id].sock);
-		clients[target_id].s_state = ST_FREE;
+		clients[target_id].sessionClear();
 		clients[target_id].s_lock.unlock();
 
-		// Server Message
-		cout << "Player[ID: " << clients[target_id].id << ", name: " << clients[target_id].name << "] is log out\n" << endl;	// server message
 		break;
 
 	case SESSION_LOGIC:

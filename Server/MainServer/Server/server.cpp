@@ -1576,7 +1576,7 @@ void process_packet(int client_id, char* packet)
 			SC_CHAT_PACKET send_chat_pack;
 			send_chat_pack.size = sizeof(SC_CHAT_PACKET);
 			send_chat_pack.type = SC_CHAT;
-			strcpy_s(send_chat_pack.name, cl.name);
+			strcpy_s(send_chat_pack.name, clients[client_id].name);
 			strcpy_s(send_chat_pack.msg, recv_chat_pack->msg);
 			cl.do_send(&send_chat_pack);
 		}
