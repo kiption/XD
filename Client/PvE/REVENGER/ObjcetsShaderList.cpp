@@ -232,8 +232,6 @@ void CFragmentsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 {
 	if (m_bActive == true)
 	{
-		CShader::Render(pd3dCommandList, pCamera, 0, false);
-
 		for (int j = 0; j < m_nObjects; j++)
 		{
 			if (m_ppObjects[j])
@@ -242,6 +240,7 @@ void CFragmentsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 				m_ppObjects[j]->Render(pd3dCommandList, pCamera, false);
 			}
 		}
+		CShader::Render(pd3dCommandList, pCamera, 0, false);
 	}
 
 }
@@ -268,36 +267,20 @@ D3D12_INPUT_LAYOUT_DESC CFragmentsShader::CreateInputLayout(int nPipelineState)
 
 void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 {
-	{
-		random_device rd;
-		default_random_engine dre(rd());
-		uniform_real_distribution<float>uidr(50.0, 60.0);
-		uniform_real_distribution<float>uidy(80.0, 90.0);
-		uniform_real_distribution<float>uidz(-0.5, 0.5);
-
-		float gravity = 9.8f;
-		float EmmitTime = 1.0f;
-		float time = fTimeElapsed - EmmitTime;
-		float a_LifeTime = 3.5f;
-		XMFLOAT3 velocity = XMFLOAT3(1.f * ((float)rand() / (float)RAND_MAX), 1.f * ((float)rand() / (float)RAND_MAX), 1.f * ((float)rand() / (float)RAND_MAX));
-		XMFLOAT3 Accel = XMFLOAT3(0.0, -3.0, 0.0);
-		float radian = uidr(dre);
-		float dirtheta = XMConvertToRadians(radian);
-	}
-
+	
 	if (m_bActive == true)
 	{
 
-		XMFLOAT3 gravity = XMFLOAT3(0, -7.8f, 0);
-		m_fElapsedTimes += fTimeElapsed * 6.0f;
+		XMFLOAT3 gravity = XMFLOAT3(0, -6.8f, 0);
+		m_fElapsedTimes += fTimeElapsed * 4.0f;
 		if (m_fElapsedTimes <= m_fDuration)
 		{
 			for (int i = 0; i < EXPLOSION_DEBRISES; i++)
 			{
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
-				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + gravity.x;
-				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;;
-				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes + gravity.z;
+				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes;// +gravity.x;
+				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes +0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;;
+				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes;// +gravity.z;
 				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
 
 				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
@@ -308,7 +291,7 @@ void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 		}
 		else
 		{
-
+			m_bActive = false;
 			m_fElapsedTimes = 0.0f;
 		}
 
@@ -422,7 +405,7 @@ D3D12_SHADER_BYTECODE CHelicopterBulletMarkParticleShader::CreatePixelShader(ID3
 
 void CHelicopterBulletMarkParticleShader::AnimateObjects(float fTimeElapsed)
 {
-	
+
 	if (m_bActive == true)
 	{
 

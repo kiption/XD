@@ -1022,7 +1022,12 @@ void CGameFramework::ProcessInput()
 			if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; }
 			if (pKeysBuffer[KEY_A] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_A); dwDirection |= DIR_LEFT; }
 			if (pKeysBuffer[KEY_D] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT; }
-			if (pKeysBuffer[KEY_Q] & 0xF0) { dwDirection |= DIR_UP; }
+			
+			if (m_ingame_role == R_HELI)
+			{
+				if (pKeysBuffer[KEY_Q] & 0xF0) { dwDirection |= DIR_UP; }
+				if (pKeysBuffer[KEY_E] & 0xF0) { dwDirection |= DIR_DOWN; }
+			}
 		}
 
 		if (!player_dead) { if (pKeysBuffer[VK_SPACE] & 0xF0) { q_keyboardInput.push(SEND_KEY_SPACEBAR); } }
@@ -1156,10 +1161,9 @@ void CGameFramework::ProcessInput()
 							if (m_ingame_role == R_RIFLE)
 								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
 							if (m_ingame_role == R_HELI)
-								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
-							else
+								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
+							else 
 								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
-
 						} 	//--------Human Player-----------// 
 						else
 						{
@@ -1167,7 +1171,7 @@ void CGameFramework::ProcessInput()
 								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
 
 							if (m_ingame_role == R_HELI)
-								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
+								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
 							else
 								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
 						}
@@ -1177,8 +1181,7 @@ void CGameFramework::ProcessInput()
 						//--------Human Player-----------// 
 						if (m_ingame_role == R_RIFLE)
 							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
-						else
-							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
+
 					}
 				}
 			}
@@ -1228,13 +1231,10 @@ void CGameFramework::AnimateObjects()
 				m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera(CLOSEUP_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
 			if (m_ingame_role == R_HELI)
 				m_pCamera = ((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera(CLOSEUP_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
-			else
-			{
-				m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera(CLOSEUP_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
-			}
+
 		}
-		if (m_ingame_role == R_RIFLE) ShotDelay();
-		else ShotDelay();
+		ShotDelay();
+
 	}
 }
 void CGameFramework::ShotDelay()
@@ -1400,15 +1400,15 @@ void CGameFramework::FrameAdvance()
 
 
 			D2D_POINT_2F D2_RegistButtonUI = { (FRAME_BUFFER_WIDTH / 6) + 22.5f, D2_LoginUI.y + 210.0f };
-			D2D_RECT_F D2_RegistButtonUIRect = { 0.0f, 71.5f * RegistOff, 171.0f, 71.5f * (RegistOff + 1)};
+			D2D_RECT_F D2_RegistButtonUIRect = { 0.0f, 71.5f * RegistOff, 171.0f, 71.5f * (RegistOff + 1) };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[69], &D2_RegistButtonUI, &D2_RegistButtonUIRect);
 
 
 			D2D_POINT_2F D2_LoginButtonUI = { D2_RegistButtonUI.x + 190.0f, D2_LoginUI.y + 210.0f };
-			D2D_RECT_F D2_LoginButtonUIRect = { 0.0f, 71.5f * LoginOff, 168.0f, 71.5f * (LoginOff + 1)};
+			D2D_RECT_F D2_LoginButtonUIRect = { 0.0f, 71.5f * LoginOff, 168.0f, 71.5f * (LoginOff + 1) };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[68], &D2_LoginButtonUI, &D2_LoginButtonUIRect);
 
-			
+
 
 		}
 		else if (m_LoginScene == 1) {
@@ -1901,7 +1901,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-	}
+}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -1974,8 +1974,8 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			break;
 		}
 		}
-		}
-		}
+	}
+}
 
 
 #ifdef _WITH_DIRECT2D
@@ -2015,7 +2015,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-}
+	}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -3016,7 +3016,7 @@ void CGameFramework::CreateDirect2DDevice()
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
 #endif
-	}
+}
 #endif
 
 
@@ -3354,18 +3354,25 @@ void CGameFramework::NpcHittingMotion(int p_id)
 }
 void CGameFramework::MyPlayerDieMotion()
 {
-	m_bDieMotion = true;
-	((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType
-		= ANIMATION_TYPE_ONCE;
-	((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = true;
-	((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->DieState();
-	m_pCamera->GenerateProjectionMatrix(1.01f, 8000.0f, ASPECT_RATIO, 70.0f);
+	if (m_ingame_role == R_RIFLE)
+	{
+
+		m_bDieMotion = true;
+		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType
+			= ANIMATION_TYPE_ONCE;
+		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = true;
+		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->DieState();
+		m_pCamera->GenerateProjectionMatrix(1.01f, 8000.0f, ASPECT_RATIO, 70.0f);
+	}
 
 }
 void CGameFramework::MyPlayerResponeMotion()
 {
-	m_bDieMotion = false;
-	((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = false;
+	if (m_ingame_role == R_RIFLE)
+	{
+		m_bDieMotion = false;
+		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = false;
+	}
 }
 void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
 {
@@ -3386,8 +3393,10 @@ void CGameFramework::DyingMotionNPC(int id)
 	/* 12~16 = 헬리콥터NPC , 22~41 = 사람NPC */
 	if (0 <= id && id < 5) {	// 헬기
 
+		((CFragmentsShader*)((Stage1*)m_pScene)->m_ppFragShaders[0])->m_bActive = true;
 		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->m_bDyingstate = true;
-
+		((CFragmentsShader*)((Stage1*)m_pScene)->m_ppFragShaders[0])->ParticlePosition =
+			((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->GetPosition();
 
 	}
 	else {		// 사람

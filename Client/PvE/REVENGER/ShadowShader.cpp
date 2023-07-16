@@ -80,16 +80,24 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[1]->SetMaterial(0, pOtherPlayerMaterial);
 
 		pSModel->m_pModelRootObject->AddRef();
-		for (int x = 5; x < 8; x++)
+		for (int x = 5; x < 7; x++)
 		{
 			m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
 			m_ppObjects[x]->SetMaterial(0, pOtherPlayerMaterial);
 			m_ppObjects[x]->SetScale(5, 5, 5);
-			m_ppObjects[x]->SetPosition(XMFLOAT3(70.0 + (x) * 20, 8.0, 800.0));
+			m_ppObjects[x]->SetPosition(XMFLOAT3(70.0 + (x) * 20, 0.0, 800.0));
 			pSModel->m_pModelRootObject->AddRef();
 		}
-
 		if (pSModel) delete pSModel;
+
+
+		CGameObject* pPlayerHelicopterModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
+		m_ppObjects[7] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pPlayerHelicopterModel, pd3dGraphicsRootSignature);
+		m_ppObjects[7]->SetChild(pPlayerHelicopterModel, false);
+		m_ppObjects[7]->SetMaterial(0, pOtherPlayerMaterial);
+		m_ppObjects[7]->OnPrepareAnimate();
+		m_ppObjects[7]->SetPosition(XMFLOAT3(50.0 , -5.0, 500.0));
+		pPlayerHelicopterModel->AddRef();
 
 		/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
 

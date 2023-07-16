@@ -1017,7 +1017,6 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveMark = true;
 	((CFragmentsShader*)m_ppFragShaders[0])->m_bActive = true;
 	((CHelicopterBulletMarkParticleShader*)m_ppFragShaders[1])->m_bActive = true;
-	((CFragmentsShader*)m_ppFragShaders[0])->ParticlePosition = m_ppShaders[0]->m_ppObjects[13]->GetPosition();
 	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(m_ppShaders[0]->m_ppObjects[30]->GetPosition());
 	((CHelicopterBulletMarkParticleShader*)m_ppFragShaders[1])->ParticlePosition = XMFLOAT3(120.0, 6.1, 800.0);
 	((HeliHittingMarkBillboard*)m_pBillboardShader[5])->m_bActive = true;
