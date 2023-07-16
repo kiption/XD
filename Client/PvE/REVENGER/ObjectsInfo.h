@@ -23,6 +23,7 @@ struct ObjectsInfo
 	bool m_new_state_update; // 상태가 바뀌었는지
 	bool m_attack_on;	// 공격을 했는 지
 	bool m_damaged_effect_on;
+	bool m_near_death_hp;	// HP 30%미만
 
 	ObjectsInfo() {
 		m_id = -1;
@@ -41,6 +42,7 @@ struct ObjectsInfo
 		m_new_state_update = false;
 		m_damaged_effect_on = false;
 		m_attack_on = false;
+		m_near_death_hp = false;
 	}
 
 	void InfoClear() {
@@ -59,6 +61,8 @@ struct ObjectsInfo
 		m_ingame_state = PL_ST_DEAD;
 		m_new_state_update = false;
 		m_damaged_effect_on = false;
+		m_attack_on = false;
+		m_near_death_hp = false;
 	}
 };
 

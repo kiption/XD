@@ -55,6 +55,7 @@ int left_member_id = -1;
 int role_change_member_id = -1;
 
 //==================================================
+// 인게임 관련
 volatile bool respawn_trigger = false;
 
 //==================================================
@@ -708,13 +709,17 @@ void processPacket(char* ptr)
 		if (recv_packet->target == TARGET_PLAYER) {
 			gamesound.collisionSound();
 			players_info[recv_id].m_hp -= recv_packet->damage;
-			if (players_info[recv_id].m_hp < 0) players_info[recv_packet->id].m_hp = 0;
-
+			players_info[recv_id].m_damaged_effect_on = true;
+			if (players_info[recv_id].m_hp < 0)
+				players_info[recv_packet->id].m_hp = 0;
+			else if (players_info[recv_id].m_hp <= 30 && players_info[recv_packet->id].m_near_death_hp == false)
+				players_info[recv_packet->id].m_near_death_hp = true;
 		}
 		// NPC Damaged
 		else if (recv_packet->target == TARGET_NPC) {
 			gamesound.collisionSound();
 			npcs_info[recv_id].m_hp -= recv_packet->damage;
+			npcs_info[recv_id].m_damaged_effect_on = true;
 			if (npcs_info[recv_id].m_hp < 0) npcs_info[recv_packet->id].m_hp = 0;
 		}
 
@@ -762,9 +767,6 @@ void processPacket(char* ptr)
 				players_info[recv_id].m_hp = 0;
 				players_info[recv_id].m_damaged_effect_on = true;
 				break;
-
-			case PL_ST_DAMAGED:
-				break;
 			}
 		}
 		else if (recvd_target == TARGET_NPC) {
@@ -783,10 +785,6 @@ void processPacket(char* ptr)
 				npcs_info[recv_id].m_hp = 0;
 				cout << "NPC[" << recv_id << "] 죽었다" << endl;
 				break;
-
-			case PL_ST_DAMAGED:
-
-				break;
 			}
 		}
 
@@ -804,6 +802,7 @@ void processPacket(char* ptr)
 		players_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 		players_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
 		players_info[recv_id].m_ingame_state = recv_packet->state;
+		players_info[recv_packet->id].m_near_death_hp = false;
 
 		respawn_trigger = true;
 		break;

@@ -385,6 +385,9 @@ public:
 	vector<int>path;
 	BoundingFrustum m_frustum;
 	XMFLOAT3 m_VectorMAX = { -9999.f, -9999.f, -9999.f };
+	chrono::system_clock::time_point PrevTime;
+	chrono::system_clock::time_point CurrTime;
+
 public:
 	NPC() : OBJECT() {
 		m_state = NPC_IDLE;
@@ -1925,11 +1928,13 @@ void process_packet(char* packet)
 		if (damaged_packet->target == TARGET_PLAYER) {
 			playersInfo[obj_id].obj_lock.lock();
 			playersInfo[obj_id].hp -= damaged_packet->damage;
+			if (playersInfo[obj_id].hp < 0) playersInfo[obj_id].hp = 0;
 			playersInfo[obj_id].obj_lock.unlock();
 		}
 		else if (damaged_packet->target == TARGET_NPC) {
 			npcsInfo[obj_id].obj_lock.lock();
 			npcsInfo[obj_id].hp -= damaged_packet->damage;
+			if (npcsInfo[obj_id].hp < 0) npcsInfo[obj_id].hp = 0;
 			npcsInfo[obj_id].obj_lock.unlock();
 		}
 
@@ -2134,6 +2139,8 @@ void initNpc() {
 		npcsInfo[i].path.clear();
 		npcsInfo[i].SetTargetNodeIndex(-1);
 		npcsInfo[i].SetHp(250);
+		npcsInfo[i].CurrTime = chrono::system_clock::now();
+		npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
 		g_logicservers[a_lgcsvr_num].send_npc_init_packet(npc_id);
 	}
 
@@ -2170,6 +2177,9 @@ void initNpc() {
 			npcsInfo[i].path.clear();
 			npcsInfo[i].SetTargetNodeIndex(-1);
 			npcsInfo[i].SetHp(100);
+
+			npcsInfo[i].CurrTime = chrono::system_clock::now();
+			npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
 			g_logicservers[a_lgcsvr_num].send_npc_init_packet(npc_id);
 		}
 	}
@@ -2191,12 +2201,14 @@ void MoveNPC()
 
 					for (auto& cl : playersInfo) {
 						if (cl.id != -1) {
-							npcsInfo[i].Caculation_Distance(cl.pos, cl.id);
-							// 가장 가까운 거리를 갖고있는 아이를 chase_id로 지정
-							float distance = npcsInfo[i].GetDistance(cl.id);
-							if (temp_min > distance) {
-								temp_min = distance;
-								temp_id = cl.id;
+							if (cl.hp != 0) {
+								npcsInfo[i].Caculation_Distance(cl.pos, cl.id);
+								// 가장 가까운 거리를 갖고있는 아이를 chase_id로 지정
+								float distance = npcsInfo[i].GetDistance(cl.id);
+								if (temp_min > distance) {
+									temp_min = distance;
+									temp_id = cl.id;
+								}
 							}
 						}
 					}
@@ -2229,12 +2241,24 @@ void MoveNPC()
 					//	cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
 					//}
 
-					if (npcsInfo[i].GetState() == NPC_ATTACK && npcsInfo[i].type == NPC_HELICOPTER) {
-						g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
+					if (npcsInfo[i].GetState() == NPC_ATTACK) {
+						if (npcsInfo[i].type == NPC_HELICOPTER) {
+							npcsInfo[i].CurrTime = system_clock::now();
+							if (npcsInfo[i].CurrTime - npcsInfo[i].PrevTime > 300ms) {
+								g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
+								npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
+							}
+						}
+						else {
+							npcsInfo[i].CurrTime = system_clock::now();
+							if (npcsInfo[i].CurrTime - npcsInfo[i].PrevTime > 1000ms) {
+								g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
+								npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
+							}
+						}
 					}
 				}
 			}
-
 			//======================================================================
 			auto curr_t = system_clock::now();
 			if (curr_t - start_t < 16ms)
@@ -2252,7 +2276,7 @@ void npcAttack()
 		if (ConnectingServer) {
 			for (int i{}; i < MAX_NPCS; ++i) {
 				if (npcsInfo[i].GetState() == NPC_ATTACK && npcsInfo[i].type == NPC_ARMY) {
-					g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
+					//g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
 				}
 			}
 		}
