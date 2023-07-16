@@ -462,9 +462,11 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 
 		break;
 
-	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
+		break;
+	case WM_LBUTTONDOWN:
 	{
+		::GetCursorPos(&m_ptOldCursorPos);
 		if (m_nMode == OPENINGSCENE) {
 			cout << "x: " << m_ptOldCursorPos.x << ", y: " << m_ptOldCursorPos.y << endl;
 			switch (m_LoginScene)
@@ -585,12 +587,14 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 					case 0:
 						if (choicejob[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[0].lx\
 							&& choicejob[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[0].ly) {
-							// 헬기 -> 사람
+							// 역핧변경 (사람)
+							cout << "소총 클릭됨." << endl;
 							role_change_h2a_click = true;
 						}
 						else if (choicejob[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[1].lx\
 							&& choicejob[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[1].ly) {
-							// 사람 -> 헬기
+							// 역핧변경 (헬기)
+							cout << "헬기 클릭됨." << endl;
 							role_change_a2h_click = true;
 						}
 						break;
@@ -640,7 +644,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 		}
 	}
 	if (m_nMode == SCENE1STAGE) ::SetCapture(hWnd);
-	::GetCursorPos(&m_ptOldCursorPos);
+	/*::GetCursorPos(&m_ptOldCursorPos);*/
 	break;
 	case WM_MOUSEMOVE:
 
