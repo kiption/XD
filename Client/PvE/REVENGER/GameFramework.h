@@ -154,8 +154,8 @@ public:
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
-	
-	
+
+
 	void ChangeScene(DWORD nMode);
 	void ShotDelay();
 	DWORD						m_nMode = OPENINGSCENE;
@@ -276,6 +276,9 @@ public:
 public:
 	int m_MAX_USER;
 	int m_roominMyId;
+	enum INGAME_ROLE { R_NONE, R_RIFLE, R_HELI };
+	int m_ingame_role = R_NONE;	// 역할 (소총수, 헬기)
+
 	SceneManager* m_pScene = NULL;
 	// 서버로 보낼 키보드 입력값
 	queue<short> q_keyboardInput;

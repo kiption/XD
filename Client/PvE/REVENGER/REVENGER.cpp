@@ -811,16 +811,19 @@ void uiThreadFunc() {
 					if (players_info[role_change_member_id].m_role == ROLE_NOTCHOOSE) {
 						gGameFramework.m_MyRoom_Info[role_change_member_id].armyCheck = false;
 						gGameFramework.m_MyRoom_Info[role_change_member_id].HeliCheck = false;
+						gGameFramework.m_ingame_role = gGameFramework.R_NONE;
 						cout << "Client[" << role_change_member_id << "]의 역할이 [선택 안함]으로 바뀌었음." << endl;
 					}
 					else if (players_info[role_change_member_id].m_role == ROLE_RIFLE) {
 						gGameFramework.m_MyRoom_Info[role_change_member_id].armyCheck = true;
 						gGameFramework.m_MyRoom_Info[role_change_member_id].HeliCheck = false;
+						gGameFramework.m_ingame_role = gGameFramework.R_RIFLE;
 						cout << "Client[" << role_change_member_id << "]의 역할이 [Rifle]로 바뀌었음." << endl;
 					}
 					else if (players_info[role_change_member_id].m_role == ROLE_HELI) {
 						gGameFramework.m_MyRoom_Info[role_change_member_id].armyCheck = false;
 						gGameFramework.m_MyRoom_Info[role_change_member_id].HeliCheck = true;
+						gGameFramework.m_ingame_role = gGameFramework.R_HELI;
 						cout << "Client[" << role_change_member_id << "]의 역할이 [Heli]로 바뀌었음." << endl;
 					}
 					role_change_member_id = -1;

@@ -549,6 +549,22 @@ void process_packet(int client_id, char* packet)
 	{
 		CLBY_GAME_READY_PACKET* recv_packet = reinterpret_cast<CLBY_GAME_READY_PACKET*>(packet);
 
+		int cur_room = clients[client_id].curr_room;
+		if (cur_room == -1) break;	// 비정상 요청 (나중에 접속을 끊어버리던가 하자)
+
+		// 요청한 클라이언트가 방에서의 몇번째 인덱스인지 알아냄
+		int inroom_index = -1;
+		for (int i = 0; i < MAX_USER; ++i) {
+			if (game_rooms[cur_room].users[i] == client_id) {
+				inroom_index = i;
+				break;
+			}
+		}
+		if (inroom_index == -1) {
+			cout << "[Error] Unknown Error (Line:564)" << endl;
+			break;
+		}
+
 		if (clients[client_id].inroom_state == RM_ST_NONREADY) {
 			clients[client_id].inroom_state = RM_ST_READY;
 			cout << "Client[" << client_id << "] 준비 완료." << endl;
@@ -563,7 +579,7 @@ void process_packet(int client_id, char* packet)
 						LBYC_MEMBER_STATE_PACKET ready_packet;
 						ready_packet.size = sizeof(LBYC_MEMBER_STATE_PACKET);
 						ready_packet.type = LBYC_MEMBER_STATE;
-						ready_packet.member_id = client_id;
+						ready_packet.member_id = inroom_index;
 						ready_packet.member_state = RM_ST_READY;
 						clients[member_id].do_send(&ready_packet);
 						cout << "Client[" << member_id << "]에게 Client[" << client_id << "]가 준비되었다고 알림." << endl;
@@ -586,7 +602,7 @@ void process_packet(int client_id, char* packet)
 						LBYC_MEMBER_STATE_PACKET ready_packet;
 						ready_packet.size = sizeof(LBYC_MEMBER_STATE_PACKET);
 						ready_packet.type = LBYC_MEMBER_STATE;
-						ready_packet.member_id = client_id;
+						ready_packet.member_id = inroom_index;
 						ready_packet.member_state = RM_ST_NONREADY;
 						clients[member_id].do_send(&ready_packet);
 						cout << "Client[" << member_id << "]에게 Client[" << client_id << "]가 준비를 해제하였다고 알림." << endl;
