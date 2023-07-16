@@ -802,6 +802,7 @@ void processPacket(char* ptr)
 		players_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 		players_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
 		players_info[recv_id].m_ingame_state = recv_packet->state;
+		players_info[recv_packet->id].m_near_death_hp = false;
 
 		respawn_trigger = true;
 		break;
