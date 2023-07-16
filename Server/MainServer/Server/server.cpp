@@ -170,6 +170,7 @@ public:
 	SOCKET socket;
 	int remain_size;
 	char name[NAME_SIZE];
+	char role;
 
 	short pl_state;
 	int hp;
@@ -820,10 +821,16 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].pl_state = PL_ST_IDLE;
 		clients[client_id].curr_stage = 1;
 		clients[client_id].hp = HELI_MAXHP;
+		clients[client_id].role = login_packet->role;
 		strcpy_s(clients[client_id].name, login_packet->name);
 
 		clients[client_id].pos.x = RESPAWN_POS_X + 15 * client_id;
-		clients[client_id].pos.y = RESPAWN_POS_Y;
+		if (login_packet->role == ROLE_RIFLE) {
+			clients[client_id].pos.y = RESPAWN_POS_Y_HUMAN;
+		}
+		else if (login_packet->role == ROLE_HELI) {
+			clients[client_id].pos.y = RESPAWN_POS_Y_HELI;
+		}
 		clients[client_id].pos.z = RESPAWN_POS_Z;
 
 		clients[client_id].m_rightvec = XMFLOAT3{ 1.0f, 0.0f, 0.0f };
@@ -2329,7 +2336,10 @@ void timerFunc() {
 						cl.s_lock.lock();
 						cl.pl_state = PL_ST_IDLE;
 						cl.hp = HELI_MAXHP;
-						cl.pos = XMFLOAT3{ RESPAWN_POS_X + 15 * cl.id, RESPAWN_POS_Y, RESPAWN_POS_Z };
+						if (cl.role == ROLE_RIFLE)
+							cl.pos = XMFLOAT3{ RESPAWN_POS_X + 15 * cl.id, RESPAWN_POS_Y_HUMAN, RESPAWN_POS_Z };
+						else if (cl.role == ROLE_HELI)
+							cl.pos = XMFLOAT3{ RESPAWN_POS_X + 15 * cl.id, RESPAWN_POS_Y_HELI, RESPAWN_POS_Z };
 						cl.m_rightvec = XMFLOAT3{ 1.0f, 0.0f, 0.0f };
 						cl.m_upvec = XMFLOAT3{ 0.0f, 1.0f, 0.0f };
 						cl.m_lookvec = XMFLOAT3{ 0.0f, 0.0f, 1.0f };

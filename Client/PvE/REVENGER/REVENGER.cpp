@@ -288,6 +288,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						login_pack.size = sizeof(CS_LOGIN_PACKET);
 						login_pack.type = CS_LOGIN;
 						strcpy_s(login_pack.name, full_name.c_str());
+						login_pack.role = players_info[my_id].m_role;
+						login_pack.inroom_index = my_id;
+						login_pack.room_id = curr_room_id;
 						sendPacket(&login_pack);
 						recvPacket();
 

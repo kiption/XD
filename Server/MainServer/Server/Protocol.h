@@ -264,6 +264,9 @@ struct CS_LOGIN_PACKET {
 	unsigned char size;
 	char type;
 	char name[NAME_SIZE];
+	char role;
+	short room_id;
+	short inroom_index;
 };
 
 // 2) 조작 관련 패킷
