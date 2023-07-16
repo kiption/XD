@@ -333,7 +333,8 @@ public:
 
 
 	bool W_KEY, A_KEY, S_KEY, D_KEY, SPACE_KEY, SHOOT_KEY = false;
-	//
+	bool isComplete = false;
+
 	bool player_dead = false;
 	bool role_change_a2h_click = false;	// army -> heli
 	bool role_change_h2a_click = false;	// heli -> human
