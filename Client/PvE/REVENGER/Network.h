@@ -55,6 +55,7 @@ int left_member_id = -1;
 int role_change_member_id = -1;
 
 //==================================================
+// 인게임 관련
 volatile bool respawn_trigger = false;
 
 //==================================================
@@ -709,8 +710,10 @@ void processPacket(char* ptr)
 			gamesound.collisionSound();
 			players_info[recv_id].m_hp -= recv_packet->damage;
 			players_info[recv_id].m_damaged_effect_on = true;
-			if (players_info[recv_id].m_hp < 0) players_info[recv_packet->id].m_hp = 0;
-
+			if (players_info[recv_id].m_hp < 0)
+				players_info[recv_packet->id].m_hp = 0;
+			else if (players_info[recv_id].m_hp <= 30 && players_info[recv_packet->id].m_near_death_hp == false)
+				players_info[recv_packet->id].m_near_death_hp = true;
 		}
 		// NPC Damaged
 		else if (recv_packet->target == TARGET_NPC) {
