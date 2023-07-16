@@ -46,24 +46,24 @@ CGameFramework::CGameFramework()
 	_tcscpy_s(m_pszFrameRate, _T("REVENGER :"));
 
 	loginpos[0].sx = 460.0f;
-	loginpos[0].sy = 662.0f;
-	loginpos[0].lx = 696.0f;
-	loginpos[0].ly = 731.0f;
+	loginpos[0].sy = 660.0f;
+	loginpos[0].lx = 695.0f;
+	loginpos[0].ly = 735.0f;
 
 	loginpos[1].sx = 460.0f;
 	loginpos[1].sy = 752.0;
-	loginpos[1].lx = 696.0f;
-	loginpos[1].ly = 821.0f;
+	loginpos[1].lx = 695.0f;
+	loginpos[1].ly = 820.0f;
 
-	loginpos[2].sx = 460.0f;
-	loginpos[2].sy = 842.0f;
-	loginpos[2].lx = 696.0f;
-	loginpos[2].ly = 912.0f;
+	loginpos[2].sx = 355.0f;
+	loginpos[2].sy = 845.0f;
+	loginpos[2].lx = 520.0f;
+	loginpos[2].ly = 915.0f;
 
-	loginpos[3].sx = 541.0f;
-	loginpos[3].sy = 932.0f;
-	loginpos[3].lx = 702.0f;
-	loginpos[3].ly = 1006.0f;
+	loginpos[3].sx = 540.0f;
+	loginpos[3].sy = 845.0f;
+	loginpos[3].lx = 705.0f;
+	loginpos[3].ly = 915.0f;
 
 	gamepos[0].sx = 107.0f;
 	gamepos[0].sy = 705.0f;
@@ -482,7 +482,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				}
 				else if (loginpos[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[2].lx && loginpos[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[2].ly) {
 					memset(m_LoginClick, 0, sizeof(m_LoginClick));
-					m_LoginClick[2] = true; // IP 입력 활성화 --> 서버 선택으로 변경 예정
+					m_LoginClick[2] = true; // Regist
 				}
 				else if (loginpos[3].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < loginpos[3].lx && loginpos[3].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < loginpos[3].ly) {
 					memset(m_LoginClick, 0, sizeof(m_LoginClick));
@@ -660,25 +660,43 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 	if (m_LoginScene == 0) {
 		switch (nMessageID)
 		{
+		case WM_CHAR:
+		{
+			if (m_LoginClick[0]) {
+				WCHAR IDchar = static_cast<WCHAR>(wParam);
+				if ((IDchar >= L'A' && IDchar <= L'Z') || (IDchar >= L'a' && IDchar <= L'z') || (IDchar >= L'0' && IDchar <= L'9'))
+				{
+					size_t IDLength = wcslen(m_LoginID);
+					size_t remainingSpace = sizeof(m_LoginID) / sizeof(m_LoginID[0]) - IDLength - 1;
+
+
+					if (remainingSpace > 0) {
+						wcsncat_s(m_LoginID, sizeof(m_LoginID) / sizeof(m_LoginID[0]), &IDchar, remainingSpace);
+						m_LoginID[++IDLength] = L'\0';  // 널 종료 문자 위치 업데이트
+					}
+				}
+			}
+			else if (m_LoginClick[1]) {
+				WCHAR PWchar = static_cast<WCHAR>(wParam);
+				if ((PWchar >= L'A' && PWchar <= L'Z') || (PWchar >= L'a' && PWchar <= L'z') || (PWchar >= L'0' && PWchar <= L'9'))
+				{
+					size_t PWLength = wcslen(m_LoginPW);
+					size_t remainingSpace = sizeof(m_LoginPW) / sizeof(m_LoginPW[0]) - PWLength - 1;
+					if (remainingSpace > 0) {
+						wcsncat_s(m_LoginPW, sizeof(m_LoginPW) / sizeof(m_LoginPW[0]), &PWchar, remainingSpace);
+						m_LoginPW[++PWLength] = L'\0';  // 널 종료 문자 위치 업데이트
+					}
+				}
+			}
+			break;
+		}
 		case WM_KEYUP:
 		{
 			if (m_LoginClick[0]) {
 				if (wParam == VK_BACK) {
-					size_t pwLength = wcslen(m_LoginPW);
+					size_t pwLength = wcslen(m_LoginID);
 					if (pwLength > 0) {
-						m_LoginPW[pwLength - 1] = L'\0';
-					}
-				}
-				else {
-					WCHAR PWchar = static_cast<WCHAR>(wParam);
-					if (PWchar == L'.') {
-						PWchar = L'*';
-					}
-					size_t pwLength = wcslen(m_LoginPW);
-					size_t remainingSpace = sizeof(m_LoginPW) / sizeof(m_LoginPW[0]) - pwLength - 1;
-
-					if (remainingSpace > 0) {
-						wcsncat_s(m_LoginPW, sizeof(m_LoginPW) / sizeof(m_LoginPW[0]), &PWchar, remainingSpace);
+						m_LoginID[pwLength - 1] = L'\0';
 					}
 				}
 			}
@@ -689,48 +707,15 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 						m_LoginPW[pwLength - 1] = L'\0';
 					}
 				}
-				else {
-					WCHAR PWchar = static_cast<WCHAR>(wParam);
-					if (PWchar == L'.') {
-						PWchar = L'*';
-					}
-					size_t pwLength = wcslen(m_LoginPW);
-					size_t remainingSpace = sizeof(m_LoginPW) / sizeof(m_LoginPW[0]) - pwLength - 1;
-
-					if (remainingSpace > 0) {
-						wcsncat_s(m_LoginPW, sizeof(m_LoginPW) / sizeof(m_LoginPW[0]), &PWchar, remainingSpace);
-					}
-				}
 			}
-			else if (m_LoginClick[2]) {
-				if (wParam == VK_BACK) {
-					size_t ipLength = wcslen(m_LoginIP);
-					if (ipLength > 0) {
-						m_LoginIP[ipLength - 1] = L'\0';
-					}
-				}
-				else {
-					WCHAR IPchar = static_cast<WCHAR>(wParam);
-					if (IPchar == L'.') {
-						IPchar = L'*';
-					}
-					size_t ipLength = wcslen(m_LoginIP);
-					size_t remainingSpace = sizeof(m_LoginIP) / sizeof(m_LoginIP[0]) - ipLength - 1;
-
-					if (remainingSpace > 0) {
-						wcsncat_s(m_LoginIP, sizeof(m_LoginIP) / sizeof(m_LoginIP[0]), &IPchar, remainingSpace);
-					}
-				}
-			}
+			break;
 		}
-		break;
 		}
 	}
 	else if (UI_Switch) {
 		switch (nMessageID) {
 		case WM_IME_COMPOSITION:
 		{
-
 			WCHAR IDchar = static_cast<WCHAR>(wParam);//어쨌든 뭔가가 조합된다
 			if (lParam == GCS_RESULTSTR) {//얘는 확신
 				size_t completeChatLength = wcslen(m_CompleteChat);//아이디 길이
@@ -782,7 +767,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 					m_CompleteChat[++ChatCompleteLength] = L'\0';  // 널 종료 문자 위치 업데이트
 				}
 			}
-
 			break;
 		}
 		case WM_KEYUP:
@@ -819,11 +803,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				size_t ChatLength = wcslen(m_InsertChat);
 				size_t remainingChatSpace = sizeof(m_InsertChat) / sizeof(m_InsertChat[0]) - ChatLength - 1;
 
-
 				//size_t ChatLength = wcslen(m_InsertChat);
 				size_t CompleteLength = wcslen(m_CompleteChat);
 				size_t remainingCompleteSpace = sizeof(m_CompleteChat) / sizeof(m_CompleteChat[0]) - CompleteLength - 1;
-
 
 				if (remainingChatSpace > 0) {
 					m_InsertChat[ChatLength] = L' ';  // m_InsertChat에 공백 문자 추가
@@ -834,10 +816,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 					m_CompleteChat[CompleteLength] = L' ';  // m_CompleteChat에 공백 문자 추가
 					m_CompleteChat[CompleteLength + 1] = L'\0';
 				}
-
-			}
-			else {
-
 			}
 			break;
 		}
@@ -1355,15 +1333,42 @@ void CGameFramework::FrameAdvance()
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	if (m_nMode == OPENINGSCENE) {
 		// Logo
-		D2D_POINT_2F D2_OpeningUI = { FRAME_BUFFER_WIDTH / 6, 0.0f };
-		D2D_RECT_F D2_OpeningUIRect = { 0.0f, 0.0f, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
-		//m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[25], &D2_OpeningUI, &D2_OpeningUIRect);
-		// -> logo 받으면 재삽입
+		D2D_POINT_2F D2_OpeningUI = { 50.0f, 50.0f };
+		D2D_RECT_F D2_OpeningUIRect = { 0.0f, 0.0f, 840.0f, 184.0f };
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[25], &D2_OpeningUI, &D2_OpeningUIRect);
 
 		if (m_LoginScene == 0) {
-			D2D_POINT_2F D2_LoginUI = { D2_OpeningUI.x + 12.0f, FRAME_BUFFER_HEIGHT / 16 * 9 };
-			D2D_RECT_F D2_LoginUIRect = { 0.0f, 0.0f, 381.0f, 388.0f };
+			D2D_POINT_2F D2_LoginUI = { (FRAME_BUFFER_WIDTH / 6) + 12.0f, FRAME_BUFFER_HEIGHT / 16 * 9 };
+			D2D_RECT_F D2_LoginUIRect = { 0.0f, 0.0f, 381.0f, 297.0f };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[26], &D2_LoginUI, &D2_LoginUIRect);
+
+			POINT CurrMousePoint;
+			GetCursorPos(&CurrMousePoint);
+
+			bool RegistOff = true;
+			bool LoginOff = true;
+
+			if (loginpos[2].sx < CurrMousePoint.x && CurrMousePoint.x < loginpos[2].lx && loginpos[2].sy < CurrMousePoint.y && CurrMousePoint.y < loginpos[2].ly) {
+				RegistOff = false;
+				LoginOff = true;
+			}
+			else if (loginpos[3].sx < CurrMousePoint.x && CurrMousePoint.x < loginpos[3].lx && loginpos[3].sy < CurrMousePoint.y && CurrMousePoint.y < loginpos[3].ly) {
+				RegistOff = true;
+				LoginOff = false;
+			}
+
+
+			D2D_POINT_2F D2_RegistButtonUI = { (FRAME_BUFFER_WIDTH / 6) + 22.5f, D2_LoginUI.y + 210.0f };
+			D2D_RECT_F D2_RegistButtonUIRect = { 0.0f, 71.5f * RegistOff, 171.0f, 71.5f * (RegistOff + 1)};
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[69], &D2_RegistButtonUI, &D2_RegistButtonUIRect);
+
+
+			D2D_POINT_2F D2_LoginButtonUI = { D2_RegistButtonUI.x + 190.0f, D2_LoginUI.y + 210.0f };
+			D2D_RECT_F D2_LoginButtonUIRect = { 0.0f, 71.5f * LoginOff, 168.0f, 71.5f * (LoginOff + 1)};
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[68], &D2_LoginButtonUI, &D2_LoginButtonUIRect);
+
+			
+
 		}
 		else if (m_LoginScene == 1) {
 			POINT CurrMousePoint;
@@ -1402,32 +1407,32 @@ void CGameFramework::FrameAdvance()
 			bool CreateRoom = false;
 			bool LeftOn = false;
 			bool RightOn = false;
-
-			if (lobbypos[0].sx < CurrMousePoint.x && CurrMousePoint.x < lobbypos[0].lx && lobbypos[0].sy < CurrMousePoint.y && CurrMousePoint.y < lobbypos[0].ly) {
-				Roomin = true;
-				CreateRoom = false;
-				LeftOn = false;
-				RightOn = false;
+			if (m_LoginScene == 2) {
+				if (lobbypos[0].sx < CurrMousePoint.x && CurrMousePoint.x < lobbypos[0].lx && lobbypos[0].sy < CurrMousePoint.y && CurrMousePoint.y < lobbypos[0].ly) {
+					Roomin = true;
+					CreateRoom = false;
+					LeftOn = false;
+					RightOn = false;
+				}
+				else if (lobbypos[1].sx < CurrMousePoint.x && CurrMousePoint.x < lobbypos[1].lx && lobbypos[1].sy < CurrMousePoint.y && CurrMousePoint.y < lobbypos[1].ly) {
+					Roomin = false;
+					CreateRoom = true;
+					LeftOn = false;
+					RightOn = false;
+				}
+				else if (lobbypos[3].sx < CurrMousePoint.x && CurrMousePoint.x < lobbypos[3].lx && lobbypos[3].sy < CurrMousePoint.y && CurrMousePoint.y < lobbypos[3].ly) {
+					Roomin = false;
+					CreateRoom = false;
+					LeftOn = true;
+					RightOn = false;
+				}
+				else if (lobbypos[4].sx < CurrMousePoint.x && CurrMousePoint.x < lobbypos[4].lx && lobbypos[4].sy < CurrMousePoint.y && CurrMousePoint.y < lobbypos[4].ly) {
+					Roomin = false;
+					CreateRoom = false;
+					LeftOn = false;
+					RightOn = true;
+				}
 			}
-			else if (lobbypos[1].sx < CurrMousePoint.x && CurrMousePoint.x < lobbypos[1].lx && lobbypos[1].sy < CurrMousePoint.y && CurrMousePoint.y < lobbypos[1].ly) {
-				Roomin = false;
-				CreateRoom = true;
-				LeftOn = false;
-				RightOn = false;
-			}
-			else if (lobbypos[3].sx < CurrMousePoint.x && CurrMousePoint.x < lobbypos[3].lx && lobbypos[3].sy < CurrMousePoint.y && CurrMousePoint.y < lobbypos[3].ly) {
-				Roomin = false;
-				CreateRoom = false;
-				LeftOn = true;
-				RightOn = false;
-			}
-			else if (lobbypos[4].sx < CurrMousePoint.x && CurrMousePoint.x < lobbypos[4].lx && lobbypos[4].sy < CurrMousePoint.y && CurrMousePoint.y < lobbypos[4].ly) {
-				Roomin = false;
-				CreateRoom = false;
-				LeftOn = false;
-				RightOn = true;
-			}
-
 
 			// 빠른시작
 			D2D_POINT_2F D2_RapidStartUI = { 1004.0f, 215.0f };
@@ -1478,7 +1483,7 @@ void CGameFramework::FrameAdvance()
 			}
 			if (m_LoginScene == 3) {
 				// 방 ui
-				D2D_POINT_2F D2_RoomUI = { D2_OpeningUI.x, FRAME_BUFFER_HEIGHT / 2 - 223.5f };
+				D2D_POINT_2F D2_RoomUI = { (FRAME_BUFFER_WIDTH / 6), FRAME_BUFFER_HEIGHT / 2 - 223.5f };
 				D2D_RECT_F D2_RoomUIRect = { 0.0f, 0.0f, 1280.0f, 447.0f };
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[44], &D2_RoomUI, &D2_RoomUIRect);
 
@@ -1532,11 +1537,9 @@ void CGameFramework::FrameAdvance()
 
 
 				}
-
-
 			}
 			if (m_LoginScene == 4) {
-				D2D_POINT_2F D2_RoomUI = { D2_OpeningUI.x + 100.0f, FRAME_BUFFER_HEIGHT / 2 - 146.5f };
+				D2D_POINT_2F D2_RoomUI = { (FRAME_BUFFER_WIDTH / 6) + 100.0f, FRAME_BUFFER_HEIGHT / 2 - 146.5f };
 				D2D_RECT_F D2_RoomUIRect = { 0.0f, 0.0f, 1080.0f, 293.0f };
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[53], &D2_RoomUI, &D2_RoomUIRect);
 
@@ -1694,9 +1697,6 @@ void CGameFramework::FrameAdvance()
 
 			D2D_RECT_F D2_LoginPWText = D2D1::RectF((FRAME_BUFFER_WIDTH / 4.2), (FRAME_BUFFER_HEIGHT / 1.43f), (FRAME_BUFFER_WIDTH / 2.8), (FRAME_BUFFER_HEIGHT / 1.43f));
 			m_pd2dDeviceContext->DrawTextW(m_LoginPW, (UINT32)wcslen(m_LoginPW), m_pdwFont[1], &D2_LoginPWText, m_pd2dbrText[1]);
-
-			D2D_RECT_F D2_LoginIPText = D2D1::RectF((FRAME_BUFFER_WIDTH / 4.2), (FRAME_BUFFER_HEIGHT / 1.28f), (FRAME_BUFFER_WIDTH / 2.8), (FRAME_BUFFER_HEIGHT / 1.28f));
-			m_pd2dDeviceContext->DrawTextW(m_LoginIP, (UINT32)wcslen(m_LoginIP), m_pdwFont[1], &D2_LoginIPText, m_pd2dbrText[1]);
 		}
 		else if (m_LoginScene == 2) {
 			D2D_RECT_F D2_LoginRoomNumText[8];
@@ -1850,7 +1850,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-	}
+		}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -1914,8 +1914,8 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			break;
 		}
 		}
-	}
-}
+		}
+		}
 
 
 #ifdef _WITH_DIRECT2D
@@ -1941,7 +1941,7 @@ void CGameFramework::CreateDirect2DDevice()
 		D3D12_MESSAGE_SEVERITY pd3dSeverities[] =
 		{
 			D3D12_MESSAGE_SEVERITY_INFO,
-};
+		};
 
 		D3D12_MESSAGE_ID pd3dDenyIds[] =
 		{
@@ -1955,7 +1955,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-	}
+}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -2437,7 +2437,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[24]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	// Logo
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/CrossHair.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Logo.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	//hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Opening.jpg", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
@@ -2917,10 +2917,46 @@ void CGameFramework::CreateDirect2DDevice()
 		m_pd2dfxEdgeDetection[66 + i]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 	}
 
+	// loginButtonUI
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/loginButtonUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[68]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[68]->SetInputEffect(0, m_pd2dfxBitmapSource[68]);
+	m_pd2dfxGaussianBlur[68]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[68]->SetInputEffect(0, m_pd2dfxBitmapSource[68]);
+	m_pd2dfxEdgeDetection[68]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[68]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[68]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[68]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[68]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// RegistButtonUI
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/RegistButtonUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[69]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[69]->SetInputEffect(0, m_pd2dfxBitmapSource[69]);
+	m_pd2dfxGaussianBlur[69]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[69]->SetInputEffect(0, m_pd2dfxBitmapSource[69]);
+	m_pd2dfxEdgeDetection[69]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[69]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[69]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[69]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[69]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
 #endif
-}
+	}
 #endif
 
 

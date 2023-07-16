@@ -114,12 +114,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 					size_t idLength = wcslen(gGameFramework.m_LoginID);
 					size_t pwLength = wcslen(gGameFramework.m_LoginPW);
-					size_t ipLength = wcslen(gGameFramework.m_LoginIP);
-
+					
 					wcstombs_s(nullptr, id, sizeof(id), gGameFramework.m_LoginID, idLength);
 					wcstombs_s(nullptr, pw, sizeof(pw), gGameFramework.m_LoginPW, pwLength);
-					wcstombs_s(nullptr, ip, sizeof(ip), gGameFramework.m_LoginIP, ipLength);
-
+					
 					gGameFramework.m_bLoginInfoSend = false;
 				}
 
