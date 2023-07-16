@@ -59,6 +59,7 @@ struct ObjectsInfo
 		m_ingame_state = PL_ST_DEAD;
 		m_new_state_update = false;
 		m_damaged_effect_on = false;
+		m_attack_on = false;
 	}
 };
 

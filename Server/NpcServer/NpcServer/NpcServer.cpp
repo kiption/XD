@@ -1928,11 +1928,13 @@ void process_packet(char* packet)
 		if (damaged_packet->target == TARGET_PLAYER) {
 			playersInfo[obj_id].obj_lock.lock();
 			playersInfo[obj_id].hp -= damaged_packet->damage;
+			if (playersInfo[obj_id].hp < 0) playersInfo[obj_id].hp = 0;
 			playersInfo[obj_id].obj_lock.unlock();
 		}
 		else if (damaged_packet->target == TARGET_NPC) {
 			npcsInfo[obj_id].obj_lock.lock();
 			npcsInfo[obj_id].hp -= damaged_packet->damage;
+			if (npcsInfo[obj_id].hp < 0) npcsInfo[obj_id].hp = 0;
 			npcsInfo[obj_id].obj_lock.unlock();
 		}
 

@@ -708,6 +708,7 @@ void processPacket(char* ptr)
 		if (recv_packet->target == TARGET_PLAYER) {
 			gamesound.collisionSound();
 			players_info[recv_id].m_hp -= recv_packet->damage;
+			players_info[recv_id].m_damaged_effect_on = true;
 			if (players_info[recv_id].m_hp < 0) players_info[recv_packet->id].m_hp = 0;
 
 		}
@@ -715,6 +716,7 @@ void processPacket(char* ptr)
 		else if (recv_packet->target == TARGET_NPC) {
 			gamesound.collisionSound();
 			npcs_info[recv_id].m_hp -= recv_packet->damage;
+			npcs_info[recv_id].m_damaged_effect_on = true;
 			if (npcs_info[recv_id].m_hp < 0) npcs_info[recv_packet->id].m_hp = 0;
 		}
 
@@ -762,9 +764,6 @@ void processPacket(char* ptr)
 				players_info[recv_id].m_hp = 0;
 				players_info[recv_id].m_damaged_effect_on = true;
 				break;
-
-			case PL_ST_DAMAGED:
-				break;
 			}
 		}
 		else if (recvd_target == TARGET_NPC) {
@@ -782,10 +781,6 @@ void processPacket(char* ptr)
 
 				npcs_info[recv_id].m_hp = 0;
 				cout << "NPC[" << recv_id << "] ав╬З╢ы" << endl;
-				break;
-
-			case PL_ST_DAMAGED:
-
 				break;
 			}
 		}

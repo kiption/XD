@@ -417,8 +417,17 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				// 2. 객체 인게임 상태 업데이트 (자기 자신 제외, 자기 자신은 클라 독자적으로 돌아가기 때문)
 				//  1) Other Players
 				for (int i = 0; i < MAX_USER; ++i) {
-					if (i == my_id) break;
+					if (players_info[i].m_damaged_effect_on) {	// 피격 이펙트
+						if (i == my_id) {
+							// 혈흔 UI
+						}
+						else {
+							// 피격이펙트
+						}
+						players_info[i].m_damaged_effect_on = false;
+					}
 
+					if (i == my_id) continue;
 					if (players_info[i].m_new_state_update) {
 						switch (players_info[i].m_ingame_state) {
 						case PL_ST_IDLE:
@@ -440,8 +449,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						case PL_ST_DEAD:
 							gGameFramework.otherPlayerDyingMotion(i);
 							break;
-						case PL_ST_DAMAGED:
-							break;
 						}
 
 						players_info[i].m_new_state_update = false;
@@ -451,6 +458,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//  2) NPC
 				for (int i = 0; i < MAX_NPCS; ++i) {
 					if (npcs_info[i].m_id == -1) continue;
+
+					if (npcs_info[i].m_damaged_effect_on) {	// 피격 이펙트
+						gGameFramework.NpcHittingMotion(i);
+						npcs_info[i].m_damaged_effect_on = false;
+					}
 
 					if (npcs_info[i].m_new_state_update) {
 						switch (npcs_info[i].m_ingame_state) {
@@ -468,9 +480,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						case PL_ST_DEAD:
 							//((Stage1*)gGameFramework.m_pScene)->m_ppShaders[0]->m_ppObjects[10 + i]->m_xmf4x4ToParent._42 = 0.0f;
 							gGameFramework.DyingMotionNPC(i);
-							break;
-						case PL_ST_DAMAGED:
-							gGameFramework.NpcHittingMotion(i);
 							break;
 						}
 						npcs_info[i].m_new_state_update = false;
