@@ -7,12 +7,37 @@ float Random(float fMin, float fMax)
 	if (fRandomValue > fMax) fRandomValue = fMax;
 	return(fRandomValue);
 }
+inline float RandF(float fMin, float fMax)
+{
+	return(fMin + ((float)rand() / (float)RAND_MAX) * (fMax - fMin));
+}
 
 float Random()
 {
 	return(rand() / float(RAND_MAX));
 }
+XMVECTOR RandomUnitVectorOnSphere()
+{
+	XMVECTOR xmvOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
+	XMVECTOR xmvZero = XMVectorZero();
 
+	while (true)
+	{
+		XMVECTOR v = XMVectorSet(RandF(-1.0f, 1.0f), RandF(-1.0f, 1.0f), RandF(-1.0f, 1.0f), 0.0f);
+		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
+	}
+}
+XMVECTOR RandomMarkDir()
+{
+	XMVECTOR xmvOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
+	XMVECTOR xmvZero = XMVectorZero();
+
+	while (true)
+	{
+		XMVECTOR v = XMVectorSet(RandF(-0.2f, 0.2f), RandF(-1.f, 1.5f), RandF(-0.2f, 0.2f), 0.0f);
+		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
+	}
+}
 XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn, int nColumnSpace)
 {
 	float fAngle = Random() * 360.0f * (2.0f * 3.14159f / 360.0f);
@@ -174,46 +199,20 @@ D3D12_SHADER_BYTECODE CFragmentsShader::CreatePixelShader(ID3DBlob** ppd3dShader
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSParticleStandard", "ps_5_1", ppd3dShaderBlob));
 }
-inline float RandF(float fMin, float fMax)
-{
-	return(fMin + ((float)rand() / (float)RAND_MAX) * (fMax - fMin));
-}
-XMVECTOR RandomUnitVectorOnSphere()
-{
-	XMVECTOR xmvOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
-	XMVECTOR xmvZero = XMVectorZero();
 
-	while (true)
-	{
-		XMVECTOR v = XMVectorSet(RandF(-1.0f, 1.0f), RandF(-1.0f, 1.0f), RandF(-1.0f, 1.0f), 0.0f);
-		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
-	}
-}
-XMVECTOR RandomMarkDir()
-{
-	XMVECTOR xmvOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
-	XMVECTOR xmvZero = XMVectorZero();
-
-	while (true)
-	{
-		XMVECTOR v = XMVectorSet(RandF(-0.2f, 0.2f), RandF(-1.f, 1.5f), RandF(-0.2f, 0.2f), 0.0f);
-		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
-	}
-}
 
 void CFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	m_nObjects = EXPLOSION_DEBRISES;
 	m_ppObjects = new CGameObject * [m_nObjects];
-	CGameObject* pFragmentModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Sphere.bin", this);
+	CGameObject* pFragmentModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Wing2_1_Variant.bin", this);
 	for (int i = 0; i < m_nObjects; i++)
 	{
 		m_ppObjects[i] = new CExplosiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pFragmentModel, false);
-		m_ppObjects[i]->SetScale(20.0, 20.0, 20.0);
-		m_ppObjects[i]->SetPosition(0.0, 500.0, 0.0);
+		m_ppObjects[i]->SetScale(0.5, 1.5, 0.5);
 		pFragmentModel->AddRef();
-		ParticlePosition = m_ppObjects[i]->GetPosition();
+		//ParticlePosition = m_ppObjects[i]->GetPosition();
 	}
 	for (int i = 0; i < EXPLOSION_DEBRISES; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomUnitVectorOnSphere());
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -230,17 +229,15 @@ void CFragmentsShader::ReleaseObjects()
 
 void CFragmentsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	if (m_bActive == true)
+	CShader::Render(pd3dCommandList, pCamera, 0, false);
+
+	for (int j = 0; j < m_nObjects; j++)
 	{
-		for (int j = 0; j < m_nObjects; j++)
+		if (m_ppObjects[j])
 		{
-			if (m_ppObjects[j])
-			{
-				m_ppObjects[j]->UpdateTransform(NULL);
-				m_ppObjects[j]->Render(pd3dCommandList, pCamera, false);
-			}
+			m_ppObjects[j]->UpdateTransform(NULL);
+			m_ppObjects[j]->Render(pd3dCommandList, pCamera, false);
 		}
-		CShader::Render(pd3dCommandList, pCamera, 0, false);
 	}
 
 }
@@ -263,35 +260,33 @@ D3D12_INPUT_LAYOUT_DESC CFragmentsShader::CreateInputLayout(int nPipelineState)
 	return(d3dInputLayoutDesc);
 }
 
-
-
 void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 {
-	
 	if (m_bActive == true)
 	{
 
-		XMFLOAT3 gravity = XMFLOAT3(0, -6.8f, 0);
-		m_fElapsedTimes += fTimeElapsed * 4.0f;
+		XMFLOAT3 gravity = XMFLOAT3(0.0, -4.8, 0);
+		m_fElapsedTimes += fTimeElapsed * 6.05f;
 		if (m_fElapsedTimes <= m_fDuration)
 		{
 			for (int i = 0; i < EXPLOSION_DEBRISES; i++)
 			{
+				m_fExplosionSpeed = Random(1.0f, 12.0f);
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
-				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes;// +gravity.x;
-				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes +0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;;
-				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes;// +gravity.z;
+				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + gravity.x;
+				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;;
+				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes + gravity.z;
 				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
 
 				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
 				m_ppObjects[i]->m_xmf4x4ToParent._42 = m_pxmf4x4Transforms[i]._42;
 				m_ppObjects[i]->m_xmf4x4ToParent._43 = m_pxmf4x4Transforms[i]._43;
-				m_ppObjects[i]->Rotate(5.0, 8.0, 10.0);
+				m_ppObjects[i]->Rotate(2.0, 8.0, 0.0);
 			}
 		}
 		else
 		{
-			m_bActive = false;
+
 			m_fElapsedTimes = 0.0f;
 		}
 
@@ -345,7 +340,6 @@ void CHelicopterBulletMarkParticleShader::Render(ID3D12GraphicsCommandList* pd3d
 	{
 		if (m_ppObjects[j])
 		{
-			//ParticlePosition = XMFLOAT3(81.0f, 12.0f, 800.0f);
 			m_ppObjects[j]->UpdateTransform(NULL);
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera, false);
 		}

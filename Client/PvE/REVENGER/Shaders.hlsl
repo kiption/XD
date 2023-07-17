@@ -1,4 +1,5 @@
 #define MAX_LIGHTS 8
+
 #include "PCF.hlsl"
 struct MATERIAL
 {
@@ -7,7 +8,6 @@ struct MATERIAL
 	float4					m_cSpecular; //a = power
 	float4					m_cEmissive;
 };
-
 struct EXPLOSIONMATERIAL
 {
 	float4				m_cAmbient;
@@ -19,7 +19,6 @@ struct EXPLOSIONMATERIAL
 	int2				gi2TextureTiling;
 	float2				gf2TextureOffset;
 };
-
 cbuffer cbCameraInfo : register(b1)
 {
 	matrix		gmtxView : packoffset(c0);
@@ -27,7 +26,6 @@ cbuffer cbCameraInfo : register(b1)
 	matrix		gmtxInverseView : packoffset(c8);
 	float3		gvCameraPosition : packoffset(c12);
 };
-
 cbuffer cbGameObjectInfo : register(b2)
 {
 	matrix					gmtxGameObject : packoffset(c0);
@@ -54,18 +52,15 @@ cbuffer cbStreamGameObjectInfo : register(b9)
 
 
 };
-
 struct CB_TOOBJECTSPACE
 {
 	matrix		mtxToTexture;
 	float4		f4Position;
 };
-
 cbuffer cbToLightSpace : register(b12)
 {
 	CB_TOOBJECTSPACE gcbToLightSpaces[MAX_LIGHTS];
 };
-
 struct VS_CIRCULAR_SHADOW_INPUT
 {
 	float3 center : POSITION;
@@ -78,9 +73,6 @@ struct GS_CIRCULAR_SHADOW_GEOMETRY_OUTPUT
 };
 
 #include "Light.hlsl"
-
-
-//#define _WITH_VERTEX_LIGHTING
 
 struct VS_STANDARD_INPUT
 {
@@ -158,7 +150,6 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	return(lerp(cColor, cIllumination, 0.1f));
 }
 
-
 struct VS_PARTICLES_INPUT
 {
 	float3 position : POSITION;
@@ -206,7 +197,7 @@ float4 PSParticleStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
 	float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
 	if (gnTexturesMask & MATERIAL_EMISSION_MAP) cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
 	float3 normalW;
-	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor;
+	float4 cColor = cAlbedoColor + cSpecularColor + cEmissionColor + cMetallicColor;
 
 	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	{
@@ -218,10 +209,10 @@ float4 PSParticleStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
 	{
 		normalW = normalize(input.normalW);
 	}
-	cColor.r += 5.0f;
-	float4 uvs[MAX_LIGHTS];
+
+	float4 uvs[MAX_LIGHTS]; cColor.r += 0.47;
 	float4 cIllumination = ParticleLighting(input.positionW, normalize(input.normalW), false, uvs);
-	return(lerp(cColor, cIllumination, 0.2f));
+	return(lerp(cColor, cIllumination, 0.8f));
 }
 float4 PSBloodParticleStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
 {
@@ -288,8 +279,6 @@ float4 PSBulletStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 
 	return(lerp(cColor, cIllumination, 0.4f));
 }
-
-
 
 cbuffer cbBoneOffsets : register(b7)
 {
@@ -421,16 +410,13 @@ VS_SKYBOX_CUBEMAP_OUTPUT VSSkyBox(VS_SKYBOX_CUBEMAP_INPUT input)
 float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtSkyCubeTexture.Sample(gssClamp, input.positionL);
-
 	return(cColor);
 }
-
 struct VS_TEXTURED_INPUT
 {
 	float3 position : POSITION;
 	float2 uv : TEXCOORD;
 };
-
 struct VS_TEXTURED_OUTPUT
 {
 	float4 position : SV_POSITION;
@@ -446,14 +432,6 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 
 	return(output);
 }
-
-float4 PSTextured(VS_TEXTURED_OUTPUT input, uint primitiveID : SV_PrimitiveID) : SV_TARGET
-{
-	float4 cColor = gtxtBillboardTexture.Sample(gssWrap, input.uv);
-
-	return(cColor);
-}
-
 VS_TEXTURED_OUTPUT VSSpriteAnimation(VS_TEXTURED_INPUT input)
 {
 	VS_TEXTURED_OUTPUT output;
@@ -479,13 +457,20 @@ VS_TEXTURED_OUTPUT VSParticleBillBoardTextured(VS_TEXTURED_INPUT input)
 	return (output);
 
 }
+
+float4 PSTextured(VS_TEXTURED_OUTPUT input, uint primitiveID : SV_PrimitiveID) : SV_TARGET
+{
+	float4 cColor = gtxtBillboardTexture.Sample(gssWrap, input.uv);
+
+	return(cColor);
+}
+
 float4 PSBillBoardTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
 
 	float4 cColor = gtxtBillboardTexture.Sample(gssWrap, input.uv);
 	return (cColor);
 }
-
 
 float4 PSSmokeBillBoardTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {

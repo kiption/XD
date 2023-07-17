@@ -1,16 +1,3 @@
-//--------------------------------------------------------------------------------------
-#define MAX_LIGHTS			8
-#define MAX_MATERIALS		16
-
-#define POINT_LIGHT			1
-#define SPOT_LIGHT			2
-#define DIRECTIONAL_LIGHT	3
-
-#define _WITH_LOCAL_VIEWER_HIGHLIGHTING
-#define _WITH_THETA_PHI_CONES
-#define _WITH_REFLECT
-#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
-#define _WITH_PCF_FILTERING
 struct LIGHT
 {
 	float4					m_cAmbient;
@@ -31,28 +18,13 @@ struct LIGHT
 cbuffer cbMaterial : register(b10)
 {
 	MATERIAL			gMaterials[MAX_MATERIALS];
-
 };
-
 cbuffer cbLights : register(b4)
 {
 	LIGHT					gLights[MAX_LIGHTS];
 	float4					gcGlobalAmbientLight;
 	int						gnLights;
 };
-#define FRAME_BUFFER_WIDTH		1920
-#define FRAME_BUFFER_HEIGHT		1080
-
-#define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 4)
-#define _DEPTH_BUFFER_HEIGHT	(FRAME_BUFFER_HEIGHT * 4)
-
-#define DELTA_X					(1.0f / _DEPTH_BUFFER_WIDTH)
-#define DELTA_Y					(1.0f / _DEPTH_BUFFER_HEIGHT)
-
-#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
-
-Texture2D<float> gtxtDepthTextures[MAX_DEPTH_TEXTURES] : register(t18);
-SamplerComparisonState gssComparisonPCFShadow : register(s2);
 
 float Compute3x3ShadowFactor(float2 uv, float fDepth, uint nIndex)
 {
@@ -189,7 +161,6 @@ float4 Lighting(float3 vPosition, float3 vNormal)
 	float3 vToCamera = normalize(vCameraPosition - vPosition);
 	// Emissive Color: 텍스처로 제공된 물체의 색상 정보를 가져옴
 
-
 	float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	[unroll(MAX_LIGHTS)] for (int i = 0; i < gnLights; i++)
 	{
@@ -202,20 +173,16 @@ float4 Lighting(float3 vPosition, float3 vNormal)
 			else if (gLights[i].m_nType == POINT_LIGHT)
 			{
 				cColor += PointLight(i, vPosition, vNormal, vToCamera);
-
 			}
 			else if (gLights[i].m_nType == SPOT_LIGHT)
 			{
 				cColor += SpotLight(i, vPosition, vNormal, vToCamera);
-
-
 			}
 		}
 	}
 
 	cColor += (gcGlobalAmbientLight * gMaterial.m_cAmbient);
 	cColor.a = gMaterial.m_cDiffuse.a;
-
 	return(cColor);
 }
 float4 Lightings(float3 vPosition, float3 vNormal, float4 vEmissive)
@@ -223,7 +190,6 @@ float4 Lightings(float3 vPosition, float3 vNormal, float4 vEmissive)
 	float3 vCameraPosition = float3(gvCameraPosition.x, gvCameraPosition.y, gvCameraPosition.z);
 	float3 vToCamera = normalize(vCameraPosition - vPosition);
 	// Emissive Color: 텍스처로 제공된 물체의 색상 정보를 가져옴
-
 
 	float4 cColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	[unroll(MAX_LIGHTS)] for (int i = 0; i < gnLights; i++)
