@@ -2197,7 +2197,7 @@ void MoveNPC()
 	while (true) {
 		auto start_t = system_clock::now();
 		//======================================================================
-		if (ConnectingServer) {
+		if (ConnectingServer && ClientConnected) {
 			for (int i = 0; i < MAX_NPCS; ++i) {
 				// 클라이언트들과 NPC 사이의 거리 계산
 				if (npcsInfo[i].GetState() != NPC_DEATH)
