@@ -498,7 +498,6 @@ void process_packet(int client_id, char* packet)
 					}
 				}
 			}
-			cout << "Room[" << cur_room << "]에는 RIFLE유저가 " << rifle_num << "명, HELI유저가 " << heli_num << "명 있습니다.\n" << endl;
 
 			// 역할을 바꿉니다.
 			if (after_role == ROLE_RIFLE) {

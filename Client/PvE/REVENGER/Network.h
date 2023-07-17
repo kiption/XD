@@ -45,6 +45,7 @@ bool ls_lobby_enter_ok = false;
 bool ls_room_enter_ok = false;
 bool ls_create_room_enter_ok = false;
 
+bool trigger_lobby_update = false;	// 로비 내부 방 정보 업데이트 트리거 (로비화면에 띄울 방들 정보 업데이트를 위함)
 bool trigger_new_member = false; // 새로운 유저 방 입장 트리거
 bool trigger_leave_member = false; // 새로운 유저 방 입장 트리거
 bool trigger_room_update = false; // 방 내부 데이터 변경 트리거 (방 데이터 전체를 업데이트하기 위함)

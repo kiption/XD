@@ -156,15 +156,15 @@ CGameFramework::CGameFramework()
 	choicejob[5].ly = 760.0f;
 
 	// 아래는 지워도 되는 구간 - ui표시 상태 보려고 하는 것
-	LobbyRoom temp;
-	temp.currnum_of_people = 1;
-	WCHAR* tempname = L"빠르게 시작";
-	temp.name = tempname;
+	//LobbyRoom temp;
+	//temp.currnum_of_people = 1;
+	//WCHAR* tempname = L"빠르게 시작";
+	//temp.name = tempname;
 
-	temp.num = 12;
-	temp.ready_state = 2;
+	//temp.num = 12;
+	//temp.ready_state = 2;
 
-	m_LobbyRoom_Info.emplace_back(temp);
+	//m_LobbyRoom_Info.emplace_back(temp);
 }
 
 CGameFramework::~CGameFramework()

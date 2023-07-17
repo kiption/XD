@@ -150,6 +150,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 					if (ls_room_enter_ok) {										// 서버에서 방 진입을 허락해줘야
 						gGameFramework.m_LoginScene = gGameFramework.LS_ROOM;	// 방으로 이동함.
+						gGameFramework.currRoomName = charToWchar(curr_room.room_name);
+						cout << "생성이름: ";
+						wprintf(gGameFramework.currRoomName);
+						cout << endl;
 						gGameFramework.m_myRoomNum = curr_room_id;
 						gGameFramework.m_roominMyId = my_room_index;
 
@@ -838,6 +842,17 @@ void uiThreadFunc() {
 				break;
 
 			case gGameFramework.LS_LOBBY:	// 로비
+				//if (trigger_lobby_update) {	// 로비에 있는 방 정보 업데이트 트리거
+				//	LobbyRoom temp;
+				//	temp.currnum_of_people = 1;
+				//	WCHAR* tempname = L"빠르게 시작";
+				//	temp.name = tempname;
+
+				//	temp.num = 12;
+				//	temp.ready_state = 2;
+
+				//	m_LobbyRoom_Info.emplace_back(temp);
+				//}
 				break;
 
 			case gGameFramework.LS_ROOM: // 게임 방
