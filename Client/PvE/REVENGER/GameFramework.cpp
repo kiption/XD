@@ -668,7 +668,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		{
 			if (m_LoginClick[0]) {
 				WCHAR IDchar = static_cast<WCHAR>(wParam);
-				if ((IDchar >= L'A' && IDchar <= L'Z') || (IDchar >= L'a' && IDchar <= L'z') || (IDchar >= L'0' && IDchar <= L'9'))
+				if ((IDchar >= L'A' && IDchar <= L'Z') || (IDchar >= L'a' && IDchar <= L'z') ||
+					(IDchar >= L'0' && IDchar <= L'9') || (IDchar >= L'!' && IDchar <= L'/') || (IDchar >= L':' && IDchar <= L'@') ||
+					(IDchar >= L'[' && IDchar <= L'`') || (IDchar >= L'{' && IDchar <= L'~'))
 				{
 					size_t IDLength = wcslen(m_LoginID);
 					size_t remainingSpace = sizeof(m_LoginID) / sizeof(m_LoginID[0]) - IDLength - 1;
@@ -682,7 +684,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			}
 			else if (m_LoginClick[1]) {
 				WCHAR PWchar = static_cast<WCHAR>(wParam);
-				if ((PWchar >= L'A' && PWchar <= L'Z') || (PWchar >= L'a' && PWchar <= L'z') || (PWchar >= L'0' && PWchar <= L'9'))
+				if ((PWchar >= L'A' && PWchar <= L'Z') || (PWchar >= L'a' && PWchar <= L'z') ||
+					(PWchar >= L'0' && PWchar <= L'9') || (PWchar >= L'!' && PWchar <= L'/') || (PWchar >= L':' && PWchar <= L'@') ||
+					(PWchar >= L'[' && PWchar <= L'`') || (PWchar >= L'{' && PWchar <= L'~'))
 				{
 					size_t PWLength = wcslen(m_LoginPW);
 					size_t remainingSpace = sizeof(m_LoginPW) / sizeof(m_LoginPW[0]) - PWLength - 1;
@@ -720,12 +724,12 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		switch (nMessageID) {
 		case WM_IME_COMPOSITION:
 		{
-			WCHAR IDchar = static_cast<WCHAR>(wParam);//어쨌든 뭔가가 조합된다
+			WCHAR Chatchar = static_cast<WCHAR>(wParam);//어쨌든 뭔가가 조합된다
 			if (lParam == GCS_RESULTSTR) {//얘는 확신
 				size_t completeChatLength = wcslen(m_CompleteChat);//아이디 길이
 				size_t completeremainingSpace = sizeof(m_CompleteChat) / sizeof(m_CompleteChat[0]) - completeChatLength - 1;//남은 문자					
 				if (completeremainingSpace > 0) {
-					wcsncat_s(m_CompleteChat, sizeof(m_CompleteChat) / sizeof(m_CompleteChat[0]), &IDchar, completeremainingSpace);
+					wcsncat_s(m_CompleteChat, sizeof(m_CompleteChat) / sizeof(m_CompleteChat[0]), &Chatchar, completeremainingSpace);
 					m_CompleteChat[++completeChatLength] = L'\0';  // 널 종료 문자 위치 업데이트					
 					wcscpy_s(m_InsertChat, sizeof(m_InsertChat) / sizeof(m_InsertChat[0]), m_CompleteChat);
 				}
@@ -740,7 +744,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 						m_InsertChat[ChatLength - 1] = L'\0';
 						ChatLength -= 1;
 					}
-					wcsncat_s(m_InsertChat, sizeof(m_InsertChat) / sizeof(m_InsertChat[0]), &IDchar, remainingSpace);
+					wcsncat_s(m_InsertChat, sizeof(m_InsertChat) / sizeof(m_InsertChat[0]), &Chatchar, remainingSpace);
 					m_InsertChat[++ChatLength] = L'\0';  // 널 종료 문자 위치 업데이트
 				}
 				isComplete = false;
@@ -749,10 +753,12 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		}
 		case WM_CHAR:
 		{
-			WCHAR IDchar = static_cast<WCHAR>(wParam);
+			WCHAR Chatchar = static_cast<WCHAR>(wParam);
 
 			// 영어 대문자, 영어 소문자, 숫자를 추가합니다.
-			if ((IDchar >= L'A' && IDchar <= L'Z') || (IDchar >= L'a' && IDchar <= L'z') || (IDchar >= L'0' && IDchar <= L'9'))
+			if ((Chatchar >= L'A' && Chatchar <= L'Z') || (Chatchar >= L'a' && Chatchar <= L'z') ||
+				(Chatchar >= L'0' && Chatchar <= L'9') || (Chatchar >= L'!' && Chatchar <= L'/') || (Chatchar >= L':' && Chatchar <= L'@') ||
+				(Chatchar >= L'[' && Chatchar <= L'`') || (Chatchar >= L'{' && Chatchar <= L'~'))
 			{
 				size_t ChatLength = wcslen(m_InsertChat);
 				size_t remainingSpace = sizeof(m_InsertChat) / sizeof(m_InsertChat[0]) - ChatLength - 1;
@@ -761,13 +767,13 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				size_t remainingCompleteSpace = sizeof(m_CompleteChat) / sizeof(m_CompleteChat[0]) - ChatCompleteLength - 1;
 
 				if (remainingSpace > 0) {
-					wcsncat_s(m_InsertChat, sizeof(m_InsertChat) / sizeof(m_InsertChat[0]), &IDchar, remainingSpace);
+					wcsncat_s(m_InsertChat, sizeof(m_InsertChat) / sizeof(m_InsertChat[0]), &Chatchar, remainingSpace);
 					m_InsertChat[++ChatLength] = L'\0';  // 널 종료 문자 위치 업데이트
 				}
 
 
 				if (remainingCompleteSpace > 0) {
-					wcsncat_s(m_CompleteChat, sizeof(m_CompleteChat) / sizeof(m_CompleteChat[0]), &IDchar, remainingCompleteSpace);
+					wcsncat_s(m_CompleteChat, sizeof(m_CompleteChat) / sizeof(m_CompleteChat[0]), &Chatchar, remainingCompleteSpace);
 					m_CompleteChat[++ChatCompleteLength] = L'\0';  // 널 종료 문자 위치 업데이트
 				}
 			}

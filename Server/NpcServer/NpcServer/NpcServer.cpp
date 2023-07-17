@@ -2206,8 +2206,17 @@ void MoveNPC()
 					int temp_id = -1;
 
 					for (auto& cl : playersInfo) {
-						if (cl.id != -1) {
-							if (cl.hp != 0) {
+						if (cl.id != -1 && cl.hp != 0) {
+							if (cl.role == ROLE_RIFLE && npcsInfo[i].type == NPC_ARMY) {
+								npcsInfo[i].Caculation_Distance(cl.pos, cl.id);
+								// 가장 가까운 거리를 갖고있는 아이를 chase_id로 지정
+								float distance = npcsInfo[i].GetDistance(cl.id);
+								if (temp_min > distance) {
+									temp_min = distance;
+									temp_id = cl.id;
+								}
+							}
+							else if (cl.role == ROLE_HELI && npcsInfo[i].type == NPC_HELICOPTER) {
 								npcsInfo[i].Caculation_Distance(cl.pos, cl.id);
 								// 가장 가까운 거리를 갖고있는 아이를 chase_id로 지정
 								float distance = npcsInfo[i].GetDistance(cl.id);
@@ -2488,12 +2497,11 @@ int main(int argc, char* argv[])
 	//						  Threads Initialize
 	//======================================================================
 	vector<thread> worker_threads;
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < 5; ++i)
 		worker_threads.emplace_back(do_worker);			// 메인서버-npc서버 통신용 Worker스레드
 
 	vector<thread> timer_threads;
 	timer_threads.emplace_back(MoveNPC);
-	timer_threads.emplace_back(npcAttack);
 
 
 	for (auto& th : worker_threads)
