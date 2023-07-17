@@ -798,7 +798,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			}
 			else if (wParam == VK_RETURN) {
 				SendChat temp;
-				wcstombs_s(nullptr, temp.chatData, sizeof(temp.chatData), m_CompleteChat, sizeof(m_CompleteChat));
+				wcstombs_s(nullptr, temp.chatData, sizeof(temp.chatData), m_InsertChat, sizeof(m_InsertChat));
 
 				if (temp.chatData == nullptr || temp.chatData[0] == '\0') {
 					cout << "입력된 값이 없습니다." << endl;
