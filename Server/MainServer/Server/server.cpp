@@ -322,6 +322,7 @@ void SESSION::send_add_obj_packet(int obj_id, short obj_type)
 		add_player_packet.id = obj_id;
 		strcpy_s(add_player_packet.name, name);
 		add_player_packet.obj_state = clients[obj_id].pl_state;
+		add_player_packet.role = clients[obj_id].role;
 
 		add_player_packet.x = clients[obj_id].pos.x;
 		add_player_packet.y = clients[obj_id].pos.y;

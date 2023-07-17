@@ -291,6 +291,7 @@ public:
 	WCHAR m_CompleteChat[60];
 	WCHAR m_InsertChat[60];
 	WCHAR* createRoomName;
+	WCHAR* currRoomName;
 	int m_myRoomNum = 13;
 
 	int m_mainmissionnum = 0;

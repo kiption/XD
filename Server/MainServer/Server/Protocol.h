@@ -354,6 +354,7 @@ struct SC_ADD_OBJECT_PACKET {
 	short id;
 	short obj_state;
 	char name[NAME_SIZE];
+	char role;
 	float x, y, z;
 	float right_x, right_y, right_z;
 	float up_x, up_y, up_z;

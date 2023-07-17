@@ -594,13 +594,11 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 						if (choicejob[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[0].lx\
 							&& choicejob[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[0].ly) {
 							// 역핧변경 (사람)
-							cout << "소총 클릭됨." << endl;
 							role_change_h2a_click = true;
 						}
 						else if (choicejob[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < choicejob[1].lx\
 							&& choicejob[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < choicejob[1].ly) {
 							// 역핧변경 (헬기)
-							cout << "헬기 클릭됨." << endl;
 							role_change_a2h_click = true;
 						}
 						break;

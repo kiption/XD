@@ -220,6 +220,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							break;
 						}
 
+						// [임시코드] 서버에서 모두 역할을 선택했는지 확인을 해야하는데 개발 효율때문에 잠시 막아놨음. 대신 역할없이 시작하는거 막기 위해 아래 코드 사용
+						if (gGameFramework.m_ingame_role == gGameFramework.R_NONE) {
+							gGameFramework.m_RoomClick[0] = false;
+							break;
+						}
+
 						/* [치트키] 작업 편의성을 위해 1명만 접속해도 게임 시작이 가능하도록 주석처리하였음.
 						// 방에 사람이 세 명이 있는지 확인합니다.
 						if (curr_room.user_count < MAX_USER) {
@@ -701,6 +707,7 @@ void networkThreadFunc()
 				break;
 
 			case PACKET_KEY_Q:	// 상승
+				if (gGameFramework.m_ingame_role != gGameFramework.R_HELI) break;	// 상승은 헬기만 가능
 				CS_MOVE_PACKET move_up_pack;
 				move_up_pack.size = sizeof(CS_MOVE_PACKET);
 				move_up_pack.type = CS_MOVE;
@@ -712,6 +719,7 @@ void networkThreadFunc()
 				break;
 
 			case PACKET_KEY_E:	// 하강
+				if (gGameFramework.m_ingame_role != gGameFramework.R_HELI) break;	// 상승은 헬기만 가능
 				CS_MOVE_PACKET move_down_pack;
 				move_down_pack.size = sizeof(CS_MOVE_PACKET);
 				move_down_pack.type = CS_MOVE;

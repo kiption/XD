@@ -55,6 +55,7 @@ enum Hit_target { g_none, g_body, g_profeller };
 enum NPCType { NPC_HELICOPTER, NPC_ARMY };
 
 bool ConnectingServer = false;
+bool ClientConnected = false;
 constexpr int HelicopterNum = 5;
 constexpr int ArmyNum = 20;
 
@@ -352,6 +353,8 @@ public:
 
 //======================================================================
 class PLAYER : public OBJECT {
+public:
+	int role;
 public:
 	PLAYER() : OBJECT()
 	{
@@ -1820,6 +1823,7 @@ void process_packet(char* packet)
 
 		playersInfo[client_id].id = login_packet->id;
 		strcpy_s(playersInfo[client_id].name, login_packet->name);
+		playersInfo[client_id].role = login_packet->role;
 
 		playersInfo[client_id].pos.x = login_packet->x;
 		playersInfo[client_id].pos.y = login_packet->y;
@@ -1837,7 +1841,9 @@ void process_packet(char* packet)
 		playersInfo[client_id].m_lookvec.y = login_packet->look_y;
 		playersInfo[client_id].m_lookvec.z = login_packet->look_z;
 
-		/*cout << "[Add New Player] Player[ID:" << client_id << ", Name:" << playersInfo[client_id].name << "]의 정보를 받았습니다." << endl;
+		if (!ClientConnected) ClientConnected = true;
+		/*
+		cout << "[Add New Player] Player[ID:" << client_id << ", Name:" << playersInfo[client_id].name << ", Role: " << playersInfo[client_id].role <<"]의 정보를 받았습니다." << endl;
 		cout << "POS: (" << playersInfo[client_id].pos.x << ", " << playersInfo[client_id].pos.y << ", " << playersInfo[client_id].pos.z << "), ";
 		cout << "Look: (" << playersInfo[client_id].m_lookvec.x << ", " << playersInfo[client_id].m_lookvec.y << ", " << playersInfo[client_id].m_lookvec.z << ")\n" << endl;*/
 
