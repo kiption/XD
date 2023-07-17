@@ -700,6 +700,28 @@ void networkThreadFunc()
 				sendPacket(&input_rkey_pack);
 				break;
 
+			case PACKET_KEY_Q:	// 상승
+				CS_MOVE_PACKET move_up_pack;
+				move_up_pack.size = sizeof(CS_MOVE_PACKET);
+				move_up_pack.type = CS_MOVE;
+				move_up_pack.x = gGameFramework.getMyPosition().x;
+				move_up_pack.y = gGameFramework.getMyPosition().y;
+				move_up_pack.z = gGameFramework.getMyPosition().z;
+				move_up_pack.direction = MV_FRONT;
+				sendPacket(&move_up_pack);
+				break;
+
+			case PACKET_KEY_E:	// 하강
+				CS_MOVE_PACKET move_down_pack;
+				move_down_pack.size = sizeof(CS_MOVE_PACKET);
+				move_down_pack.type = CS_MOVE;
+				move_down_pack.x = gGameFramework.getMyPosition().x;
+				move_down_pack.y = gGameFramework.getMyPosition().y;
+				move_down_pack.z = gGameFramework.getMyPosition().z;
+				move_down_pack.direction = MV_FRONT;
+				sendPacket(&move_down_pack);
+				break;
+
 			case PACKET_KEY_SPACEBAR:
 				// 점프
 				break;

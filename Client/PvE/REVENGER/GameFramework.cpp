@@ -447,18 +447,24 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	switch (nMessageID)
 	{
 	case WM_RBUTTONDOWN:
-		if (m_nMode == SCENE1STAGE)
-			m_SniperOn = true;
-		((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = true;
-		m_pCamera->GenerateProjectionMatrix(1.01f, 1000.0f, ASPECT_RATIO, 40.0f);
+		if (m_nMode == SCENE1STAGE) {
+			if (m_ingame_role == R_RIFLE) {
+				m_SniperOn = true;
+				((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = true;
+				m_pCamera->GenerateProjectionMatrix(1.01f, 1000.0f, ASPECT_RATIO, 40.0f);
+			}
+		}
 
 		break;
 		//::ReleaseCapture();
 	case WM_RBUTTONUP:
-		if (m_nMode == SCENE1STAGE)
-			m_SniperOn = false;
-		((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = false;
-		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		if (m_nMode == SCENE1STAGE) {
+			if (m_ingame_role == R_RIFLE) {
+				m_SniperOn = false;
+				((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = false;
+				m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+			}
+		}
 
 		break;
 

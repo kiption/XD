@@ -120,8 +120,8 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		break;
 	case CLOSEUP_PERSON_CAMERA:
 		SetFriction(0.0f);
-		SetGravity(XMFLOAT3(0.0f, 1.0f, 0.0f));
-		SetMaxVelocityXZ(10.0f);
+		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		SetMaxVelocityXZ(25.0f);
 		SetMaxVelocityY(2.0f);
 		m_pCamera = OnChangeCamera(CLOSEUP_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
@@ -176,11 +176,11 @@ void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 	}
 	if (m_xmf3Position.y > 90.0)
 	{
-		SetGravity(XMFLOAT3(0.0f, -1.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	}
 	else
 	{
-		SetGravity(XMFLOAT3(0.0f, 1.0f, 0.0f));
+		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 	}
 	if (m_pMainRotorFrame)
