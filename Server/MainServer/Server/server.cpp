@@ -1218,18 +1218,18 @@ void process_packet(int client_id, char* packet)
 
 				case C_OBJ_NPC:
 					// 데미지 계산
-					float dec_damage = static_cast<float>(BULLET_DAMAGE);
+					float dec_damage = static_cast<float>(RIFLE_DAMAGE);
 					if (XMF_Distance(npcs[collided_npc_id].pos, bullet_initpos) > 10) {	// 멀리 떨어질 수록 데미지가 조금씩 감소한다.
 						float dist = static_cast<int>(XMF_Distance(npcs[collided_npc_id].pos, bullet_initpos));
 						dec_damage = dec_damage / 100.f * (dist / 10);
 					}
+					int damage = static_cast<int>(RIFLE_DAMAGE - dec_damage);
 					if (collided_npc_id < MAX_NPC_HELI) {	// 헬기는 좀 덜 아프게 맞는다.
-						dec_damage = dec_damage * 2;
+						damage = damage - static_cast<int>(damage * 0.3f);
 					}
-					if (dec_damage >= BULLET_DAMAGE - 1) {
-						dec_damage = BULLET_DAMAGE - 1;
+					if (damage < 1) {	// 최소한 1 데미지는 주도록
+						damage = 1;
 					}
-					int damage = static_cast<int>(BULLET_DAMAGE - dec_damage);
 
 					// 우선 맞아서 죽든 안죽든 피격 위치를 클라이언트에게 알려줍니다. (피터지는? 연출을 위함)
 					SC_DAMAGED_PACKET npc_damaged_pack;
@@ -1250,7 +1250,8 @@ void process_packet(int client_id, char* packet)
 						npcs[collided_npc_id].s_lock.lock();
 						npcs[collided_npc_id].hp -= damage;
 						npcs[collided_npc_id].s_lock.unlock();
-						cout << "Player[" << client_id << "]의 공격에 NPC[" << collided_npc_id << "]가 피해를 받았다. (피해: " << damage << ")\n" << endl;
+						cout << "Player[" << client_id << "]의 공격에 NPC[" << collided_npc_id << "]가 피해(-" << damage << ")를 입었다."
+							<< " (남은 HP : " << npcs[collided_npc_id].hp << ")\n" << endl;
 					}
 					else {	// npc 사망
 						npcs[collided_npc_id].s_lock.lock();
@@ -1815,9 +1816,15 @@ void process_packet(int client_id, char* packet)
 					b_collide = true;
 
 					// 데미지 계산
-					int damage = BULLET_DAMAGE;
+					int damage = 0;
 					if (npc_attack_pack->n_id < MAX_NPC_HELI) {
-						damage = damage / 5;
+						damage = NPC_VALKAN_DAMAGE;
+					}
+					else {
+						damage = NPC_RIFLE_DAMAGE;
+					}
+					if (cl.role == ROLE_HELI) {	// 헬기 플레이어는 덜 아프게 맞는다.
+						damage = damage - static_cast<int>(damage * 0.3f);
 					}
 					int after_hp = cl.hp - damage;	//
 
@@ -1838,7 +1845,7 @@ void process_packet(int client_id, char* packet)
 						cl.s_lock.lock();
 						cl.hp -= damage;
 						cl.s_lock.unlock();
-						cout << "Npc[" << npc_attack_pack->n_id << "]의 공격에 Player[" << cl.id << "]가 맞았다. (HP: " << cl.hp << " 남음)\n" << endl;
+						cout << "NPC[" << npc_attack_pack->n_id << "]의 공격에 Player[" << cl.id << "]가 피해(-" << damage << ")를 입었다. (HP: " << cl.hp << " 남음)\n" << endl;
 
 						SC_DAMAGED_PACKET damaged_packet;
 						damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
