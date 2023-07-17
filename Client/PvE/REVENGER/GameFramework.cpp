@@ -519,28 +519,8 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			case LS_LOBBY: // 로비 UI
 				if (lobbypos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[0].lx && lobbypos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[0].ly) {
 					m_LobbyClick[0] = true;		// '빠른시작' 서버전송용 트리거
-
-					random_device rd;
-					default_random_engine dre(rd());
-					uniform_int_distribution <int> uid(1, 3);
-
-					int ran = uid(dre);
-					switch (ran)
-					{
-					case 1:
-						createRoomName = RoomnameList.str1;
-						break;
-					case 2:
-						createRoomName = RoomnameList.str2;
-						break;
-					case 3:
-						createRoomName = RoomnameList.str3;
-						break;
-					}
 				}
 				else if (lobbypos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[1].lx && lobbypos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[1].ly) {
-					m_LoginScene = LS_CREATE_ROOM;	// 방 생성 UI를 띄운다.
-
 					random_device rd;
 					default_random_engine dre(rd());
 					uniform_int_distribution <int> uid(1, 3);
@@ -558,6 +538,8 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 						createRoomName = RoomnameList.str3;
 						break;
 					}
+
+					m_LoginScene = LS_CREATE_ROOM;	// 방 생성 UI를 띄운다.
 				}
 				else if (lobbypos[2].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[2].lx && lobbypos[2].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[2].ly) {
 					m_LoginScene = LS_OPENING; // 뒤로가기 누름
@@ -1783,7 +1765,7 @@ void CGameFramework::FrameAdvance()
 			m_pd2dDeviceContext->DrawTextW(roomnum, (UINT32)wcslen(roomnum), m_pdwFont[2], &D2_RoomnumText, m_pd2dbrText[2]);
 
 			D2D_RECT_F D2_RoomNameText = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.22f), (FRAME_BUFFER_HEIGHT * 0.4f), (FRAME_BUFFER_WIDTH * 0.5f), (FRAME_BUFFER_HEIGHT * 0.4f));
-			m_pd2dDeviceContext->DrawTextW(createRoomName, (UINT32)wcslen(createRoomName), m_pdwFont[5], &D2_RoomNameText, m_pd2dbrText[5]);
+			m_pd2dDeviceContext->DrawTextW(currRoomName, (UINT32)wcslen(currRoomName), m_pdwFont[5], &D2_RoomNameText, m_pd2dbrText[5]);
 
 			D2D_RECT_F D2_UserNameText[3];
 			for (int i{}; i < m_MAX_USER; ++i) {

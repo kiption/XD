@@ -28,6 +28,15 @@ INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 void networkThreadFunc();
 void uiThreadFunc();
 
+wchar_t* charToWchar(char* str) {	// char -> wchar
+	size_t cn;
+	wchar_t wchar_arr[100] = L"";
+
+	setlocale(LC_ALL, "Korean");//로케일 설정
+	mbstowcs_s(&cn, wchar_arr, 100, str, 100);
+	return wchar_arr;
+}
+
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
@@ -141,8 +150,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 					if (ls_room_enter_ok) {										// 서버에서 방 진입을 허락해줘야
 						gGameFramework.m_LoginScene = gGameFramework.LS_ROOM;	// 방으로 이동함.
+						gGameFramework.m_myRoomNum = curr_room_id;
 						gGameFramework.m_roominMyId = my_room_index;
-						cout << "m_roominMyId: " << gGameFramework.m_roominMyId << endl;
 
 						ls_room_enter_ok = false;
 					}
@@ -169,8 +178,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					// 역할 변경
 					if (gGameFramework.role_change_h2a_click) {	// heli -> army (헬기 -> 사람)
 						if (players_info[my_id].m_role == ROLE_RIFLE) {
-							cout << "[Test] 역할(사람) 취소" << endl;
-
 							CLBY_ROLE_CHANGE_PACKET notchoose_request_pack;
 							notchoose_request_pack.size = sizeof(CLBY_ROLE_CHANGE_PACKET);
 							notchoose_request_pack.type = CLBY_ROLE_CHANGE;
@@ -178,8 +185,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							sendPacket(&notchoose_request_pack);
 						}
 						else {
-							cout << "역할변경: Rifle" << endl;
-
 							CLBY_ROLE_CHANGE_PACKET heli2human_request_pack;
 							heli2human_request_pack.size = sizeof(CLBY_ROLE_CHANGE_PACKET);
 							heli2human_request_pack.type = CLBY_ROLE_CHANGE;
@@ -191,8 +196,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 					if (gGameFramework.role_change_a2h_click) { // army -> heli (사람 -> 헬기)
 						if (players_info[my_id].m_role == ROLE_HELI) {
-							cout << "[Test] 역할(헬기) 취소" << endl;
-
 							CLBY_ROLE_CHANGE_PACKET notchoose_request_pack;
 							notchoose_request_pack.size = sizeof(CLBY_ROLE_CHANGE_PACKET);
 							notchoose_request_pack.type = CLBY_ROLE_CHANGE;
@@ -200,8 +203,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							sendPacket(&notchoose_request_pack);
 						}
 						else {
-							cout << "역할변경: Heli" << endl;
-
 							CLBY_ROLE_CHANGE_PACKET human2heli_request_pack;
 							human2heli_request_pack.size = sizeof(CLBY_ROLE_CHANGE_PACKET);
 							human2heli_request_pack.type = CLBY_ROLE_CHANGE;
@@ -336,15 +337,21 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						CLBY_CREATE_ROOM_PACKET create_room_pack;
 						create_room_pack.size = sizeof(CLBY_CREATE_ROOM_PACKET);
 						create_room_pack.type = CLBY_CREATE_ROOM;
-						strcpy_s(create_room_pack.room_name, "This is Room Name");
+						setlocale(LC_ALL, "Korean");
+						wcstombs_s(nullptr, create_room_pack.room_name, sizeof(create_room_pack.room_name)
+							, gGameFramework.createRoomName, sizeof(create_room_pack.room_name));
 						sendPacket(&create_room_pack);
 
 						gGameFramework.m_CreateRoomOkButton = false;
 					}
 					if (ls_room_enter_ok) {								// 서버에서 방 생성을 끝내면
 						gGameFramework.m_LoginScene = gGameFramework.LS_ROOM;	// 방으로 이동함.
+						gGameFramework.currRoomName = charToWchar(curr_room.room_name);
+						cout << "생성이름: ";
+						wprintf(gGameFramework.currRoomName);
+						cout << endl;
+						gGameFramework.m_myRoomNum = curr_room_id;
 						gGameFramework.m_roominMyId = my_room_index;
-						cout << "m_roominMyId: " << gGameFramework.m_roominMyId << endl;
 
 						ls_room_enter_ok = false;
 					}
@@ -819,14 +826,6 @@ wchar_t* ConvertToWideChar(const char* str) {
 	return wideStr;
 }
 
-wchar_t* charToWchar(char* str) {	// char -> wchar
-	size_t cn;
-	wchar_t wchar_arr[100] = L"";
-
-	setlocale(LC_ALL, "Korean");//로케일 설정
-	mbstowcs_s(&cn, wchar_arr, 100, str, 100);
-	return wchar_arr;
-}
 void uiThreadFunc() {
 	while (1) {
 		if (gGameFramework.m_nMode == OPENINGSCENE) {

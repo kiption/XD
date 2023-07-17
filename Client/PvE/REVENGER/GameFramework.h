@@ -75,7 +75,7 @@ struct MYRoomUser {
 };
 
 struct Roomname {
-	WCHAR* str1 = L"즐겁지 않은 졸작";
+	WCHAR* str1 = L"R E V E N G E R";
 	WCHAR* str2 = L"빠른 게임 고고";
 	WCHAR* str3 = L"즐거운 게임 해요";
 };
@@ -292,7 +292,7 @@ public:
 	WCHAR m_InsertChat[60];
 	WCHAR* createRoomName;
 	WCHAR* currRoomName;
-	int m_myRoomNum = 13;
+	int m_myRoomNum = 99;
 
 	int m_mainmissionnum = 0;
 	int m_submissionnum = 0;
