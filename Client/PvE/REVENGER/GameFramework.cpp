@@ -1048,18 +1048,18 @@ void CGameFramework::ProcessInput()
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
 					q_mouseInput.push(lclick);//s
 					((CHumanPlayer*)m_pScene->m_pPlayer)->ShotState(m_GameTimer.GetTimeElapsed());
-		
+
 				}
 			}
 			if (m_nMode == SCENE1STAGE && m_ingame_role == R_HELI)
 			{
-				if (((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.01)
+				if (((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.004)
 				{
 					ShotKey = true;
 
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };
 					q_mouseInput.push(lclick);
-					((Stage1*)m_pScene)->PlayerFirevalkan(m_pCamera,m_pCamera->GetLookVector());
+					((Stage1*)m_pScene)->PlayerFirevalkan(m_pCamera, m_pCamera->GetLookVector());
 
 				}
 			}
@@ -1235,36 +1235,60 @@ void CGameFramework::AnimateObjects()
 }
 void CGameFramework::ShotDelay()
 {
-	((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay += m_GameTimer.GetTimeElapsed();
-	if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay > 0.2)
+	if (m_ingame_role == R_RIFLE)
 	{
-		ShotKey = false;
-		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay = 0.0f;
-	}
-	if (ShotKey == false)
-	{
-		m_pCamera->m_xmf4x4View._43 += 0.1f;
-		((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
-		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
+		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay += m_GameTimer.GetTimeElapsed();
+		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay > 0.2)
 		{
-			m_pCamera->m_xmf4x4View._42 += 0.20f;
-			m_pCamera->m_xmf4x4View._43 += 0.75f;
+			ShotKey = false;
+			((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay = 0.0f;
 		}
-		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.7, 0.7, 0.7, 1.0);
-		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
-	}
-	if (ShotKey == true)
-	{
-		((CHumanPlayer*)m_pScene->m_pPlayer)->Rotate(-0.07, 0.0, 0.0);
-		m_pCamera->m_xmf4x4View._43 -= 0.07f;
-		((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = true;
-		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
+		if (ShotKey == false)
 		{
-			m_pCamera->m_xmf4x4View._42 -= 0.20f;
-			m_pCamera->m_xmf4x4View._43 -= 0.75f;
+			m_pCamera->m_xmf4x4View._43 += 0.1f;
+			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
+			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
+			{
+				m_pCamera->m_xmf4x4View._42 += 0.20f;
+				m_pCamera->m_xmf4x4View._43 += 0.75f;
+			}
+			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.7, 0.7, 0.7, 1.0);
+			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
 		}
-		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
-		if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
+		if (ShotKey == true)
+		{
+			((CHumanPlayer*)m_pScene->m_pPlayer)->Rotate(-0.07, 0.0, 0.0);
+			m_pCamera->m_xmf4x4View._43 -= 0.07f;
+			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = true;
+			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
+			{
+				m_pCamera->m_xmf4x4View._42 -= 0.20f;
+				m_pCamera->m_xmf4x4View._43 -= 0.75f;
+			}
+			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
+			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
+		}
+	}
+	if (m_ingame_role == R_HELI)
+	{
+		((HeliPlayer*)m_pScene->m_pPlayer)->m_fShotDelay += m_GameTimer.GetTimeElapsed();
+		if (((HeliPlayer*)m_pScene->m_pPlayer)->m_fShotDelay > 0.1)
+		{
+			ShotKey = false;
+			((HeliPlayer*)m_pScene->m_pPlayer)->m_fShotDelay = 0.0f;
+		}
+		if (ShotKey == false)
+		{
+			m_pCamera->m_xmf4x4View._43 += 0.1f;
+			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.7, 0.7, 0.7, 1.0);
+			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
+		}
+		if (ShotKey == true)
+		{
+			m_pCamera->m_xmf4x4View._43 -= 0.1f;
+			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
+			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
+		}
 	}
 }
 void CGameFramework::WaitForGpuComplete()
@@ -1897,7 +1921,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-}
+	}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -2015,7 +2039,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-	}
+}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -3242,7 +3266,7 @@ void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos)
 		((CSpriteObjectsShader*)((Stage1*)m_pScene)->m_ppSpriteBillboard[0])->m_bActive = true;
 		((CSpriteObjectsShader*)((Stage1*)m_pScene)->m_ppSpriteBillboard[0])->m_ppObjects[0]->SetPosition(mappos);
 
-	
+
 	}
 
 
@@ -3273,16 +3297,16 @@ void CGameFramework::CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents
 {
 	m_npcoobb = BoundingOrientedBox(npcpos, npcextents, XMFLOAT4(0, 0, 0, 1));
 
-	CBulletObject** ppBullets = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_ppBullets;
-	for (int i = 0; i < BULLETS; i++)
-	{
-		ppBullets[i]->m_xoobb = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
-		if (ppBullets[i]->m_xoobb.Intersects(m_npcoobb))
-		{
-			// 충돌 모션 
-			ppBullets[i]->Reset();
-		}
-	}
+	//CBulletObject** ppBullets = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_ppBullets;
+	//for (int i = 0; i < BULLETS; i++)
+	//{
+	//	ppBullets[i]->m_xoobb = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
+	//	if (ppBullets[i]->m_xoobb.Intersects(m_npcoobb))
+	//	{
+	//		// 충돌 모션 
+	//		ppBullets[i]->Reset();
+	//	}
+	//}
 }
 void CGameFramework::otherPlayerReturnToIdle(int p_id)
 {

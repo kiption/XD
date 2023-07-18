@@ -1031,15 +1031,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 
 	CBulletObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
 	m_ppShaders[0]->m_ppObjects[42]->m_xoobb = BoundingOrientedBox(m_ppShaders[0]->m_ppObjects[42]->GetPosition(), XMFLOAT3(5.0, 9.0, 5.0), XMFLOAT4(0, 0, 0, 1));
-	for (int i = 0; i < BULLETS; i++)
-	{
-		ppBullets[i]->m_xoobb = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(2.0, 2.0, 4.0), XMFLOAT4(0, 0, 0, 1));
-		if (ppBullets[i]->m_xoobb.Intersects(m_ppShaders[0]->m_ppObjects[42]->m_xoobb))
-		{
 
-			ppBullets[i]->Reset();
-		}
-	}
 
 	for (int i = 0; i < HELIBULLETS; i++)
 	{
