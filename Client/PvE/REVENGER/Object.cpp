@@ -1767,12 +1767,6 @@ void CNpcHelicopterObject::Animate(float fTimeElapsed)
 #include "MissileObject.h"
 CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pmodel, ID3D12RootSignature* pd3dGraphicsRootSignature) :CGameObject(10)
 {
-	/*SetChild(pmodel, false);
-	pmodel->AddRef();*/
-
-
-
-
 
 	OnPrepareAnimate();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);

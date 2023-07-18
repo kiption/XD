@@ -82,7 +82,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 
 	m_pLights->m_pLights[2].m_bEnable = true;
 	m_pLights->m_pLights[2].m_nType = SPOT_LIGHT;
-	m_pLights->m_pLights[2].m_fRange = 300.0f;
+	m_pLights->m_pLights[2].m_fRange = 500.0f;
 	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
@@ -1016,18 +1016,15 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 
 	((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveMark = true;
 
-	((CFragmentsShader*)m_ppFragShaders[0])->m_bActive = true;
-	((CFragmentsShader*)m_ppFragShaders[0])->ParticlePosition = XMFLOAT3(120.0, 50.0, 700.0);
+	/*((CFragmentsShader*)m_ppFragShaders[0])->m_bActive = true;
+	((CFragmentsShader*)m_ppFragShaders[0])->ParticlePosition = XMFLOAT3(120.0, 50.0, 700.0);*/
 
 	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(m_ppShaders[0]->m_ppObjects[30]->GetPosition());
 
 	((CHelicopterBulletMarkParticleShader*)m_ppFragShaders[1])->m_bActive = true;
 	((CHelicopterBulletMarkParticleShader*)m_ppFragShaders[1])->ParticlePosition = XMFLOAT3(120.0, 6.1, 800.0);
-
 	((HeliHittingMarkBillboard*)m_pBillboardShader[5])->m_bActive = true;
 	((HeliHittingMarkBillboard*)m_pBillboardShader[5])->ParticlePosition = XMFLOAT3(120.0, 6.1, 800.0);
-
-
 	((CSpriteObjectsShader*)m_ppSpriteBillboard[0])->m_bActive = true;
 
 

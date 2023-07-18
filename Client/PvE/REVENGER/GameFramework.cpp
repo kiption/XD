@@ -861,11 +861,14 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 					q_keyboardInput.push(SEND_KEY_R);
 				}
 				break;
-			case 'H':
-				((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = true;
-				((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->DieState();
-				((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 8);
-				break;
+			//case 'H':
+			//	//gamesound.HartBeatSound();
+			//	gamesound.pauseHeartBeat();
+			//	break;
+			//case 'K':
+			//	//gamesound.HartBeatSound();
+			//	gamesound.PlayHearBeatSound();
+			//	break;
 			case '9':
 				if (MouseResponsivenessY > 400 && MouseResponsivenessY < 600) MouseResponsivenessY -= 50.0f;
 				break;
@@ -1922,6 +1925,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			{
 				m_pScene->m_pPlayer = ((HeliPlayer*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[43]);
 				m_pCamera = ((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetCamera();
+				gamesound.HelicopterLoop();
 			}
 			else {
 				m_pScene->m_pPlayer = ((CHumanPlayer*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[1]);
@@ -3386,9 +3390,9 @@ void CGameFramework::DyingMotionNPC(int id)
 	if (0 <= id && id < 5) {	// 헬기
 
 		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->m_bDyingstate = true;
-		/*((CFragmentsShader*)((Stage1*)m_pScene)->m_ppFragShaders[0])->m_bActive = true;
+		((CFragmentsShader*)((Stage1*)m_pScene)->m_ppFragShaders[0])->m_bActive = true;
 		((CFragmentsShader*)((Stage1*)m_pScene)->m_ppFragShaders[0])->ParticlePosition =
-			((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->GetPosition();*/
+			((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->GetPosition();
 
 	}
 	else {		// 사람

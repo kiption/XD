@@ -23,11 +23,11 @@ public:
 	FMOD::Sound* bgmSound;
 	FMOD::Channel* bgmChannel;
 
-	FMOD::Sound* walkSound;
-	FMOD::Channel* walkChannel;
+	FMOD::Sound* HartbeatSound;
+	FMOD::Channel* HartbeatChannel;
 
-	FMOD::Sound* runSound;
-	FMOD::Channel* runChannel;
+	FMOD::Sound* RotorSound;
+	FMOD::Channel* RotorChannel;
 
 	FMOD::Sound* bossSound;
 	FMOD::Channel* bossChannel;
@@ -47,12 +47,12 @@ public:
 	void SpeakMusic();
 	void shootingSound(bool Stop=false);
 	void backGroundMusic();
-	void walkingSound();
+	void HartBeatSound();
 	void collisionSound();
-	void pauseWalking();
-	void runningSound();
-	void pauseRunning();
-	void startBossSound();
+	void pauseHeartBeat();
+	void PlayHearBeatSound();
+	void HelicopterLoop();
+	void PauseRotorLoop();
 	void pauseBossSound();
 	void reloadSound();
 
