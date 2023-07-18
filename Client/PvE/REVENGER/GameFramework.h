@@ -403,6 +403,7 @@ public:
 	bool HumanCollsiion = false;
 	bool HeliCollsiion = false;
 	void DyingMotionNPC(int id);
+	void AttackMotionNPC(int id);
 	void MoveMotionNPC(int id);
 
 	//=================================================

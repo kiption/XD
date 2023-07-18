@@ -14,6 +14,9 @@ public:
 	FMOD::Sound* shotSound;
 	FMOD::Channel* shootChannel;
 
+	FMOD::Sound* NpcshotSound;
+	FMOD::Channel* NpcshootChannel;
+
 	FMOD::Sound* ColliSound;
 	FMOD::Channel* ColliChannel;
 
@@ -55,6 +58,8 @@ public:
 	void PauseRotorLoop();
 	void pauseOpeningSound();
 	void PlayOpeningSound();
+	void PlayNpcShotSound();
+	void PauseNpcShotSound();
 	void reloadSound();
 
 };

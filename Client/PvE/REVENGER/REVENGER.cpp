@@ -407,6 +407,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					((Stage1*)gGameFramework.m_pScene)->SmokePosition = npcs_info[i].m_pos;
 
 					if (npcs_info[i].m_attack_on) {
+						gGameFramework.AttackMotionNPC(i);
 						gGameFramework.NpcUnderAttack(npcs_info[i].m_attack_dir, i);
 						npcs_info[i].m_attack_on = false;
 						gGameFramework.NpcNoneUnderAttack();
@@ -491,10 +492,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							}
 							break;
 						case PL_ST_IDLE:
+						
+							break;
 						case PL_ST_MOVE_BACK: // 뒤로 이동
 						case PL_ST_MOVE_SIDE: // 옆으로 이동
 							break;
 						case PL_ST_ATTACK:
+							if (i >= 5) {
+								gGameFramework.AttackMotionNPC(i);
+							}
 							break;
 						case PL_ST_DEAD:
 							//((Stage1*)gGameFramework.m_pScene)->m_ppShaders[0]->m_ppObjects[10 + i]->m_xmf4x4ToParent._42 = 0.0f;

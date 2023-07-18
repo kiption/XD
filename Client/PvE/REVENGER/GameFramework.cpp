@@ -3424,6 +3424,19 @@ void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
 
 
 }
+void CGameFramework::AttackMotionNPC(int id)
+{
+
+	if (id >= 5) {	// 사람
+		int indexnum = id - 5;	// id = 5 ~ 24, Object인덱스 = 22 ~ 41
+		if (((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]))
+		{
+			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
+			((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
+		}
+	}
+
+}
 void CGameFramework::DyingMotionNPC(int id)
 {
 	/* 12~16 = 헬리콥터NPC , 22~41 = 사람NPC */

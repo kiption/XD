@@ -37,7 +37,9 @@ GameSound::GameSound()
 	result = soundSystem->createSound("Sound/BackGround.mp3", FMOD_DEFAULT, 0, &BackGroundSound);
 	result = BackGroundSound->setMode(FMOD_LOOP_NORMAL);
 
-
+	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
+	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_CREATESTREAM, 0, &NpcshotSound);
+	NpcshotSound->setMode(FMOD_CREATESTREAM);
 
 	result = soundSystem->playSound(RotorSound, 0, true, &RotorChannel);
 	RotorChannel->setVolume(0.5f);
@@ -47,6 +49,9 @@ GameSound::GameSound()
 
 	result = soundSystem->playSound(BackGroundSound, 0, true, &BackGroundChannel);
 	BackGroundChannel->setVolume(0.1f);
+
+	result = soundSystem->playSound(NpcshotSound, 0, true, &NpcshootChannel);
+	NpcshootChannel->setVolume(0.25f);
 }
 
 GameSound::~GameSound()
@@ -92,6 +97,7 @@ void GameSound::collisionSound()
 	result = soundSystem->playSound(ColliSound, 0, false, &ColliChannel);
 	ColliChannel->setVolume(0.5f);
 }
+
 void GameSound::reloadSound()
 {
 	result = soundSystem->playSound(reloadSounds, 0, false, &reloadChannel);
@@ -130,4 +136,12 @@ void GameSound::PlayOpeningSound()
 
 }
 
+void GameSound::PlayNpcShotSound()
+{
+	NpcshootChannel->setPaused(false);
+}
 
+void GameSound::PauseNpcShotSound()
+{
+	NpcshootChannel->setPaused(true);
+}
