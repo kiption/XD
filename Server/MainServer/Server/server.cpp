@@ -1111,22 +1111,29 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].do_send(&bullet_update_pack);
 		}
 
-		// 총알을 발사했다는 정보를 다른 클라이언트에게 알려줍니다. (총알 나가는 모션 동기화를 위함)
-		for (auto& vl_key : clients[client_id].view_list) {
-			if (!(PLAYER_ID_START <= vl_key && vl_key <= PLAYER_ID_END)) continue;	// Player가 아니면 break
+		// 총알을 발사했다는 정보를 다른 클라이언트에게 알려줍니다.
+		for (auto& cl : clients) {
+			if (cl.id == client_id) continue;
+			if (cl.s_state != ST_INGAME) continue;
 
-			int pl_id = vl_key - PLAYER_ID_START;
-			if (pl_id == client_id) continue;
-			if (clients[pl_id].s_state != ST_INGAME) continue;
+			// 사운드 볼륨 계산을 위해 거리를 측정합니다
+			float dist = XMF_Distance(cl.pos, clients[client_id].pos);
+			char atksound_vol = VOL_MUTE;
+			if (0 <= dist && dist < ATKSOUND_NEAR_DISTANCE)
+				atksound_vol = VOL_HIGH;
+			else if (ATKSOUND_NEAR_DISTANCE <= dist && dist < ATKSOUND_MID_DISTANCE)
+				atksound_vol = VOL_MID;
+			else if (ATKSOUND_MID_DISTANCE <= dist)
+				atksound_vol = VOL_LOW;
 
-			SC_OBJECT_STATE_PACKET atk_pack;
-			atk_pack.type = SC_OBJECT_STATE;
-			atk_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
-			atk_pack.target = TARGET_PLAYER;
+			SC_ATTACK_PACKET atk_pack;
+			atk_pack.size = sizeof(SC_ATTACK_PACKET);
+			atk_pack.type = SC_ATTACK;
+			atk_pack.obj_type = TARGET_PLAYER;
 			atk_pack.id = client_id;
-			atk_pack.state = PL_ST_ATTACK;
-			lock_guard<mutex> lg{ clients[pl_id].s_lock };
-			clients[pl_id].do_send(&atk_pack);
+			atk_pack.sound_volume = atksound_vol;
+			lock_guard<mutex> lg{ cl.s_lock };
+			cl.do_send(&atk_pack);
 		}
 
 		//==============================
@@ -1781,32 +1788,48 @@ void process_packet(int client_id, char* packet)
 	}// NPC_REMOVE end
 	case NPC_ATTACK:
 	{
-		NPC_ATTACK_PACKET* npc_attack_pack = reinterpret_cast<NPC_ATTACK_PACKET*>(packet);
+		NPC_ATTACK_PACKET* recv_attack_pack = reinterpret_cast<NPC_ATTACK_PACKET*>(packet);
 
-		// 1.
+		// 총알을 발사했다는 정보를 모든 클라이언트에게 알려줍니다.
 		for (auto& cl : clients) {
 			if (cl.s_state != ST_INGAME) continue;
 			if (cl.curr_stage == 0) continue;
 
-			{
-				lock_guard<mutex> lg{ cl.s_lock };
-				cl.do_send(npc_attack_pack);
-			}
+			// 사운드 볼륨 계산을 위해 거리를 측정합니다
+			float dist = XMF_Distance(cl.pos, npcs[recv_attack_pack->n_id].pos);
+			char atksound_vol = VOL_MUTE;
+			if (0 <= dist && dist < ATKSOUND_NEAR_DISTANCE)
+				atksound_vol = VOL_HIGH;
+			else if (ATKSOUND_NEAR_DISTANCE <= dist && dist < ATKSOUND_MID_DISTANCE)
+				atksound_vol = VOL_MID;
+			else if (ATKSOUND_MID_DISTANCE <= dist)
+				atksound_vol = VOL_LOW;
+
+			SC_ATTACK_PACKET atk_pack;
+			atk_pack.size = sizeof(SC_ATTACK_PACKET);
+			atk_pack.type = SC_ATTACK;
+			atk_pack.obj_type = TARGET_NPC;
+			atk_pack.id = recv_attack_pack->n_id;
+			atk_pack.atklook_x = recv_attack_pack->atklook_x;
+			atk_pack.atklook_y = recv_attack_pack->atklook_y;
+			atk_pack.atklook_z = recv_attack_pack->atklook_z;
+			atk_pack.sound_volume = atksound_vol;
+			lock_guard<mutex> lg{ cl.s_lock };
+			cl.do_send(&atk_pack);
 		}
 
-		// 2.
+		// 2. 충돌 계산
 		bool b_collide = false;
 		for (auto& cl : clients) {
-			if (b_collide) break;	//
+			if (b_collide) break;	// 이미 충돌했으면 검사X
 
 			if (cl.s_state != ST_INGAME) continue;
 			if (cl.curr_stage == 0) continue;
+			if (cl.pl_state == PL_ST_DEAD) continue;	// 죽은 유저와는 검사하지 않음.
 
-			//
-			if (cl.pl_state == PL_ST_DEAD) continue;	//
 			SESSION bullet;
 			bullet.pos = clients[client_id].pos;
-			bullet.m_lookvec = XMFLOAT3(npc_attack_pack->atklook_x, npc_attack_pack->atklook_y, npc_attack_pack->atklook_z);
+			bullet.m_lookvec = XMFLOAT3(recv_attack_pack->atklook_x, recv_attack_pack->atklook_y, recv_attack_pack->atklook_z);
 			bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
 				, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
@@ -1817,7 +1840,7 @@ void process_packet(int client_id, char* packet)
 
 					// 데미지 계산
 					int damage = 0;
-					if (npc_attack_pack->n_id < MAX_NPC_HELI) {
+					if (recv_attack_pack->n_id < MAX_NPC_HELI) {
 						damage = NPC_VALKAN_DAMAGE;
 					}
 					else {
@@ -1841,11 +1864,11 @@ void process_packet(int client_id, char* packet)
 					}
 
 					// 데미지 처리
-					if (after_hp > 0) {		//
+					if (after_hp > 0) {		// 데미지 처리
 						cl.s_lock.lock();
 						cl.hp -= damage;
 						cl.s_lock.unlock();
-						cout << "NPC[" << npc_attack_pack->n_id << "]의 공격에 Player[" << cl.id << "]가 피해(-" << damage << ")를 입었다. (HP: " << cl.hp << " 남음)\n" << endl;
+						cout << "NPC[" << recv_attack_pack->n_id << "]의 공격에 Player[" << cl.id << "]가 피해(-" << damage << ")를 입었다. (HP: " << cl.hp << " 남음)\n" << endl;
 
 						SC_DAMAGED_PACKET damaged_packet;
 						damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
@@ -1858,13 +1881,13 @@ void process_packet(int client_id, char* packet)
 							cl.do_send(&damaged_packet);
 						}
 					}
-					else {					//
+					else {					// 사망
 						cl.s_lock.lock();
 						cl.hp = 0;
 						cl.pl_state = PL_ST_DEAD;
 						cl.death_time = system_clock::now();
 						cl.s_lock.unlock();
-						cout << "Npc[" << npc_attack_pack->n_id << "]의 공격에 Player[" << cl.id << "]가 사망하였다." << endl;
+						cout << "Npc[" << recv_attack_pack->n_id << "]의 공격에 Player[" << cl.id << "]가 사망하였다." << endl;
 						dead_player_cnt++;
 
 						SC_OBJECT_STATE_PACKET death_packet;

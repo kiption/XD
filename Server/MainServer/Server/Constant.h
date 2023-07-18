@@ -47,6 +47,10 @@
 #define NPC_RIFLE_DAMAGE 15				// NPC(소총) 피격데미지
 #define NPC_VALKAN_DAMAGE 5				// NPC(헬기) 피격데미지
 
+#define ATKSOUND_FAR_DISTANCE 600		// 먼 거리에서 나는 총 소리
+#define ATKSOUND_MID_DISTANCE 400		// 적당한 거리에서 나는 총 소리
+#define ATKSOUND_NEAR_DISTANCE 200		// 가까운 거리에서 나는 총 소리
+
 
 #define BULLET_RANGE 1000				// 총알 최대이동거리
 

@@ -732,6 +732,39 @@ void processPacket(char* ptr)
 
 		break;
 	}//SC_DAMAGED case end
+	case SC_ATTACK:
+	{
+		if (curr_servertype != SERVER_LOGIC) break;
+		SC_ATTACK_PACKET* recv_packet = reinterpret_cast<SC_ATTACK_PACKET*>(ptr);
+		int recv_id = recv_packet->id;
+
+		if (recv_packet->obj_type == TARGET_PLAYER) {
+			cout << "Client[" << recv_packet->id << "]가 공격했음." << endl;
+
+		}
+		else if (recv_packet->obj_type == TARGET_NPC) {
+			cout << "NPC[" << recv_packet->id << "]가 공격했음." << endl;
+
+			// NPC 공격 연출을 위한 정보
+			npcs_info[recv_id].m_attack_dir.x = recv_packet->atklook_x;
+			npcs_info[recv_id].m_attack_dir.y = recv_packet->atklook_y;
+			npcs_info[recv_id].m_attack_dir.z = recv_packet->atklook_z;
+			npcs_info[recv_id].m_attack_on = true;
+		}
+
+		int atk_sound_volume = recv_packet->sound_volume;
+		if (atk_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 총성
+			//cout << "작은 총성" << endl;
+		}
+		else if (atk_sound_volume == VOL_MID) {		// 적당한 거리에 있어서 적당하게 들리는 총성
+			//cout << "적당한 총성" << endl;
+		}
+		else if (atk_sound_volume == VOL_HIGH) {	// 가까이에 있어서 크게 들리는 총성
+			//cout << "큰 총성" << endl;
+		}
+
+		break;
+	}// SC_ATTACK case end
 	case SC_CHANGE_SCENE:
 	{
 		if (curr_servertype != SERVER_LOGIC) break;
@@ -956,18 +989,6 @@ void processPacket(char* ptr)
 		npcs_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 		npcs_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
 
-		break;
-	}
-	case NPC_ATTACK:
-	{
-		NPC_ATTACK_PACKET* recv_packet = reinterpret_cast<NPC_ATTACK_PACKET*>(ptr);
-
-		short recv_id = recv_packet->n_id;
-
-		npcs_info[recv_id].m_attack_dir.x = recv_packet->atklook_x;
-		npcs_info[recv_id].m_attack_dir.y = recv_packet->atklook_y;
-		npcs_info[recv_id].m_attack_dir.z = recv_packet->atklook_z;
-		npcs_info[recv_id].m_attack_on = true;
 		break;
 	}
 	}
