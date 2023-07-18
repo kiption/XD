@@ -516,6 +516,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					gGameFramework.CollisionMap_by_BULLET(mabobj_collide_pos);
 					//cout << "맵 충 돌" << mabobj_collide_pos.x << ", " << mabobj_collide_pos.y << ", " << mabobj_collide_pos.z << endl;
 				}
+				else
+				{
+					((CSpriteObjectsShader*)((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0])->m_bActive = false;
+				}
 
 				gGameFramework.CollisionNPC_by_BULLET(XMFLOAT3(/*NPC CENTER*/), XMFLOAT3(/*NPC EXTENTS*/));
 				gGameFramework.CollisionNPC_by_MAP(XMFLOAT3(/*NPC CENTER*/), XMFLOAT3(/*NPC EXTENTS*/), XMFLOAT3(/*MAP CENTER*/), XMFLOAT3(/*MAP EXTENTS*/));

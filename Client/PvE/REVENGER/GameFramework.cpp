@@ -861,14 +861,14 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 					q_keyboardInput.push(SEND_KEY_R);
 				}
 				break;
-			//case 'H':
-			//	//gamesound.HartBeatSound();
-			//	gamesound.pauseHeartBeat();
-			//	break;
-			//case 'K':
-			//	//gamesound.HartBeatSound();
-			//	gamesound.PlayHearBeatSound();
-			//	break;
+				//case 'H':
+				//	//gamesound.HartBeatSound();
+				//	gamesound.pauseHeartBeat();
+				//	break;
+				//case 'K':
+				//	//gamesound.HartBeatSound();
+				//	gamesound.PlayHearBeatSound();
+				//	break;
 			case '9':
 				if (MouseResponsivenessY > 400 && MouseResponsivenessY < 600) MouseResponsivenessY -= 50.0f;
 				break;
@@ -971,7 +971,7 @@ void CGameFramework::OnDestroy()
 }
 void CGameFramework::BuildObjects()
 {
-
+	gamesound.PlayOpeningSound();
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
@@ -1017,7 +1017,7 @@ void CGameFramework::ProcessInput()
 			if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; }
 			if (pKeysBuffer[KEY_A] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_A); dwDirection |= DIR_LEFT; }
 			if (pKeysBuffer[KEY_D] & 0xF0) { q_keyboardInput.push(SEND_KEYUP_MOVEKEY); q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT; }
-			
+
 			if (m_ingame_role == R_HELI)
 			{
 				if (pKeysBuffer[KEY_Q] & 0xF0) { dwDirection |= DIR_UP; }
@@ -1048,7 +1048,7 @@ void CGameFramework::ProcessInput()
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
 					q_mouseInput.push(lclick);//s
 					((CHumanPlayer*)m_pScene->m_pPlayer)->ShotState(m_GameTimer.GetTimeElapsed());
-					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->FireBullet(NULL);
+		
 				}
 			}
 			if (m_nMode == SCENE1STAGE && m_ingame_role == R_HELI)
@@ -1056,9 +1056,10 @@ void CGameFramework::ProcessInput()
 				if (((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.01)
 				{
 					ShotKey = true;
+
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };
 					q_mouseInput.push(lclick);
-					((Stage1*)m_pScene)->PlayerFirevalkan(m_pCamera->GetLookVector());
+					((Stage1*)m_pScene)->PlayerFirevalkan(m_pCamera,m_pCamera->GetLookVector());
 
 				}
 			}
@@ -1154,21 +1155,21 @@ void CGameFramework::ProcessInput()
 							dwDirection = DIR_SLIDEVEC;
 
 							if (m_ingame_role == R_RIFLE)
-								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
+								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
 							if (m_ingame_role == R_HELI)
 								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
-							else 
-								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
+							else
+								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
 						} 	//--------Human Player-----------// 
 						else
 						{
 							if (m_ingame_role == R_RIFLE)
-								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
+								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
 
 							if (m_ingame_role == R_HELI)
 								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
 							else
-								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 650.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
+								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
 						}
 						//--------Heli Player-----------// 
 						if (m_ingame_role == R_HELI)
@@ -1911,7 +1912,7 @@ void CGameFramework::ChangeScene(DWORD nMode)
 		{
 		case SCENE1STAGE:
 		{
-			gamesound.SpeakMusic();
+
 			m_nMode = nMode;
 			m_pScene = new Stage1();
 			if (m_pScene) ((Stage1*)m_pScene)->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
@@ -1938,6 +1939,9 @@ void CGameFramework::ChangeScene(DWORD nMode)
 
 			WaitForGpuComplete();
 
+			gamesound.SpeakMusic();
+
+			gamesound.pauseOpeningSound();
 			if (m_pScene) m_pScene->ReleaseUploadBuffers();
 			if (m_pScene->m_pPlayer)m_pScene->m_pPlayer->ReleaseUploadBuffers();
 			if (m_pPlayer) m_pPlayer->ReleaseUploadBuffers();
@@ -3227,8 +3231,20 @@ bool CGameFramework::CollisionMap_by_PLAYER(XMFLOAT3 pos, XMFLOAT3 extents, CGam
 }
 void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos)
 {
-	((BulletMarkBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[4])->m_bActive = true;
-	((BulletMarkBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[4])->ParticlePosition = (mappos);
+	if (m_ingame_role == R_RIFLE)
+	{
+		((BulletMarkBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[4])->m_bActive = true;
+		((BulletMarkBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[4])->ParticlePosition = (mappos);
+	}
+	if (m_ingame_role == R_HELI)
+	{
+
+		((CSpriteObjectsShader*)((Stage1*)m_pScene)->m_ppSpriteBillboard[0])->m_bActive = true;
+		((CSpriteObjectsShader*)((Stage1*)m_pScene)->m_ppSpriteBillboard[0])->m_ppObjects[0]->SetPosition(mappos);
+
+	
+	}
+
 
 }
 void CGameFramework::CollisionNPC_by_PLAYER(XMFLOAT3 npcpos, XMFLOAT3 npcextents)

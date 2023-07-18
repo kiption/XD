@@ -175,10 +175,10 @@ D3D12_SHADER_BYTECODE SpriteAnimationBillboard::CreateVertexShader(ID3DBlob** pp
 void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	CTexture* ppSpriteTextures[2];
-	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
-	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
-	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 8, 8);
-	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explode_8x8.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 4, 8);
+	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explosion4x8.dds", RESOURCE_TEXTURE2D, 0);
+	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 4, 8);
+	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explosion4x8.dds", RESOURCE_TEXTURE2D, 0);
 
 	CMaterial* pTerrainMaterial[2];
 	pTerrainMaterial[0] = new CMaterial(1);
@@ -188,7 +188,7 @@ void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	pTerrainMaterial[1]->SetTexture(ppSpriteTextures[1], 0);
 
 	
-	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.0, 5.0, 0.0f, 0.0f, 0.0f, 0.0f);
+	CTexturedRectMesh* pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 30.0,30.0, 0.0f, 0.0f, 0.0f, 0.0f);
 
 
 
@@ -209,7 +209,7 @@ void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 		pThirdObject[i]->SetMesh(pSpriteMesh);
 		pThirdObject[i]->SetMaterial(0, pTerrainMaterial[i]);
 		pScene->SetCbvGPUDescriptorHandlePtr(pScene->m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
-		pThirdObject[i]->m_fSpeed = 6.0f / (ppSpriteTextures[i]->m_nRows * ppSpriteTextures[i]->m_nCols);
+		pThirdObject[i]->m_fSpeed = 12.0f / (ppSpriteTextures[i]->m_nRows * ppSpriteTextures[i]->m_nCols);
 		m_ppObjects[i] = pThirdObject[i];
 		m_ppObjects[i]->AddRef();
 	}
@@ -221,19 +221,20 @@ void SpriteAnimationBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList
 	{
 
 		XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
+		XMFLOAT3 xmf3CameraLook= pCamera->GetLookVector();
 		CPlayer* pPlayer = pCamera->GetPlayer();
 		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
 
-		XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 50.0f, false));
+		XMFLOAT3 xmf3Position = Vector3::Add(xmf3CameraPosition, Vector3::ScalarProduct(xmf3CameraLook, 40.0f, false));
 		for (int j = 0; j < m_nObjects; j++)
 		{
 			if (m_ppObjects[j])
 			{
 
-				m_ppObjects[j]->SetPosition(-15.0 + j * 20,10.0 + j * 20,800.0+j*20);
+				/*m_ppObjects[j]->SetPosition(-15.0 + j * 20,10.0 + j * 20,800.0+j*20);*/
 			
-				m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
+				m_ppObjects[j]->SetLookAt(xmf3Position, XMFLOAT3(0.0f, 1.0f, 0.0f));
 			}
 		}
 

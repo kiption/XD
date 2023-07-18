@@ -29,8 +29,8 @@ public:
 	FMOD::Sound* RotorSound;
 	FMOD::Channel* RotorChannel;
 
-	FMOD::Sound* bossSound;
-	FMOD::Channel* bossChannel;
+	FMOD::Sound* BackGroundSound;
+	FMOD::Channel* BackGroundChannel;
 
 	FMOD::Sound* reloadSounds;
 	FMOD::Channel* reloadChannel;
@@ -53,7 +53,8 @@ public:
 	void PlayHearBeatSound();
 	void HelicopterLoop();
 	void PauseRotorLoop();
-	void pauseBossSound();
+	void pauseOpeningSound();
+	void PlayOpeningSound();
 	void reloadSound();
 
 };

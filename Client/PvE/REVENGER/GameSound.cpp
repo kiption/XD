@@ -23,7 +23,7 @@ GameSound::GameSound()
 
 	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
 	result = soundSystem->createSound("Sound/Reload.wav", FMOD_UNIQUE, 0, &reloadSounds);
-	result = bossSound->setMode(FMOD_UNIQUE);
+	result = BackGroundSound->setMode(FMOD_UNIQUE);
 
 	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
 	result = soundSystem->createSound("Sound/HeartBeat.mp3", FMOD_UNIQUE, 0, &HartbeatSound);
@@ -34,16 +34,19 @@ GameSound::GameSound()
 	result = RotorSound->setMode(FMOD_LOOP_NORMAL);
 
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("sound_boss.mp3", FMOD_DEFAULT, 0, &bossSound);
-	result = bossSound->setMode(FMOD_LOOP_NORMAL);
+	result = soundSystem->createSound("Sound/BackGround.mp3", FMOD_DEFAULT, 0, &BackGroundSound);
+	result = BackGroundSound->setMode(FMOD_LOOP_NORMAL);
 
 
 
 	result = soundSystem->playSound(RotorSound, 0, true, &RotorChannel);
-	RotorChannel->setVolume(0.8f);
+	RotorChannel->setVolume(0.5f);
 
 	result = soundSystem->playSound(HartbeatSound, 0, true, &HartbeatChannel);
-	HartbeatChannel->setVolume(1.4f);
+	HartbeatChannel->setVolume(0.5f);
+
+	result = soundSystem->playSound(BackGroundSound, 0, true, &BackGroundChannel);
+	BackGroundChannel->setVolume(0.1f);
 }
 
 GameSound::~GameSound()
@@ -53,7 +56,7 @@ GameSound::~GameSound()
 	result = speakSound->release();
 	result = bgmSound->release();
 	result = HartbeatSound->release();
-	result = bossSound->release();
+	result = BackGroundSound->release();
 	result = reloadSounds->release();
 	result = soundSystem->close();
 	result = soundSystem->release();
@@ -66,18 +69,18 @@ void GameSound::shootingSound(bool Stop)
 {
 	bool isPlaying = true;
 	result = soundSystem->playSound(shotSound, 0, false, &shootChannel);
-	shootChannel->setVolume(0.04f);
+	shootChannel->setVolume(0.5f);
 
 }
 void GameSound::backGroundMusic()
 {
 	result = soundSystem->playSound(bgmSound, 0, false, &bgmChannel);
-	bgmChannel->setVolume(0.05f);
+	bgmChannel->setVolume(0.5f);
 }
 void GameSound::SpeakMusic()
 {
 	result = soundSystem->playSound(speakSound, 0, false, &speakChannel);
-	speakChannel->setVolume(0.1f);
+	speakChannel->setVolume(0.7f);
 }
 void GameSound::HartBeatSound()
 {
@@ -87,12 +90,12 @@ void GameSound::HartBeatSound()
 void GameSound::collisionSound()
 {
 	result = soundSystem->playSound(ColliSound, 0, false, &ColliChannel);
-	ColliChannel->setVolume(0.32f);
+	ColliChannel->setVolume(0.5f);
 }
 void GameSound::reloadSound()
 {
 	result = soundSystem->playSound(reloadSounds, 0, false, &reloadChannel);
-	reloadChannel->setVolume(0.3f);
+	reloadChannel->setVolume(0.5f);
 	shootChannel->setPaused(true);
 
 }
@@ -116,9 +119,15 @@ void GameSound::PauseRotorLoop()
 	RotorChannel->setPaused(true);
 }
 
-void GameSound::pauseBossSound()
+void GameSound::pauseOpeningSound()
 {
-	bossChannel->setPaused(true);
+	BackGroundChannel->setPaused(true);
+}
+
+void GameSound::PlayOpeningSound()
+{
+	BackGroundChannel->setPaused(false);
+
 }
 
 

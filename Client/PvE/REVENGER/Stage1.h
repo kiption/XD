@@ -92,7 +92,7 @@ public:
 	XMFLOAT3 particlepos;
 
 	void Firevalkan(CGameObject* Objects,XMFLOAT3 ToPlayerLook);
-	void PlayerFirevalkan(XMFLOAT3 Look);
+	void PlayerFirevalkan(CCamera* pCamera,XMFLOAT3 Look);
 	void Reflectcartridgecase(CGameObject* Objects);
 public:
 	float m_fBulletEffectiveRange = 2000.0f;
