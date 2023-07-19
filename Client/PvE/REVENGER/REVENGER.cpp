@@ -55,6 +55,86 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_LABPROJECT0797ANIMATION));
 
 	// Server Code
+	// Config파일에서 서버 주소를 읽어옵니다
+	bool b_lobby = false;
+	bool b_logic = false;
+	int word_count = 0;
+	int server_num = 0;
+
+	ifstream in("ServerIpAddr.config");
+	cout << "서버 IP주소를 읽어옵니다... " << endl;
+	if (in.is_open()) {
+		string word;
+		while (in >> word) {
+			if (word == "LOBBY") {
+				b_lobby = true;
+				word_count++;
+			}
+			else if (word == "LOGIC") {
+				b_logic = true;
+				word_count++;
+			}
+			else {
+				if (!b_lobby && !b_logic) continue;
+
+				if (b_lobby) {
+					if (word_count == 1) {
+						server_num = stoi(word);
+						word_count++;
+					}
+					else if (word_count == 2) {
+						if (server_num == 0) {
+							strcpy_s(IPADDR_LOBBY0, word.c_str());
+							cout << "로비0: " << IPADDR_LOBBY0 << endl;
+
+							// 한 줄의 마지막이므로 값 초기화
+							b_lobby = false;
+							server_num = 0;
+							word_count = 0;
+						}
+						else {
+							strcpy_s(IPADDR_LOBBY1, word.c_str());
+							cout << "로비1: " << IPADDR_LOBBY1 << endl;
+
+							// 한 줄의 마지막이므로 값 초기화
+							b_lobby = false;
+							server_num = 0;
+							word_count = 0;
+						}
+					}
+				}
+				else if (b_logic) {
+					if (word_count == 1) {
+						server_num = stoi(word);
+						word_count++;
+					}
+					else if (word_count == 2) {
+						if (server_num == 0) {
+							strcpy_s(IPADDR_LOGIC0, word.c_str());
+							cout << "로직0: " << IPADDR_LOGIC0 << endl;
+
+							// 한 줄의 마지막이므로 값 초기화
+							b_logic = false;
+							server_num = 0;
+							word_count = 0;
+						}
+						else {
+							strcpy_s(IPADDR_LOGIC1, word.c_str());
+							cout << "로직1: " << IPADDR_LOGIC1 << endl;
+
+							// 한 줄의 마지막이므로 값 초기화
+							b_logic = false;
+							server_num = 0;
+							word_count = 0;
+						}
+					}
+				}
+			}
+		}
+		in.close();
+	}	
+
+	// 서버 초기설정
 	wcout.imbue(locale("korean"));
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);

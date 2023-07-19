@@ -2702,12 +2702,13 @@ int main(int argc, char* argv[])
 		//inet_pton(AF_INET, IPADDR_LOOPBACK, &ha_server_addr.sin_addr);
 
 		// ПјАн
-		if (my_server_id == 0) {
+		/*if (my_server_id == 0) {
 			inet_pton(AF_INET, IPADDR_LOGIC1, &ha_server_addr.sin_addr);
 		}
 		else if (my_server_id == 1) {
 			inet_pton(AF_INET, IPADDR_LOGIC0, &ha_server_addr.sin_addr);
 		}
+		*/
 
 		BOOL bret = connectExFP(right_ex_server_sock, reinterpret_cast<sockaddr*>(&ha_server_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over->overlapped);
 		if (FALSE == bret) {

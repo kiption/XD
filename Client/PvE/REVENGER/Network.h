@@ -16,6 +16,12 @@ enum SERVER_TYPE { SERVER_LOGIN, SERVER_LOBBY, SERVER_LOGIC };
 short curr_servertype = -1;
 short active_servernum = -1;
 
+char IPADDR_LOBBY0[16];
+char IPADDR_LOBBY1[16];
+
+char IPADDR_LOGIC0[16];
+char IPADDR_LOGIC1[16];
+
 SOCKET lgn_socket;	// 로그인서버 소켓
 SOCKET lby_socket;	// 로비서버 소켓
 SOCKET lgc_socket;	// 로직서버 소켓

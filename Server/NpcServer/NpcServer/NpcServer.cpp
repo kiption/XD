@@ -2033,17 +2033,18 @@ void do_worker()
 				ZeroMemory(&logic_server_addr, sizeof(logic_server_addr));
 				logic_server_addr.sin_family = AF_INET;
 				logic_server_addr.sin_port = htons(new_portnum);
-				inet_pton(AF_INET, IPADDR_LOOPBACK, &logic_server_addr.sin_addr);
 				// 1. 메인서버와 NPC서버가 루프백에서 동작할 때
-				//inet_pton(AF_INET, IPADDR_LOOPBACK, &logic_server_addr.sin_addr);
+				inet_pton(AF_INET, IPADDR_LOOPBACK, &logic_server_addr.sin_addr);
 
 				// 2. 메인서버와 NPC서버가 다른 PC에서 동작할 떄
+				/*
 				if (a_lgcsvr_num == 0) {
 					inet_pton(AF_INET, IPADDR_LOGIC0, &logic_server_addr.sin_addr);
 				}
 				else if (a_lgcsvr_num == 1) {
 					inet_pton(AF_INET, IPADDR_LOGIC1, &logic_server_addr.sin_addr);
 				}
+				*/
 
 				BOOL bret = connectExFP(g_logicservers[a_lgcsvr_num].sock, reinterpret_cast<sockaddr*>(&logic_server_addr), sizeof(SOCKADDR_IN),
 					nullptr, 0, nullptr, &con_over->overlapped);
@@ -2352,16 +2353,16 @@ int main(int argc, char* argv[])
 	logic_server_addr.sin_port = htons(lgvsvr_port);
 
 	// 1. 메인서버와 NPC서버가 루프백에서 동작할 때
-	//inet_pton(AF_INET, IPADDR_LOOPBACK, &logic_server_addr.sin_addr);
+	inet_pton(AF_INET, IPADDR_LOOPBACK, &logic_server_addr.sin_addr);
 
 	// 2. 메인서버와 NPC서버가 다른 PC에서 동작할 떄
+	/*
 	if (a_lgcsvr_num == 0) {
 		inet_pton(AF_INET, IPADDR_LOGIC0, &logic_server_addr.sin_addr);
 	}
 	else if (a_lgcsvr_num == 1) {
 		inet_pton(AF_INET, IPADDR_LOGIC1, &logic_server_addr.sin_addr);
-	}
-
+	}*/
 	BOOL bret = connectExFP(g_logicservers[a_lgcsvr_num].sock, reinterpret_cast<sockaddr*>(&logic_server_addr), sizeof(SOCKADDR_IN), nullptr, 0, nullptr, &con_over->overlapped);
 	if (FALSE == bret) {
 		int err_no = GetLastError();
