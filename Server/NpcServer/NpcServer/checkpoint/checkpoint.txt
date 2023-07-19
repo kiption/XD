@@ -15,6 +15,6 @@ Object: City4_2, Position: (-423.01, 0.00, -135.26), Size: (478.23, 274.32, 55.4
 Object: City4_3, Position: (-634.01, 0.00, -520.26), Size: (55.46, 274.32, 820.14)
 Object: City4_4, Position: (-429.01, 0.00, -907.26), Size: (470.63, 274.32, 55.25)
 Object: Connect12, Position: (557.99, 0.00, 13.74), Size: (54.74, 274.32, 352.63)
-Object: Connect34, Position: (-628.01, 0.00, 16.74), Size: (52.73, 274.32, 346.79)
 Object: Spawn, Position: (-30.01, 0.00, 932.74), Size: (383.22, 274.32, 47.22)
+Object: Connect34, Position: (-628.01, 0.00, 16.74), Size: (52.73, 274.32, 346.79)
 Object: Destination, Position: (-36.01, 0.00, -904.26), Size: (403.16, 274.32, 63.95)

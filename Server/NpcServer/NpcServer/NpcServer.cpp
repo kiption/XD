@@ -50,7 +50,7 @@ using namespace chrono;
 system_clock::time_point last_send_checkpos_time;	// 마지막으로 check_pos패킷 보낸 시간
 mutex time_lock;	// 서버시간 lock
 
-enum NPCState { NPC_IDLE, NPC_CHASE, NPC_ST_ATK, NPC_DEATH };
+enum NPCState { NPC_IDLE, NPC_CHASE, NPC_ST_ATK, NPC_DEATH, NPC_BACK };
 enum Hit_target { g_none, g_body, g_profeller };
 enum NPCType { NPC_HELICOPTER, NPC_ARMY };
 
@@ -369,11 +369,13 @@ class NPC : public OBJECT {
 private:
 	XMFLOAT3 m_User_Pos[MAX_USER];
 	XMFLOAT3 m_AttackVec;
+	XMFLOAT3 m_OriginPos;
 	short m_Hit;
 	short m_state;
 	int m_chaseID;
 	int m_currentNodeIndex;
 	int m_targetNodeIndex;
+	int m_OriginNodeIndex;
 	float m_Speed;
 	float m_Distance[MAX_USER];
 	float m_destinationRange;
@@ -382,7 +384,7 @@ private:
 public:
 	bool m_DeathCheck = false;
 	bool PrintRayCast = false;
-
+	bool TurnBack = false;
 	bool m_UpdateTurn = false;
 	MapObject m_CollideMap;
 	vector<int>path;
@@ -391,6 +393,8 @@ public:
 	chrono::system_clock::time_point PrevTime;
 	chrono::system_clock::time_point CurrTime;
 
+	chrono::system_clock::time_point ChaseTime;
+	chrono::system_clock::time_point AttackTime;
 public:
 	NPC() : OBJECT() {
 		m_state = NPC_IDLE;
@@ -407,11 +411,13 @@ public:
 	int GetState() { return m_state; }
 	int GetChaseID() { return m_chaseID; }
 	int GetNodeIndex() { return m_currentNodeIndex; }
+	int GetOriginNodeIndex() { return m_OriginNodeIndex; }
 	int GetTargetNodeIndex() { return m_targetNodeIndex; }
 	float GetDistance(int id) { return m_Distance[id]; }
 	float GetSpeed() { return m_Speed; }
 	XMFLOAT3 GetPosition() { return pos; }
 	XMFLOAT3 GetAttackVec() { return m_AttackVec; }
+	XMFLOAT3 GetOriginPos() { return m_OriginPos; }
 
 public:
 	// Set
@@ -420,12 +426,14 @@ public:
 	void SetChaseID(int cid) { m_chaseID = cid; }
 	void SetNodeIndex(int idx) { m_currentNodeIndex = idx; }
 	void SetTargetNodeIndex(int idx) { m_targetNodeIndex = idx; }
+	void SetOriginNodeIndex(int idx) { m_OriginNodeIndex = idx; }
 	void SetSpeed(float spd) { m_Speed = spd; }
 	void SetDestinationRange(float range) { m_destinationRange = range; }
 	void SetRotate(float y, float p, float r) { yaw = y, pitch = p, roll = r; }
 	void SetPosition(XMFLOAT3 tpos) { pos = tpos; }
 	void SetUser_Pos(XMFLOAT3 pos, int cid) { m_User_Pos[cid] = pos; }
 	void SetAttackVec(XMFLOAT3 vec) { m_AttackVec = vec; }
+	void SetOriginPos(XMFLOAT3 opos) { m_OriginPos = opos; }
 
 public:
 	// Base
@@ -651,11 +659,6 @@ void SERVER::send_npc_rotate_packet(int npc_id)
 
 	lock_guard<mutex> lg{ g_logicservers[a_lgcsvr_num].s_lock };
 	g_logicservers[a_lgcsvr_num].do_send(&npc_rotate_packet);
-
-	if (npc_id < 20 && npc_id > 17) {
-		//cout << npc_id << "Rotate Packet Call" << endl;
-		//cout << "===========================" << endl;
-	}
 }
 void SERVER::send_npc_attack_packet(int npc_id)
 {
@@ -886,12 +889,17 @@ void NPC::NPC_State_Manegement(int state)
 		switch (m_state)
 		{
 		case NPC_IDLE:
+		{
 			A_MoveToNode();
-			if (CheckChaseState()) {
+			if (A_PlayerDetact()) {
 				m_state = NPC_CHASE;
+				ChaseTime = system_clock::now();
+				AttackTime = ChaseTime;
 			}
 			break;
+		}
 		case NPC_CHASE:
+		{
 			if (!CheckChaseState()) {
 				m_state = NPC_IDLE;
 				break;
@@ -899,20 +907,43 @@ void NPC::NPC_State_Manegement(int state)
 			A_PlayerChasing();
 			if (A_PlayerDetact())
 				m_state = NPC_ATTACK;
+
+
 			break;
+		}
 		case NPC_ATTACK:
-			if (!A_PlayerDetact()) {
-				m_state = NPC_CHASE;
-				PrintRayCast = false;
+		{
+			if (AttackTime - ChaseTime > 5000ms) {
+				m_state = NPC_IDLE;
+
+
+				break;
 			}
 			else {
 				A_PlayerAttack();
+
+
 			}
+
+			if (!A_PlayerDetact()) {
+				m_state = NPC_CHASE;
+			}
+			else {
+			}
+
 			break;
+		}
 		case NPC_DEATH:
+		{
 			if (pos.y > 0.0f)
 				A_NPC_Death_motion();
 			break;
+		}
+		case NPC_BACK:
+		{
+
+			break;
+		}
 		default:
 			break;
 		}
@@ -946,6 +977,9 @@ void NPC::Caculation_Distance(XMFLOAT3 vec, int id) // 서버에서 따로 부를 것.
 // Helicopter
 void NPC::H_MoveToNode()
 {
+
+
+
 	NodeMesh currentNode = MeshInfo[m_currentNodeIndex];
 	const bool isMovingInZ = currentNode.GetMoveingSpaceZ();
 	const bool isMovingForward = m_currentNodeIndex % 4 < 2;
@@ -1362,46 +1396,58 @@ void NPC::A_MoveToNode()
 {
 	NodeMesh currentNode = MeshInfo[m_currentNodeIndex];
 	const bool isMovingInZ = currentNode.GetMoveingSpaceZ();
-	const bool isMovingForward = m_currentNodeIndex % 4 < 2;
 	const float speed = m_Speed;
-
 	XMFLOAT3 prevPos = pos;
 
 	if (isMovingInZ) {
-		const float destination = isMovingForward ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
+		const float destination = TurnBack ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
 
-		if (isMovingForward) pos.z += speed;
+		if (TurnBack) pos.z += speed;
 		else pos.z -= speed;
 
-		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) A_UpdateCurrentNodeIndex();
+		if (((TurnBack == true) && pos.z >= destination) || ((TurnBack == false) && pos.z <= destination))
+		{
+			TurnBack = !TurnBack;
+			m_UpdateTurn = true;
+		}
 	}
 	else {
-		const float destination = isMovingForward ? currentNode.GetSmallX() + m_destinationRange : currentNode.GetLargeX() - m_destinationRange;
+		const float destination = TurnBack ? currentNode.GetSmallX() + m_destinationRange : currentNode.GetLargeX() - m_destinationRange;
 
-		if (isMovingForward) pos.x -= speed;
+		if (TurnBack) pos.x -= speed;
 		else pos.x += speed;
 
-		if ((isMovingForward && pos.x <= destination) || (!isMovingForward && pos.x >= destination)) A_UpdateCurrentNodeIndex();
+		if (((TurnBack == true) && pos.x <= destination) || ((TurnBack == false) && pos.x >= destination))
+		{
+			TurnBack = !TurnBack;
+			m_UpdateTurn = true;
+		}
 	}
 	float t = 0.3f; // 보간 시간 (조정 가능)
 	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
 
 	if (m_UpdateTurn) {
-		int section = m_currentNodeIndex % 4;
+		int section = m_currentNodeIndex % 2;
 
 		switch (section)
 		{
 		case 0:
-			yaw = 0.0f;
+		{
+			if (TurnBack) {
+				yaw = 0.0f;
+			}
+			else {
+				yaw = 180.0f;
+			}
 			break;
+		}
 		case 1:
-			yaw = 270.0f;
-			break;
-		case 2:
-			yaw = 180.0f;
-			break;
-		case 3:
-			yaw = 90.0f;
+			if (TurnBack) {
+				yaw = 270.0f;
+			}
+			else {
+				yaw = 90.0f;
+			}
 			break;
 		}
 		m_rightvec = NPCcalcRightRotate();
@@ -1430,11 +1476,11 @@ void NPC::A_MoveChangeIdle()
 
 bool NPC::A_IsUserOnSafeZone(int user_City)
 {
-	return (-1 < user_City < 4) ? false : true;
+	return (-1 < user_City < 5) ? false : true;
 }
 int NPC::A_GetUserCity()
 {
-	for (int i = 0; i < 4; ++i) {
+	for (int i = 0; i < 5; ++i) {
 		if (m_User_Pos[m_chaseID].z < MeshInfo[i * 4 + 1].GetLargeZ() &&
 			m_User_Pos[m_chaseID].z > MeshInfo[i * 4 + 3].GetSmallZ() &&
 			m_User_Pos[m_chaseID].x < MeshInfo[i * 4].GetLargeX() &&
@@ -1644,7 +1690,7 @@ bool NPC::A_PlayerDetact()
 		float distance = XMVectorGetX(XMVector3Length(NPCToPlayer));
 
 		// 거리가 bounding sphere의 반지름보다 작으면 충돌했다고 판단한다.
-		if (distance < 50.0f)
+		if (distance < 600.0f)
 		{
 			return true;
 		}
@@ -1688,7 +1734,7 @@ void NPC::A_SetFrustum()
 	frustum.TopSlope = height / 50.0f;
 	frustum.BottomSlope = height / -50.0f;
 	frustum.Near = 0.1f;
-	frustum.Far = 50.0f;
+	frustum.Far = 600.0f;
 
 	m_frustum = frustum;
 }
@@ -2121,7 +2167,6 @@ void initNpc() {
 		default_random_engine dre(rd());
 
 		uniform_int_distribution<int>idx(0, 15);
-		//npcsInfo[i].graph = CP;
 		npcsInfo[i].SetNodeIndex(idx(dre));
 
 		float x = npcsInfo[i].getRandomOffset(MeshInfo[npcsInfo[i].GetNodeIndex()].GetSmallX(),
@@ -2142,6 +2187,7 @@ void initNpc() {
 		float speed = SpdSet(dre);
 		npcsInfo[i].SetSpeed(speed);
 		npcsInfo[i].SetChaseID(-1);
+		npcsInfo[i].SetOriginNodeIndex(npcsInfo[i].GetNodeIndex());
 		npcsInfo[i].path.clear();
 		npcsInfo[i].SetTargetNodeIndex(-1);
 		npcsInfo[i].SetHp(300);
@@ -2159,7 +2205,6 @@ void initNpc() {
 			default_random_engine dre(rd());
 
 			uniform_int_distribution<int>idx(0, 15);
-			//npcsInfo[i].graph = CP;
 			npcsInfo[i].SetNodeIndex(idx(dre));
 
 			float x = npcsInfo[i].getRandomOffset(MeshInfo[npcsInfo[i].GetNodeIndex()].GetSmallX(),
@@ -2180,6 +2225,7 @@ void initNpc() {
 			float speed = SpdSet(dre);
 			npcsInfo[i].SetSpeed(speed);
 			npcsInfo[i].SetChaseID(-1);
+			npcsInfo[i].SetOriginNodeIndex(npcsInfo[i].GetNodeIndex());
 			npcsInfo[i].path.clear();
 			npcsInfo[i].SetTargetNodeIndex(-1);
 			npcsInfo[i].SetHp(100);
@@ -2197,7 +2243,7 @@ void MoveNPC()
 	while (true) {
 		auto start_t = system_clock::now();
 		//======================================================================
-		if (ConnectingServer && ClientConnected) {
+		if (ConnectingServer) {
 			for (int i = 0; i < MAX_NPCS; ++i) {
 				// 클라이언트들과 NPC 사이의 거리 계산
 				if (npcsInfo[i].GetState() != NPC_DEATH)
@@ -2240,17 +2286,17 @@ void MoveNPC()
 					g_logicservers[a_lgcsvr_num].send_npc_move_packet(npcsInfo[i].GetID());
 
 					// npc pos 확인
-					/*if (i < 4) {
+					if (i > 21) {
 
-						cout << "=============" << endl;
+						//cout << "=============" << endl;
 
-						cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
-						cout << i << "번째 NPC의 Type: " << npcsInfo[i].type << endl;
-						cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
-						cout << i << "번째 NPC의 Look: " << npcsInfo[i].m_lookvec.x << ", " << npcsInfo[i].m_lookvec.y << ", " << npcsInfo[i].m_lookvec.z << endl;
-						cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
+						//cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
+						//cout << i << "번째 NPC의 Type: " << npcsInfo[i].type << endl;
+						//cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
+						//cout << i << "번째 NPC의 Look: " << npcsInfo[i].m_lookvec.x << ", " << npcsInfo[i].m_lookvec.y << ", " << npcsInfo[i].m_lookvec.z << endl;
+						//cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
 
-					}*/
+					}
 
 					//if (npcs[i].PrintRayCast) {
 					//	cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
@@ -2473,13 +2519,11 @@ int main(int argc, char* argv[])
 	cout << "\n";
 
 	for (int i{}; i < MeshInfo.size(); ++i) {
-		if (i < 16) {
-			if (i % 2 == 0) {
-				MeshInfo[i].SetMoveingSpace(false, true);
-			}
-			else {
-				MeshInfo[i].SetMoveingSpace(true, false);
-			}
+		if (i % 2 == 0) {
+			MeshInfo[i].SetMoveingSpace(false, true);
+		}
+		else {
+			MeshInfo[i].SetMoveingSpace(true, false);
 		}
 
 		for (int j{}; j < MeshInfo.size(); ++j) {
