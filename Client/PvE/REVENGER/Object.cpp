@@ -1810,7 +1810,7 @@ void CHelicopterObjects::OnPrepareAnimate()
 
 void CHelicopterObjects::Animate(float fTimeElapsed)
 {
-	XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 7.3) * fTimeElapsed);
+	XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 7.8) * fTimeElapsed);
 	
 	if (m_pMainRotorFrame)
 	{
@@ -1828,7 +1828,7 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 	}
 	if (m_bDyingMotion == true)
 	{
-		/*while(m_xmf4x4ToParent._42<-0.5) */FallDown(fTimeElapsed);
+		FallDown(fTimeElapsed);
 	}
 
 	CGameObject::Animate(fTimeElapsed);
@@ -1853,43 +1853,43 @@ void CHelicopterObjects::FallDown(float fTimeElapsed)
 	m_pTailRotorFrame->m_xmf4x4ToParent._41 += RandomValue(5.0, 8.0) * fTimeElapsed;
 	m_pMainRotorFrame->m_xmf4x4ToParent._41 -= RandomValue(5.0, 8.0) * fTimeElapsed;
 	m_pFrameFragObj1->m_xmf4x4ToParent._41 += RandomValue(5.0, 8.0) * fTimeElapsed;
-	m_pFrameFragObj2->m_xmf4x4ToParent._41 -= RandomValue(5.0, 4.0) * fTimeElapsed;
-	m_pFrameFragObj3->m_xmf4x4ToParent._43 += RandomValue(5.0, 8.0) * fTimeElapsed;
+	m_pFrameFragObj2->m_xmf4x4ToParent._41 -= RandomValue(5.0, 8.0) * fTimeElapsed;
 	m_pFrameFragObj4->m_xmf4x4ToParent._41 -= RandomValue(5.0, 8.0) * fTimeElapsed;
-	m_pFrameFragObj5->m_xmf4x4ToParent._43 += RandomValue(5.0, 8.0) * fTimeElapsed;
 	m_pFrameFragObj6->m_xmf4x4ToParent._41 -= RandomValue(5.0, 4.0) * fTimeElapsed;
-	m_pFrameFragObj7->m_xmf4x4ToParent._41 -= RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pFrameFragObj7->m_xmf4x4ToParent._41 -= RandomValue(5.0, 9.0) * fTimeElapsed;
+	m_pFrameFragObj9->m_xmf4x4ToParent._43 -= RandomValue(5.0, 9.0) * fTimeElapsed;
+	m_pFrameFragObj10->m_xmf4x4ToParent._43 += RandomValue(5.0, 6.0) * fTimeElapsed;
+	m_pFrameFragObj3->m_xmf4x4ToParent._43 += RandomValue(5.0, 8.0) * fTimeElapsed;
+	m_pFrameFragObj5->m_xmf4x4ToParent._43 += RandomValue(5.0, 8.0) * fTimeElapsed;
 	m_pFrameFragObj8->m_xmf4x4ToParent._43 += RandomValue(5.0, 6.0) * fTimeElapsed;
-	m_pFrameFragObj9->m_xmf4x4ToParent._41 -= RandomValue(5.0, 6.0) * fTimeElapsed;
-	m_pFrameFragObj10->m_xmf4x4ToParent._41 += RandomValue(5.0, 6.0) * fTimeElapsed;
 
 
 
-	m_pTailRotorFrame->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
-	m_pMainRotorFrame->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
-	m_pFrameFragObj1->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
-	m_pFrameFragObj2->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
-	m_pFrameFragObj3->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
-	m_pFrameFragObj4->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
-	m_pFrameFragObj5->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
-	m_pFrameFragObj6->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
-	m_pFrameFragObj7->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
-	m_pFrameFragObj8->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
-	m_pFrameFragObj9->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
-	m_pFrameFragObj10->m_xmf4x4ToParent._42 -= RandomValue(5.0, 6.0) * fTimeElapsed;
-	XMMATRIX xmmtxRotateSub = XMMatrixRotationY(XMConvertToRadians(360.0f * 0.2) * fTimeElapsed);
+	m_pTailRotorFrame->m_xmf4x4ToParent._42 -= RandomValue(8.0, 10.0) * fTimeElapsed;
+	m_pMainRotorFrame->m_xmf4x4ToParent._42 -= RandomValue(8.0, 10.0) * fTimeElapsed;
+	m_pFrameFragObj1->m_xmf4x4ToParent._42 -= RandomValue(8.0, 10.0) * fTimeElapsed;
+	m_pFrameFragObj2->m_xmf4x4ToParent._42 -= RandomValue(8.0, 10.0) * fTimeElapsed;
+	m_pFrameFragObj3->m_xmf4x4ToParent._42 -= RandomValue(8.0, 10.0) * fTimeElapsed;
+	m_pFrameFragObj4->m_xmf4x4ToParent._42 -= RandomValue(8.0, 10.0) * fTimeElapsed;
+	m_pFrameFragObj5->m_xmf4x4ToParent._42 -= RandomValue(8.0, 10.0) * fTimeElapsed;
+	m_pFrameFragObj6->m_xmf4x4ToParent._42 -= RandomValue(8.0, 10.0) * fTimeElapsed;
+	m_pFrameFragObj7->m_xmf4x4ToParent._42 -= RandomValue(8.0, 10.0) * fTimeElapsed;
+	m_pFrameFragObj8->m_xmf4x4ToParent._42 -= RandomValue(8.0, 10.0) * fTimeElapsed;
+	m_pFrameFragObj9->m_xmf4x4ToParent._42 -= RandomValue(8.0, 10.0) * fTimeElapsed;
+	m_pFrameFragObj10->m_xmf4x4ToParent._42 -= RandomValue(8.0, 10.0) * fTimeElapsed;
+
+	XMMATRIX xmmtxRotateSub = XMMatrixRotationY(XMConvertToRadians(360.0f * 0.5) * fTimeElapsed);
 	m_pFrameFragObj1->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj1->m_xmf4x4ToParent);
 	m_pFrameFragObj2->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj2->m_xmf4x4ToParent);
 	m_pFrameFragObj3->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj3->m_xmf4x4ToParent);
 	m_pFrameFragObj4->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj4->m_xmf4x4ToParent);
-	//m_pFrameFragObj5->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pFrameFragObj5->m_xmf4x4ToParent);
 	m_pFrameFragObj6->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj6->m_xmf4x4ToParent);
 	m_pFrameFragObj7->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj7->m_xmf4x4ToParent);
 	m_pFrameFragObj8->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj8->m_xmf4x4ToParent);
 	m_pFrameFragObj9->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj9->m_xmf4x4ToParent);
 	m_pFrameFragObj10->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateSub, m_pFrameFragObj10->m_xmf4x4ToParent);
 
-	Rotate(5, 5, 5);
+	//Rotate(5, 5, 5);
 	CGameObject::Animate(fTimeElapsed);
 }
 

@@ -229,14 +229,17 @@ void CFragmentsShader::ReleaseObjects()
 
 void CFragmentsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CShader::Render(pd3dCommandList, pCamera, 0, false);
-
-	for (int j = 0; j < m_nObjects; j++)
+	if (m_bActive == true)
 	{
-		if (m_ppObjects[j])
+		CShader::Render(pd3dCommandList, pCamera, 0, false);
+
+		for (int j = 0; j < m_nObjects; j++)
 		{
-			m_ppObjects[j]->UpdateTransform(NULL);
-			m_ppObjects[j]->Render(pd3dCommandList, pCamera, false);
+			if (m_ppObjects[j])
+			{
+				m_ppObjects[j]->UpdateTransform(NULL);
+				m_ppObjects[j]->Render(pd3dCommandList, pCamera, false);
+			}
 		}
 	}
 
@@ -286,7 +289,7 @@ void CFragmentsShader::AnimateObjects(float fTimeElapsed)
 		}
 		else
 		{
-
+			m_bActive = false;
 			m_fElapsedTimes = 0.0f;
 		}
 

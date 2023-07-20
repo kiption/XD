@@ -1157,7 +1157,7 @@ void CGameFramework::ProcessInput()
 							if (m_ingame_role == R_RIFLE)
 								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
 							if (m_ingame_role == R_HELI)
-								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
+								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 1650.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
 							else
 								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
 						} 	//--------Human Player-----------// 
@@ -1167,7 +1167,7 @@ void CGameFramework::ProcessInput()
 								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
 
 							if (m_ingame_role == R_HELI)
-								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
+								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 1650.0f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
 							else
 								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
 						}
@@ -1242,6 +1242,7 @@ void CGameFramework::ShotDelay()
 		{
 			ShotKey = false;
 			((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay = 0.0f;
+
 		}
 		if (ShotKey == false)
 		{

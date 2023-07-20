@@ -5,7 +5,7 @@ GameSound::GameSound()
 	result = FMOD::System_Create(&soundSystem);
 
 	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
-	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_CREATESTREAM, 0, &shotSound);
+	result = soundSystem->createSound("Sound/Machin.wav", FMOD_CREATESTREAM, 0, &shotSound);
 	shotSound->setMode(FMOD_CREATESTREAM);
 
 
@@ -52,6 +52,9 @@ GameSound::GameSound()
 
 	result = soundSystem->playSound(NpcshotSound, 0, true, &NpcshootChannel);
 	NpcshootChannel->setVolume(0.25f);
+
+	//result = soundSystem->playSound(shotSound, 0, true, &shotChannel);
+	//shotChannel->setVolume(0.5f);
 }
 
 GameSound::~GameSound()
@@ -70,11 +73,15 @@ GameSound::~GameSound()
 	//Common_Close();
 }
 
-void GameSound::shootingSound(bool Stop)
+void GameSound::PlayShotSound()
 {
-	bool isPlaying = true;
-	result = soundSystem->playSound(shotSound, 0, false, &shootChannel);
-	shootChannel->setVolume(0.5f);
+	result = soundSystem->playSound(shotSound, 0, false, &shotChannel);
+	shotChannel->setVolume(0.5f);
+
+}
+void GameSound::PauseshotingSound()
+{
+	shotChannel->setPaused(false);
 
 }
 void GameSound::backGroundMusic()
@@ -102,7 +109,7 @@ void GameSound::reloadSound()
 {
 	result = soundSystem->playSound(reloadSounds, 0, false, &reloadChannel);
 	reloadChannel->setVolume(0.5f);
-	shootChannel->setPaused(true);
+	shotChannel->setPaused(true);
 
 }
 void GameSound::pauseHeartBeat()

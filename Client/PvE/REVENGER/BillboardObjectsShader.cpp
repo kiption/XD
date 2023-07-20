@@ -826,7 +826,7 @@ void BulletMarkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	CMaterial* pSpriteMaterial = new CMaterial(1);
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.5, 2.5, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.5, 1.5, 0.0f, 0.0f, 0.0f, 0.0f);
 	m_nObjects = 1;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures, 0, 15);

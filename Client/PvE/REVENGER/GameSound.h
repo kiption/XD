@@ -12,7 +12,7 @@ public:
 	FMOD::System* soundSystem;
 
 	FMOD::Sound* shotSound;
-	FMOD::Channel* shootChannel;
+	FMOD::Channel* shotChannel;
 
 	FMOD::Sound* NpcshotSound;
 	FMOD::Channel* NpcshootChannel;
@@ -48,7 +48,8 @@ public:
 
 	bool m_bStopSound = false;
 	void SpeakMusic();
-	void shootingSound(bool Stop=false);
+	void PlayShotSound();
+	void PauseshotingSound();
 	void backGroundMusic();
 	void HartBeatSound();
 	void collisionSound();
