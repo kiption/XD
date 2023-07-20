@@ -5,9 +5,12 @@ GameSound::GameSound()
 	result = FMOD::System_Create(&soundSystem);
 
 	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
-	result = soundSystem->createSound("Sound/Machin.wav", FMOD_CREATESTREAM, 0, &shotSound);
+	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_CREATESTREAM, 0, &shotSound);
 	shotSound->setMode(FMOD_CREATESTREAM);
 
+	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
+	result = soundSystem->createSound("Sound/Machin.wav", FMOD_CREATESTREAM, 0, &HelishotSound);
+	HelishotSound->setMode(FMOD_CREATESTREAM);
 
 	result = soundSystem->init(64, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
 	result = soundSystem->createSound("Sound/PlayerHittingSound.wav", FMOD_UNIQUE, 0, &ColliSound);
@@ -53,8 +56,8 @@ GameSound::GameSound()
 	result = soundSystem->playSound(NpcshotSound, 0, true, &NpcshootChannel);
 	NpcshootChannel->setVolume(0.25f);
 
-	//result = soundSystem->playSound(shotSound, 0, true, &shotChannel);
-	//shotChannel->setVolume(0.5f);
+	shotChannel->setVolume(0.5f);
+	HelishotChannel->setVolume(0.5f);
 }
 
 GameSound::~GameSound()
@@ -76,12 +79,13 @@ GameSound::~GameSound()
 void GameSound::PlayShotSound()
 {
 	result = soundSystem->playSound(shotSound, 0, false, &shotChannel);
-	shotChannel->setVolume(0.5f);
+
 
 }
-void GameSound::PauseshotingSound()
+void GameSound::PlayHeliShotSound()
 {
-	shotChannel->setPaused(false);
+	result = soundSystem->playSound(HelishotSound, 0, false, &HelishotChannel);
+
 
 }
 void GameSound::backGroundMusic()

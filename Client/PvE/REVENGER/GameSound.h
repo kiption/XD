@@ -14,6 +14,9 @@ public:
 	FMOD::Sound* shotSound;
 	FMOD::Channel* shotChannel;
 
+	FMOD::Sound* HelishotSound;
+	FMOD::Channel* HelishotChannel;
+
 	FMOD::Sound* NpcshotSound;
 	FMOD::Channel* NpcshootChannel;
 
@@ -49,7 +52,7 @@ public:
 	bool m_bStopSound = false;
 	void SpeakMusic();
 	void PlayShotSound();
-	void PauseshotingSound();
+	void PlayHeliShotSound();
 	void backGroundMusic();
 	void HartBeatSound();
 	void collisionSound();
