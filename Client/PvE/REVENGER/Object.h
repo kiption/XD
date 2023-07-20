@@ -594,7 +594,7 @@ public:
 	CHelicopterObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, CGameObject* pmodel ,ID3D12RootSignature *pd3dGraphicsRootSignature);
 	virtual ~CHelicopterObjects();
 
-private:
+public:
 	CGameObject					*m_pMainRotorFrame = NULL;
 	CGameObject					*m_pTailRotorFrame = NULL;
 	CGameObject					*m_pFrameFragObj1 = NULL;
@@ -608,6 +608,15 @@ private:
 	CGameObject					*m_pFrameFragObj9 = NULL;
 	CGameObject					*m_pFrameFragObj10 = NULL;
 	CGameObject					*m_pFrameFragObj11 = NULL;
+
+	XMFLOAT3 ParticlePosition{};
+	XMFLOAT4X4					m_pxmf4x4Transforms[EXPLOSION_HELICOPTER];
+	float						m_fElapsedTimes = 0.0f;
+	float						m_fDuration = 25.0f;
+	float						m_fExplosionSpeed = 1.0f;
+	float						m_fExplosionRotation = 5.0f;
+	XMFLOAT3 m_pxmf3SphereVectors[EXPLOSION_HELICOPTER];
+
 	CCamera* m_pCamera = NULL;
 public:
 	float m_fBulletEffectiveRange = 2000.0f;

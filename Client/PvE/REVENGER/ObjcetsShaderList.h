@@ -73,11 +73,9 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void ReleaseUploadBuffers();
-	XMFLOAT3 ParticlePosition{};
 	bool m_bActive = false;
-
+	XMFLOAT3 ParticlePosition{};
 	XMFLOAT4X4					m_pxmf4x4Transforms[EXPLOSION_DEBRISES];
-
 	float						m_fElapsedTimes = 0.0f;
 	float						m_fDuration = 25.0f;
 	float						m_fExplosionSpeed = 10.0f;

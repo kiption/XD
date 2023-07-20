@@ -186,6 +186,7 @@ extern float ReadFloatFromFile(FILE *pInFile);
 
 #define EPSILON					1.0e-10f
 #define EXPLOSION_DEBRISES		60
+#define EXPLOSION_HELICOPTER		12
 #define BLOODEXPLOSION_DEBRISES		50
 
 
