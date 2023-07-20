@@ -3,12 +3,6 @@
 // IP 주소
 const char* IPADDR_LOOPBACK = "127.0.0.1";		// 루프백
 
-//const char* IPADDR_LOBBY0 = "127.0.0.1";	// 원격 접속
-//const char* IPADDR_LOBBY1 = "127.0.0.1";	// 원격 접속
-//
-//const char* IPADDR_LOGIC0 = "127.0.0.1"; //"112.152.39.13";		// 원격 접속
-//const char* IPADDR_LOGIC1 = "127.0.0.1"; //"218.101.227.89";	// 원격 접속
-
 //======================================================================
 // 포트 번호
 // 1. 클라이언트-인증서버 통신
@@ -31,7 +25,11 @@ constexpr int MAX_NPC_SERVER = 2;
 constexpr int PORTNUM_LGCNPC_0 = 9930;
 constexpr int PORTNUM_LGCNPC_1 = 9931;
 
-// 5. 로직서버-로직서버 통신 (서버 수평확장)
+// 5. 로비서버-로비서버 통신 (서버 수평확장)
+constexpr int HA_PORTNUM_LBY0 = 10010;
+constexpr int HA_PORTNUM_LBY1 = 10011;
+
+// 6. 로직서버-로직서버 통신 (서버 수평확장)
 constexpr int HA_PORTNUM_S0 = 10020;
 constexpr int HA_PORTNUM_S1 = 10021;
 
@@ -89,7 +87,7 @@ enum PacketID {
 	, LBYC_LOBBY_CLEAR, LBYC_MEMBER_STATE, LBYC_ROLE_CHANGE, LBYC_GAME_START
 	, CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_CHAT, CS_PING, CS_RELOGIN
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT
-	, SC_DAMAGED, SC_ATTACK, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_RESPAWN, SC_BULLET_COUNT, SC_BULLET_COLLIDE_POS, SC_MISSION, SC_MISSION_COMPLETE
+	, SC_DAMAGED, SC_ATTACK, SC_RELOAD, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_RESPAWN, SC_BULLET_COLLIDE_POS, SC_MISSION, SC_MISSION_COMPLETE
 	, SC_TIME_TICKING, SC_CHAT, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
 	, NPC_FULL_INFO, NPC_MOVE, NPC_ROTATE, NPC_CHECK_POS, NPC_REMOVE, NPC_ATTACK, NPC_CHANGE_STATE
@@ -419,6 +417,13 @@ struct SC_ATTACK_PACKET {
 	char sound_volume;
 };
 
+struct SC_RELOAD_PACKET {
+	unsigned char size;
+	char type;
+	short id;
+	char sound_volume;
+};
+
 struct SC_CHANGE_SCENE_PACKET {
 	unsigned char size;
 	char type;
@@ -445,12 +450,6 @@ struct SC_RESPAWN_PACKET {
 	float right_x, right_y, right_z;
 	float up_x, up_y, up_z;
 	float look_x, look_y, look_z;
-};
-
-struct SC_BULLET_COUNT_PACKET {
-	unsigned char size;
-	char type;
-	int bullet_cnt;
 };
 
 enum C_OBJ_TYPE { C_OBJ_NONCOLLIDE, C_OBJ_MAPOBJ, C_OBJ_GROUND, C_OBJ_NPC, C_OBJ_PLAYER };

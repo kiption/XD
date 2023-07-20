@@ -1101,23 +1101,15 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].remain_bullet = 0;
 		clients[client_id].s_lock.unlock();
 
-		if (clients[client_id].s_state == ST_INGAME) {
-			SC_BULLET_COUNT_PACKET bullet_update_pack;
-			bullet_update_pack.type = SC_BULLET_COUNT;
-			bullet_update_pack.size = sizeof(SC_BULLET_COUNT_PACKET);
-			bullet_update_pack.bullet_cnt = clients[client_id].remain_bullet;
-
-			lock_guard<mutex> lg{ clients[client_id].s_lock };
-			clients[client_id].do_send(&bullet_update_pack);
-		}
-
 		// 총알을 발사했다는 정보를 다른 클라이언트에게 알려줍니다.
 		for (auto& cl : clients) {
-			if (cl.id == client_id) continue;
 			if (cl.s_state != ST_INGAME) continue;
+			if (cl.curr_stage == 0) continue;
 
 			// 사운드 볼륨 계산을 위해 거리를 측정합니다
 			float dist = XMF_Distance(cl.pos, clients[client_id].pos);
+			if (dist > ATKSOUND_MAX_DISTANCE) continue;
+
 			char atksound_vol = VOL_MUTE;
 			if (0 <= dist && dist < ATKSOUND_NEAR_DISTANCE)
 				atksound_vol = VOL_HIGH;
@@ -1502,13 +1494,25 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].reload_time = system_clock::now();
 			clients[client_id].s_lock.unlock();
 
-			SC_BULLET_COUNT_PACKET reload_packet;
-			reload_packet.size = sizeof(SC_BULLET_COUNT_PACKET);
-			reload_packet.type = SC_BULLET_COUNT;
-			reload_packet.bullet_cnt = MAX_BULLET;
-			{
-				lock_guard<mutex> lg{ clients[client_id].s_lock };
-				clients[client_id].do_send(&reload_packet);
+			for (auto& cl : clients) {
+				if (cl.s_state != ST_INGAME) continue;
+				if (cl.curr_stage == 0) continue;
+				int dist = XMF_Distance(cl.pos, clients[client_id].pos);
+				if (dist > RELOADSOUND_MAX_DISTANCE) continue;
+				
+				SC_RELOAD_PACKET reload_packet;
+				reload_packet.size = sizeof(SC_RELOAD_PACKET);
+				reload_packet.type = SC_RELOAD;
+				reload_packet.id = client_id;
+				if (0 <= dist && dist < RELOADSOUND_NEAR_DISTANCE)
+					reload_packet.sound_volume = VOL_HIGH;
+				else if (RELOADSOUND_NEAR_DISTANCE <= dist && dist < RELOADSOUND_MID_DISTANCE)
+					reload_packet.sound_volume = VOL_MID;
+				else if (RELOADSOUND_MID_DISTANCE <= dist && dist < RELOADSOUND_MAX_DISTANCE)
+					reload_packet.sound_volume = VOL_LOW;
+
+				lock_guard<mutex> lg{ cl.s_lock };
+				cl.do_send(&reload_packet);
 			}
 			break;
 
@@ -2251,6 +2255,7 @@ void do_worker()
 					extended_servers[server_id].do_recv();
 				}
 			}
+			break;
 		}//OP_CONN end
 		}
 	}
@@ -2699,7 +2704,7 @@ int main(int argc, char* argv[])
 		ha_server_addr.sin_port = htons(right_portnum);	// 수평확장된 서버군에서 자기 오른쪽에 있는 서버
 
 		// 루프백
-		//inet_pton(AF_INET, IPADDR_LOOPBACK, &ha_server_addr.sin_addr);
+		inet_pton(AF_INET, "127.0.0.1", &ha_server_addr.sin_addr);
 
 		// 원격
 		/*if (my_server_id == 0) {

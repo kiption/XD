@@ -741,21 +741,29 @@ void processPacket(char* ptr)
 	{
 		if (curr_servertype != SERVER_LOGIC) break;
 		SC_ATTACK_PACKET* recv_packet = reinterpret_cast<SC_ATTACK_PACKET*>(ptr);
+
 		int recv_id = recv_packet->id;
 		int atk_sound_volume = recv_packet->sound_volume;
 		if (recv_packet->obj_type == TARGET_PLAYER) {
 			cout << "Client[" << recv_packet->id << "]가 공격했음." << endl;
 
 			if (atk_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 총성
-			//cout << "작은 총성" << endl;
+				//cout << "작은 총성" << endl;
+				gamesound.shootingSound(false);
 			}
 			else if (atk_sound_volume == VOL_MID) {		// 적당한 거리에 있어서 적당하게 들리는 총성
 				//cout << "적당한 총성" << endl;
+				gamesound.shootingSound(false);
 			}
 			else if (atk_sound_volume == VOL_HIGH) {	// 가까이에 있어서 크게 들리는 총성
 				//cout << "큰 총성" << endl;
+				gamesound.shootingSound(false);
 			}
 
+			if (recv_packet->id == my_id) {
+				if (players_info[recv_packet->id].m_bullet > 1)
+					players_info[recv_packet->id].m_bullet--;
+			}
 		}
 		else if (recv_packet->obj_type == TARGET_NPC) {
 			cout << "NPC[" << recv_packet->id << "]가 공격했음." << endl;
@@ -786,12 +794,35 @@ void processPacket(char* ptr)
 				gamesound.PauseNpcShotSound();
 			}*/
 		}
-		
-
-		
-		
 		break;
 	}// SC_ATTACK case end
+	case SC_RELOAD:
+	{
+		if (curr_servertype != SERVER_LOGIC) break;
+		SC_RELOAD_PACKET* recv_packet = reinterpret_cast<SC_RELOAD_PACKET*>(ptr);
+
+		// 장전
+		if (recv_packet->id == my_id) {
+			players_info[recv_packet->id].m_bullet = MAX_BULLET;
+		}
+
+		// 장전 소리
+		int sound_volume = recv_packet->sound_volume;
+		if (sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 소리
+			cout << "작은 소리" << endl;
+			gamesound.reloadSound();
+		}
+		else if (sound_volume == VOL_MID) {		// 적당한 거리에 있어서 적당하게 들리는 소리
+			cout << "적당한 소리" << endl;
+			gamesound.reloadSound();
+		}
+		else if (sound_volume == VOL_HIGH) {	// 가까이에 있어서 크게 들리는 소리
+			cout << "큰 소리" << endl;
+			gamesound.reloadSound();
+		}
+
+		break;
+	}// case SC_RELOAD case end
 	case SC_CHANGE_SCENE:
 	{
 		if (curr_servertype != SERVER_LOGIC) break;
@@ -874,17 +905,6 @@ void processPacket(char* ptr)
 		respawn_trigger = true;
 		break;
 	}//SC_RESPAWN case end
-	case SC_BULLET_COUNT:
-	{
-		SC_BULLET_COUNT_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COUNT_PACKET*>(ptr);
-		players_info[my_id].m_bullet = recv_packet->bullet_cnt;
-		if (recv_packet->bullet_cnt == MAX_BULLET) {
-			gamesound.reloadSound();
-		}
-		else
-			gamesound.shootingSound(false);
-		break;
-	}//SC_BULLET_COUNT case end
 	case SC_BULLET_COLLIDE_POS:
 	{
 		SC_BULLET_COLLIDE_POS_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COLLIDE_POS_PACKET*>(ptr);
