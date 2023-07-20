@@ -749,15 +749,15 @@ void processPacket(char* ptr)
 
 			if (atk_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 총성
 				//cout << "작은 총성" << endl;
-				gamesound.shootingSound(false);
+				gamesound.PlayShotSound();
 			}
 			else if (atk_sound_volume == VOL_MID) {		// 적당한 거리에 있어서 적당하게 들리는 총성
 				//cout << "적당한 총성" << endl;
-				gamesound.shootingSound(false);
+				gamesound.PlayShotSound();
 			}
 			else if (atk_sound_volume == VOL_HIGH) {	// 가까이에 있어서 크게 들리는 총성
 				//cout << "큰 총성" << endl;
-				gamesound.shootingSound(false);
+				gamesound.PlayShotSound();
 			}
 
 			if (recv_packet->id == my_id) {
