@@ -1027,7 +1027,7 @@ void CGameFramework::ProcessInput()
 
 		if (!player_dead) { if (pKeysBuffer[VK_SPACE] & 0xF0) { q_keyboardInput.push(SEND_KEY_SPACEBAR); } }
 
-		float cxDelta = 0.0f, cyDelta = 0.0f;
+		float cxDelta = 0.0f, cyDelta = 0.0f, czDelta = 0.0f;
 		POINT ptCursorPos;
 		if (GetCapture() == m_hWnd)
 		{
@@ -1035,6 +1035,7 @@ void CGameFramework::ProcessInput()
 			GetCursorPos(&ptCursorPos);
 			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / MouseResponsivenessX;
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / MouseResponsivenessY;
+			czDelta = ((float)(ptCursorPos.y - m_ptOldCursorPos.y) + (float)(ptCursorPos.x - m_ptOldCursorPos.x)) / MouseResponsivenessX;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
@@ -1157,7 +1158,7 @@ void CGameFramework::ProcessInput()
 							if (m_ingame_role == R_RIFLE)
 								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
 							if (m_ingame_role == R_HELI)
-								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 1650.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
+								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 1750.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
 							else
 								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
 						} 	//--------Human Player-----------// 
@@ -1167,7 +1168,7 @@ void CGameFramework::ProcessInput()
 								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
 
 							if (m_ingame_role == R_HELI)
-								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 1650.0f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
+								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 1750.0f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
 							else
 								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.f * m_GameTimer.GetTimeElapsed(), true, { 0,0,0 });
 						}
@@ -1238,11 +1239,11 @@ void CGameFramework::ShotDelay()
 	if (m_ingame_role == R_RIFLE)
 	{
 		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay += m_GameTimer.GetTimeElapsed();
-		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay > 0.2)
+		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay > 0.17)
 		{
 			ShotKey = false;
 			((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay = 0.0f;
-
+			
 		}
 		if (ShotKey == false)
 		{

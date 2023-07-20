@@ -37,7 +37,7 @@ GameSound::GameSound()
 	result = RotorSound->setMode(FMOD_LOOP_NORMAL);
 
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
-	result = soundSystem->createSound("Sound/BackGround.mp3", FMOD_DEFAULT, 0, &BackGroundSound);
+	result = soundSystem->createSound("Sound/RobbyScene.mp3", FMOD_DEFAULT, 0, &BackGroundSound);
 	result = BackGroundSound->setMode(FMOD_LOOP_NORMAL);
 
 	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
@@ -51,13 +51,14 @@ GameSound::GameSound()
 	HartbeatChannel->setVolume(0.5f);
 
 	result = soundSystem->playSound(BackGroundSound, 0, true, &BackGroundChannel);
-	BackGroundChannel->setVolume(0.1f);
+	BackGroundChannel->setVolume(0.05f);
 
 	result = soundSystem->playSound(NpcshotSound, 0, true, &NpcshootChannel);
 	NpcshootChannel->setVolume(0.25f);
 
-	shotChannel->setVolume(0.5f);
+	shotChannel->setVolume(0.4f);
 	HelishotChannel->setVolume(0.5f);
+	reloadChannel->setVolume(0.5f);
 }
 
 GameSound::~GameSound()
@@ -112,7 +113,7 @@ void GameSound::collisionSound()
 void GameSound::reloadSound()
 {
 	result = soundSystem->playSound(reloadSounds, 0, false, &reloadChannel);
-	reloadChannel->setVolume(0.5f);
+
 	shotChannel->setPaused(true);
 
 }

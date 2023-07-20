@@ -747,17 +747,52 @@ void processPacket(char* ptr)
 		if (recv_packet->obj_type == TARGET_PLAYER) {
 			cout << "Client[" << recv_packet->id << "]가 공격했음." << endl;
 
+			if (players_info[recv_packet->id].m_role == ROLE_HELI)
+			{
+				gamesound.PlayHeliShotSound();
+			}
+			if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
+			{
+				gamesound.PlayShotSound();
+			}
 			if (atk_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 총성
 				//cout << "작은 총성" << endl;
-				gamesound.PlayShotSound();
+				if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
+				{
+					gamesound.PlayShotSound();
+					gamesound.shotChannel->setVolume(0.05f);
+				}
+				if (players_info[recv_packet->id].m_role == ROLE_HELI)
+				{
+					gamesound.PlayHeliShotSound();
+					gamesound.HelishotChannel->setVolume(0.05f);
+				}
 			}
 			else if (atk_sound_volume == VOL_MID) {		// 적당한 거리에 있어서 적당하게 들리는 총성
 				//cout << "적당한 총성" << endl;
-				gamesound.PlayShotSound();
+				if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
+				{
+					gamesound.PlayShotSound();
+					gamesound.shotChannel->setVolume(0.25f);
+				}
+				if (players_info[recv_packet->id].m_role == ROLE_HELI)
+				{
+					gamesound.PlayHeliShotSound();
+					gamesound.HelishotChannel->setVolume(0.25f);
+				}
 			}
 			else if (atk_sound_volume == VOL_HIGH) {	// 가까이에 있어서 크게 들리는 총성
 				//cout << "큰 총성" << endl;
-				gamesound.PlayShotSound();
+				if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
+				{
+					gamesound.PlayShotSound();
+					gamesound.shotChannel->setVolume(0.6f);
+				}
+				if (players_info[recv_packet->id].m_role == ROLE_HELI)
+				{
+					gamesound.PlayHeliShotSound();
+					gamesound.HelishotChannel->setVolume(0.6f);
+				}
 			}
 
 			if (recv_packet->id == my_id) {
@@ -805,20 +840,54 @@ void processPacket(char* ptr)
 		if (recv_packet->id == my_id) {
 			players_info[recv_packet->id].m_bullet = MAX_BULLET;
 		}
-
+		if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
+		{
+			gamesound.reloadSound();
+		}
+		if (players_info[recv_packet->id].m_role == ROLE_HELI)
+		{
+			gamesound.reloadSound();
+		}
 		// 장전 소리
 		int sound_volume = recv_packet->sound_volume;
 		if (sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 소리
-			cout << "작은 소리" << endl;
-			gamesound.reloadSound();
+			//cout << "작은 소리" << endl;
+			if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
+			{
+				gamesound.reloadSound();
+				gamesound.reloadChannel->setVolume(0.05f);
+			}
+			if (players_info[recv_packet->id].m_role == ROLE_HELI)
+			{
+				gamesound.reloadSound();
+				gamesound.reloadChannel->setVolume(0.05f);
+			}
 		}
 		else if (sound_volume == VOL_MID) {		// 적당한 거리에 있어서 적당하게 들리는 소리
-			cout << "적당한 소리" << endl;
-			gamesound.reloadSound();
+			//cout << "적당한 소리" << endl;
+			if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
+			{
+				gamesound.reloadSound();
+				gamesound.reloadChannel->setVolume(0.25f);
+			}
+			if (players_info[recv_packet->id].m_role == ROLE_HELI)
+			{
+				gamesound.reloadSound();
+				gamesound.reloadChannel->setVolume(0.25f);
+			}
 		}
 		else if (sound_volume == VOL_HIGH) {	// 가까이에 있어서 크게 들리는 소리
-			cout << "큰 소리" << endl;
-			gamesound.reloadSound();
+			//cout << "큰 소리" << endl;
+			if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
+			{
+				gamesound.reloadSound();
+				gamesound.reloadChannel->setVolume(0.5f);
+			}
+			if (players_info[recv_packet->id].m_role == ROLE_HELI)
+			{
+				gamesound.reloadSound();
+				gamesound.reloadChannel->setVolume(0.5f);
+			}
 		}
 
 		break;

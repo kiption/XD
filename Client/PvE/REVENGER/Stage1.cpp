@@ -271,9 +271,9 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
 
+	CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
 	for (int i = 0; i < HELIBULLETS; i++)
 	{
-		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
 		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, false);
 		pBulletObject->SetMovingSpeed(200.0f);
@@ -282,9 +282,9 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 		m_ppBullets[i] = pBulletObject;
 		pBulletMesh->AddRef();
 	}
+	CGameObject* pCartrudgetMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet4.bin", pBCBulletEffectShader);
 	for (int i = 0; i < CARTRIDGES; i++)
 	{
-		CGameObject* pCartrudgetMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet4.bin", pBCBulletEffectShader);
 		pCartridge = new CValkanObject(1.5);
 		pCartridge->SetChild(pCartrudgetMesh, false);
 		pCartridge->SetMovingSpeed(6.5f);
@@ -298,7 +298,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 		CGameObject* pHelicopterValkanMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet4.bin", pBCBulletEffectShader);
 		pValkan = new CValkanObject(300.0);
 		pValkan->SetChild(pHelicopterValkanMesh, false);
-		pValkan->SetMovingSpeed(5000.0f);
+		pValkan->SetMovingSpeed(1000.0f);
 		pValkan->SetActive(false);
 		pValkan->SetCurScene(SCENE1STAGE);
 		m_ppValkan[i] = pValkan;
@@ -899,9 +899,9 @@ void Stage1::PlayerFirevalkan(CCamera* pCamera, XMFLOAT3 Look)
 	CValkanObject* pBulletObject = NULL;
 	for (int i = 0; i < HELICOPTERVALKANS; i++)
 	{
-		if (!m_ppBullets[i]->m_bActive)
+		if (!m_ppValkan[i]->m_bActive)
 		{
-			pBulletObject = m_ppBullets[i];
+			pBulletObject = m_ppValkan[i];
 			pBulletObject->Reset();
 			break;
 		}

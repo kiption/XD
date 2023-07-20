@@ -167,6 +167,16 @@ void CPlayer::Rotate(float x, float y, float z)
 			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
 		}
+		/*if (z != 0.0f)
+		{
+			m_fRoll += z;
+			if (m_fRoll > +1.0f) { x -= (m_fRoll - 1.0f); m_fRoll = +1.0f; }
+			if (m_fRoll < -1.0f) { x -= (m_fRoll + 1.0f); m_fRoll = -1.0f; }
+			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Look), XMConvertToRadians(z));
+			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
+
+		}*/
 		m_pCamera->Rotate(x, y, z);
 	}
 
