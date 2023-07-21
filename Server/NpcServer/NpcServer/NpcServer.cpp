@@ -280,6 +280,20 @@ float DistanceBetween(int nodeIndex1, int nodeIndex2)
 	return distance;
 }
 
+float Length(XMFLOAT3& xmf3Vector)
+{
+	XMFLOAT3 xmf3Result;
+	XMStoreFloat3(&xmf3Result, XMVector3Length(XMLoadFloat3(&xmf3Vector)));
+	return(xmf3Result.x);
+}
+
+float DotProduct(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2)
+{
+	XMFLOAT3 xmf3Result;
+	XMStoreFloat3(&xmf3Result, XMVector3Dot(XMLoadFloat3(&xmf3Vector1), XMLoadFloat3(&xmf3Vector2)));
+	return(xmf3Result.x);
+}
+
 XMFLOAT3 Lerp(XMFLOAT3 start, XMFLOAT3 end, float t)
 {
 	XMVECTOR startVector = XMLoadFloat3(&start);
@@ -291,6 +305,20 @@ XMFLOAT3 Lerp(XMFLOAT3 start, XMFLOAT3 end, float t)
 	XMStoreFloat3(&interpolatedFloat3, interpolatedVector);
 
 	return interpolatedFloat3;
+}
+
+XMFLOAT3 Subtract(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2)
+{
+	XMFLOAT3 xmf3Result;
+	XMStoreFloat3(&xmf3Result, XMLoadFloat3(&xmf3Vector1) - XMLoadFloat3(&xmf3Vector2));
+	return(xmf3Result);
+}
+
+XMFLOAT3 Normalize(XMFLOAT3& xmf3Vector)
+{
+	XMFLOAT3 m_xmf3Normal;
+	XMStoreFloat3(&m_xmf3Normal, XMVector3Normalize(XMLoadFloat3(&xmf3Vector)));
+	return(m_xmf3Normal);
 }
 
 //======================================================================
@@ -423,6 +451,7 @@ public:
 	// Set
 	void SetHp(int thp) { hp = thp; }
 	void SetID(int tid) { id = tid; }
+	void SetState(int type) { m_state = type; }
 	void SetChaseID(int cid) { m_chaseID = cid; }
 	void SetNodeIndex(int idx) { m_currentNodeIndex = idx; }
 	void SetTargetNodeIndex(int idx) { m_targetNodeIndex = idx; }
@@ -501,7 +530,7 @@ public:
 	// State
 		// Attack
 	bool		A_PlayerDetact();																	// 뷰 프러스텀 내의 플레이어 탐색
-	void		A_SetFrustum();																		// 프러스텀 설정
+	bool		A_SetFrustum(XMVECTOR startPoint, XMVECTOR lookVector, XMVECTOR playerPosition);																		// 프러스텀 설정
 	void		A_PlayerAttack();																	// Attack 상태에서 동작하는 함수
 
 	// State
@@ -512,6 +541,8 @@ public:
 	// 3. Common
 	bool		NPC_CollideByMap();																	// 맵이랑 충돌인지 판단
 	void		NPC_CalculationCollide();															// 충돌된 경우 위치 및 회전 정보 재설정
+	void		NPC_BackOwnsPos();																	// NPC Back 상황
+
 
 	void		H_setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
 	void		A_setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
@@ -891,46 +922,36 @@ void NPC::NPC_State_Manegement(int state)
 		case NPC_IDLE:
 		{
 			A_MoveToNode();
-			if (A_PlayerDetact()) {
-				m_state = NPC_CHASE;
+			if ((A_PlayerDetact() || (m_Distance[m_chaseID] < 200)) && m_chaseID != -1) {
+				m_state = NPC_ATTACK;
 				ChaseTime = system_clock::now();
 				AttackTime = ChaseTime;
+				cout << "-=-----------" << endl;
+				cout << "추적 중인 NPC ID: " << id << endl;
+				cout << "플레이어 간의 거리: " << m_Distance[m_chaseID] << endl;
+				cout << "프러스텀 충돌 결과: " << A_PlayerDetact() << endl;
+				cout << "NPC가 위치한 노드: " << m_currentNodeIndex << endl;
 			}
-			break;
-		}
-		case NPC_CHASE:
-		{
-			if (!CheckChaseState()) {
-				m_state = NPC_IDLE;
-				break;
-			}
-			A_PlayerChasing();
-			if (A_PlayerDetact())
-				m_state = NPC_ATTACK;
-
-
 			break;
 		}
 		case NPC_ATTACK:
 		{
-			if (AttackTime - ChaseTime > 5000ms) {
-				m_state = NPC_IDLE;
+			if (m_chaseID == -1 || AttackTime - ChaseTime > 5000ms) {
+				m_state = NPC_BACK;
+				m_targetNodeIndex = m_OriginNodeIndex;
+				if (!path.empty()) path.clear();
+				int myCity = m_OriginNodeIndex / 4;
 
-
+				path = A_AStarSearch(m_currentNodeIndex, m_targetNodeIndex, myCity);
 				break;
 			}
 			else {
+				if (A_PlayerDetact() || (m_Distance[m_chaseID] < 300)) {
+					AttackTime = system_clock::now();
+				}
+				ChaseTime = system_clock::now();
 				A_PlayerAttack();
-
-
 			}
-
-			if (!A_PlayerDetact()) {
-				m_state = NPC_CHASE;
-			}
-			else {
-			}
-
 			break;
 		}
 		case NPC_DEATH:
@@ -941,7 +962,15 @@ void NPC::NPC_State_Manegement(int state)
 		}
 		case NPC_BACK:
 		{
-
+			if (A_PlayerDetact() || (m_Distance[m_chaseID] < 300) || m_chaseID != -1) {
+				m_state = NPC_ATTACK;
+				ChaseTime = system_clock::now();
+				AttackTime = ChaseTime;
+				break;
+			}
+			else {
+				NPC_BackOwnsPos();
+			}
 			break;
 		}
 		default:
@@ -949,7 +978,6 @@ void NPC::NPC_State_Manegement(int state)
 		}
 
 		A_NPC_Check_HP();
-		A_SetFrustum();
 		A_setBB();
 		break;
 		break;
@@ -1380,15 +1408,7 @@ void NPC::H_NPC_Check_HP()
 }
 void NPC::H_NPC_Death_motion()
 {
-	pos.y -= 6.0f;
 
-	// 빙글빙글 돌며 추락
-	yaw += 3.0f;
-
-	m_rightvec = NPCcalcRightRotate();
-	m_lookvec = NPCcalcLookRotate();
-
-	//g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(id);
 }
 
 // Army
@@ -1518,13 +1538,13 @@ void NPC::A_IsPathMove()
 	const float speed = m_Speed;
 
 	XMFLOAT3 prevPos = pos;
-	float Curr_yaw = yaw;
+	m_PrevYaw = yaw;
 	float destination;
 	if (isMovingInZ) {
 		destination = isMovingForward ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
 		pos.z += isMovingForward ? speed : -speed;
 		yaw = isMovingForward ? 0.0f : 180.0f;
-		if (Curr_yaw != yaw) m_UpdateTurn = true;
+		if (m_PrevYaw != yaw) m_UpdateTurn = true;
 
 		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) m_currentNodeIndex = nextNode.GetIndex();
 	}
@@ -1532,7 +1552,7 @@ void NPC::A_IsPathMove()
 		destination = isMovingForward ? currentNode.GetLargeX() - m_destinationRange : currentNode.GetSmallX() + m_destinationRange;
 		pos.x += isMovingForward ? speed : -speed;
 		yaw = isMovingForward ? 90.0f : 270.0f;
-		if (Curr_yaw != yaw) m_UpdateTurn = true;
+		if (m_PrevYaw != yaw) m_UpdateTurn = true;
 
 		if ((isMovingForward && pos.x >= destination) || (!isMovingForward && pos.x <= destination)) m_currentNodeIndex = nextNode.GetIndex();
 	}
@@ -1544,7 +1564,6 @@ void NPC::A_IsPathMove()
 		m_lookvec = NPCcalcLookRotate();
 
 		m_UpdateTurn = false;
-
 		if (ConnectingServer) {
 			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
 		}
@@ -1616,15 +1635,20 @@ void NPC::A_PlayerChasing()
 		path.clear();
 
 		path = A_AStarSearch(m_currentNodeIndex, user_node, user_City);
-		m_targetNodeIndex = path[path.size() - 1];
-		m_currentNodeIndex = path[0];
-		A_IsPathMove();
+		if (path.empty()) {
+			cout << "경로를 탐색하지 못했습니다." << endl;
+			A_MoveToNode();
+		}
+		else {
+			m_targetNodeIndex = path[path.size() - 1];
+			m_currentNodeIndex = path[0];
+			A_IsPathMove();
+		}
 	}
 }
 vector<int> NPC::A_AStarSearch(int startNode, int targetNode, int user_City)
 {
 	const int m_NumTotalNode = MeshInfo.size();
-	vector<bool> visited(m_NumTotalNode, false);
 	vector<float> gScore(m_NumTotalNode, numeric_limits<float>::infinity());
 	vector<float> fScore(m_NumTotalNode, numeric_limits<float>::infinity());
 	vector<Node*> cameFrom(m_NumTotalNode, nullptr);
@@ -1634,109 +1658,103 @@ vector<int> NPC::A_AStarSearch(int startNode, int targetNode, int user_City)
 
 	priority_queue<Node> openSet;
 	openSet.emplace(startNode, fScore[startNode], gScore[startNode], nullptr);
-	visited[startNode] = true;
 
 	vector<int> temppath;
-	while (!openSet.empty()) {
-		if (cameFrom[targetNode] != nullptr) {
-			Node* node = cameFrom[targetNode];
-			while (node != nullptr) {
-				temppath.push_back(node->index);
-				node = node->parent;
-			}
-			reverse(temppath.begin(), temppath.end());
-			temppath.push_back(targetNode);
-			break;
-		}
 
+	while (!openSet.empty()) {
 		Node current = openSet.top();
 		openSet.pop();
 
-		visited[current.index] = true;
+		if (current.index == targetNode) {
+			// 경로를 구성하여 반환합니다.
+			Node* node = &current;
+			while (node != nullptr) {
+				temppath.emplace_back(node->index);
+				node = node->parent;
+			}
+			reverse(temppath.begin(), temppath.end());
+			// cameFrom 벡터에 할당된 메모리를 해제합니다.
+			for (Node* node : cameFrom) {
+				delete node;
+			}
+			return temppath;
+		}
+
+		// 이미 방문한 노드라도 다시 방문할 수 있도록 합니다.
+		// (음의 가중치가 없다고 가정하므로 무한 루프를 방지합니다)
+		//visited[current.index] = true;
 
 		for (int neighborIndex : MeshInfo[current.index].neighbor_mesh) {
-			if (user_City != neighborIndex / 4)
-				continue;
+			float tentative_gScore = gScore[current.index] + DistanceBetween(current.index, neighborIndex);
 
-			if (!visited[neighborIndex]) {
-				float tentative_gScore = gScore[current.index] + DistanceBetween(current.index, neighborIndex);
+			if (tentative_gScore < gScore[neighborIndex]) {
+				delete cameFrom[neighborIndex];
+				cameFrom[neighborIndex] = new Node(current);
 
-				if (tentative_gScore < gScore[neighborIndex]) {
-					cameFrom[neighborIndex] = new Node(current);  // 복사본을 만들어서 cameFrom에 저장
-					gScore[neighborIndex] = tentative_gScore;
-					fScore[neighborIndex] = gScore[neighborIndex] + HeuristicEstimate(neighborIndex, targetNode);
+				gScore[neighborIndex] = tentative_gScore;
+				fScore[neighborIndex] = gScore[neighborIndex] + HeuristicEstimate(neighborIndex, targetNode);
 
-					openSet.emplace(neighborIndex, fScore[neighborIndex], gScore[neighborIndex], cameFrom[neighborIndex]);
-				}
+				openSet.emplace(neighborIndex, fScore[neighborIndex], gScore[neighborIndex], cameFrom[neighborIndex]);
 			}
 		}
 	}
 
-	return temppath;
+	// 탐색 실패 시, cameFrom 벡터에 할당된 메모리를 해제하고 빈 경로를 반환합니다.
+	for (Node* node : cameFrom) {
+		delete node;
+	}
+	return vector<int>();
 }
 
 bool NPC::A_PlayerDetact()
 {
-	XMVECTOR PlayerPos = XMLoadFloat3(&m_User_Pos[m_chaseID]);
-
+	// NPC의 위치, 바라보는 방향 벡터, 플레이어의 위치를 로드합니다.
 	XMVECTOR NPCPos = XMLoadFloat3(&pos);
 	XMVECTOR NPCLook = XMLoadFloat3(&m_lookvec);
+	XMVECTOR PlayerPos = XMLoadFloat3(&m_User_Pos[m_chaseID]);
+
+	// NPC에서 플레이어로 향하는 벡터를 계산합니다.
 	XMVECTOR NPCToPlayer = XMVectorSubtract(PlayerPos, NPCPos);
 
-	// 플레이어의 위치가 NPC가 바라보는 방향에 있어야만 충돌로 간주한다.
-	if (XMVectorGetX(XMVector3Dot(NPCToPlayer, NPCLook)) > 0)
+	// 플레이어가 프러스텀 내부에 있는지 확인합니다.
+	if (A_SetFrustum(NPCPos, NPCLook, PlayerPos))
 	{
-		// 프러스텀과 Player의 bounding sphere와의 거리를 구한다.
-		float distance = XMVectorGetX(XMVector3Length(NPCToPlayer));
-
-		// 거리가 bounding sphere의 반지름보다 작으면 충돌했다고 판단한다.
-		if (distance < 600.0f)
-		{
-			return true;
-		}
+		cout << "NPC ID: " << id << "번째가 플레이어를 감지하였습니다." << endl;
+		return true;
 	}
 
 	return false;
 }
 
-void NPC::A_SetFrustum()
+bool NPC::A_SetFrustum(XMVECTOR startPoint, XMVECTOR lookVector, XMVECTOR playerPosition)
 {
-	// NPC의 위치와 Look 벡터를 가져온다.
-	XMVECTOR position = XMLoadFloat3(&pos);
-	XMVECTOR look = XMLoadFloat3(&m_lookvec);
+	// 프러스텀의 끝점을 계산합니다.
+	XMVECTOR endPoint = startPoint + (lookVector * 200.0f);
 
-	// Frustum의 사이드 범위와 상하 범위를 설정한다.
-	float width = 100.0f;
-	float height = 100.0f;
-
-	// Frustum의 시작점을 설정한다.
-	XMVECTOR startPoint = position;
-
-	// Frustum의 끝점을 설정한다.
-	XMVECTOR endPoint = position + (look * 200.0f);
-
-	// Frustum의 Up 벡터를 설정한다.
+	// 프러스텀의 Up 벡터를 설정합니다.
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-	// Frustum을 생성하고 설정한다.
+	// 프러스텀을 생성하고 설정합니다.
 	BoundingFrustum frustum;
-
-	// Frustum의 Origin을 설정한다.
 	XMStoreFloat3(&frustum.Origin, startPoint);
-
-	// Frustum의 Orientation을 설정한다.
 	XMMATRIX viewMatrix = XMMatrixLookAtRH(startPoint, endPoint, up);
 	XMVECTOR quaternion = XMQuaternionRotationMatrix(viewMatrix);
 	XMStoreFloat4(&frustum.Orientation, quaternion);
-
-	frustum.RightSlope = width / 50.0f;
-	frustum.LeftSlope = width / -50.0f;
-	frustum.TopSlope = height / 50.0f;
-	frustum.BottomSlope = height / -50.0f;
+	frustum.RightSlope = 0.5f;
+	frustum.LeftSlope = -0.5f;
+	frustum.TopSlope = 0.5f;
+	frustum.BottomSlope = -0.5f;
 	frustum.Near = 0.1f;
-	frustum.Far = 600.0f;
+	frustum.Far = 150.0f;
 
-	m_frustum = frustum;
+	// 플레이어의 위치가 프러스텀 내부에 있는지 확인합니다.
+	if (frustum.Contains(playerPosition) != ContainmentType::DISJOINT)
+	{
+		// 플레이어가 프러스텀 내부에 있습니다.
+		return true;
+	}
+
+	return false;
 }
 void NPC::A_PlayerAttack()
 {
@@ -1828,26 +1846,64 @@ bool NPC::NPC_CollideByMap()
 
 void NPC::NPC_CalculationCollide()
 {
-	int currNode = m_currentNodeIndex % 4;
+	XMFLOAT3 locallook = m_CollideMap.getLocalForward();
+	XMFLOAT3 normalizedLocalForward;
+	XMVECTOR localForwardNormalized = XMVector3Normalize(XMLoadFloat3(&locallook));
+	XMStoreFloat3(&normalizedLocalForward, localForwardNormalized);
+
+	XMFLOAT3 localright = m_CollideMap.getLocalRight();
+	XMFLOAT3 normalizedLocalRight;
+	XMVECTOR localRightNormalized = XMVector3Normalize(XMLoadFloat3(&localright));
+	XMStoreFloat3(&normalizedLocalRight, localRightNormalized);
+
+	XMFLOAT3 Center2PlayerVector = Subtract(pos, m_CollideMap.m_xoobb.Center);//벡터
+	float Center2PlayerDisrtance = Length(Center2PlayerVector);//거리
+	Center2PlayerVector = Normalize(Center2PlayerVector);
+
+
+	float forwardDotResult = DotProduct(Center2PlayerVector, locallook); //객체의 center와 플레이어와 normal간의 cos값   
+	float rightDotResult = DotProduct(Center2PlayerVector, localright);
+
+	float forwardDotResultAbs = abs(forwardDotResult);
+	float rightDotResultAbs = abs(rightDotResult);
+
+	float radian = XMConvertToRadians((m_CollideMap.getAngleAOB()) / 2);
+
+	XMFLOAT3 PlayerMoveDir;
+	int CollideCase;
+	if (abs(cos(radian)) < forwardDotResultAbs) {
+		if (forwardDotResult < 0) {
+			CollideCase = 1;
+		}
+		else {
+			CollideCase = 2;
+		}
+	}
+	else {
+		if (rightDotResult < 0) {
+			CollideCase = 3;
+		}
+		else {
+			CollideCase = 4;
+		}
+	}		
 	XMFLOAT3 prevPos = pos;
-
-
-	switch (currNode)
+	switch (CollideCase)
 	{
-	case 0:
-		yaw = 270.0f;
-		pos.x -= m_Speed;
-		break;
 	case 1:
 		yaw = 180.0f;
-		pos.z -= m_Speed;
+		pos.x -= m_Speed;
 		break;
 	case 2:
-		yaw = 90.0f;
-		pos.x += m_Speed;
+		yaw = 0.0f;
+		pos.z -= m_Speed;
 		break;
 	case 3:
-		yaw = 0.0f;
+		yaw = 270.0f;
+		pos.x += m_Speed;
+		break;
+	case 4:
+		yaw = 90.0f;
 		pos.z += m_Speed;
 		break;
 	}
@@ -1855,6 +1911,60 @@ void NPC::NPC_CalculationCollide()
 	float t = 0.3f; // 보간 시간 (조정 가능)
 	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
 	pos = interpolatedPos;
+}
+
+void NPC::NPC_BackOwnsPos()
+{
+	if (path[0] == m_OriginNodeIndex || m_currentNodeIndex == m_OriginNodeIndex) {
+		m_state = NPC_IDLE;
+	}
+	else {
+		NodeMesh currentNode = MeshInfo[path[0]];
+		NodeMesh nextNode = MeshInfo[path[1]];
+
+		const bool isMovingInZ = currentNode.GetMoveingSpaceZ();
+		const bool isMovingForward = nextNode.GetIndex() % 4 < 2;
+		const float speed = m_Speed;
+
+		XMFLOAT3 prevPos = pos;
+		m_PrevYaw = yaw;
+		float destination;
+		if (isMovingInZ) {
+			destination = isMovingForward ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
+			pos.z += isMovingForward ? speed : -speed;
+			yaw = isMovingForward ? 0.0f : 180.0f;
+			if (m_PrevYaw != yaw) m_UpdateTurn = true;
+
+			if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) {
+				m_currentNodeIndex = nextNode.GetIndex();
+				path.erase(path.begin());
+			}
+		}
+		else {
+			destination = isMovingForward ? currentNode.GetLargeX() - m_destinationRange : currentNode.GetSmallX() + m_destinationRange;
+			pos.x += isMovingForward ? speed : -speed;
+			yaw = isMovingForward ? 90.0f : 270.0f;
+			if (m_PrevYaw != yaw) m_UpdateTurn = true;
+
+			if ((isMovingForward && pos.x >= destination) || (!isMovingForward && pos.x <= destination)) {
+				m_currentNodeIndex = nextNode.GetIndex();
+				path.erase(path.begin());
+			}
+		}
+		float t = 0.3f; // 보간 시간 (조정 가능)
+		XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
+
+		if (m_UpdateTurn) {
+			m_rightvec = NPCcalcRightRotate();
+			m_lookvec = NPCcalcLookRotate();
+
+			m_UpdateTurn = false;
+			if (ConnectingServer) {
+				g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+			}
+		}
+		pos = interpolatedPos;
+	}
 }
 
 //======================================================================
@@ -1986,7 +2096,7 @@ void process_packet(char* packet)
 		else if (damaged_packet->target == TARGET_NPC) {
 			npcsInfo[obj_id].obj_lock.lock();
 			npcsInfo[obj_id].hp -= damaged_packet->damage;
-			if (npcsInfo[obj_id].hp < 0) npcsInfo[obj_id].hp = 0;
+			if (npcsInfo[obj_id].hp < 0) npcsInfo[obj_id].hp = 0; npcsInfo[obj_id].SetState(NPC_DEATH);
 			npcsInfo[obj_id].obj_lock.unlock();
 		}
 
@@ -2306,14 +2416,14 @@ void MoveNPC()
 						if (npcsInfo[i].type == NPC_HELICOPTER) {
 							npcsInfo[i].CurrTime = system_clock::now();
 							if (npcsInfo[i].CurrTime - npcsInfo[i].PrevTime > 300ms) {
-								g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
+								//g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
 								npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
 							}
 						}
 						else {
 							npcsInfo[i].CurrTime = system_clock::now();
 							if (npcsInfo[i].CurrTime - npcsInfo[i].PrevTime > 1000ms) {
-								g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
+								//g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
 								npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
 							}
 						}
