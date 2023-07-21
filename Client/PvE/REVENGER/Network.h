@@ -65,10 +65,6 @@ int role_change_member_id = -1;
 // 인게임 관련
 volatile bool respawn_trigger = false;
 
-bool trigger_otherplayer_attack = false;		// 다른 플레이어(주로 헬기)가 총쏘는 모션
-int otherplayer_attack_id;						// " id
-XMFLOAT3 otherplayer_attack_vec;				// " 쏘는 방향
-
 //==================================================
 int curr_connection_num = 1;
 
@@ -752,12 +748,14 @@ void processPacket(char* ptr)
 		if (recv_packet->obj_type == TARGET_PLAYER) {
 			cout << "Client[" << recv_packet->id << "]가 공격했음." << endl;
 
-			// 상대방 총 나가는 모션 업데이트
-			trigger_otherplayer_attack = true;
-			otherplayer_attack_id = recv_id;
-			otherplayer_attack_vec = { recv_packet->atklook_x, recv_packet->atklook_y, recv_packet->atklook_z };
-
-			// 총소리
+			if (players_info[recv_packet->id].m_role == ROLE_HELI)
+			{
+				gamesound.PlayHeliShotSound();
+			}
+			if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
+			{
+				gamesound.PlayShotSound();
+			}
 			if (atk_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 총성
 				//cout << "작은 총성" << endl;
 				if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
@@ -798,7 +796,6 @@ void processPacket(char* ptr)
 				}
 			}
 
-			// 총알 수 업데이트
 			if (recv_packet->id == my_id) {
 				if (players_info[recv_packet->id].m_bullet > 1)
 					players_info[recv_packet->id].m_bullet--;
