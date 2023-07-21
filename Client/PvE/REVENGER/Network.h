@@ -326,6 +326,7 @@ void processPacket(char* ptr)
 		}
 
 		// 방과 관련된 그 외 정보를 업데이트합니다.
+		my_id = recv_packet->your_roomindex;
 		my_room_index = recv_packet->your_roomindex;
 		if (recv_packet->b_manager == b_TRUE) b_room_manager = true;
 		else								  b_room_manager = false;
