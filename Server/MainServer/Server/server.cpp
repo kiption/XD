@@ -1123,6 +1123,9 @@ void process_packet(int client_id, char* packet)
 			atk_pack.type = SC_ATTACK;
 			atk_pack.obj_type = TARGET_PLAYER;
 			atk_pack.id = client_id;
+			atk_pack.atklook_x = clients[client_id].m_cam_lookvec.x;
+			atk_pack.atklook_y = clients[client_id].m_cam_lookvec.y;
+			atk_pack.atklook_z = clients[client_id].m_cam_lookvec.z;
 			atk_pack.sound_volume = atksound_vol;
 			lock_guard<mutex> lg{ cl.s_lock };
 			cl.do_send(&atk_pack);

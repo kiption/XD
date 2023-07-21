@@ -461,12 +461,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//==================================================
 				//				   플레이어 동기화
 				//==================================================
-				//1. 좌표 및 벡터 업데이트
-				// 1) 다른 플레이어
+				//1. 다른 플레이어 업데이트
 				for (int i = 0; i < MAX_USER; ++i) {
 					if (i == my_id) continue;
 					if (players_info[i].m_state == OBJ_ST_RUNNING) {
-				
+						// 1) 좌표, 벡터
 						if (players_info[i].m_role == ROLE_RIFLE)
 						{
 						gGameFramework.setPosition_SoldiarOtherPlayer(i, players_info[i].m_pos);
@@ -520,6 +519,23 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				if ((players_info[my_id].m_ingame_state != PL_ST_DEAD) && (gGameFramework.player_dead)) {
 					gGameFramework.MyPlayerResponeMotion();
 					gGameFramework.player_dead = false;
+				}
+
+				// 5. 총쏘는거
+				if (trigger_otherplayer_attack) {
+					// 여기에서 총알 연출!
+					if (players_info[otherplayer_attack_id].m_role == ROLE_RIFLE) {
+					}
+					else if (players_info[otherplayer_attack_id].m_role == ROLE_HELI)
+					{
+						cout << "Client[" << otherplayer_attack_id << "]가 ("
+							<< otherplayer_attack_vec.x << ", " << otherplayer_attack_vec.y << ", " << otherplayer_attack_vec.z << ") 방향으로 총을 쐈다." << endl;
+						gGameFramework.HeliPlayerUnderAttack(otherplayer_attack_vec);
+					}
+
+					trigger_otherplayer_attack = false;
+					otherplayer_attack_id = 0;
+					otherplayer_attack_vec = { 0, 0, 0 };
 				}
 
 				//==================================================
