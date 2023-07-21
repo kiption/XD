@@ -379,6 +379,7 @@ public:
 	void otherPlayerShootingMotion(int p_id);
 	void otherPlayerDyingMotion(int p_id);
 	void NpcHittingMotion(int p_id);
+	void HeliPlayerUnderAttack(XMFLOAT3 ToLook);
 	void MyPlayerDieMotion();
 	void MyPlayerResponeMotion();
 	bool m_bDamageOn = false;

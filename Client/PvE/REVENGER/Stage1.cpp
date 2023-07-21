@@ -893,7 +893,41 @@ void Stage1::Firevalkan(CGameObject* Objects, XMFLOAT3 ToPlayerLook)
 
 	}
 }
+void Stage1::OtherPlayerFirevalkan(CGameObject* Objects, XMFLOAT3 ToPlayerLook)
+{
+	CValkanObject* pBulletObject = NULL;
+	for (int i = 0; i < HELICOPTERVALKANS; i++)
+	{
+		if (!m_ppValkan[i]->m_bActive)
+		{
+			pBulletObject = m_ppValkan[i];
+			pBulletObject->Reset();
+			break;
+		}
+	}
 
+	if (pBulletObject)
+	{
+		XMFLOAT3 PlayerLook = ToPlayerLook;
+
+		XMFLOAT3 xmf3Position = Objects->GetPosition();
+		XMFLOAT3 xmf3Direction = PlayerLook;
+
+		pBulletObject->m_xmf4x4ToParent = Objects->m_xmf4x4World;
+
+
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
+		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+		pBulletObject->m_xmf4x4ToParent._31 = ToPlayerLook.x;
+		pBulletObject->m_xmf4x4ToParent._32 = ToPlayerLook.y;
+		pBulletObject->m_xmf4x4ToParent._33 = ToPlayerLook.z;
+		pBulletObject->Rotate(90.0, 0.0, 0.0);
+		pBulletObject->SetMovingDirection(xmf3Direction);
+		pBulletObject->SetScale(0.5, 6.0, 0.5);
+		pBulletObject->SetActive(true);
+
+	}
+}
 void Stage1::PlayerFirevalkan(CCamera* pCamera, XMFLOAT3 Look)
 {
 	CValkanObject* pBulletObject = NULL;

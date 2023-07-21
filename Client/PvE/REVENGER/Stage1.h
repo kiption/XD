@@ -92,6 +92,7 @@ public:
 	XMFLOAT3 particlepos;
 
 	void Firevalkan(CGameObject* Objects,XMFLOAT3 ToPlayerLook);
+	void OtherPlayerFirevalkan(CGameObject* Objects,XMFLOAT3 ToPlayerLook);
 	void PlayerFirevalkan(CCamera* pCamera,XMFLOAT3 Look);
 	void Reflectcartridgecase(CGameObject* Objects);
 public:

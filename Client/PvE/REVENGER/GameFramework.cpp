@@ -1060,6 +1060,7 @@ void CGameFramework::ProcessInput()
 
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };
 					q_mouseInput.push(lclick);
+
 					((Stage1*)m_pScene)->PlayerFirevalkan(m_pCamera, m_pCamera->GetLookVector());
 
 				}
@@ -3408,6 +3409,11 @@ void CGameFramework::NpcHittingMotion(int p_id)
 	}
 
 }
+void CGameFramework::HeliPlayerUnderAttack(XMFLOAT3 ToLook)
+{
+	((Stage1*)m_pScene)->OtherPlayerFirevalkan(((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]), ToLook);
+}
+
 void CGameFramework::MyPlayerDieMotion()
 {
 	if (m_ingame_role == R_RIFLE)

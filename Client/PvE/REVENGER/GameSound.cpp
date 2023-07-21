@@ -45,7 +45,7 @@ GameSound::GameSound()
 	NpcshotSound->setMode(FMOD_CREATESTREAM);
 
 	result = soundSystem->playSound(RotorSound, 0, true, &RotorChannel);
-	RotorChannel->setVolume(0.5f);
+	RotorChannel->setVolume(0.2f);
 
 	result = soundSystem->playSound(HartbeatSound, 0, true, &HartbeatChannel);
 	HartbeatChannel->setVolume(0.5f);
@@ -56,8 +56,8 @@ GameSound::GameSound()
 	result = soundSystem->playSound(NpcshotSound, 0, true, &NpcshootChannel);
 	NpcshootChannel->setVolume(0.25f);
 
-	shotChannel->setVolume(0.4f);
-	HelishotChannel->setVolume(0.5f);
+	shotChannel->setVolume(0.3f);
+	HelishotChannel->setVolume(0.3f);
 	reloadChannel->setVolume(0.5f);
 }
 
