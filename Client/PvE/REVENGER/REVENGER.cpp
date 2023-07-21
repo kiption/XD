@@ -466,8 +466,17 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				for (int i = 0; i < MAX_USER; ++i) {
 					if (i == my_id) continue;
 					if (players_info[i].m_state == OBJ_ST_RUNNING) {
-						gGameFramework.setPosition_OtherPlayer(i, players_info[i].m_pos);
-						gGameFramework.setVectors_OtherPlayer(i, players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
+				
+						if (players_info[i].m_role == ROLE_RIFLE)
+						{
+						gGameFramework.setPosition_SoldiarOtherPlayer(i, players_info[i].m_pos);
+						gGameFramework.setVectors_SoldiarOtherPlayer(i, players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
+						}
+						if (players_info[i].m_role == ROLE_HELI)
+						{
+							gGameFramework.setPosition_HeliOtherPlayer(i, players_info[i].m_pos);
+							gGameFramework.setVectors_HeliOtherPlayer(i, players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
+						}
 					}
 					else if (players_info[i].m_state == OBJ_ST_LOGOUT) {
 						players_info[i].InfoClear();
@@ -528,7 +537,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 
 					if (i == my_id) continue;
-					if (players_info[i].m_new_state_update) {
+					if (players_info[i].m_new_state_update && players_info[i].m_role==ROLE_RIFLE) {
 						switch (players_info[i].m_ingame_state) {
 						case PL_ST_IDLE:
 							gGameFramework.otherPlayerReturnToIdle(i);

@@ -359,8 +359,10 @@ public:
 	// 객체 좌표,벡터 값 최신화 함수입니다.
 	void setPosition_Self(XMFLOAT3 pos);
 	void setVectors_Self(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
-	void setPosition_OtherPlayer(int id, XMFLOAT3 pos);
-	void setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+	void setPosition_SoldiarOtherPlayer(int id, XMFLOAT3 pos);
+	void setPosition_HeliOtherPlayer(int id, XMFLOAT3 pos);
+	void setVectors_SoldiarOtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+	void setVectors_HeliOtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void remove_OtherPlayer(int id);
 
 	void setPosition_Npc(int id, XMFLOAT3 pos);

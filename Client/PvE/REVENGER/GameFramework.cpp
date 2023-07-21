@@ -1243,7 +1243,7 @@ void CGameFramework::ShotDelay()
 		{
 			ShotKey = false;
 			((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay = 0.0f;
-			
+
 		}
 		if (ShotKey == false)
 		{
@@ -1923,7 +1923,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-	}
+}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -2041,7 +2041,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-}
+	}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -3167,27 +3167,44 @@ void CGameFramework::setVectors_Self(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3
 
 }
 
-void CGameFramework::setPosition_OtherPlayer(int id, XMFLOAT3 pos)
+void CGameFramework::setPosition_SoldiarOtherPlayer(int id, XMFLOAT3 pos)
 {
 	/* 5~8 다른플레이어 */
 	if (id < 0 || id > 5) return;   // 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE) {
-		if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])
-		{
-			((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetPosition(pos);
-		}
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])->SetPosition(pos);
 	}
 
 }
-void CGameFramework::setVectors_OtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
+void CGameFramework::setVectors_SoldiarOtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
 	/* 5~8 다른플레이어 */
 	if (id < 0 || id > 5) return;   // 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE) {
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetRight(rightVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetUp(upVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetLook(lookVec);
-		((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]->SetScale(5.0, 5.0, 5.0);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5+id])->SetRight(rightVec);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5+id])->SetUp(upVec);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5+id])->SetLook(lookVec);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5+id])->SetScale(5.0, 5.0, 5.0);
+	}
+}
+void CGameFramework::setPosition_HeliOtherPlayer(int id, XMFLOAT3 pos)
+{
+	/* 5~8 다른플레이어 */
+	if (id < 0 || id > 5) return;   // 배열 범위 벗어나는 거 방지
+	if (m_nMode == SCENE1STAGE) {
+		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->SetPosition(pos);
+	}
+
+}
+void CGameFramework::setVectors_HeliOtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
+{
+	/* 5~8 다른플레이어 */
+	if (id < 0 || id > 5) return;   // 배열 범위 벗어나는 거 방지
+	if (m_nMode == SCENE1STAGE) {
+		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->SetRight(rightVec);
+		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->SetUp(upVec);
+		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->SetLook(lookVec);
+		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->SetScale(5.0, 5.0, 5.0);
 	}
 }
 void CGameFramework::remove_OtherPlayer(int id)
@@ -3314,6 +3331,7 @@ void CGameFramework::otherPlayerReturnToIdle(int p_id)
 {
 	if (m_nMode == SCENE1STAGE)
 	{
+
 		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->IdleState(m_GameTimer.GetTimeElapsed());
 	}
 }

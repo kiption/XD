@@ -204,6 +204,20 @@ void CSpaceShipCamera::Rotate(float x, float y, float z)
 		m_xmf3Position = Vector3::TransformCoord(m_xmf3Position, xmmtxRotate);
 		m_xmf3Position = Vector3::Add(m_xmf3Position, m_pPlayer->GetPosition());
 	}
+	//if (m_pPlayer && (z != 0.0f))
+	//{
+	//	m_fRoll += z;
+	//	if (m_fRoll > +1.0f) { x -= (m_fRoll - 1.0f); m_fRoll = +1.0f; }
+	//	if (m_fRoll < -1.0f) { x -= (m_fRoll + 1.0f); m_fRoll = -1.0f; }
+	//	XMFLOAT3 xmf3Look = m_pPlayer->GetLookVector();
+	//	XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Look), XMConvertToRadians(z));
+	//	m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+	//	m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
+	//	m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
+	//	m_xmf3Position = Vector3::Subtract(m_xmf3Position, m_pPlayer->GetPosition());
+	//	m_xmf3Position = Vector3::TransformCoord(m_xmf3Position, xmmtxRotate);
+	//	m_xmf3Position = Vector3::Add(m_xmf3Position, m_pPlayer->GetPosition());
+	//}
 }
 void CSpaceShipCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
