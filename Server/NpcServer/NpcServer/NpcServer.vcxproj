@@ -140,7 +140,6 @@
     <ClInclude Include="CheckPoint.h" />
     <ClInclude Include="CollideMapData.h" />
     <ClInclude Include="DirectCalculation.h" />
-    <ClInclude Include="Mainobject.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Raycast.h" />
   </ItemGroup>
