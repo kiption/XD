@@ -359,7 +359,10 @@ public:
 		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 	}
 
-	void setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
+	void setBB() {
+
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
 	void memberClear()
 	{
 		id = -1;
@@ -398,6 +401,7 @@ private:
 	XMFLOAT3 m_User_Pos[MAX_USER];
 	XMFLOAT3 m_AttackVec;
 	XMFLOAT3 m_OriginPos;
+	XMFLOAT3 m_otherNPCPos;
 	short m_Hit;
 	short m_state;
 	int m_chaseID;
@@ -411,12 +415,13 @@ private:
 
 public:
 	bool m_DeathCheck = false;
+	bool m_shooton = false;
 	bool PrintRayCast = false;
 	bool TurnBack = false;
 	bool m_UpdateTurn = false;
-	MapObject m_CollideMap;
 	vector<int>path;
 	BoundingFrustum m_frustum;
+	MapObject m_collideBox;
 	XMFLOAT3 m_VectorMAX = { -9999.f, -9999.f, -9999.f };
 	chrono::system_clock::time_point PrevTime;
 	chrono::system_clock::time_point CurrTime;
@@ -503,7 +508,7 @@ public:
 	// State
 		// Attack
 	bool		H_PlayerDetact();																	// 뷰 프러스텀 내의 플레이어 탐색
-	void		H_SetFrustum();																		// 프러스텀 설정
+	bool		H_SetFrustum(XMVECTOR startPoint, XMVECTOR lookVector, XMVECTOR playerPosition);	// 프러스텀 설정
 	void		H_PlayerAttack();																	// Attack 상태에서 동작하는 함수
 
 	// State
@@ -530,7 +535,7 @@ public:
 	// State
 		// Attack
 	bool		A_PlayerDetact();																	// 뷰 프러스텀 내의 플레이어 탐색
-	bool		A_SetFrustum(XMVECTOR startPoint, XMVECTOR lookVector, XMVECTOR playerPosition);																		// 프러스텀 설정
+	bool		A_SetFrustum(XMVECTOR startPoint, XMVECTOR lookVector, XMVECTOR playerPosition);	// 프러스텀 설정
 	void		A_PlayerAttack();																	// Attack 상태에서 동작하는 함수
 
 	// State
@@ -540,12 +545,25 @@ public:
 
 	// 3. Common
 	bool		NPC_CollideByMap();																	// 맵이랑 충돌인지 판단
+	bool		NPC_CollideByOtherNPC();															// NPC 간의 충돌
 	void		NPC_CalculationCollide();															// 충돌된 경우 위치 및 회전 정보 재설정
+	void		NPC_CalculationOtherCollide();														// NPC 간의 충돌된 경우 위치 및 회전 정보 재설정
 	void		NPC_BackOwnsPos();																	// NPC Back 상황
 
+	void		H_setBB() {
+		XMVECTOR rotation = XMQuaternionRotationRollPitchYaw(0.0f, yaw, 0.0f);
 
-	void		H_setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
-	void		A_setBB() { m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f)); }
+		XMFLOAT4 oriented;
+		XMStoreFloat4(&oriented, rotation);
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), oriented);
+	}
+	void		A_setBB() {
+		XMVECTOR rotation = XMQuaternionRotationRollPitchYaw(0.0f, yaw, 0.0f);
+
+		XMFLOAT4 oriented;
+		XMStoreFloat4(&oriented, rotation);
+		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HUMAN_BBSIZE_X, HUMAN_BBSIZE_Y, HUMAN_BBSIZE_Z), oriented);
+	}
 
 };
 array<NPC, MAX_NPCS> npcsInfo;
@@ -879,39 +897,58 @@ void NPC::NPC_State_Manegement(int state)
 		switch (m_state)
 		{
 		case NPC_IDLE:
+		{
 			H_MoveToNode();
-			if (CheckChaseState()) {
-				m_state = NPC_CHASE;
+			if (((H_PlayerDetact()) || m_Distance[m_chaseID] < 200.0f) && m_chaseID != -1) {
+				m_state = NPC_ATTACK;
+				ChaseTime = system_clock::now();
+				AttackTime = ChaseTime;
 			}
 			break;
-		case NPC_CHASE:
-			if (!CheckChaseState()) {
-				m_state = NPC_IDLE;
+		}
+		case NPC_ATTACK:
+		{
+			if (m_chaseID == -1 || ChaseTime - AttackTime > 5000ms) {
+				m_state = NPC_BACK;
+				m_targetNodeIndex = m_OriginNodeIndex;
+				if (!path.empty()) path.clear();
+				int myCity = m_OriginNodeIndex / 4;
+
+				path = H_AStarSearch(m_currentNodeIndex, m_targetNodeIndex, myCity);
 				break;
 			}
-			H_PlayerChasing();
-			if (H_PlayerDetact())
-				m_state = NPC_ATTACK;
-			break;
-		case NPC_ATTACK:
-			if (!H_PlayerDetact()) {
-				m_state = NPC_CHASE;
-				PrintRayCast = false;
-			}
 			else {
+				if (H_PlayerDetact() || (m_Distance[m_chaseID] < 200.0f)) {
+					AttackTime = system_clock::now();
+				}
+				ChaseTime = system_clock::now();
 				H_PlayerAttack();
 			}
 			break;
+		}
 		case NPC_DEATH:
+		{
 			if (pos.y > 0.0f)
 				H_NPC_Death_motion();
 			break;
+		}
+		case NPC_BACK:
+		{
+			if (H_PlayerDetact() || (m_Distance[m_chaseID] < 300) || m_chaseID != -1) {
+				m_state = NPC_ATTACK;
+				ChaseTime = system_clock::now();
+				AttackTime = ChaseTime;
+				break;
+			}
+			else {
+				NPC_BackOwnsPos();
+			}
+			break;
+		}
 		default:
 			break;
 		}
-
 		H_NPC_Check_HP();
-		H_SetFrustum();
 		H_setBB();
 		break;
 	}
@@ -922,21 +959,16 @@ void NPC::NPC_State_Manegement(int state)
 		case NPC_IDLE:
 		{
 			A_MoveToNode();
-			if ((A_PlayerDetact() || (m_Distance[m_chaseID] < 200)) && m_chaseID != -1) {
+			if (A_PlayerDetact() && m_chaseID != -1) {
 				m_state = NPC_ATTACK;
 				ChaseTime = system_clock::now();
 				AttackTime = ChaseTime;
-				cout << "-=-----------" << endl;
-				cout << "추적 중인 NPC ID: " << id << endl;
-				cout << "플레이어 간의 거리: " << m_Distance[m_chaseID] << endl;
-				cout << "프러스텀 충돌 결과: " << A_PlayerDetact() << endl;
-				cout << "NPC가 위치한 노드: " << m_currentNodeIndex << endl;
 			}
 			break;
 		}
 		case NPC_ATTACK:
 		{
-			if (m_chaseID == -1 || AttackTime - ChaseTime > 5000ms) {
+			if (m_chaseID == -1 || ChaseTime - AttackTime > 5000ms) {
 				m_state = NPC_BACK;
 				m_targetNodeIndex = m_OriginNodeIndex;
 				if (!path.empty()) path.clear();
@@ -962,15 +994,9 @@ void NPC::NPC_State_Manegement(int state)
 		}
 		case NPC_BACK:
 		{
-			if (A_PlayerDetact() || (m_Distance[m_chaseID] < 300) || m_chaseID != -1) {
-				m_state = NPC_ATTACK;
-				ChaseTime = system_clock::now();
-				AttackTime = ChaseTime;
-				break;
-			}
-			else {
-				NPC_BackOwnsPos();
-			}
+
+			NPC_BackOwnsPos();
+
 			break;
 		}
 		default:
@@ -983,19 +1009,6 @@ void NPC::NPC_State_Manegement(int state)
 		break;
 	}
 	}
-
-	if (NPC_CollideByMap()) {
-		NPC_CalculationCollide();
-	}
-	if (yaw != m_PrevYaw) {
-		m_rightvec = NPCcalcRightRotate();
-		m_lookvec = NPCcalcLookRotate();
-
-		if (ConnectingServer) {
-			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
-		}
-	}
-
 }
 void NPC::Caculation_Distance(XMFLOAT3 vec, int id) // 서버에서 따로 부를 것.
 {
@@ -1005,9 +1018,6 @@ void NPC::Caculation_Distance(XMFLOAT3 vec, int id) // 서버에서 따로 부를 것.
 // Helicopter
 void NPC::H_MoveToNode()
 {
-
-
-
 	NodeMesh currentNode = MeshInfo[m_currentNodeIndex];
 	const bool isMovingInZ = currentNode.GetMoveingSpaceZ();
 	const bool isMovingForward = m_currentNodeIndex % 4 < 2;
@@ -1018,51 +1028,57 @@ void NPC::H_MoveToNode()
 	if (isMovingInZ) {
 		const float destination = isMovingForward ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
 
-		if (isMovingForward) pos.z += speed;
-		else pos.z -= speed;
+		if (isMovingForward) prevPos.z += speed;
+		else prevPos.z -= speed;
 
-		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) H_UpdateCurrentNodeIndex();
+		if ((isMovingForward && prevPos.z >= destination) || (!isMovingForward && prevPos.z <= destination)) H_UpdateCurrentNodeIndex();
 	}
 	else {
 		const float destination = isMovingForward ? currentNode.GetSmallX() + m_destinationRange : currentNode.GetLargeX() - m_destinationRange;
 
-		if (isMovingForward) pos.x -= speed;
-		else pos.x += speed;
+		if (isMovingForward) prevPos.x -= speed;
+		else prevPos.x += speed;
 
-		if ((isMovingForward && pos.x <= destination) || (!isMovingForward && pos.x >= destination)) H_UpdateCurrentNodeIndex();
+		if ((isMovingForward && prevPos.x <= destination) || (!isMovingForward && prevPos.x >= destination)) H_UpdateCurrentNodeIndex();
 	}
 	float t = 0.3f; // 보간 시간 (조정 가능)
-	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
+	XMFLOAT3 interpolatedPos = Lerp(pos, prevPos, t);
 
-	if (m_UpdateTurn) {
-		int section = m_currentNodeIndex % 4;
-
-		switch (section)
-		{
-		case 0:
-			yaw = 0.0f;
-			break;
-		case 1:
-			yaw = 270.0f;
-			break;
-		case 2:
-			yaw = 180.0f;
-			break;
-		case 3:
-			yaw = 90.0f;
-			break;
-		}
-		m_rightvec = NPCcalcRightRotate();
-		m_lookvec = NPCcalcLookRotate();
-
-		if (ConnectingServer) {
-			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
-		}
-
-		m_UpdateTurn = false;
+	if (NPC_CollideByOtherNPC()) {
+		NPC_CalculationOtherCollide();
 	}
+	else if (NPC_CollideByMap()) {
+		NPC_CalculationCollide();
+	}
+	else {
+		pos = interpolatedPos;
+		if (m_UpdateTurn) {
+			int section = m_currentNodeIndex % 4;
 
-	pos = interpolatedPos;
+			switch (section)
+			{
+			case 0:
+				yaw = 0.0f;
+				break;
+			case 1:
+				yaw = 270.0f;
+				break;
+			case 2:
+				yaw = 180.0f;
+				break;
+			case 3:
+				yaw = 90.0f;
+				break;
+			}
+			m_rightvec = NPCcalcRightRotate();
+			m_lookvec = NPCcalcLookRotate();
+
+			if (ConnectingServer) {
+				g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+			}
+			m_UpdateTurn = false;
+		}
+	}
 }
 void NPC::H_UpdateCurrentNodeIndex()
 {
@@ -1125,37 +1141,44 @@ void NPC::H_IsPathMove()
 	float destination;
 	if (isMovingInZ) {
 		destination = isMovingForward ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
-		pos.z += isMovingForward ? speed : -speed;
+		prevPos.z += isMovingForward ? speed : -speed;
 		yaw = isMovingForward ? 0.0f : 180.0f;
 
 		if (Curr_yaw != yaw) m_UpdateTurn = true;
 
-		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) m_currentNodeIndex = nextNode.GetIndex();
+		if ((isMovingForward && prevPos.z >= destination) || (!isMovingForward && prevPos.z <= destination)) m_currentNodeIndex = nextNode.GetIndex();
 	}
 	else {
 		destination = isMovingForward ? currentNode.GetLargeX() - m_destinationRange : currentNode.GetSmallX() + m_destinationRange;
-		pos.x += isMovingForward ? speed : -speed;
+		prevPos.x += isMovingForward ? speed : -speed;
 		yaw = isMovingForward ? 90.0f : 270.0f;
 
 		if (Curr_yaw != yaw) m_UpdateTurn = true;
 
-		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) m_currentNodeIndex = nextNode.GetIndex();
+		if ((isMovingForward && prevPos.z >= destination) || (!isMovingForward && prevPos.z <= destination)) m_currentNodeIndex = nextNode.GetIndex();
 	}
 	float t = 0.3f; // 보간 시간 (조정 가능)
-	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
+	XMFLOAT3 interpolatedPos = Lerp(pos, prevPos, t);
 
-	if (m_UpdateTurn) {
-		m_rightvec = NPCcalcRightRotate();
-		m_lookvec = NPCcalcLookRotate();
+	if (NPC_CollideByOtherNPC()) {
+		NPC_CalculationOtherCollide();
+	}
+	else if (NPC_CollideByMap()) {
+		NPC_CalculationCollide();
+	}
+	else {
+		pos = interpolatedPos;
+		if (m_UpdateTurn) {
+			m_rightvec = NPCcalcRightRotate();
+			m_lookvec = NPCcalcLookRotate();
 
-		m_UpdateTurn = false;
+			m_UpdateTurn = false;
 
-		if (ConnectingServer) {
-			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+			if (ConnectingServer) {
+				g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+			}
 		}
 	}
-
-	pos = interpolatedPos;
 }
 void NPC::H_PlayerChasing()
 {
@@ -1180,7 +1203,7 @@ void NPC::H_PlayerChasing()
 
 		// 내 포지션과 유저의 포지션이 이루는 벡터를 구함
 		XMFLOAT3 prevPos = pos;
-		XMFLOAT3 positionToUser = { m_User_Pos[m_chaseID].x - pos.x, m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
+		XMFLOAT3 positionToUser = { m_User_Pos[m_chaseID].x - prevPos.x, m_User_Pos[m_chaseID].y - prevPos.y, m_User_Pos[m_chaseID].z - prevPos.z };
 		XMFLOAT3 DefaultTemp = { 0.0f, 0.0f, 1.0f };
 
 		// xz 평면으로 투영
@@ -1201,29 +1224,42 @@ void NPC::H_PlayerChasing()
 		// 회전한 look 벡터를 통해 이동 (look은 계산하기 전에 노멀라이즈)
 		m_lookvec = NPCcalcLookRotate();
 		m_rightvec = NPCcalcRightRotate();
-
 		if (ConnectingServer) {
 			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
 		}
 
 		if (m_Distance[m_chaseID] >= 150.0f) {
-			pos.x += m_lookvec.x * m_Speed;
-			pos.z += m_lookvec.z * m_Speed;
+			if (NPC_CollideByOtherNPC()) {
+				NPC_CalculationOtherCollide();
+			}
+			else if (NPC_CollideByMap()) {
+				NPC_CalculationCollide();
+			}
+			else {
+				prevPos.x += m_lookvec.x * m_Speed;
+				prevPos.z += m_lookvec.z * m_Speed;
 
-			float t = 0.3f; // 보간 시간 (조정 가능)
-			XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
+				float t = 0.3f; // 보간 시간 (조정 가능)
+				XMFLOAT3 interpolatedPos = Lerp(pos, prevPos, t);
 
-			pos = interpolatedPos;
+				pos = interpolatedPos;
+			}
 		}
+		m_shooton = true;
 	}
 	else {
 		// path 데이터가 있다면 제거
 		path.clear();
 
 		path = H_AStarSearch(m_currentNodeIndex, user_node, user_City);
-		m_targetNodeIndex = path[path.size() - 1];
-		m_currentNodeIndex = path[0];
-		H_IsPathMove();
+		if (!path.empty()) {
+			m_targetNodeIndex = path[path.size() - 1];
+			m_currentNodeIndex = path[0];
+			H_IsPathMove();
+		}
+		else {
+			H_MoveToNode();
+		}
 	}
 }
 vector<int> NPC::H_AStarSearch(int startNode, int targetNode, int user_City)
@@ -1282,122 +1318,111 @@ vector<int> NPC::H_AStarSearch(int startNode, int targetNode, int user_City)
 
 bool NPC::H_PlayerDetact()
 {
-	XMVECTOR PlayerPos = XMLoadFloat3(&m_User_Pos[m_chaseID]);
-
+	// NPC의 위치, 바라보는 방향 벡터, 플레이어의 위치를 로드합니다.
 	XMVECTOR NPCPos = XMLoadFloat3(&pos);
 	XMVECTOR NPCLook = XMLoadFloat3(&m_lookvec);
-	XMVECTOR NPCToPlayer = XMVectorSubtract(PlayerPos, NPCPos);
+	XMVECTOR PlayerPos = XMLoadFloat3(&m_User_Pos[m_chaseID]);
 
-	// 플레이어의 위치가 NPC가 바라보는 방향에 있어야만 충돌로 간주한다.
-	if (XMVectorGetX(XMVector3Dot(NPCToPlayer, NPCLook)) > 0)
+	// 플레이어가 프러스텀 내부에 있는지 확인합니다.
+	if (H_SetFrustum(NPCPos, NPCLook, PlayerPos))
 	{
-		// 프러스텀과 Player의 bounding sphere와의 거리를 구한다.
-		float distance = XMVectorGetX(XMVector3Length(NPCToPlayer));
-
-		// 거리가 bounding sphere의 반지름보다 작으면 충돌했다고 판단한다.
-		if (distance < 100.0f)
-		{
-			return true;
-		}
+		return true;
 	}
 
 	return false;
 }
 
-void NPC::H_SetFrustum()
+bool NPC::H_SetFrustum(XMVECTOR startPoint, XMVECTOR lookVector, XMVECTOR playerPosition)
 {
-	// NPC의 위치와 Look 벡터를 가져온다.
-	XMVECTOR position = XMLoadFloat3(&pos);
-	XMVECTOR look = XMLoadFloat3(&m_lookvec);
+	// 프러스텀의 끝점을 계산합니다.
+	XMVECTOR endPoint = startPoint + (lookVector * 200.0f);
 
-	// Frustum의 사이드 범위와 상하 범위를 설정한다.
-	float width = 100.0f;
-	float height = 100.0f;
 
-	// Frustum의 시작점을 설정한다.
-	XMVECTOR startPoint = position;
-
-	// Frustum의 끝점을 설정한다.
-	XMVECTOR endPoint = position + (look * 200.0f);
-
-	// Frustum의 Up 벡터를 설정한다.
+	// 프러스텀의 Up 벡터를 설정합니다.
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-	// Frustum을 생성하고 설정한다.
+	// 프러스텀을 생성하고 설정합니다.
 	BoundingFrustum frustum;
-
-	// Frustum의 Origin을 설정한다.
 	XMStoreFloat3(&frustum.Origin, startPoint);
-
-	// Frustum의 Orientation을 설정한다.
 	XMMATRIX viewMatrix = XMMatrixLookAtRH(startPoint, endPoint, up);
 	XMVECTOR quaternion = XMQuaternionRotationMatrix(viewMatrix);
 	XMStoreFloat4(&frustum.Orientation, quaternion);
-
-	frustum.RightSlope = width / 50.0f;
-	frustum.LeftSlope = width / -50.0f;
-	frustum.TopSlope = height / 50.0f;
-	frustum.BottomSlope = height / -50.0f;
+	frustum.RightSlope = 0.5f;
+	frustum.LeftSlope = -0.5f;
+	frustum.TopSlope = 0.5f;
+	frustum.BottomSlope = -0.5f;
 	frustum.Near = 0.1f;
-	frustum.Far = 50.0f;
-
+	frustum.Far = 200.0f;
 	m_frustum = frustum;
+
+
+	// 플레이어의 위치가 프러스텀 내부에 있는지 확인합니다.
+	if (m_frustum.Contains(playerPosition) != ContainmentType::DISJOINT)
+	{
+		// 플레이어가 프러스텀 내부에 있습니다.
+		return true;
+	}
+
+	return false;
+
 }
 void NPC::H_PlayerAttack()
 {
 	// Look
 	H_PlayerChasing();
 
-	XMFLOAT3 NPCtoPlayerLook = { m_User_Pos[m_chaseID].x - pos.x,m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
-	float distance = sqrtf(pow((m_User_Pos[m_chaseID].x - pos.x), 2) + pow((m_User_Pos[m_chaseID].y - pos.y), 2) + pow((m_User_Pos[m_chaseID].z - pos.z), 2));
+	if (m_shooton) {
 
-	XMVECTOR NPCtoPlayerLookNormal = XMVector3Normalize(XMLoadFloat3(&NPCtoPlayerLook));
-	XMStoreFloat3(&NPCtoPlayerLook, NPCtoPlayerLookNormal);
+		XMFLOAT3 NPCtoPlayerLook = { m_User_Pos[m_chaseID].x - pos.x,m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
+		float distance = sqrtf(pow((m_User_Pos[m_chaseID].x - pos.x), 2) + pow((m_User_Pos[m_chaseID].y - pos.y), 2) + pow((m_User_Pos[m_chaseID].z - pos.z), 2));
 
-	//cout << "NPCtoPlayerLook x: " << NPCtoPlayerLook.x << ", y: " << NPCtoPlayerLook.y << ", z: " << NPCtoPlayerLook.z << endl;
+		XMVECTOR NPCtoPlayerLookNormal = XMVector3Normalize(XMLoadFloat3(&NPCtoPlayerLook));
+		XMStoreFloat3(&NPCtoPlayerLook, NPCtoPlayerLookNormal);
 
-	XMFLOAT3 NPCtoPlayerUpTemp = { 0.0f, 1.0f, 0.0f };
+		//cout << "NPCtoPlayerLook x: " << NPCtoPlayerLook.x << ", y: " << NPCtoPlayerLook.y << ", z: " << NPCtoPlayerLook.z << endl;
 
-	XMVECTOR NPCtoPlayerLookMat = XMLoadFloat3(&NPCtoPlayerLook);
-	XMVECTOR NPCtoPlayerUpTempMat = XMLoadFloat3(&NPCtoPlayerUpTemp);
+		XMFLOAT3 NPCtoPlayerUpTemp = { 0.0f, 1.0f, 0.0f };
 
-	XMVECTOR NPCtoPlayerRightMat = XMVector3Normalize(XMVector3Cross(NPCtoPlayerUpTempMat, NPCtoPlayerLookMat));
+		XMVECTOR NPCtoPlayerLookMat = XMLoadFloat3(&NPCtoPlayerLook);
+		XMVECTOR NPCtoPlayerUpTempMat = XMLoadFloat3(&NPCtoPlayerUpTemp);
 
-	XMFLOAT3 NPCtoPlayerRight;
-	XMStoreFloat3(&NPCtoPlayerRight, NPCtoPlayerRightMat);
+		XMVECTOR NPCtoPlayerRightMat = XMVector3Normalize(XMVector3Cross(NPCtoPlayerUpTempMat, NPCtoPlayerLookMat));
 
-	XMVECTOR NPCtoPlayerUpMat = XMVector3Normalize(XMVector3Cross(NPCtoPlayerLookMat, NPCtoPlayerRightMat));
+		XMFLOAT3 NPCtoPlayerRight;
+		XMStoreFloat3(&NPCtoPlayerRight, NPCtoPlayerRightMat);
 
-	XMFLOAT3 NPCtoPlayerUp;
-	XMStoreFloat3(&NPCtoPlayerUp, NPCtoPlayerUpMat);
+		XMVECTOR NPCtoPlayerUpMat = XMVector3Normalize(XMVector3Cross(NPCtoPlayerLookMat, NPCtoPlayerRightMat));
 
-	random_device rd;
-	default_random_engine dre(rd());
-	uniform_real_distribution<float> ShackingAttackRange(-3, 3);
+		XMFLOAT3 NPCtoPlayerUp;
+		XMStoreFloat3(&NPCtoPlayerUp, NPCtoPlayerUpMat);
 
-	float UpShaking = ShackingAttackRange(dre);
-	float UpshakingDevide = UpShaking / distance;
+		random_device rd;
+		default_random_engine dre(rd());
+		uniform_real_distribution<float> ShackingAttackRange(-3, 3);
 
-	float RightShaking = ShackingAttackRange(dre);
-	float RightshakingDevide = UpShaking / distance;
+		float UpShaking = ShackingAttackRange(dre);
+		float UpshakingDevide = UpShaking / distance;
 
-	XMVECTOR ShakeUPMatrix = XMVectorScale(XMLoadFloat3(&NPCtoPlayerUp), UpshakingDevide);
-	XMVECTOR ShakeRightMatrix = XMVectorScale(XMLoadFloat3(&NPCtoPlayerRight), RightshakingDevide);
+		float RightShaking = ShackingAttackRange(dre);
+		float RightshakingDevide = UpShaking / distance;
 
-	XMFLOAT3 ShakeUpVec;
-	XMStoreFloat3(&ShakeUpVec, ShakeUPMatrix);
+		XMVECTOR ShakeUPMatrix = XMVectorScale(XMLoadFloat3(&NPCtoPlayerUp), UpshakingDevide);
+		XMVECTOR ShakeRightMatrix = XMVectorScale(XMLoadFloat3(&NPCtoPlayerRight), RightshakingDevide);
 
-	XMFLOAT3 ShakeRightVec;
-	XMStoreFloat3(&ShakeRightVec, ShakeRightMatrix);
+		XMFLOAT3 ShakeUpVec;
+		XMStoreFloat3(&ShakeUpVec, ShakeUPMatrix);
 
-	XMVECTOR ShakeUpRightVec = XMVectorAdd(XMLoadFloat3(&ShakeUpVec), XMLoadFloat3(&ShakeRightVec));
-	XMVECTOR ShakeMat = XMVectorAdd(ShakeUpRightVec, NPCtoPlayerLookNormal);
-	XMStoreFloat3(&m_AttackVec, ShakeMat);
+		XMFLOAT3 ShakeRightVec;
+		XMStoreFloat3(&ShakeRightVec, ShakeRightMatrix);
 
-	m_AttackVec = NPCNormalize(m_AttackVec);
+		XMVECTOR ShakeUpRightVec = XMVectorAdd(XMLoadFloat3(&ShakeUpVec), XMLoadFloat3(&ShakeRightVec));
+		XMVECTOR ShakeMat = XMVectorAdd(ShakeUpRightVec, NPCtoPlayerLookNormal);
+		XMStoreFloat3(&m_AttackVec, ShakeMat);
 
-	//cout << "m_AttackVec x: " << m_AttackVec.x << ", y: " << m_AttackVec.y << ", z: " << m_AttackVec.z << endl;
+		m_AttackVec = NPCNormalize(m_AttackVec);
 
+		m_shooton = false;
+	}
 }
 
 void NPC::H_NPC_Check_HP()
@@ -1422,10 +1447,10 @@ void NPC::A_MoveToNode()
 	if (isMovingInZ) {
 		const float destination = TurnBack ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
 
-		if (TurnBack) pos.z += speed;
-		else pos.z -= speed;
+		if (TurnBack) prevPos.z += speed;
+		else prevPos.z -= speed;
 
-		if (((TurnBack == true) && pos.z >= destination) || ((TurnBack == false) && pos.z <= destination))
+		if (((TurnBack == true) && prevPos.z >= destination) || ((TurnBack == false) && prevPos.z <= destination))
 		{
 			TurnBack = !TurnBack;
 			m_UpdateTurn = true;
@@ -1434,53 +1459,60 @@ void NPC::A_MoveToNode()
 	else {
 		const float destination = TurnBack ? currentNode.GetSmallX() + m_destinationRange : currentNode.GetLargeX() - m_destinationRange;
 
-		if (TurnBack) pos.x -= speed;
-		else pos.x += speed;
+		if (TurnBack) prevPos.x -= speed;
+		else prevPos.x += speed;
 
-		if (((TurnBack == true) && pos.x <= destination) || ((TurnBack == false) && pos.x >= destination))
+		if (((TurnBack == true) && prevPos.x <= destination) || ((TurnBack == false) && prevPos.x >= destination))
 		{
 			TurnBack = !TurnBack;
 			m_UpdateTurn = true;
 		}
 	}
 	float t = 0.3f; // 보간 시간 (조정 가능)
-	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
+	XMFLOAT3 interpolatedPos = Lerp(pos, prevPos, t);
 
-	if (m_UpdateTurn) {
-		int section = m_currentNodeIndex % 2;
-
-		switch (section)
-		{
-		case 0:
-		{
-			if (TurnBack) {
-				yaw = 0.0f;
-			}
-			else {
-				yaw = 180.0f;
-			}
-			break;
-		}
-		case 1:
-			if (TurnBack) {
-				yaw = 270.0f;
-			}
-			else {
-				yaw = 90.0f;
-			}
-			break;
-		}
-		m_rightvec = NPCcalcRightRotate();
-		m_lookvec = NPCcalcLookRotate();
-
-		if (ConnectingServer) {
-			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
-		}
-
-		m_UpdateTurn = false;
+	if (NPC_CollideByOtherNPC()) {
+		NPC_CalculationOtherCollide();
 	}
+	else if (NPC_CollideByMap()) {
+		NPC_CalculationCollide();
+	}
+	else {
+		pos = interpolatedPos;
+		if (m_UpdateTurn) {
+			int section = m_currentNodeIndex % 2;
 
-	pos = interpolatedPos;
+			switch (section)
+			{
+			case 0:
+			{
+				if (TurnBack) {
+					yaw = 0.0f;
+				}
+				else {
+					yaw = 180.0f;
+				}
+				break;
+			}
+			case 1:
+				if (TurnBack) {
+					yaw = 270.0f;
+				}
+				else {
+					yaw = 90.0f;
+				}
+				break;
+			}
+			m_rightvec = NPCcalcRightRotate();
+			m_lookvec = NPCcalcLookRotate();
+
+			if (ConnectingServer) {
+				g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+			}
+
+			m_UpdateTurn = false;
+		}
+	}
 }
 void NPC::A_UpdateCurrentNodeIndex()
 {
@@ -1542,34 +1574,41 @@ void NPC::A_IsPathMove()
 	float destination;
 	if (isMovingInZ) {
 		destination = isMovingForward ? currentNode.GetLargeZ() - m_destinationRange : currentNode.GetSmallZ() + m_destinationRange;
-		pos.z += isMovingForward ? speed : -speed;
+		prevPos.z += isMovingForward ? speed : -speed;
 		yaw = isMovingForward ? 0.0f : 180.0f;
 		if (m_PrevYaw != yaw) m_UpdateTurn = true;
 
-		if ((isMovingForward && pos.z >= destination) || (!isMovingForward && pos.z <= destination)) m_currentNodeIndex = nextNode.GetIndex();
+		if ((isMovingForward && prevPos.z >= destination) || (!isMovingForward && prevPos.z <= destination)) m_currentNodeIndex = nextNode.GetIndex();
 	}
 	else {
 		destination = isMovingForward ? currentNode.GetLargeX() - m_destinationRange : currentNode.GetSmallX() + m_destinationRange;
-		pos.x += isMovingForward ? speed : -speed;
+		prevPos.x += isMovingForward ? speed : -speed;
 		yaw = isMovingForward ? 90.0f : 270.0f;
 		if (m_PrevYaw != yaw) m_UpdateTurn = true;
 
-		if ((isMovingForward && pos.x >= destination) || (!isMovingForward && pos.x <= destination)) m_currentNodeIndex = nextNode.GetIndex();
+		if ((isMovingForward && prevPos.x >= destination) || (!isMovingForward && prevPos.x <= destination)) m_currentNodeIndex = nextNode.GetIndex();
 	}
 	float t = 0.3f; // 보간 시간 (조정 가능)
-	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
+	XMFLOAT3 interpolatedPos = Lerp(pos, prevPos, t);
 
-	if (m_UpdateTurn) {
-		m_rightvec = NPCcalcRightRotate();
-		m_lookvec = NPCcalcLookRotate();
+	if (NPC_CollideByOtherNPC()) {
+		NPC_CalculationOtherCollide();
+	}
+	else if (NPC_CollideByMap()) {
+		NPC_CalculationCollide();
+	}
+	else {
+		pos = interpolatedPos;
+		if (m_UpdateTurn) {
+			m_rightvec = NPCcalcRightRotate();
+			m_lookvec = NPCcalcLookRotate();
 
-		m_UpdateTurn = false;
-		if (ConnectingServer) {
-			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+			m_UpdateTurn = false;
+			if (ConnectingServer) {
+				g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+			}
 		}
 	}
-
-	pos = interpolatedPos;
 }
 void NPC::A_PlayerChasing()
 {
@@ -1589,12 +1628,11 @@ void NPC::A_PlayerChasing()
 		return;
 	}
 
-
 	// 노드 검색 후 같은 섹션에 있는 지 판별
 	if (user_node == m_currentNodeIndex) {
 		XMFLOAT3 prevPos = pos;
 		// 내 포지션과 유저의 포지션이 이루는 벡터를 구함
-		XMFLOAT3 positionToUser = { m_User_Pos[m_chaseID].x - pos.x, m_User_Pos[m_chaseID].y - pos.y, m_User_Pos[m_chaseID].z - pos.z };
+		XMFLOAT3 positionToUser = { m_User_Pos[m_chaseID].x - prevPos.x, m_User_Pos[m_chaseID].y - prevPos.y, m_User_Pos[m_chaseID].z - prevPos.z };
 		XMFLOAT3 DefaultTemp = { 0.0f, 0.0f, 1.0f };
 
 		// xz 평면으로 투영
@@ -1612,7 +1650,6 @@ void NPC::A_PlayerChasing()
 		if (yaw < 0.0f)
 			yaw += 360.0f;
 
-		// 회전한 look 벡터를 통해 이동 (look은 계산하기 전에 노멀라이즈)
 		m_lookvec = NPCcalcLookRotate();
 		m_rightvec = NPCcalcRightRotate();
 
@@ -1620,15 +1657,24 @@ void NPC::A_PlayerChasing()
 			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
 		}
 
-		if (m_Distance[m_chaseID] >= 30.0f) {
-			pos.x += m_lookvec.x * m_Speed;
-			pos.z += m_lookvec.z * m_Speed;
+		// 회전한 look 벡터를 통해 이동 (look은 계산하기 전에 노멀라이즈)
+		if (m_Distance[m_chaseID] >= 100.0f) {
+			if (NPC_CollideByOtherNPC()) {
+				NPC_CalculationOtherCollide();
+			}
+			else if (NPC_CollideByMap()) {
+				NPC_CalculationCollide();
+			}
+			else {
+				prevPos.x += m_lookvec.x * m_Speed;
+				prevPos.z += m_lookvec.z * m_Speed;
 
-			float t = 0.5f; // 보간 시간 (조정 가능)
-			XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
-
-			pos = interpolatedPos;
+				float t = 0.5f; // 보간 시간 (조정 가능)
+				XMFLOAT3 interpolatedPos = Lerp(pos, prevPos, t);
+				pos = interpolatedPos;
+			}
 		}
+		m_shooton = true;
 	}
 	else {
 		// path 데이터가 있다면 제거
@@ -1636,7 +1682,6 @@ void NPC::A_PlayerChasing()
 
 		path = A_AStarSearch(m_currentNodeIndex, user_node, user_City);
 		if (path.empty()) {
-			cout << "경로를 탐색하지 못했습니다." << endl;
 			A_MoveToNode();
 		}
 		else {
@@ -1713,13 +1758,9 @@ bool NPC::A_PlayerDetact()
 	XMVECTOR NPCLook = XMLoadFloat3(&m_lookvec);
 	XMVECTOR PlayerPos = XMLoadFloat3(&m_User_Pos[m_chaseID]);
 
-	// NPC에서 플레이어로 향하는 벡터를 계산합니다.
-	XMVECTOR NPCToPlayer = XMVectorSubtract(PlayerPos, NPCPos);
-
 	// 플레이어가 프러스텀 내부에 있는지 확인합니다.
 	if (A_SetFrustum(NPCPos, NPCLook, PlayerPos))
 	{
-		cout << "NPC ID: " << id << "번째가 플레이어를 감지하였습니다." << endl;
 		return true;
 	}
 
@@ -1737,20 +1778,25 @@ bool NPC::A_SetFrustum(XMVECTOR startPoint, XMVECTOR lookVector, XMVECTOR player
 	// 프러스텀을 생성하고 설정합니다.
 	BoundingFrustum frustum;
 	XMStoreFloat3(&frustum.Origin, startPoint);
-	XMMATRIX viewMatrix = XMMatrixLookAtRH(startPoint, endPoint, up);
+	XMMATRIX viewMatrix = XMMatrixLookAtLH(startPoint, endPoint, up);
+	XMVECTOR PrintviewMat;
+	PrintviewMat = viewMatrix.r[2];
+	XMFLOAT3 Printview;
+	XMStoreFloat3(&Printview, PrintviewMat);
+
+
 	XMVECTOR quaternion = XMQuaternionRotationMatrix(viewMatrix);
 	XMStoreFloat4(&frustum.Orientation, quaternion);
-	frustum.RightSlope = 0.5f;
-	frustum.LeftSlope = -0.5f;
-	frustum.TopSlope = 0.5f;
-	frustum.BottomSlope = -0.5f;
+	frustum.RightSlope = 0.6f;
+	frustum.LeftSlope = -0.6f;
+	frustum.TopSlope = 0.2f;
+	frustum.BottomSlope = -0.2f;
 	frustum.Near = 0.1f;
-	frustum.Far = 150.0f;
+	frustum.Far = 200.0f;
 
 	// 플레이어의 위치가 프러스텀 내부에 있는지 확인합니다.
 	if (frustum.Contains(playerPosition) != ContainmentType::DISJOINT)
 	{
-		// 플레이어가 프러스텀 내부에 있습니다.
 		return true;
 	}
 
@@ -1760,57 +1806,57 @@ void NPC::A_PlayerAttack()
 {
 	// Look
 	A_PlayerChasing();
+	if (m_shooton) {
 
-	XMFLOAT3 NPCtoPlayerLook = m_lookvec;
-	float distance = m_Distance[m_chaseID];
+		XMFLOAT3 NPCtoPlayerLook = m_lookvec;
+		float distance = m_Distance[m_chaseID];
 
-	XMVECTOR NPCtoPlayerLookNormal = XMVector3Normalize(XMLoadFloat3(&NPCtoPlayerLook));
-	XMStoreFloat3(&NPCtoPlayerLook, NPCtoPlayerLookNormal);
+		XMVECTOR NPCtoPlayerLookNormal = XMVector3Normalize(XMLoadFloat3(&NPCtoPlayerLook));
+		XMStoreFloat3(&NPCtoPlayerLook, NPCtoPlayerLookNormal);
 
-	//cout << "NPCtoPlayerLook x: " << NPCtoPlayerLook.x << ", y: " << NPCtoPlayerLook.y << ", z: " << NPCtoPlayerLook.z << endl;
+		//cout << "NPCtoPlayerLook x: " << NPCtoPlayerLook.x << ", y: " << NPCtoPlayerLook.y << ", z: " << NPCtoPlayerLook.z << endl;
 
-	XMFLOAT3 NPCtoPlayerUpTemp = { 0.0f, 1.0f, 0.0f };
+		XMFLOAT3 NPCtoPlayerUpTemp = { 0.0f, 1.0f, 0.0f };
 
-	XMVECTOR NPCtoPlayerLookMat = XMLoadFloat3(&NPCtoPlayerLook);
-	XMVECTOR NPCtoPlayerUpTempMat = XMLoadFloat3(&NPCtoPlayerUpTemp);
+		XMVECTOR NPCtoPlayerLookMat = XMLoadFloat3(&NPCtoPlayerLook);
+		XMVECTOR NPCtoPlayerUpTempMat = XMLoadFloat3(&NPCtoPlayerUpTemp);
 
-	XMVECTOR NPCtoPlayerRightMat = XMVector3Normalize(XMVector3Cross(NPCtoPlayerUpTempMat, NPCtoPlayerLookMat));
+		XMVECTOR NPCtoPlayerRightMat = XMVector3Normalize(XMVector3Cross(NPCtoPlayerUpTempMat, NPCtoPlayerLookMat));
 
-	XMFLOAT3 NPCtoPlayerRight;
-	XMStoreFloat3(&NPCtoPlayerRight, NPCtoPlayerRightMat);
+		XMFLOAT3 NPCtoPlayerRight;
+		XMStoreFloat3(&NPCtoPlayerRight, NPCtoPlayerRightMat);
 
-	XMVECTOR NPCtoPlayerUpMat = XMVector3Normalize(XMVector3Cross(NPCtoPlayerLookMat, NPCtoPlayerRightMat));
+		XMVECTOR NPCtoPlayerUpMat = XMVector3Normalize(XMVector3Cross(NPCtoPlayerLookMat, NPCtoPlayerRightMat));
 
-	XMFLOAT3 NPCtoPlayerUp;
-	XMStoreFloat3(&NPCtoPlayerUp, NPCtoPlayerUpMat);
+		XMFLOAT3 NPCtoPlayerUp;
+		XMStoreFloat3(&NPCtoPlayerUp, NPCtoPlayerUpMat);
 
-	random_device rd;
-	default_random_engine dre(rd());
-	uniform_real_distribution<float> ShackingAttackRange(-3, 3);
+		random_device rd;
+		default_random_engine dre(rd());
+		uniform_real_distribution<float> ShackingAttackRange(-3, 3);
 
-	float UpShaking = ShackingAttackRange(dre);
-	float UpshakingDevide = UpShaking / distance;
+		float UpShaking = ShackingAttackRange(dre);
+		float UpshakingDevide = UpShaking / distance;
 
-	float RightShaking = ShackingAttackRange(dre);
-	float RightshakingDevide = UpShaking / distance;
+		float RightShaking = ShackingAttackRange(dre);
+		float RightshakingDevide = UpShaking / distance;
 
-	XMVECTOR ShakeUPMatrix = XMVectorScale(XMLoadFloat3(&NPCtoPlayerUp), UpshakingDevide);
-	XMVECTOR ShakeRightMatrix = XMVectorScale(XMLoadFloat3(&NPCtoPlayerRight), RightshakingDevide);
+		XMVECTOR ShakeUPMatrix = XMVectorScale(XMLoadFloat3(&NPCtoPlayerUp), UpshakingDevide);
+		XMVECTOR ShakeRightMatrix = XMVectorScale(XMLoadFloat3(&NPCtoPlayerRight), RightshakingDevide);
 
-	XMFLOAT3 ShakeUpVec;
-	XMStoreFloat3(&ShakeUpVec, ShakeUPMatrix);
+		XMFLOAT3 ShakeUpVec;
+		XMStoreFloat3(&ShakeUpVec, ShakeUPMatrix);
 
-	XMFLOAT3 ShakeRightVec;
-	XMStoreFloat3(&ShakeRightVec, ShakeRightMatrix);
+		XMFLOAT3 ShakeRightVec;
+		XMStoreFloat3(&ShakeRightVec, ShakeRightMatrix);
 
-	XMVECTOR ShakeUpRightVec = XMVectorAdd(XMLoadFloat3(&ShakeUpVec), XMLoadFloat3(&ShakeRightVec));
-	XMVECTOR ShakeMat = XMVectorAdd(ShakeUpRightVec, NPCtoPlayerLookNormal);
-	XMStoreFloat3(&m_AttackVec, ShakeMat);
+		XMVECTOR ShakeUpRightVec = XMVectorAdd(XMLoadFloat3(&ShakeUpVec), XMLoadFloat3(&ShakeRightVec));
+		XMVECTOR ShakeMat = XMVectorAdd(ShakeUpRightVec, NPCtoPlayerLookNormal);
+		XMStoreFloat3(&m_AttackVec, ShakeMat);
 
-	m_AttackVec = NPCNormalize(m_AttackVec);
-
-	//cout << "m_AttackVec x: " << m_AttackVec.x << ", y: " << m_AttackVec.y << ", z: " << m_AttackVec.z << endl;
-
+		m_AttackVec = NPCNormalize(m_AttackVec);
+		m_shooton = false;
+	}
 }
 
 void NPC::A_NPC_Check_HP()
@@ -1835,7 +1881,7 @@ bool NPC::NPC_CollideByMap()
 	bool collide = false;
 	for (int i{}; i < mapobjects_info.size(); ++i) {
 		if (mapobjects_info[i].m_xoobb.Intersects(m_xoobb)) {
-			m_CollideMap = mapobjects_info[i];
+			m_collideBox = mapobjects_info[i];
 			collide = true;
 			break;
 		}
@@ -1844,73 +1890,147 @@ bool NPC::NPC_CollideByMap()
 	return collide;
 }
 
+bool NPC::NPC_CollideByOtherNPC()
+{
+	bool collide = false;
+	for (int i{}; i < MAX_NPCS; ++i) {
+		if (i == id) continue;
+		if (npcsInfo[i].m_xoobb.Intersects(m_xoobb)) {
+			collide = true;
+			m_otherNPCPos = npcsInfo[i].GetPosition();
+			break;
+		}
+	}
+	return collide;
+}
+
 void NPC::NPC_CalculationCollide()
 {
-	XMFLOAT3 locallook = m_CollideMap.getLocalForward();
+	XMFLOAT3 localforwark = m_collideBox.getLocalForward();
+	XMFLOAT3 localright = m_collideBox.getLocalRight();
+
 	XMFLOAT3 normalizedLocalForward;
-	XMVECTOR localForwardNormalized = XMVector3Normalize(XMLoadFloat3(&locallook));
+	XMVECTOR localForwardNormalized = XMVector3Normalize(XMLoadFloat3(&localforwark));
 	XMStoreFloat3(&normalizedLocalForward, localForwardNormalized);
 
-	XMFLOAT3 localright = m_CollideMap.getLocalRight();
 	XMFLOAT3 normalizedLocalRight;
 	XMVECTOR localRightNormalized = XMVector3Normalize(XMLoadFloat3(&localright));
 	XMStoreFloat3(&normalizedLocalRight, localRightNormalized);
 
-	XMFLOAT3 Center2PlayerVector = Subtract(pos, m_CollideMap.m_xoobb.Center);//벡터
-	float Center2PlayerDisrtance = Length(Center2PlayerVector);//거리
-	Center2PlayerVector = Normalize(Center2PlayerVector);
+	XMFLOAT3 prevPos = pos;
+	// 내 포지션과 유저의 포지션이 이루는 벡터를 구함
+	XMFLOAT3 Center2NPCPos = Subtract(prevPos, m_collideBox.m_xoobb.Center);//벡터
+	Center2NPCPos = Normalize(Center2NPCPos);
 
-
-	float forwardDotResult = DotProduct(Center2PlayerVector, locallook); //객체의 center와 플레이어와 normal간의 cos값   
-	float rightDotResult = DotProduct(Center2PlayerVector, localright);
+	float forwardDotResult = DotProduct(Center2NPCPos, localforwark); //객체의 center와 플레이어와 normal간의 cos값   
+	float rightDotResult = DotProduct(Center2NPCPos, localright);
 
 	float forwardDotResultAbs = abs(forwardDotResult);
 	float rightDotResultAbs = abs(rightDotResult);
 
-	float radian = XMConvertToRadians((m_CollideMap.getAngleAOB()) / 2);
+	float angle_a = m_collideBox.getAngleAOB();
+	float radian = XMConvertToRadians(angle_a / 2);
 
-	XMFLOAT3 PlayerMoveDir;
-	int CollideCase;
+	XMFLOAT3 NPCMoveDir;
+
 	if (abs(cos(radian)) < forwardDotResultAbs) {
 		if (forwardDotResult < 0) {
-			CollideCase = 1;
+			XMVECTOR reversedLocalForward = XMVectorNegate(XMLoadFloat3(&normalizedLocalForward));
+			XMStoreFloat3(&normalizedLocalForward, reversedLocalForward);
+
+			XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2NPCPos), XMLoadFloat3(&normalizedLocalForward));
+			XMStoreFloat3(&NPCMoveDir, AddVector);
 		}
 		else {
-			CollideCase = 2;
+			XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2NPCPos), XMLoadFloat3(&normalizedLocalForward));
+			XMStoreFloat3(&NPCMoveDir, AddVector);
 		}
 	}
 	else {
 		if (rightDotResult < 0) {
-			CollideCase = 3;
+			XMVECTOR reversedLocalRight = XMVectorNegate(XMLoadFloat3(&normalizedLocalRight));
+			XMStoreFloat3(&normalizedLocalRight, reversedLocalRight);
+
+			XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2NPCPos), XMLoadFloat3(&normalizedLocalRight));
+			XMStoreFloat3(&NPCMoveDir, AddVector);
 		}
 		else {
-			CollideCase = 4;
+			XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2NPCPos), XMLoadFloat3(&normalizedLocalRight));
+			XMStoreFloat3(&NPCMoveDir, AddVector);
 		}
-	}		
-	XMFLOAT3 prevPos = pos;
-	switch (CollideCase)
-	{
-	case 1:
-		yaw = 180.0f;
-		pos.x -= m_Speed;
-		break;
-	case 2:
-		yaw = 0.0f;
-		pos.z -= m_Speed;
-		break;
-	case 3:
-		yaw = 270.0f;
-		pos.x += m_Speed;
-		break;
-	case 4:
-		yaw = 90.0f;
-		pos.z += m_Speed;
-		break;
 	}
-	m_UpdateTurn = true;
-	float t = 0.3f; // 보간 시간 (조정 가능)
-	XMFLOAT3 interpolatedPos = Lerp(prevPos, pos, t);
+	XMVECTOR PlayerMoveNormalized = XMVector3Normalize(XMLoadFloat3(&NPCMoveDir));
+	XMStoreFloat3(&NPCMoveDir, PlayerMoveNormalized);
+
+	XMFLOAT3 DefaultTemp = { 0.0f, 0.0f, 1.0f };
+
+	float angleRadian = atan2(DefaultTemp.z, DefaultTemp.x) - atan2(NPCMoveDir.z, NPCMoveDir.x);
+	float angleDegree = XMConvertToDegrees(angleRadian);
+	yaw = angleDegree;
+
+	if (yaw > 360.0f)
+		yaw -= 360.0f;
+	if (yaw < 0.0f)
+		yaw += 360.0f;
+
+	m_lookvec = NPCcalcLookRotate();
+	m_rightvec = NPCcalcRightRotate();
+
+	prevPos.x += m_lookvec.x * m_Speed;
+	prevPos.z += m_lookvec.z * m_Speed;
+
+	float t = 0.8f; // 보간 시간 (조정 가능)
+	XMFLOAT3 interpolatedPos = Lerp(pos, prevPos, t);
+	if (ConnectingServer) {
+		g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+	}
+
 	pos = interpolatedPos;
+
+	m_UpdateTurn = true;
+}
+
+void NPC::NPC_CalculationOtherCollide()
+{
+	XMFLOAT3 prevPos = pos;
+	// 내 포지션과 유저의 포지션이 이루는 벡터를 구함
+	XMFLOAT3 positionToOtherNPC = { m_otherNPCPos.x - prevPos.x, m_otherNPCPos.y - prevPos.y, m_otherNPCPos.z - prevPos.z };
+	XMFLOAT3 DefaultTemp = { 0.0f, 0.0f, 1.0f };
+
+	XMVECTOR PositionToOtherNPCnormal = XMVector3Normalize(XMLoadFloat3(&positionToOtherNPC));
+	XMVECTOR reversedToOtherNPC = XMVectorNegate(PositionToOtherNPCnormal);
+	XMVECTOR ProjCollideMat = XMVectorAdd(reversedToOtherNPC, XMLoadFloat3(&m_lookvec));
+	ProjCollideMat = XMVector3Normalize(ProjCollideMat);
+	XMFLOAT3 ProjCollideNormal;
+	XMStoreFloat3(&ProjCollideNormal, ProjCollideMat);
+
+	// DefalutTemp, 가야하는 방향 사이의 각도 구하기
+	float angleRadian = atan2(DefaultTemp.z, DefaultTemp.x) - atan2(ProjCollideNormal.z, ProjCollideNormal.x);
+	float angleDegree = XMConvertToDegrees(angleRadian);
+	yaw = angleDegree;
+
+	if (yaw > 360.0f)
+		yaw -= 360.0f;
+	if (yaw < 0.0f)
+		yaw += 360.0f;
+
+	m_lookvec = NPCcalcLookRotate();
+	m_rightvec = NPCcalcRightRotate();
+
+	prevPos.x += m_lookvec.x * m_Speed;
+	prevPos.z += m_lookvec.z * m_Speed;
+
+	float t = 0.5f; // 보간 시간 (조정 가능)
+	XMFLOAT3 interpolatedPos = Lerp(pos, prevPos, t);
+
+
+	if (ConnectingServer) {
+		g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+	}
+
+	pos = interpolatedPos;
+
+	m_UpdateTurn = true;
 }
 
 void NPC::NPC_BackOwnsPos()
@@ -2372,7 +2492,7 @@ void MoveNPC()
 									temp_id = cl.id;
 								}
 							}
-							else if (cl.role == ROLE_HELI && npcsInfo[i].type == NPC_HELICOPTER) {
+							else if (npcsInfo[i].type == NPC_HELICOPTER) {
 								npcsInfo[i].Caculation_Distance(cl.pos, cl.id);
 								// 가장 가까운 거리를 갖고있는 아이를 chase_id로 지정
 								float distance = npcsInfo[i].GetDistance(cl.id);
@@ -2395,35 +2515,18 @@ void MoveNPC()
 					// 메인서버로 변경된 NPC좌표 전달
 					g_logicservers[a_lgcsvr_num].send_npc_move_packet(npcsInfo[i].GetID());
 
-					// npc pos 확인
-					if (i > 21) {
-
-						//cout << "=============" << endl;
-
-						//cout << i << "번째 NPC의 NodeIndex: " << npcsInfo[i].GetNodeIndex() << endl;
-						//cout << i << "번째 NPC의 Type: " << npcsInfo[i].type << endl;
-						//cout << i << "번째 NPC의 Pos: " << npcsInfo[i].GetPosition().x << ',' << npcsInfo[i].GetPosition().y << ',' << npcsInfo[i].GetPosition().z << endl;
-						//cout << i << "번째 NPC의 Look: " << npcsInfo[i].m_lookvec.x << ", " << npcsInfo[i].m_lookvec.y << ", " << npcsInfo[i].m_lookvec.z << endl;
-						//cout << i << "번째 NPC의 상태: " << npcsInfo[i].GetState() << endl;
-
-					}
-
-					//if (npcs[i].PrintRayCast) {
-					//	cout << i << "번째 NPC가 쏜 총알에 대해" << npcs[i].GetChaseID() << "의 ID를 가진 플레이어가 피격되었습니다." << endl;
-					//}
-
 					if (npcsInfo[i].GetState() == NPC_ATTACK) {
 						if (npcsInfo[i].type == NPC_HELICOPTER) {
 							npcsInfo[i].CurrTime = system_clock::now();
 							if (npcsInfo[i].CurrTime - npcsInfo[i].PrevTime > 300ms) {
-								//g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
+								g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
 								npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
 							}
 						}
 						else {
 							npcsInfo[i].CurrTime = system_clock::now();
 							if (npcsInfo[i].CurrTime - npcsInfo[i].PrevTime > 1000ms) {
-								//g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
+								g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
 								npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
 							}
 						}
