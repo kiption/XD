@@ -20,10 +20,10 @@
 //============================================================
 //						 DirectX API
 //============================================================
+#include <DirectXMath.h>
 #include <d3d12.h>
 #include <dxgi1_4.h>
 #include <D3Dcompiler.h>
-#include <DirectXMath.h>
 #include <DirectXPackedVector.h>
 #include <DirectXCollision.h>
 #include <DirectXCollision.inl>
@@ -34,15 +34,14 @@
 
 using namespace DirectX;
 using namespace DirectX::PackedVector;
-
 //============================================================
 //			메인서버에서 사용한 것들을 그대로 사용
 //============================================================
 #include "../../MainServer/Server/Protocol.h"
 #include "../../MainServer/Server/Constant.h"
 #include "../../MainServer/Server/CP_KEYS.h"
-#include "../../MainServer/Server/RayCast.h"
 #include "CheckPoint.h"
+//#include "Raycast.h"
 
 using namespace std;
 using namespace chrono;
@@ -152,7 +151,6 @@ class MapObject
 {
 private:
 	int obj_type;
-
 	float pos_x, pos_y, pos_z;
 	float scale_x, scale_y, scale_z;
 
@@ -165,6 +163,7 @@ private:
 
 public:
 	BoundingOrientedBox m_xoobb;
+	int id;
 
 public:
 	MapObject() {
@@ -227,6 +226,75 @@ public:
 };
 // Map Objects CollideBox
 vector<MapObject> mapobjects_info;
+
+
+
+//=====================================================================
+struct RaycastResult {
+	bool hit; // 충돌 여부
+	float distance; // 레이의 시작점에서 충돌 지점까지의 거리
+	XMFLOAT3 hitPoint; // 충돌 지점
+};
+
+RaycastResult Raycast(const XMFLOAT3& rayOrigin, const XMFLOAT3& rayDirection, const BoundingOrientedBox& box) {
+	RaycastResult result;
+	result.hit = false;
+
+	// 월드 공간에서 로컬 공간으로 레이의 시작점을 변환
+	XMFLOAT3 localRayOrigin;
+	XMStoreFloat3(&localRayOrigin, XMVector3InverseRotate(XMLoadFloat3(&rayOrigin) - XMLoadFloat3(&box.Center), XMLoadFloat4(&box.Orientation)));
+
+	// 월드 공간에서 로컬 공간으로 레이의 방향을 변환
+	XMFLOAT3 localRayDirection;
+	XMStoreFloat3(&localRayDirection, XMVector3InverseRotate(XMLoadFloat3(&rayDirection), XMLoadFloat4(&box.Orientation)));
+
+	XMFLOAT3 invDir(1.0f / localRayDirection.x, 1.0f / localRayDirection.y, 1.0f / localRayDirection.z);
+
+	// 바운딩 박스의 최소 지점과 최대 지점
+	const XMFLOAT3& boxExtents = box.Extents;
+	XMFLOAT3 boxMin(-boxExtents.x, -boxExtents.y, -boxExtents.z);
+	XMFLOAT3 boxMax(boxExtents.x, boxExtents.y, boxExtents.z);
+
+	// 바운딩 박스와의 충돌 시간 계산
+	float tmin = (boxMin.x - localRayOrigin.x) * invDir.x;
+	float tmax = (boxMax.x - localRayOrigin.x) * invDir.x;
+
+	float tymin = (boxMin.y - localRayOrigin.y) * invDir.y;
+	float tymax = (boxMax.y - localRayOrigin.y) * invDir.y;
+
+	if ((tmin > tymax) || (tymin > tmax))
+		return result;
+
+	if (tymin > tmin)
+		tmin = tymin;
+	if (tymax < tmax)
+		tmax = tymax;
+
+	float tzmin = (boxMin.z - localRayOrigin.z) * invDir.z;
+	float tzmax = (boxMax.z - localRayOrigin.z) * invDir.z;
+
+	if ((tmin > tzmax) || (tzmin > tmax))
+		return result;
+
+	if (tzmin > tmin)
+		tmin = tzmin;
+	if (tzmax < tmax)
+		tmax = tzmax;
+
+	// 충돌 지점 계산
+	result.hit = true;
+	result.distance = tmin;
+	result.hitPoint = XMFLOAT3(
+		localRayOrigin.x + localRayDirection.x * tmin,
+		localRayOrigin.y + localRayDirection.y * tmin,
+		localRayOrigin.z + localRayDirection.z * tmin
+	);
+
+	// 로컬 공간에서 월드 공간으로 충돌 지점을 변환
+	XMStoreFloat3(&result.hitPoint, XMLoadFloat3(&result.hitPoint) + XMLoadFloat3(&box.Center));
+
+	return result;
+}
 
 //======================================================================
 XMFLOAT3 NPCNormalize(XMFLOAT3 vec)
@@ -420,6 +488,7 @@ public:
 	bool TurnBack = false;
 	bool m_UpdateTurn = false;
 	vector<int>path;
+	unordered_set<int>m_objectlist;
 	BoundingFrustum m_frustum;
 	MapObject m_collideBox;
 	XMFLOAT3 m_VectorMAX = { -9999.f, -9999.f, -9999.f };
@@ -546,10 +615,11 @@ public:
 	// 3. Common
 	bool		NPC_CollideByMap();																	// 맵이랑 충돌인지 판단
 	bool		NPC_CollideByOtherNPC();															// NPC 간의 충돌
+	bool		NPC_BulletRaycast();																// NPC가 쏜 총알 충돌 여부 판단
 	void		NPC_CalculationCollide();															// 충돌된 경우 위치 및 회전 정보 재설정
 	void		NPC_CalculationOtherCollide();														// NPC 간의 충돌된 경우 위치 및 회전 정보 재설정
 	void		NPC_BackOwnsPos();																	// NPC Back 상황
-
+	void		NPC_SetObjectList();																// 충돌 판정을 위한 오브젝트 뷰 리스트 담기
 	void		H_setBB() {
 		XMVECTOR rotation = XMQuaternionRotationRollPitchYaw(0.0f, yaw, 0.0f);
 
@@ -1009,6 +1079,7 @@ void NPC::NPC_State_Manegement(int state)
 		break;
 	}
 	}
+	NPC_SetObjectList();
 }
 void NPC::Caculation_Distance(XMFLOAT3 vec, int id) // 서버에서 따로 부를 것.
 {
@@ -1187,6 +1258,9 @@ void NPC::H_PlayerChasing()
 	if (user_City == -1 || H_IsUserOnSafeZone(user_City)) {
 		m_UpdateTurn = true;
 		H_MoveToNode();
+		m_state = NPC_IDLE;
+		AttackTime = system_clock::now();
+		ChaseTime = AttackTime;
 		return;
 	}
 
@@ -1195,6 +1269,7 @@ void NPC::H_PlayerChasing()
 	if (user_node == -1) {
 		m_UpdateTurn = true;
 		H_MoveToNode();
+		m_state = NPC_IDLE;
 		return;
 	}
 
@@ -1398,7 +1473,7 @@ void NPC::H_PlayerAttack()
 
 		random_device rd;
 		default_random_engine dre(rd());
-		uniform_real_distribution<float> ShackingAttackRange(-3, 3);
+		uniform_real_distribution<float> ShackingAttackRange(-7, 7);
 
 		float UpShaking = ShackingAttackRange(dre);
 		float UpshakingDevide = UpShaking / distance;
@@ -1833,7 +1908,7 @@ void NPC::A_PlayerAttack()
 
 		random_device rd;
 		default_random_engine dre(rd());
-		uniform_real_distribution<float> ShackingAttackRange(-3, 3);
+		uniform_real_distribution<float> ShackingAttackRange(-5, 5);
 
 		float UpShaking = ShackingAttackRange(dre);
 		float UpshakingDevide = UpShaking / distance;
@@ -1879,7 +1954,7 @@ void NPC::A_NPC_Death_motion()
 bool NPC::NPC_CollideByMap()
 {
 	bool collide = false;
-	for (int i{}; i < mapobjects_info.size(); ++i) {
+	for (int i{}; i < mapobjects_info.size() - 1; ++i) {
 		if (mapobjects_info[i].m_xoobb.Intersects(m_xoobb)) {
 			m_collideBox = mapobjects_info[i];
 			collide = true;
@@ -1902,6 +1977,18 @@ bool NPC::NPC_CollideByOtherNPC()
 		}
 	}
 	return collide;
+}
+
+bool NPC::NPC_BulletRaycast()
+{
+	for (auto collideCheck : m_objectlist) {
+		RaycastResult result = Raycast(mapobjects_info[collideCheck].getPos(), m_AttackVec, mapobjects_info[collideCheck].m_xoobb);
+		if (result.hit) {
+			cout << "NPC ID: " << id << ", 건물 인덱스: " << collideCheck << "에서 충돌이 일어났습니다." << endl;
+			return true;
+		}
+	}
+	return false;
 }
 
 void NPC::NPC_CalculationCollide()
@@ -2084,6 +2171,25 @@ void NPC::NPC_BackOwnsPos()
 			}
 		}
 		pos = interpolatedPos;
+	}
+}
+
+void NPC::NPC_SetObjectList()
+{
+	for (int i{}; i < mapobjects_info.size() - 1; ++i) {
+		XMFLOAT3 O_pos = mapobjects_info[i].getPos();
+		XMFLOAT3 NtoO_vec = Subtract(pos, O_pos);
+		float NtoODistance = Length(NtoO_vec);
+		if (NtoODistance < 200.0f) {
+			if (!m_objectlist.count(i)) {
+				m_objectlist.insert(i);
+			}
+		}
+		else {
+			if (m_objectlist.count(i)) {
+				m_objectlist.erase(i);
+			}
+		}
 	}
 }
 
@@ -2519,15 +2625,19 @@ void MoveNPC()
 						if (npcsInfo[i].type == NPC_HELICOPTER) {
 							npcsInfo[i].CurrTime = system_clock::now();
 							if (npcsInfo[i].CurrTime - npcsInfo[i].PrevTime > 300ms) {
-								g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
-								npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
+								if (!npcsInfo[i].NPC_BulletRaycast()) {
+									g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
+									npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
+								}
 							}
 						}
 						else {
 							npcsInfo[i].CurrTime = system_clock::now();
 							if (npcsInfo[i].CurrTime - npcsInfo[i].PrevTime > 1000ms) {
-								g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
-								npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
+								if (!npcsInfo[i].NPC_BulletRaycast()) {
+									//g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
+									npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
+								}
 							}
 						}
 					}

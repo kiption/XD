@@ -135,6 +135,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\MainServer\Server\Protocol.h" />
     <ClInclude Include="CheckPoint.h" />
+    <ClInclude Include="Raycast.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
