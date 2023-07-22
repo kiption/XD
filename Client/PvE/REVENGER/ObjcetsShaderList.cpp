@@ -318,7 +318,7 @@ void CHelicopterBulletMarkParticleShader::BuildObjects(ID3D12Device* pd3dDevice,
 	{
 		m_ppObjects[i] = new CExplosiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pFragmentModel, false);
-		m_ppObjects[i]->SetScale(0.1, 0.1, 0.1);
+		m_ppObjects[i]->SetScale(0.3, 0.3, 0.3);
 		pFragmentModel->AddRef();
 		//ParticlePosition = m_ppObjects[i]->GetPosition();
 	}
@@ -337,6 +337,9 @@ void CHelicopterBulletMarkParticleShader::ReleaseObjects()
 
 void CHelicopterBulletMarkParticleShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
+	if (m_bActive == true)
+	{
+
 	CShader::Render(pd3dCommandList, pCamera, 0, false);
 
 	for (int j = 0; j < m_nObjects; j++)
@@ -346,6 +349,7 @@ void CHelicopterBulletMarkParticleShader::Render(ID3D12GraphicsCommandList* pd3d
 			m_ppObjects[j]->UpdateTransform(NULL);
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera, false);
 		}
+	}
 	}
 
 }
@@ -407,16 +411,16 @@ void CHelicopterBulletMarkParticleShader::AnimateObjects(float fTimeElapsed)
 	{
 
 		XMFLOAT3 gravity = XMFLOAT3(0.0, 8.8, 0);
-		m_fElapsedTimes += fTimeElapsed * 2.05f;
+		m_fElapsedTimes += fTimeElapsed * 5.05f;
 		if (m_fElapsedTimes <= m_fDuration)
 		{
 			for (int i = 0; i < BLOODEXPLOSION_DEBRISES; i++)
 			{
-				m_fExplosionSpeed = Random(1.0f, 6.0f);
+				m_fExplosionSpeed = Random(1.0f, 10.0f);
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
-				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + gravity.x;
-				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;;
-				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes + gravity.z;
+				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes;// + gravity.x;
+				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes;// + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;;
+				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes;// + gravity.z;
 				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
 
 				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
@@ -426,7 +430,7 @@ void CHelicopterBulletMarkParticleShader::AnimateObjects(float fTimeElapsed)
 		}
 		else
 		{
-
+			m_bActive = false;
 			m_fElapsedTimes = 0.0f;
 		}
 

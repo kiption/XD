@@ -729,7 +729,7 @@ void BloodHittingBillboard::AnimateObjects(float fTimeElapsed)
 		{
 			for (int i = 0; i < m_nObjects; i++)
 			{
-	
+
 				m_fExplosionSpeed = +RandomBillboard(3.0f, 5.1f);
 
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
@@ -946,14 +946,14 @@ void HeliHittingMarkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	CMaterial* pSpriteMaterial = new CMaterial(1);
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.4f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.0f, 2.f, 0.0f, 0.0f, 0.0f, 0.0f);
 	m_nObjects = HITTINGMARKS;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SceneManager::CreateShaderResourceViews(pd3dDevice, ppSpriteTextures, 0, 15);
 
 	CBillboardObject** pSparkObject = new CBillboardObject * [m_nObjects];
-	for (int j = 0; j < m_nObjects; j++)
+	for (int j = 0; j < HITTINGMARKS; j++)
 	{
 		pSparkObject[j] = new CBillboardObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		pSparkObject[j]->SetMesh(pSpriteMesh);
@@ -962,7 +962,7 @@ void HeliHittingMarkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 
 	}
 
-	for (int i = 0; i < m_nObjects; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomHittingVectorOnSphereBillboard());
+	for (int i = 0; i < HITTINGMARKS; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomHittingVectorOnSphereBillboard());
 }
 
 void HeliHittingMarkBillboard::ReleaseObjects()
@@ -972,19 +972,23 @@ void HeliHittingMarkBillboard::ReleaseObjects()
 
 void HeliHittingMarkBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CPlayer* pPlayer = pCamera->GetPlayer();
-	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
-	XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
-	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
-	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 0.0f, false));
-
-	for (int j = 0; j < m_nObjects; j++)
+	if (m_bActive == true)
 	{
-		//ParticlePosition = XMFLOAT3(58.0f, 12.0f, 900.0f);
-		if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0, 0.0f));
 
+		CPlayer* pPlayer = pCamera->GetPlayer();
+		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
+		XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
+		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
+		XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 0.0f, false));
+
+		for (int j = 0; j < m_nObjects; j++)
+		{
+			//ParticlePosition = XMFLOAT3(58.0f, 12.0f, 900.0f);
+			if (m_ppObjects[j])m_ppObjects[j]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0, 0.0f));
+
+		}
+		BillboardShader::Render(pd3dCommandList, pCamera, 0);
 	}
-	BillboardShader::Render(pd3dCommandList, pCamera, 0);
 }
 
 void HeliHittingMarkBillboard::AnimateObjects(float fTimeElapsed)
@@ -992,17 +996,17 @@ void HeliHittingMarkBillboard::AnimateObjects(float fTimeElapsed)
 	if (m_bActive == true)
 	{
 		XMFLOAT3 gravity = XMFLOAT3(0.0f, 9.8f, 0);
-		m_fElapsedTimes += fTimeElapsed * 2.0f;
+		m_fElapsedTimes += fTimeElapsed * 5.0f;
 		if (m_fElapsedTimes <= m_fDuration)
 		{
-			for (int i = 0; i < m_nObjects; i++)
+			for (int i = 0; i < HITTINGMARKS; i++)
 			{
 				gravity = XMFLOAT3(0.0f, 9.8f, 0);
 				m_fExplosionSpeed = +RandomBillboard(3.0f, 8.1f);
 
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
 				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes;
-				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;
+				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes;// +0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;
 				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes;
 				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
 
@@ -1014,8 +1018,8 @@ void HeliHittingMarkBillboard::AnimateObjects(float fTimeElapsed)
 		}
 		else
 		{
-			m_fElapsedTimes = 0.0f;
 			m_bActive = false;
+			m_fElapsedTimes = 0.0f;
 		}
 	}
 

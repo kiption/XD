@@ -3285,7 +3285,10 @@ void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos)
 
 		((CSpriteObjectsShader*)((Stage1*)m_pScene)->m_ppSpriteBillboard[0])->m_bActive = true;
 		((CSpriteObjectsShader*)((Stage1*)m_pScene)->m_ppSpriteBillboard[0])->m_ppObjects[0]->SetPosition(mappos);
-
+		((CHelicopterBulletMarkParticleShader*)((Stage1*)m_pScene)->m_ppFragShaders[1])->m_bActive = true;
+		((CHelicopterBulletMarkParticleShader*)((Stage1*)m_pScene)->m_ppFragShaders[1])->ParticlePosition = mappos;
+		((HeliHittingMarkBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[5])->m_bActive = true;
+		((HeliHittingMarkBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[5])->ParticlePosition = mappos;
 
 	}
 

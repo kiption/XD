@@ -68,7 +68,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6, 0.6, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-210, 400.0f, 1000.0f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-400, 500.0f, 1000.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.3f, -1.0f, -1.0f);
 
 	m_pLights->m_pLights[1].m_bEnable = true;
@@ -77,7 +77,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6, 0.6, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-450, 600.0f, 1000.0f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-550, 600.0f, 1100.0f);
 	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.4f, -1.0f, -0.9f);
 
 	m_pLights->m_pLights[2].m_bEnable = true;
@@ -1107,10 +1107,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 
 	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(m_ppShaders[0]->m_ppObjects[30]->GetPosition());
 
-	((CHelicopterBulletMarkParticleShader*)m_ppFragShaders[1])->m_bActive = true;
-	((CHelicopterBulletMarkParticleShader*)m_ppFragShaders[1])->ParticlePosition = XMFLOAT3(120.0, 6.1, 800.0);
-	((HeliHittingMarkBillboard*)m_pBillboardShader[5])->m_bActive = true;
-	((HeliHittingMarkBillboard*)m_pBillboardShader[5])->ParticlePosition = XMFLOAT3(120.0, 6.1, 800.0);
+
 
 	for (int i = 0; i < HELIBULLETS; i++)
 	{
