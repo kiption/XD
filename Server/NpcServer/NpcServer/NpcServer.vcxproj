@@ -138,6 +138,10 @@
   <ItemGroup>
     <ClInclude Include="..\..\MainServer\Server\Protocol.h" />
     <ClInclude Include="CheckPoint.h" />
+    <ClInclude Include="CollideMapData.h" />
+    <ClInclude Include="DirectCalculation.h" />
+    <ClInclude Include="Mainobject.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="Raycast.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
