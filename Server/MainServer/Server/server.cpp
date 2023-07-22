@@ -166,6 +166,8 @@ class SESSION {
 public:
 	mutex s_lock;
 	SESSION_STATE s_state;
+	int inserver_index;
+
 	int id;
 	SOCKET socket;
 	int remain_size;
@@ -195,6 +197,7 @@ public:
 	{
 		s_state = ST_FREE;
 		id = -1;
+		inserver_index = -1;
 		socket = 0;
 		remain_size = 0;
 		name[0] = 0;
@@ -2026,6 +2029,7 @@ void do_worker()
 				if (client_id != -1) {
 					// 클라이언트 id, 소켓
 					clients[client_id].s_lock.lock();
+					clients[client_id].inserver_index = client_id;
 					clients[client_id].remain_size = 0;
 					clients[client_id].socket = c_socket;
 					clients[client_id].s_lock.unlock();
@@ -2398,8 +2402,20 @@ void timerFunc() {
 						// 3. NPC 서버에게도 플레이어 리스폰 위치를 알려준다.
 						if (b_npcsvr_conn) {
 							npc_server.s_lock.lock();
-							npc_server.send_move_packet(cl.id, TARGET_PLAYER, 0);
-							npc_server.send_rotate_packet(cl.id, TARGET_PLAYER);
+							//npc_server.send_move_packet(cl.id, TARGET_PLAYER, 0);
+							//npc_server.send_rotate_packet(cl.id, TARGET_PLAYER);
+
+							SC_MOVE_OBJECT_PACKET move_pl_packet;
+							move_pl_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
+							move_pl_packet.type = SC_MOVE_OBJECT;
+							move_pl_packet.target = TARGET_PLAYER;
+							move_pl_packet.direction = 0;
+							move_pl_packet.id = cl.inserver_index;
+							move_pl_packet.x = cl.pos.x;
+							move_pl_packet.y = cl.pos.y;
+							move_pl_packet.z = cl.pos.z;
+							npc_server.do_send(&move_pl_packet);
+
 							npc_server.s_lock.unlock();
 						}
 					}
