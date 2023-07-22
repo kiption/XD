@@ -1872,14 +1872,14 @@ void CHelicopterObjects::FallDown(float fTimeElapsed)
 	m_pFrameFragObj2->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateFast, m_pFrameFragObj2->m_xmf4x4ToParent);
 	m_pFrameFragObj3->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateFast, m_pFrameFragObj3->m_xmf4x4ToParent);
 	m_pFrameFragObj4->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateMid, m_pFrameFragObj4->m_xmf4x4ToParent);
-	m_pFrameFragObj5->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateMid, m_pFrameFragObj5->m_xmf4x4ToParent);
+	m_pFrameFragObj5->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateRow, m_pFrameFragObj5->m_xmf4x4ToParent);
 	m_pFrameFragObj6->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateFast, m_pFrameFragObj6->m_xmf4x4ToParent);
 	m_pFrameFragObj7->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateRow, m_pFrameFragObj7->m_xmf4x4ToParent);
 	m_pFrameFragObj8->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateRow, m_pFrameFragObj8->m_xmf4x4ToParent);
 	m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateMid, m_pTailRotorFrame->m_xmf4x4ToParent);
 	m_pMainRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateRow, m_pMainRotorFrame->m_xmf4x4ToParent);
 
-	XMFLOAT3 gravity = XMFLOAT3(0.0, -1.8, 0);
+	XMFLOAT3 gravity = XMFLOAT3(0.0, -1.5, 0);
 	m_fElapsedTimes += fTimeElapsed * 1.1f;
 	/*if (m_fElapsedTimes <= m_fDuration)
 	{
@@ -1900,7 +1900,7 @@ void CHelicopterObjects::FallDown(float fTimeElapsed)
 	{
 		m_fElapsedTimes = 0.0f;
 	}*/
-	float staticValue = 4.3f;
+	float staticValue = 6.3f;
 	float randomValue = RandomValue(2.f, 8.0f);
 	XMVECTOR staticDir1 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.5, -0.25, 0.5, 0.0)));
 	XMVECTOR staticDir2 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.5, -0.25, 0.75, 0.0)));

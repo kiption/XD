@@ -281,8 +281,8 @@ void processPacket(char* ptr)
 {
 	switch (ptr[1])
 	{
-	//==========
-	// 로비서버
+		//==========
+		// 로비서버
 	case LBYC_MATCH_FAIL:
 	{
 		if (curr_servertype != SERVER_LOBBY) break;
@@ -312,7 +312,7 @@ void processPacket(char* ptr)
 		if (curr_room.user_count == MAX_USER) curr_room.room_state = R_ST_FULL;
 		else								  curr_room.room_state = R_ST_WAIT;
 
-		for (int i = 0; i < MAX_USER;++i) {
+		for (int i = 0; i < MAX_USER; ++i) {
 			curr_room.user_state[i] = recv_packet->member_state[i];
 		}
 
@@ -715,7 +715,9 @@ void processPacket(char* ptr)
 
 		// Player Damaged
 		if (recv_packet->target == TARGET_PLAYER) {
-			gamesound.collisionSound();
+			if (players_info[recv_id].m_role == ROLE_RIFLE) gamesound.HumancollisionSound();
+			if (players_info[recv_id].m_role == ROLE_HELI) gamesound.HelicollisionSound();
+
 			players_info[recv_id].m_hp -= recv_packet->damage;
 			players_info[recv_id].m_damaged_effect_on = true;
 			if (players_info[recv_id].m_hp < 0)
@@ -724,13 +726,18 @@ void processPacket(char* ptr)
 			}
 			else if (players_info[recv_id].m_hp <= 30 && players_info[recv_packet->id].m_near_death_hp == false)
 			{
-				if(recv_id==my_id)gamesound.PlayHearBeatSound();
-				players_info[recv_packet->id].m_near_death_hp = true;
+				if (recv_id == my_id)
+				{
+					if (players_info[recv_id].m_role == ROLE_RIFLE)gamesound.PlayHearBeatSound();
+					if (players_info[recv_id].m_role == ROLE_HELI)gamesound.PlayHeliWarnningSound();
+					players_info[recv_packet->id].m_near_death_hp = true;
+				}
 			}
 		}
 		// NPC Damaged
 		else if (recv_packet->target == TARGET_NPC) {
-			gamesound.collisionSound();
+			if (recv_id < MAX_NPC_HELI) gamesound.HelicollisionSound();
+			if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN) gamesound.HumancollisionSound();
 			npcs_info[recv_id].m_hp -= recv_packet->damage;
 			npcs_info[recv_id].m_damaged_effect_on = true;
 			if (npcs_info[recv_id].m_hp < 0) npcs_info[recv_packet->id].m_hp = 0;
@@ -774,7 +781,7 @@ void processPacket(char* ptr)
 				if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
 				{
 					gamesound.PlayShotSound();
-					gamesound.shotChannel->setVolume(0.25f);
+					gamesound.shotChannel->setVolume(0.1f);
 				}
 				if (players_info[recv_packet->id].m_role == ROLE_HELI)
 				{
@@ -803,7 +810,7 @@ void processPacket(char* ptr)
 		}
 		else if (recv_packet->obj_type == TARGET_NPC) {
 			cout << "NPC[" << recv_packet->id << "]가 공격했음." << endl;
-		
+
 			// NPC 공격 연출을 위한 정보
 			npcs_info[recv_id].m_attack_dir.x = recv_packet->atklook_x;
 			npcs_info[recv_id].m_attack_dir.y = recv_packet->atklook_y;
@@ -813,7 +820,7 @@ void processPacket(char* ptr)
 			if (atk_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 총성
 				gamesound.PlayNpcShotSound();
 				gamesound.NpcshootChannel->setVolume(0.25f);
-			//cout << "작은 총성" << endl;
+				//cout << "작은 총성" << endl;
 			}
 			else if (atk_sound_volume == VOL_MID) {		// 적당한 거리에 있어서 적당하게 들리는 총성
 				gamesound.PlayNpcShotSound();
@@ -930,8 +937,9 @@ void processPacket(char* ptr)
 			case PL_ST_ATTACK:
 				break;
 			case PL_ST_DEAD:
-				gamesound.collisionSound();
-				if(recv_id==my_id) gamesound.pauseHeartBeat();
+				if(players_info[recv_id].m_role==ROLE_RIFLE) gamesound.HumancollisionSound();
+				if(players_info[recv_id].m_role==ROLE_HELI) gamesound.HeliiShotDownSound();
+				if (recv_id == my_id) gamesound.pauseHeartBeat(); gamesound.PauseHeliWarnningSound();
 				players_info[recv_id].m_hp = 0;
 				players_info[recv_id].m_damaged_effect_on = true;
 				break;
@@ -948,8 +956,8 @@ void processPacket(char* ptr)
 			case PL_ST_ATTACK:
 				break;
 			case PL_ST_DEAD:
-				gamesound.collisionSound();
-
+				if(recv_id<MAX_NPC_HELI) gamesound.HeliiShotDownSound();
+				if(MAX_NPC_HELI<=recv_id< MAX_NPC_HUMAN) gamesound.HumancollisionSound();
 				npcs_info[recv_id].m_hp = 0;
 				cout << "NPC[" << recv_id << "] 죽었다" << endl;
 				break;
@@ -971,7 +979,7 @@ void processPacket(char* ptr)
 		players_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
 		players_info[recv_id].m_ingame_state = recv_packet->state;
 		players_info[recv_packet->id].m_near_death_hp = false;
-	
+
 		respawn_trigger = true;
 		break;
 	}//SC_RESPAWN case end

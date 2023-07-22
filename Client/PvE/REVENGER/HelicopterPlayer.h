@@ -35,6 +35,7 @@ public:
 	float m_fShotDelay = 0.f;
 	BoundingOrientedBox m_xoobb = BoundingOrientedBox(XMFLOAT3(),XMFLOAT3(),XMFLOAT4());
 
+	bool m_bDieState = false;
 private:
 	GameSound gamesound;
 };

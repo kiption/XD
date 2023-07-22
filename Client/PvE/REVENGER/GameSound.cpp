@@ -8,13 +8,17 @@ GameSound::GameSound()
 	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_CREATESTREAM, 0, &shotSound);
 	shotSound->setMode(FMOD_CREATESTREAM);
 
-	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
+	result = soundSystem->init(64, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
 	result = soundSystem->createSound("Sound/Machin.wav", FMOD_CREATESTREAM, 0, &HelishotSound);
 	HelishotSound->setMode(FMOD_CREATESTREAM);
 
 	result = soundSystem->init(64, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
-	result = soundSystem->createSound("Sound/PlayerHittingSound.wav", FMOD_UNIQUE, 0, &ColliSound);
-	result = ColliSound->setMode(FMOD_UNIQUE);
+	result = soundSystem->createSound("Sound/PlayerHittingSound.wav", FMOD_UNIQUE, 0, &HumanColliSound);
+	result = HumanColliSound->setMode(FMOD_UNIQUE);
+
+	result = soundSystem->init(64, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
+	result = soundSystem->createSound("Sound/CollisionSound.wav", FMOD_UNIQUE, 0, &HeliColliSound);
+	result = HeliColliSound->setMode(FMOD_UNIQUE);
 
 	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
 	result = soundSystem->createSound("Sound/helicopterfieldwithbirds.mp3", FMOD_DEFAULT, 0, &speakSound);
@@ -25,12 +29,16 @@ GameSound::GameSound()
 	result = bgmSound->setMode(FMOD_LOOP_OFF);
 
 	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
-	result = soundSystem->createSound("Sound/Reload.wav", FMOD_UNIQUE, 0, &reloadSounds);
+	result = soundSystem->createSound("Sound/Rifle_Reload.wav", FMOD_UNIQUE, 0, &reloadSounds);
 	result = BackGroundSound->setMode(FMOD_UNIQUE);
 
 	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
 	result = soundSystem->createSound("Sound/HeartBeat.mp3", FMOD_UNIQUE, 0, &HartbeatSound);
 	result = HartbeatSound->setMode(FMOD_UNIQUE);
+
+	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
+	result = soundSystem->createSound("Sound/AlamSound.mp3", FMOD_UNIQUE, 0, &WarnningSound);
+	result = WarnningSound->setMode(FMOD_UNIQUE);
 
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
 	result = soundSystem->createSound("Sound/RotorLoop.wav", FMOD_DEFAULT, 0, &RotorSound);
@@ -44,11 +52,18 @@ GameSound::GameSound()
 	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_CREATESTREAM, 0, &NpcshotSound);
 	NpcshotSound->setMode(FMOD_CREATESTREAM);
 
+	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
+	result = soundSystem->createSound("Sound/Explosive.mp3", FMOD_UNIQUE, 0, &HeliShotDownSounds);
+	HeliShotDownSounds->setMode(FMOD_UNIQUE);
+
 	result = soundSystem->playSound(RotorSound, 0, true, &RotorChannel);
 	RotorChannel->setVolume(0.2f);
 
 	result = soundSystem->playSound(HartbeatSound, 0, true, &HartbeatChannel);
 	HartbeatChannel->setVolume(1.5f);
+
+	result = soundSystem->playSound(WarnningSound, 0, true, &WarnningChannel);
+	WarnningChannel->setVolume(1.5f);
 
 	result = soundSystem->playSound(BackGroundSound, 0, true, &BackGroundChannel);
 	BackGroundChannel->setVolume(0.05f);
@@ -64,10 +79,13 @@ GameSound::GameSound()
 GameSound::~GameSound()
 {
 	result = shotSound->release();
-	result = ColliSound->release();
+	result = HumanColliSound->release();
+	result = HeliColliSound->release();
+	result = HeliShotDownSounds->release();
 	result = speakSound->release();
 	result = bgmSound->release();
 	result = HartbeatSound->release();
+	result = WarnningSound->release();
 	result = BackGroundSound->release();
 	result = reloadSounds->release();
 	result = soundSystem->close();
@@ -77,22 +95,27 @@ GameSound::~GameSound()
 	//Common_Close();
 }
 
+void GameSound::PauseHeliWarnningSound()
+{
+	WarnningChannel->setPaused(true);
+}
+void GameSound::PlayHeliWarnningSound()
+{
+	WarnningChannel->setPaused(false);
+}
+
 void GameSound::PlayShotSound()
 {
 	result = soundSystem->playSound(shotSound, 0, false, &shotChannel);
-
-
 }
 void GameSound::PlayHeliShotSound()
 {
 	result = soundSystem->playSound(HelishotSound, 0, false, &HelishotChannel);
-
-
 }
 void GameSound::backGroundMusic()
 {
 	result = soundSystem->playSound(bgmSound, 0, false, &bgmChannel);
-	bgmChannel->setVolume(0.5f);
+	bgmChannel->setVolume(0.05f);
 }
 void GameSound::SpeakMusic()
 {
@@ -101,13 +124,23 @@ void GameSound::SpeakMusic()
 }
 void GameSound::HartBeatSound()
 {
-
+}
+void GameSound::HumancollisionSound()
+{
+	result = soundSystem->playSound(HumanColliSound, 0, false, &HumanColliChannel);
+	HumanColliChannel->setVolume(0.5f);
 }
 
-void GameSound::collisionSound()
+void GameSound::HeliiShotDownSound()
 {
-	result = soundSystem->playSound(ColliSound, 0, false, &ColliChannel);
-	ColliChannel->setVolume(0.5f);
+	result = soundSystem->playSound(HeliShotDownSounds, 0, false, &HeliShotDownChannel);
+	HeliShotDownChannel->setVolume(1.5f);
+}
+
+void GameSound::HelicollisionSound()
+{
+	result = soundSystem->playSound(HeliColliSound, 0, false, &HeliColliChannel);
+	HeliColliChannel->setVolume(0.5f);
 }
 
 void GameSound::reloadSound()

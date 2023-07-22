@@ -5,7 +5,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
-HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* model,ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* model, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
@@ -18,7 +18,7 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 
 	pBCBulletEffectShader = new CBulletEffectShader();
-	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,0);
+	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
 	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
 
 
@@ -26,7 +26,7 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	SetCameraUpdatedContext(pContext);
 	OnPrepareAnimate();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	
+
 	m_xoobb = BoundingOrientedBox(XMFLOAT3(this->GetPosition()), XMFLOAT3(15.0, 13.0, 20.0), XMFLOAT4(0, 0, 0, 1));
 }
 
@@ -61,7 +61,7 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	case CLOSEUP_PERSON_CAMERA:
 		SetFriction(600.0f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(40.0f);
+		SetMaxVelocityXZ(50.0f);
 		SetMaxVelocityY(4.0f);
 		m_pCamera = OnChangeCamera(CLOSEUP_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
@@ -117,6 +117,22 @@ void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 8.0f) * fTimeElapse);
 		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
 	}
+
+	if (m_bDieState == true)
+	{
+	
+		if (m_xmf4x4ToParent._42 > 3.5)
+		{
+			Rotate(-2, 4, 0);
+			Move(DIR_DOWN, 0.7, false, { 0,0,0 });
+		}
+		if (m_xmf4x4ToParent._42 < 3.5)
+		{
+			Rotate(0, 1.5, 0);
+			Move(DIR_FORWARD, 0.5, false, { 0,0,0 });
+		}
+	}
+
 	
 }
 
@@ -164,7 +180,7 @@ void HeliPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 void HeliPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	CPlayer::Render(pd3dCommandList, NULL,pCamera);
+	CPlayer::Render(pd3dCommandList, NULL, pCamera);
 }
 
 void HeliPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, XMFLOAT3 slideVec)

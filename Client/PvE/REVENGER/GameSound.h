@@ -20,8 +20,11 @@ public:
 	FMOD::Sound* NpcshotSound;
 	FMOD::Channel* NpcshootChannel;
 
-	FMOD::Sound* ColliSound;
-	FMOD::Channel* ColliChannel;
+	FMOD::Sound* HumanColliSound;
+	FMOD::Channel* HumanColliChannel;
+
+	FMOD::Sound* HeliColliSound;
+	FMOD::Channel* HeliColliChannel;
 
 	FMOD::Sound* speakSound;
 	FMOD::Channel* speakChannel;
@@ -32,6 +35,9 @@ public:
 	FMOD::Sound* HartbeatSound;
 	FMOD::Channel* HartbeatChannel;
 
+	FMOD::Sound* WarnningSound;
+	FMOD::Channel* WarnningChannel;
+
 	FMOD::Sound* RotorSound;
 	FMOD::Channel* RotorChannel;
 
@@ -40,6 +46,9 @@ public:
 
 	FMOD::Sound* reloadSounds;
 	FMOD::Channel* reloadChannel;
+
+	FMOD::Sound* HeliShotDownSounds;
+	FMOD::Channel* HeliShotDownChannel;
 
 	FMOD_RESULT  result;
 	void* extradriverdata = 0;
@@ -51,11 +60,15 @@ public:
 
 	bool m_bStopSound = false;
 	void SpeakMusic();
+	void PlayHeliWarnningSound();
+	void PauseHeliWarnningSound();
 	void PlayShotSound();
 	void PlayHeliShotSound();
 	void backGroundMusic();
 	void HartBeatSound();
-	void collisionSound();
+	void HumancollisionSound();
+	void HeliiShotDownSound();
+	void HelicollisionSound();
 	void pauseHeartBeat();
 	void PlayHearBeatSound();
 	void HelicopterLoop();

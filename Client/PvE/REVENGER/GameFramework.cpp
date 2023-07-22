@@ -3426,6 +3426,10 @@ void CGameFramework::MyPlayerDieMotion()
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->DieState();
 		m_pCamera->GenerateProjectionMatrix(1.01f, 8000.0f, ASPECT_RATIO, 70.0f);
 	}
+	if (m_ingame_role == R_HELI)
+	{
+		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = true;
+	}
 
 }
 void CGameFramework::MyPlayerResponeMotion()
@@ -3434,6 +3438,10 @@ void CGameFramework::MyPlayerResponeMotion()
 	{
 		m_bDieMotion = false;
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = false;
+	}
+	if (m_ingame_role == R_HELI)
+	{
+		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = false;
 	}
 }
 void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
