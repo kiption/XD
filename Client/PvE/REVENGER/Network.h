@@ -65,6 +65,10 @@ int role_change_member_id = -1;
 // 인게임 관련
 volatile bool respawn_trigger = false;
 
+bool trigger_otherplayer_attack = false;	// 다른 플레이어 공격 연출
+int otherplayer_attack_id;					// " id
+XMFLOAT3 otherplayer_attack_dir;			// " 방향
+
 //==================================================
 int curr_connection_num = 1;
 
@@ -503,8 +507,6 @@ void processPacket(char* ptr)
 		if (curr_servertype != SERVER_LOGIC) break;
 		SC_LOGIN_INFO_PACKET* recv_packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(ptr);
 		// Player 초기정보 설정
-		my_id = recv_packet->id;
-		players_info[my_id].m_id = recv_packet->id;
 		players_info[my_id].m_hp = recv_packet->hp;
 		strcpy_s(players_info[my_id].m_name, recv_packet->name);
 		players_info[my_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
@@ -514,6 +516,7 @@ void processPacket(char* ptr)
 		players_info[my_id].m_state = OBJ_ST_RUNNING;
 		players_info[my_id].m_ingame_state = PL_ST_IDLE;
 		players_info[my_id].m_new_state_update = true;
+		cout << "자기 자신의 정보를 받았습니다. (Myid: " << my_id << ")" << endl;
 
 		trigger_stage1_playerinfo_load = true;
 		break;
@@ -538,11 +541,12 @@ void processPacket(char* ptr)
 				players_info[recv_id].m_state = OBJ_ST_RUNNING;
 				players_info[recv_id].m_ingame_state = recv_packet->obj_state;
 				players_info[recv_id].m_new_state_update = true;
+				cout << "다른 플레이어(ID: " << recv_id << ")의 정보를 받았습니다." << endl;
 
 				curr_connection_num++;
 			}
 			else {
-				cout << "[SC_ADD Error] Unknown ID." << endl;
+				cout << "[SC_ADD Error] Unknown ID. (Input ID: " << recv_id << ")" << endl;
 			}
 		}
 		// 2. Add NPC (Helicopter)
@@ -754,7 +758,12 @@ void processPacket(char* ptr)
 		int atk_sound_volume = recv_packet->sound_volume;
 		if (recv_packet->obj_type == TARGET_PLAYER) {
 			cout << "Client[" << recv_packet->id << "]가 공격했음." << endl;
+			// 연출 트리거
+			trigger_otherplayer_attack = true;
+			otherplayer_attack_id = recv_id;
+			otherplayer_attack_dir = { recv_packet->atklook_x, recv_packet->atklook_y, recv_packet->atklook_z };
 
+			// 사운드
 			if (players_info[recv_packet->id].m_role == ROLE_HELI)
 			{
 				gamesound.PlayHeliShotSound();

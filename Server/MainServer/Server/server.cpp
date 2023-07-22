@@ -284,7 +284,6 @@ void SESSION::send_login_packet() {
 	login_info_packet.size = sizeof(SC_LOGIN_INFO_PACKET);
 	login_info_packet.type = SC_LOGIN_INFO;
 
-	login_info_packet.id = id;
 	strcpy_s(login_info_packet.name, name);
 	login_info_packet.x = pos.x;
 	login_info_packet.y = pos.y;
@@ -319,7 +318,7 @@ void SESSION::send_add_obj_packet(int obj_id, short obj_type)
 		add_player_packet.type = SC_ADD_OBJECT;
 
 		add_player_packet.target = TARGET_PLAYER;
-		add_player_packet.id = obj_id;
+		add_player_packet.id = clients[obj_id].id;
 		strcpy_s(add_player_packet.name, name);
 		add_player_packet.obj_state = clients[obj_id].pl_state;
 		add_player_packet.role = clients[obj_id].role;
@@ -381,17 +380,21 @@ void SESSION::send_move_packet(int obj_id, short obj_type, short dir)
 	move_pl_packet.size = sizeof(SC_MOVE_OBJECT_PACKET);
 	move_pl_packet.type = SC_MOVE_OBJECT;
 	move_pl_packet.target = obj_type;
-	move_pl_packet.id = obj_id;
+	
 	move_pl_packet.direction = dir;
 
 	switch (obj_type) {
 	case TARGET_PLAYER:
+		move_pl_packet.id = clients[obj_id].id;
+
 		move_pl_packet.x = clients[obj_id].pos.x;
 		move_pl_packet.y = clients[obj_id].pos.y;
 		move_pl_packet.z = clients[obj_id].pos.z;
 		break;
 
 	case TARGET_NPC:
+		move_pl_packet.id = obj_id;
+
 		move_pl_packet.x = npcs[obj_id].pos.x;
 		move_pl_packet.y = npcs[obj_id].pos.y;
 		move_pl_packet.z = npcs[obj_id].pos.z;
@@ -406,10 +409,11 @@ void SESSION::send_rotate_packet(int obj_id, short obj_type)
 	rotate_pl_packet.size = sizeof(SC_ROTATE_OBJECT_PACKET);
 	rotate_pl_packet.type = SC_ROTATE_OBJECT;
 	rotate_pl_packet.target = obj_type;
-	rotate_pl_packet.id = obj_id;
-
+	
 	switch (obj_type) {
 	case TARGET_PLAYER:
+		rotate_pl_packet.id = clients[obj_id].id;
+
 		rotate_pl_packet.right_x = clients[obj_id].m_rightvec.x;
 		rotate_pl_packet.right_y = clients[obj_id].m_rightvec.y;
 		rotate_pl_packet.right_z = clients[obj_id].m_rightvec.z;
@@ -424,6 +428,8 @@ void SESSION::send_rotate_packet(int obj_id, short obj_type)
 		break;
 
 	case TARGET_NPC:
+		rotate_pl_packet.id = obj_id;
+
 		rotate_pl_packet.right_x = npcs[obj_id].m_rightvec.x;
 		rotate_pl_packet.right_y = npcs[obj_id].m_rightvec.y;
 		rotate_pl_packet.right_z = npcs[obj_id].m_rightvec.z;
@@ -445,11 +451,12 @@ void SESSION::send_move_rotate_packet(int obj_id, short obj_type, short dir)
 	update_pl_packet.size = sizeof(SC_MOVE_ROTATE_OBJECT_PACKET);
 	update_pl_packet.type = SC_MOVE_ROTATE_OBJECT;
 	update_pl_packet.target = obj_type;
-	update_pl_packet.id = obj_id;
 	update_pl_packet.direction = dir;
 
 	switch (obj_type) {
 	case TARGET_PLAYER:
+		update_pl_packet.id = clients[obj_id].id;
+		
 		update_pl_packet.x = clients[obj_id].pos.x;
 		update_pl_packet.y = clients[obj_id].pos.y;
 		update_pl_packet.z = clients[obj_id].pos.z;
@@ -468,6 +475,8 @@ void SESSION::send_move_rotate_packet(int obj_id, short obj_type, short dir)
 		break;
 
 	case TARGET_NPC:
+		update_pl_packet.id = obj_id;
+
 		update_pl_packet.x = npcs[obj_id].pos.x;
 		update_pl_packet.y = npcs[obj_id].pos.y;
 		update_pl_packet.z = npcs[obj_id].pos.z;
@@ -515,7 +524,10 @@ void SESSION::send_remove_packet(int obj_id, short obj_type)
 	remove_packet.size = sizeof(SC_REMOVE_OBJECT_PACKET);
 	remove_packet.type = SC_REMOVE_OBJECT;
 	remove_packet.target = obj_type;
-	remove_packet.id = obj_id;
+	if (obj_type == TARGET_PLAYER)
+		remove_packet.id = clients[obj_id].id;
+	else if (obj_type == TARGET_NPC)
+		remove_packet.id = obj_id;
 
 	do_send(&remove_packet);
 }
@@ -818,6 +830,7 @@ void process_packet(int client_id, char* packet)
 		}
 
 		// 새로 접속한 플레이어의 초기 정보를 설정합니다.
+		clients[client_id].id = login_packet->inroom_index;	// client_id (서버에서 쓰는 id)와 클라이언트 인덱스는 다르다!
 		clients[client_id].s_state = ST_INGAME;
 		clients[client_id].pl_state = PL_ST_IDLE;
 		clients[client_id].curr_stage = 1;
@@ -842,7 +855,8 @@ void process_packet(int client_id, char* packet)
 
 		clients[client_id].send_login_packet();
 		clients[client_id].s_lock.unlock();
-		cout << "Player[ID: " << clients[client_id].id << ", name: " << clients[client_id].name << "]이(가) 접속하였습니다." << endl;	// server message
+		cout << "Player[서버내 ID: " << client_id << ", 클라 인덱스: " << clients[client_id].id
+			<< ", name: " << clients[client_id].name << "]이(가) 접속하였습니다." << endl;	// server message
 
 		if (!b_active_server) {
 			cout << "Stand-By서버는 대기 상태를 유지합니다." << endl;
@@ -1122,7 +1136,7 @@ void process_packet(int client_id, char* packet)
 			atk_pack.size = sizeof(SC_ATTACK_PACKET);
 			atk_pack.type = SC_ATTACK;
 			atk_pack.obj_type = TARGET_PLAYER;
-			atk_pack.id = client_id;
+			atk_pack.id = clients[client_id].id;
 			atk_pack.sound_volume = atksound_vol;
 			lock_guard<mutex> lg{ cl.s_lock };
 			cl.do_send(&atk_pack);
@@ -1441,48 +1455,6 @@ void process_packet(int client_id, char* packet)
 
 		float sign = 1.0f;					// right/up/look벡터 방향으로 움직이는지, 반대 방향으로 움직이는지
 		switch (inputkey_p->keytype) {
-		case PACKET_KEY_NUM1:
-			if (clients[client_id].curr_stage == 1) break;
-
-			clients[client_id].s_lock.lock();
-			clients[client_id].curr_stage = 1;
-			cout << "Client[" << client_id << "] Stage1로 전환." << endl;
-			clients[client_id].s_lock.unlock();
-
-			SC_CHANGE_SCENE_PACKET chg_scene1_pack;
-			chg_scene1_pack.type = SC_CHANGE_SCENE;
-			chg_scene1_pack.size = sizeof(SC_CHANGE_SCENE_PACKET);
-			chg_scene1_pack.id = client_id;
-			chg_scene1_pack.scene_num = 1;
-			for (auto& cl : clients) {
-				if (cl.s_state != ST_INGAME) continue;
-
-				lock_guard<mutex> lg{ cl.s_lock };
-				cl.do_send(&chg_scene1_pack);
-			}
-
-			// 스테이지1 미션 전달
-			{
-				lock_guard<mutex> lg{ clients[client_id].s_lock };
-				clients[client_id].send_mission_packet(clients[client_id].curr_stage);
-			}
-
-			stage1_missions[0].start = static_cast<int>(g_curr_servertime.count());
-			cout << "[" << stage1_missions[0].start << "]  새로운 미션 추가: ";
-			switch (stage1_missions[0].type) {
-			case MISSION_KILL:
-				cout << "[처치] ";
-				break;
-			case MISSION_OCCUPY:
-				cout << "[점령] ";
-				break;
-			}
-			cout << stage1_missions[0].curr << " / " << stage1_missions[0].goal << "\n" << endl;
-			break;
-
-		case PACKET_KEY_NUM2:
-			break;
-
 		case PACKET_KEY_R:
 			milliseconds reload_term = duration_cast<milliseconds>(system_clock::now() - clients[client_id].reload_time);
 			if (reload_term < milliseconds(RELOAD_TIME)) break;
@@ -1503,7 +1475,7 @@ void process_packet(int client_id, char* packet)
 				SC_RELOAD_PACKET reload_packet;
 				reload_packet.size = sizeof(SC_RELOAD_PACKET);
 				reload_packet.type = SC_RELOAD;
-				reload_packet.id = client_id;
+				reload_packet.id = clients[client_id].id;
 				if (0 <= dist && dist < RELOADSOUND_NEAR_DISTANCE)
 					reload_packet.sound_volume = VOL_HIGH;
 				else if (RELOADSOUND_NEAR_DISTANCE <= dist && dist < RELOADSOUND_MID_DISTANCE)
@@ -1527,7 +1499,7 @@ void process_packet(int client_id, char* packet)
 				change2idle_pack.type = SC_OBJECT_STATE;
 				change2idle_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
 				change2idle_pack.target = TARGET_PLAYER;
-				change2idle_pack.id = client_id;
+				change2idle_pack.id = clients[client_id].id;
 				change2idle_pack.state = PL_ST_IDLE;
 
 				for (auto& cl : clients) {
@@ -1604,7 +1576,7 @@ void process_packet(int client_id, char* packet)
 		SC_PING_RETURN_PACKET ping_ret_pack;
 		ping_ret_pack.type = SC_PING_RETURN;
 		ping_ret_pack.size = sizeof(SC_PING_RETURN_PACKET);
-		ping_ret_pack.ping_sender_id = client_id;
+		ping_ret_pack.ping_sender_id = clients[client_id].id;
 		clients[client_id].do_send(&ping_ret_pack);
 
 		break;
@@ -2054,7 +2026,6 @@ void do_worker()
 				if (client_id != -1) {
 					// 클라이언트 id, 소켓
 					clients[client_id].s_lock.lock();
-					clients[client_id].id = client_id;
 					clients[client_id].remain_size = 0;
 					clients[client_id].socket = c_socket;
 					clients[client_id].s_lock.unlock();

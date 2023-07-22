@@ -361,6 +361,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 					// 다음 스테이지로 전환
 					if (stage1_enter_ok) {
+						// 동시에 클라이언트 여러 대가 가면 꼬일 수 있기에 입장 순서를 정해주기 위함
+						if (my_id != 0) {
+							Sleep(300 * my_id);
+						}
+
 						// 로직 서버에 연결
 						curr_servertype = SERVER_LOGIC;
 						active_servernum = MAX_LOGIC_SERVER - 1;
@@ -469,11 +474,30 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				
 						if (players_info[i].m_role == ROLE_RIFLE)
 						{
-						gGameFramework.setPosition_SoldiarOtherPlayer(i, players_info[i].m_pos);
-						gGameFramework.setVectors_SoldiarOtherPlayer(i, players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
+							// 인덱스 조정
+							int index_num = 0;
+							switch (i) {
+							case 0:	// 자신의 id가 0일때
+							case 1:	// 자신의 id가 1일때
+								index_num = i;	// 그대로 사용
+								break;
+							case 2:	// 자신의 id가 2일때
+								if (players_info[0].m_role == ROLE_RIFLE) {	// id 0 클라이언트도 소총수이면
+									index_num = 1;
+								}
+								else {										// id 1 클라이언트도 소충수이면
+									index_num = 0;
+								}
+								break;
+							}
+
+							// 적용
+							gGameFramework.setPosition_SoldiarOtherPlayer(index_num, players_info[i].m_pos);
+							gGameFramework.setVectors_SoldiarOtherPlayer(index_num, players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
 						}
-						if (players_info[i].m_role == ROLE_HELI)
+						else if (players_info[i].m_role == ROLE_HELI)
 						{
+							// 헬기는 무조건 index가 7
 							gGameFramework.setPosition_HeliOtherPlayer(i, players_info[i].m_pos);
 							gGameFramework.setVectors_HeliOtherPlayer(i, players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
 						}
@@ -520,6 +544,24 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				if ((players_info[my_id].m_ingame_state != PL_ST_DEAD) && (gGameFramework.player_dead)) {
 					gGameFramework.MyPlayerResponeMotion();
 					gGameFramework.player_dead = false;
+				}
+
+				// 5. 총쏘는거
+				if (trigger_otherplayer_attack) {
+					// 여기에서 총알 연출!
+					if (players_info[otherplayer_attack_id].m_role == ROLE_RIFLE) {
+						// 사람도 하게된다면 여기서 하면됨.
+					}
+					else if (players_info[otherplayer_attack_id].m_role == ROLE_HELI)
+					{
+						cout << "Client[" << otherplayer_attack_id << "]가 ("
+							<< otherplayer_attack_dir.x << ", " << otherplayer_attack_dir.y << ", " << otherplayer_attack_dir.z << ") 방향으로 총을 쐈다." << endl;
+						gGameFramework.HeliPlayerUnderAttack(otherplayer_attack_dir);
+					}
+
+					trigger_otherplayer_attack = false;
+					otherplayer_attack_id = 0;
+					otherplayer_attack_dir = { 0, 0, 0 };
 				}
 
 				//==================================================
