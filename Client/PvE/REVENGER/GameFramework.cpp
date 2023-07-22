@@ -1096,12 +1096,6 @@ void CGameFramework::ProcessInput()
 						}
 
 						if (isCollide) {
-							XMFLOAT3 PlayertoBox = { temp.m_pos.x - ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition().x, 0.0f ,
-							   temp.m_pos.z - ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition().z };
-							XMVECTOR playerToBoxNormalized = XMVector3Normalize(XMLoadFloat3(&PlayertoBox));
-							XMFLOAT3 normalizedPlayerToBox;
-							XMStoreFloat3(&normalizedPlayerToBox, playerToBoxNormalized);
-
 							XMFLOAT3 normalizedLocalForward;
 							XMVECTOR localForwardNormalized = XMVector3Normalize(XMLoadFloat3(&temp.m_local_forward));
 							XMStoreFloat3(&normalizedLocalForward, localForwardNormalized);
