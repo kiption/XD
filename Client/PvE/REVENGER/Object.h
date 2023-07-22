@@ -171,20 +171,20 @@ public:
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
 public:
-	CShader							*m_pShader = NULL;
+	CShader* m_pShader = NULL;
 	UINT							m_nReflection = 0;
 	XMFLOAT4						m_xmf4AlbedoColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	XMFLOAT4						m_xmf4EmissiveColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4						m_xmf4SpecularColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	XMFLOAT4						m_xmf4AmbientColor = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	void SetShader(CShader *pShader);
+	void SetShader(CShader* pShader);
 	void SetMaterialType(UINT nType) { m_nType |= nType; }
-	virtual void SetTextures(CTexture *pTexture);
-	virtual void SetTexture(CTexture *pTexture, UINT nTexture = 0);
+	virtual void SetTextures(CTexture* pTexture);
+	virtual void SetTexture(CTexture* pTexture, UINT nTexture = 0);
 	void SetReflection(UINT nReflection) { m_nReflection = nReflection; }
 
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 	virtual void ReleaseUploadBuffers();
 
@@ -200,20 +200,20 @@ public:
 	bool m_isAnimationShader = false;
 public:
 	int 							m_nTextures = 0;
-	_TCHAR							(*m_ppstrTextureNames)[64] = NULL;
-	CTexture						**m_ppTextures = NULL; //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
-	CTexture						*m_pTexture = NULL; //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
+	_TCHAR(*m_ppstrTextureNames)[64] = NULL;
+	CTexture** m_ppTextures = NULL; //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
+	CTexture* m_pTexture = NULL; //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
 
-	void LoadTextureFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR *pwstrTextureName, CTexture **ppTexture, CGameObject *pParent, FILE *pInFile, CShader *pShader);
+	void LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR* pwstrTextureName, CTexture** ppTexture, CGameObject* pParent, FILE* pInFile, CShader* pShader);
 
 public:
-	static CShader					*m_pStandardShader;
-	static CShader					*m_pSkinnedAnimationShader;
+	static CShader* m_pStandardShader;
+	static CShader* m_pSkinnedAnimationShader;
 
-	static void CMaterial::PrepareShaders(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	static void CMaterial::PrepareShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
 	void SetStandardShader() { CMaterial::SetShader(m_pStandardShader); }
-	void SetSkinnedAnimationShader() { CMaterial::SetShader(m_pSkinnedAnimationShader); m_isAnimationShader = true;}
+	void SetSkinnedAnimationShader() { CMaterial::SetShader(m_pSkinnedAnimationShader); m_isAnimationShader = true; }
 
 
 };
@@ -222,8 +222,8 @@ public:
 //
 struct CALLBACKKEY
 {
-   float  							m_fTime = 0.0f;
-   void  							*m_pCallbackData = NULL;
+	float  							m_fTime = 0.0f;
+	void* m_pCallbackData = NULL;
 };
 
 #define _WITH_ANIMATION_INTERPOLATION
@@ -235,7 +235,7 @@ public:
 	~CAnimationCallbackHandler() { }
 
 public:
-   virtual void HandleCallback(void *pCallbackData, float fTrackPosition) { }
+	virtual void HandleCallback(void* pCallbackData, float fTrackPosition) { }
 };
 
 //#define _WITH_ANIMATION_SRT
@@ -243,7 +243,7 @@ public:
 class CAnimationSet
 {
 public:
-	CAnimationSet(float fLength, int nFramesPerSecond, int nKeyFrameTransforms, int nSkinningBones, char *pstrName);
+	CAnimationSet(float fLength, int nFramesPerSecond, int nKeyFrameTransforms, int nSkinningBones, char* pstrName);
 	~CAnimationSet();
 
 public:
@@ -253,8 +253,8 @@ public:
 	int								m_nFramesPerSecond = 0; //m_fTicksPerSecond
 
 	int								m_nKeyFrames = 0;
-	float							*m_pfKeyFrameTimes = NULL;
-	XMFLOAT4X4						**m_ppxmf4x4KeyFrameTransforms = NULL;
+	float* m_pfKeyFrameTimes = NULL;
+	XMFLOAT4X4** m_ppxmf4x4KeyFrameTransforms = NULL;
 	CAnimationCallbackHandler* m_pAnimationCallbackHandler = NULL;
 	int 							m_nCallbackKeys = 0;
 	CALLBACKKEY* m_pCallbackKeys = NULL;
@@ -262,14 +262,14 @@ public:
 
 #ifdef _WITH_ANIMATION_SRT
 	int								m_nKeyFrameScales = 0;
-	float							*m_pfKeyFrameScaleTimes = NULL;
-	XMFLOAT3						**m_ppxmf3KeyFrameScales = NULL;
+	float* m_pfKeyFrameScaleTimes = NULL;
+	XMFLOAT3** m_ppxmf3KeyFrameScales = NULL;
 	int								m_nKeyFrameRotations = 0;
-	float							*m_pfKeyFrameRotationTimes = NULL;
-	XMFLOAT4						**m_ppxmf4KeyFrameRotations = NULL;
+	float* m_pfKeyFrameRotationTimes = NULL;
+	XMFLOAT4** m_ppxmf4KeyFrameRotations = NULL;
 	int								m_nKeyFrameTranslations = 0;
-	float							*m_pfKeyFrameTranslationTimes = NULL;
-	XMFLOAT3						**m_ppxmf3KeyFrameTranslations = NULL;
+	float* m_pfKeyFrameTranslationTimes = NULL;
+	XMFLOAT3** m_ppxmf3KeyFrameTranslations = NULL;
 #endif
 
 public:
@@ -292,10 +292,10 @@ public:
 
 public:
 	int								m_nAnimationSets = 0;
-	CAnimationSet					**m_pAnimationSets = NULL;
+	CAnimationSet** m_pAnimationSets = NULL;
 
-	int								m_nAnimatedBoneFrames = 0; 
-	CGameObject						**m_ppAnimatedBoneFrameCaches = NULL; //[m_nAnimatedBoneFrames]
+	int								m_nAnimatedBoneFrames = 0;
+	CGameObject** m_ppAnimatedBoneFrameCaches = NULL; //[m_nAnimatedBoneFrames]
 };
 
 class CAnimationTrack
@@ -305,9 +305,9 @@ public:
 	~CAnimationTrack();
 
 public:
-    BOOL 							m_bEnable = true;
-    float 							m_fSpeed = 1.0f;
-    float 							m_fPosition = -ANIMATION_CALLBACK_EPSILON;
+	BOOL 							m_bEnable = true;
+	float 							m_fSpeed = 1.0f;
+	float 							m_fPosition = -ANIMATION_CALLBACK_EPSILON;
 	float 							m_fWeight = 1.0f;
 
 	int 							m_nAnimationSet = 0;
@@ -315,9 +315,9 @@ public:
 	int 							m_nType = ANIMATION_TYPE_LOOP; //Once, Loop, PingPong
 
 	int 							m_nCallbackKeys = 0;
-	CALLBACKKEY*					m_pCallbackKeys = NULL;
+	CALLBACKKEY* m_pCallbackKeys = NULL;
 
-	CAnimationCallbackHandler*		m_pAnimationCallbackHandler = NULL;
+	CAnimationCallbackHandler* m_pAnimationCallbackHandler = NULL;
 
 public:
 	void SetAnimationSet(int nAnimationSet) { m_nAnimationSet = nAnimationSet; }
@@ -328,6 +328,7 @@ public:
 
 	void SetPosition(float fPosition) { m_fPosition = fPosition; }
 	float UpdatePosition(float fTrackPosition, float fTrackElapsedTime, float fAnimationLength);
+	bool m_bAnimationEnd = false;
 
 	void SetCallbackKeys(int nCallbackKeys);
 	void SetCallbackKey(int nKeyIndex, float fTime, void* pData);
@@ -342,39 +343,39 @@ public:
 	CLoadedModelInfo() { }
 	~CLoadedModelInfo();
 
-    CGameObject						*m_pModelRootObject = NULL;
+	CGameObject* m_pModelRootObject = NULL;
 
 	int 							m_nSkinnedMeshes = 0;
-	CSkinnedMesh					**m_ppSkinnedMeshes = NULL; //[SkinnedMeshes], Skinned Mesh Cache
+	CSkinnedMesh** m_ppSkinnedMeshes = NULL; //[SkinnedMeshes], Skinned Mesh Cache
 
-	CAnimationSets					*m_pAnimationSets = NULL;
+	CAnimationSets* m_pAnimationSets = NULL;
 
 public:
 	void PrepareSkinning();
 };
 
-class CAnimationController 
+class CAnimationController
 {
 public:
-	CAnimationController(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, int nAnimationTracks, CLoadedModelInfo *pModel);
+	CAnimationController(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int nAnimationTracks, CLoadedModelInfo* pModel);
 	~CAnimationController();
 
 public:
-    float 							m_fTime = 0.0f;
+	float 							m_fTime = 0.0f;
 
-    int 							m_nAnimationTracks = 0;
-    CAnimationTrack 				*m_pAnimationTracks = NULL;
+	int 							m_nAnimationTracks = 0;
+	CAnimationTrack* m_pAnimationTracks = NULL;
 
-	CAnimationSets					*m_pAnimationSets = NULL;
+	CAnimationSets* m_pAnimationSets = NULL;
 
 	int 							m_nSkinnedMeshes = 0;
-	CSkinnedMesh					**m_ppSkinnedMeshes = NULL; //[SkinnedMeshes], Skinned Mesh Cache
+	CSkinnedMesh** m_ppSkinnedMeshes = NULL; //[SkinnedMeshes], Skinned Mesh Cache
 
-	ID3D12Resource					**m_ppd3dcbSkinningBoneTransforms = NULL; //[SkinnedMeshes]
-	XMFLOAT4X4						**m_ppcbxmf4x4MappedSkinningBoneTransforms = NULL; //[SkinnedMeshes]
+	ID3D12Resource** m_ppd3dcbSkinningBoneTransforms = NULL; //[SkinnedMeshes]
+	XMFLOAT4X4** m_ppcbxmf4x4MappedSkinningBoneTransforms = NULL; //[SkinnedMeshes]
 
 public:
-	void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
+	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet);
 
@@ -384,16 +385,16 @@ public:
 	void SetTrackWeight(int nAnimationTrack, float fWeight);
 
 	void SetCallbackKeys(int nAnimationTrack, int nCallbackKeys);
-	void SetCallbackKey(int nAnimationTrack, int nKeyIndex, float fTime, void *pData);
-	void SetAnimationCallbackHandler(int nAnimationTrack, CAnimationCallbackHandler *pCallbackHandler);
+	void SetCallbackKey(int nAnimationTrack, int nKeyIndex, float fTime, void* pData);
+	void SetAnimationCallbackHandler(int nAnimationTrack, CAnimationCallbackHandler* pCallbackHandler);
 
-	void AdvanceTime(float fElapsedTime, CGameObject *pRootGameObject);
+	void AdvanceTime(float fElapsedTime, CGameObject* pRootGameObject);
 
 public:
 	bool							m_bRootMotion = false;
-	CGameObject*					m_pModelRootObject = NULL;
+	CGameObject* m_pModelRootObject = NULL;
 
-	CGameObject*					m_pRootMotionObject = NULL;
+	CGameObject* m_pRootMotionObject = NULL;
 	XMFLOAT3						m_xmf3FirstRootMotionPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	void SetRootMotion(bool bRootMotion) { m_bRootMotion = bRootMotion; }
@@ -417,25 +418,25 @@ public:
 	CGameObject();
 	CGameObject(int nMaterials);
 	CGameObject(int nMeshes, int nMaterials);
-    virtual ~CGameObject();
+	virtual ~CGameObject();
 
 public:
 	char							m_pstrFrameName[64];
 
-	CMesh							*m_pMesh = NULL;
-	CMesh							**m_ppMeshes = NULL;
+	CMesh* m_pMesh = NULL;
+	CMesh** m_ppMeshes = NULL;
 	int m_nMeshes = NULL;
 
 	int								m_nMaterials = 0;
-	CMaterial						**m_ppMaterials = NULL;
-	CMaterial						*m_pMaterials = NULL;
+	CMaterial** m_ppMaterials = NULL;
+	CMaterial* m_pMaterials = NULL;
 
 	XMFLOAT4X4						m_xmf4x4ToParent;
 	XMFLOAT4X4						m_xmf4x4World;
 
-	CGameObject 					*m_pParent = NULL;
-	CGameObject 					*m_pChild = NULL;
-	CGameObject 					*m_pSibling = NULL;
+	CGameObject* m_pParent = NULL;
+	CGameObject* m_pChild = NULL;
+	CGameObject* m_pSibling = NULL;
 	CShader* m_pShaderInfo = NULL;
 	CTexture* m_pTextureInfo = NULL;
 
@@ -468,19 +469,19 @@ public:
 	XMFLOAT3 m_xmf3RotationAxis = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	XMFLOAT3 m_xmf3MovingDirection = XMFLOAT3(0.0f, 1.0f, 0.0f);
 
-	CAnimationController*			m_pSkinnedAnimationController = NULL;
+	CAnimationController* m_pSkinnedAnimationController = NULL;
 	CAnimationTrack* m_ppAnimationTrack = NULL;
-	virtual void SetMesh(CMesh *pMesh);
+	virtual void SetMesh(CMesh* pMesh);
 	virtual void SetMesh(int nIndex, CMesh* pMesh);
-	void SetShader(CShader *pShader);
-	void SetShader(int nMaterial, CShader *pShader);
-	virtual void SetMaterial(int nMaterial, CMaterial *pMaterial);
+	void SetShader(CShader* pShader);
+	void SetShader(int nMaterial, CShader* pShader);
+	virtual void SetMaterial(int nMaterial, CMaterial* pMaterial);
 	virtual void SetMaterial(CMaterial* pMaterial);
 
 
-	void SetChild(CGameObject *pChild, bool bReferenceUpdate=false);
+	void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
 
-	virtual void BuildMaterials(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList) { }
+	virtual void BuildMaterials(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) { }
 
 	virtual void OnPrepareAnimate() { }
 	virtual void Animate(float fTimeElapsed);
@@ -491,16 +492,16 @@ public:
 	void ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bPrerender, CShader* pShaderComponent);
 	virtual void OnLateUpdate() { }
 
-	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMFLOAT4X4 *pxmf4x4World);
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, CMaterial *pMaterial);
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMMATRIX* pxmf4x4Shadow);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World);
+	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, CMaterial* pMaterial);
+	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMMATRIX* pxmf4x4Shadow);
 
 	virtual void ReleaseUploadBuffers();
-	
+
 	void CalculateBoundingBox();
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
@@ -520,38 +521,38 @@ public:
 	void MoveForward(float fDistance = 1.0f);
 
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
-	void Rotate(XMFLOAT3 *pxmf3Axis, float fAngle);
-	void Rotate(XMFLOAT4 *pxmf4Quaternion);
+	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
+	void Rotate(XMFLOAT4* pxmf4Quaternion);
 
-	CGameObject *GetParent() { return(m_pParent); }
-	void UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent=NULL);
-	CGameObject *FindFrame(char *pstrFrameName);
+	CGameObject* GetParent() { return(m_pParent); }
+	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
+	CGameObject* FindFrame(char* pstrFrameName);
 
-	CTexture *FindReplicatedTexture(_TCHAR *pstrTextureName);
+	CTexture* FindReplicatedTexture(_TCHAR* pstrTextureName);
 
 	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0x00); }
 
 	void SetCurScene(int nCurScene) { m_nCurScene = nCurScene; }
 	int m_nCurScene = SCENE1STAGE;
 public:
-	CSkinnedMesh *FindSkinnedMesh(char *pstrSkinnedMeshName);
-	void FindAndSetSkinnedMesh(CSkinnedMesh **ppSkinnedMeshes, int *pnSkinnedMesh);
+	CSkinnedMesh* FindSkinnedMesh(char* pstrSkinnedMeshName);
+	void FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnSkinnedMesh);
 
 	void SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet);
 	void SetTrackAnimationPosition(int nAnimationTrack, float fPosition);
 
 	void SetRootMotion(bool bRootMotion) { if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->SetRootMotion(bRootMotion); }
 
-	void LoadMaterialsFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, CGameObject *pParent, FILE *pInFile, CShader *pShader);
+	void LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pParent, FILE* pInFile, CShader* pShader);
 
-	static void LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoadedModel);
-	static CGameObject *LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CGameObject *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes);
-	static CLoadedModelInfo *LoadGeometryAndAnimationFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, char *pstrFileName, CShader *pShader);
-	
+	static void LoadAnimationFromFile(FILE* pInFile, CLoadedModelInfo* pLoadedModel);
+	static CGameObject* LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CGameObject* pParent, FILE* pInFile, CShader* pShader, int* pnSkinnedMeshes);
+	static CLoadedModelInfo* LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader);
+
 	static CGameObject* LoadGeometryFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName, CShader* pShader);
 	static CGameObject* LoadGeometryHierachyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pstrFileName, CShader* pShader);
 
-	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
+	static void PrintFrameInfo(CGameObject* pGameObject, CGameObject* pParent);
 
 	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dCbvGPUDescriptorHandle;
 	void SetCbvGPUDescriptorHandle(D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle) { m_d3dCbvGPUDescriptorHandle = d3dCbvGPUDescriptorHandle; }
@@ -571,13 +572,13 @@ public:
 class CNpcHelicopterObject : public CGameObject
 {
 public:
-	CNpcHelicopterObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	CNpcHelicopterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual ~CNpcHelicopterObject();
 
 private:
-	CGameObject					*m_pMainRotorFrame = NULL;
-	CGameObject					*m_pTailRotorFrame = NULL;
-	CGameObject					*m_pTail2RotorFrame = NULL;
+	CGameObject* m_pMainRotorFrame = NULL;
+	CGameObject* m_pTailRotorFrame = NULL;
+	CGameObject* m_pTail2RotorFrame = NULL;
 public:
 	virtual void OnPrepareAnimate();
 	virtual void Animate(float fTimeElapsed);
@@ -591,23 +592,37 @@ class CNPCbulletObject;
 class CHelicopterObjects : public CGameObject
 {
 public:
-	CHelicopterObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, CGameObject* pmodel ,ID3D12RootSignature *pd3dGraphicsRootSignature);
+	CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* pmodel, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual ~CHelicopterObjects();
 
 public:
-	CGameObject					*m_pMainRotorFrame = NULL;
-	CGameObject					*m_pTailRotorFrame = NULL;
-	CGameObject					*m_pFrameFragObj1 = NULL;
-	CGameObject					*m_pFrameFragObj2 = NULL;
-	CGameObject					*m_pFrameFragObj3 = NULL;
-	CGameObject					*m_pFrameFragObj4 = NULL;
-	CGameObject					*m_pFrameFragObj5 = NULL;
-	CGameObject					*m_pFrameFragObj6 = NULL;
-	CGameObject					*m_pFrameFragObj7 = NULL;
-	CGameObject					*m_pFrameFragObj8 = NULL;
-	CGameObject					*m_pFrameFragObj9 = NULL;
-	CGameObject					*m_pFrameFragObj10 = NULL;
-	CGameObject					*m_pFrameFragObj11 = NULL;
+	CGameObject* m_pMainRotorFrame = NULL;
+	CGameObject* m_pTailRotorFrame = NULL;
+	CGameObject* m_pFrameFragObj1 = NULL;
+	CGameObject* m_pFrameFragObj2 = NULL;
+	CGameObject* m_pFrameFragObj3 = NULL;
+	CGameObject* m_pFrameFragObj4 = NULL;
+	CGameObject* m_pFrameFragObj5 = NULL;
+	CGameObject* m_pFrameFragObj6 = NULL;
+	CGameObject* m_pFrameFragObj7 = NULL;
+	CGameObject* m_pFrameFragObj8 = NULL;
+	CGameObject* m_pFrameFragObj9 = NULL;
+	CGameObject* m_pFrameFragObj10 = NULL;
+	CGameObject* m_pFrameFragObj11 = NULL;
+
+	BoundingOrientedBox ParticleFrame1;
+	BoundingOrientedBox ParticleFrame2;
+	BoundingOrientedBox ParticleFrame3;
+	BoundingOrientedBox ParticleFrame4;
+	BoundingOrientedBox ParticleFrame5;
+	BoundingOrientedBox ParticleFrame6;
+	BoundingOrientedBox ParticleFrame7;
+	BoundingOrientedBox ParticleFrame8;
+	BoundingOrientedBox ParticleFrame9;
+	BoundingOrientedBox ParticleFrame10;
+	BoundingOrientedBox ParticleFrame11;
+	BoundingOrientedBox ParticleFrame12;
+
 
 	XMFLOAT3 ParticlePosition{};
 	XMFLOAT4X4					m_pxmf4x4Transforms[EXPLOSION_HELICOPTER];
@@ -652,7 +667,7 @@ public:
 class CSoldiarNpcObjects : public CGameObject
 {
 public:
-	CSoldiarNpcObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks);
+	CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks);
 	virtual ~CSoldiarNpcObjects();
 	void MoveForward(float EleapsedTime);
 	void HittingState(float EleapsedTime);
@@ -661,7 +676,7 @@ public:
 	void ShotState(float EleapsedTime);
 	void IdleState(float EleapsedTime);
 	virtual void Animate(float fTimeElapsed);
-	
+
 
 public:
 	float m_fBulletEffectiveRange = 2000.0f;
@@ -669,7 +684,7 @@ public:
 	CNPCbulletObject* pBulletObject = NULL;
 	CNPCbulletObject* m_ppBullets[HUMANBULLETS];
 	void Firevalkan(XMFLOAT3 ToPlayerLook);
-	
+
 };
 
 

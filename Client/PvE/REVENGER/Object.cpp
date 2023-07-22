@@ -573,6 +573,7 @@ float CAnimationTrack::UpdatePosition(float fTrackPosition, float fElapsedTime, 
 			m_fPosition = fTrackPosition + fTrackElapsedTime;
 			if (m_fPosition > fAnimationLength)
 			{
+				m_bAnimationEnd = true;
 				m_fPosition = -ANIMATION_CALLBACK_EPSILON;
 				return(fAnimationLength);
 			}
@@ -1784,7 +1785,7 @@ CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 {
 
 	OnPrepareAnimate();
-	for (int i = 0; i < EXPLOSION_HELICOPTER; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomScatter());
+	//for (int i = 0; i < EXPLOSION_HELICOPTER; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomScatter());
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }
@@ -1802,6 +1803,7 @@ void CHelicopterObjects::Firevalkan(XMFLOAT3 ToPlayerLook)
 void CHelicopterObjects::OnPrepareAnimate()
 {
 	CGameObject::OnPrepareAnimate();
+
 	m_pFrameFragObj1 = FindFrame("glass");
 	m_pFrameFragObj2 = FindFrame("cleanser");
 	m_pFrameFragObj3 = FindFrame("left_tyre");
@@ -1812,8 +1814,6 @@ void CHelicopterObjects::OnPrepareAnimate()
 	m_pFrameFragObj8 = FindFrame("left_door");
 	m_pFrameFragObj9 = FindFrame("right_tyre");
 	m_pFrameFragObj10 = FindFrame("back_tyre");
-
-
 	m_pTailRotorFrame = FindFrame("rescue_2");
 	m_pMainRotorFrame = FindFrame("rescue_1");
 
@@ -1828,7 +1828,7 @@ void CHelicopterObjects::OnPrepareAnimate()
 void CHelicopterObjects::Animate(float fTimeElapsed)
 {
 	XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 7.8) * fTimeElapsed);
-	
+
 	if (m_pMainRotorFrame)
 	{
 		m_pMainRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4ToParent);
@@ -1837,7 +1837,7 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 	{
 		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
 	}
-	
+
 
 	if (m_bDyingstate == true) {
 		m_bDyingMotion = true;
@@ -1853,9 +1853,35 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 
 void CHelicopterObjects::FallDown(float fTimeElapsed)
 {
-	XMFLOAT3 gravity = XMFLOAT3(0.0, -5.8, 0);
+	XMMATRIX xmmtxRotateMid = XMMatrixRotationRollPitchYaw(
+		XMConvertToRadians(360.0f * 1.8) * fTimeElapsed,
+		XMConvertToRadians(360.0f * 1.8) * fTimeElapsed,
+		XMConvertToRadians(360.0f * 1.8) * fTimeElapsed);
+
+	XMMATRIX xmmtxRotateFast = XMMatrixRotationRollPitchYaw(
+		XMConvertToRadians(360.0f * 2.8) * fTimeElapsed,
+		XMConvertToRadians(360.0f * 2.8) * fTimeElapsed,
+		XMConvertToRadians(360.0f * 2.8) * fTimeElapsed);
+
+	XMMATRIX xmmtxRotateRow = XMMatrixRotationRollPitchYaw(
+		XMConvertToRadians(360.0f * 0.4) * fTimeElapsed,
+		XMConvertToRadians(360.0f * 0.4) * fTimeElapsed,
+		XMConvertToRadians(360.0f * 0.4) * fTimeElapsed);
+
+	m_pFrameFragObj1->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateRow, m_pFrameFragObj1->m_xmf4x4ToParent);
+	m_pFrameFragObj2->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateFast, m_pFrameFragObj2->m_xmf4x4ToParent);
+	m_pFrameFragObj3->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateFast, m_pFrameFragObj3->m_xmf4x4ToParent);
+	m_pFrameFragObj4->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateMid, m_pFrameFragObj4->m_xmf4x4ToParent);
+	m_pFrameFragObj5->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateMid, m_pFrameFragObj5->m_xmf4x4ToParent);
+	m_pFrameFragObj6->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateFast, m_pFrameFragObj6->m_xmf4x4ToParent);
+	m_pFrameFragObj7->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateRow, m_pFrameFragObj7->m_xmf4x4ToParent);
+	m_pFrameFragObj8->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateRow, m_pFrameFragObj8->m_xmf4x4ToParent);
+	m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateMid, m_pTailRotorFrame->m_xmf4x4ToParent);
+	m_pMainRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateRow, m_pMainRotorFrame->m_xmf4x4ToParent);
+
+	XMFLOAT3 gravity = XMFLOAT3(0.0, -1.8, 0);
 	m_fElapsedTimes += fTimeElapsed * 1.1f;
-	if (m_fElapsedTimes <= m_fDuration)
+	/*if (m_fElapsedTimes <= m_fDuration)
 	{
 		for (int i = 0; i < EXPLOSION_HELICOPTER; i++)
 		{
@@ -1867,54 +1893,68 @@ void CHelicopterObjects::FallDown(float fTimeElapsed)
 			m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
 
 
-			
+
 		}
 	}
 	else
 	{
 		m_fElapsedTimes = 0.0f;
-	}
+	}*/
+	float staticValue = 4.3f;
+	float randomValue = RandomValue(2.f, 8.0f);
+	XMVECTOR staticDir1 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.5, -0.25, 0.5, 0.0)));
+	XMVECTOR staticDir2 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.5, -0.25, 0.75, 0.0)));
+	XMVECTOR staticDir3 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.5, -0.25, 0.6, 0.0)));
+	XMVECTOR staticDir4 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.75, -0.25, -0.5, 0.0)));
+	XMVECTOR staticDir5 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.55, -0.25, -0.35, 0.0)));
+	XMVECTOR staticDir6 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.25, -0.25, 0.25, 0.0)));
+	XMVECTOR staticDir7 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.7, -0.25, -0.5, 0.0)));
+	for (int i = 0; i < 2; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir1);
+	for (int i = 2; i < 4; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir2);
+	for (int i = 4; i < 5; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir3);
+	for (int i = 5; i < 6; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir4);
+	for (int i = 6; i < 7; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir5);
+	for (int i = 7; i < 9; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir6);
+	for (int i = 9; i < EXPLOSION_HELICOPTER; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir7);
 
-	m_pTailRotorFrame->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[0].x * RandomValue(2.0f, 8.0f) * fTimeElapsed;	
-	m_pMainRotorFrame->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[1].x * RandomValue(2.0f, 8.0f) * fTimeElapsed;	
-	m_pFrameFragObj1->m_xmf4x4ToParent._41 +=  m_pxmf3SphereVectors[2].x *RandomValue(2.0f, 8.0f) * fTimeElapsed;	
-	m_pFrameFragObj2->m_xmf4x4ToParent._41 +=  m_pxmf3SphereVectors[3].x *RandomValue(2.0f, 8.0f) * fTimeElapsed;	
-	m_pFrameFragObj3->m_xmf4x4ToParent._41 +=  m_pxmf3SphereVectors[4].x *RandomValue(2.0f, 8.0f) * fTimeElapsed;	
-	m_pFrameFragObj4->m_xmf4x4ToParent._41 +=  m_pxmf3SphereVectors[5].x *RandomValue(2.0f, 8.0f) * fTimeElapsed;	
-	m_pFrameFragObj5->m_xmf4x4ToParent._41 +=  m_pxmf3SphereVectors[6].x *RandomValue(2.0f, 8.0f) * fTimeElapsed;	
-	m_pFrameFragObj6->m_xmf4x4ToParent._41 +=  m_pxmf3SphereVectors[7].x *RandomValue(2.0f, 8.0f) * fTimeElapsed;	
-	m_pFrameFragObj7->m_xmf4x4ToParent._41 +=  m_pxmf3SphereVectors[8].x *RandomValue(2.0f, 8.0f) * fTimeElapsed;	
-	m_pFrameFragObj8->m_xmf4x4ToParent._41 +=  m_pxmf3SphereVectors[9].x *RandomValue(2.0f, 8.0f) * fTimeElapsed;	
-	m_pFrameFragObj9->m_xmf4x4ToParent._41 +=  m_pxmf3SphereVectors[10].x *RandomValue(2.0f, 8.0f) * fTimeElapsed;	
-	m_pFrameFragObj10->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[11].x * RandomValue(2.0f, 8.0f) * fTimeElapsed; 
+	m_pTailRotorFrame->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[0].x * staticValue * fTimeElapsed;
+	m_pMainRotorFrame->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[1].x * staticValue * fTimeElapsed;
+	m_pFrameFragObj1->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[2].x * staticValue * fTimeElapsed;
+	m_pFrameFragObj2->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[3].x * staticValue * fTimeElapsed;
+	m_pFrameFragObj3->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[4].x * staticValue * fTimeElapsed;
+	m_pFrameFragObj4->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[5].x * staticValue * fTimeElapsed;
+	m_pFrameFragObj5->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[6].x * staticValue * fTimeElapsed;
+	m_pFrameFragObj6->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[7].x * staticValue * fTimeElapsed;
+	m_pFrameFragObj7->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[8].x * staticValue * fTimeElapsed;
+	m_pFrameFragObj8->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[9].x * staticValue * fTimeElapsed;
+	m_pFrameFragObj9->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[10].x * staticValue * fTimeElapsed;
+	m_pFrameFragObj10->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[11].x * staticValue * fTimeElapsed;
 
-	m_pTailRotorFrame->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[0].y * RandomValue(2.0f, 8.0f) * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
-	m_pMainRotorFrame->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[1].y * RandomValue(2.0f, 8.0f) * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
-	m_pFrameFragObj1->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[2].y * RandomValue(2.0f, 8.0f) * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
-	m_pFrameFragObj2->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[3].y * RandomValue(2.0f, 8.0f) * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;		
-	m_pFrameFragObj3->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[4].y * RandomValue(2.0f, 8.0f) * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;		
-	m_pFrameFragObj4->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[5].y * RandomValue(2.0f, 8.0f) * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;		
-	m_pFrameFragObj5->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[6].y * RandomValue(2.0f, 8.0f) * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;		//
-	m_pFrameFragObj6->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[7].y * RandomValue(2.0f, 8.0f) * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;		
-	m_pFrameFragObj7->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[8].y * RandomValue(2.0f, 8.0f) * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;		
-	m_pFrameFragObj8->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[9].y * RandomValue(2.0f, 8.0f) * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;		
-	m_pFrameFragObj9->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[10].y * RandomValue(2.0f, 8.0f) * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
-	m_pFrameFragObj10->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[11].y * RandomValue(2.0f, 8.0f) * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+	m_pTailRotorFrame->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[0].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+	m_pMainRotorFrame->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[1].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+	m_pFrameFragObj1->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[2].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+	m_pFrameFragObj2->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[3].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+	m_pFrameFragObj3->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[4].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+	m_pFrameFragObj4->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[5].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+	m_pFrameFragObj5->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[6].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;		//
+	m_pFrameFragObj6->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[7].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+	m_pFrameFragObj7->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[8].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+	m_pFrameFragObj8->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[9].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+	m_pFrameFragObj9->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[10].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+	m_pFrameFragObj10->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[11].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
 
-	m_pTailRotorFrame->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[0].z * RandomValue(2.0f, 8.0f) * fTimeElapsed;
-	m_pMainRotorFrame->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[1].z * RandomValue(2.0f, 8.0f) * fTimeElapsed;
-	m_pFrameFragObj1->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[2].z * RandomValue(2.0f, 8.0f) * fTimeElapsed;
-	m_pFrameFragObj2->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[3].z * RandomValue(2.0f, 8.0f) * fTimeElapsed;
-	m_pFrameFragObj3->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[4].z * RandomValue(2.0f, 8.0f) * fTimeElapsed;
-	m_pFrameFragObj4->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[5].z * RandomValue(2.0f, 8.0f) * fTimeElapsed;
-	m_pFrameFragObj5->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[6].z * RandomValue(2.0f, 8.0f) * fTimeElapsed;
-	m_pFrameFragObj6->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[7].z * RandomValue(2.0f, 8.0f) * fTimeElapsed;
-	m_pFrameFragObj7->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[8].z * RandomValue(2.0f, 8.0f) * fTimeElapsed;
-	m_pFrameFragObj8->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[9].z * RandomValue(2.0f, 8.0f) * fTimeElapsed;
-	m_pFrameFragObj9->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[10].z * RandomValue(2.0f, 9.0f) * fTimeElapsed;
-	m_pFrameFragObj10->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[11].z * RandomValue(2.f, 8.0f) * fTimeElapsed;
-
-	m_pFrameFragObj5->Rotate(1,0,1);
+	m_pTailRotorFrame->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[0].z * staticValue * fTimeElapsed;
+	m_pMainRotorFrame->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[1].z * staticValue * fTimeElapsed;
+	m_pFrameFragObj1->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[2].z * staticValue * fTimeElapsed;
+	m_pFrameFragObj2->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[3].z * staticValue * fTimeElapsed;
+	m_pFrameFragObj3->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[4].z * staticValue * fTimeElapsed;
+	m_pFrameFragObj4->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[5].z * staticValue * fTimeElapsed;
+	m_pFrameFragObj5->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[6].z * staticValue * fTimeElapsed;
+	m_pFrameFragObj6->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[7].z * staticValue * fTimeElapsed;
+	m_pFrameFragObj7->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[8].z * staticValue * fTimeElapsed;
+	m_pFrameFragObj8->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[9].z * staticValue * fTimeElapsed;
+	m_pFrameFragObj9->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[10].z * staticValue * fTimeElapsed;
+	m_pFrameFragObj10->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[11].z * staticValue * fTimeElapsed;
 
 	CGameObject::Animate(fTimeElapsed);
 }

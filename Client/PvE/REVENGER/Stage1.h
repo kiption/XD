@@ -90,8 +90,12 @@ public:
 	LIGHTS* m_pcbMappedLights = NULL;
 
 	XMFLOAT3 particlepos;
-
+	BoundingOrientedBox P1{}; BoundingOrientedBox P2{}; BoundingOrientedBox P3{}; BoundingOrientedBox P4{}; BoundingOrientedBox P5{}; BoundingOrientedBox P6{};
+	BoundingOrientedBox P7{}; BoundingOrientedBox P8{}; BoundingOrientedBox P9{}; BoundingOrientedBox P10{}; BoundingOrientedBox P11{}; BoundingOrientedBox P12{};
 	void Firevalkan(CGameObject* Objects,XMFLOAT3 ToPlayerLook);
+	void ParticleCollisionResult();
+	bool m_bHeliParticleCollisionCheck = false;
+	bool m_bHumanParticleCollisionCheck = false;
 	void OtherPlayerFirevalkan(CGameObject* Objects,XMFLOAT3 ToPlayerLook);
 	void PlayerFirevalkan(CCamera* pCamera,XMFLOAT3 Look);
 	void Reflectcartridgecase(CGameObject* Objects);

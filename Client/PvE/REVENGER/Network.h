@@ -787,12 +787,12 @@ void processPacket(char* ptr)
 				if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
 				{
 					gamesound.PlayShotSound();
-					gamesound.shotChannel->setVolume(0.6f);
+					gamesound.shotChannel->setVolume(0.4f);
 				}
 				if (players_info[recv_packet->id].m_role == ROLE_HELI)
 				{
 					gamesound.PlayHeliShotSound();
-					gamesound.HelishotChannel->setVolume(0.6f);
+					gamesound.HelishotChannel->setVolume(0.5f);
 				}
 			}
 

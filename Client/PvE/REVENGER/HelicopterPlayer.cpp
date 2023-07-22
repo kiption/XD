@@ -59,10 +59,10 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
 	case CLOSEUP_PERSON_CAMERA:
-		SetFriction(0.0f);
+		SetFriction(600.0f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(25.0f);
-		SetMaxVelocityY(2.0f);
+		SetMaxVelocityXZ(40.0f);
+		SetMaxVelocityY(4.0f);
 		m_pCamera = OnChangeCamera(CLOSEUP_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
 		m_pCamera->SetOffset(XMFLOAT3(0.5f, 7.8, 8.5f));

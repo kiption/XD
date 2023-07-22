@@ -48,7 +48,7 @@ GameSound::GameSound()
 	RotorChannel->setVolume(0.2f);
 
 	result = soundSystem->playSound(HartbeatSound, 0, true, &HartbeatChannel);
-	HartbeatChannel->setVolume(0.5f);
+	HartbeatChannel->setVolume(1.5f);
 
 	result = soundSystem->playSound(BackGroundSound, 0, true, &BackGroundChannel);
 	BackGroundChannel->setVolume(0.05f);
@@ -56,7 +56,7 @@ GameSound::GameSound()
 	result = soundSystem->playSound(NpcshotSound, 0, true, &NpcshootChannel);
 	NpcshootChannel->setVolume(0.25f);
 
-	shotChannel->setVolume(0.3f);
+	shotChannel->setVolume(0.1f);
 	HelishotChannel->setVolume(0.3f);
 	reloadChannel->setVolume(0.5f);
 }

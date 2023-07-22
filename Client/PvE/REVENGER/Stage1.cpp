@@ -893,6 +893,58 @@ void Stage1::Firevalkan(CGameObject* Objects, XMFLOAT3 ToPlayerLook)
 
 	}
 }
+void Stage1::ParticleCollisionResult()
+{
+	
+	BoundingOrientedBox HeliPlayeroobb = BoundingOrientedBox(((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->GetPosition(),
+		XMFLOAT3(8.0, 8.0, 10.0), XMFLOAT4(0, 0, 0, 1));
+
+	BoundingOrientedBox HumanPlayeroobb = BoundingOrientedBox(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition(),
+		XMFLOAT3(2.0, 4.0, 2.0), XMFLOAT4(0, 0, 0, 1));
+
+	XMFLOAT4 Quaternion = XMFLOAT4(0, 0, 0, 1);
+	for (int i = 12; i < 17; i++)
+	{
+		P1 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj1->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P2 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj2->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P3 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj3->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P4 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj4->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P5 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj5->GetPosition(), XMFLOAT3(5.0, 5.0, 5.0), Quaternion);
+		P6 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj6->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P7 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj7->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P8 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj8->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P9 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj9->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P10 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pTailRotorFrame->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P11 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pMainRotorFrame->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+
+		if (HeliPlayeroobb.Intersects(P1)) cout << "Heli Collision P1!" << endl; m_bHeliParticleCollisionCheck = true;	
+		if (HeliPlayeroobb.Intersects(P2)) cout << "Heli Collision P2!" << endl; m_bHeliParticleCollisionCheck = true;	
+		if (HeliPlayeroobb.Intersects(P3)) cout << "Heli Collision P3!" << endl; m_bHeliParticleCollisionCheck = true;	
+		if (HeliPlayeroobb.Intersects(P4)) cout << "Heli Collision P4!" << endl; m_bHeliParticleCollisionCheck = true;	
+		if (HeliPlayeroobb.Intersects(P5)) cout << "Heli Collision P5!" << endl; m_bHeliParticleCollisionCheck = true;	
+		if (HeliPlayeroobb.Intersects(P6)) cout << "Heli Collision P6!" << endl; m_bHeliParticleCollisionCheck = true;	
+		if (HeliPlayeroobb.Intersects(P7)) cout << "Heli Collision P7!" << endl; m_bHeliParticleCollisionCheck = true;	
+		if (HeliPlayeroobb.Intersects(P8)) cout << "Heli Collision P8!" << endl; m_bHeliParticleCollisionCheck = true;	
+		if (HeliPlayeroobb.Intersects(P9)) cout << "Heli Collision P9!" << endl; m_bHeliParticleCollisionCheck = true;	
+		if (HeliPlayeroobb.Intersects(P10)) cout << "Heli Collision P10!" << endl; m_bHeliParticleCollisionCheck = true;
+		if (HeliPlayeroobb.Intersects(P11)) cout << "Heli Collision P11!" << endl; m_bHeliParticleCollisionCheck = true;
+
+		if (HumanPlayeroobb.Intersects(P1)) cout << "Human Collision P1!" << endl; m_bHumanParticleCollisionCheck = true;
+		if (HumanPlayeroobb.Intersects(P2)) cout << "Human Collision P2!" << endl; m_bHumanParticleCollisionCheck = true;
+		if (HumanPlayeroobb.Intersects(P3)) cout << "Human Collision P3!" << endl; m_bHumanParticleCollisionCheck = true;
+		if (HumanPlayeroobb.Intersects(P4)) cout << "Human Collision P4!" << endl; m_bHumanParticleCollisionCheck = true;
+		if (HumanPlayeroobb.Intersects(P5)) cout << "Human Collision P5!" << endl; m_bHumanParticleCollisionCheck = true;
+		if (HumanPlayeroobb.Intersects(P6)) cout << "Human Collision P6!" << endl; m_bHumanParticleCollisionCheck = true;
+		if (HumanPlayeroobb.Intersects(P7)) cout << "Human Collision P7!" << endl; m_bHumanParticleCollisionCheck = true;
+		if (HumanPlayeroobb.Intersects(P8)) cout << "Human Collision P8!" << endl; m_bHumanParticleCollisionCheck = true;
+		if (HumanPlayeroobb.Intersects(P9)) cout << "Human Collision P9!" << endl; m_bHumanParticleCollisionCheck = true;
+		if (HumanPlayeroobb.Intersects(P10)) cout << "Human Collision P10!" << endl; m_bHumanParticleCollisionCheck = true;
+		if (HumanPlayeroobb.Intersects(P11)) cout << "Human Collision P11!" << endl; m_bHumanParticleCollisionCheck = true;
+	}
+
+
+
+}
 void Stage1::OtherPlayerFirevalkan(CGameObject* Objects, XMFLOAT3 ToPlayerLook)
 {
 	CValkanObject* pBulletObject = NULL;
@@ -1060,13 +1112,6 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	((HeliHittingMarkBillboard*)m_pBillboardShader[5])->m_bActive = true;
 	((HeliHittingMarkBillboard*)m_pBillboardShader[5])->ParticlePosition = XMFLOAT3(120.0, 6.1, 800.0);
 
-
-
-
-	CBulletObject** ppBullets = ((CHumanPlayer*)m_pPlayer)->m_ppBullets;
-	m_ppShaders[0]->m_ppObjects[42]->m_xoobb = BoundingOrientedBox(m_ppShaders[0]->m_ppObjects[42]->GetPosition(), XMFLOAT3(5.0, 9.0, 5.0), XMFLOAT4(0, 0, 0, 1));
-
-
 	for (int i = 0; i < HELIBULLETS; i++)
 	{
 		if (m_ppBullets[i]->m_bActive)
@@ -1113,6 +1158,19 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 			m_ppShaders[0]->m_ppObjects[i]->SetPosition(xmf3PlayerPosition);
 		}
 	}
+
+
+	if (m_bHeliParticleCollisionCheck == true)
+	{
+		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_xmf4x4ToParent._41 -= 4.0f;
+		m_bHumanParticleCollisionCheck = false;
+	}
+	if (m_bHeliParticleCollisionCheck == true)
+	{
+		
+		m_bHeliParticleCollisionCheck = false;
+	}
+	ParticleCollisionResult();
 	ParticleAnimation();
 }
 
