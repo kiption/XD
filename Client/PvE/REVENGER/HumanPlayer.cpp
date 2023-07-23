@@ -231,6 +231,7 @@ void CHumanPlayer::ReloadState()
 		m_pSkinnedAnimationController->SetTrackEnable(4, false);
 		m_pSkinnedAnimationController->SetTrackEnable(5, true);
 		m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
+		m_pSkinnedAnimationController->SetTrackSpeed(5,1.8f);
 		m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
 	}
 }
