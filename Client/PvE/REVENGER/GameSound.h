@@ -50,6 +50,12 @@ public:
 	FMOD::Sound* HeliShotDownSounds;
 	FMOD::Channel* HeliShotDownChannel;
 
+	FMOD::Sound* EmptyShotSounds;
+	FMOD::Channel* EmptyShotChannel;
+
+	FMOD::Sound* FallDownEmptyBulletSounds;
+	FMOD::Channel* FallDownEmptyBulletChannel;
+	
 	FMOD_RESULT  result;
 	void* extradriverdata = 0;
 	
@@ -62,6 +68,8 @@ public:
 	void SpeakMusic();
 	void PlayHeliWarnningSound();
 	void PauseHeliWarnningSound();
+	void PlayFallDownEmptyBullet();
+	void PlayEmptyShot();
 	void PlayShotSound();
 	void PlayHeliShotSound();
 	void backGroundMusic();

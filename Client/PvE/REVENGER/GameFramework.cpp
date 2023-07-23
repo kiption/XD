@@ -846,6 +846,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				if (!player_dead && ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bMoveUpdate == false && m_ingame_role == R_RIFLE)
 				{
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bReloadState = true;
+					((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReloadState();
 					q_keyboardInput.push(SEND_KEY_R);
 				}
@@ -1035,7 +1036,7 @@ void CGameFramework::ProcessInput()
 		if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
 			if (m_nMode == SCENE1STAGE && m_ingame_role == R_RIFLE)
 			{
-				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.01)
+				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.01 && m_currbullet!=0)
 				{
 					ShotKey = true;
 					((Stage1*)m_pScene)->Reflectcartridgecase(NULL);
@@ -1047,10 +1048,9 @@ void CGameFramework::ProcessInput()
 			}
 			if (m_nMode == SCENE1STAGE && m_ingame_role == R_HELI)
 			{
-				if (((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.004)
+				if (((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.004 && m_currbullet != 0)
 				{
 					ShotKey = true;
-
 					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };
 					q_mouseInput.push(lclick);
 
@@ -1219,6 +1219,7 @@ void CGameFramework::AnimateObjects()
 
 		}
 		ShotDelay();
+		if (m_currbullet <= 0)((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
 
 	}
 }
@@ -1771,20 +1772,23 @@ void CGameFramework::FrameAdvance()
 		if (m_ingame_role == R_HELI)
 		{
 			//if(/*헬기 30퍼 일때 */)
-			// Splatter 
-			if (m_HeliPlayerWarnningUISwitch && g_WarnningSwitchtime > 3.0f) {
-				D2D_POINT_2F D2_HeliWarrningBannerUI = { (FRAME_BUFFER_WIDTH - 2500.0) / 2, (FRAME_BUFFER_HEIGHT - 1559.0) / 2 };
-				D2D_RECT_F D2_HeliWarrningRECT = { 0.0f, 0.0f, 2500.0, 1559.0 };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[72], &D2_HeliWarrningBannerUI, &D2_HeliWarrningRECT);
-			
-				D2D_POINT_2F D2_HeliWarrningIconUI = { 20.0, 150.0 };
-				D2D_RECT_F D2_HeliWarrningIconRECT = { 0.0f, 0.0f, 200.0, 57.0 };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[73], &D2_HeliWarrningIconUI, &D2_HeliWarrningIconRECT);
-			}
-			g_WarnningSwitchtime++;
-			if (g_WarnningSwitchtime > 12.0f)
-			{
-				g_WarnningSwitchtime = 0.0f;
+			// Warrning
+			if (m_HeliPlayerWarnningUISwitch) {
+				if (g_WarnningSwitchtime > 3.0f)
+				{
+					D2D_POINT_2F D2_HeliWarrningBannerUI = { (FRAME_BUFFER_WIDTH - 2500.0) / 2, (FRAME_BUFFER_HEIGHT - 1559.0) / 2 };
+					D2D_RECT_F D2_HeliWarrningRECT = { 0.0f, 0.0f, 2500.0, 1559.0 };
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[72], &D2_HeliWarrningBannerUI, &D2_HeliWarrningRECT);
+
+					D2D_POINT_2F D2_HeliWarrningIconUI = { 20.0, 150.0 };
+					D2D_RECT_F D2_HeliWarrningIconRECT = { 0.0f, 0.0f, 200.0, 57.0 };
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[73], &D2_HeliWarrningIconUI, &D2_HeliWarrningIconRECT);
+				}
+				g_WarnningSwitchtime++;
+				if (g_WarnningSwitchtime > 12.0f)
+				{
+					g_WarnningSwitchtime = 0.0f;
+				}
 			}
 		}
 		// DyingBanner
