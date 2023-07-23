@@ -1720,7 +1720,7 @@ void CGameFramework::FrameAdvance()
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[21], &D2_Team1UI, &D2_Team1UIRect);
 
 			D2D_POINT_2F D2_Team1UIHP = { FRAME_BUFFER_WIDTH / 128 + 14.0f, D2_Team1UI.y + 44.0f };
-			D2D_RECT_F D2_Team1UIHPRect = { 0.0f, 0.0f, 295.0f, 11.0f };
+			D2D_RECT_F D2_Team1UIHPRect = { 0.0f, 0.0f, m_otherHP[0] * 2.95f, 11.0f };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[23], &D2_Team1UIHP, &D2_Team1UIHPRect);
 		}
 
@@ -1730,7 +1730,7 @@ void CGameFramework::FrameAdvance()
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[22], &D2_Team2UI, &D2_Team2UIRect);
 
 			D2D_POINT_2F D2_Team2UIHP = { FRAME_BUFFER_WIDTH / 128 + 14.0f, D2_Team2UI.y + 44.0f };
-			D2D_RECT_F D2_Team2UIHPRect = { 0.0f, 0.0f, 295.0f, 11.0f };
+			D2D_RECT_F D2_Team2UIHPRect = { 0.0f, 0.0f, m_otherHP[1] * 2.95f, 11.0f };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[24], &D2_Team2UIHP, &D2_Team2UIHPRect);
 		}
 
@@ -1922,12 +1922,12 @@ void CGameFramework::FrameAdvance()
 
 		if (m_CurrentPlayerNum > 1) {
 			D2D1_RECT_F Friend1Text = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 1, (FRAME_BUFFER_HEIGHT / 64) * 42, (FRAME_BUFFER_WIDTH / 64) * 7, (FRAME_BUFFER_HEIGHT / 64) * 42);
-			m_pd2dDeviceContext->DrawTextW(L"Other 1", (UINT32)wcslen(L"Other 1"), m_pdwFont[0], &Friend1Text, m_pd2dbrText[0]);
+			m_pd2dDeviceContext->DrawTextW(m_OtherName[0], (UINT32)wcslen(m_OtherName[0]), m_pdwFont[0], &Friend1Text, m_pd2dbrText[0]);
 		}
 
 		if (m_CurrentPlayerNum > 2) {
 			D2D1_RECT_F Friend2Text = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 1, (FRAME_BUFFER_HEIGHT / 128) * 93, (FRAME_BUFFER_WIDTH / 64) * 7, (FRAME_BUFFER_HEIGHT / 128) * 93);
-			m_pd2dDeviceContext->DrawTextW(L"Other 2", (UINT32)wcslen(L"Other 2"), m_pdwFont[0], &Friend2Text, m_pd2dbrText[0]);
+			m_pd2dDeviceContext->DrawTextW(m_OtherName[1], (UINT32)wcslen(m_OtherName[1]), m_pdwFont[0], &Friend2Text, m_pd2dbrText[0]);
 		}
 	}
 

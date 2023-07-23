@@ -132,7 +132,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 			}
 		}
 		in.close();
-	}	
+	}
 
 	// 서버 초기설정
 	wcout.imbue(locale("korean"));
@@ -203,10 +203,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 					size_t idLength = wcslen(gGameFramework.m_LoginID);
 					size_t pwLength = wcslen(gGameFramework.m_LoginPW);
-					
+
 					wcstombs_s(nullptr, id, sizeof(id), gGameFramework.m_LoginID, idLength);
 					wcstombs_s(nullptr, pw, sizeof(pw), gGameFramework.m_LoginPW, pwLength);
-					
+
 					gGameFramework.m_bLoginInfoSend = false;
 				}
 
@@ -471,7 +471,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				for (int i = 0; i < MAX_USER; ++i) {
 					if (i == my_id) continue;
 					if (players_info[i].m_state == OBJ_ST_RUNNING) {
-				
+
 						if (players_info[i].m_role == ROLE_RIFLE)
 						{
 							// 인덱스 조정
@@ -525,7 +525,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						npcs_info[i].m_attack_on = false;
 						gGameFramework.NpcNoneUnderAttack();
 					}
-					
+
 
 				}
 
@@ -581,7 +581,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 
 					if (i == my_id) continue;
-					if (players_info[i].m_new_state_update && players_info[i].m_role==ROLE_RIFLE) {
+					if (players_info[i].m_new_state_update && players_info[i].m_role == ROLE_RIFLE) {
 						switch (players_info[i].m_ingame_state) {
 						case PL_ST_IDLE:
 							gGameFramework.otherPlayerReturnToIdle(i);
@@ -625,7 +625,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							}
 							break;
 						case PL_ST_IDLE:
-						
+
 							break;
 						case PL_ST_MOVE_BACK: // 뒤로 이동
 						case PL_ST_MOVE_SIDE: // 옆으로 이동
@@ -1180,24 +1180,55 @@ void uiThreadFunc() {
 
 			// 8. 피격 효과 UI
 			if (players_info[my_id].m_damaged_effect_on) {
-				
+
 				gGameFramework.m_BloodSplatterOn = true;
 				players_info[my_id].m_damaged_effect_on = false;
-	
+
 			}
 
 			// 9. HP 적을때 UI
 			if (players_info[my_id].m_near_death_hp) {
 				if (players_info[my_id].m_role == ROLE_RIFLE) {
-					
+
 				}
 				else if (players_info[my_id].m_role == ROLE_HELI) {
 					gGameFramework.m_HeliPlayerWarnningUISwitch = true;
-				
+
 				}
 			}
-			
-			
+			else {
+				if (players_info[my_id].m_role == ROLE_RIFLE) {
+
+				}
+				else if (players_info[my_id].m_role == ROLE_HELI) {
+					if (gGameFramework.m_HeliPlayerWarnningUISwitch)
+						gGameFramework.m_HeliPlayerWarnningUISwitch = false;
+
+				}
+			}
+
+			// 10. HP, 이름 인게임 동기화
+			bool idcheck = false;
+			for (int i{}; i < gGameFramework.m_CurrentPlayerNum; ++i) {
+				if (i == my_id) {
+					idcheck = true;
+					continue;
+				}
+				if (idcheck) {
+					gGameFramework.m_otherHP[i - 1] = players_info[i].m_hp;
+					
+					wchar_t* converttext = ConvertToWideChar(players_info[i].m_name);
+
+					wcscpy_s(gGameFramework.m_OtherName[i - 1], converttext);
+				}
+				else {
+					gGameFramework.m_otherHP[i] = players_info[i].m_hp;
+					wchar_t* converttext = ConvertToWideChar(players_info[i].m_name);
+
+					wcscpy_s(gGameFramework.m_OtherName[i], converttext);
+				}
+			}
+
 		}
 
 		this_thread::yield();
