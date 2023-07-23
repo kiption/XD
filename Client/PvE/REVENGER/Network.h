@@ -764,14 +764,14 @@ void processPacket(char* ptr)
 			otherplayer_attack_dir = { recv_packet->atklook_x, recv_packet->atklook_y, recv_packet->atklook_z };
 
 			// 사운드
-			if (players_info[recv_packet->id].m_role == ROLE_HELI)
+		/*	if (players_info[recv_packet->id].m_role == ROLE_HELI)
 			{
 				gamesound.PlayHeliShotSound();
 			}
 			if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
 			{
 				gamesound.PlayShotSound();
-			}
+			}*/
 			if (atk_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 총성
 				//cout << "작은 총성" << endl;
 				if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
@@ -803,7 +803,7 @@ void processPacket(char* ptr)
 				if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
 				{
 					gamesound.PlayShotSound();
-					gamesound.shotChannel->setVolume(0.4f);
+					gamesound.shotChannel->setVolume(0.3f);
 				}
 				if (players_info[recv_packet->id].m_role == ROLE_HELI)
 				{
@@ -828,17 +828,17 @@ void processPacket(char* ptr)
 
 			if (atk_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 총성
 				gamesound.PlayNpcShotSound();
-				gamesound.NpcshootChannel->setVolume(0.25f);
+				gamesound.NpcshootChannel->setVolume(0.05f);
 				//cout << "작은 총성" << endl;
 			}
 			else if (atk_sound_volume == VOL_MID) {		// 적당한 거리에 있어서 적당하게 들리는 총성
 				gamesound.PlayNpcShotSound();
-				gamesound.NpcshootChannel->setVolume(0.65f);
+				gamesound.NpcshootChannel->setVolume(0.25f);
 				//cout << "적당한 총성" << endl;
 			}
 			else if (atk_sound_volume == VOL_HIGH) {	// 가까이에 있어서 크게 들리는 총성
 				gamesound.PlayNpcShotSound();
-				gamesound.NpcshootChannel->setVolume(1.25f);
+				gamesound.NpcshootChannel->setVolume(0.4f);
 				//cout << "큰 총성" << endl;
 			}
 			/*else

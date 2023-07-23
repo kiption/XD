@@ -9,7 +9,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
-CPlayer::CPlayer():CGameObject(6)
+CPlayer::CPlayer() :CGameObject(6)
 {
 	m_pCamera = NULL;
 
@@ -81,7 +81,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, XMF
 //	else m_xmf3Position = xmf3Position;
 //}
 
-void CPlayer:: Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
+void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
 	if (bUpdateVelocity)
 	{
@@ -103,7 +103,7 @@ void CPlayer::Rotate(float x, float y, float z)
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	if ((nCurrentCameraMode == FIRST_PERSON_CAMERA) || (nCurrentCameraMode == THIRD_PERSON_CAMERA))
 	{
-		if (x!=0.0f)
+		if (x != 0.0f)
 		{
 			m_fPitch += x;
 			if (m_fPitch > +10.0f)m_fPitch -= 11.0f;// { x -= (m_fPitch - 10.0f); m_fPitch = 0.0f; }
@@ -140,21 +140,29 @@ void CPlayer::Rotate(float x, float y, float z)
 			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
 		}
-	
+
 
 	}
 	else if (nCurrentCameraMode == CLOSEUP_PERSON_CAMERA)
 	{
 
-		if (x!=0.0f)
+		if (x != 0.0f)
 		{
 			m_fPitch += x;
-			if (m_fPitch > +7.0f) { x -= (m_fPitch - 7.0f); m_fPitch = +7.0f; }
-			if (m_fPitch < -12.0f) { x -= (m_fPitch + 12.0f); m_fPitch = -12.0f; }
+			if (HeliPitch == true && SoldiarPitch==false)
+			{
+				if (m_fPitch > +20.0f) { x -= (m_fPitch - 20.0f); m_fPitch = +20.0f; }
+				if (m_fPitch < -15.0f) { x -= (m_fPitch + 15.0f); m_fPitch = -15.0f; }
+			}
+			if (SoldiarPitch == true && HeliPitch==false)
+			{
+				if (m_fPitch > +6.0) { x -= (m_fPitch - 6.0); m_fPitch = +6.0; }
+				if (m_fPitch < -12.0f) { x -= (m_fPitch + 12.0f); m_fPitch = -12.0f; }
+			}
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(x));
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 			m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
-			
+
 		}
 		if (y != 0.0f)
 		{
@@ -205,12 +213,12 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
 
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
-	if (nCurrentCameraMode == FIRST_PERSON_CAMERA ) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
-	if (nCurrentCameraMode == THIRD_PERSON_CAMERA ) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
+	if (nCurrentCameraMode == FIRST_PERSON_CAMERA) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
+	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
 	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA || nCurrentCameraMode == CLOSEUP_PERSON_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
 
-	
+
 	m_pCamera->RegenerateViewMatrix();
 
 	fLength = Vector3::Length(m_xmf3Velocity);
@@ -279,7 +287,7 @@ void CPlayer::OnPrepareRender()
 
 void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, CCamera* pCamera)
 {
-	CGameObject::Render(pd3dCommandList, pCamera,false);
+	CGameObject::Render(pd3dCommandList, pCamera, false);
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 	if (nCameraMode == THIRD_PERSON_CAMERA || nCameraMode == CLOSEUP_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
 }

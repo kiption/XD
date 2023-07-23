@@ -1941,6 +1941,9 @@ void CGameFramework::ChangeScene(DWORD nMode)
 			{
 				m_pScene->m_pPlayer = ((CHumanPlayer*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[1]);
 				m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetCamera();
+				((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->HeliPitch = false;
+				((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->SoldiarPitch = true;
+
 			}
 			//-----HeliPlayer
 			if (m_ingame_role == R_HELI)
@@ -1948,6 +1951,8 @@ void CGameFramework::ChangeScene(DWORD nMode)
 				m_pScene->m_pPlayer = ((HeliPlayer*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[43]);
 				m_pCamera = ((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetCamera();
 				gamesound.HelicopterLoop();
+				((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->HeliPitch = true;
+				((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->SoldiarPitch = false;
 			}
 			else {
 				m_pScene->m_pPlayer = ((CHumanPlayer*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[1]);
@@ -3300,6 +3305,7 @@ void CGameFramework::CollisionNPC_by_PLAYER(XMFLOAT3 npcpos, XMFLOAT3 npcextents
 	}
 
 }
+
 void CGameFramework::CollisionNPC_by_MAP(XMFLOAT3 npcpos, XMFLOAT3 npcextents, XMFLOAT3 mapcenter, XMFLOAT3 mapextents)
 {
 	m_npcoobb = BoundingOrientedBox(npcpos, npcextents, XMFLOAT4(0, 0, 0, 1));

@@ -163,13 +163,13 @@ bool CCamera::IsInFrustum(BoundingBox& xmBoundingBox)
 CSpaceShipCamera::CSpaceShipCamera(CCamera* pCamera) : CCamera(pCamera)
 {
 	m_nMode = CLOSEUP_PERSON_CAMERA;
-	
-		m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
-		m_xmf3Right.y = 0.0f;
-		m_xmf3Look.y = 0.0f;
-		m_xmf3Right = Vector3::Normalize(m_xmf3Right);
-		m_xmf3Look = Vector3::Normalize(m_xmf3Look);
-	
+
+	m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	m_xmf3Right.y = 0.0f;
+	m_xmf3Look.y = 0.0f;
+	m_xmf3Right = Vector3::Normalize(m_xmf3Right);
+	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
+
 }
 
 void CSpaceShipCamera::Rotate(float x, float y, float z)
@@ -178,8 +178,16 @@ void CSpaceShipCamera::Rotate(float x, float y, float z)
 	if (m_pPlayer && (x != 0.0f))
 	{
 		m_fPitch += x;
-		if (m_fPitch > +7.0f) { x -= (m_fPitch - 7.0f); m_fPitch = +7.0f; }
-		if (m_fPitch < -12.0f) { x -= (m_fPitch + 12.0f); m_fPitch = -12.0f; }
+		if (m_pPlayer->HeliPitch == true && m_pPlayer->SoldiarPitch == false)
+		{
+			if (m_fPitch > +20.0f) { x -= (m_fPitch - 20.0f); m_fPitch = +20.0f; }
+			if (m_fPitch < -15.0f) { x -= (m_fPitch + 15.0f); m_fPitch = -15.0f; }
+		}
+		if (m_pPlayer->SoldiarPitch == true && m_pPlayer->HeliPitch == false)
+		{
+			if (m_fPitch > +6.0) { x -= (m_fPitch - 6.0); m_fPitch = +6.0; }
+			if (m_fPitch < -12.0f) { x -= (m_fPitch + 12.0f); m_fPitch = -12.0f; }
+		}
 		XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Right), XMConvertToRadians(x));
 		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
@@ -255,8 +263,8 @@ void CSpaceShipCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 {
 	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(m_xmf3Position, xmf3LookAt, m_pPlayer->GetUpVector());
 
-	m_xmf3Up = XMFLOAT3(0,1,0);
-	
+	m_xmf3Up = XMFLOAT3(0, 1, 0);
+
 
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -290,7 +298,7 @@ void CFirstPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		xmf4x4Rotate._11 = xmf3Right.x; xmf4x4Rotate._21 = xmf3Up.x; xmf4x4Rotate._31 = xmf3Look.x;
 		xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
 		xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;
-		
+
 
 		XMFLOAT3 xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, xmf4x4Rotate);
 		XMFLOAT3 xmf3Position = Vector3::Add(XMFLOAT3(m_pPlayer->m_xmf3Position.x, m_pPlayer->m_xmf3Position.y, m_pPlayer->m_xmf3Position.z), xmf3Offset);
