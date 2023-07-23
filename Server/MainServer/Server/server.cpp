@@ -1959,27 +1959,129 @@ void process_packet(int client_id, char* packet)
 			lock_guard<mutex> lg{ cl.s_lock };
 			cl.do_send(&atk_pack);
 		}
+		//====
 
-		// 2. 충돌 계산
+		// 2. 충돌검사
+		int npc_id = recv_attack_pack->n_id;
 		bool b_collide = false;
-		for (auto& cl : clients) {
-			if (b_collide) break;	// 이미 충돌했으면 검사X
 
-			if (cl.s_state != ST_INGAME) continue;
-			if (cl.curr_stage == 0) continue;
-			if (cl.pl_state == PL_ST_DEAD) continue;	// 죽은 유저와는 검사하지 않음.
+		// 야매방법 (추후에 반드시 레이캐스트로 바꿔야함!!!)
+		SESSION bullet;
+		bullet.pos = npcs[npc_id].pos;
+		bullet.m_lookvec = XMFLOAT3{ recv_attack_pack->atklook_x, recv_attack_pack->atklook_y, recv_attack_pack->atklook_z };
+		bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
+			, XMFLOAT3(0.1f, 0.1f, 0.3f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
-			SESSION bullet;
-			bullet.pos = npcs[recv_attack_pack->n_id].pos;
-			bullet.m_lookvec = XMFLOAT3(recv_attack_pack->atklook_x, recv_attack_pack->atklook_y, recv_attack_pack->atklook_z);
-			bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
-				, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+		XMFLOAT3 bullet_initpos = bullet.pos;
+		XMFLOAT3 collide_pos = XMF_fault;
+		int collided_obj = C_OBJ_NONCOLLIDE;
+		int collided_cl_id = -1;
+		while (XMF_Distance(bullet.pos, bullet_initpos) <= BULLET_RANGE) {
 
-			XMFLOAT3 bullet_initpos = bullet.pos;
-			while ((XMF_Distance(bullet.pos, bullet_initpos) <= BULLET_RANGE) && (!b_collide)) {
+			// 1. 맵 지형(건물, 나무, 박스, 차, ...)과 검사
+			for (auto& mapobj : mapobj_info) {
+				// 거리가 너무 멀면 검사 X
+				if (XMF_Distance(bullet.pos, mapobj.getPos()) > BULLET_RANGE) continue;
+
+				if (bullet.m_xoobb.Intersects(mapobj.m_xoobb)) {
+					if (collide_pos == XMF_fault) {	// 첫 검사는 무조건 업데이트
+						b_collide = true;
+
+						collide_pos = bullet.pos;
+						collided_obj = C_OBJ_MAPOBJ;
+						//cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+					}
+					else {
+						if (XMF_Distance(bullet.pos, bullet_initpos) < XMF_Distance(collide_pos, bullet_initpos)) {	// 저장해둔 충돌점보다 가까이에 있으면 업데이트
+							b_collide = true;
+
+							collide_pos = bullet.pos;
+							collided_obj = C_OBJ_MAPOBJ;
+							//cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+						}
+					}
+				}
+			}
+
+			// 2. 플레이어랑 검사
+			for (auto& cl : clients) {
+				if (cl.s_state != ST_INGAME) continue;
+				if (cl.pl_state == PL_ST_DEAD) continue;
+				if (XMF_Distance(bullet.pos, cl.pos) > BULLET_RANGE) continue;
+
 				if (bullet.m_xoobb.Intersects(cl.m_xoobb)) {
+					if (collide_pos == XMF_fault) {	// 첫 검사는 무조건 업데이트
+						b_collide = true;
+						collided_cl_id = cl.inserver_index;
+
+						collide_pos = bullet.pos;
+						collided_obj = C_OBJ_PLAYER;
+					}
+					else {
+						if (XMF_Distance(bullet.pos, bullet_initpos) < XMF_Distance(collide_pos, bullet_initpos)) {	// 저장해둔 충돌점보다 가까이에 있으면 업데이트
+							b_collide = true;
+							collided_cl_id = cl.inserver_index;
+
+							collide_pos = bullet.pos;
+							collided_obj = C_OBJ_PLAYER;
+						}
+						else {
+							continue;
+						}
+					}
+				}
+			}
+
+			// 3. 바닥이랑 검사
+			if (bullet.pos.y <= 6.0f) {
+				if (XMF_Distance(bullet.pos, bullet_initpos) < XMF_Distance(collide_pos, bullet_initpos)) {	// 저장해둔 충돌점보다 가까이에 있으면 업데이트
 					b_collide = true;
 
+					collide_pos = bullet.pos;
+					collided_obj = C_OBJ_GROUND;
+				}
+			}
+
+			// 충돌했다면 패킷을 보낸다.
+			if (b_collide) {
+				switch (collided_obj) {
+				case C_OBJ_MAPOBJ:
+					cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+					SC_BULLET_COLLIDE_POS_PACKET map_collide_pack;
+					map_collide_pack.size = sizeof(SC_BULLET_COLLIDE_POS_PACKET);
+					map_collide_pack.type = SC_BULLET_COLLIDE_POS;
+					map_collide_pack.attacker = TARGET_PLAYER;
+					map_collide_pack.collide_target = C_OBJ_MAPOBJ;
+					map_collide_pack.x = collide_pos.x;
+					map_collide_pack.y = collide_pos.y;
+					map_collide_pack.z = collide_pos.z;
+					for (auto& cl : clients) {
+						if (cl.s_state != ST_INGAME) continue;
+						if (cl.curr_stage != clients[client_id].curr_stage) continue;
+						lock_guard<mutex> lg{ cl.s_lock };
+						cl.do_send(&map_collide_pack);
+					}
+
+					break;
+				case C_OBJ_GROUND:
+					cout << "바닥 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+					SC_BULLET_COLLIDE_POS_PACKET ground_collide_pack;
+					ground_collide_pack.size = sizeof(SC_BULLET_COLLIDE_POS_PACKET);
+					ground_collide_pack.type = SC_BULLET_COLLIDE_POS;
+					ground_collide_pack.attacker = TARGET_PLAYER;
+					ground_collide_pack.collide_target = C_OBJ_GROUND;
+					ground_collide_pack.x = collide_pos.x;
+					ground_collide_pack.y = collide_pos.y;
+					ground_collide_pack.z = collide_pos.z;
+					for (auto& cl : clients) {
+						if (cl.s_state != ST_INGAME) continue;
+						if (cl.curr_stage != clients[client_id].curr_stage) continue;
+						lock_guard<mutex> lg{ cl.s_lock };
+						cl.do_send(&ground_collide_pack);
+					}
+
+					break;
+				case C_OBJ_PLAYER:
 					// 데미지 계산
 					int damage = 0;
 					if (recv_attack_pack->n_id < MAX_NPC_HELI) {
@@ -1988,17 +2090,17 @@ void process_packet(int client_id, char* packet)
 					else {
 						damage = NPC_RIFLE_DAMAGE;
 					}
-					if (cl.role == ROLE_HELI) {	// 헬기 플레이어는 덜 아프게 맞는다.
+					if (clients[collided_cl_id].role == ROLE_HELI) {	// 헬기 플레이어는 덜 아프게 맞는다.
 						damage = damage - static_cast<int>(damage * 0.3f);
 					}
-					int after_hp = cl.hp - damage;	//
+					int after_hp = clients[collided_cl_id].hp - damage;	//
 
 					// 우선 NPC서버에게 플레이어 데미지 정보를 보내줍니다.
 					SC_DAMAGED_PACKET damaged_packet;
 					damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
 					damaged_packet.type = SC_DAMAGED;
 					damaged_packet.target = TARGET_PLAYER;
-					damaged_packet.id = cl.id;
+					damaged_packet.id = collided_cl_id;
 					damaged_packet.damage = damage;
 					{
 						lock_guard<mutex> lg{ npc_server.s_lock };
@@ -2007,36 +2109,37 @@ void process_packet(int client_id, char* packet)
 
 					// 데미지 처리
 					if (after_hp > 0) {		// 데미지 처리
-						cl.s_lock.lock();
-						cl.hp -= damage;
-						cl.s_lock.unlock();
-						cout << "NPC[" << recv_attack_pack->n_id << "]의 공격에 Player[" << cl.id << "]가 피해(-" << damage << ")를 입었다. (HP: " << cl.hp << " 남음)\n" << endl;
+						clients[collided_cl_id].s_lock.lock();
+						clients[collided_cl_id].hp -= damage;
+						clients[collided_cl_id].s_lock.unlock();
+						cout << "NPC[" << recv_attack_pack->n_id << "]의 공격에 Player[" << collided_cl_id << "]가 피해(-" << damage << ")를 입었다. (HP: "
+							<< clients[collided_cl_id].hp << " 남음)\n" << endl;
 
 						SC_DAMAGED_PACKET damaged_packet;
 						damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
 						damaged_packet.type = SC_DAMAGED;
 						damaged_packet.target = TARGET_PLAYER;
-						damaged_packet.id = cl.id;
+						damaged_packet.id = clients[collided_cl_id].id;
 						damaged_packet.damage = damage;
 						{
-							lock_guard<mutex> lg{ cl.s_lock };
-							cl.do_send(&damaged_packet);
+							lock_guard<mutex> lg{ clients[collided_cl_id].s_lock };
+							clients[collided_cl_id].do_send(&damaged_packet);
 						}
 					}
 					else {					// 사망
-						cl.s_lock.lock();
-						cl.hp = 0;
-						cl.pl_state = PL_ST_DEAD;
-						cl.death_time = system_clock::now();
-						cl.s_lock.unlock();
-						cout << "Npc[" << recv_attack_pack->n_id << "]의 공격에 Player[" << cl.id << "]가 사망하였다." << endl;
+						clients[collided_cl_id].s_lock.lock();
+						clients[collided_cl_id].hp = 0;
+						clients[collided_cl_id].pl_state = PL_ST_DEAD;
+						clients[collided_cl_id].death_time = system_clock::now();
+						clients[collided_cl_id].s_lock.unlock();
+						cout << "Npc[" << recv_attack_pack->n_id << "]의 공격에 Player[" << collided_cl_id << "]가 사망하였다." << endl;
 						dead_player_cnt++;
 
 						SC_OBJECT_STATE_PACKET death_packet;
 						death_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
 						death_packet.type = SC_OBJECT_STATE;
 						death_packet.target = TARGET_PLAYER;
-						death_packet.id = cl.id;
+						death_packet.id = clients[collided_cl_id].id;
 						death_packet.state = PL_ST_DEAD;
 						for (auto& send_cl : clients) {
 							if (send_cl.s_state != ST_INGAME) continue;
@@ -2048,13 +2151,18 @@ void process_packet(int client_id, char* packet)
 							}
 						}
 					}
+
 					break;
-				}
+				}// switch end
+				break;
 			}
-			bullet.pos = XMF_Add(bullet.pos, XMF_MultiplyScalar(bullet.m_lookvec, 1.f));
-			bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
-				, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+			else {
+				bullet.pos = XMF_Add(bullet.pos, XMF_MultiplyScalar(bullet.m_lookvec, 1.f));
+				bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
+					, XMFLOAT3(0.1f, 0.1f, 0.3f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+			}
 		}
+
 		break;
 	}
 	case NPC_CHANGE_STATE:
