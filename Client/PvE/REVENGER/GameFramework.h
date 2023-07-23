@@ -159,7 +159,7 @@ public:
 	DWORD						m_nMode = OPENINGSCENE;
 	bool m_bDieMotion = false;
 	GameSound gamesound;
-	int m_NumOfUI = 70;
+	int m_NumOfUI = UICOUNTERS;
 	bool UI_Switch = false;
 	bool m_bRollState = false;
 	bool m_LoginClick[4]{ false };
@@ -211,9 +211,10 @@ public:
 
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
 	IWICImagingFactory* m_pwicImagingFactory = NULL;
-	ID2D1Effect* m_pd2dfxBitmapSource[70];
-	ID2D1Effect* m_pd2dfxGaussianBlur[70];
-	ID2D1Effect* m_pd2dfxEdgeDetection[70];
+	ID2D1Effect* m_pd2dfxBitmapSource[UICOUNTERS];
+	ID2D1Effect* m_pd2dfxGaussianBlur[UICOUNTERS];
+	ID2D1Effect* m_pd2dfxEdgeDetection[UICOUNTERS];
+
 	ID2D1DrawingStateBlock1* m_pd2dsbDrawingState = NULL;
 	IWICFormatConverter* m_pwicFormatConverter = NULL;
 	int							m_nDrawEffectImage = 0;

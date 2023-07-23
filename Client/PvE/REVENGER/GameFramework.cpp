@@ -1748,6 +1748,13 @@ void CGameFramework::FrameAdvance()
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[52], &D2_SniperAimUI, &D2_SniperAimUIRect);
 
 		}
+
+		// Splatter 
+		if (m_SniperOn) {
+			D2D_POINT_2F D2_HumanSplatterUI = { (FRAME_BUFFER_WIDTH - 2000.0f) / 2, (FRAME_BUFFER_HEIGHT - 1491.0f) / 2 };
+			D2D_RECT_F D2_Splatter = { 0.0f, 0.0f, 2000.0f, 1491.0f };
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[70], &D2_HumanSplatterUI, &D2_Splatter);
+		}
 	}
 
 #endif
@@ -3031,6 +3038,22 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[69]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
 	m_pd2dfxEdgeDetection[69]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[69]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// HittingSplatter
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/BloodSplatter51.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[70]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	m_pd2dfxGaussianBlur[70]->SetInputEffect(0, m_pd2dfxBitmapSource[70]);
+	m_pd2dfxGaussianBlur[70]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+	m_pd2dfxEdgeDetection[70]->SetInputEffect(0, m_pd2dfxBitmapSource[70]);
+	m_pd2dfxEdgeDetection[70]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[70]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[70]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[70]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[70]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
