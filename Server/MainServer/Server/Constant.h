@@ -73,8 +73,8 @@
 #define RESPAWN_POS_Z_HUMAN 750.0f
 
 #define RESPAWN_POS_X_HELI -43.5f
-#define RESPAWN_POS_Y_HELI 30.0f
-#define RESPAWN_POS_Z_HELI -685.0f
+#define RESPAWN_POS_Y_HELI 25.0f
+#define RESPAWN_POS_Z_HELI -750.0f
 
 #define RESPAWN_TIME 5000			// 리스폰 시간 (ms)
 

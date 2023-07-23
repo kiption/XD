@@ -677,6 +677,19 @@ void processPacket(char* ptr)
 
 		break;
 	}// SC_MOVE_ROTATE_PLAYER case end
+	case SC_HEIGHT_ALERT:
+	{
+		if (curr_servertype != SERVER_LOGIC) break;
+		SC_HEIGHT_ALERT_PACKET* recv_packet = reinterpret_cast<SC_HEIGHT_ALERT_PACKET*>(ptr);
+
+		if (recv_packet->alert_on) {
+			// 경보 On
+		}
+		else {
+			// 경보 Off
+		}
+		break;
+	}// SC_HEIGHT_ALERT case end
 	case SC_REMOVE_OBJECT:
 	{
 		if (curr_servertype != SERVER_LOGIC) break;

@@ -1014,8 +1014,8 @@ void CGameFramework::ProcessInput()
 
 			if (m_ingame_role == R_HELI)
 			{
-				if (pKeysBuffer[KEY_Q] & 0xF0) { dwDirection |= DIR_UP; }
-				if (pKeysBuffer[KEY_E] & 0xF0) { dwDirection |= DIR_DOWN; }
+				if (pKeysBuffer[KEY_Q] & 0xF0) { q_keyboardInput.push(SEND_KEY_Q); dwDirection |= DIR_UP; }
+				if (pKeysBuffer[KEY_E] & 0xF0) { q_keyboardInput.push(SEND_KEY_E); dwDirection |= DIR_DOWN; }
 			}
 		}
 

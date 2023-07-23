@@ -183,6 +183,8 @@ public:
 	XMFLOAT3 m_cam_lookvec;							// 카메라 룩벡터 (조준을 여기에 하고 있음)
 	chrono::system_clock::time_point death_time;
 
+	bool height_alert;	// 헬기는 일정고도 아래로 내려가면 경보음을 울린다.
+
 	chrono::system_clock::time_point shoot_time;	// 총을 발사한 시간
 	chrono::system_clock::time_point reload_time;	// 총알 장전 시작시간
 
@@ -210,6 +212,7 @@ public:
 		m_rightvec = { 1.0f, 0.0f, 0.0f };
 		m_upvec = { 0.0f, 1.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 1.0f };
+		height_alert = false;
 		m_cam_lookvec = m_lookvec;
 		curr_stage = 0;
 
@@ -270,6 +273,7 @@ public:
 		m_rightvec = { 1.0f, 0.0f, 0.0f };
 		m_upvec = { 0.0f, 1.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 1.0f };
+		height_alert = false;
 		m_cam_lookvec = m_lookvec;
 		curr_stage = 0;
 
@@ -973,9 +977,9 @@ void process_packet(int client_id, char* packet)
 		if (clients[client_id].pl_state == PL_ST_DEAD) break;	// 죽은 자는 움직일 수 없다.
 
 		CS_MOVE_PACKET* cl_move_packet = reinterpret_cast<CS_MOVE_PACKET*>(packet);
-
+		
 		// 1. 헬기는 바닥에 박으면 터지도록하였다.
-		if (clients[client_id].role == ROLE_HELI && clients[client_id].pos.y <= 6.0f) {
+		if (clients[client_id].role == ROLE_HELI && clients[client_id].pos.y <= 8.5f) {
 			// 우선 NPC서버에게 플레이어 낙사 정보를 보내줍니다.
 			SC_DAMAGED_PACKET damaged_packet;
 			damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
@@ -1010,7 +1014,6 @@ void process_packet(int client_id, char* packet)
 				lock_guard<mutex> lg{ send_cl.s_lock };
 				send_cl.do_send(&heli_fall_packet);
 			}
-
 			break;
 		}
 
@@ -1019,6 +1022,24 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].pos = { cl_move_packet->x, cl_move_packet->y, cl_move_packet->z };
 		clients[client_id].setBB();
 		clients[client_id].pl_state = cl_move_packet->direction + 1;	// MV_FRONT = 0, MV_BACK = 1, MV_SIDE = 2; PL_ST_MOVE_FRONT = 1, PL_ST_MOVE_BACK = 2, PL_ST_MOVE_SIDE = 3;
+		if (clients[client_id].role == ROLE_HELI) {
+			if (clients[client_id].height_alert && clients[client_id].pos.y > 17.0f) {	// 경보가 울리고 있다가 고도가 일정 높이 이상 올라오면 경보를 해제한다.
+				clients[client_id].height_alert = false;
+				SC_HEIGHT_ALERT_PACKET alert_cancel_packet;
+				alert_cancel_packet.size = sizeof(SC_HEIGHT_ALERT_PACKET);
+				alert_cancel_packet.type = SC_HEIGHT_ALERT;
+				alert_cancel_packet.alert_on = 0;
+				clients[client_id].do_send(&alert_cancel_packet);
+			}
+			else if (!clients[client_id].height_alert && clients[client_id].pos.y <= 17.0f) {	// 고도가 일정 높이 미만 내려가면 경보를 울린다.
+				clients[client_id].height_alert = true;
+				SC_HEIGHT_ALERT_PACKET alert_start_packet;
+				alert_start_packet.size = sizeof(SC_HEIGHT_ALERT_PACKET);
+				alert_start_packet.type = SC_HEIGHT_ALERT;
+				alert_start_packet.alert_on = 1;
+				clients[client_id].do_send(&alert_start_packet);
+			}
+		}
 		clients[client_id].s_lock.unlock();
 
 		//cout << "[Move TEST] Player[" << client_id << "]가 " << cl_move_packet->direction << " 방향으로 이동하여 POS가 ("

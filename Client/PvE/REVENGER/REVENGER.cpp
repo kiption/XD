@@ -871,7 +871,7 @@ void networkThreadFunc()
 				break;
 
 			case SEND_KEY_Q:	// 상승
-				if (gGameFramework.m_ingame_role != gGameFramework.R_HELI) break;	// 상승은 헬기만 가능
+				if (players_info[my_id].m_role != ROLE_HELI) break;	// 상승은 헬기만 가능
 				CS_MOVE_PACKET move_up_pack;
 				move_up_pack.size = sizeof(CS_MOVE_PACKET);
 				move_up_pack.type = CS_MOVE;
@@ -883,7 +883,7 @@ void networkThreadFunc()
 				break;
 
 			case SEND_KEY_E:	// 하강
-				if (gGameFramework.m_ingame_role != gGameFramework.R_HELI) break;	// 상승은 헬기만 가능
+				if (players_info[my_id].m_role != ROLE_HELI) break;	// 상승은 헬기만 가능
 				CS_MOVE_PACKET move_down_pack;
 				move_down_pack.size = sizeof(CS_MOVE_PACKET);
 				move_down_pack.type = CS_MOVE;
@@ -971,7 +971,25 @@ void networkThreadFunc()
 			sendPacket(&chat_msg_packet);
 		}
 
-		// 4. 
+		// 4. 파티클 충돌
+		/*
+		if (players_info[my_id].m_role == ROLE_HELI && ((Stage1*)gGameFramework.m_pScene)->m_bHeliParticleCollisionCheck) {
+			CS_PARTICLE_COLLIDE_PACKET heli_particle_coll_pack;
+			heli_particle_coll_pack.size = sizeof(CS_PARTICLE_COLLIDE_PACKET);
+			heli_particle_coll_pack.type = CS_PARTICLE_COLLIDE;
+			heli_particle_coll_pack.particle_mass = 1.0f;
+			cout << "파티클 충돌: 헬리" << endl;
+			sendPacket(&heli_particle_coll_pack);
+		}f
+		if (players_info[my_id].m_role == ROLE_RIFLE && ((Stage1*)gGameFramework.m_pScene)->m_bHumanParticleCollisionCheck) {
+			CS_PARTICLE_COLLIDE_PACKET human_particle_coll_pack;
+			human_particle_coll_pack.size = sizeof(CS_PARTICLE_COLLIDE_PACKET);
+			human_particle_coll_pack.type = CS_PARTICLE_COLLIDE;
+			human_particle_coll_pack.particle_mass = 1.0f;
+			cout << "파티클 충돌: 사람" << endl;
+			sendPacket(&human_particle_coll_pack);
+		}
+		*/
 
 		this_thread::yield();
 	}
