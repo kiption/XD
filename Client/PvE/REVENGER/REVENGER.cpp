@@ -1179,10 +1179,12 @@ void uiThreadFunc() {
 			// 8. 피격 효과 UI
 			if (players_info[my_id].m_damaged_effect_on) {
 				
-
+				gGameFramework.m_BloodSplatterOn = true;
 				players_info[my_id].m_damaged_effect_on = false;
+	
 			}
-
+			
+			
 		}
 
 		this_thread::yield();

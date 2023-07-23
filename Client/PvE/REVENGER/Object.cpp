@@ -1827,7 +1827,7 @@ void CHelicopterObjects::OnPrepareAnimate()
 
 void CHelicopterObjects::Animate(float fTimeElapsed)
 {
-	XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 7.8) * fTimeElapsed);
+	XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 7.1) * fTimeElapsed);
 
 	if (m_pMainRotorFrame)
 	{

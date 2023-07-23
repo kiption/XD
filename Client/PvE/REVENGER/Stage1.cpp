@@ -59,7 +59,7 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	::ZeroMemory(m_pLights, sizeof(LIGHTS) * m_nLights);
 
 
-	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// 방향 조절 -> 2개 쓰면 프레임 떨어짐
 	m_pLights->m_pLights[0].m_bEnable = false;

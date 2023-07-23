@@ -167,6 +167,7 @@ public:
 	bool m_LobbyClick[3]{ false };
 	bool m_RoomClick[3]{ false };
 	bool m_SniperOn = false;
+	bool m_BloodSplatterOn = false;
 	LoginSceneInfo loginpos[4];
 	LoginSceneInfo gamepos[2];
 	LoginSceneInfo lobbypos[5];

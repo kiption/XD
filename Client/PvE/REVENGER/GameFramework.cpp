@@ -1317,6 +1317,8 @@ void CGameFramework::UpdateShaderVariables()
 
 float g_time = 0.0f;
 float g_reverse_time = 0.0f;
+
+float g_Hittingtime = 0.0f;
 void CGameFramework::FrameAdvance()
 {
 
@@ -1749,12 +1751,33 @@ void CGameFramework::FrameAdvance()
 
 		}
 
-		// Splatter 
-		if (m_SniperOn) {
-			D2D_POINT_2F D2_HumanSplatterUI = { (FRAME_BUFFER_WIDTH - 2000.0f) / 2, (FRAME_BUFFER_HEIGHT - 1491.0f) / 2 };
-			D2D_RECT_F D2_Splatter = { 0.0f, 0.0f, 2000.0f, 1491.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[70], &D2_HumanSplatterUI, &D2_Splatter);
+		if (m_ingame_role == R_RIFLE)
+		{
+			// Splatter 
+			if (m_BloodSplatterOn) {
+				D2D_POINT_2F D2_HumanSplatterUI = { (FRAME_BUFFER_WIDTH - 2000.0f) / 2, (FRAME_BUFFER_HEIGHT - 1491.0f) / 2 };
+				D2D_RECT_F D2_Splatter = { 0.0f, 0.0f, 2000.0f, 1491.0f };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[70], &D2_HumanSplatterUI, &D2_Splatter);
+			}
+
+			if (m_BloodSplatterOn == true) g_Hittingtime++;
+			if (g_Hittingtime > 6.0f)
+			{
+				g_Hittingtime = 0.0f;
+				m_BloodSplatterOn = false;
+			}
+
+			// DyingBanner
+			if (player_dead == true)
+			{
+				D2D_POINT_2F D2_DyingBannerUI = { (FRAME_BUFFER_WIDTH - 2500.0) / 2, (FRAME_BUFFER_HEIGHT - 1730.0) / 2 };
+				D2D_RECT_F D2_DyingBanner = { 0.0f, 0.0f, 2500.0, 1730.0 };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[71], &D2_DyingBannerUI, &D2_DyingBanner);
+			}
+
 		}
+
+
 	}
 
 #endif
@@ -2041,7 +2064,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-	}
+}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -3055,10 +3078,26 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[70]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[70]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
+	// HittingSplatter
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Respawning_BannerUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[71]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	m_pd2dfxGaussianBlur[71]->SetInputEffect(0, m_pd2dfxBitmapSource[71]);
+	m_pd2dfxGaussianBlur[71]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+	m_pd2dfxEdgeDetection[71]->SetInputEffect(0, m_pd2dfxBitmapSource[71]);
+	m_pd2dfxEdgeDetection[71]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[71]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[71]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[71]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[71]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
 #endif
-}
+	}
 #endif
 
 
@@ -3197,10 +3236,10 @@ void CGameFramework::setVectors_SoldiarOtherPlayer(int id, XMFLOAT3 rightVec, XM
 	/* 5~8 다른플레이어 */
 	if (id < 0 || id > 5) return;   // 배열 범위 벗어나는 거 방지
 	if (m_nMode == SCENE1STAGE) {
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5+id])->SetRight(rightVec);
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5+id])->SetUp(upVec);
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5+id])->SetLook(lookVec);
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5+id])->SetScale(5.0, 5.0, 5.0);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])->SetRight(rightVec);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])->SetUp(upVec);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])->SetLook(lookVec);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])->SetScale(5.0, 5.0, 5.0);
 	}
 }
 void CGameFramework::setPosition_HeliOtherPlayer(int id, XMFLOAT3 pos)
