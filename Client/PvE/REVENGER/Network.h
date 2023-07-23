@@ -69,6 +69,10 @@ bool trigger_otherplayer_attack = false;	// 다른 플레이어 공격 연출
 int otherplayer_attack_id;					// " id
 XMFLOAT3 otherplayer_attack_dir;			// " 방향
 
+bool b_height_alert = false;						// 헬기 고도 경보
+bool b_first_height_alert = false;
+chrono::system_clock::time_point height_alert_time; // 경보 울린 시간
+
 //==================================================
 int curr_connection_num = 1;
 
@@ -682,11 +686,14 @@ void processPacket(char* ptr)
 		if (curr_servertype != SERVER_LOGIC) break;
 		SC_HEIGHT_ALERT_PACKET* recv_packet = reinterpret_cast<SC_HEIGHT_ALERT_PACKET*>(ptr);
 
-		if (recv_packet->alert_on) {
-			// 경보 On
-		}
-		else {
+		if (recv_packet->alert_on == 0) {
 			// 경보 Off
+			b_height_alert = false;
+		}
+		else if (recv_packet->alert_on == 1) {
+			// 경보 On
+			b_height_alert = true;
+			b_first_height_alert = true;
 		}
 		break;
 	}// SC_HEIGHT_ALERT case end

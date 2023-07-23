@@ -644,6 +644,24 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 				}
 
+				// 고도 경보 (1.5초 주기로)
+				if (b_height_alert) {
+					bool speak_alert = false;
+					if (b_first_height_alert) {
+						speak_alert = true;
+						b_first_height_alert = false;
+					}
+					else if (height_alert_time + 1500ms <= system_clock::now()) {
+						speak_alert = true;
+					}
+
+					if (speak_alert) {
+						// 경보 출력
+
+						height_alert_time = system_clock::now();
+					}
+				}
+
 
 				//==================================================
 				//					Map 충돌 관련
