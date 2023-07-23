@@ -186,7 +186,7 @@ public:
 		name[0] = 0;
 
 		state = PL_ST_IDLE;
-		hp = 1000;
+		hp = 100;
 		remain_bullet = MAX_BULLET;
 
 		pos = { 0.0f, 0.0f, 0.0f };
@@ -1930,6 +1930,35 @@ void process_packet(char* packet)
 
 		break;
 	}// SC_DAMAGED end
+	case SC_RESPAWN:
+	{
+		SC_RESPAWN_PACKET* respawn_packet = reinterpret_cast<SC_RESPAWN_PACKET*>(packet);
+
+		int obj_id = respawn_packet->id;
+		playersInfo[obj_id].obj_lock.lock();
+
+		playersInfo[obj_id].hp = 100;
+
+		playersInfo[obj_id].pos.x = respawn_packet->x;
+		playersInfo[obj_id].pos.y = respawn_packet->y;
+		playersInfo[obj_id].pos.z = respawn_packet->z;
+
+		playersInfo[obj_id].m_rightvec.x = respawn_packet->right_x;
+		playersInfo[obj_id].m_rightvec.y = respawn_packet->right_y;
+		playersInfo[obj_id].m_rightvec.z = respawn_packet->right_z;
+
+		playersInfo[obj_id].m_upvec.x = respawn_packet->up_x;
+		playersInfo[obj_id].m_upvec.y = respawn_packet->up_y;
+		playersInfo[obj_id].m_upvec.z = respawn_packet->up_z;
+
+		playersInfo[obj_id].m_lookvec.x = respawn_packet->look_x;
+		playersInfo[obj_id].m_lookvec.y = respawn_packet->look_y;
+		playersInfo[obj_id].m_lookvec.z = respawn_packet->look_z;
+
+		playersInfo[obj_id].obj_lock.unlock();
+
+		break;
+	}// SC_RESPAWN end
 	case SC_OBJECT_STATE:
 	{
 		SC_OBJECT_STATE_PACKET* chgstate_packet = reinterpret_cast<SC_OBJECT_STATE_PACKET*>(packet);
