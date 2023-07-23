@@ -1170,18 +1170,21 @@ void process_packet(int client_id, char* packet)
 
 				if (bullet.m_xoobb.Intersects(mapobj.m_xoobb)) {
 					if (collide_pos == XMF_fault) {	// 첫 검사는 무조건 업데이트
+						b_collide = true;
+
 						collide_pos = bullet.pos;
 						collided_obj = C_OBJ_MAPOBJ;
 						//cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
 					}
 					else {
 						if (XMF_Distance(bullet.pos, bullet_initpos) < XMF_Distance(collide_pos, bullet_initpos)) {	// 저장해둔 충돌점보다 가까이에 있으면 업데이트
+							b_collide = true;
+
 							collide_pos = bullet.pos;
 							collided_obj = C_OBJ_MAPOBJ;
 							//cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
 						}
 					}
-					b_collide = true;
 				}
 			}
 			
@@ -1194,11 +1197,17 @@ void process_packet(int client_id, char* packet)
 
 				if (bullet.m_xoobb.Intersects(npcs[npc_id].m_xoobb)) {
 					if (collide_pos == XMF_fault) {	// 첫 검사는 무조건 업데이트
+						b_collide = true;
+						collided_npc_id = npc_id;
+
 						collide_pos = bullet.pos;
 						collided_obj = C_OBJ_NPC;
 					}
 					else {
 						if (XMF_Distance(bullet.pos, bullet_initpos) < XMF_Distance(collide_pos, bullet_initpos)) {	// 저장해둔 충돌점보다 가까이에 있으면 업데이트
+							b_collide = true;
+							collided_npc_id = npc_id;
+
 							collide_pos = bullet.pos;
 							collided_obj = C_OBJ_NPC;
 						}
@@ -1206,15 +1215,24 @@ void process_packet(int client_id, char* packet)
 							continue;
 						}
 					}
-					b_collide = true;
-					collided_npc_id = npc_id;
 				}
 			}
 
+			// 3. 바닥이랑 검사
+			if (bullet.pos.y <= 6.0f) {
+				if (XMF_Distance(bullet.pos, bullet_initpos) < XMF_Distance(collide_pos, bullet_initpos)) {	// 저장해둔 충돌점보다 가까이에 있으면 업데이트
+					b_collide = true;
+
+					collide_pos = bullet.pos;
+					collided_obj = C_OBJ_GROUND;
+				}
+			}
+
+			// 충돌했다면 패킷을 보낸다.
 			if (b_collide) {
 				switch (collided_obj) {
 				case C_OBJ_MAPOBJ:
-					//cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+					cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
 					SC_BULLET_COLLIDE_POS_PACKET map_collide_pack;
 					map_collide_pack.size = sizeof(SC_BULLET_COLLIDE_POS_PACKET);
 					map_collide_pack.type = SC_BULLET_COLLIDE_POS;
@@ -1231,7 +1249,24 @@ void process_packet(int client_id, char* packet)
 					}
 
 					break;
+				case C_OBJ_GROUND:
+					cout << "바닥 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+					SC_BULLET_COLLIDE_POS_PACKET ground_collide_pack;
+					ground_collide_pack.size = sizeof(SC_BULLET_COLLIDE_POS_PACKET);
+					ground_collide_pack.type = SC_BULLET_COLLIDE_POS;
+					ground_collide_pack.attacker = TARGET_PLAYER;
+					ground_collide_pack.collide_target = C_OBJ_GROUND;
+					ground_collide_pack.x = collide_pos.x;
+					ground_collide_pack.y = collide_pos.y;
+					ground_collide_pack.z = collide_pos.z;
+					for (auto& cl : clients) {
+						if (cl.s_state != ST_INGAME) continue;
+						if (cl.curr_stage != clients[client_id].curr_stage) continue;
+						lock_guard<mutex> lg{ cl.s_lock };
+						cl.do_send(&ground_collide_pack);
+					}
 
+					break;
 				case C_OBJ_NPC:
 					// 데미지 계산
 					float dec_damage = static_cast<float>(RIFLE_DAMAGE);

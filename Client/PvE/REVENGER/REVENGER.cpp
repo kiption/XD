@@ -651,11 +651,21 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					mabobj_collide_pos.y += 3.0f;
 					q_bullet_hit_pos_mapobj.pop();
 					gGameFramework.CollisionMap_by_BULLET(mabobj_collide_pos);
-					//cout << "맵 충 돌" << mabobj_collide_pos.x << ", " << mabobj_collide_pos.y << ", " << mabobj_collide_pos.z << endl;
 				}
 				else
 				{
 					((CSpriteObjectsShader*)((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0])->m_bActive = false;
+				}
+
+				if (!q_bullet_hit_pos_ground.empty()) {
+					XMFLOAT3 ground_collide_pos = q_bullet_hit_pos_ground.front();
+					q_bullet_hit_pos_ground.pop();
+					gGameFramework.CollisionMap_by_BULLET(ground_collide_pos);
+					cout << "바닥 충돌" << ground_collide_pos.x << ", " << ground_collide_pos.y << ", " << ground_collide_pos.z << endl;
+				}
+				else
+				{
+
 				}
 
 				gGameFramework.CollisionNPC_by_BULLET(XMFLOAT3(/*NPC CENTER*/), XMFLOAT3(/*NPC EXTENTS*/));

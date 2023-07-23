@@ -1924,12 +1924,3 @@ Local Rotate: (0.00, 0.00, 0.00)
 Angle AOB: 100.3008
 Angle BOC: 79.69918
 
-Object Name: Plane1
-Center: (0.00, 5.90, 0.00)
-Scale: (1535.96, 1.00, 2158.30)
-Local Forward: (0.00, 0.00, 1.00)
-Local Right: (1.00, 0.00, 0.00)
-Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 70.87547
-Angle BOC: 109.1245
-

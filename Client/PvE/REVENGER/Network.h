@@ -757,7 +757,7 @@ void processPacket(char* ptr)
 		int recv_id = recv_packet->id;
 		int atk_sound_volume = recv_packet->sound_volume;
 		if (recv_packet->obj_type == TARGET_PLAYER) {
-			cout << "Client[" << recv_packet->id << "]가 공격했음." << endl;
+			//cout << "Client[" << recv_packet->id << "]가 공격했음." << endl;
 			// 연출 트리거
 			trigger_otherplayer_attack = true;
 			otherplayer_attack_id = recv_id;
@@ -818,7 +818,7 @@ void processPacket(char* ptr)
 			}
 		}
 		else if (recv_packet->obj_type == TARGET_NPC) {
-			cout << "NPC[" << recv_packet->id << "]가 공격했음." << endl;
+			//cout << "NPC[" << recv_packet->id << "]가 공격했음." << endl;
 
 			// NPC 공격 연출을 위한 정보
 			npcs_info[recv_id].m_attack_dir.x = recv_packet->atklook_x;
@@ -1002,6 +1002,8 @@ void processPacket(char* ptr)
 			q_bullet_hit_pos_mapobj.push(XMFLOAT3{ recv_packet->x, recv_packet->y, recv_packet->z });
 			break;
 		case C_OBJ_GROUND:
+			cout << "바닥 충돌: " << recv_packet->x << ", " << recv_packet->y << ", " << recv_packet->z << endl;
+			q_bullet_hit_pos_ground.push(XMFLOAT3{ recv_packet->x, recv_packet->y, recv_packet->z });
 			break;
 		}
 
