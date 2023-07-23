@@ -1176,6 +1176,13 @@ void uiThreadFunc() {
 				}
 			}
 
+			// 8. 피격 효과 UI
+			if (players_info[my_id].m_damaged_effect_on) {
+				
+
+				players_info[my_id].m_damaged_effect_on = false;
+			}
+
 		}
 
 		this_thread::yield();
