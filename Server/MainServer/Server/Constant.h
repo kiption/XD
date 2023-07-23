@@ -68,10 +68,13 @@
 #define HUMAN_BBSIZE_Y 10.0f
 #define HUMAN_BBSIZE_Z 4.0f
 
-#define RESPAWN_POS_X -15.0f
+#define RESPAWN_POS_X_HUMAN -15.0f
 #define RESPAWN_POS_Y_HUMAN 6.0f
-#define RESPAWN_POS_Y_HELI 80.0f
-#define RESPAWN_POS_Z 750.0f
+#define RESPAWN_POS_Z_HUMAN 750.0f
+
+#define RESPAWN_POS_X_HELI -43.5f
+#define RESPAWN_POS_Y_HELI 30.0f
+#define RESPAWN_POS_Z_HELI -685.0f
 
 #define RESPAWN_TIME 5000			// 리스폰 시간 (ms)
 

@@ -841,14 +841,16 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].role = login_packet->role;
 		strcpy_s(clients[client_id].name, login_packet->name);
 
-		clients[client_id].pos.x = RESPAWN_POS_X + 15 * client_id;
 		if (login_packet->role == ROLE_RIFLE) {
+			clients[client_id].pos.x = RESPAWN_POS_X_HUMAN + 15 * client_id;
 			clients[client_id].pos.y = RESPAWN_POS_Y_HUMAN;
+			clients[client_id].pos.z = RESPAWN_POS_Z_HUMAN;
 		}
 		else if (login_packet->role == ROLE_HELI) {
+			clients[client_id].pos.x = RESPAWN_POS_X_HELI;
 			clients[client_id].pos.y = RESPAWN_POS_Y_HELI;
+			clients[client_id].pos.z = RESPAWN_POS_Z_HELI;
 		}
-		clients[client_id].pos.z = RESPAWN_POS_Z;
 
 		clients[client_id].m_rightvec = XMFLOAT3{ 1.0f, 0.0f, 0.0f };
 		clients[client_id].m_upvec = XMFLOAT3{ 0.0f, 1.0f, 0.0f };
@@ -972,12 +974,45 @@ void process_packet(int client_id, char* packet)
 
 		CS_MOVE_PACKET* cl_move_packet = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 
-		// 1. 충돌체크를 한다. -> 플레이어가 이동할 수 없는 곳으로 이동했다면 RollBack패킷을 보내 이전 위치로 돌아가도록 한다.
-		bool b_isCollide = false;
-		//  1) 맵 오브젝트
-		//  2) 다른 플레이어
-		//  3) NPC
-		//if (b_isCollide) {}
+		// 1. 헬기는 바닥에 박으면 터지도록하였다.
+		if (clients[client_id].role == ROLE_HELI && clients[client_id].pos.y <= 6.0f) {
+			// 우선 NPC서버에게 플레이어 낙사 정보를 보내줍니다.
+			SC_DAMAGED_PACKET damaged_packet;
+			damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
+			damaged_packet.type = SC_DAMAGED;
+			damaged_packet.target = TARGET_PLAYER;
+			damaged_packet.id = client_id;
+			damaged_packet.damage = HELI_MAXHP;
+			{
+				lock_guard<mutex> lg{ npc_server.s_lock };
+				npc_server.do_send(&damaged_packet);
+			}
+
+			// 사망처리
+			clients[client_id].s_lock.lock();
+			clients[client_id].hp = 0;
+			clients[client_id].pl_state = PL_ST_DEAD;
+			clients[client_id].death_time = system_clock::now();
+			clients[client_id].s_lock.unlock();
+			cout << "Player[" << client_id << "]의 헬리콥터가 지면에 추락하여 폭발하였다." << endl;
+			dead_player_cnt++;
+
+			SC_OBJECT_STATE_PACKET heli_fall_packet;
+			heli_fall_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
+			heli_fall_packet.type = SC_OBJECT_STATE;
+			heli_fall_packet.target = TARGET_PLAYER;
+			heli_fall_packet.id = clients[client_id].id;
+			heli_fall_packet.state = PL_ST_DEAD;
+			for (auto& send_cl : clients) {
+				if (send_cl.s_state != ST_INGAME) continue;
+				if (send_cl.curr_stage == 0) continue;
+
+				lock_guard<mutex> lg{ send_cl.s_lock };
+				send_cl.do_send(&heli_fall_packet);
+			}
+
+			break;
+		}
 
 		// 2. 정상적인 이동이라면 세션 정보를 업데이트 한다.
 		clients[client_id].s_lock.lock();
@@ -2637,10 +2672,12 @@ void timerFunc() {
 						cl.s_lock.lock();
 						cl.pl_state = PL_ST_IDLE;
 						cl.hp = HELI_MAXHP;
-						if (cl.role == ROLE_RIFLE)
-							cl.pos = XMFLOAT3{ RESPAWN_POS_X + 15 * cl.id, RESPAWN_POS_Y_HUMAN, RESPAWN_POS_Z };
-						else if (cl.role == ROLE_HELI)
-							cl.pos = XMFLOAT3{ RESPAWN_POS_X + 15 * cl.id, RESPAWN_POS_Y_HELI, RESPAWN_POS_Z };
+						if (cl.role == ROLE_RIFLE) {
+							cl.pos = XMFLOAT3{ RESPAWN_POS_X_HUMAN + 15 * cl.id, RESPAWN_POS_Y_HUMAN, RESPAWN_POS_Z_HUMAN };
+						}
+						else if (cl.role == ROLE_HELI) {
+							cl.pos = XMFLOAT3{ RESPAWN_POS_X_HELI + 15 * cl.id, RESPAWN_POS_Y_HELI, RESPAWN_POS_Z_HELI };
+						}
 						cl.m_rightvec = XMFLOAT3{ 1.0f, 0.0f, 0.0f };
 						cl.m_upvec = XMFLOAT3{ 0.0f, 1.0f, 0.0f };
 						cl.m_lookvec = XMFLOAT3{ 0.0f, 0.0f, 1.0f };
