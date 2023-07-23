@@ -839,16 +839,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case VK_F9:
 				ChangeSwapChainState();
 				break;
-			case '1':
-			{
-				q_keyboardInput.push(SEND_KEY_NUM1);//S
+			case VK_END:
+				q_keyboardInput.push(SEND_KEY_END);	// 몰살 치트키
 				break;
-			}
-			case '2':
-			{
-				q_keyboardInput.push(SEND_KEY_NUM2);//S
-				break;
-			}
 			case 'R':
 				if (!player_dead && ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bMoveUpdate == false && m_ingame_role == R_RIFLE)
 				{

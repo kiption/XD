@@ -1509,7 +1509,7 @@ void process_packet(int client_id, char* packet)
 				if (cl.curr_stage == 0) continue;
 				int dist = XMF_Distance(cl.pos, clients[client_id].pos);
 				if (dist > RELOADSOUND_MAX_DISTANCE) continue;
-				
+
 				SC_RELOAD_PACKET reload_packet;
 				reload_packet.size = sizeof(SC_RELOAD_PACKET);
 				reload_packet.type = SC_RELOAD;
@@ -1550,6 +1550,134 @@ void process_packet(int client_id, char* packet)
 				}
 			}
 			break;
+
+		case PACKET_KEY_END:
+			if (clients[client_id].s_state != ST_INGAME) break;	// 잘못된 요청
+			if (clients[client_id].curr_stage == 0) break;	// 잘못된 요청
+			if (!b_active_server) break;	// 잘못된 요청
+			if (!b_npcsvr_conn) break;	// 죽일 NPC가 없음.
+			if (curr_mission_stage[clients[client_id].curr_stage] != 0) break;	// 잘못된 요청
+
+			cout << "==몰살 치트키==" << endl;
+
+			for (auto& npc : npcs) {
+				if (npc.pl_state == PL_ST_DEAD) continue;
+
+				npc.s_lock.lock();
+				npc.hp = 0;
+				npc.pl_state = PL_ST_DEAD;
+				npc.s_lock.unlock();
+				cout << "[치트키] Player[" << client_id << "]의 치트키에 NPC[" << npc.id << "]가 사망하였다." << endl;
+
+				if (npc.id < STAGE1_MAX_HELI) {
+					// 1) 헬기NPC인 경우 NPC서버에게 상태패킷을 보냅니다.
+					SC_OBJECT_STATE_PACKET npc_die_packet;
+					npc_die_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
+					npc_die_packet.type = SC_OBJECT_STATE;
+					npc_die_packet.target = TARGET_NPC;
+					npc_die_packet.id = npc.id;
+					npc_die_packet.state = PL_ST_DEAD;
+					if (b_npcsvr_conn) {
+						lock_guard<mutex> lg{ npc_server.s_lock };
+						npc_server.do_send(&npc_die_packet);
+					}
+
+					// 헬기 추락모션
+					SC_OBJECT_STATE_PACKET temp_packet;
+					temp_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
+					temp_packet.type = SC_OBJECT_STATE;
+					temp_packet.target = TARGET_NPC;
+					temp_packet.id = npc.id;
+					temp_packet.state = PL_ST_DEAD;
+					for (auto& cl : clients) {
+						if (cl.s_state != ST_INGAME) continue;
+						if (cl.curr_stage == 0) continue;
+
+						lock_guard<mutex> lg{ cl.s_lock };
+						cl.do_send(&temp_packet);
+					}
+				}
+				else {
+					// 2) 인간NPC인 경우 NPC서버에게 제거패킷, 클라이언트에게 상태패킷을 보냅니다.
+					//   (NPC서버에선 동작을 멈추게하고, 클라에선 애니메이션을 하게됩니다.)
+
+					// 제거 패킷 (to. NPC서버)
+					if (b_npcsvr_conn) {
+						lock_guard<mutex> lg{ npc_server.s_lock };
+						npc_server.send_remove_packet(npc.id, TARGET_NPC);
+					}
+
+					// 상태패킷 (to. 클라이언트)
+					SC_OBJECT_STATE_PACKET npc_die_packet;
+					npc_die_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
+					npc_die_packet.type = SC_OBJECT_STATE;
+					npc_die_packet.target = TARGET_NPC;
+					npc_die_packet.id = npc.id;
+					npc_die_packet.state = PL_ST_DEAD;
+					for (auto& cl : clients) {
+						if (cl.s_state != ST_INGAME) continue;
+						if (cl.curr_stage == 0) continue;
+
+						lock_guard<mutex> lg{ cl.s_lock };
+						cl.do_send(&npc_die_packet);
+					}
+				}
+			}
+
+			// 미션 강제 완료
+			short curr_mission = curr_mission_stage[clients[client_id].curr_stage];
+			bool mission_clear = false;
+			if (clients[client_id].curr_stage == 1) {
+				stage1_missions[curr_mission].curr = stage1_missions[curr_mission].goal;
+				mission_clear = true;
+			}
+
+			for (auto& cl : clients) {
+				if (cl.s_state != ST_INGAME) continue;
+				if (cl.curr_stage != clients[client_id].curr_stage) continue;
+				lock_guard<mutex> lg{ cl.s_lock };
+				cl.send_mission_packet(clients[client_id].curr_stage);
+			}
+
+			if (clients[client_id].curr_stage == 1) {
+				cout << "스테이지[1]의 미션[" << curr_mission << "] 완료!" << endl;
+
+				// 미션 완료 패킷
+				SC_MISSION_COMPLETE_PACKET mission_complete;
+				mission_complete.type = SC_MISSION_COMPLETE;
+				mission_complete.size = sizeof(SC_MISSION_COMPLETE_PACKET);
+				mission_complete.stage_num = clients[client_id].curr_stage;
+				mission_complete.mission_num = curr_mission;
+				for (auto& cl : clients) {
+					if (cl.s_state != ST_INGAME) continue;
+					if (cl.curr_stage != clients[client_id].curr_stage) continue;
+					lock_guard<mutex> lg{ cl.s_lock };
+					cl.do_send(&mission_complete);
+				}
+
+				curr_mission_stage[clients[client_id].curr_stage]++;
+				curr_mission = curr_mission_stage[clients[client_id].curr_stage];
+
+				// 다음 미션 전달
+				for (auto& cl : clients) {
+					if (cl.s_state != ST_INGAME) continue;
+					if (cl.curr_stage != clients[client_id].curr_stage) continue;
+					lock_guard<mutex> lg{ cl.s_lock };
+					cl.send_mission_packet(clients[client_id].curr_stage);
+				}
+
+				stage1_missions[curr_mission].start = static_cast<int>(g_curr_servertime.count());
+				cout << "[" << stage1_missions[curr_mission].start << "] 새로운 미션 추가: ";
+				switch (stage1_missions[curr_mission].type) {
+				case MISSION_KILL:
+					cout << "[처치] ";
+					break;
+				case MISSION_OCCUPY:
+					cout << "[점령] ";
+					break;
+				}
+				cout << stage1_missions[curr_mission].curr << " / " << stage1_missions[curr_mission].goal << "\n" << endl;
+			}
 		}
 
 		break;

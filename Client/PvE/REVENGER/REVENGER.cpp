@@ -817,7 +817,7 @@ void networkThreadFunc()
 			short keyValue = gGameFramework.popInputVal_Keyboard();
 
 			switch (keyValue) {
-			case PACKET_KEY_W:
+			case SEND_KEY_W:
 				if (gGameFramework.m_nMode == OPENINGSCENE) break;
 
 				CS_MOVE_PACKET move_front_pack;
@@ -830,7 +830,7 @@ void networkThreadFunc()
 				sendPacket(&move_front_pack);
 				break;
 
-			case PACKET_KEY_S:
+			case SEND_KEY_S:
 				if (gGameFramework.m_nMode == OPENINGSCENE) break;
 
 				CS_MOVE_PACKET move_back_pack;
@@ -843,8 +843,8 @@ void networkThreadFunc()
 				sendPacket(&move_back_pack);
 				break;
 
-			case PACKET_KEY_A:
-			case PACKET_KEY_D:
+			case SEND_KEY_A:
+			case SEND_KEY_D:
 				if (gGameFramework.m_nMode == OPENINGSCENE) break;
 
 				CS_MOVE_PACKET move_side_pack;
@@ -857,7 +857,7 @@ void networkThreadFunc()
 				sendPacket(&move_side_pack);
 				break;
 
-			case PACKET_KEY_R:
+			case SEND_KEY_R:
 				// 재장전
 				if (gGameFramework.m_nMode == OPENINGSCENE) break;
 
@@ -868,7 +868,7 @@ void networkThreadFunc()
 				sendPacket(&input_rkey_pack);
 				break;
 
-			case PACKET_KEY_Q:	// 상승
+			case SEND_KEY_Q:	// 상승
 				if (gGameFramework.m_ingame_role != gGameFramework.R_HELI) break;	// 상승은 헬기만 가능
 				CS_MOVE_PACKET move_up_pack;
 				move_up_pack.size = sizeof(CS_MOVE_PACKET);
@@ -880,7 +880,7 @@ void networkThreadFunc()
 				sendPacket(&move_up_pack);
 				break;
 
-			case PACKET_KEY_E:	// 하강
+			case SEND_KEY_E:	// 하강
 				if (gGameFramework.m_ingame_role != gGameFramework.R_HELI) break;	// 상승은 헬기만 가능
 				CS_MOVE_PACKET move_down_pack;
 				move_down_pack.size = sizeof(CS_MOVE_PACKET);
@@ -892,18 +892,24 @@ void networkThreadFunc()
 				sendPacket(&move_down_pack);
 				break;
 
-			case PACKET_KEY_SPACEBAR:
-				// 점프
-				break;
-
-			case PACKET_KEYUP_MOVEKEY:
+			case SEND_KEYUP_MOVEKEY:
 				if (gGameFramework.m_nMode == OPENINGSCENE) break;
 
 				CS_INPUT_KEYBOARD_PACKET mv_keyup_pack;
-				mv_keyup_pack.type = CS_INPUT_KEYBOARD;
 				mv_keyup_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+				mv_keyup_pack.type = CS_INPUT_KEYBOARD;
 				mv_keyup_pack.keytype = PACKET_KEYUP_MOVEKEY;
 				sendPacket(&mv_keyup_pack);
+				break;
+
+			case SEND_KEY_END:	// 치트키: NPC 전부 죽이기
+				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+
+				CS_INPUT_KEYBOARD_PACKET cheatkey_allkill_pack;
+				cheatkey_allkill_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+				cheatkey_allkill_pack.type = CS_INPUT_KEYBOARD;
+				cheatkey_allkill_pack.keytype = PACKET_KEY_END;
+				sendPacket(&cheatkey_allkill_pack);
 				break;
 
 			default:
@@ -962,6 +968,8 @@ void networkThreadFunc()
 			gGameFramework.m_mychat_log.pop();
 			sendPacket(&chat_msg_packet);
 		}
+
+		// 4. 
 
 		this_thread::yield();
 	}
