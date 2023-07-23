@@ -319,6 +319,10 @@ public:
 
 	int m_occupationnum = 0;
 	int m_LobbyPage = 0;
+	int m_myID = -1;
+	int m_otherHP[2];
+	WCHAR m_OtherName[2][20];
+	
 	vector<CollideMapInfo> mapcol_info;
 	vector<LobbyRoom>m_LobbyRoom_Info;
 	array<MYRoomUser, 3> m_MyRoom_Info;
