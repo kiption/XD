@@ -657,7 +657,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 					if (speak_alert) {
 						// 경보 출력
-
+						gamesound.PlayHightLimitSound();
 						height_alert_time = system_clock::now();
 					}
 				}

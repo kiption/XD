@@ -89,6 +89,7 @@ public:
 	void PlayNpcShotSound();
 	void PauseNpcShotSound();
 	void PlayHightLimitSound();
+	void PauseHightLimitSound();
 	void reloadSound();
 
 };

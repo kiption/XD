@@ -83,7 +83,8 @@ GameSound::GameSound()
 	result = soundSystem->playSound(NpcshotSound, 0, true, &NpcshootChannel);
 	NpcshootChannel->setVolume(0.25f);
 
-
+	result = soundSystem->playSound(HeliWarrningHighSounds, 0, true, &HeliWarrningHighChannel);
+	HeliWarrningHighChannel->setVolume(0.3f);
 
 	shotChannel->setVolume(0.1f);
 	HelishotChannel->setVolume(0.3f);
@@ -221,6 +222,11 @@ void GameSound::PauseNpcShotSound()
 
 void GameSound::PlayHightLimitSound()
 {
+	//HeliWarrningHighChannel->setPaused(false);
 	result = soundSystem->playSound(HeliWarrningHighSounds, 0, false, &HeliWarrningHighChannel);
-	HeliWarrningHighChannel->setVolume(0.3f);
+	HeliWarrningHighChannel->setVolume(0.5f);
+}
+void GameSound::PauseHightLimitSound()
+{
+	HeliWarrningHighChannel->setPaused(true);
 }
