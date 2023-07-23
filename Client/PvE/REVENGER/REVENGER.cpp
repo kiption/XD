@@ -1187,10 +1187,11 @@ void uiThreadFunc() {
 			// 9. HP 적을때 UI
 			if (players_info[my_id].m_near_death_hp) {
 				if (players_info[my_id].m_role == ROLE_RIFLE) {
-					cout << "사람 하나님이랑 하이파이브 하기 직전" << endl;
+					
 				}
 				else if (players_info[my_id].m_role == ROLE_HELI) {
-					cout << "헬기 폭발 위기" << endl;
+					gGameFramework.m_HeliPlayerWarnningUISwitch = true;
+				
 				}
 			}
 			

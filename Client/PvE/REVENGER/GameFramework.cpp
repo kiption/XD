@@ -1319,6 +1319,7 @@ float g_time = 0.0f;
 float g_reverse_time = 0.0f;
 
 float g_Hittingtime = 0.0f;
+float g_WarnningSwitchtime = 0.0f;
 void CGameFramework::FrameAdvance()
 {
 
@@ -1766,17 +1767,33 @@ void CGameFramework::FrameAdvance()
 				g_Hittingtime = 0.0f;
 				m_BloodSplatterOn = false;
 			}
-
-			// DyingBanner
-			if (player_dead == true)
-			{
-				D2D_POINT_2F D2_DyingBannerUI = { (FRAME_BUFFER_WIDTH - 2500.0) / 2, (FRAME_BUFFER_HEIGHT - 1730.0) / 2 };
-				D2D_RECT_F D2_DyingBanner = { 0.0f, 0.0f, 2500.0, 1730.0 };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[71], &D2_DyingBannerUI, &D2_DyingBanner);
-			}
-
 		}
-
+		if (m_ingame_role == R_HELI)
+		{
+			//if(/*헬기 30퍼 일때 */)
+			// Splatter 
+			if (m_HeliPlayerWarnningUISwitch && g_WarnningSwitchtime > 3.0f) {
+				D2D_POINT_2F D2_HeliWarrningBannerUI = { (FRAME_BUFFER_WIDTH - 2500.0) / 2, (FRAME_BUFFER_HEIGHT - 1559.0) / 2 };
+				D2D_RECT_F D2_HeliWarrningRECT = { 0.0f, 0.0f, 2500.0, 1559.0 };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[72], &D2_HeliWarrningBannerUI, &D2_HeliWarrningRECT);
+			
+				D2D_POINT_2F D2_HeliWarrningIconUI = { 20.0, 150.0 };
+				D2D_RECT_F D2_HeliWarrningIconRECT = { 0.0f, 0.0f, 200.0, 57.0 };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[73], &D2_HeliWarrningIconUI, &D2_HeliWarrningIconRECT);
+			}
+			g_WarnningSwitchtime++;
+			if (g_WarnningSwitchtime > 12.0f)
+			{
+				g_WarnningSwitchtime = 0.0f;
+			}
+		}
+		// DyingBanner
+		if (player_dead == true)
+		{
+			D2D_POINT_2F D2_DyingBannerUI = { (FRAME_BUFFER_WIDTH - 2500.0) / 2, (FRAME_BUFFER_HEIGHT - 1730.0) / 2 };
+			D2D_RECT_F D2_DyingBanner = { 0.0f, 0.0f, 2500.0, 1730.0 };
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[71], &D2_DyingBannerUI, &D2_DyingBanner);
+		}
 
 	}
 
@@ -2064,7 +2081,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-}
+	}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -3094,10 +3111,41 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[71]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[71]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
+	// HelicopterWarnningBanner
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/HelicopterWarnning_Banner.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[72]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	m_pd2dfxGaussianBlur[72]->SetInputEffect(0, m_pd2dfxBitmapSource[72]);
+	m_pd2dfxGaussianBlur[72]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+	m_pd2dfxEdgeDetection[72]->SetInputEffect(0, m_pd2dfxBitmapSource[72]);
+	m_pd2dfxEdgeDetection[72]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[72]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[72]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[72]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[72]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// HelicopterWarnningIcon
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/HelicopterWarnning.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[73]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	m_pd2dfxGaussianBlur[73]->SetInputEffect(0, m_pd2dfxBitmapSource[73]);
+	m_pd2dfxGaussianBlur[73]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+	m_pd2dfxEdgeDetection[73]->SetInputEffect(0, m_pd2dfxBitmapSource[73]);
+	m_pd2dfxEdgeDetection[73]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[73]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[73]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[73]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[73]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
 #endif
-	}
+}
 #endif
 
 

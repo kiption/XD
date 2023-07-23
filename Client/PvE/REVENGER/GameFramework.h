@@ -168,6 +168,8 @@ public:
 	bool m_RoomClick[3]{ false };
 	bool m_SniperOn = false;
 	bool m_BloodSplatterOn = false;
+	bool m_HeliPlayerWarnningSwitch = false;
+	bool m_HeliPlayerWarnningUISwitch = false;
 	LoginSceneInfo loginpos[4];
 	LoginSceneInfo gamepos[2];
 	LoginSceneInfo lobbypos[5];
