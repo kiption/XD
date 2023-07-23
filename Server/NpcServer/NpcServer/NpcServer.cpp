@@ -1488,8 +1488,7 @@ void NPC::A_PlayerAttack()
 {
 	A_PlayerChasing();
 	if (m_shooton) {
-
-		XMFLOAT3 NPCtoPlayerLook = m_lookvec;
+		XMFLOAT3 NPCtoPlayerLook = { m_lookvec.x, 0.0f, m_lookvec.z };
 		float distance = m_Distance[m_chaseID];
 
 		XMVECTOR NPCtoPlayerLookNormal = XMVector3Normalize(XMLoadFloat3(&NPCtoPlayerLook));
@@ -2112,7 +2111,6 @@ void do_worker()
 				CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_logicservers[a_lgcsvr_num].sock), h_iocp, NULL, 0);
 				delete ex_over;
 				g_logicservers[a_lgcsvr_num].do_recv();
-				initNpc();
 				ConnectingServer = true;
 			}
 
@@ -2271,6 +2269,7 @@ void MoveNPC()
 								if (!npcsInfo[i].NPC_BulletRaycast()) {
 									g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
 									npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
+									//cout << i << "번째 NPC Attack Vec x: " << npcsInfo[i].GetAttackVec().x <<  ", y: " << npcsInfo[i].GetAttackVec().y << ", z: " << npcsInfo[i].GetAttackVec().z << endl;
 								/*	cout << i << "번째 NPC가" << npcsInfo[i].GetChaseID() << " 플레이어에게 공격하였습니다." << endl;
 									cout << i << "번째 NPC Pos x: " << npcsInfo[i].GetPosition().x << ", y: " << npcsInfo[i].GetPosition().y << ", z: " << npcsInfo[i].GetPosition().z << endl;
 									cout << i << "번쨰 NPC Node: " << npcsInfo[i].GetNodeIndex() << endl;
@@ -2476,6 +2475,7 @@ int main(int argc, char* argv[])
 			}
 		}
 	}
+	initNpc();
 
 	//======================================================================
 	//						  Threads Initialize
