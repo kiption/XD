@@ -258,6 +258,7 @@ public:
 	bool PrintRayCast = false;
 	bool TurnBack = false;
 	bool m_UpdateTurn = false;
+	int m_attackcount = 0;
 	vector<int>path;
 	unordered_set<int>m_objectlist;
 	BoundingFrustum m_frustum;
@@ -330,7 +331,7 @@ public:
 		// Idle
 	void		H_MoveToNode();																		// 지정된 노드를 찾아가며 이동 - Idle
 	void		H_UpdateCurrentNodeIndex();															// 노드 변환 시 다음 노드 지정
-	
+
 	// State
 		// Chase
 	bool		H_IsUserOnSafeZone(int user_City);													// User가 안전지대에 존재하는 지 확인
@@ -667,12 +668,9 @@ void NPC::NPC_State_Manegement(int state)
 		case NPC_ATTACK:
 		{
 			if (m_chaseID == -1 || ChaseTime - AttackTime > 5000ms) {
-				m_state = NPC_BACK;
-				m_targetNodeIndex = m_OriginNodeIndex;
+				//cout << "NPC ID: " << id << "원래의 상태로 돌아갑니다." << endl;
+				m_state = NPC_IDLE;
 				if (!path.empty()) path.clear();
-				int myCity = m_OriginNodeIndex / 4;
-
-				path = H_AStarSearch(m_currentNodeIndex, m_targetNodeIndex, myCity);
 				break;
 			}
 			else {
@@ -688,19 +686,6 @@ void NPC::NPC_State_Manegement(int state)
 		{
 			break;
 		}
-		case NPC_BACK:
-		{
-			if (H_PlayerDetact() || (m_Distance[m_chaseID] < 300) || m_chaseID != -1) {
-				m_state = NPC_ATTACK;
-				ChaseTime = system_clock::now();
-				AttackTime = ChaseTime;
-				break;
-			}
-			else {
-				NPC_BackOwnsPos();
-			}
-			break;
-		}
 		default:
 			break;
 		}
@@ -714,7 +699,7 @@ void NPC::NPC_State_Manegement(int state)
 		case NPC_IDLE:
 		{
 			A_MoveToNode();
-			if (A_PlayerDetact() && m_chaseID != -1) {
+			if ((A_PlayerDetact() || m_Distance[m_chaseID] < 200.0f) && m_chaseID != -1) {
 				m_state = NPC_ATTACK;
 				ChaseTime = system_clock::now();
 				AttackTime = ChaseTime;
@@ -747,9 +732,7 @@ void NPC::NPC_State_Manegement(int state)
 		}
 		case NPC_BACK:
 		{
-
 			NPC_BackOwnsPos();
-
 			break;
 		}
 		default:
@@ -1129,7 +1112,7 @@ void NPC::H_PlayerAttack()
 
 		random_device rd;
 		default_random_engine dre(rd());
-		uniform_real_distribution<float> ShackingAttackRange(-7, 7);
+		uniform_real_distribution<float> ShackingAttackRange(-4, 4);
 
 		float UpShaking = ShackingAttackRange(dre);
 		float UpshakingDevide = UpShaking / distance;
@@ -1151,8 +1134,6 @@ void NPC::H_PlayerAttack()
 		XMStoreFloat3(&m_AttackVec, ShakeMat);
 
 		m_AttackVec = NPCNormalize(m_AttackVec);
-
-		m_shooton = false;
 	}
 }
 
@@ -1553,14 +1534,14 @@ void NPC::A_PlayerAttack()
 		XMStoreFloat3(&m_AttackVec, ShakeMat);
 
 		m_AttackVec = NPCNormalize(m_AttackVec);
-		m_shooton = false;
+		//cout << id << "번째 NPC의 m_AttackVec x: " << m_AttackVec.x << ", y: " << m_AttackVec.y << ", z: " << m_AttackVec.z << endl;
 	}
 }
 
 bool NPC::NPC_CollideByMap()
 {
 	bool collide = false;
-	for (int i{}; i < mapobjects_info.size() - 1; ++i) {
+	for (int i{}; i < mapobjects_info.size(); ++i) {
 		if (mapobjects_info[i].m_xoobb.Intersects(m_xoobb)) {
 			m_collideBox = mapobjects_info[i];
 			collide = true;
@@ -1586,9 +1567,12 @@ bool NPC::NPC_CollideByOtherNPC()
 
 bool NPC::NPC_BulletRaycast()
 {
+	//cout << id << "번째 NPC의 공격 횟수: " << m_attackcount << endl;
+	m_attackcount++;
 	for (auto collideCheck : m_objectlist) {
 		RaycastResult result = Raycast(mapobjects_info[collideCheck].getPos(), m_AttackVec, mapobjects_info[collideCheck].m_xoobb);
 		if (result.hit) {
+			//cout << "충돌 위치, x: " << result.hitPoint.x << ", y: " << result.hitPoint.y << ", z: " << result.hitPoint.z << endl;
 			return true;
 		}
 	}
@@ -1730,9 +1714,17 @@ void NPC::NPC_BackOwnsPos()
 	else {
 		NodeMesh currentNode = MeshInfo[path[0]];
 		NodeMesh nextNode = MeshInfo[path[1]];
-
 		const bool isMovingInZ = currentNode.GetMoveingSpaceZ();
-		const bool isMovingForward = nextNode.GetIndex() % 4 < 2;
+		bool isMovingForward = nextNode.GetIndex() % 4 < 2;
+
+		if (currentNode.GetIndex() / 4 > 3) {
+			if (isMovingInZ) {
+				isMovingForward = nextNode.GetIndex() % 8 < 4;
+			}
+			else {
+				isMovingForward = nextNode.GetIndex() < 8;
+			}
+		}
 		const float speed = m_Speed;
 
 		XMFLOAT3 prevPos = pos;
@@ -1778,7 +1770,7 @@ void NPC::NPC_BackOwnsPos()
 
 void NPC::NPC_SetObjectList()
 {
-	for (int i{}; i < mapobjects_info.size() - 1; ++i) {
+	for (int i{}; i < mapobjects_info.size(); ++i) {
 		XMFLOAT3 O_pos = mapobjects_info[i].getPos();
 		XMFLOAT3 NtoO_vec = Subtract(pos, O_pos);
 		float NtoODistance = Length(NtoO_vec);
@@ -1924,7 +1916,11 @@ void process_packet(char* packet)
 		else if (damaged_packet->target == TARGET_NPC) {
 			npcsInfo[obj_id].obj_lock.lock();
 			npcsInfo[obj_id].hp -= damaged_packet->damage;
-			if (npcsInfo[obj_id].hp < 0) npcsInfo[obj_id].hp = 0; npcsInfo[obj_id].SetState(NPC_DEATH);
+			if (npcsInfo[obj_id].hp < 0)
+			{
+				npcsInfo[obj_id].hp = 0;
+				npcsInfo[obj_id].SetState(NPC_DEATH);
+			}
 			npcsInfo[obj_id].obj_lock.unlock();
 		}
 
@@ -2211,7 +2207,7 @@ void MoveNPC()
 	while (true) {
 		auto start_t = system_clock::now();
 		//======================================================================
-		if (ConnectingServer) {
+		if (ConnectingServer && ClientConnected) {
 			for (int i = 0; i < MAX_NPCS; ++i) {
 				// 클라이언트들과 NPC 사이의 거리 계산
 				if (npcsInfo[i].GetState() != NPC_DEATH)
@@ -2220,12 +2216,12 @@ void MoveNPC()
 					int temp_id = -1;
 
 					for (auto& cl : playersInfo) {
-						if (cl.id != -1 && cl.hp != 0) {
+						if (cl.id != -1 && cl.hp > 0) {
 							if (cl.role == ROLE_RIFLE && npcsInfo[i].type == NPC_ARMY) {
 								npcsInfo[i].Caculation_Distance(cl.pos, cl.id);
 								// 가장 가까운 거리를 갖고있는 아이를 chase_id로 지정
 								float distance = npcsInfo[i].GetDistance(cl.id);
-								if (temp_min > distance) {
+								if (temp_min > distance && distance < 200.0f) {
 									temp_min = distance;
 									temp_id = cl.id;
 								}
@@ -2234,7 +2230,7 @@ void MoveNPC()
 								npcsInfo[i].Caculation_Distance(cl.pos, cl.id);
 								// 가장 가까운 거리를 갖고있는 아이를 chase_id로 지정
 								float distance = npcsInfo[i].GetDistance(cl.id);
-								if (temp_min > distance) {
+								if (temp_min > distance && distance < 200.0f) {
 									temp_min = distance;
 									temp_id = cl.id;
 								}
@@ -2253,22 +2249,32 @@ void MoveNPC()
 					// 메인서버로 변경된 NPC좌표 전달
 					g_logicservers[a_lgcsvr_num].send_npc_move_packet(npcsInfo[i].GetID());
 
-					if (npcsInfo[i].GetState() == NPC_ATTACK) {
+					if (npcsInfo[i].GetState() == NPC_ATTACK && npcsInfo[i].m_shooton) {
 						if (npcsInfo[i].type == NPC_HELICOPTER) {
 							npcsInfo[i].CurrTime = system_clock::now();
+							npcsInfo[i].m_shooton = false;
 							if (npcsInfo[i].CurrTime - npcsInfo[i].PrevTime > 300ms) {
 								if (!npcsInfo[i].NPC_BulletRaycast()) {
 									g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
 									npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
+								/*	cout << i << "번째 NPC가" << npcsInfo[i].GetChaseID() << " 플레이어에게 공격하였습니다." << endl;
+									cout << i << "번째 NPC Pos x: " << npcsInfo[i].GetPosition().x << ", y: " << npcsInfo[i].GetPosition().y << ", z: " << npcsInfo[i].GetPosition().z << endl;
+									cout << i << "번쨰 NPC Node: " << npcsInfo[i].GetNodeIndex() << endl;
+								*/
 								}
 							}
 						}
 						else {
 							npcsInfo[i].CurrTime = system_clock::now();
-							if (npcsInfo[i].CurrTime - npcsInfo[i].PrevTime > 1000ms) {
+							npcsInfo[i].m_shooton = false;
+							if (npcsInfo[i].CurrTime - npcsInfo[i].PrevTime > 700ms) {
 								if (!npcsInfo[i].NPC_BulletRaycast()) {
 									g_logicservers[a_lgcsvr_num].send_npc_attack_packet(npcsInfo[i].GetID());
 									npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
+								/*	cout << i << "번째 NPC가" << npcsInfo[i].GetChaseID() << " 플레이어에게 공격하였습니다." << endl;
+									cout << i << "번째 NPC Pos x: " << npcsInfo[i].GetPosition().x << ", y: " << npcsInfo[i].GetPosition().y << ", z: " << npcsInfo[i].GetPosition().z << endl;
+									cout << i << "번쨰 NPC Node: " << npcsInfo[i].GetNodeIndex() << endl;
+								*/
 								}
 							}
 						}
