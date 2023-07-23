@@ -539,10 +539,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				// 4. 만약 죽어있는 상태면 캐릭터 조작이 불가능하게 막아야합니다.
 				if ((players_info[my_id].m_ingame_state == PL_ST_DEAD) && (!gGameFramework.player_dead)) {
 					gGameFramework.MyPlayerDieMotion();
+					gGameFramework.m_HeliPlayerWarnningUISwitch = false;
 					gGameFramework.player_dead = true;
 				}
 				if ((players_info[my_id].m_ingame_state != PL_ST_DEAD) && (gGameFramework.player_dead)) {
 					gGameFramework.MyPlayerResponeMotion();
+					gGameFramework.m_HeliPlayerWarnningUISwitch = false;
 					gGameFramework.player_dead = false;
 				}
 

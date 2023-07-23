@@ -16,18 +16,11 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	pGameObject->SetCurScene(SCENE1STAGE);
 	Rotate(0, 90, 0);
 
-
-	pBCBulletEffectShader = new CBulletEffectShader();
-	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
-	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
-
-
 	SetPlayerUpdatedContext(pContext);
 	SetCameraUpdatedContext(pContext);
 	OnPrepareAnimate();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	m_xoobb = BoundingOrientedBox(XMFLOAT3(this->GetPosition()), XMFLOAT3(15.0, 13.0, 20.0), XMFLOAT4(0, 0, 0, 1));
 }
 
 HeliPlayer::~HeliPlayer()
@@ -65,7 +58,7 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(4.0f);
 		m_pCamera = OnChangeCamera(CLOSEUP_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(0.5f, 7.8, 8.5f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 7.8, 9.0f));
 		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z), m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
@@ -129,7 +122,7 @@ void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 		if (m_xmf4x4ToParent._42 < 3.5)
 		{
 			Rotate(0, 1.5, 0);
-			Move(DIR_FORWARD, 0.5, false, { 0,0,0 });
+			//Move(DIR_FORWARD, 0.5, false, { 0,0,0 });
 		}
 	}
 

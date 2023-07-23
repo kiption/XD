@@ -33,8 +33,8 @@ GameSound::GameSound()
 	result = BackGroundSound->setMode(FMOD_UNIQUE);
 
 	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
-	result = soundSystem->createSound("Sound/HeartBeat.mp3", FMOD_UNIQUE, 0, &HartbeatSound);
-	result = HartbeatSound->setMode(FMOD_UNIQUE);
+	result = soundSystem->createSound("Sound/HeartBeat.mp3", FMOD_LOOP_NORMAL, 0, &HartbeatSound);
+	result = HartbeatSound->setMode(FMOD_LOOP_NORMAL);
 
 	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
 	result = soundSystem->createSound("Sound/AlamSound.mp3", FMOD_UNIQUE, 0, &WarnningSound);
@@ -49,12 +49,20 @@ GameSound::GameSound()
 	result = BackGroundSound->setMode(FMOD_LOOP_NORMAL);
 
 	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
-	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_CREATESTREAM, 0, &NpcshotSound);
-	NpcshotSound->setMode(FMOD_CREATESTREAM);
+	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_UNIQUE, 0, &NpcshotSound);
+	NpcshotSound->setMode(FMOD_UNIQUE);
 
 	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
 	result = soundSystem->createSound("Sound/Explosive.mp3", FMOD_UNIQUE, 0, &HeliShotDownSounds);
 	HeliShotDownSounds->setMode(FMOD_UNIQUE);
+
+	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
+	result = soundSystem->createSound("Sound/BulletFallDown.wav", FMOD_UNIQUE, 0, &FallDownEmptyBulletSounds);
+	FallDownEmptyBulletSounds->setMode(FMOD_UNIQUE);
+
+	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
+	result = soundSystem->createSound("Sound/EmptyFire.mp3", FMOD_UNIQUE, 0, &EmptyShotSounds);
+	EmptyShotSounds->setMode(FMOD_UNIQUE);
 
 	result = soundSystem->playSound(RotorSound, 0, true, &RotorChannel);
 	RotorChannel->setVolume(0.2f);
@@ -66,7 +74,7 @@ GameSound::GameSound()
 	WarnningChannel->setVolume(1.5f);
 
 	result = soundSystem->playSound(BackGroundSound, 0, true, &BackGroundChannel);
-	BackGroundChannel->setVolume(0.05f);
+	BackGroundChannel->setVolume(0.5f);
 
 	result = soundSystem->playSound(NpcshotSound, 0, true, &NpcshootChannel);
 	NpcshootChannel->setVolume(0.25f);
@@ -79,9 +87,12 @@ GameSound::GameSound()
 GameSound::~GameSound()
 {
 	result = shotSound->release();
+	result = FallDownEmptyBulletSounds->release();
 	result = HumanColliSound->release();
 	result = HeliColliSound->release();
+	result = WarnningSound->release();
 	result = HeliShotDownSounds->release();
+	result = EmptyShotSounds->release();
 	result = speakSound->release();
 	result = bgmSound->release();
 	result = HartbeatSound->release();
@@ -102,6 +113,16 @@ void GameSound::PauseHeliWarnningSound()
 void GameSound::PlayHeliWarnningSound()
 {
 	WarnningChannel->setPaused(false);
+}
+void GameSound::PlayFallDownEmptyBullet()
+{
+	result = soundSystem->playSound(FallDownEmptyBulletSounds, 0, false, &FallDownEmptyBulletChannel);
+	FallDownEmptyBulletChannel->setVolume(0.8f);
+}
+void GameSound::PlayEmptyShot()
+{
+	result = soundSystem->playSound(EmptyShotSounds, 0, false, &EmptyShotChannel);
+	EmptyShotChannel->setVolume(1.5f);
 }
 
 void GameSound::PlayShotSound()

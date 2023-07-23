@@ -763,7 +763,6 @@ void processPacket(char* ptr)
 			otherplayer_attack_id = recv_id;
 			otherplayer_attack_dir = { recv_packet->atklook_x, recv_packet->atklook_y, recv_packet->atklook_z };
 
-			// 사운드
 			if (atk_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 총성
 				//cout << "작은 총성" << endl;
 				if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
@@ -806,7 +805,14 @@ void processPacket(char* ptr)
 
 			if (recv_packet->id == my_id) {
 				if (players_info[recv_packet->id].m_bullet >= 1)
+				{
 					players_info[recv_packet->id].m_bullet--;
+					if (players_info[recv_packet->id].m_role == ROLE_RIFLE)gamesound.PlayFallDownEmptyBullet();
+				}
+				/*if (players_info[recv_packet->id].m_bullet <= 0)
+				{
+					if (players_info[recv_packet->id].m_role == ROLE_RIFLE)gamesound.PlayEmptyShot();
+				}*/
 			}
 		}
 		else if (recv_packet->obj_type == TARGET_NPC) {
