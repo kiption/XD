@@ -813,7 +813,7 @@ void processPacket(char* ptr)
 			}
 
 			if (recv_packet->id == my_id) {
-				if (players_info[recv_packet->id].m_bullet > 1)
+				if (players_info[recv_packet->id].m_bullet >= 1)
 					players_info[recv_packet->id].m_bullet--;
 			}
 		}
@@ -1002,7 +1002,6 @@ void processPacket(char* ptr)
 			q_bullet_hit_pos_mapobj.push(XMFLOAT3{ recv_packet->x, recv_packet->y, recv_packet->z });
 			break;
 		case C_OBJ_GROUND:
-			cout << "¹Ù´Ú Ãæµ¹: " << recv_packet->x << ", " << recv_packet->y << ", " << recv_packet->z << endl;
 			q_bullet_hit_pos_ground.push(XMFLOAT3{ recv_packet->x, recv_packet->y, recv_packet->z });
 			break;
 		}
