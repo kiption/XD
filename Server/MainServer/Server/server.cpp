@@ -2126,9 +2126,12 @@ void process_packet(int client_id, char* packet)
 						damaged_packet.target = TARGET_PLAYER;
 						damaged_packet.id = clients[collided_cl_id].id;
 						damaged_packet.damage = damage;
-						{
-							lock_guard<mutex> lg{ clients[collided_cl_id].s_lock };
-							clients[collided_cl_id].do_send(&damaged_packet);
+						for (auto& send_cl : clients) {
+							if (send_cl.s_state != ST_INGAME) continue;
+							if (send_cl.curr_stage == 0) continue;
+
+							lock_guard<mutex> lg{ send_cl.s_lock };
+							send_cl.do_send(&damaged_packet);
 						}
 					}
 					else {					// »ç¸Á
