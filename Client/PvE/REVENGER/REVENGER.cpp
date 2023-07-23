@@ -896,7 +896,7 @@ void networkThreadFunc()
 
 			case SEND_KEYUP_MOVEKEY:
 				if (gGameFramework.m_nMode == OPENINGSCENE) break;
-
+				if (players_info[my_id].m_role != ROLE_RIFLE) break;
 				CS_INPUT_KEYBOARD_PACKET mv_keyup_pack;
 				mv_keyup_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
 				mv_keyup_pack.type = CS_INPUT_KEYBOARD;
