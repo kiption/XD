@@ -946,7 +946,7 @@ void HeliHittingMarkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	CMaterial* pSpriteMaterial = new CMaterial(1);
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.0f, 2.f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.0f, 5.f, 0.0f, 0.0f, 0.0f, 0.0f);
 	m_nObjects = HITTINGMARKS;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);

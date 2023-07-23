@@ -3590,8 +3590,9 @@ void CGameFramework::DyingMotionNPC(int id)
 		((CFragmentsShader*)((Stage1*)m_pScene)->m_ppFragShaders[0])->m_bActive = true;
 		((CFragmentsShader*)((Stage1*)m_pScene)->m_ppFragShaders[0])->ParticlePosition =
 			((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->GetPosition();
+
 		//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->ParticlePosition
-		//	= ((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->GetPosition();
+			//= ((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + id])->GetPosition();
 
 	}
 	else {		// 사람

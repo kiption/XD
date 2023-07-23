@@ -56,6 +56,9 @@ public:
 	FMOD::Sound* FallDownEmptyBulletSounds;
 	FMOD::Channel* FallDownEmptyBulletChannel;
 	
+	FMOD::Sound* HeliWarrningHighSounds;
+	FMOD::Channel* HeliWarrningHighChannel;
+
 	FMOD_RESULT  result;
 	void* extradriverdata = 0;
 	
@@ -85,6 +88,7 @@ public:
 	void PlayOpeningSound();
 	void PlayNpcShotSound();
 	void PauseNpcShotSound();
+	void PlayHightLimitSound();
 	void reloadSound();
 
 };

@@ -40,6 +40,10 @@ GameSound::GameSound()
 	result = soundSystem->createSound("Sound/AlamSound.mp3", FMOD_UNIQUE, 0, &WarnningSound);
 	result = WarnningSound->setMode(FMOD_UNIQUE);
 
+	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
+	result = soundSystem->createSound("Sound/HighLimit.mp3", FMOD_UNIQUE, 0, &HeliWarrningHighSounds);
+	result = HeliWarrningHighSounds->setMode(FMOD_UNIQUE);
+
 	result = soundSystem->init(32, FMOD_INIT_NORMAL, extradriverdata);
 	result = soundSystem->createSound("Sound/RotorLoop.wav", FMOD_DEFAULT, 0, &RotorSound);
 	result = RotorSound->setMode(FMOD_LOOP_NORMAL);
@@ -74,10 +78,12 @@ GameSound::GameSound()
 	WarnningChannel->setVolume(1.5f);
 
 	result = soundSystem->playSound(BackGroundSound, 0, true, &BackGroundChannel);
-	BackGroundChannel->setVolume(0.5f);
+	BackGroundChannel->setVolume(0.25f);
 
 	result = soundSystem->playSound(NpcshotSound, 0, true, &NpcshootChannel);
 	NpcshootChannel->setVolume(0.25f);
+
+
 
 	shotChannel->setVolume(0.1f);
 	HelishotChannel->setVolume(0.3f);
@@ -89,6 +95,7 @@ GameSound::~GameSound()
 	result = shotSound->release();
 	result = FallDownEmptyBulletSounds->release();
 	result = HumanColliSound->release();
+	result = HeliWarrningHighSounds->release();
 	result = HeliColliSound->release();
 	result = WarnningSound->release();
 	result = HeliShotDownSounds->release();
@@ -210,4 +217,10 @@ void GameSound::PlayNpcShotSound()
 void GameSound::PauseNpcShotSound()
 {
 	NpcshootChannel->setPaused(true);
+}
+
+void GameSound::PlayHightLimitSound()
+{
+	result = soundSystem->playSound(HeliWarrningHighSounds, 0, false, &HeliWarrningHighChannel);
+	HeliWarrningHighChannel->setVolume(0.3f);
 }
