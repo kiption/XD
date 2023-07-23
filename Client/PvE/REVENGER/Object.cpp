@@ -1876,17 +1876,17 @@ void CHelicopterObjects::FallDown(float fTimeElapsed)
 	{
 		m_fElapsedTimes = 0.0f;
 	}*/
-	float FallingMaxHeight = -8.5f;
-	float staticValue = 6.3f;
-	float staticValueZ = 3.3f;
+	float FallingMaxHeight = -18.5f;
+	float staticValue = 5.3f;
+	float staticValueZ = 6.3f;
 	float randomValue = RandomValue(2.f, 8.0f);
-	XMVECTOR staticDir1 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.5, -0.25, 0.5, 0.0)));
-	XMVECTOR staticDir2 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.5, -0.25, 0.75, 0.0)));
-	XMVECTOR staticDir3 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.5, -0.25, 0.6, 0.0)));
-	XMVECTOR staticDir4 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.75, -0.25, -0.5, 0.0)));
-	XMVECTOR staticDir5 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.55, -0.25, -0.35, 0.0)));
-	XMVECTOR staticDir6 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.25, -0.25, 0.25, 0.0)));
-	XMVECTOR staticDir7 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.7, -0.25, -0.5, 0.0)));
+	XMVECTOR staticDir1 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.25, -0.5, 0.25, 0.0)));
+	XMVECTOR staticDir2 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.25, -0.5, 0.35, 0.0)));
+	XMVECTOR staticDir3 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.25, -0.5, 0.15, 0.0)));
+	XMVECTOR staticDir4 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.15, -0.5, -0.5, 0.0)));
+	XMVECTOR staticDir5 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.25, -0.5, -0.35, 0.0)));
+	XMVECTOR staticDir6 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.25, -0.5, 0.25, 0.0)));
+	XMVECTOR staticDir7 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.1, -0.5, -0.25, 0.0)));
 	for (int i = 0; i < 2; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir1);
 	for (int i = 2; i < 4; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir2);
 	for (int i = 4; i < 5; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir3);
@@ -2007,18 +2007,6 @@ void CHelicopterObjects::FallDown(float fTimeElapsed)
 		m_pFrameFragObj10->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[11].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
 		m_pFrameFragObj10->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[11].z * staticValueZ * fTimeElapsed;
 	}
-	//if (m_pFrameFragObj1->m_xmf4x4ToParent._42 < 2.0)m_pFrameFragObj1->SetPosition()
-	//if (m_pFrameFragObj2->m_xmf4x4ToParent._42 < 2.0)m_pFrameFragObj2->m_xmf4x4ToParent._42 = 1.0f;
-	//if (m_pFrameFragObj3->m_xmf4x4ToParent._42 < 2.0)m_pFrameFragObj3->m_xmf4x4ToParent._42 = 1.0f;
-	//if (m_pFrameFragObj4->m_xmf4x4ToParent._42 < 2.0)m_pFrameFragObj4->m_xmf4x4ToParent._42 = 1.0f;
-	//if (m_pFrameFragObj5->m_xmf4x4ToParent._42 < 2.0)m_pFrameFragObj5->m_xmf4x4ToParent._42 = 1.0f;
-	//if (m_pFrameFragObj6->m_xmf4x4ToParent._42 < 2.0)m_pFrameFragObj6->m_xmf4x4ToParent._42 = 1.0f;
-	//if (m_pFrameFragObj7->m_xmf4x4ToParent._42 < 2.0)m_pFrameFragObj7->m_xmf4x4ToParent._42 = 1.0f;
-	//if (m_pFrameFragObj8->m_xmf4x4ToParent._42 < 2.0)m_pFrameFragObj8->m_xmf4x4ToParent._42 = 1.0f;
-	//if (m_pFrameFragObj9->m_xmf4x4ToParent._42 < 2.0)m_pFrameFragObj9->m_xmf4x4ToParent._42 = 1.0f;
-	//if (m_pFrameFragObj10->m_xmf4x4ToParent._42 < 2.0)m_pFrameFragObj10->m_xmf4x4ToParent._42 = 1.0f;
-	//if (m_pTailRotorFrame->m_xmf4x4ToParent._42 < 2.0)m_pTailRotorFrame->m_xmf4x4ToParent._42 = 1.0f;
-	//if (m_pMainRotorFrame->m_xmf4x4ToParent._42 < 2.0)m_pMainRotorFrame->m_xmf4x4ToParent._42 = 1.0f;
 
 	CGameObject::Animate(fTimeElapsed);
 }

@@ -14,7 +14,7 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	SetChild(pGameObject, false);
 	pGameObject->SetScale(1.1, 1.0, 1.2);
 	pGameObject->SetCurScene(SCENE1STAGE);
-	Rotate(0, 90, 0);
+
 
 	SetPlayerUpdatedContext(pContext);
 	SetCameraUpdatedContext(pContext);
@@ -54,11 +54,11 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	case CLOSEUP_PERSON_CAMERA:
 		SetFriction(600.0f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(50.0f);
-		SetMaxVelocityY(4.0f);
+		SetMaxVelocityXZ(60.0f);
+		SetMaxVelocityY(10.0f);
 		m_pCamera = OnChangeCamera(CLOSEUP_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 7.8, 9.0f));
+		m_pCamera->SetOffset(XMFLOAT3(-1.3f, 7.2, 10.4f));
 		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z), m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
@@ -113,19 +113,23 @@ void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 
 	if (m_bDieState == true)
 	{
-	
+		Rotate(-3.5, 5.5, 0);
 		if (m_xmf4x4ToParent._42 > 3.5)
 		{
-			Rotate(-2, 4, 0);
-			Move(DIR_DOWN, 0.7, false, { 0,0,0 });
+			Move(DIR_DOWN, 0.5, false, { 0,0,0 });
 		}
 		if (m_xmf4x4ToParent._42 < 3.5)
 		{
-			Rotate(0, 1.5, 0);
-			//Move(DIR_FORWARD, 0.5, false, { 0,0,0 });
+			//SetGravity(XMFLOAT3(0.0, 5.0, 0.0));
+			
 		}
 	}
 
+	if (m_bDieState == false)
+	{
+		SetGravity(XMFLOAT3(0.0, 0.0, 0.0));
+	}
+	//if (m_xmf4x4ToParent._42 <20.0) gamesound.PlayHightLimitSound();
 	
 }
 

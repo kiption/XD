@@ -68,22 +68,6 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 
 
-	pBCBulletEffectShader = new CBulletEffectShader();
-	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
-	pBCBulletEffectShader->SetCurScene(SCENE1STAGE);
-
-	for (int i = 0; i < BULLETS; i++)
-	{
-		CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
-		pBulletObject = new CBulletObject(m_fBulletEffectiveRange);
-		pBulletObject->SetChild(pBulletMesh, false);
-		pBulletObject->SetMovingSpeed(1000.0f);
-		pBulletObject->SetActive(false);
-		pBulletObject->SetCurScene(SCENE1STAGE);
-		m_ppBullets[i] = pBulletObject;
-		pBulletMesh->AddRef();
-	}
-	//SetPosition(XMFLOAT3(.0f, 8.0f, 1000.0));
 	SetPlayerUpdatedContext(pContext);
 	SetCameraUpdatedContext(pContext);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -96,7 +80,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 CHumanPlayer::~CHumanPlayer()
 {
-	for (int i = 0; i < BULLETS; i++) if (m_ppBullets[i]) delete m_ppBullets[i];
+	
 }
 
 CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
@@ -329,14 +313,6 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 void CHumanPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 
-	for (int i = 0; i < BULLETS; i++)
-	{
-		if (m_ppBullets[i]->m_bActive) {
-
-			m_ppBullets[i]->Animate(fTimeElapsed);
-
-		}
-	}
 	if (m_bReloadState == true)
 		m_pSkinnedAnimationController->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
 	if (m_bReloadState == false && m_bDieState!=true)
@@ -385,45 +361,5 @@ void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CShader* p
 
 void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
 {
-
-
-	CBulletObject* pBulletObject = NULL;
-	for (int i = 0; i < BULLETS; i++)
-	{
-		if (!m_ppBullets[i]->m_bActive)
-		{
-			pBulletObject = m_ppBullets[i];
-			pBulletObject->Reset();
-			//gamesound.shootSound->release();
-			break;
-		}
-
-
-	}
-	XMFLOAT3 PlayerLook = this->GetLookVector();
-	XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
-	XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
-
-	if (pBulletObject)
-	{
-
-		XMFLOAT3 PlayerLook = GetLookVector();
-		XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
-		XMFLOAT3 CaemraPosition = m_pCamera->GetPosition();
-		XMFLOAT3 TotalLookVector = Vector3::Normalize(Vector3::Add(PlayerLook, CameraLook));
-		XMFLOAT3 xmf3Position = m_pBulletFindFrame->GetPosition();
-		XMFLOAT3 xmf3Direction = CameraLook;
-		pBulletObject->m_xmf4x4ToParent = m_xmf4x4World;
-		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
-
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
-		pBulletObject->Rotate(90.0, 0.0, 0.0);
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition.x, xmf3FirePosition.y, xmf3FirePosition.z));
-		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->SetScale(0.4, 0.4, 1.2);
-		pBulletObject->SetActive(true);
-
-	}
-
 }
 
