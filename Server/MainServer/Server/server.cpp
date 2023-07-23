@@ -1295,6 +1295,10 @@ void process_packet(int client_id, char* packet)
 						lock_guard<mutex> lg{ cl.s_lock };
 						cl.do_send(&npc_damaged_pack);
 					}
+					{
+						lock_guard<mutex> lg{ npc_server.s_lock };
+						npc_server.do_send(&npc_damaged_pack);
+					}
 
 					// npc 데미지 처리
 					if (npcs[collided_npc_id].hp > damage) {
