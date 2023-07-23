@@ -1301,8 +1301,13 @@ void disconnect(int target_id, int target)
 		wsprintfW(wchar_buf, L"%d", 10 + session_id);	// 십의자리: Actvie여부(S: 1, A: 2), 일의자리: 서버ID
 
 		// XD폴더 내에서 동작할 때(내부 테스트)와 외부에서 실행할 때를 구분해줍니다.
-		ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L"../../../Execute/Execute_S", SW_SHOW);	// 내부 테스트용 (컴파일러로 실행할때)
-		//ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L".", SW_SHOW);							// 외부 수출용 (exe로 실행할때
+		string XDFolderKeyword = "XD";
+		if (filesystem::current_path().string().find(XDFolderKeyword) != string::npos) {
+			ShellExecute(NULL, L"open", L"LobbyServer.exe", wchar_buf, L"./x64/Release", SW_SHOW);	// 내부 테스트용
+		}
+		else {
+			ShellExecute(NULL, L"open", L"LobbyServer.exe", wchar_buf, L".", SW_SHOW);					// 외부 수출용 (exe로 실행될때)
+		}
 
 		// 클라이언트에게 Active서버가 다운되었다고 알려줌.
 		if (!b_active_server) {	// 내가 Active가 아니면 상대가 Active임. (서버가 2개밖에 없기 때문)
