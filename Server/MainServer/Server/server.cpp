@@ -1970,7 +1970,7 @@ void process_packet(int client_id, char* packet)
 			if (cl.pl_state == PL_ST_DEAD) continue;	// 죽은 유저와는 검사하지 않음.
 
 			SESSION bullet;
-			bullet.pos = clients[client_id].pos;
+			bullet.pos = npcs[recv_attack_pack->n_id].pos;
 			bullet.m_lookvec = XMFLOAT3(recv_attack_pack->atklook_x, recv_attack_pack->atklook_y, recv_attack_pack->atklook_z);
 			bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
 				, XMFLOAT3(0.2f, 0.2f, 0.6f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
