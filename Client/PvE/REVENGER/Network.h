@@ -764,14 +764,6 @@ void processPacket(char* ptr)
 			otherplayer_attack_dir = { recv_packet->atklook_x, recv_packet->atklook_y, recv_packet->atklook_z };
 
 			// 사운드
-		/*	if (players_info[recv_packet->id].m_role == ROLE_HELI)
-			{
-				gamesound.PlayHeliShotSound();
-			}
-			if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
-			{
-				gamesound.PlayShotSound();
-			}*/
 			if (atk_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 총성
 				//cout << "작은 총성" << endl;
 				if (players_info[recv_packet->id].m_role == ROLE_RIFLE)

@@ -1194,6 +1194,16 @@ void uiThreadFunc() {
 				
 				}
 			}
+			else {
+				if (players_info[my_id].m_role == ROLE_RIFLE) {
+
+				}
+				else if (players_info[my_id].m_role == ROLE_HELI) {
+					if (gGameFramework.m_HeliPlayerWarnningUISwitch)
+						gGameFramework.m_HeliPlayerWarnningUISwitch = false;
+
+				}
+			}
 			
 			
 		}

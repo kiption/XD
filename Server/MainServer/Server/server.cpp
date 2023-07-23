@@ -1155,7 +1155,7 @@ void process_packet(int client_id, char* packet)
 		bullet.pos.y += 2.8f;
 		bullet.m_lookvec = clients[client_id].m_cam_lookvec;
 		bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
-			, XMFLOAT3(0.1f, 0.1f, 0.4f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+			, XMFLOAT3(0.1f, 0.1f, 0.3f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
 		XMFLOAT3 bullet_initpos = bullet.pos;
 		XMFLOAT3 collide_pos = XMF_fault;
@@ -1963,7 +1963,6 @@ void process_packet(int client_id, char* packet)
 			lock_guard<mutex> lg{ cl.s_lock };
 			cl.do_send(&atk_pack);
 		}
-		//====
 
 		// 2. 충돌검사
 		int npc_id = recv_attack_pack->n_id;
@@ -1972,9 +1971,11 @@ void process_packet(int client_id, char* packet)
 		// 야매방법 (추후에 반드시 레이캐스트로 바꿔야함!!!)
 		SESSION bullet;
 		bullet.pos = npcs[npc_id].pos;
+		if (MAX_NPC_HELI <= npcs[recv_attack_pack->n_id].id) bullet.pos.y += 2.8f;
 		bullet.m_lookvec = XMFLOAT3{ recv_attack_pack->atklook_x, recv_attack_pack->atklook_y, recv_attack_pack->atklook_z };
 		bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
 			, XMFLOAT3(0.1f, 0.1f, 0.3f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+		cout << "총알 진행방향: " << bullet.m_lookvec.x << ", " << bullet.m_lookvec.y << ", " << bullet.m_lookvec.z << endl;
 
 		XMFLOAT3 bullet_initpos = bullet.pos;
 		XMFLOAT3 collide_pos = XMF_fault;
@@ -2037,7 +2038,7 @@ void process_packet(int client_id, char* packet)
 			}
 
 			// 3. 바닥이랑 검사
-			if (bullet.pos.y <= 6.0f) {
+			if (bullet.pos.y <= 0.0f) {
 				if (XMF_Distance(bullet.pos, bullet_initpos) < XMF_Distance(collide_pos, bullet_initpos)) {	// 저장해둔 충돌점보다 가까이에 있으면 업데이트
 					b_collide = true;
 
@@ -2095,7 +2096,7 @@ void process_packet(int client_id, char* packet)
 						damage = NPC_RIFLE_DAMAGE;
 					}
 					if (clients[collided_cl_id].role == ROLE_HELI) {	// 헬기 플레이어는 덜 아프게 맞는다.
-						damage = damage - static_cast<int>(damage * 0.3f);
+						damage = damage - static_cast<int>(damage * 0.4f);
 					}
 					int after_hp = clients[collided_cl_id].hp - damage;	//
 
