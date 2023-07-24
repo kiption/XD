@@ -1795,6 +1795,78 @@ void process_packet(int client_id, char* packet)
 
 		break;
 	}
+	case CS_PARTICLE_COLLIDE:
+	{
+		CS_PARTICLE_COLLIDE_PACKET* particle_pack = reinterpret_cast<CS_PARTICLE_COLLIDE_PACKET*>(packet);
+
+		// 데미지 계산
+		int damage = static_cast<int>(PARTICLE_BASIC_DAMAGE * particle_pack->particle_mass);
+		if (clients[client_id].role == ROLE_HELI) {	// 헬기 플레이어는 덜 아프게 맞는다.
+			damage = damage - static_cast<int>(damage * 0.4f);
+		}
+		int after_hp = clients[client_id].hp - damage;	//
+
+		// 우선 NPC서버에게 플레이어 데미지 정보를 보내줍니다.
+		SC_DAMAGED_PACKET damaged_packet;
+		damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
+		damaged_packet.type = SC_DAMAGED;
+		damaged_packet.target = TARGET_PLAYER;
+		damaged_packet.id = clients[client_id].inserver_index;
+		damaged_packet.damage = damage;
+		{
+			lock_guard<mutex> lg{ npc_server.s_lock };
+			npc_server.do_send(&damaged_packet);
+		}
+
+		// 데미지 처리
+		if (after_hp > 0) {		// 데미지 처리
+			clients[client_id].s_lock.lock();
+			clients[client_id].hp -= damage;
+			clients[client_id].s_lock.unlock();
+			cout << "파티클에 충돌하여 Player[" << client_id << "]가 피해(-" << damage << ")를 입었다. (HP: " << clients[client_id].hp << " 남음)\n" << endl;
+
+			SC_DAMAGED_PACKET damaged_packet;
+			damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
+			damaged_packet.type = SC_DAMAGED;
+			damaged_packet.target = TARGET_PLAYER;
+			damaged_packet.id = clients[client_id].id;
+			damaged_packet.damage = damage;
+			for (auto& send_cl : clients) {
+				if (send_cl.s_state != ST_INGAME) continue;
+				if (send_cl.curr_stage == 0) continue;
+
+				lock_guard<mutex> lg{ send_cl.s_lock };
+				send_cl.do_send(&damaged_packet);
+			}
+		}
+		else {					// 사망
+			clients[client_id].s_lock.lock();
+			clients[client_id].hp = 0;
+			clients[client_id].pl_state = PL_ST_DEAD;
+			clients[client_id].death_time = system_clock::now();
+			clients[client_id].s_lock.unlock();
+			cout << "파티클에 충돌하여 Player[" << client_id << "]가 사망하였다." << endl;
+			dead_player_cnt++;
+
+			SC_OBJECT_STATE_PACKET death_packet;
+			death_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
+			death_packet.type = SC_OBJECT_STATE;
+			death_packet.target = TARGET_PLAYER;
+			death_packet.id = clients[client_id].id;
+			death_packet.state = PL_ST_DEAD;
+			for (auto& send_cl : clients) {
+				if (send_cl.s_state != ST_INGAME) continue;
+				if (send_cl.curr_stage == 0) continue;
+
+				{
+					lock_guard<mutex> lg{ send_cl.s_lock };
+					send_cl.do_send(&death_packet);
+				}
+			}
+		}
+
+		break;
+	}// CS_PARTICLE_COLLIDE end
 	case CS_PING:
 	{
 		CS_PING_PACKET* re_login_pack = reinterpret_cast<CS_PING_PACKET*>(packet);

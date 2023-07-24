@@ -917,29 +917,29 @@ void Stage1::ParticleCollisionResult()
 		P10 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pTailRotorFrame->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
 		P11 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pMainRotorFrame->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
 
-		if (HeliPlayeroobb.Intersects(P1)) cout << "Heli Collision P1!" << endl; m_bHeliParticleCollisionCheck = true;	
-		if (HeliPlayeroobb.Intersects(P2)) cout << "Heli Collision P2!" << endl; m_bHeliParticleCollisionCheck = true;	
-		if (HeliPlayeroobb.Intersects(P3)) cout << "Heli Collision P3!" << endl; m_bHeliParticleCollisionCheck = true;	
-		if (HeliPlayeroobb.Intersects(P4)) cout << "Heli Collision P4!" << endl; m_bHeliParticleCollisionCheck = true;	
-		if (HeliPlayeroobb.Intersects(P5)) cout << "Heli Collision P5!" << endl; m_bHeliParticleCollisionCheck = true;	
-		if (HeliPlayeroobb.Intersects(P6)) cout << "Heli Collision P6!" << endl; m_bHeliParticleCollisionCheck = true;	
-		if (HeliPlayeroobb.Intersects(P7)) cout << "Heli Collision P7!" << endl; m_bHeliParticleCollisionCheck = true;	
-		if (HeliPlayeroobb.Intersects(P8)) cout << "Heli Collision P8!" << endl; m_bHeliParticleCollisionCheck = true;	
-		if (HeliPlayeroobb.Intersects(P9)) cout << "Heli Collision P9!" << endl; m_bHeliParticleCollisionCheck = true;	
-		if (HeliPlayeroobb.Intersects(P10)) cout << "Heli Collision P10!" << endl; m_bHeliParticleCollisionCheck = true;
-		if (HeliPlayeroobb.Intersects(P11)) cout << "Heli Collision P11!" << endl; m_bHeliParticleCollisionCheck = true;
+		if (HeliPlayeroobb.Intersects(P1)) { cout << "Heli Collision P1!" << endl; m_bHeliParticleCollisionCheck = true; }
+		if (HeliPlayeroobb.Intersects(P2)) { cout << "Heli Collision P2!" << endl; m_bHeliParticleCollisionCheck = true; }
+		if (HeliPlayeroobb.Intersects(P3)) { cout << "Heli Collision P3!" << endl; m_bHeliParticleCollisionCheck = true; }
+		if (HeliPlayeroobb.Intersects(P4)) { cout << "Heli Collision P4!" << endl; m_bHeliParticleCollisionCheck = true; }
+		if (HeliPlayeroobb.Intersects(P5)) { cout << "Heli Collision P5!" << endl; m_bHeliParticleCollisionCheck = true; }
+		if (HeliPlayeroobb.Intersects(P6)) { cout << "Heli Collision P6!" << endl; m_bHeliParticleCollisionCheck = true; }
+		if (HeliPlayeroobb.Intersects(P7)) { cout << "Heli Collision P7!" << endl; m_bHeliParticleCollisionCheck = true; }
+		if (HeliPlayeroobb.Intersects(P8)) { cout << "Heli Collision P8!" << endl; m_bHeliParticleCollisionCheck = true; }
+		if (HeliPlayeroobb.Intersects(P9)) { cout << "Heli Collision P9!" << endl; m_bHeliParticleCollisionCheck = true; }
+		if (HeliPlayeroobb.Intersects(P10)) { cout << "Heli Collision P10!" << endl; m_bHeliParticleCollisionCheck = true; }
+		if (HeliPlayeroobb.Intersects(P11)) { cout << "Heli Collision P11!" << endl; m_bHeliParticleCollisionCheck = true; }
 
-		if (HumanPlayeroobb.Intersects(P1)) cout << "Human Collision P1!" << endl; m_bHumanParticleCollisionCheck = true;
-		if (HumanPlayeroobb.Intersects(P2)) cout << "Human Collision P2!" << endl; m_bHumanParticleCollisionCheck = true;
-		if (HumanPlayeroobb.Intersects(P3)) cout << "Human Collision P3!" << endl; m_bHumanParticleCollisionCheck = true;
-		if (HumanPlayeroobb.Intersects(P4)) cout << "Human Collision P4!" << endl; m_bHumanParticleCollisionCheck = true;
-		if (HumanPlayeroobb.Intersects(P5)) cout << "Human Collision P5!" << endl; m_bHumanParticleCollisionCheck = true;
-		if (HumanPlayeroobb.Intersects(P6)) cout << "Human Collision P6!" << endl; m_bHumanParticleCollisionCheck = true;
-		if (HumanPlayeroobb.Intersects(P7)) cout << "Human Collision P7!" << endl; m_bHumanParticleCollisionCheck = true;
-		if (HumanPlayeroobb.Intersects(P8)) cout << "Human Collision P8!" << endl; m_bHumanParticleCollisionCheck = true;
-		if (HumanPlayeroobb.Intersects(P9)) cout << "Human Collision P9!" << endl; m_bHumanParticleCollisionCheck = true;
-		if (HumanPlayeroobb.Intersects(P10)) cout << "Human Collision P10!" << endl; m_bHumanParticleCollisionCheck = true;
-		if (HumanPlayeroobb.Intersects(P11)) cout << "Human Collision P11!" << endl; m_bHumanParticleCollisionCheck = true;
+		if (HumanPlayeroobb.Intersects(P1)) { cout << "Human Collision P1!" << endl; m_bHumanParticleCollisionCheck = true; }
+		if (HumanPlayeroobb.Intersects(P2)) { cout << "Human Collision P2!" << endl; m_bHumanParticleCollisionCheck = true; }
+		if (HumanPlayeroobb.Intersects(P3)) { cout << "Human Collision P3!" << endl; m_bHumanParticleCollisionCheck = true; }
+		if (HumanPlayeroobb.Intersects(P4)) { cout << "Human Collision P4!" << endl; m_bHumanParticleCollisionCheck = true; }
+		if (HumanPlayeroobb.Intersects(P5)) { cout << "Human Collision P5!" << endl; m_bHumanParticleCollisionCheck = true; }
+		if (HumanPlayeroobb.Intersects(P6)) { cout << "Human Collision P6!" << endl; m_bHumanParticleCollisionCheck = true; }
+		if (HumanPlayeroobb.Intersects(P7)) { cout << "Human Collision P7!" << endl; m_bHumanParticleCollisionCheck = true; }
+		if (HumanPlayeroobb.Intersects(P8)) { cout << "Human Collision P8!" << endl; m_bHumanParticleCollisionCheck = true; }
+		if (HumanPlayeroobb.Intersects(P9)) { cout << "Human Collision P9!" << endl; m_bHumanParticleCollisionCheck = true; }
+		if (HumanPlayeroobb.Intersects(P10)) { cout << "Human Collision P10!" << endl; m_bHumanParticleCollisionCheck = true; }
+		if (HumanPlayeroobb.Intersects(P11)) { cout << "Human Collision P11!" << endl; m_bHumanParticleCollisionCheck = true; }
 	}
 
 
@@ -1157,16 +1157,19 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	}
 
 
-	if (m_bHeliParticleCollisionCheck == true)
-	{
-		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_xmf4x4ToParent._41 -= 4.0f;
-		m_bHumanParticleCollisionCheck = false;
-	}
-	if (m_bHeliParticleCollisionCheck == true)
-	{
-		
-		m_bHeliParticleCollisionCheck = false;
-	}
+	//if (m_bHeliParticleCollisionCheck == true)
+	//{
+	//	((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_xmf4x4ToParent._41 -= 4.0f;
+	//	m_bHumanParticleCollisionCheck = false;
+	//}
+	//if (m_bHeliParticleCollisionCheck == true)
+	//{
+	//	
+	//	m_bHeliParticleCollisionCheck = false;
+	//}
+	//m_bHumanParticleCollisionCheck = false;
+	//m_bHeliParticleCollisionCheck = false;
+
 	ParticleCollisionResult();
 	ParticleAnimation();
 }

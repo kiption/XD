@@ -990,24 +990,28 @@ void networkThreadFunc()
 		}
 
 		// 4. 파티클 충돌
-		/*
-		if (players_info[my_id].m_role == ROLE_HELI && ((Stage1*)gGameFramework.m_pScene)->m_bHeliParticleCollisionCheck) {
-			CS_PARTICLE_COLLIDE_PACKET heli_particle_coll_pack;
-			heli_particle_coll_pack.size = sizeof(CS_PARTICLE_COLLIDE_PACKET);
-			heli_particle_coll_pack.type = CS_PARTICLE_COLLIDE;
-			heli_particle_coll_pack.particle_mass = 1.0f;
-			cout << "파티클 충돌: 헬리" << endl;
-			sendPacket(&heli_particle_coll_pack);
-		}f
-		if (players_info[my_id].m_role == ROLE_RIFLE && ((Stage1*)gGameFramework.m_pScene)->m_bHumanParticleCollisionCheck) {
-			CS_PARTICLE_COLLIDE_PACKET human_particle_coll_pack;
-			human_particle_coll_pack.size = sizeof(CS_PARTICLE_COLLIDE_PACKET);
-			human_particle_coll_pack.type = CS_PARTICLE_COLLIDE;
-			human_particle_coll_pack.particle_mass = 1.0f;
-			cout << "파티클 충돌: 사람" << endl;
-			sendPacket(&human_particle_coll_pack);
+		if (gGameFramework.m_nMode == SCENE1STAGE) {
+			if (players_info[my_id].m_role == ROLE_HELI && ((Stage1*)gGameFramework.m_pScene)->m_bHeliParticleCollisionCheck == true) {
+				CS_PARTICLE_COLLIDE_PACKET heli_particle_coll_pack;
+				heli_particle_coll_pack.size = sizeof(CS_PARTICLE_COLLIDE_PACKET);
+				heli_particle_coll_pack.type = CS_PARTICLE_COLLIDE;
+				heli_particle_coll_pack.particle_mass = 1.0f;
+				cout << "파티클 충돌: 헬리" << endl;
+				sendPacket(&heli_particle_coll_pack);
+
+				((Stage1*)gGameFramework.m_pScene)->m_bHeliParticleCollisionCheck = false;
+			}
+			if (players_info[my_id].m_role == ROLE_RIFLE && ((Stage1*)gGameFramework.m_pScene)->m_bHumanParticleCollisionCheck == true) {
+				CS_PARTICLE_COLLIDE_PACKET human_particle_coll_pack;
+				human_particle_coll_pack.size = sizeof(CS_PARTICLE_COLLIDE_PACKET);
+				human_particle_coll_pack.type = CS_PARTICLE_COLLIDE;
+				human_particle_coll_pack.particle_mass = 1.0f;
+				cout << "파티클 충돌: 사람" << endl;
+				sendPacket(&human_particle_coll_pack);
+
+				((Stage1*)gGameFramework.m_pScene)->m_bHumanParticleCollisionCheck = false;
+			}
 		}
-		*/
 
 		this_thread::yield();
 	}
