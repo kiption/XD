@@ -842,6 +842,12 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case VK_END:
 				q_keyboardInput.push(SEND_KEY_END);	// 몰살 치트키
 				break;
+			case VK_PRIOR:	// Page up key
+				q_keyboardInput.push(SEND_KEY_PGUP); // 원샷원킬 치트키
+				break;
+			case VK_NEXT:	// Page down key
+				q_keyboardInput.push(SEND_KEY_PGDN); // 원샷원킬 치트키 해제
+				break;
 			case 'W':
 			case 'A':
 			case 'S':

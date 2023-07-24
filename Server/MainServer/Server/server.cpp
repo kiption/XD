@@ -194,6 +194,8 @@ public:
 
 	unordered_set<int> view_list;	// 시야처리 (id값을 넣어주게 된다.) => 그럼 무엇을 해야하냐: 플레이어, npc들의 ID를 완전 다른값으로 설정해줘야한다.
 
+	bool oneshot_onekill_cheat;		//[치트키] 원샷 원킬
+
 public:
 	SESSION()
 	{
@@ -217,6 +219,8 @@ public:
 		curr_stage = 0;
 
 		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+
+		oneshot_onekill_cheat = false;
 	}
 
 	~SESSION() {}
@@ -278,6 +282,8 @@ public:
 		curr_stage = 0;
 
 		setBB();
+
+		oneshot_onekill_cheat = false;
 	}
 };
 
@@ -1325,17 +1331,23 @@ void process_packet(int client_id, char* packet)
 					break;
 				case C_OBJ_NPC:
 					// 데미지 계산
-					float dec_damage = static_cast<float>(RIFLE_DAMAGE);
-					if (XMF_Distance(npcs[collided_npc_id].pos, bullet_initpos) > 10) {	// 멀리 떨어질 수록 데미지가 조금씩 감소한다.
-						float dist = static_cast<int>(XMF_Distance(npcs[collided_npc_id].pos, bullet_initpos));
-						dec_damage = dec_damage / 100.f * (dist / 10);
+					int damage = 0;
+					if (clients[client_id].oneshot_onekill_cheat) {	// 원샷원킬 치트키 적용중일때
+						damage = 9999;
 					}
-					int damage = static_cast<int>(RIFLE_DAMAGE - dec_damage);
-					if (collided_npc_id < MAX_NPC_HELI) {	// 헬기는 좀 덜 아프게 맞는다.
-						damage = damage - static_cast<int>(damage * 0.3f);
-					}
-					if (damage < 1) {	// 최소한 1 데미지는 주도록
-						damage = 1;
+					else {
+						float dec_damage = static_cast<float>(RIFLE_DAMAGE);
+						if (XMF_Distance(npcs[collided_npc_id].pos, bullet_initpos) > 10) {	// 멀리 떨어질 수록 데미지가 조금씩 감소한다.
+							float dist = static_cast<int>(XMF_Distance(npcs[collided_npc_id].pos, bullet_initpos));
+							dec_damage = dec_damage / 100.f * (dist / 10);
+						}
+						damage = static_cast<int>(RIFLE_DAMAGE - dec_damage);
+						if (collided_npc_id < MAX_NPC_HELI) {	// 헬기는 좀 덜 아프게 맞는다.
+							damage = damage - static_cast<int>(damage * 0.3f);
+						}
+						if (damage < 1) {	// 최소한 1 데미지는 주도록
+							damage = 1;
+						}
 					}
 
 					// 우선 맞아서 죽든 안죽든 피격 위치를 클라이언트에게 알려줍니다. (피터지는? 연출을 위함)
@@ -1611,7 +1623,8 @@ void process_packet(int client_id, char* packet)
 			}
 			break;
 
-		case PACKET_KEY_END:
+		case PACKET_KEY_END:	// 몰살 치트키
+		{
 			if (clients[client_id].s_state != ST_INGAME) break;	// 잘못된 요청
 			if (clients[client_id].curr_stage == 0) break;	// 잘못된 요청
 			if (!b_active_server) break;	// 잘못된 요청
@@ -1738,7 +1751,39 @@ void process_packet(int client_id, char* packet)
 				}
 				cout << stage1_missions[curr_mission].curr << " / " << stage1_missions[curr_mission].goal << "\n" << endl;
 			}
-		}
+			break;
+		}// PACKET_KEY_END case end
+		case PACKET_KEY_PGUP:		// 원샷원킬 치트키
+		{
+			if (clients[client_id].s_state != ST_INGAME) break;	// 잘못된 요청
+			if (clients[client_id].curr_stage == 0) break;	// 잘못된 요청
+			if (!b_active_server) break;	// 잘못된 요청
+			if (curr_mission_stage[clients[client_id].curr_stage] != 0) break;	// 잘못된 요청
+			if (clients[client_id].oneshot_onekill_cheat == true) break;	// 이미 원샷 원킬 적용중임.
+
+			cout << "==원샷원킬 치트키==\n" << endl;
+			clients[client_id].s_lock.lock();
+			clients[client_id].oneshot_onekill_cheat = true;
+			clients[client_id].s_lock.unlock();
+
+			break;
+		}// PACKET_KEY_PGUP case end
+		case PACKET_KEY_PGDN:		// 원샷원킬 치트키 해제
+		{
+			if (clients[client_id].s_state != ST_INGAME) break;	// 잘못된 요청
+			if (clients[client_id].curr_stage == 0) break;	// 잘못된 요청
+			if (!b_active_server) break;	// 잘못된 요청
+			if (curr_mission_stage[clients[client_id].curr_stage] != 0) break;	// 잘못된 요청
+			if (clients[client_id].oneshot_onekill_cheat == false) break;	// 이미 원샷 원킬 치트키가 적용중이지 않음
+
+			cout << "==원샷원킬 치트키 해제==\n" << endl;
+			clients[client_id].s_lock.lock();
+			clients[client_id].oneshot_onekill_cheat = false;
+			clients[client_id].s_lock.unlock();
+
+			break;
+		}// PACKET_KEY_PGDN case end
+		}// switch end
 
 		break;
 	}// CS_INPUT_KEYBOARD end

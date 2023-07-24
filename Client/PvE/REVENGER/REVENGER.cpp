@@ -932,6 +932,26 @@ void networkThreadFunc()
 				sendPacket(&cheatkey_allkill_pack);
 				break;
 
+			case SEND_KEY_PGUP:	// 치트키: 원샷원킬
+				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+
+				CS_INPUT_KEYBOARD_PACKET cheatkey_oneshotonekill_pack;
+				cheatkey_oneshotonekill_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+				cheatkey_oneshotonekill_pack.type = CS_INPUT_KEYBOARD;
+				cheatkey_oneshotonekill_pack.keytype = PACKET_KEY_PGUP;
+				sendPacket(&cheatkey_oneshotonekill_pack);
+				break;
+
+			case SEND_KEY_PGDN:	// 치트키: 원샷원킬 해제
+				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+
+				CS_INPUT_KEYBOARD_PACKET cheatkey_oneshotonekillend_pack;
+				cheatkey_oneshotonekillend_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+				cheatkey_oneshotonekillend_pack.type = CS_INPUT_KEYBOARD;
+				cheatkey_oneshotonekillend_pack.keytype = PACKET_KEY_PGDN;
+				sendPacket(&cheatkey_oneshotonekillend_pack);
+				break;
+
 			default:
 				cout << "[KeyInput Error] Unknown Key Type." << endl;
 			}
