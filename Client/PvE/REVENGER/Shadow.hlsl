@@ -28,7 +28,7 @@ struct VS_SHADOW_MAP_OUTPUT
 	float2 uv : TEXCOORD;
 	float3 tangentW : TANGENT;
 	float3 bitangentW : BITANGENT;
-	float4 uvs[MAX_LIGHTS] : TEXCOORD1;
+	float4 uvs[MAX_LIGHTS] : TEXCOORD1; 
 	int4 indices : BONEINDEX;
 	float4 weights : BONEWEIGHT;
 };
@@ -72,25 +72,6 @@ VS_LIGHTING_OUTPUT VSLighting(VS_LIGHTING_INPUT input)
 
 	return(output);
 }
-
-VS_LIGHTING_OUTPUT VSAnimationLighting(VS_LIGHTING_INPUT input)
-{
-	VS_LIGHTING_OUTPUT output;
-
-	
-	output.normalW = mul(input.normal, (float3x3) gmtxGameObject);
-	output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxGameObject);
-	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
-	output.uv = input.uv;
-	output.tangentW = mul(input.tangent, (float3x3) gmtxGameObject);
-	output.bitangentW = mul(input.bitangent, (float3x3) gmtxGameObject);
-	
-
-
-	return(output);
-}
-
-
 
 PS_DEPTH_OUTPUT PSDepthWriteShader(VS_LIGHTING_OUTPUT input)
 {
@@ -150,15 +131,30 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 {
 	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+
 	if (gnTexturesMask & MATERIAL_ALBEDO_MAP)
 		cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
 	else
 		cAlbedoColor = gMaterial.m_cDiffuse;
 
+	float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (gnTexturesMask & MATERIAL_NORMAL_MAP) cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
+	float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (gnTexturesMask & MATERIAL_SPECULAR_MAP) cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
+	float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	if (gnTexturesMask & MATERIAL_METALLIC_MAP) cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
+
+	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
+	{
+		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
+		float3 vNormal = normalize(cNormalColor.rgb * 1.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
+		input.normalW = normalize(mul(vNormal, TBN));
+	}
+	
 
 	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
 	float4 cColor = cAlbedoColor;
-	return (lerp(cIllumination,cColor,0.65f));
+	return (lerp(cIllumination,cColor,0.66f));
 
 
 }

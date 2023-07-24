@@ -77,21 +77,22 @@ void Stage1::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6, 0.6, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-550, 600.0f, 1100.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.4f, -1.0f, -0.9f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-600, 650.0f, 1200.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.5f, -1.0f, -1.0f);
 
 	m_pLights->m_pLights[2].m_bEnable = true;
 	m_pLights->m_pLights[2].m_nType = SPOT_LIGHT;
-	m_pLights->m_pLights[2].m_fRange = 500.0f;
-	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
-	m_pLights->m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, -0.2f, 1.0f);
-	m_pLights->m_pLights[2].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights->m_pLights[2].m_fFalloff = 6.0f;
-	m_pLights->m_pLights[2].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
-	m_pLights->m_pLights[2].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights->m_pLights[2].m_fRange = 500.0;
+	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.9f, 0.5f, 0.1f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.5f, 0.1f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.8f, 0.5f, 0.1f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Emissive = XMFLOAT4(0.9f, 0.5f, 0.1f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(20.0, 15, 50);
+	m_pLights->m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, -0.0f);
+	m_pLights->m_pLights[2].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.001f);
+	m_pLights->m_pLights[2].m_fFalloff = 80.0f;
+	m_pLights->m_pLights[2].m_fPhi = (float)cos(XMConvertToRadians(359.0f));
+	m_pLights->m_pLights[2].m_fTheta = (float)cos(XMConvertToRadians(10.0));
 
 	m_pLights->m_pLights[3].m_bEnable = true;
 	m_pLights->m_pLights[3].m_nType = SPOT_LIGHT;
@@ -618,10 +619,9 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 
 
 
-
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[4];
 
-	pd3dSamplerDescs[0].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+	pd3dSamplerDescs[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pd3dSamplerDescs[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	pd3dSamplerDescs[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -655,8 +655,8 @@ ID3D12RootSignature* Stage1::CreateGraphicsRootSignature(ID3D12Device* pd3dDevic
 	pd3dSamplerDescs[2].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 	pd3dSamplerDescs[2].MipLODBias = 0.0f;
 	pd3dSamplerDescs[2].MaxAnisotropy = 1;
-	pd3dSamplerDescs[2].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;// D3D12_COMPARISON_FUNC_LESS;
-	pd3dSamplerDescs[2].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;//  D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+	pd3dSamplerDescs[2].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS;// D3D12_COMPARISON_FUNC_LESS;
+	pd3dSamplerDescs[2].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;//  D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
 	pd3dSamplerDescs[2].MinLOD = 0;
 	pd3dSamplerDescs[2].MaxLOD = D3D12_FLOAT32_MAX;
 	pd3dSamplerDescs[2].ShaderRegister = 2;
@@ -1009,7 +1009,6 @@ void Stage1::PlayerFirevalkan(CCamera* pCamera, XMFLOAT3 Look)
 
 	}
 }
-
 void Stage1::Reflectcartridgecase(CGameObject* Objects)
 {
 	CValkanObject* pBulletObject = NULL;
@@ -1040,12 +1039,10 @@ void Stage1::Reflectcartridgecase(CGameObject* Objects)
 
 	}
 }
-
 bool Stage1::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	return(false);
 }
-
 bool Stage1::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
@@ -1073,7 +1070,6 @@ bool Stage1::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	}
 	return(false);
 }
-
 void Stage1::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	/*m_pBoundingBoxShader->Render(pd3dCommandList, pCamera,0);
@@ -1084,7 +1080,6 @@ void Stage1::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 
 	m_pPlayer->RenderBoundingBox(pd3dCommandList, pCamera);*/
 }
-
 bool Stage1::ProcessInput(UCHAR* pKeysBuffer)
 {
 	return(false);
@@ -1131,11 +1126,12 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 			m_ppValkan[i]->Animate(fTimeElapsed);
 		}
 	}
-	XMFLOAT3 Position2P = m_ppShaders[0]->m_ppObjects[5]->GetPosition();
-	XMFLOAT3 Look2P = m_ppShaders[0]->m_ppObjects[5]->GetLook();
+	XMFLOAT3 Position2P = ((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->GetPosition();
+	//XMFLOAT3 Position2P = XMFLOAT3(-197.0,20.0,-792.0);
+	XMFLOAT3 Look2P = ((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->GetLook();
 	if (m_pLights)
 	{
-		m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(Position2P.x, Position2P.y + 8.0, Position2P.z);
+		m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(Position2P.x, Position2P.y + 0.0, Position2P.z+0.0f);
 		m_pLights->m_pLights[2].m_xmf3Direction = Look2P;
 
 		m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(xmfPosition.x, xmfPosition.y + 8.0, xmfPosition.z);
@@ -1155,20 +1151,6 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 			m_ppShaders[0]->m_ppObjects[i]->SetPosition(xmf3PlayerPosition);
 		}
 	}
-
-
-	//if (m_bHeliParticleCollisionCheck == true)
-	//{
-	//	((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_xmf4x4ToParent._41 -= 4.0f;
-	//	m_bHumanParticleCollisionCheck = false;
-	//}
-	//if (m_bHeliParticleCollisionCheck == true)
-	//{
-	//	
-	//	m_bHeliParticleCollisionCheck = false;
-	//}
-	//m_bHumanParticleCollisionCheck = false;
-	//m_bHeliParticleCollisionCheck = false;
 
 	ParticleCollisionResult();
 	ParticleAnimation();

@@ -75,16 +75,16 @@ GameSound::GameSound()
 	HartbeatChannel->setVolume(1.5f);
 
 	result = soundSystem->playSound(WarnningSound, 0, true, &WarnningChannel);
-	WarnningChannel->setVolume(1.5f);
+	WarnningChannel->setVolume(0.5f);
 
 	result = soundSystem->playSound(BackGroundSound, 0, true, &BackGroundChannel);
-	BackGroundChannel->setVolume(0.25f);
+	BackGroundChannel->setVolume(0.05f);
 
 	result = soundSystem->playSound(NpcshotSound, 0, true, &NpcshootChannel);
 	NpcshootChannel->setVolume(0.25f);
 
 	result = soundSystem->playSound(HeliWarrningHighSounds, 0, true, &HeliWarrningHighChannel);
-	HeliWarrningHighChannel->setVolume(0.3f);
+	HeliWarrningHighChannel->setVolume(0.2f);
 
 	shotChannel->setVolume(0.1f);
 	HelishotChannel->setVolume(0.3f);
