@@ -344,6 +344,14 @@ public:
 	bool player_dead = false;
 	bool role_change_a2h_click = false;	// army -> heli
 	bool role_change_h2a_click = false;	// heli -> human
+	bool m_missionFailed = false;
+	bool m_missionClear = false;
+	float m_missionFailedUI;
+	float m_missionClearUI;
+	bool m_ingame = false;
+	bool m_infoReady = false;
+	bool m_infoChoose = false;
+	
 	//==================================================
 
 	//==================================================
