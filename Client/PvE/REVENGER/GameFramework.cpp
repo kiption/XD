@@ -3581,7 +3581,7 @@ void CGameFramework::MyPlayerResponeMotion()
 		
 		//((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_pResetCameraPos
 		//	= m_pCamera->m_xmf4x4View;
-		//((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Resetpartition();
+		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Resetpartition();
 		//m_pCamera->m_nMode = THIRD_PERSON_CAMERA;
 	}
 }
