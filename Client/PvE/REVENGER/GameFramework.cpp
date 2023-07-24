@@ -881,6 +881,12 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case '0':
 				if (MouseResponsivenessY > 400 && MouseResponsivenessY < 600) MouseResponsivenessY += 50.0f;
 				break;
+			case 'M':
+				((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->FallDown(m_GameTimer.GetTimeElapsed());
+				break;
+			case 'Y':
+				((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Resetpartition();
+				break;
 			default:
 				break;
 			}
@@ -1367,6 +1373,7 @@ void CGameFramework::FrameAdvance()
 	{
 		if (m_ingame_role == R_RIFLE)
 			((Stage1*)m_pScene)->BillBoardRender(m_pd3dCommandList, m_pCamera, ((CHumanPlayer*)m_pScene->m_pPlayer)->m_pBulletFindFrame->GetPosition());
+			((Stage1*)m_pScene)->MuzzleFlameRender(m_pd3dCommandList, m_pCamera, ((CHumanPlayer*)m_pScene->m_pPlayer)->m_pBulletFindFrame->GetPosition());
 		if (m_ingame_role == R_HELI)
 			((Stage1*)m_pScene)->BillBoardRender(m_pd3dCommandList, m_pCamera, m_pCamera->GetPosition());
 	}
@@ -3550,7 +3557,10 @@ void CGameFramework::MyPlayerDieMotion()
 	}
 	if (m_ingame_role == R_HELI)
 	{
+
 		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = true;
+
+
 	}
 
 }
@@ -3560,10 +3570,19 @@ void CGameFramework::MyPlayerResponeMotion()
 	{
 		m_bDieMotion = false;
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = false;
+	/*	((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_pResetCameraPos
+			= m_pCamera->m_xmf4x4View;
+		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ResetCamera();
+		m_pCamera->m_nMode = THIRD_PERSON_CAMERA;*/
 	}
 	if (m_ingame_role == R_HELI)
 	{
 		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = false;
+		
+		//((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_pResetCameraPos
+		//	= m_pCamera->m_xmf4x4View;
+		//((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Resetpartition();
+		//m_pCamera->m_nMode = THIRD_PERSON_CAMERA;
 	}
 }
 void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)

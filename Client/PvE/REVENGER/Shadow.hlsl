@@ -147,14 +147,14 @@ float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	{
 		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
-		float3 vNormal = normalize(cNormalColor.rgb * 1.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
+		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
 		input.normalW = normalize(mul(vNormal, TBN));
 	}
 	
 
 	float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
 	float4 cColor = cAlbedoColor;
-	return (lerp(cIllumination,cColor,0.66f));
+	return (lerp(cIllumination,cColor,0.6));
 
 
 }

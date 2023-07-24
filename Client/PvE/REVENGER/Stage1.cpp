@@ -1211,17 +1211,23 @@ void Stage1::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 
 void Stage1::BillBoardRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, XMFLOAT3 Position)
 {
-	XMFLOAT3 MuzzleFrameLook = pCamera->GetLookVector();
-	XMFLOAT3 MuzzleFramePosition = pCamera->GetPosition();
+
 
 	if (m_pBillboardShader[1]) m_pBillboardShader[1]->Render(pd3dCommandList, pCamera, 0);
 	if (((BulletMarkBillboard*)m_pBillboardShader[4])) ((BulletMarkBillboard*)m_pBillboardShader[4])->Render(pd3dCommandList, pCamera, 0);
 	//if (((MuzzleFrameBillboard*)m_pBillboardShader[7])) ((MuzzleFrameBillboard*)m_pBillboardShader[7])->Render(pd3dCommandList, pCamera, Position);
 
-	if (((MuzzleFrameBillboard*)m_pBillboardShader[6])) ((MuzzleFrameBillboard*)m_pBillboardShader[6])
-		->Render(pd3dCommandList, pCamera, 0, MuzzleFrameLook, ((CHumanPlayer*)m_pPlayer)->m_pBulletFindFrame->GetPosition());
+	
 
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
+}
+
+void Stage1::MuzzleFlameRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, XMFLOAT3 Position)
+{
+	XMFLOAT3 MuzzleFrameLook = pCamera->GetLookVector();
+	XMFLOAT3 MuzzleFramePosition = pCamera->GetPosition();
+	if (((MuzzleFrameBillboard*)m_pBillboardShader[6])) ((MuzzleFrameBillboard*)m_pBillboardShader[6])
+		->Render(pd3dCommandList, pCamera, 0, MuzzleFrameLook, ((CHumanPlayer*)m_pPlayer)->m_pBulletFindFrame->GetPosition());
 }
 
 void Stage1::NPCMuzzleFlamedRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, XMFLOAT3 Position)

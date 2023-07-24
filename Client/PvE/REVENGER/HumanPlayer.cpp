@@ -319,6 +319,8 @@ void CHumanPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	{
 		m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	}
+
+
 	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
@@ -357,6 +359,11 @@ void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CShader* p
 		for (int i = 0; i < BULLETS; i++)
 			if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->ShadowRender(pd3dCommandList, pCamera, true, pShader); }
 	}
+}
+
+void CHumanPlayer::ResetCamera()
+{
+	m_pCamera->m_xmf4x4View = m_pResetCameraPos;
 }
 
 void CHumanPlayer::FireBullet(CGameObject* pLockedObject)

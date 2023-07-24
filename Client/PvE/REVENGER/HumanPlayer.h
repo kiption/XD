@@ -13,6 +13,8 @@ public:
 	CGameObject* pSoldiarObject = NULL;
 	CGameObject* m_pBulletFindFrame{ NULL };
 	CGameObject* m_pHeadFindFrame{ NULL };
+	XMFLOAT4X4 m_pResetCameraPos;
+	bool m_bDieState = false;
 public:
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	CBulletEffectShader* pBCBulletEffectShader = NULL;
@@ -28,10 +30,9 @@ public:
 
 	virtual void Update(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList,CShader* pShader, CCamera* pCamera);
-	
+	void ResetCamera();
 	bool m_bMoveUpdate = false;
 	bool m_bReloadState = false;
-	bool m_bDieState = false;
 	bool m_bZoomMode = false;
 public:
 	float m_fBulletEffectiveRange = 1600.0f;
