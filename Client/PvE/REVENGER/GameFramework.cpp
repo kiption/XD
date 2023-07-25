@@ -3648,7 +3648,9 @@ void CGameFramework::otherPlayerReturnToIdle(int p_id)
 	if (m_nMode == SCENE1STAGE)
 	{
 		if (m_ingame_role == R_RIFLE)
+		{
 			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->IdleState(m_GameTimer.GetTimeElapsed());
+		}
 	}
 }
 void CGameFramework::otherPlayerForwardMotion(int p_id)
@@ -3691,7 +3693,7 @@ void CGameFramework::otherPlayerDyingMotion(int p_id)
 			{
 				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType
 					= ANIMATION_TYPE_ONCE;
-				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 11);
+				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + p_id])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 8);
 			}
 		}
 	}
