@@ -64,6 +64,7 @@ int role_change_member_id = -1;
 //==================================================
 // 인게임 관련
 volatile bool respawn_trigger = false;
+volatile int respawn_id = -1;
 
 bool trigger_otherplayer_attack = false;	// 다른 플레이어 공격 연출
 int otherplayer_attack_id;					// " id
@@ -1008,6 +1009,7 @@ void processPacket(char* ptr)
 		players_info[recv_packet->id].m_near_death_hp = false;
 
 		respawn_trigger = true;
+		respawn_id = recv_id;
 		break;
 	}//SC_RESPAWN case end
 	case SC_BULLET_COLLIDE_POS:

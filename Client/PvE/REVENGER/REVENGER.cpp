@@ -529,11 +529,18 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 				}
 
-				// 3. 리스폰할 때는 자기 자신을 움직여줘야합니다.
+				// 3. 리스폰할 때
 				if (respawn_trigger) {
-					gGameFramework.setPosition_Self(players_info[my_id].m_pos);
-					gGameFramework.setVectors_Self(players_info[my_id].m_right_vec, players_info[my_id].m_up_vec, players_info[my_id].m_look_vec);
+					if (respawn_id == my_id) {	// 자기 자신
+						gGameFramework.setPosition_Self(players_info[my_id].m_pos);
+						gGameFramework.setVectors_Self(players_info[my_id].m_right_vec, players_info[my_id].m_up_vec, players_info[my_id].m_look_vec);
+					}
+					else {	// 다른 플레이어 리스폰
+
+					}
+
 					respawn_trigger = false;
+					respawn_id = -1;
 				}
 
 				// 4. 만약 죽어있는 상태면 캐릭터 조작이 불가능하게 막아야합니다.
