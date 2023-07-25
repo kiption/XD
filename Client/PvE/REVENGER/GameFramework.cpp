@@ -3642,16 +3642,6 @@ void CGameFramework::CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents
 {
 	m_npcoobb = BoundingOrientedBox(npcpos, npcextents, XMFLOAT4(0, 0, 0, 1));
 
-	//CBulletObject** ppBullets = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_ppBullets;
-	//for (int i = 0; i < BULLETS; i++)
-	//{
-	//	ppBullets[i]->m_xoobb = BoundingOrientedBox(ppBullets[i]->GetPosition(), XMFLOAT3(1.0, 1.0, 3.0), XMFLOAT4(0, 0, 0, 1));
-	//	if (ppBullets[i]->m_xoobb.Intersects(m_npcoobb))
-	//	{
-	//		// 충돌 모션 
-	//		ppBullets[i]->Reset();
-	//	}
-	//}
 }
 void CGameFramework::otherPlayerReturnToIdle(int p_id)
 {
