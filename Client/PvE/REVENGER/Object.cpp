@@ -1822,18 +1822,18 @@ void CHelicopterObjects::OnPrepareAnimate()
 	CGameObject::OnPrepareAnimate();
 
 
-	m_pMainRotorFrameP = m_pMainRotorFrame->m_xmf4x4ToParent;
-	m_pTailRotorFrameP = m_pTailRotorFrame->m_xmf4x4ToParent;
-	m_pFrameFragObj1P= m_pFrameFragObj1->m_xmf4x4ToParent;
-	m_pFrameFragObj2P= m_pFrameFragObj2->m_xmf4x4ToParent;
-	m_pFrameFragObj3P= m_pFrameFragObj3->m_xmf4x4ToParent;
-	m_pFrameFragObj4P= m_pFrameFragObj4->m_xmf4x4ToParent;
-	m_pFrameFragObj5P= m_pFrameFragObj5->m_xmf4x4ToParent;
-	m_pFrameFragObj6P= m_pFrameFragObj6->m_xmf4x4ToParent;
-	m_pFrameFragObj7P= m_pFrameFragObj7->m_xmf4x4ToParent;
-	m_pFrameFragObj8P= m_pFrameFragObj8->m_xmf4x4ToParent;
-	m_pFrameFragObj9P= m_pFrameFragObj9->m_xmf4x4ToParent;
-	m_pFrameFragObj10P = m_pFrameFragObj10->m_xmf4x4ToParent;
+	//m_pMainRotorFrameP = m_pMainRotorFrame->m_xmf4x4ToParent;
+	//m_pTailRotorFrameP = m_pTailRotorFrame->m_xmf4x4ToParent;
+	//m_pFrameFragObj1P= m_pFrameFragObj1->m_xmf4x4ToParent;
+	//m_pFrameFragObj2P= m_pFrameFragObj2->m_xmf4x4ToParent;
+	//m_pFrameFragObj3P= m_pFrameFragObj3->m_xmf4x4ToParent;
+	//m_pFrameFragObj4P= m_pFrameFragObj4->m_xmf4x4ToParent;
+	//m_pFrameFragObj5P= m_pFrameFragObj5->m_xmf4x4ToParent;
+	//m_pFrameFragObj6P= m_pFrameFragObj6->m_xmf4x4ToParent;
+	//m_pFrameFragObj7P= m_pFrameFragObj7->m_xmf4x4ToParent;
+	//m_pFrameFragObj8P= m_pFrameFragObj8->m_xmf4x4ToParent;
+	//m_pFrameFragObj9P= m_pFrameFragObj9->m_xmf4x4ToParent;
+	//m_pFrameFragObj10P = m_pFrameFragObj10->m_xmf4x4ToParent;
 	m_pFrameFragObj1 = FindFrame("glass");
 	m_pFrameFragObj2 = FindFrame("cleanser");
 	m_pFrameFragObj3 = FindFrame("left_tyre");
