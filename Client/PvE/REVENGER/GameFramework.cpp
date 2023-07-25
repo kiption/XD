@@ -561,6 +561,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			case LS_ROOM: // 방 내부
 				if (roompos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[0].lx && roompos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[0].ly) {
 					m_RoomClick[0] = true;//Start
+					m_ingame = true;
 				}
 				else if (roompos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[1].lx && roompos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[1].ly) {
 					m_RoomClick[1] = true; // Ready
@@ -1606,6 +1607,9 @@ void CGameFramework::FrameAdvance()
 				D2D_POINT_2F D2_JobHeliUI[3];
 				D2D_RECT_F D2_JobHeliRect[3];
 
+				D2D_POINT_2F D2_MyMarkUI;
+				D2D_RECT_F D2_MyMarkRect;
+
 				for (int i = 0; i < m_MAX_USER; ++i) {
 					int resulty = 565 + 58 * i;
 					float textypos = (((float)(FRAME_BUFFER_HEIGHT)) / ((float)(resulty)));
@@ -1618,8 +1622,14 @@ void CGameFramework::FrameAdvance()
 					D2_JobHeliRect[i] = { 0.0f, (m_MyRoom_Info[i].HeliCheck) * 50.0f, 50.0f, (m_MyRoom_Info[i].HeliCheck + 1) * 50.0f };
 					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[65 + i], &D2_JobHeliUI[i], &D2_JobHeliRect[i]);
 
-
+					if (i == m_roominMyId) {
+						D2_MyMarkUI = { (FRAME_BUFFER_WIDTH / 5.0f), FRAME_BUFFER_HEIGHT / textypos + 5.0f};
+						D2_MyMarkRect = { 0.0f, 0.0f, 25.0f, 37.0f };
+						m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[83], &D2_MyMarkUI, &D2_MyMarkRect);
+					}
 				}
+
+
 
 				if (m_ingame) {
 					D2D_POINT_2F D2_GameLoadingUI = { FRAME_BUFFER_WIDTH / 2 - 404.0f, FRAME_BUFFER_HEIGHT / 2 - 78.0f };
@@ -1685,17 +1695,21 @@ void CGameFramework::FrameAdvance()
 
 		// Progress
 		if (m_mainmissionnum == 1) {
-			D2D_POINT_2F D2_ProgressUI = { FRAME_BUFFER_WIDTH / 2 - 325.0f, 160.0f };
-			D2D_RECT_F D2_ProgressUIRect = { 0.0f, 0.0f, 67.0f, 36.0f };
+			D2D_POINT_2F D2_ProgressUI = { FRAME_BUFFER_WIDTH / 2 - 113.0f, 160.0f };
+			D2D_RECT_F D2_ProgressUIRect = { 0.0f, 0.0f, 226.0f, 112.0f };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[6], &D2_ProgressUI, &D2_ProgressUIRect);
 
-			D2D_POINT_2F D2_ProgressBG = { FRAME_BUFFER_WIDTH / 2 - 251.0f, 160.0f };
-			D2D_RECT_F D2_ProgressBGRect = { 0.0f, 0.0f, 502.0f, 36.0f };
+			D2D_POINT_2F D2_ProgressBG = { FRAME_BUFFER_WIDTH / 2 - 451.0f, D2_ProgressUI.y + 120.0f };
+			D2D_RECT_F D2_ProgressBGRect = { 0.0f, 0.0f, 902.0f, 66.0f };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[7], &D2_ProgressBG, &D2_ProgressBGRect);
 
-			D2D_POINT_2F D2_CurrentProgress = { FRAME_BUFFER_WIDTH / 2 - 250.0f, 160.5f };
-			D2D_RECT_F D2_CurrentProgressRect = { 0.0f, 0.0f, (500.0f / 100 * m_occupationnum), 36.0f };
+			D2D_POINT_2F D2_CurrentProgress = { FRAME_BUFFER_WIDTH / 2 - 451.0f, D2_ProgressUI.y + 122.0f };
+			D2D_RECT_F D2_CurrentProgressRect = { 0.0f, 0.0f, (902.0f / 100 * m_occupationnum), 62.0f };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[8], &D2_CurrentProgress, &D2_CurrentProgressRect);
+
+			if (m_occupationnum >= 99) {
+				m_missionClear = true;
+			}
 		}
 		// Compress
 		D2D_POINT_2F D2_CompressArrow = { FRAME_BUFFER_WIDTH / 2 - 61.0f, 0.0f };
@@ -1869,7 +1883,10 @@ void CGameFramework::FrameAdvance()
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[76], &D2_CongratulationUI, &D2_CongratulationUIRect);
 			}
 			else {
-				m_missionClearUI++;
+				m_missionClearUI += 2.5f;
+				if (m_missionClearUI >= 100) {
+					m_missionClearUI = 100.0f;
+				}
 			}
 		}
 		if (m_missionFailed) {
@@ -1887,7 +1904,10 @@ void CGameFramework::FrameAdvance()
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[79], &D2_TimeOverUI, &D2_TimeOverUIRect);
 			}
 			else {
-				m_missionFailedUI++;
+				m_missionFailedUI += 2.5f;
+				if (m_missionFailedUI >= 100) {
+					m_missionFailedUI = 100.0f;
+				}
 			}
 		}
 	}
@@ -1935,7 +1955,7 @@ void CGameFramework::FrameAdvance()
 				//wchar_t roomnum_tmp[20];
 				//_itow_s(m_LobbyRoom_Info[i].num, roomnum_tmp, 20, 10);
 
-				D2_UserNameText[i] = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.26f), (FRAME_BUFFER_HEIGHT / textypos), (FRAME_BUFFER_WIDTH * 0.5f), (FRAME_BUFFER_HEIGHT / textypos));
+				D2_UserNameText[i] = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.22f), (FRAME_BUFFER_HEIGHT / textypos), (FRAME_BUFFER_WIDTH * 0.5f), (FRAME_BUFFER_HEIGHT / textypos));
 				m_pd2dDeviceContext->DrawTextW(m_MyRoom_Info[i].User_name, (UINT32)wcslen(m_MyRoom_Info[i].User_name), m_pdwFont[2], &D2_UserNameText[i], m_pd2dbrText[2]);
 			}
 
@@ -3383,6 +3403,22 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[82]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
 	m_pd2dfxEdgeDetection[82]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[82]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// Lobby My Mark
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LobbyMymark.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[83]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	m_pd2dfxGaussianBlur[83]->SetInputEffect(0, m_pd2dfxBitmapSource[83]);
+	m_pd2dfxGaussianBlur[83]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+	m_pd2dfxEdgeDetection[83]->SetInputEffect(0, m_pd2dfxBitmapSource[83]);
+	m_pd2dfxEdgeDetection[83]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[83]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[83]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[83]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[83]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
