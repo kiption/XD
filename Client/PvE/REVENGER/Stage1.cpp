@@ -167,7 +167,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pSkyBox->SetCurScene(SCENE1STAGE);
 
-	m_nBillboardShaders = 8;
+	m_nBillboardShaders = 10;
 	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
 
 	BillboardParticleShader* pBillboardParticleShader = new BillboardParticleShader();
@@ -220,6 +220,19 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pMuzzleFrameBillboard2->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[7] = pMuzzleFrameBillboard2;
 
+	HeliHittingMarkBillboard* pOtherPlyHeliHittingMarkBillboard = new HeliHittingMarkBillboard();
+	pOtherPlyHeliHittingMarkBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pOtherPlyHeliHittingMarkBillboard->SetCurScene(SCENE1STAGE);
+	pOtherPlyHeliHittingMarkBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	pOtherPlyHeliHittingMarkBillboard->m_bActive = true;
+	m_pBillboardShader[8] = pOtherPlyHeliHittingMarkBillboard;
+
+	HeliHittingMarkBillboard* pNPCHeliHittingMarkBillboard = new HeliHittingMarkBillboard();
+	pNPCHeliHittingMarkBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pNPCHeliHittingMarkBillboard->SetCurScene(SCENE1STAGE);
+	pNPCHeliHittingMarkBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	pNPCHeliHittingMarkBillboard->m_bActive = true;
+	m_pBillboardShader[9] = pNPCHeliHittingMarkBillboard;
 
 	m_nSpriteBillboards = 1;
 	m_ppSpriteBillboard = new CSpriteObjectsShader * [m_nSpriteBillboards];

@@ -1785,35 +1785,25 @@ CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 {
 
 	OnPrepareAnimate();
-	m_pMainRotorFramePos = m_pMainRotorFrame->m_xmf4x4ToParent;
-	m_pTailRotorFramePos = m_pTailRotorFrame->m_xmf4x4ToParent;
-	m_pFrameFragObj1Pos = m_pFrameFragObj1->m_xmf4x4ToParent;
-	m_pFrameFragObj2Pos = m_pFrameFragObj2->m_xmf4x4ToParent;
-	m_pFrameFragObj3Pos = m_pFrameFragObj3->m_xmf4x4ToParent;
-	m_pFrameFragObj4Pos = m_pFrameFragObj4->m_xmf4x4ToParent;
-	m_pFrameFragObj5Pos = m_pFrameFragObj5->m_xmf4x4ToParent;
-	m_pFrameFragObj6Pos = m_pFrameFragObj6->m_xmf4x4ToParent;
-	m_pFrameFragObj7Pos = m_pFrameFragObj7->m_xmf4x4ToParent;
-	m_pFrameFragObj8Pos = m_pFrameFragObj8->m_xmf4x4ToParent;
-	m_pFrameFragObj9Pos = m_pFrameFragObj9->m_xmf4x4ToParent;
-	m_pFrameFragObj10Pos = m_pFrameFragObj10->m_xmf4x4ToParent;
+
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }
 void CHelicopterObjects::Resetpartition()
 {
-	m_pMainRotorFrame->m_xmf4x4ToParent = m_pMainRotorFramePos;
-	m_pTailRotorFrame->m_xmf4x4ToParent = m_pTailRotorFramePos;
-	m_pFrameFragObj1->m_xmf4x4ToParent = m_pFrameFragObj1Pos;
-	m_pFrameFragObj2->m_xmf4x4ToParent = m_pFrameFragObj2Pos;
-	m_pFrameFragObj3->m_xmf4x4ToParent = m_pFrameFragObj3Pos;
-	m_pFrameFragObj4->m_xmf4x4ToParent = m_pFrameFragObj4Pos;
-	m_pFrameFragObj5->m_xmf4x4ToParent = m_pFrameFragObj5Pos;
-	m_pFrameFragObj6->m_xmf4x4ToParent = m_pFrameFragObj6Pos;
-	m_pFrameFragObj7->m_xmf4x4ToParent = m_pFrameFragObj7Pos;
-	m_pFrameFragObj8->m_xmf4x4ToParent = m_pFrameFragObj8Pos;
-	m_pFrameFragObj9->m_xmf4x4ToParent = m_pFrameFragObj9Pos;
-	m_pFrameFragObj10->m_xmf4x4ToParent = m_pFrameFragObj10Pos;
+	m_pMainRotorFrame->m_xmf4x4ToParent = m_pMainRotorFrameP;
+	m_pTailRotorFrame->m_xmf4x4ToParent = m_pTailRotorFrameP;
+	m_pFrameFragObj1->m_xmf4x4ToParent = m_pFrameFragObj1P;
+	m_pFrameFragObj2->m_xmf4x4ToParent = m_pFrameFragObj2P;
+	m_pFrameFragObj3->m_xmf4x4ToParent = m_pFrameFragObj3P;
+	m_pFrameFragObj4->m_xmf4x4ToParent = m_pFrameFragObj4P;
+	m_pFrameFragObj5->m_xmf4x4ToParent = m_pFrameFragObj5P;
+	m_pFrameFragObj6->m_xmf4x4ToParent = m_pFrameFragObj6P;
+	m_pFrameFragObj7->m_xmf4x4ToParent = m_pFrameFragObj7P;
+	m_pFrameFragObj8->m_xmf4x4ToParent = m_pFrameFragObj8P;
+	m_pFrameFragObj9->m_xmf4x4ToParent = m_pFrameFragObj9P;
+	m_pFrameFragObj10->m_xmf4x4ToParent = m_pFrameFragObj10P;
 
 }
 CHelicopterObjects::~CHelicopterObjects()
@@ -1828,8 +1818,22 @@ void CHelicopterObjects::Firevalkan(XMFLOAT3 ToPlayerLook)
 
 void CHelicopterObjects::OnPrepareAnimate()
 {
+
 	CGameObject::OnPrepareAnimate();
 
+
+	m_pMainRotorFrameP = m_pMainRotorFrame->m_xmf4x4ToParent;
+	m_pTailRotorFrameP = m_pTailRotorFrame->m_xmf4x4ToParent;
+	m_pFrameFragObj1P= m_pFrameFragObj1->m_xmf4x4ToParent;
+	m_pFrameFragObj2P= m_pFrameFragObj2->m_xmf4x4ToParent;
+	m_pFrameFragObj3P= m_pFrameFragObj3->m_xmf4x4ToParent;
+	m_pFrameFragObj4P= m_pFrameFragObj4->m_xmf4x4ToParent;
+	m_pFrameFragObj5P= m_pFrameFragObj5->m_xmf4x4ToParent;
+	m_pFrameFragObj6P= m_pFrameFragObj6->m_xmf4x4ToParent;
+	m_pFrameFragObj7P= m_pFrameFragObj7->m_xmf4x4ToParent;
+	m_pFrameFragObj8P= m_pFrameFragObj8->m_xmf4x4ToParent;
+	m_pFrameFragObj9P= m_pFrameFragObj9->m_xmf4x4ToParent;
+	m_pFrameFragObj10P = m_pFrameFragObj10->m_xmf4x4ToParent;
 	m_pFrameFragObj1 = FindFrame("glass");
 	m_pFrameFragObj2 = FindFrame("cleanser");
 	m_pFrameFragObj3 = FindFrame("left_tyre");
