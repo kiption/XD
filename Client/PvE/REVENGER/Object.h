@@ -623,7 +623,7 @@ public:
 	BoundingOrientedBox ParticleFrame11;
 	BoundingOrientedBox ParticleFrame12;
 
-
+	bool m_bPartitionfalldownEnd = false;
 	XMFLOAT3 ParticlePosition{};
 	XMFLOAT4X4					m_pxmf4x4Transforms[EXPLOSION_HELICOPTER];
 	float						m_fElapsedTimes = 0.0f;

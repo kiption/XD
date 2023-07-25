@@ -1152,6 +1152,14 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		}
 	}
 
+	for (int i = 12; i < 17; i++)
+	{
+		if (((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_bPartitionfalldownEnd == true)
+		{
+			m_bPartitionEnd = true;
+		}
+
+	}
 	ParticleCollisionResult();
 	ParticleAnimation();
 }

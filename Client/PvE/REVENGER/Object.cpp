@@ -578,9 +578,9 @@ float CAnimationTrack::UpdatePosition(float fTrackPosition, float fElapsedTime, 
 				return(fAnimationLength);
 			}
 		}
-		//			m_fPosition = fmod(fTrackPosition, m_pfKeyFrameTimes[m_nKeyFrames-1]); // m_fPosition = fTrackPosition - int(fTrackPosition / m_pfKeyFrameTimes[m_nKeyFrames-1]) * m_pfKeyFrameTimes[m_nKeyFrames-1];
-		//			m_fPosition = fmod(fTrackPosition, m_fLength); //if (m_fPosition < 0) m_fPosition += m_fLength;
-		//			m_fPosition = fTrackPosition - int(fTrackPosition / m_fLength) * m_fLength;
+		//	m_fPosition = fmod(fTrackPosition, m_pfKeyFrameTimes[m_nKeyFrames-1]); // m_fPosition = fTrackPosition - int(fTrackPosition / m_pfKeyFrameTimes[m_nKeyFrames-1]) * m_pfKeyFrameTimes[m_nKeyFrames-1];
+		//	m_fPosition = fmod(fTrackPosition, m_fLength); //if (m_fPosition < 0) m_fPosition += m_fLength;
+		//	m_fPosition = fTrackPosition - int(fTrackPosition / m_fLength) * m_fLength;
 		break;
 	}
 	case ANIMATION_TYPE_ONCE:
@@ -1851,6 +1851,19 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 
 	ParticlePosition = this->GetPosition();
 	CGameObject::Animate(fTimeElapsed);
+
+	float FallingMaxHeight = -18.5f;
+	if (m_pTailRotorFrame->m_xmf4x4ToParent._42 > FallingMaxHeight&&
+		m_pMainRotorFrame->m_xmf4x4ToParent._42 > FallingMaxHeight&&
+		m_pFrameFragObj4->m_xmf4x4ToParent._42 > FallingMaxHeight&&
+		m_pFrameFragObj5->m_xmf4x4ToParent._42 > FallingMaxHeight&&
+		m_pFrameFragObj6->m_xmf4x4ToParent._42 > FallingMaxHeight&&
+		m_pFrameFragObj8->m_xmf4x4ToParent._42 > FallingMaxHeight&&
+		m_pFrameFragObj9->m_xmf4x4ToParent._42 > FallingMaxHeight&&
+		m_pFrameFragObj10->m_xmf4x4ToParent._42 > FallingMaxHeight)
+	{
+		m_bPartitionfalldownEnd = true;
+	}
 }
 
 void CHelicopterObjects::FallDown(float fTimeElapsed)
@@ -2125,8 +2138,6 @@ void CSoldiarNpcObjects::Animate(float fTimeElapsed)
 	CGameObject::Animate(fTimeElapsed);
 }
 
-
-
 void CSoldiarNpcObjects::Firevalkan(XMFLOAT3 ToPlayerLook)
 {
 
@@ -2219,6 +2230,7 @@ CSoldiarOtherPlayerObjects::CSoldiarOtherPlayerObjects(ID3D12Device* pd3dDevice,
 	pModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 9, pModel);
+
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);

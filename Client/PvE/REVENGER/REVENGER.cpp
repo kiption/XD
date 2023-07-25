@@ -579,7 +579,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						}
 						players_info[i].m_damaged_effect_on = false;
 					}
-
+				
 					if (i == my_id) continue;
 					if (players_info[i].m_new_state_update && players_info[i].m_role == ROLE_RIFLE) {
 						switch (players_info[i].m_ingame_state) {
@@ -1276,7 +1276,7 @@ void uiThreadFunc() {
 				}
 				if (idcheck) {
 					gGameFramework.m_otherHP[i - 1] = players_info[i].m_hp;
-					
+
 					wchar_t* converttext = ConvertToWideChar(players_info[i].m_name);
 
 					wcscpy_s(gGameFramework.m_OtherName[i - 1], converttext);

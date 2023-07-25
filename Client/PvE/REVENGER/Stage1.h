@@ -24,7 +24,7 @@ public:
 
 	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	ID3D12RootSignature* GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
-
+	
 	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	bool ProcessInput(UCHAR* pKeysBuffer);
 	virtual void AnimateObjects(float fTimeElapsed);
@@ -78,6 +78,8 @@ public:
 	BillboardShader** m_pBillboardShader = NULL;
 	bool Start = false;
 	bool Hit = false;
+
+	bool m_bPartitionEnd = false;
 	int m_nSpriteBillboards = 0;
 	CSpriteObjectsShader** m_ppSpriteBillboard = NULL;
 	CSkyBox* m_pSkyBox = NULL;
