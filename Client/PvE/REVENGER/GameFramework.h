@@ -399,6 +399,7 @@ public:
 	void HeliPlayerUnderAttack(XMFLOAT3 ToLook);
 	void MyPlayerDieMotion();
 	void MyPlayerResponeMotion();
+	void OtherPlayerResponeMotion();
 	bool m_bDamageOn = false;
 	float m_pPlayerRotate_z = 0.0f;
 	float m_pPlayerRotate_x = 0.0f;

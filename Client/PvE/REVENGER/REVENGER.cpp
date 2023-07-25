@@ -536,7 +536,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						gGameFramework.setVectors_Self(players_info[my_id].m_right_vec, players_info[my_id].m_up_vec, players_info[my_id].m_look_vec);
 					}
 					else {	// 다른 플레이어 리스폰
-
+						gGameFramework.OtherPlayerResponeMotion();
 					}
 
 					respawn_trigger = false;

@@ -1785,11 +1785,37 @@ CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 {
 
 	OnPrepareAnimate();
-	//for (int i = 0; i < EXPLOSION_HELICOPTER; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomScatter());
+	m_pMainRotorFramePos = m_pMainRotorFrame->m_xmf4x4ToParent;
+	m_pTailRotorFramePos = m_pTailRotorFrame->m_xmf4x4ToParent;
+	m_pFrameFragObj1Pos = m_pFrameFragObj1->m_xmf4x4ToParent;
+	m_pFrameFragObj2Pos = m_pFrameFragObj2->m_xmf4x4ToParent;
+	m_pFrameFragObj3Pos = m_pFrameFragObj3->m_xmf4x4ToParent;
+	m_pFrameFragObj4Pos = m_pFrameFragObj4->m_xmf4x4ToParent;
+	m_pFrameFragObj5Pos = m_pFrameFragObj5->m_xmf4x4ToParent;
+	m_pFrameFragObj6Pos = m_pFrameFragObj6->m_xmf4x4ToParent;
+	m_pFrameFragObj7Pos = m_pFrameFragObj7->m_xmf4x4ToParent;
+	m_pFrameFragObj8Pos = m_pFrameFragObj8->m_xmf4x4ToParent;
+	m_pFrameFragObj9Pos = m_pFrameFragObj9->m_xmf4x4ToParent;
+	m_pFrameFragObj10Pos = m_pFrameFragObj10->m_xmf4x4ToParent;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }
+void CHelicopterObjects::Resetpartition()
+{
+	m_pMainRotorFrame->m_xmf4x4ToParent = m_pMainRotorFramePos;
+	m_pTailRotorFrame->m_xmf4x4ToParent = m_pTailRotorFramePos;
+	m_pFrameFragObj1->m_xmf4x4ToParent = m_pFrameFragObj1Pos;
+	m_pFrameFragObj2->m_xmf4x4ToParent = m_pFrameFragObj2Pos;
+	m_pFrameFragObj3->m_xmf4x4ToParent = m_pFrameFragObj3Pos;
+	m_pFrameFragObj4->m_xmf4x4ToParent = m_pFrameFragObj4Pos;
+	m_pFrameFragObj5->m_xmf4x4ToParent = m_pFrameFragObj5Pos;
+	m_pFrameFragObj6->m_xmf4x4ToParent = m_pFrameFragObj6Pos;
+	m_pFrameFragObj7->m_xmf4x4ToParent = m_pFrameFragObj7Pos;
+	m_pFrameFragObj8->m_xmf4x4ToParent = m_pFrameFragObj8Pos;
+	m_pFrameFragObj9->m_xmf4x4ToParent = m_pFrameFragObj9Pos;
+	m_pFrameFragObj10->m_xmf4x4ToParent = m_pFrameFragObj10Pos;
 
+}
 CHelicopterObjects::~CHelicopterObjects()
 {
 

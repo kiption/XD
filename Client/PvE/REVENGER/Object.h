@@ -631,7 +631,22 @@ public:
 	float						m_fExplosionSpeed = 1.0f;
 	float						m_fExplosionRotation = 5.0f;
 	XMFLOAT3 m_pxmf3SphereVectors[EXPLOSION_HELICOPTER];
-
+public:
+	XMFLOAT4X4 m_pMainRotorFramePos;
+	XMFLOAT4X4 m_pTailRotorFramePos;
+	XMFLOAT4X4 m_pFrameFragObj1Pos;
+	XMFLOAT4X4 m_pFrameFragObj2Pos;
+	XMFLOAT4X4 m_pFrameFragObj3Pos;
+	XMFLOAT4X4 m_pFrameFragObj4Pos;
+	XMFLOAT4X4 m_pFrameFragObj5Pos;
+	XMFLOAT4X4 m_pFrameFragObj6Pos;
+	XMFLOAT4X4 m_pFrameFragObj7Pos;
+	XMFLOAT4X4 m_pFrameFragObj8Pos;
+	XMFLOAT4X4 m_pFrameFragObj9Pos;
+	XMFLOAT4X4 m_pFrameFragObj10Pos;
+	XMFLOAT4X4 m_pFrameFragObj11Pos;
+	XMFLOAT4X4 m_pResetCameraPos;
+	void Resetpartition();
 	CCamera* m_pCamera = NULL;
 public:
 	float m_fBulletEffectiveRange = 2000.0f;
@@ -639,6 +654,7 @@ public:
 	CValkanObject* pBulletObject = NULL;
 	CValkanObject* m_ppBullets[HELIBULLETS];
 	void Firevalkan(XMFLOAT3 ToPlayerLook);
+	void Resetpartition();
 public:
 	virtual void OnPrepareAnimate();
 	virtual void Animate(float fTimeElapsed);

@@ -3758,19 +3758,18 @@ void CGameFramework::MyPlayerResponeMotion()
 	{
 		m_bDieMotion = false;
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = false;
-		/*	((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_pResetCameraPos
-				= m_pCamera->m_xmf4x4View;
-			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ResetCamera();
-			m_pCamera->m_nMode = THIRD_PERSON_CAMERA;*/
 	}
 	if (m_ingame_role == R_HELI)
 	{
 		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = false;
-
-		//((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_pResetCameraPos
-		//	= m_pCamera->m_xmf4x4View;
 		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Resetpartition();
-		//m_pCamera->m_nMode = THIRD_PERSON_CAMERA;
+	}
+}
+void CGameFramework::OtherPlayerResponeMotion()
+{
+	if (m_ingame_role == R_HELI)
+	{
+		((CHelicopterObjects*)((Stage1*)m_pScene)->m_pPlayer)->Resetpartition();
 	}
 }
 void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
