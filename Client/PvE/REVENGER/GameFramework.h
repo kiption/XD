@@ -346,12 +346,14 @@ public:
 	bool role_change_h2a_click = false;	// heli -> human
 	bool m_missionFailed = false;
 	bool m_missionClear = false;
-	float m_missionFailedUI;
-	float m_missionClearUI;
+	float m_missionFailedUI = 0.0f;
+	float m_missionClearUI = 0.0f;
 	bool m_ingame = false;
 	bool m_infoReady = false;
 	bool m_infoChoose = false;
-	
+	float m_infoReadyTime = 0.0f;
+	float m_infoChooseTime = 0.0f;
+
 	//==================================================
 
 	//==================================================
