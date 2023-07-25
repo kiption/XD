@@ -1412,53 +1412,13 @@ void CGameFramework::FrameAdvance()
 		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[25], &D2_OpeningUI, &D2_OpeningUIRect);
 
 		// Game Clear 시 UI --> 내일 작업 예정
-		/*D2D_POINT_2F D2_MissionclearedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 163.0f };
-		D2D_RECT_F D2_MissionclearedBGUIRect = { 0.0f, 0.0f, m_missionClearUI * 19.6f, 326.0f };
-		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[74], &D2_MissionclearedBGUI, &D2_MissionclearedBGUIRect);
 
-		if (m_missionClearUI = 100) {
-			D2D_POINT_2F D2_MissionclearedTextUI = { FRAME_BUFFER_WIDTH / 2 - 416.0f, FRAME_BUFFER_HEIGHT / 2 - 170.0f };
-			D2D_RECT_F D2_MissionclearedTextUIRect = { 0.0f, 0.0f, 832.0f, 176.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[75], &D2_MissionclearedTextUI, &D2_MissionclearedTextUIRect);
-
-			D2D_POINT_2F D2_CongratulationUI = { FRAME_BUFFER_WIDTH / 2 - 399.0f, FRAME_BUFFER_HEIGHT / 2 };
-			D2D_RECT_F D2_CongratulationUIRect = { 0.0f, 0.0f, 792.0f, 176.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[76], &D2_CongratulationUI, &D2_CongratulationUIRect);
-		}
-		else {
-			m_missionClearUI++;
-		}*/
 
 		// Game Failed 시 UI --> 내일 작업 예정
-		/*D2D_POINT_2F D2_MissionFailedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 181.5f };
-		D2D_RECT_F D2_MissionFailedBGUIRect = { 0.0f, 0.0f, m_missionFailedUI * 19.6f, 363.0f };
-		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[77], &D2_MissionFailedBGUI, &D2_MissionFailedBGUIRect);
 
-		if (m_missionFailedUI = 100) {
-			D2D_POINT_2F D2_MissionFailedTextUI = { FRAME_BUFFER_WIDTH / 2 - 345.0f, FRAME_BUFFER_HEIGHT / 2 - 170.0f };
-			D2D_RECT_F D2_MissionFailedTextUIRect = { 0.0f, 0.0f, 690.0f, 176.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[78], &D2_MissionFailedTextUI, &D2_MissionFailedTextUIRect);
-
-			D2D_POINT_2F D2_TimeOverUI = { FRAME_BUFFER_WIDTH / 2 - 314.0f, FRAME_BUFFER_HEIGHT / 2 + 10.0f };
-			D2D_RECT_F D2_TimeOverUIRect = { 0.0f, 0.0f, 628.0f, 175.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[79], &D2_TimeOverUI, &D2_TimeOverUIRect);
-		}
-		else {
-			m_missionFailedUI += 0.05f;
-		}*/
 
 		// 로비 안내 UI --> 80(인 게임 진입), 81(방장에게만 보낼 것. 준비되지 않은 플레이어 있다고 표시), 82(각자 직업 선택하라고 알림)
-		/*D2D_POINT_2F D2_GameLoadingUI = { FRAME_BUFFER_WIDTH / 2 - 404.0f, FRAME_BUFFER_HEIGHT / 2 - 78.0f };
-		D2D_RECT_F D2_GameLoadingUIRect = { 0.0f, 0.0f, 808.0f, 156.0f };
-		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[80], &D2_GameLoadingUI, &D2_GameLoadingUIRect);
 
-		D2D_POINT_2F D2_NotAllReadyUI = { FRAME_BUFFER_WIDTH / 2 - 404.0f, FRAME_BUFFER_HEIGHT / 2 - 84.0f };
-		D2D_RECT_F D2_NotAllReadyUIRect = { 0.0f, 0.0f, 808.0f, 168.0f };
-		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[81], &D2_NotAllReadyUI, &D2_NotAllReadyUIRect);
-
-		D2D_POINT_2F D2_ChoiceJobUI = { FRAME_BUFFER_WIDTH / 2 - 404.0f, FRAME_BUFFER_HEIGHT / 2 - 84.0f };
-		D2D_RECT_F D2_ChoiceJobUIRect = { 0.0f, 0.0f, 808.0f, 168.0f };
-		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[82], &D2_ChoiceJobUI, &D2_ChoiceJobUIRect);*/
 
 		if (m_LoginScene == 0) {
 			D2D_POINT_2F D2_LoginUI = { (FRAME_BUFFER_WIDTH / 6) + 12.0f, FRAME_BUFFER_HEIGHT / 16 * 9 };
@@ -1660,6 +1620,34 @@ void CGameFramework::FrameAdvance()
 
 
 				}
+
+				if (m_ingame) {
+					D2D_POINT_2F D2_GameLoadingUI = { FRAME_BUFFER_WIDTH / 2 - 404.0f, FRAME_BUFFER_HEIGHT / 2 - 78.0f };
+					D2D_RECT_F D2_GameLoadingUIRect = { 0.0f, 0.0f, 808.0f, 156.0f };
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[80], &D2_GameLoadingUI, &D2_GameLoadingUIRect);
+				}
+				if (m_infoReady) {
+					D2D_POINT_2F D2_NotAllReadyUI = { FRAME_BUFFER_WIDTH / 2 - 404.0f, FRAME_BUFFER_HEIGHT / 2 - 84.0f };
+					D2D_RECT_F D2_NotAllReadyUIRect = { 0.0f, 0.0f, 808.0f, 168.0f };
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[81], &D2_NotAllReadyUI, &D2_NotAllReadyUIRect);
+
+					m_infoReadyTime++;
+					if (m_infoReadyTime > 3.0f) {
+						m_infoReadyTime = 0.0f;
+						m_infoReady = false;
+					}
+				}
+				if (m_infoChoose) {
+					D2D_POINT_2F D2_ChoiceJobUI = { FRAME_BUFFER_WIDTH / 2 - 404.0f, FRAME_BUFFER_HEIGHT / 2 - 84.0f };
+					D2D_RECT_F D2_ChoiceJobUIRect = { 0.0f, 0.0f, 808.0f, 168.0f };
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[82], &D2_ChoiceJobUI, &D2_ChoiceJobUIRect);
+					m_infoChooseTime++;
+					if (m_infoChooseTime > 3.0f) {
+						m_infoChooseTime = 0.0f;
+						m_infoChoose = false;
+					}
+				}
+
 			}
 			if (m_LoginScene == 4) {
 				D2D_POINT_2F D2_RoomUI = { (FRAME_BUFFER_WIDTH / 6) + 100.0f, FRAME_BUFFER_HEIGHT / 2 - 146.5f };
@@ -1866,7 +1854,42 @@ void CGameFramework::FrameAdvance()
 			D2D_RECT_F D2_DyingBanner = { 0.0f, 0.0f, 2500.0, 1730.0 };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[71], &D2_DyingBannerUI, &D2_DyingBanner);
 		}
+		if (m_missionClear) {
+			D2D_POINT_2F D2_MissionclearedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 163.0f };
+			D2D_RECT_F D2_MissionclearedBGUIRect = { 0.0f, 0.0f, m_missionClearUI * 19.6f, 326.0f };
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[74], &D2_MissionclearedBGUI, &D2_MissionclearedBGUIRect);
 
+			if (m_missionClearUI >= 100) {
+				D2D_POINT_2F D2_MissionclearedTextUI = { FRAME_BUFFER_WIDTH / 2 - 416.0f, FRAME_BUFFER_HEIGHT / 2 - 170.0f };
+				D2D_RECT_F D2_MissionclearedTextUIRect = { 0.0f, 0.0f, 832.0f, 176.0f };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[75], &D2_MissionclearedTextUI, &D2_MissionclearedTextUIRect);
+
+				D2D_POINT_2F D2_CongratulationUI = { FRAME_BUFFER_WIDTH / 2 - 399.0f, FRAME_BUFFER_HEIGHT / 2 };
+				D2D_RECT_F D2_CongratulationUIRect = { 0.0f, 0.0f, 792.0f, 176.0f };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[76], &D2_CongratulationUI, &D2_CongratulationUIRect);
+			}
+			else {
+				m_missionClearUI++;
+			}
+		}
+		if (m_missionFailed) {
+			D2D_POINT_2F D2_MissionFailedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 181.5f };
+			D2D_RECT_F D2_MissionFailedBGUIRect = { 0.0f, 0.0f, m_missionFailedUI * 19.6f, 363.0f };
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[77], &D2_MissionFailedBGUI, &D2_MissionFailedBGUIRect);
+
+			if (m_missionFailedUI >= 100) {
+				D2D_POINT_2F D2_MissionFailedTextUI = { FRAME_BUFFER_WIDTH / 2 - 345.0f, FRAME_BUFFER_HEIGHT / 2 - 170.0f };
+				D2D_RECT_F D2_MissionFailedTextUIRect = { 0.0f, 0.0f, 690.0f, 176.0f };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[78], &D2_MissionFailedTextUI, &D2_MissionFailedTextUIRect);
+
+				D2D_POINT_2F D2_TimeOverUI = { FRAME_BUFFER_WIDTH / 2 - 314.0f, FRAME_BUFFER_HEIGHT / 2 + 10.0f };
+				D2D_RECT_F D2_TimeOverUIRect = { 0.0f, 0.0f, 628.0f, 175.0f };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[79], &D2_TimeOverUI, &D2_TimeOverUIRect);
+			}
+			else {
+				m_missionFailedUI++;
+			}
+		}
 	}
 
 #endif

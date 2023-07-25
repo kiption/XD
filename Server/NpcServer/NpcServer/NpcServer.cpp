@@ -708,6 +708,7 @@ void NPC::NPC_State_Manegement(int state)
 		}
 		case NPC_ATTACK:
 		{
+			ChaseTime = system_clock::now();
 			if (m_chaseID == -1 || ChaseTime - AttackTime > 5000ms) {
 				m_state = NPC_BACK;
 				m_targetNodeIndex = m_OriginNodeIndex;
@@ -721,7 +722,6 @@ void NPC::NPC_State_Manegement(int state)
 				if (A_PlayerDetact() || (m_Distance[m_chaseID] < 300)) {
 					AttackTime = system_clock::now();
 				}
-				ChaseTime = system_clock::now();
 				A_PlayerAttack();
 			}
 			break;
