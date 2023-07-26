@@ -561,23 +561,23 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					if (players_info[i].m_new_state_update && players_info[i].m_role == ROLE_RIFLE) {
 						switch (players_info[i].m_ingame_state) {
 						case PL_ST_IDLE:
-							gGameFramework.otherPlayerReturnToIdle(i);
+							gGameFramework.otherPlayerReturnToIdle();
 							break;
 						case PL_ST_MOVE_FRONT: // 앞으로 이동
-							gGameFramework.otherPlayerForwardMotion(i);
+							gGameFramework.otherPlayerForwardMotion();
 							break;
 						case PL_ST_MOVE_BACK: // 뒤로 이동
-							gGameFramework.otherPlayerBackwardMotion(i);
+							gGameFramework.otherPlayerBackwardMotion();
 							break;
 						case PL_ST_MOVE_SIDE: // 옆으로 이동
-							gGameFramework.otherPlayerSfrateMotion(i);
+							gGameFramework.otherPlayerSfrateMotion();
 							break;
 						case PL_ST_ATTACK:
-							gGameFramework.otherPlayerShootingMotion(i);
+							gGameFramework.otherPlayerShootingMotion();
 							break;
 							// + 구르기 및 점프
 						case PL_ST_DEAD:
-							gGameFramework.otherPlayerDyingMotion(i);
+							gGameFramework.otherPlayerDyingMotion();
 							break;
 						}
 

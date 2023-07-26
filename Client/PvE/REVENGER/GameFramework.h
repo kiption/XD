@@ -156,36 +156,13 @@ public:
 
 	void ChangeScene(DWORD nMode);
 	void ShotDelay();
-	DWORD						m_nMode = OPENINGSCENE;
+	DWORD m_nMode = OPENINGSCENE;
 	bool m_bDieMotion = false;
 	GameSound gamesound;
-	int m_NumOfUI = UICOUNTERS;
-	bool UI_Switch = false;
-	bool m_bRollState = false;
-	bool m_LoginClick[4]{ false };
-	bool m_GameClick[3]{ false };
-	bool m_LobbyClick[3]{ false };
-	bool m_RoomClick[3]{ false };
-	bool m_SniperOn = false;
-	bool m_BloodSplatterOn = false;
-	bool m_HeliPlayerWarnningSwitch = false;
-	bool m_HeliPlayerWarnningUISwitch = false;
-	LoginSceneInfo loginpos[4];
-	LoginSceneInfo gamepos[2];
-	LoginSceneInfo lobbypos[5];
-	LoginSceneInfo roompos[3];
-	LoginSceneInfo createpos[2];
-	LoginSceneInfo choicejob[6];
 
-	bool m_bLoginInfoSend = false;
-	enum LOGINSCENE { LS_LOGIN, LS_OPENING, LS_LOBBY, LS_ROOM, LS_CREATE_ROOM };
-	int m_LoginScene = 0;
-	bool m_CreateRoomOkButton = false;
-	bool m_RoomBackButton = false;
-	float m_StartKey = 0;
-	float m_ReadyKey = 0;
-	bool m_CameraShaking = false;
 	float deltax = 0.0;
+
+	// 마우스 민감도
 	float MouseResponsivenessX = 350.0f;
 	float MouseResponsivenessY = 550.0f;
 public:
@@ -263,13 +240,13 @@ private:
 	CGameTimer					m_GameTimer;
 
 public:
-	XMFLOAT3	PrevPosition;
+	XMFLOAT3 PrevPosition;
 	CPlayer* m_pPlayer = NULL;
 	CCamera* m_pCamera = NULL;
 	CGameObject* m_pGameObject = NULL;
-	POINT						m_ptOldCursorPos;
+	POINT m_ptOldCursorPos;
 	CMaterial* m_pMaterial = NULL;
-	_TCHAR						m_pszFrameRate[70];
+	_TCHAR	m_pszFrameRate[70];
 	float ShootCnt = 0.0;
 
 	//==================================================
@@ -288,7 +265,6 @@ public:
 	// 서버로 보낼 마우스 입력값
 	queue<MouseInputVal> q_mouseInput;
 
-	// 서버에서 받은 총알 개수
 	WCHAR m_remainNPCPrint[20];
 	Roomname RoomnameList;
 	WCHAR m_LoginID[20];
@@ -322,7 +298,35 @@ public:
 	int m_myID = -1;
 	int m_otherHP[2];
 	WCHAR m_OtherName[2][20];
-	
+
+	int m_NumOfUI = UICOUNTERS;
+	bool UI_Switch = false;
+	bool m_bRollState = false;
+	bool m_LoginClick[4]{ false };
+	bool m_GameClick[3]{ false };
+	bool m_LobbyClick[3]{ false };
+	bool m_RoomClick[3]{ false };
+	bool m_SniperOn = false;
+	bool m_BloodSplatterOn = false;
+	bool m_HeliPlayerWarnningSwitch = false;
+	bool m_HeliPlayerWarnningUISwitch = false;
+	LoginSceneInfo loginpos[4];
+	LoginSceneInfo gamepos[2];
+	LoginSceneInfo lobbypos[5];
+	LoginSceneInfo roompos[3];
+	LoginSceneInfo createpos[2];
+	LoginSceneInfo choicejob[6];
+
+	bool m_bLoginInfoSend = false;
+	enum LOGINSCENE { LS_LOGIN, LS_OPENING, LS_LOBBY, LS_ROOM, LS_CREATE_ROOM };
+	int m_LoginScene = 0;
+	bool m_CreateRoomOkButton = false;
+	bool m_CameraShaking = false;
+	bool m_RoomBackButton = false;
+	float m_StartKey = 0;
+	float m_ReadyKey = 0;
+
+	// UI Info
 	vector<CollideMapInfo> mapcol_info;
 	vector<LobbyRoom>m_LobbyRoom_Info;
 	array<MYRoomUser, 3> m_MyRoom_Info;
@@ -331,23 +335,26 @@ public:
 	queue<ChatInfo> m_chat_info;
 	queue<SendChat> m_mychat_log;
 
+	// UI Print
 	wchar_t killNPCprint[100];
 	wchar_t occupationPrint[100];
 	wchar_t SurviveSecPrint[20];
 	wchar_t FlyAtkPrint[20];
 	wchar_t KillArmyPrint[20];
 
-
 	bool W_KEY, A_KEY, S_KEY, D_KEY, SPACE_KEY, SHOOT_KEY = false;
 	bool isComplete = false;
-
 	bool player_dead = false;
 	bool role_change_a2h_click = false;	// army -> heli
 	bool role_change_h2a_click = false;	// heli -> human
+
+	// 미션 UI 관련 변수
 	bool m_missionFailed = false;
 	bool m_missionClear = false;
 	float m_missionFailedUI = 0.0f;
 	float m_missionClearUI = 0.0f;
+
+	// 인게임 UI 관련 변수
 	bool m_ingame = false;
 	bool m_infoReady = false;
 	bool m_infoChoose = false;
@@ -376,14 +383,25 @@ public:
 	XMFLOAT3 getMyCameraLookVec();
 
 	// 객체 좌표,벡터 값 최신화 함수입니다.
+
+	// 나 자신 최신화
 	void setPosition_Self(XMFLOAT3 pos);
 	void setVectors_Self(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 
+	// 다른 플레이어 최신화
 	void setPosition_SoldiarOtherPlayer(XMFLOAT3 pos);
 	void setPosition_HeliOtherPlayer(XMFLOAT3 pos);
 	void setVectors_SoldiarOtherPlayer(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void setVectors_HeliOtherPlayer(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+	void remove_OtherPlayer();
 
+	// 플레이어 상태변화
+	void HeliPlayerUnderAttack(XMFLOAT3 ToLook);
+	void MyPlayerDieMotion();
+	void MyPlayerResponeMotion();
+	void OtherPlayerResponeMotion();
+
+	// 군인 플레이어 동작상태
 	void otherPlayerReturnToIdle();
 	void otherPlayerForwardMotion();
 	void otherPlayerBackwardMotion();
@@ -391,53 +409,40 @@ public:
 	void otherPlayerShootingMotion();
 	void otherPlayerDyingMotion();
 
-	void remove_OtherPlayer();
-
+	// NPC 최신화
 	void setPosition_Npc(int id, XMFLOAT3 pos);
 	void setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void remove_Npcs(int id);
 
-	// 클라이언트 객체의 상태 최신화 함수
+	// NPC 동작 상태
+	void NpcHittingMotion(int p_id);
+	void DyingMotionNPC(int id);
+	void AttackMotionNPC(int id);
+	void MoveMotionNPC(int id);
+
 	int a_id;
 	bool active = false;
-
-
-	void NpcHittingMotion(int p_id);
-	void HeliPlayerUnderAttack(XMFLOAT3 ToLook);
-	void MyPlayerDieMotion();
-	void MyPlayerResponeMotion();
-	void OtherPlayerResponeMotion();
 	bool m_bDamageOn = false;
+	bool HumanCollsiion = false;
+	bool HeliCollsiion = false;
 	float m_pPlayerRotate_z = 0.0f;
 	float m_pPlayerRotate_x = 0.0f;
+
 	// MYRoomUser
 	void setRoomUserInfo(int index, wchar_t* user_name, int user_state) {
 		m_MyRoom_Info[index].ready_state = user_state;
 		memcpy(m_MyRoom_Info[index].User_name, user_name, 24);
 	}
 
-	//==================================================
-		// 서버에서 받은 Bound 값과의 충돌설정 함수입니다.
-		//player - map
 	bool CollisionMap_by_PLAYER(XMFLOAT3 mappos, XMFLOAT3 mapextents, CGameObject* pTargetGameObject);
-	//bullet - map
 	void CollisionMap_by_BULLET(XMFLOAT3 mappos);
-	//npc - (player/map/bullet)
 	void CollisionNPC_by_PLAYER(XMFLOAT3 npcpos, XMFLOAT3 npcextents);
 	void CollisionNPC_by_MAP(XMFLOAT3 npcpos, XMFLOAT3 npcextents, XMFLOAT3 mapcenter, XMFLOAT3 mapextents);
 	void CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents);
 	void CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents);
 
-	bool HumanCollsiion = false;
-	bool HeliCollsiion = false;
-	void DyingMotionNPC(int id);
-	void AttackMotionNPC(int id);
-	void MoveMotionNPC(int id);
-
 	//=================================================
-		// 충돌 모션과 이펙트 처리 함수입니다.
-
-		//void Motion_BulletbyPlayer(int id, XMFLOAT3 mappos, XMFLOAT3 mapextents);
+	// 충돌 모션과 이펙트 처리 함수입니다.
 	BoundingOrientedBox m_mapxmoobb;
 	BoundingOrientedBox m_mapStorexmoobb;
 	BoundingOrientedBox m_npcoobb;
@@ -446,12 +451,7 @@ public:
 
 	float m_fResponCount = 0.0;
 	//=================================================
-		//NPC Attack
+	//NPC Attack
 	void NpcUnderAttack(XMFLOAT3 ToLook,int npc_id);
 	void NpcNoneUnderAttack();
 };
-
-
-
-//npc - map
-//npc - bullet

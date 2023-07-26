@@ -1296,10 +1296,10 @@ void Stage1::PlayerByPlayerCollision()
 	if (MyPoobb.Intersects(Other2Poobb)) {
 
 		cout << "Collision P2!" << endl; 
-		P2Pos.z -= 1.0f;
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._43 -= 1.0f;
 	}
 	if (MyPoobb.Intersects(Other1Poobb)) {
 		cout << "Collision P1!" << endl; 
-		P1Pos.z-= 1.0f;
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._43 -= 1.0f;
 	}
 }
