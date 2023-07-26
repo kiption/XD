@@ -513,10 +513,12 @@ void processPacket(char* ptr)
 		switch (recv_packet->msg) {
 		case POPUPMSG_PLZCHOOSEROLE:	// 역할 선택 X
 			cout << "역할 준비X" << endl;
+			b_room_PlzChooseRole = true;
 			break;
 
 		case POPUPMSG_ANYONENOTREADY:	// 누군가 준비를 안했음.
 			cout << "누군가 준비 안했음" << endl;
+			b_room_AnyOneNotReady = true;
 			break;
 		}
 
@@ -1086,6 +1088,7 @@ void processPacket(char* ptr)
 		servertime_ms = recv_packet->servertime_ms;
 		timelimit_ms = STAGE1_TIMELIMIT * 1000 - servertime_ms;
 		timelimit_sec = timelimit_ms / 1000;
+		b_startTime = true;
 		break;
 	}//SC_TIME_TICKING case end
 	case SC_CHAT:

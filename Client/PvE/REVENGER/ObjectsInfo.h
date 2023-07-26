@@ -138,6 +138,11 @@ RoomInfo curr_room;
 int curr_room_id = -1;
 bool b_room_manager = false;
 int my_room_index = -1;
+bool b_room_PlzChooseRole = false;
+bool b_room_AnyOneNotReady = false;
+float b_roomPlzRoleTime = 0.0f;
+float b_roomNotReadyTime = 0.0f;
+bool b_startTime = false;
 
 void CurrRoomInfoClear() {	// Room에서 나와 Lobby로 이동할 때 그동안 있었던 방에 대한 정보를 초기화하는 함수입니다.
 	curr_room.room_id = -1;

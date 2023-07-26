@@ -556,7 +556,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						}
 						players_info[i].m_damaged_effect_on = false;
 					}
-				
+
 					if (i == my_id) continue;
 					if (players_info[i].m_new_state_update && players_info[i].m_role == ROLE_RIFLE) {
 						switch (players_info[i].m_ingame_state) {
@@ -1091,6 +1091,41 @@ void uiThreadFunc() {
 					trigger_role_change = false;
 				}
 
+				// 인 게임 진입 UI
+				if (stage1_enter_ok) {
+					gGameFramework.m_infoReady = false;
+					b_room_AnyOneNotReady = false;
+					gGameFramework.m_infoChoose = false;
+					b_room_PlzChooseRole = false;
+
+					gGameFramework.m_ingame = true;
+				}
+				// 역할 선택해주세요.
+				if (b_room_PlzChooseRole) {
+					gGameFramework.m_infoReady = false;
+					b_room_AnyOneNotReady = false;
+
+					gGameFramework.m_infoChoose = true;
+					if (gGameFramework.m_infoChooseTime >= 10.0f) {
+						gGameFramework.m_infoChooseTime = 0.0f;
+						b_room_PlzChooseRole = false;
+						gGameFramework.m_infoChoose = false;
+					}
+				}
+
+				// 준비 안한 사람이 있습니다.
+				if (b_room_AnyOneNotReady) {
+					gGameFramework.m_infoChoose = false;
+					b_room_PlzChooseRole = false;
+
+					gGameFramework.m_infoReady = true;
+					if (gGameFramework.m_infoReadyTime >= 10.0f) {
+						gGameFramework.m_infoReadyTime = 0.0f;
+						b_room_AnyOneNotReady = false;
+						gGameFramework.m_infoReady = false;
+					}
+				}
+
 				if (trigger_leave_member) {	// 다른 유저 방 퇴장 트리거
 					if (0 <= left_member_id && left_member_id < MAX_USER) {
 						gGameFramework.setRoomUserInfo(left_member_id, L"\0", RM_ST_EMPTY);
@@ -1127,6 +1162,13 @@ void uiThreadFunc() {
 			gGameFramework.m_1MinOfTime = (timelimit_sec - gGameFramework.m_10MinOfTime * 600) / 60;
 			gGameFramework.m_10SecOftime = (timelimit_sec - gGameFramework.m_1MinOfTime * 60) / 10;
 			gGameFramework.m_1SecOfTime = timelimit_sec % 10;
+
+			if (!gGameFramework.m_missionClear && b_startTime) {
+				if (timelimit_sec <= 0) {
+					gGameFramework.m_missionFailed = true;
+					gGameFramework.m_missionClear = false;
+				}
+			}
 
 			// 4. 미션 진행상황 동기화
 			switch (gGameFramework.m_nMode) {

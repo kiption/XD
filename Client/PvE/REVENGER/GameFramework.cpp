@@ -561,7 +561,6 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 			case LS_ROOM: // 방 내부
 				if (roompos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[0].lx && roompos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[0].ly) {
 					m_RoomClick[0] = true;//Start
-					m_ingame = true;
 				}
 				else if (roompos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < roompos[1].lx && roompos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < roompos[1].ly) {
 					m_RoomClick[1] = true; // Ready
@@ -1641,21 +1640,14 @@ void CGameFramework::FrameAdvance()
 					D2D_RECT_F D2_NotAllReadyUIRect = { 0.0f, 0.0f, 808.0f, 168.0f };
 					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[81], &D2_NotAllReadyUI, &D2_NotAllReadyUIRect);
 
-					m_infoReadyTime++;
-					if (m_infoReadyTime > 3.0f) {
-						m_infoReadyTime = 0.0f;
-						m_infoReady = false;
-					}
+					m_infoReadyTime += 0.1f;
 				}
 				if (m_infoChoose) {
 					D2D_POINT_2F D2_ChoiceJobUI = { FRAME_BUFFER_WIDTH / 2 - 404.0f, FRAME_BUFFER_HEIGHT / 2 - 84.0f };
 					D2D_RECT_F D2_ChoiceJobUIRect = { 0.0f, 0.0f, 808.0f, 168.0f };
 					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[82], &D2_ChoiceJobUI, &D2_ChoiceJobUIRect);
-					m_infoChooseTime++;
-					if (m_infoChooseTime > 3.0f) {
-						m_infoChooseTime = 0.0f;
-						m_infoChoose = false;
-					}
+
+					m_infoChooseTime += 0.1f;
 				}
 
 			}
@@ -1663,7 +1655,6 @@ void CGameFramework::FrameAdvance()
 				D2D_POINT_2F D2_RoomUI = { (FRAME_BUFFER_WIDTH / 6) + 100.0f, FRAME_BUFFER_HEIGHT / 2 - 146.5f };
 				D2D_RECT_F D2_RoomUIRect = { 0.0f, 0.0f, 1080.0f, 293.0f };
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[53], &D2_RoomUI, &D2_RoomUIRect);
-
 			}
 		}
 	}
@@ -1707,7 +1698,7 @@ void CGameFramework::FrameAdvance()
 			D2D_RECT_F D2_CurrentProgressRect = { 0.0f, 0.0f, (902.0f / 100 * m_occupationnum), 62.0f };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[8], &D2_CurrentProgress, &D2_CurrentProgressRect);
 
-			if (m_occupationnum >= 99) {
+			if (m_occupationnum >= 99 && !m_missionFailed) {
 				m_missionClear = true;
 			}
 		}
@@ -1868,7 +1859,7 @@ void CGameFramework::FrameAdvance()
 			D2D_RECT_F D2_DyingBanner = { 0.0f, 0.0f, 2500.0, 1730.0 };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[71], &D2_DyingBannerUI, &D2_DyingBanner);
 		}
-		if (m_missionClear) {
+		if (m_missionClear && !m_missionFailed) {
 			D2D_POINT_2F D2_MissionclearedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 163.0f };
 			D2D_RECT_F D2_MissionclearedBGUIRect = { 0.0f, 0.0f, m_missionClearUI * 19.6f, 326.0f };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[74], &D2_MissionclearedBGUI, &D2_MissionclearedBGUIRect);
