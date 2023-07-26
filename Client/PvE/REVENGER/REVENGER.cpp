@@ -440,41 +440,41 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				// 1) 다른 플레이어
 				for (int i = 0; i < MAX_USER; ++i) {
 					if (i == my_id) continue;
-					if (players_info[i].m_state == OBJ_ST_RUNNING) {
-
+					if (players_info[i].m_state == OBJ_ST_RUNNING)
+					{
 						if (players_info[i].m_role == ROLE_RIFLE)
 						{
-							// 인덱스 조정
-							int index_num = 0;
-							switch (i) {
-							case 0:	// 자신의 id가 0일때
-							case 1:	// 자신의 id가 1일때
-								index_num = i;	// 그대로 사용
-								break;
-							case 2:	// 자신의 id가 2일때
-								if (players_info[0].m_role == ROLE_RIFLE) {	// id 0 클라이언트도 소총수이면
-									index_num = 1;
-								}
-								else {										// id 1 클라이언트도 소충수이면
-									index_num = 0;
-								}
-								break;
-							}
+							//// 인덱스 조정
+							//int index_num = 0;
+							//switch (i) {
+							//case 0:	// 자신의 id가 0일때
+							//case 1:	// 자신의 id가 1일때
+							//	index_num = i;	// 그대로 사용
+							//	break;
+							//case 2:	// 자신의 id가 2일때
+							//	if (players_info[0].m_role == ROLE_RIFLE) {	// id 0 클라이언트도 소총수이면
+							//		index_num = 1;
+							//	}
+							//	else {										// id 1 클라이언트도 소충수이면
+							//		index_num = 0;
+							//	}
+							//	break;
+							//}
 
-							// 적용
-							gGameFramework.setPosition_SoldiarOtherPlayer(index_num, players_info[i].m_pos);
-							gGameFramework.setVectors_SoldiarOtherPlayer(index_num, players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
+							// 군인은 무조건 index가 6
+							gGameFramework.setPosition_SoldiarOtherPlayer(players_info[i].m_pos);
+							gGameFramework.setVectors_SoldiarOtherPlayer(players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
 						}
 						else if (players_info[i].m_role == ROLE_HELI)
 						{
 							// 헬기는 무조건 index가 7
-							gGameFramework.setPosition_HeliOtherPlayer(i, players_info[i].m_pos);
-							gGameFramework.setVectors_HeliOtherPlayer(i, players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
+							gGameFramework.setPosition_HeliOtherPlayer(players_info[i].m_pos);
+							gGameFramework.setVectors_HeliOtherPlayer(players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
 						}
 					}
 					else if (players_info[i].m_state == OBJ_ST_LOGOUT) {
 						players_info[i].InfoClear();
-						gGameFramework.remove_OtherPlayer(i);
+						gGameFramework.remove_OtherPlayer();
 					}
 				}
 
@@ -493,9 +493,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						gGameFramework.AttackMotionNPC(i);
 						gGameFramework.NpcUnderAttack(npcs_info[i].m_attack_dir, i);
 						npcs_info[i].m_attack_on = false;
+					
+					}
+					if (!npcs_info[i].m_attack_on) {
 						gGameFramework.NpcNoneUnderAttack();
 					}
-
 
 				}
 
@@ -520,7 +522,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					gGameFramework.player_dead = true;
 				}
 				if ((players_info[my_id].m_ingame_state != PL_ST_DEAD) && (gGameFramework.player_dead)) {
-					gGameFramework.MyPlayerResponeMotion();
+					gGameFramework.MyPlayerRespawnMotion();
 					gGameFramework.m_HeliPlayerWarnningUISwitch = false;
 					gGameFramework.player_dead = false;
 				}

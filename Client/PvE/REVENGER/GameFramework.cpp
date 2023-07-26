@@ -3798,7 +3798,7 @@ void CGameFramework::MyPlayerDieMotion()
 	}
 
 }
-void CGameFramework::MyPlayerResponeMotion()
+void CGameFramework::MyPlayerRespawnMotion()
 {
 	if (m_ingame_role == R_RIFLE)
 	{

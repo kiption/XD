@@ -398,7 +398,7 @@ public:
 	// 플레이어 상태변화
 	void HeliPlayerUnderAttack(XMFLOAT3 ToLook);
 	void MyPlayerDieMotion();
-	void MyPlayerResponeMotion();
+	void MyPlayerRespawnMotion();
 	void OtherPlayerResponeMotion();
 
 	// 군인 플레이어 동작상태
