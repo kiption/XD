@@ -872,31 +872,31 @@ Angle AOB: 89.94583
 Angle BOC: 90.05418
 
 Object Name: Tree1
-Center: (61.71, 27.60, 873.50)
-Scale: (4.83, 44.44, 2.66)
+Center: (60.30, 27.60, 873.50)
+Scale: (6.23, 106.63, 8.45)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.4375
-Angle BOC: 57.56249
+Angle AOB: 72.76051
+Angle BOC: 107.2395
 
 Object Name: Tree2
-Center: (256.20, 27.60, 983.20)
-Scale: (4.83, 44.44, 2.66)
+Center: (256.20, 27.60, 972.90)
+Scale: (11.00, 44.44, 4.69)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.4376
-Angle BOC: 57.56242
+Angle AOB: 133.8361
+Angle BOC: 46.16395
 
 Object Name: Tree3
-Center: (195.80, 27.60, 750.50)
-Scale: (4.83, 44.44, 2.66)
+Center: (204.50, 27.60, 750.80)
+Scale: (8.46, 132.42, 7.97)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.4376
-Angle BOC: 57.56242
+Angle AOB: 93.42311
+Angle BOC: 86.57689
 
 Object Name: Tree4
 Center: (203.50, 27.60, 606.70)
@@ -909,21 +909,21 @@ Angle BOC: 57.56242
 
 Object Name: Tree5
 Center: (174.60, 27.60, 438.90)
-Scale: (4.83, 44.44, 2.66)
+Scale: (4.83, 44.44, 4.26)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.4387
-Angle BOC: 57.5613
+Angle AOB: 97.20471
+Angle BOC: 82.79529
 
 Object Name: Tree6
-Center: (-123.20, 27.60, 873.37)
-Scale: (4.83, 44.44, 3.14)
+Center: (-124.30, 27.60, 888.20)
+Scale: (4.95, 44.44, 3.49)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 113.9876
-Angle BOC: 66.01238
+Angle AOB: 109.5445
+Angle BOC: 70.45554
 
 Object Name: Tree7
 Center: (107.20, 27.60, 205.20)
@@ -989,22 +989,22 @@ Angle AOB: 122.4376
 Angle BOC: 57.56242
 
 Object Name: Tree14
-Center: (482.80, 27.60, 462.10)
-Scale: (4.83, 44.44, 3.53)
+Center: (513.80, 27.60, 443.30)
+Scale: (8.72, 85.95, 6.25)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 107.6971
-Angle BOC: 72.30292
+Angle AOB: 108.7266
+Angle BOC: 71.27338
 
 Object Name: Tree15
-Center: (476.90, 27.60, 519.50)
-Scale: (4.83, 44.44, 3.39)
+Center: (476.90, 27.60, 520.30)
+Scale: (4.83, 101.96, 5.45)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 109.9155
-Angle BOC: 70.08449
+Angle AOB: 83.15887
+Angle BOC: 96.84114
 
 Object Name: Tree16
 Center: (172.70, 27.60, 135.80)
@@ -1052,94 +1052,94 @@ Angle AOB: 107.6966
 Angle BOC: 72.30338
 
 Object Name: Tree21
-Center: (604.10, 27.60, 650.50)
-Scale: (4.83, 44.44, 3.53)
+Center: (594.50, 27.60, 645.10)
+Scale: (6.36, 99.57, 5.58)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 107.6955
-Angle BOC: 72.30455
+Angle AOB: 97.49093
+Angle BOC: 82.50908
 
 Object Name: Tree22
-Center: (610.00, 27.60, 819.70)
-Scale: (4.83, 44.44, 3.53)
+Center: (592.90, 27.60, 809.80)
+Scale: (5.84, 60.13, 3.53)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 107.6955
-Angle BOC: 72.30455
+Angle AOB: 117.6477
+Angle BOC: 62.35231
 
 Object Name: Tree23
-Center: (596.00, 27.60, 904.10)
-Scale: (4.83, 44.44, 3.53)
+Center: (595.10, 27.60, 907.20)
+Scale: (6.29, 103.39, 6.19)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 107.6955
-Angle BOC: 72.30455
+Angle AOB: 90.9221
+Angle BOC: 89.0779
 
 Object Name: Tree24
-Center: (517.60, 27.60, 976.30)
-Scale: (4.83, 44.44, 3.53)
+Center: (519.10, 27.60, 968.80)
+Scale: (8.65, 82.71, 4.47)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 107.6955
-Angle BOC: 72.30455
+Angle AOB: 125.3106
+Angle BOC: 54.68941
 
 Object Name: Tree25
 Center: (106.40, 27.60, -167.10)
-Scale: (4.83, 44.44, 2.66)
+Scale: (6.84, 96.48, 6.82)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.4381
-Angle BOC: 57.56186
+Angle AOB: 90.11867
+Angle BOC: 89.88133
 
 Object Name: Tree26
-Center: (350.80, 27.60, -82.70)
-Scale: (4.83, 44.44, 2.66)
+Center: (351.90, 27.60, -82.70)
+Scale: (8.39, 63.52, 3.51)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.4384
-Angle BOC: 57.56158
+Angle AOB: 134.5946
+Angle BOC: 45.40538
 
 Object Name: Tree27
-Center: (204.40, 27.60, -308.90)
-Scale: (4.83, 44.44, 2.66)
+Center: (207.70, 27.60, -329.90)
+Scale: (7.67, 66.16, 8.52)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.4387
-Angle BOC: 57.5613
+Angle AOB: 83.99995
+Angle BOC: 96.00005
 
 Object Name: Tree28
 Center: (207.20, 27.60, -472.20)
-Scale: (4.83, 44.44, 2.66)
+Scale: (6.10, 75.51, 6.36)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.4387
-Angle BOC: 57.5613
+Angle AOB: 87.58777
+Angle BOC: 92.41223
 
 Object Name: Tree29
-Center: (177.20, 27.60, -632.94)
-Scale: (4.83, 44.44, 2.66)
+Center: (177.20, 27.60, -633.40)
+Scale: (4.83, 67.53, 6.24)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.4376
-Angle BOC: 57.56242
+Angle AOB: 75.54545
+Angle BOC: 104.4546
 
 Object Name: Tree30
-Center: (68.25, 27.60, -859.61)
-Scale: (4.83, 44.44, 2.66)
+Center: (62.50, 27.60, -858.90)
+Scale: (12.14, 113.49, 6.10)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.4376
-Angle BOC: 57.56242
+Angle AOB: 126.6824
+Angle BOC: 53.31765
 
 Object Name: Tree31
 Center: (253.80, 27.60, -559.10)
@@ -1151,13 +1151,13 @@ Angle AOB: 122.4374
 Angle BOC: 57.56242
 
 Object Name: Tree32
-Center: (165.40, 27.60, -59.20)
-Scale: (4.83, 44.44, 3.93)
+Center: (174.80, 27.60, -89.00)
+Scale: (7.28, 75.08, 8.02)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 101.7177
-Angle BOC: 78.28227
+Angle AOB: 84.47358
+Angle BOC: 95.52642
 
 Object Name: Tree33
 Center: (430.74, 27.60, -527.82)
@@ -1197,21 +1197,21 @@ Angle BOC: 57.56242
 
 Object Name: Tree37
 Center: (495.80, 27.60, -627.00)
-Scale: (4.83, 44.44, 3.53)
+Scale: (10.05, 111.60, 7.22)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 107.6962
-Angle BOC: 72.30386
+Angle AOB: 108.6149
+Angle BOC: 71.38513
 
 Object Name: Tree38
-Center: (129.00, 27.60, -950.40)
-Scale: (4.83, 44.44, 2.66)
+Center: (129.00, 27.60, -936.90)
+Scale: (6.27, 50.32, 5.74)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.4376
-Angle BOC: 57.56242
+Angle AOB: 95.10083
+Angle BOC: 84.89917
 
 Object Name: Tree39
 Center: (468.50, 27.60, -804.20)
@@ -1250,7 +1250,7 @@ Angle AOB: 103.0129
 Angle BOC: 76.98711
 
 Object Name: Tree43
-Center: (599.69, 27.60, -415.62)
+Center: (596.90, 27.60, -415.62)
 Scale: (4.83, 44.44, 3.53)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
@@ -1304,13 +1304,13 @@ Angle AOB: 122.4376
 Angle BOC: 57.56242
 
 Object Name: Tree49
-Center: (-202.60, 27.60, 984.30)
-Scale: (4.83, 44.44, 2.66)
+Center: (-194.70, 27.60, 970.30)
+Scale: (4.83, 44.44, 3.67)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.4376
-Angle BOC: 57.56242
+Angle AOB: 105.6278
+Angle BOC: 74.3722
 
 Object Name: Tree50
 Center: (-337.50, 27.60, 594.00)
@@ -1322,13 +1322,13 @@ Angle AOB: 75.50131
 Angle BOC: 104.4987
 
 Object Name: Tree51
-Center: (-243.70, 27.60, 101.00)
-Scale: (4.83, 44.44, 3.93)
+Center: (-272.40, 27.60, 134.20)
+Scale: (5.91, 125.01, 5.74)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 101.7177
-Angle BOC: 78.28227
+Angle AOB: 91.69029
+Angle BOC: 88.30971
 
 Object Name: Tree52
 Center: (-505.10, 27.60, 563.60)
@@ -1338,15 +1338,6 @@ Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
 Angle AOB: 122.4376
 Angle BOC: 57.56242
-
-Object Name: Tree53
-Center: (-560.00, 27.60, 652.00)
-Scale: (4.83, 44.44, 2.66)
-Local Forward: (0.00, 0.00, 1.00)
-Local Right: (1.00, 0.00, 0.00)
-Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.437
-Angle BOC: 57.56303
 
 Object Name: Tree54
 Center: (-526.72, 27.60, 592.50)
@@ -1386,12 +1377,12 @@ Angle BOC: 72.30386
 
 Object Name: Tree58
 Center: (-573.00, 27.60, 968.70)
-Scale: (4.83, 44.44, 3.53)
+Scale: (8.41, 59.48, 5.00)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 107.6955
-Angle BOC: 72.30455
+Angle AOB: 118.5674
+Angle BOC: 61.43259
 
 Object Name: Tree59
 Center: (-500.28, 27.60, 883.50)
@@ -1403,22 +1394,22 @@ Angle AOB: 103.0129
 Angle BOC: 76.98711
 
 Object Name: Tree60
-Center: (-677.72, 27.60, 455.80)
-Scale: (4.83, 44.44, 3.53)
+Center: (-677.72, 27.60, 453.90)
+Scale: (6.21, 44.44, 5.45)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 107.6964
-Angle BOC: 72.3036
+Angle AOB: 97.4385
+Angle BOC: 82.5615
 
 Object Name: Tree61
-Center: (-683.00, 27.60, 291.90)
-Scale: (4.83, 44.44, 4.19)
+Center: (-666.80, 44.60, 290.10)
+Scale: (6.09, 77.86, 7.93)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 98.20661
-Angle BOC: 81.7934
+Angle AOB: 75.03594
+Angle BOC: 104.9641
 
 Object Name: Tree62
 Center: (-692.90, 27.60, 69.10)
@@ -1430,31 +1421,31 @@ Angle AOB: 107.6962
 Angle BOC: 72.30384
 
 Object Name: Tree63
-Center: (-180.50, 27.60, 204.11)
-Scale: (4.83, 44.44, 3.93)
+Center: (-172.20, 27.60, 215.60)
+Scale: (6.99, 101.34, 3.93)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 101.7177
-Angle BOC: 78.28227
+Angle AOB: 121.285
+Angle BOC: 58.71498
 
 Object Name: Tree64
-Center: (-271.60, 27.60, 514.00)
-Scale: (4.83, 44.44, 2.66)
+Center: (-264.30, 27.60, 487.10)
+Scale: (6.65, 116.11, 9.92)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.4376
-Angle BOC: 57.56242
+Angle AOB: 67.66006
+Angle BOC: 112.3399
 
 Object Name: Tree65
-Center: (-317.90, 27.60, 985.20)
-Scale: (4.83, 44.44, 2.66)
+Center: (-324.80, 27.60, 983.30)
+Scale: (4.83, 44.44, 3.25)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.4376
-Angle BOC: 57.56242
+Angle AOB: 112.1211
+Angle BOC: 67.87888
 
 Object Name: Tree66
 Center: (-395.14, 27.60, 901.53)
@@ -1466,13 +1457,13 @@ Angle AOB: 113.7579
 Angle BOC: 66.24206
 
 Object Name: Tree67
-Center: (-672.60, 27.60, 889.20)
-Scale: (4.83, 44.44, 3.53)
+Center: (-672.60, 27.60, 887.20)
+Scale: (7.57, 44.44, 6.80)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 107.6955
-Angle BOC: 72.30455
+Angle AOB: 96.13744
+Angle BOC: 83.86256
 
 Object Name: Tree68
 Center: (-282.80, 27.60, -726.10)
@@ -1537,15 +1528,6 @@ Local Rotate: (0.00, 0.00, 0.00)
 Angle AOB: 122.4373
 Angle BOC: 57.56303
 
-Object Name: Tree75
-Center: (-549.82, 27.60, -504.08)
-Scale: (4.83, 44.44, 2.66)
-Local Forward: (0.00, 0.00, 1.00)
-Local Right: (1.00, 0.00, 0.00)
-Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 122.4381
-Angle BOC: 57.56191
-
 Object Name: Tree76
 Center: (-528.97, 27.60, -491.47)
 Scale: (4.83, 44.44, 2.66)
@@ -1602,30 +1584,30 @@ Angle BOC: 72.3036
 
 Object Name: Tree82
 Center: (-677.80, 27.60, -789.40)
-Scale: (4.83, 44.44, 4.19)
+Scale: (4.83, 67.19, 8.40)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 98.20661
-Angle BOC: 81.7934
+Angle AOB: 59.80597
+Angle BOC: 120.194
 
 Object Name: Tree83
-Center: (-607.80, 27.60, -940.20)
-Scale: (4.83, 44.44, 3.53)
+Center: (-609.28, 27.60, -940.20)
+Scale: (8.34, 65.69, 7.68)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 107.6955
-Angle BOC: 72.30455
+Angle AOB: 94.73182
+Angle BOC: 85.26819
 
 Object Name: Tree84
 Center: (-151.80, 27.60, -852.30)
-Scale: (4.83, 44.44, 3.93)
+Scale: (14.54, 85.45, 8.93)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 101.7182
-Angle BOC: 78.28185
+Angle AOB: 116.8666
+Angle BOC: 63.13336
 
 Object Name: Tree85
 Center: (-257.30, 27.60, -611.80)
@@ -1646,49 +1628,40 @@ Angle AOB: 118.2141
 Angle BOC: 61.7859
 
 Object Name: Tree87
-Center: (-130.60, 27.60, -948.10)
-Scale: (4.83, 44.44, 3.15)
+Center: (-130.60, 21.20, -948.10)
+Scale: (4.83, 37.28, 3.15)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
 Angle AOB: 113.7579
 Angle BOC: 66.24206
 
-Object Name: Tree88
-Center: (-588.70, 27.60, -392.20)
-Scale: (7.00, 44.44, 3.53)
-Local Forward: (0.00, 0.00, 1.00)
-Local Right: (1.00, 0.00, 0.00)
-Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 126.4413
-Angle BOC: 53.5587
-
 Object Name: Tree89
 Center: (519.73, 27.60, -938.50)
-Scale: (4.83, 44.44, 3.53)
+Scale: (8.58, 68.86, 6.01)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 107.6955
-Angle BOC: 72.30455
+Angle AOB: 109.9356
+Angle BOC: 70.06442
 
 Object Name: Tree90
-Center: (596.80, 27.60, -856.40)
-Scale: (4.83, 44.44, 3.53)
+Center: (598.90, 27.60, -856.40)
+Scale: (8.75, 44.44, 3.53)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 107.6955
-Angle BOC: 72.30455
+Angle AOB: 136.0637
+Angle BOC: 43.93631
 
 Object Name: Tree91
-Center: (601.00, 27.60, -671.30)
-Scale: (4.83, 44.44, 3.53)
+Center: (603.70, 27.60, -671.30)
+Scale: (6.56, 44.44, 7.76)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 107.6955
-Angle BOC: 72.30455
+Angle AOB: 80.41174
+Angle BOC: 99.58826
 
 Object Name: Tree92
 Center: (-540.50, 27.60, 575.50)
@@ -1826,13 +1799,13 @@ Angle AOB: 100.301
 Angle BOC: 79.69904
 
 Object Name: lamp13
-Center: (-590.50, 27.60, 684.85)
-Scale: (4.83, 44.44, 4.03)
+Center: (-590.50, 27.60, 678.40)
+Scale: (6.65, 81.06, 21.40)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 100.301
-Angle BOC: 79.69904
+Angle AOB: 34.53083
+Angle BOC: 145.4692
 
 Object Name: lamp14
 Center: (-587.80, 27.60, 227.50)
@@ -1880,13 +1853,13 @@ Angle AOB: 100.3003
 Angle BOC: 79.69968
 
 Object Name: lamp19
-Center: (-572.80, 27.60, -415.90)
-Scale: (4.83, 44.44, 4.03)
+Center: (-572.80, 27.60, -410.30)
+Scale: (6.82, 112.64, 16.44)
 Local Forward: (0.00, 0.00, 1.00)
 Local Right: (1.00, 0.00, 0.00)
 Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 100.3001
-Angle BOC: 79.69989
+Angle AOB: 45.07813
+Angle BOC: 134.9219
 
 Object Name: lamp20
 Center: (-593.57, 27.60, -865.92)
