@@ -153,18 +153,16 @@ void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 
 	if (m_bDieState == true)
 	{
-	
-		//m_pCamera->m_xmf3Position.z -= 0.1f;
-		FallDown(fTimeElapse);
-		
+		FallDown(fTimeElapse);	
 	}
 
 	if (m_bDieState == false)
 	{
-		
 		SetGravity(XMFLOAT3(0.0, 0.0, 0.0));
 	}
-	//if (m_xmf4x4ToParent._42 <20.0) gamesound.PlayHightLimitSound();
+
+
+	LimitAltitude();
 
 }
 
@@ -359,5 +357,13 @@ void HeliPlayer::FallDown(float fTimeElapsed)
 		m_pFrameFragObj10->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[11].x * staticValue * fTimeElapsed;
 		m_pFrameFragObj10->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[11].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
 		m_pFrameFragObj10->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[11].z * staticValueZ * fTimeElapsed;
+	}
+}
+
+void HeliPlayer::LimitAltitude()
+{
+	if (this->m_xmf4x4ToParent._42>120.0f)
+	{
+		SetPosition(XMFLOAT3(this->GetPosition().x,119.99f, this->GetPosition().z));
 	}
 }
