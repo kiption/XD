@@ -48,6 +48,7 @@ public:
 
 	XMFLOAT4X4						m_xmf4x4View;
 	XMFLOAT4X4						m_xmf4x4Projection;
+	bool m_bHelicopterFreedom = false;
 public:
 	CCamera();
 	CCamera(CCamera *pCamera);

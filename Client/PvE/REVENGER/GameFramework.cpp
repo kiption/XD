@@ -453,6 +453,9 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = true;
 				m_pCamera->GenerateProjectionMatrix(1.01f, 1000.0f, ASPECT_RATIO, 40.0f);
 			}
+			if (m_ingame_role == R_HELI) {
+				m_pCamera->m_bHelicopterFreedom = true;
+			}
 		}
 
 		break;
@@ -463,6 +466,9 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				m_SniperOn = false;
 				((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode = false;
 				m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+			}
+			if (m_ingame_role == R_HELI) {
+				m_pCamera->m_bHelicopterFreedom = false;
 			}
 		}
 
@@ -1093,7 +1099,11 @@ void CGameFramework::ProcessInput()
 						if (m_ingame_role == R_HELI)
 						{
 							((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
-							m_pCamera->Rotate(cyDelta / 2, cxDelta / 2, 0.0f);
+							if (m_pCamera->m_bHelicopterFreedom==true)
+							{
+								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(0.0,0.0, 0.0f);
+								m_pCamera->Rotate(cyDelta/6, cxDelta/6,0.0f);
+							}
 						}
 						else
 							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
@@ -2077,7 +2087,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-}
+	}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -2197,7 +2207,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-	}
+}
 	pd3dInfoQueue->Release();
 #endif
 

@@ -202,6 +202,8 @@ void CSpaceShipCamera::Rotate(float x, float y, float z)
 		m_fYaw += y;
 		if (m_fYaw > 360.0f) m_fYaw -= 360.0f;
 		if (m_fYaw < 0.0f) m_fYaw += 360.0f;
+
+
 		XMFLOAT3 xmf3Up = m_pPlayer->GetUpVector();
 		XMFLOAT3 DefalutUp = { 0.0f, 1.0f, 0.0f };
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&DefalutUp), XMConvertToRadians(y));
