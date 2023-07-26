@@ -1102,7 +1102,7 @@ void CGameFramework::ProcessInput()
 					{
 						bool isCollide = false;
 						CollideMapInfo temp;
-						for (int i{}; i < mapcol_info.size() - 1; ++i) {
+						for (int i{}; i < mapcol_info.size(); ++i) {
 							if (mapcol_info[i].m_xoobb.Intersects(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xoobb)) {
 								temp = mapcol_info[i];
 								isCollide = true;
