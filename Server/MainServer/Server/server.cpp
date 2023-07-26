@@ -2710,7 +2710,7 @@ void timerFunc() {
 				case 1:
 					left_time = STAGE1_TIMELIMIT * 1000 - static_cast<int>(g_curr_servertime.count());
 					if (left_time < 0) {
-						ticking_packet.servertime_ms = STAGE1_TIMELIMIT;
+						ticking_packet.servertime_ms = STAGE1_TIMELIMIT * 1000;
 					}
 					else {
 						ticking_packet.servertime_ms = static_cast<int>(g_curr_servertime.count());
