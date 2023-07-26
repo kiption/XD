@@ -908,7 +908,7 @@ void Stage1::Firevalkan(CGameObject* Objects, XMFLOAT3 ToPlayerLook)
 }
 void Stage1::ParticleCollisionResult()
 {
-	
+
 	BoundingOrientedBox HeliPlayeroobb = BoundingOrientedBox(((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->GetPosition(),
 		XMFLOAT3(8.0, 8.0, 10.0), XMFLOAT4(0, 0, 0, 1));
 
@@ -919,14 +919,14 @@ void Stage1::ParticleCollisionResult()
 	for (int i = 12; i < 17; i++)
 	{
 		P1 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj1->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
-		P2 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj2->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
-		P3 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj3->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
-		P4 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj4->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
-		P5 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj5->GetPosition(), XMFLOAT3(5.0, 5.0, 5.0), Quaternion);
-		P6 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj6->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
-		P7 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj7->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
-		P8 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj8->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
-		P9 =  BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj9->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P2 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj2->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P3 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj3->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P4 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj4->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P5 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj5->GetPosition(), XMFLOAT3(5.0, 5.0, 5.0), Quaternion);
+		P6 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj6->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P7 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj7->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P8 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj8->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
+		P9 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj9->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
 		P10 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pTailRotorFrame->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
 		P11 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pMainRotorFrame->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
 
@@ -1012,12 +1012,15 @@ void Stage1::PlayerFirevalkan(CCamera* pCamera, XMFLOAT3 Look)
 		XMFLOAT3 xmf3Position = pCamera->GetPosition();
 		XMFLOAT3 xmf3Direction = PlayerLook;
 		xmf3Direction.y += 0.0f;
-		pBulletObject->m_xmf4x4ToParent = m_pPlayer->m_xmf4x4World;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 60.0f, false));
+		pBulletObject->m_xmf4x4ToParent = m_pPlayer->m_xmf4x4World;		
+		pBulletObject->m_xmf4x4ToParent._31 = PlayerLook.x;
+		pBulletObject->m_xmf4x4ToParent._32 = PlayerLook.y;
+		pBulletObject->m_xmf4x4ToParent._33 = PlayerLook.z;
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->Rotate(90.0, 0.0, 0.0);
 		pBulletObject->SetMovingDirection(xmf3Direction);
-		pBulletObject->SetScale(1.5, 7.0, 1.5);
+		pBulletObject->SetScale(3.5, 7.0, 3.5);
 		pBulletObject->SetActive(true);
 
 	}
@@ -1144,7 +1147,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	XMFLOAT3 Look2P = ((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->GetLook();
 	if (m_pLights)
 	{
-		m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(Position2P.x, Position2P.y + 0.0, Position2P.z+0.0f);
+		m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(Position2P.x, Position2P.y + 0.0, Position2P.z + 0.0f);
 		m_pLights->m_pLights[2].m_xmf3Direction = Look2P;
 
 		m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(xmfPosition.x, xmfPosition.y + 8.0, xmfPosition.z);
@@ -1238,7 +1241,7 @@ void Stage1::BillBoardRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	if (((BulletMarkBillboard*)m_pBillboardShader[4])) ((BulletMarkBillboard*)m_pBillboardShader[4])->Render(pd3dCommandList, pCamera, 0);
 	//if (((MuzzleFrameBillboard*)m_pBillboardShader[7])) ((MuzzleFrameBillboard*)m_pBillboardShader[7])->Render(pd3dCommandList, pCamera, Position);
 
-	
+
 
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
 }
@@ -1257,9 +1260,12 @@ void Stage1::NPCMuzzleFlamedRender(ID3D12GraphicsCommandList* pd3dCommandList, C
 	XMFLOAT3 MuzzleFramePosition = pCamera->GetPosition();
 
 
+	if (((MuzzleFrameBillboard*)m_pBillboardShader[7]))
+	{
 
-	if (((MuzzleFrameBillboard*)m_pBillboardShader[7])) ((MuzzleFrameBillboard*)m_pBillboardShader[7])
-		->Render(pd3dCommandList, pCamera, 0, MuzzleFrameLook, Position);
+		((MuzzleFrameBillboard*)m_pBillboardShader[7])
+			->Render(pd3dCommandList, pCamera, 0, MuzzleFrameLook, Position);
+	}
 
 }
 

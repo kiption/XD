@@ -8,9 +8,9 @@ GameSound::GameSound()
 	result = soundSystem->createSound("Sound/Shooting.mp3", FMOD_CREATESTREAM, 0, &shotSound);
 	shotSound->setMode(FMOD_CREATESTREAM);
 
-	result = soundSystem->init(64, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
-	result = soundSystem->createSound("Sound/Machin.wav", FMOD_CREATESTREAM, 0, &HelishotSound);
-	HelishotSound->setMode(FMOD_CREATESTREAM);
+	result = soundSystem->init(16, FMOD_INIT_NORMAL, extradriverdata);
+	result = soundSystem->createSound("Sound/HeliShot.wav", FMOD_UNIQUE, 0, &HelishotSound);
+	HelishotSound->setMode(FMOD_UNIQUE);
 
 	result = soundSystem->init(64, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
 	result = soundSystem->createSound("Sound/PlayerHittingSound.wav", FMOD_UNIQUE, 0, &HumanColliSound);

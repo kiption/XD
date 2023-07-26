@@ -108,7 +108,7 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	case CLOSEUP_PERSON_CAMERA:
 		SetFriction(600);
 		SetGravity(XMFLOAT3(0.0f, -3.f, 0.0f));
-		SetMaxVelocityXZ(32.0);
+		SetMaxVelocityXZ(25.0);
 		SetMaxVelocityY(0.0f);
 		m_pCamera = OnChangeCamera(CLOSEUP_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);

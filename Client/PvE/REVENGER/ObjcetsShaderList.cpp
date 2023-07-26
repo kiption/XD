@@ -318,7 +318,7 @@ void CHelicopterBulletMarkParticleShader::BuildObjects(ID3D12Device* pd3dDevice,
 	{
 		m_ppObjects[i] = new CExplosiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[i]->SetChild(pFragmentModel, false);
-		m_ppObjects[i]->SetScale(0.3, 0.3, 0.3);
+		m_ppObjects[i]->SetScale(0.5, 0.6, 0.5);
 		pFragmentModel->AddRef();
 		//ParticlePosition = m_ppObjects[i]->GetPosition();
 	}
@@ -416,7 +416,7 @@ void CHelicopterBulletMarkParticleShader::AnimateObjects(float fTimeElapsed)
 		{
 			for (int i = 0; i < BLOODEXPLOSION_DEBRISES; i++)
 			{
-				m_fExplosionSpeed = Random(1.0f, 10.0f);
+				m_fExplosionSpeed = Random(5.0f, 20.0f);
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
 				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes;// + gravity.x;
 				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes;// + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;;

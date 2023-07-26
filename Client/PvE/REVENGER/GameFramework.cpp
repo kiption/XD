@@ -1016,6 +1016,7 @@ void CGameFramework::ReleaseObjects()
 }
 
 bool ShotKey = false;
+bool NpcShotKey = false;
 void CGameFramework::ProcessInput()
 {
 	static UCHAR pKeysBuffer[256];
@@ -1090,7 +1091,10 @@ void CGameFramework::ProcessInput()
 							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
 						//---------- HeliPlayer
 						if (m_ingame_role == R_HELI)
+						{
 							((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
+							m_pCamera->Rotate(cyDelta/2, cxDelta/2, 0.0f);
+						}
 						else
 							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
 					}
@@ -1239,6 +1243,15 @@ void CGameFramework::AnimateObjects()
 		ShotDelay();
 		if (m_currbullet <= 0)((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
 
+
+		if (NpcShotKey == true)
+		{
+			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[7])->m_bShotActive = true;
+		}
+		if (NpcShotKey == false)
+		{
+			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[7])->m_bShotActive = false;
+		}
 	}
 }
 void CGameFramework::ShotDelay()
@@ -1622,7 +1635,7 @@ void CGameFramework::FrameAdvance()
 					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[65 + i], &D2_JobHeliUI[i], &D2_JobHeliRect[i]);
 
 					if (i == m_roominMyId) {
-						D2_MyMarkUI = { (FRAME_BUFFER_WIDTH / 5.0f), FRAME_BUFFER_HEIGHT / textypos + 5.0f};
+						D2_MyMarkUI = { (FRAME_BUFFER_WIDTH / 5.0f), FRAME_BUFFER_HEIGHT / textypos + 5.0f };
 						D2_MyMarkRect = { 0.0f, 0.0f, 25.0f, 37.0f };
 						m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[83], &D2_MyMarkUI, &D2_MyMarkRect);
 					}
@@ -3895,17 +3908,18 @@ void CGameFramework::NpcUnderAttack(XMFLOAT3 ToLook, int npc_id)
 	if (npc_id < 5) {
 		((Stage1*)m_pScene)->Firevalkan(((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[12 + npc_id]), ToLook);
 	}
-	((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[7])->m_bShotActive = true;
+
 	int indexnum = npc_id - 5;
-	XMFLOAT3 SoldiarsPosition = ((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->GetPosition();
 	if (((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum]))
 	{
-		((Stage1*)m_pScene)->NPCMuzzleFlamedRender(m_pd3dCommandList, m_pCamera, XMFLOAT3(SoldiarsPosition.x, SoldiarsPosition.y + 8.0f, SoldiarsPosition.z));
+		NpcShotKey = true;
+		XMFLOAT3 SoldiarsPosition = ((CSoldiarNpcObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[22 + indexnum])->GetPosition();
+		((Stage1*)m_pScene)->NPCMuzzleFlamedRender(m_pd3dCommandList, m_pCamera, XMFLOAT3(SoldiarsPosition.x, SoldiarsPosition.y + 6.0f, SoldiarsPosition.z));
 	}
 
 }
 
 void CGameFramework::NpcNoneUnderAttack()
 {
-	((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[7])->m_bShotActive = false;
+	NpcShotKey = false;
 }
