@@ -652,6 +652,11 @@ void process_packet(int client_id, char* packet)
 		// 요청한 클라이언트가 역할을 선택했는지 확인함.
 		if (clients[client_id].role == ROLE_NOTCHOOSE) {
 			cout << "Client[" << client_id << "]가 준비 요청을 하였으나, 아직 역할을 선택하지 않아 요청을 거절하였습니다.\n" << endl;
+			LBYC_POPUP_PACKET cannotready_packet;
+			cannotready_packet.size = sizeof(LBYC_POPUP_PACKET);
+			cannotready_packet.type = LBYC_POPUP;
+			cannotready_packet.msg = POPUPMSG_PLZCHOOSEROLE;
+			clients[client_id].do_send(&cannotready_packet);
 			break;
 		}
 
@@ -725,34 +730,26 @@ void process_packet(int client_id, char* packet)
 		
 		int room_id = clients[client_id].curr_room;
 		
-		/* [치트키] 작업 편의성을 위해 1명만 접속해도 게임 시작이 가능하도록 주석처리하였음.
+		//[치트키] 작업 편의성을 위해 1명만 접속해도 게임 시작이 가능하도록 주석처리하였음.
 		for (auto& room : game_rooms) {
 			if (room.room_id == room_id) {
-				
-				// 2. 인원이 3명인가
-				if (room.user_count < MAX_USER) {
-					gamestart = false;
-					break;
-				}
-
-				for (int i = 0; i < MAX_USER; ++i) {
+				for (int i = 0; i < room.user_count; ++i) {
 					int member_id = room.users[i];
-					// 3. 3명 모두 역할을 선택하였는가?
-					if (clients[member_id].role == ROLE_NOTCHOOSE) {
-						gamestart = false;
-						cout << "Client[" << client_id << "]가 아직 역할을 선택하지 않아 시작할 수 없습니다.\n" << endl;
-						break;
-					}
-					// 4. 3명 모두 준비 상태인가
+					// 방에 있는 인원 모두 준비 상태인가
 					if (clients[member_id].inroom_state == RM_ST_MANAGER) continue;	// 방장은 준비 X
 					if (clients[member_id].inroom_state == RM_ST_NONREADY) {
 						gamestart = false;
+						cout << "Client[" << client_id << "]가 아직 준비를 하지 않아 시작할 수 없습니다.\n" << endl;
+						LBYC_POPUP_PACKET anyonenotready_packet;
+						anyonenotready_packet.size = sizeof(LBYC_POPUP_PACKET);
+						anyonenotready_packet.type = LBYC_POPUP;
+						anyonenotready_packet.msg = POPUPMSG_ANYONENOTREADY;
+						clients[client_id].do_send(&anyonenotready_packet);
 						break;
 					}
 				}
 			}
 		}
-		*/
 		if (!gamestart) break;
 
 		// 검사를 모두 통과했다면 게임을 시작한다.

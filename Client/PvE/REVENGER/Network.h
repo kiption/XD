@@ -505,6 +505,23 @@ void processPacket(char* ptr)
 
 		break;
 	}// LBYC_GAME_START case end
+	case LBYC_POPUP:
+	{
+		if (curr_servertype != SERVER_LOBBY) break;
+		LBYC_POPUP_PACKET* recv_packet = reinterpret_cast<LBYC_POPUP_PACKET*>(ptr);
+
+		switch (recv_packet->msg) {
+		case POPUPMSG_PLZCHOOSEROLE:	// 역할 선택 X
+			cout << "역할 준비X" << endl;
+			break;
+
+		case POPUPMSG_ANYONENOTREADY:	// 누군가 준비를 안했음.
+			cout << "누군가 준비 안했음" << endl;
+			break;
+		}
+
+		break;
+	}// LBYC_POPUP case end
 	//==========
 	// 로직서버
 	case SC_LOGIN_INFO:

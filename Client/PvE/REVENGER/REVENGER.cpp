@@ -305,36 +305,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							break;
 						}
 
-						// [임시코드] 서버에서 모두 역할을 선택했는지 확인을 해야하는데 개발 효율때문에 잠시 막아놨음. 대신 역할없이 시작하는거 막기 위해 아래 코드 사용
-						if (gGameFramework.m_ingame_role == gGameFramework.R_NONE) {
-							gGameFramework.m_RoomClick[0] = false;
-							break;
-						}
-
-						/* [치트키] 작업 편의성을 위해 1명만 접속해도 게임 시작이 가능하도록 주석처리하였음.
-						// 방에 사람이 세 명이 있는지 확인합니다.
-						if (curr_room.user_count < MAX_USER) {
-							gGameFramework.m_RoomClick[0] = false;
-							break;
-						}
-						*/
-
-						// 모든 사람이 준비가 되어있는지 확인합니다.
-						bool all_ready = true;
-						/* [치트키] 작업 편의성을 위해 1명만 접속해도 게임 시작이 가능하도록 주석처리하였음.
-						for (int i = 0; i < MAX_USER; ++i) {
-							if (curr_room.user_state[i] == RM_ST_MANAGER) continue;	// 방장은 준비상태가 없다.
-							if (curr_room.user_state[i] == RM_ST_NONREADY) {
-								all_ready = false;
-								break;
-							}
-						}
-						if (!all_ready) {	// 세 명 모두 준비되어있어야 시작이 가능하다.
-							gGameFramework.m_RoomClick[0] = false;
-							break;
-						}
-						*/
-
 						CLBY_GAME_START_PACKET start_packet;
 						start_packet.size = sizeof(CLBY_GAME_START_PACKET);
 						start_packet.type = CLBY_GAME_START;
