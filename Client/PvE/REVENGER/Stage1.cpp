@@ -1176,6 +1176,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		}
 
 	}
+	PlayerByPlayerCollision();
 	ParticleCollisionResult();
 	ParticleAnimation();
 }
@@ -1274,4 +1275,31 @@ void Stage1::ParticleAnimation()
 	m_pBillboardShader[0]->NextPosition.x = SmokePosition.x;
 	m_pBillboardShader[0]->NextPosition.y = SmokePosition.y + 10.0f;
 	m_pBillboardShader[0]->NextPosition.z = SmokePosition.z;
+}
+
+void Stage1::PlayerByPlayerCollision()
+{
+	XMFLOAT3 P1Pos = XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._41,
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._42, 
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._43);
+	XMFLOAT3 P2Pos = XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._41,
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._42,
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._43);
+	XMFLOAT3 MyPos = XMFLOAT3(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().x,
+		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().y,
+		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().z);
+	// 1. 다른 사람 플레이어의 바운딩박스 + 자기 자신 플레이어의 바운딩박스
+	BoundingOrientedBox Other1Poobb = BoundingOrientedBox(XMFLOAT3(P1Pos),XMFLOAT3(2.0,4.0,2.0), XMFLOAT4(0, 0, 0, 1));
+	BoundingOrientedBox Other2Poobb = BoundingOrientedBox(XMFLOAT3(P2Pos),XMFLOAT3(2.0, 4.0, 2.0), XMFLOAT4(0, 0, 0, 1));
+	BoundingOrientedBox MyPoobb = BoundingOrientedBox(XMFLOAT3(MyPos),XMFLOAT3(2.0, 4.0,2.0), XMFLOAT4(0, 0, 0, 1));
+
+	if (MyPoobb.Intersects(Other2Poobb)) {
+
+		cout << "Collision P2!" << endl; 
+		P2Pos.z -= 1.0f;
+	}
+	if (MyPoobb.Intersects(Other1Poobb)) {
+		cout << "Collision P1!" << endl; 
+		P1Pos.z-= 1.0f;
+	}
 }

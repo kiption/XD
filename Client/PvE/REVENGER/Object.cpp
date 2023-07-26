@@ -1900,36 +1900,17 @@ void CHelicopterObjects::FallDown(float fTimeElapsed)
 {
 	XMFLOAT3 gravity = XMFLOAT3(0.0, -1.5, 0);
 	m_fElapsedTimes += fTimeElapsed * 1.1f;
-	/*if (m_fElapsedTimes <= m_fDuration)
-	{
-		for (int i = 0; i < EXPLOSION_HELICOPTER; i++)
-		{
-			m_fExplosionSpeed = RandomValue(1.0f, 4.0f);
-			m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
-			m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + gravity.x;
-			m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;;
-			m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes + gravity.z;
-			m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
-
-
-
-		}
-	}
-	else
-	{
-		m_fElapsedTimes = 0.0f;
-	}*/
-	float FallingMaxHeight = -18.5f;
+	
+	float FallingMaxHeight = -17.5f;
 	float staticValue = 5.3f;
 	float staticValueZ = 6.3f;
-	float randomValue = RandomValue(2.f, 8.0f);
-	XMVECTOR staticDir1 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.25, -0.5, 0.25, 0.0)));
-	XMVECTOR staticDir2 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.25, -0.5, 0.35, 0.0)));
-	XMVECTOR staticDir3 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.25, -0.5, 0.15, 0.0)));
-	XMVECTOR staticDir4 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.15, -0.5, -0.5, 0.0)));
-	XMVECTOR staticDir5 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.25, -0.5, -0.35, 0.0)));
-	XMVECTOR staticDir6 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.25, -0.5, 0.25, 0.0)));
-	XMVECTOR staticDir7 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.1, -0.5, -0.25, 0.0)));
+	XMVECTOR staticDir1 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.75, -0.3, 0.65, 0.0)));
+	XMVECTOR staticDir2 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.65, -0.3, 0.85, 0.0)));
+	XMVECTOR staticDir3 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.85, -0.3, 0.75, 0.0)));
+	XMVECTOR staticDir4 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.75, -0.3, -0.55, 0.0)));
+	XMVECTOR staticDir5 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.75, -0.3, -0.85, 0.0)));
+	XMVECTOR staticDir6 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.75, -0.3, 0.65, 0.0)));
+	XMVECTOR staticDir7 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.63, -0.3, -0.75, 0.0)));
 	for (int i = 0; i < 2; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir1);
 	for (int i = 2; i < 4; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir2);
 	for (int i = 4; i < 5; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir3);

@@ -36,6 +36,7 @@ public:
 	void NPCMuzzleFlamedRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera,XMFLOAT3 Position);
 	void ReleaseUploadBuffers();
 	void ParticleAnimation();
+	void PlayerByPlayerCollision();
 public:
 	static void CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
 	static void CreateConstantBufferView(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride);

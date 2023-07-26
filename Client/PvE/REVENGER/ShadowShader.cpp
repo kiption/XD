@@ -84,7 +84,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 				m_ppObjects[x] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
 				m_ppObjects[x]->SetMaterial(0, pOtherPlayerMaterial);
 				m_ppObjects[x]->SetScale(5, 5, 5);
-				m_ppObjects[x]->SetPosition(XMFLOAT3(70.0 + (x) * 20, -10.0, 800.0));
+				m_ppObjects[x]->SetPosition(XMFLOAT3(150.0, 6.0, 800.0));
 				pSModel->m_pModelRootObject->AddRef();
 			}
 			if (pSModel) delete pSModel;

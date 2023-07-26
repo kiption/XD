@@ -378,11 +378,20 @@ public:
 	// 객체 좌표,벡터 값 최신화 함수입니다.
 	void setPosition_Self(XMFLOAT3 pos);
 	void setVectors_Self(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
-	void setPosition_SoldiarOtherPlayer(int id, XMFLOAT3 pos);
-	void setPosition_HeliOtherPlayer(int id, XMFLOAT3 pos);
-	void setVectors_SoldiarOtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
-	void setVectors_HeliOtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
-	void remove_OtherPlayer(int id);
+
+	void setPosition_SoldiarOtherPlayer(XMFLOAT3 pos);
+	void setPosition_HeliOtherPlayer(XMFLOAT3 pos);
+	void setVectors_SoldiarOtherPlayer(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+	void setVectors_HeliOtherPlayer(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+
+	void otherPlayerReturnToIdle();
+	void otherPlayerForwardMotion();
+	void otherPlayerBackwardMotion();
+	void otherPlayerSfrateMotion();
+	void otherPlayerShootingMotion();
+	void otherPlayerDyingMotion();
+
+	void remove_OtherPlayer();
 
 	void setPosition_Npc(int id, XMFLOAT3 pos);
 	void setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
@@ -391,12 +400,8 @@ public:
 	// 클라이언트 객체의 상태 최신화 함수
 	int a_id;
 	bool active = false;
-	void otherPlayerReturnToIdle(int p_id);
-	void otherPlayerForwardMotion(int p_id);
-	void otherPlayerBackwardMotion(int p_id);
-	void otherPlayerSfrateMotion(int p_id);
-	void otherPlayerShootingMotion(int p_id);
-	void otherPlayerDyingMotion(int p_id);
+
+
 	void NpcHittingMotion(int p_id);
 	void HeliPlayerUnderAttack(XMFLOAT3 ToLook);
 	void MyPlayerDieMotion();
