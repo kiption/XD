@@ -176,6 +176,7 @@ public:
 
 	short pl_state;
 	int hp;
+	int life;	// 목숨: 헬기는 1번, 사람은 2번
 	int remain_bullet;
 	XMFLOAT3 pos;									// Position (x, y, z)
 	float pitch, yaw, roll;							// Rotated Degree
@@ -208,6 +209,7 @@ public:
 
 		pl_state = PL_ST_IDLE;
 		hp = 0;
+		life = 0;
 		remain_bullet = 0;
 		pos = { 0.0f, 0.0f, 0.0f };
 		pitch = yaw = roll = 0.0f;
@@ -271,6 +273,7 @@ public:
 
 		pl_state = PL_ST_IDLE;
 		hp = 0;
+		life = 0;
 		remain_bullet = 0;
 		pos = { 0.0f, 0.0f, 0.0f };
 		pitch = yaw = roll = 0.0f;
@@ -315,6 +318,7 @@ void SESSION::send_login_packet() {
 	login_info_packet.look_z = m_lookvec.z;
 
 	login_info_packet.hp = hp;
+	login_info_packet.life = life;
 	login_info_packet.remain_bullet = remain_bullet;
 
 	do_send(&login_info_packet);
@@ -850,12 +854,14 @@ void process_packet(int client_id, char* packet)
 		strcpy_s(clients[client_id].name, login_packet->name);
 
 		if (login_packet->role == ROLE_RIFLE) {
+			clients[client_id].life = 3;
 			clients[client_id].pos.x = RESPAWN_POS_X_HUMAN + 15 * client_id;
 			clients[client_id].pos.y = RESPAWN_POS_Y_HUMAN;
 			clients[client_id].pos.z = RESPAWN_POS_Z_HUMAN;
 			clients[client_id].remain_bullet = MAX_BULLET;
 		}
 		else if (login_packet->role == ROLE_HELI) {
+			clients[client_id].life = 2;
 			clients[client_id].pos.x = RESPAWN_POS_X_HELI;
 			clients[client_id].pos.y = RESPAWN_POS_Y_HELI;
 			clients[client_id].pos.z = RESPAWN_POS_Z_HELI;
@@ -1000,6 +1006,7 @@ void process_packet(int client_id, char* packet)
 				// 사망처리
 				clients[client_id].s_lock.lock();
 				clients[client_id].hp = 0;
+				clients[client_id].life--;
 				clients[client_id].pl_state = PL_ST_DEAD;
 				clients[client_id].death_time = system_clock::now();
 				clients[client_id].s_lock.unlock();
@@ -1018,6 +1025,21 @@ void process_packet(int client_id, char* packet)
 
 					lock_guard<mutex> lg{ send_cl.s_lock };
 					send_cl.do_send(&heli_fall_packet);
+				}
+
+				if (clients[client_id].life == 0) {
+					cout << "Player[" << client_id << "] 게임 오버" << endl;
+					SC_GAMEOVER_PACKET heli_gameover_packet;
+					heli_gameover_packet.size = sizeof(SC_GAMEOVER_PACKET);
+					heli_gameover_packet.type = SC_GAMEOVER;
+					heli_gameover_packet.id = clients[client_id].id;
+					{
+						lock_guard<mutex> lg{ clients[client_id].s_lock };
+						clients[client_id].do_send(&heli_fall_packet);
+					}
+				}
+				else {
+					cout << "Player[" << client_id << "] 남은 목숨: " << clients[client_id].life << "개" << endl;
 				}
 				break;
 			}
@@ -1893,6 +1915,7 @@ void process_packet(int client_id, char* packet)
 		else {					// 사망
 			clients[client_id].s_lock.lock();
 			clients[client_id].hp = 0;
+			clients[client_id].life--;
 			clients[client_id].pl_state = PL_ST_DEAD;
 			clients[client_id].death_time = system_clock::now();
 			clients[client_id].s_lock.unlock();
@@ -1914,6 +1937,22 @@ void process_packet(int client_id, char* packet)
 					send_cl.do_send(&death_packet);
 				}
 			}
+
+			// 라이프를 다 쓰면 게임오버
+			if (clients[client_id].life == 0) {
+				cout << "Player[" << client_id << "] 게임 오버" << endl;
+				SC_GAMEOVER_PACKET player_gameover_packet;
+				player_gameover_packet.size = sizeof(SC_GAMEOVER_PACKET);
+				player_gameover_packet.type = SC_GAMEOVER;
+				player_gameover_packet.id = clients[client_id].id;
+				{
+					lock_guard<mutex> lg{ clients[client_id].s_lock };
+					clients[client_id].do_send(&player_gameover_packet);
+				}
+			}
+			else {
+				cout << "Player[" << client_id << "] 남은 목숨: " << clients[client_id].life << "개" << endl;
+			}
 		}
 
 		break;
@@ -1921,9 +1960,10 @@ void process_packet(int client_id, char* packet)
 	case CS_HELI_MAP_COLLIDE:
 	{
 		CS_HELI_MAP_COLLIDE_PACKET* particle_pack = reinterpret_cast<CS_HELI_MAP_COLLIDE_PACKET*>(packet);
+		if (clients[client_id].role != ROLE_HELI) break;	// 잘못된 요청
 		
 		// 데미지 계산
-		int damage = static_cast<int>(HUMAN_MAXHP / 3);
+		int damage = static_cast<int>(HUMAN_MAXHP / 3) + 1;
 		int after_hp = clients[client_id].hp - damage;
 
 		// 우선 NPC서버에게 플레이어 데미지 정보를 보내줍니다.
@@ -1962,6 +2002,7 @@ void process_packet(int client_id, char* packet)
 		else {					// 사망
 			clients[client_id].s_lock.lock();
 			clients[client_id].hp = 0;
+			clients[client_id].life--;
 			clients[client_id].pl_state = PL_ST_DEAD;
 			clients[client_id].death_time = system_clock::now();
 			clients[client_id].s_lock.unlock();
@@ -1982,6 +2023,22 @@ void process_packet(int client_id, char* packet)
 					lock_guard<mutex> lg{ send_cl.s_lock };
 					send_cl.do_send(&death_packet);
 				}
+			}
+
+			// 게임 오버
+			if (clients[client_id].life == 0) {
+				cout << "Player[" << client_id << "] 게임 오버" << endl;
+				SC_GAMEOVER_PACKET heli_gameover_packet;
+				heli_gameover_packet.size = sizeof(SC_GAMEOVER_PACKET);
+				heli_gameover_packet.type = SC_GAMEOVER;
+				heli_gameover_packet.id = clients[client_id].id;
+				{
+					lock_guard<mutex> lg{ clients[client_id].s_lock };
+					clients[client_id].do_send(&heli_gameover_packet);
+				}
+			}
+			else {
+				cout << "Player[" << client_id << "] 남은 목숨: " << clients[client_id].life << "개" << endl;
 			}
 		}
 
@@ -2384,6 +2441,7 @@ void process_packet(int client_id, char* packet)
 					else {					// 사망
 						clients[collided_cl_id].s_lock.lock();
 						clients[collided_cl_id].hp = 0;
+						clients[collided_cl_id].life--;
 						clients[collided_cl_id].pl_state = PL_ST_DEAD;
 						clients[collided_cl_id].death_time = system_clock::now();
 						clients[collided_cl_id].s_lock.unlock();
@@ -2404,6 +2462,22 @@ void process_packet(int client_id, char* packet)
 								lock_guard<mutex> lg{ send_cl.s_lock };
 								send_cl.do_send(&death_packet);
 							}
+						}
+
+						// 게임 오버
+						if (clients[collided_cl_id].life == 0) {
+							cout << "Player[" << collided_cl_id << "] 게임 오버" << endl;
+							SC_GAMEOVER_PACKET player_gameover_packet;
+							player_gameover_packet.size = sizeof(SC_GAMEOVER_PACKET);
+							player_gameover_packet.type = SC_GAMEOVER;
+							player_gameover_packet.id = clients[collided_cl_id].id;
+							{
+								lock_guard<mutex> lg{ clients[collided_cl_id].s_lock };
+								clients[collided_cl_id].do_send(&player_gameover_packet);
+							}
+						}
+						else {
+							cout << "Player[" << client_id << "] 남은 목숨: " << clients[client_id].life << "개" << endl;
 						}
 					}
 
@@ -2879,7 +2953,18 @@ void timerFunc() {
 					if (cl.curr_stage == 0) continue;
 					if (cl.pl_state != PL_ST_DEAD) continue;
 
-					if (system_clock::now() >= cl.death_time + milliseconds(RESPAWN_TIME)) {
+					if (cl.life == 0) {	// life를 다 쓰면 리스폰 불가능 (그대로 게임오버)
+						dead_player_cnt--;
+						continue;
+					}
+
+					int respawn_time = 0;
+					if (cl.role == ROLE_HELI)	// 헬기는 리스폰 대기 시간이 좀 더 길다.
+						respawn_time = RESPAWN_TIME_HELI;
+					else
+						respawn_time = RESPAWN_TIME;
+
+					if (system_clock::now() >= cl.death_time + milliseconds(respawn_time)) {
 						// 1. 플레이어 리스폰
 						cl.s_lock.lock();
 						cl.pl_state = PL_ST_IDLE;
@@ -2894,9 +2979,9 @@ void timerFunc() {
 						cl.m_upvec = XMFLOAT3{ 0.0f, 1.0f, 0.0f };
 						cl.m_lookvec = XMFLOAT3{ 0.0f, 0.0f, 1.0f };
 						cl.setBB();
+						dead_player_cnt--;
 						cl.s_lock.unlock();
 						cout << "Player[" << cl.id << "]가 리스폰 장소에서 부활하였습니다.\n" << endl;
-						dead_player_cnt--;
 
 						// 2. 클라이언트에게 플레이어 리스폰 위치를 알려준다.
 						SC_RESPAWN_PACKET respawn_packet;
