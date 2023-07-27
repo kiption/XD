@@ -299,6 +299,9 @@ public:
 	int m_otherHP[2];
 	WCHAR m_OtherName[2][20];
 
+	bool b_heli_mapcollide = false;
+	int b_heli_mapcollide_cooldown = 0;
+
 	int m_NumOfUI = UICOUNTERS;
 	bool UI_Switch = false;
 	bool m_bRollState = false;

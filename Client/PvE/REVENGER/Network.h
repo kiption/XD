@@ -537,6 +537,7 @@ void processPacket(char* ptr)
 		players_info[my_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 		players_info[my_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
 		players_info[my_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
+		players_info[my_id].m_bullet = recv_packet->remain_bullet;
 		players_info[my_id].m_state = OBJ_ST_RUNNING;
 		players_info[my_id].m_ingame_state = PL_ST_IDLE;
 		players_info[my_id].m_new_state_update = true;
@@ -894,7 +895,7 @@ void processPacket(char* ptr)
 
 		// ÀåÀü
 		if (recv_packet->id == my_id) {
-			players_info[recv_packet->id].m_bullet = MAX_BULLET;
+			players_info[recv_packet->id].m_bullet = recv_packet->bullet_cnt;
 		}
 		if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
 		{
