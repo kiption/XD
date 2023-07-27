@@ -564,7 +564,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							}
 						}
 						else if (players_info[i].m_role == ROLE_HELI) {
-
+							switch (players_info[i].m_ingame_state) {
+							case PL_ST_DEAD:
+								gGameFramework.otherHeliPlayerDyingMotion();
+								break;
+							}
 						}
 						players_info[i].m_new_state_update = false;
 					}

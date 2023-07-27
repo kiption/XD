@@ -411,6 +411,7 @@ public:
 	void otherPlayerSfrateMotion(int id);
 	void otherPlayerShootingMotion(int id);
 	void otherPlayerDyingMotion(int id);
+	void otherHeliPlayerDyingMotion();
 
 	// NPC √÷Ω≈»≠
 	void setPosition_Npc(int id, XMFLOAT3 pos);

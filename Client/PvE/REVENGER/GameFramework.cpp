@@ -3772,6 +3772,25 @@ void CGameFramework::otherPlayerDyingMotion(int id)
 	}
 }
 
+void CGameFramework::otherHeliPlayerDyingMotion()
+{
+	if (m_nMode == SCENE1STAGE)
+	{
+		if (((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]))
+		{
+			((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->FallDown(m_GameTimer.GetTimeElapsed());
+			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[2])->m_pSkinnedAnimationController
+				->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
+			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[2])->m_pSkinnedAnimationController
+				->SetTrackAnimationSet(0, 8);
+			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[2])->SetPosition(XMFLOAT3(
+				((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition().x,
+				6.0f,
+				((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition().z));
+		}
+	}
+}
+
 void CGameFramework::NpcHittingMotion(int p_id)
 {
 	if (m_nMode == SCENE1STAGE)

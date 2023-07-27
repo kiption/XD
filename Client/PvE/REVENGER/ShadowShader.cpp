@@ -64,15 +64,15 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		CMaterial* pPlaneMaterial = new CMaterial(4);
 		pPlaneMaterial->SetReflection(4);
 		//m_ppObjects[0] = new CGameObject(1);
-		m_ppObjects[2] = new CGameObject(1);
+		//m_ppObjects[2] = new CGameObject(1);
 		m_ppObjects[3] = new CGameObject(1);
 		//m_ppObjects[4] = new CGameObject(1);
 
 
 		/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
 		{
-			CMaterial* pOtherPlayerMaterial = new CMaterial(5);
-			pOtherPlayerMaterial->SetReflection(5);
+			CMaterial* pOtherPlayerMaterial = new CMaterial(6);
+			pOtherPlayerMaterial->SetReflection(6);
 
 			CLoadedModelInfo* pSModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
 			m_ppObjects[0] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
@@ -81,6 +81,12 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppObjects[0]->SetPosition(XMFLOAT3(150.0, 6.0, 830.0));
 			pSModel->m_pModelRootObject->AddRef();
 			
+			m_ppObjects[2] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
+			m_ppObjects[2]->SetMaterial(0, pOtherPlayerMaterial);
+			m_ppObjects[2]->SetScale(3, 3, 3);
+			m_ppObjects[2]->SetPosition(XMFLOAT3(150.0, 6.0, 830.0));
+			pSModel->m_pModelRootObject->AddRef();
+
 			m_ppObjects[1] = new CHumanPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
 			m_ppObjects[1]->SetMaterial(0, pOtherPlayerMaterial);
 			pSModel->m_pModelRootObject->AddRef();
