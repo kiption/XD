@@ -1910,6 +1910,7 @@ void process_packet(char* packet)
 			playersInfo[obj_id].obj_lock.lock();
 			playersInfo[obj_id].hp -= damaged_packet->damage;
 			if (playersInfo[obj_id].hp < 0) playersInfo[obj_id].hp = 0;
+			if (playersInfo[obj_id].hp > 100) playersInfo[obj_id].hp = 100;
 			playersInfo[obj_id].obj_lock.unlock();
 		}
 		else if (damaged_packet->target == TARGET_NPC) {

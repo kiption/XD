@@ -1841,18 +1841,26 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].s_lock.unlock();
 			cout << "Player[" << client_id << "]가 HP를 (+" << damaged_hp << ")만큼 회복하였다. (HP: "	<< clients[client_id].hp << " 남음)\n" << endl;
 
-			SC_DAMAGED_PACKET damaged_packet;
-			damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
-			damaged_packet.type = SC_DAMAGED;
-			damaged_packet.target = TARGET_PLAYER;
-			damaged_packet.id = clients[client_id].id;
-			damaged_packet.damage = -damaged_hp;
+			SC_DAMAGED_PACKET healing_packet;
+			healing_packet.size = sizeof(SC_DAMAGED_PACKET);
+			healing_packet.type = SC_DAMAGED;
+			healing_packet.target = TARGET_PLAYER;
+			healing_packet.id = clients[client_id].id;
+			healing_packet.damage = -damaged_hp;
+
+			// 우선 NPC서버에게 플레이어 데미지 정보를 보내줍니다.
+			{
+				lock_guard<mutex> lg{ npc_server.s_lock };
+				npc_server.do_send(&healing_packet);
+			}
+
+			// 모든 클라이언트한테도 보내줍니다.
 			for (auto& send_cl : clients) {
 				if (send_cl.s_state != ST_INGAME) continue;
 				if (send_cl.curr_stage == 0) continue;
 
 				lock_guard<mutex> lg{ send_cl.s_lock };
-				send_cl.do_send(&damaged_packet);
+				send_cl.do_send(&healing_packet);
 			}			
 
 			break;
