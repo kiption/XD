@@ -1853,7 +1853,7 @@ void CHelicopterObjects::OnPrepareAnimate()
 	*/
 }
 
-void CHelicopterObjects::Animate(float fTimeElapsed, XMFLOAT4 m_xmf4x4tranform)
+void CHelicopterObjects::Animate(float fTimeElapsed)
 {
 	XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 7.1) * fTimeElapsed);
 
@@ -1892,7 +1892,7 @@ void CHelicopterObjects::Animate(float fTimeElapsed, XMFLOAT4 m_xmf4x4tranform)
 		m_bPartitionfalldownEnd = true;
 	}
 
-	CGameObject::Animate(fTimeElapsed,NULL);
+	CGameObject::Animate(fTimeElapsed);
 }
 
 void CHelicopterObjects::FallDown(float fTimeElapsed)
@@ -2038,8 +2038,6 @@ void CHelicopterObjects::FallDown(float fTimeElapsed)
 void CHelicopterObjects::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	CGameObject::Render(pd3dCommandList, pCamera);
-
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
