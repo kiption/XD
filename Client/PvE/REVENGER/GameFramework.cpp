@@ -1635,17 +1635,20 @@ void CGameFramework::FrameAdvance()
 				if (m_LobbyPage != 0) {
 					numberRoom = m_LobbyPage * 8 + i;
 				}
-				int resulty = 400 + 54 * i;
-				float textypos = (((float)(FRAME_BUFFER_HEIGHT)) / ((float)(resulty)));
+				float resulty = 0.365f + 0.053f * i;
+				float textypos = (((float)(FRAME_BUFFER_HEIGHT)) * ((float)(resulty)));
+
+				float numResulty = 410.0f + 56.5f * i;
+				float numResultypos = (((float)(FRAME_BUFFER_HEIGHT)) / ((float)(numResulty)));
 
 				// 각 방 현재 인원
-				D2_RobbyPeopleUI[i] = { FRAME_BUFFER_WIDTH / 1.60f, FRAME_BUFFER_HEIGHT / textypos - 10.0f };
-				D2_RobbyPeopleUIRect[i] = { 0.0f, (m_LobbyRoom_Info[numberRoom].currnum_of_people - 1) * 48.0f, 120.0f, m_LobbyRoom_Info[numberRoom].currnum_of_people * 48.0f };
+				D2_RobbyPeopleUI[i] = { FRAME_BUFFER_WIDTH / 1.57f, FRAME_BUFFER_HEIGHT / numResultypos };
+				D2_RobbyPeopleUIRect[i] = { 0.0f, (m_LobbyRoom_Info[numberRoom].currnum_of_people - 1) * 30.0f, 103.0f, m_LobbyRoom_Info[numberRoom].currnum_of_people * 30.0f };
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[28 + i], &D2_RobbyPeopleUI[i], &D2_RobbyPeopleUIRect[i]);
 
 				// 각 방 준비 상태
-				D2_RobbyReadyUI[i] = { FRAME_BUFFER_WIDTH / 1.42f, FRAME_BUFFER_HEIGHT / textypos };
-				D2_RobbyReadyUIRect[i] = { 0.0f, (m_LobbyRoom_Info[numberRoom].ready_state - 1) * 50.0f,225.0f, m_LobbyRoom_Info[numberRoom].ready_state * 50.0f };
+				D2_RobbyReadyUI[i] = { FRAME_BUFFER_WIDTH / 1.44f, textypos };
+				D2_RobbyReadyUIRect[i] = { 0.0f, (m_LobbyRoom_Info[numberRoom].ready_state - 1) * 54.0f, 243.0f, m_LobbyRoom_Info[numberRoom].ready_state * 54.0f };
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[36 + i], &D2_RobbyReadyUI[i], &D2_RobbyReadyUIRect[i]);
 			}
 			if (m_LoginScene == 3) {
@@ -2000,7 +2003,7 @@ void CGameFramework::FrameAdvance()
 			D2D_RECT_F D2_LoginRoomNumText[8];
 			D2D_RECT_F D2_LoginRoomNameText[8];
 			for (int i{}; i < m_LobbyRoom_Info.size(); ++i) {
-				int resultY = 420 + 55 * i;
+				float resultY = 420 + 57.0f * i;
 				float textypos = (((float)FRAME_BUFFER_HEIGHT) / ((float)resultY));
 
 				wchar_t roomnum1[20];

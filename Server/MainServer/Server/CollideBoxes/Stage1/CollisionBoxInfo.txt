@@ -853,24 +853,6 @@ Local Rotate: (0.00, 0.00, 0.00)
 Angle AOB: 5.765548
 Angle BOC: 174.2345
 
-Object Name: Gared64
-Center: (-39.90, 8.30, -727.80)
-Scale: (105.35, 5.05, 120.48)
-Local Forward: (0.00, 0.00, 1.00)
-Local Right: (1.00, 0.00, 0.00)
-Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 82.33145
-Angle BOC: 97.66855
-
-Object Name: Gared65
-Center: (-39.90, 14.90, -727.80)
-Scale: (78.93, 8.06, 79.01)
-Local Forward: (0.00, 0.00, 1.00)
-Local Right: (1.00, 0.00, 0.00)
-Local Rotate: (0.00, 0.00, 0.00)
-Angle AOB: 89.94583
-Angle BOC: 90.05418
-
 Object Name: Tree1
 Center: (60.30, 27.60, 873.50)
 Scale: (6.23, 106.63, 8.45)
