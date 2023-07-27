@@ -1785,8 +1785,6 @@ CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 {
 
 	OnPrepareAnimate();
-
-
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }
@@ -1855,7 +1853,7 @@ void CHelicopterObjects::OnPrepareAnimate()
 	*/
 }
 
-void CHelicopterObjects::Animate(float fTimeElapsed)
+void CHelicopterObjects::Animate(float fTimeElapsed, XMFLOAT4 m_xmf4x4tranform)
 {
 	XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 7.1) * fTimeElapsed);
 
@@ -1880,7 +1878,6 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 
 
 	ParticlePosition = this->GetPosition();
-	CGameObject::Animate(fTimeElapsed);
 
 	float FallingMaxHeight = -18.5f;
 	if (m_pTailRotorFrame->m_xmf4x4ToParent._42 > FallingMaxHeight&&
@@ -1894,6 +1891,8 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 	{
 		m_bPartitionfalldownEnd = true;
 	}
+
+	CGameObject::Animate(fTimeElapsed,NULL);
 }
 
 void CHelicopterObjects::FallDown(float fTimeElapsed)
@@ -2352,7 +2351,8 @@ void CSoldiarOtherPlayerObjects::JumpState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	m_pSkinnedAnimationController->SetTrackEnable(5, false);
 	m_pSkinnedAnimationController->SetTrackEnable(6, false);
-
+	m_pSkinnedAnimationController->SetTrackEnable(7, false);
+	m_pSkinnedAnimationController->SetTrackEnable(8, false);
 	CGameObject::Animate(EleapsedTime);
 }
 void CSoldiarOtherPlayerObjects::DieState(float EleapsedTime)
@@ -2379,6 +2379,8 @@ void CSoldiarOtherPlayerObjects::ShotState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	m_pSkinnedAnimationController->SetTrackEnable(5, false);
 	m_pSkinnedAnimationController->SetTrackEnable(6, true);
+	m_pSkinnedAnimationController->SetTrackEnable(7, false);
+	m_pSkinnedAnimationController->SetTrackEnable(8, false);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 6);
 	CGameObject::Animate(EleapsedTime);
 }

@@ -3560,17 +3560,17 @@ void CGameFramework::setVectors_Self(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3
 void CGameFramework::setPosition_SoldiarOtherPlayer(int id, XMFLOAT3 pos)
 {
 	if (m_nMode == SCENE1STAGE) {
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])->SetPosition(pos);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->SetPosition(pos);
 	}
 }
 void CGameFramework::setVectors_SoldiarOtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec)
 {
 	if (m_nMode == SCENE1STAGE) {
 
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5+id])->SetRight(rightVec);
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5+id])->SetUp(upVec);
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5+id])->SetLook(lookVec);
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5+id])->SetScale(5.0, 5.0, 5.0);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4+id])->SetRight(rightVec);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4+id])->SetUp(upVec);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4+id])->SetLook(lookVec);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4+id])->SetScale(5.0, 5.0, 5.0);
 
 	}
 }
@@ -3597,8 +3597,8 @@ void CGameFramework::remove_OtherPlayer(int id)
 	if (m_nMode == SCENE1STAGE) {
 		if (m_ingame_role == R_RIFLE)
 		{
-			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5+id]) {
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5+id]->SetScale(0.0, 0.0, 0.0);
+			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4+id]) {
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4+id]->SetScale(0.0, 0.0, 0.0);
 			}
 		}
 		if (m_ingame_role == R_HELI)
@@ -3711,13 +3711,14 @@ void CGameFramework::CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents
 	m_npcoobb = BoundingOrientedBox(npcpos, npcextents, XMFLOAT4(0, 0, 0, 1));
 
 }
+
 void CGameFramework::otherPlayerReturnToIdle(int id)
 {
 	if (m_nMode == SCENE1STAGE)
 	{
-		if (((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]))
+		if (((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id]))
 		{
-			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])->IdleState(m_GameTimer.GetTimeElapsed());
+			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->IdleState(m_GameTimer.GetTimeElapsed());
 		}
 	}
 }
@@ -3725,9 +3726,9 @@ void CGameFramework::otherPlayerForwardMotion(int id)
 {
 	if (m_nMode == SCENE1STAGE)
 	{
-		if (((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]))
+		if (((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id]))
 		{
-			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])->MoveForward(m_GameTimer.GetTimeElapsed());
+			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->MoveForward(m_GameTimer.GetTimeElapsed());
 		}
 	}
 
@@ -3736,9 +3737,9 @@ void CGameFramework::otherPlayerBackwardMotion(int id)
 {
 	if (m_nMode == SCENE1STAGE)
 	{
-		if (((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]))
+		if (((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id]))
 		{
-			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])->MoveBackward(m_GameTimer.GetTimeElapsed());
+			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->MoveBackward(m_GameTimer.GetTimeElapsed());
 		}
 	}
 }
@@ -3746,9 +3747,9 @@ void CGameFramework::otherPlayerSfrateMotion(int id)
 {
 	if (m_nMode == SCENE1STAGE)
 	{
-		if (((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]))
+		if (((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id]))
 		{
-			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])->MoveLeft(m_GameTimer.GetTimeElapsed());
+			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->MoveLeft(m_GameTimer.GetTimeElapsed());
 		}
 	}
 }
@@ -3756,9 +3757,9 @@ void CGameFramework::otherPlayerShootingMotion(int id)
 {
 	if (m_nMode == SCENE1STAGE)
 	{
-		if (((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]))
+		if (((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id]))
 		{
-			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])->ShotState(m_GameTimer.GetTimeElapsed());
+			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->ShotState(m_GameTimer.GetTimeElapsed());
 		}
 	}
 }
@@ -3767,11 +3768,11 @@ void CGameFramework::otherPlayerDyingMotion(int id)
 {
 	if (m_nMode == SCENE1STAGE)
 	{
-		if (((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id]))
+		if (((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id]))
 		{
-			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType
+			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType
 				= ANIMATION_TYPE_ONCE;
-			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[5 + id])->DieState(m_GameTimer.GetTimeElapsed());
+			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 8);
 		}
 	}
 }

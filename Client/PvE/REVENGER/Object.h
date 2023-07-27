@@ -656,7 +656,7 @@ public:
 	void Firevalkan(XMFLOAT3 ToPlayerLook);
 public:
 	virtual void OnPrepareAnimate();
-	virtual void Animate(float fTimeElapsed);
+	virtual void Animate(float fTimeElapsed,XMFLOAT4 m_xmf4x4tranform);
 	virtual void FallDown(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 public:

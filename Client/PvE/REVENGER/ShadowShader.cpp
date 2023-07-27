@@ -66,7 +66,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[0] = new CGameObject(1);
 		m_ppObjects[2] = new CGameObject(1);
 		m_ppObjects[3] = new CGameObject(1);
-		m_ppObjects[4] = new CGameObject(1);
+		//m_ppObjects[4] = new CGameObject(1);
 
 
 		/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
@@ -79,12 +79,12 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppObjects[1]->SetMaterial(0, pOtherPlayerMaterial);
 			pSModel->m_pModelRootObject->AddRef();
 
-			for (int i = 5; i < 7; i++)
+			for (int i = 4; i <=6; i++)
 			{
 				m_ppObjects[i] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
 				m_ppObjects[i]->SetMaterial(0, pOtherPlayerMaterial);
 				m_ppObjects[i]->SetScale(5, 5, 5);
-				m_ppObjects[i]->SetPosition(XMFLOAT3(150.0, 6.0, 800.0));
+				m_ppObjects[i]->SetPosition(XMFLOAT3(150.0, -6.0, 800.0));
 				pSModel->m_pModelRootObject->AddRef();
 			}
 			if (pSModel) delete pSModel;
