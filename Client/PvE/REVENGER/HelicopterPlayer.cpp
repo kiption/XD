@@ -92,7 +92,7 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		m_pCamera->SetTimeLag(0.0f);
 		m_pCamera->SetOffset(XMFLOAT3(-1.3f, 6.9, 11.0f));
 		m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z), m_pCamera->GetOffset()));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 80.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
@@ -133,6 +133,7 @@ void HeliPlayer::OnPrepareAnimate()
 	m_pFrameFragObj8 = FindFrame("left_door");
 	m_pFrameFragObj9 = FindFrame("right_tyre");
 	m_pFrameFragObj10 = FindFrame("back_tyre");
+	m_pChairPoint = FindFrame("ChairPoint");
 }
 
 
@@ -227,6 +228,7 @@ void HeliPlayer::Update(float fTimeElapsed)
 
 void HeliPlayer::FallDown(float fTimeElapsed)
 {
+	m_FallSwitch = true;
 	XMFLOAT3 gravity = XMFLOAT3(0.0, -1.5, 0);
 	float FallingMaxHeight = -18.5f;
 	float staticValue = 5.3f;

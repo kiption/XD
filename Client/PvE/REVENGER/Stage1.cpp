@@ -1179,6 +1179,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	PlayerByPlayerCollision();
 	ParticleCollisionResult();
 	ParticleAnimation();
+	SetPositionPilotHuman();
 }
 
 void Stage1::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -1292,28 +1293,66 @@ void Stage1::PlayerByPlayerCollision()
 		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().y,
 		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().z);
 	// 1. 다른 사람 플레이어의 바운딩박스 + 자기 자신 플레이어의 바운딩박스
-	BoundingOrientedBox Other0Poobb = BoundingOrientedBox(XMFLOAT3(P0Pos), XMFLOAT3(2.0, 4.0, 2.0), XMFLOAT4(0, 0, 0, 1));
-	BoundingOrientedBox Other1Poobb = BoundingOrientedBox(XMFLOAT3(P1Pos), XMFLOAT3(2.0, 4.0, 2.0), XMFLOAT4(0, 0, 0, 1));
-	BoundingOrientedBox Other2Poobb = BoundingOrientedBox(XMFLOAT3(P2Pos), XMFLOAT3(2.0, 4.0, 2.0), XMFLOAT4(0, 0, 0, 1));
-	BoundingOrientedBox MyPoobb = BoundingOrientedBox(XMFLOAT3(MyPos), XMFLOAT3(2.0, 4.0, 2.0), XMFLOAT4(0, 0, 0, 1));
+	BoundingOrientedBox Other0Poobb = BoundingOrientedBox(XMFLOAT3(P0Pos), XMFLOAT3(3.0, 5.0, 3.0), XMFLOAT4(0, 0, 0, 1));
+	BoundingOrientedBox Other1Poobb = BoundingOrientedBox(XMFLOAT3(P1Pos), XMFLOAT3(3.0, 5.0, 3.0), XMFLOAT4(0, 0, 0, 1));
+	BoundingOrientedBox Other2Poobb = BoundingOrientedBox(XMFLOAT3(P2Pos), XMFLOAT3(3.0, 5.0, 3.0), XMFLOAT4(0, 0, 0, 1));
+	BoundingOrientedBox MyPoobb = BoundingOrientedBox(XMFLOAT3(MyPos), XMFLOAT3(3.0, 5.0, 3.0), XMFLOAT4(0, 0, 0, 1));
 
 	if (MyPoobb.Intersects(Other0Poobb)) {
 		cout << "Collision P0!" << endl;
 		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->SetPosition(XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->GetPosition().x,
 			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->GetPosition().y,
-			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._43 - 3.0f));
+			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._43 - 1.0f));
 	}
 	if (MyPoobb.Intersects(Other2Poobb)) {
 
 		cout << "Collision P2!" << endl;
 		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->SetPosition(XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->GetPosition().x,
 			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->GetPosition().y,
-			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._43 - 3.0f));
+			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._43 - 1.0f));
 	}
 	if (MyPoobb.Intersects(Other1Poobb)) {
 		cout << "Collision P1!" << endl;
 		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->SetPosition(XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->GetPosition().x,
 			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->GetPosition().y,
-			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->m_xmf4x4ToParent._43 -3.0f));
+			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->m_xmf4x4ToParent._43 -1.0f));
+	}
+}
+
+void Stage1::SetPositionPilotHuman()
+{
+	
+
+	((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[0])->m_xmf4x4ToParent._11 = ((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->m_xmf4x4ToParent._11;
+	((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[0])->m_xmf4x4ToParent._12 = ((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->m_xmf4x4ToParent._12;
+	((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[0])->m_xmf4x4ToParent._13 = ((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->m_xmf4x4ToParent._13;
+	((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[0])->m_xmf4x4ToParent._21 = ((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->m_xmf4x4ToParent._21;
+	((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[0])->m_xmf4x4ToParent._22 = ((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->m_xmf4x4ToParent._22;
+	((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[0])->m_xmf4x4ToParent._23 = ((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->m_xmf4x4ToParent._23;
+	((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[0])->m_xmf4x4ToParent._31 = ((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->m_xmf4x4ToParent._31;
+	((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[0])->m_xmf4x4ToParent._32 = ((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->m_xmf4x4ToParent._32;
+	((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[0])->m_xmf4x4ToParent._33 = ((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->m_xmf4x4ToParent._33;
+
+	if (((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->m_FallSwitch == true)
+	{
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[0])->m_pSkinnedAnimationController
+			->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[0])->m_pSkinnedAnimationController
+			->SetTrackAnimationSet(0, 8);
+	}
+	if (((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->m_FallSwitch == false)
+	{
+		
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[0])->m_pSkinnedAnimationController
+			->SetTrackAnimationSet(0, 9);
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[0])->
+			SetPosition(XMFLOAT3(
+				((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->m_pChairPoint->GetPosition().x,
+				((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->m_pChairPoint->GetPosition().y - 2.0f,
+				((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->m_pChairPoint->GetPosition().z
+
+			));
+
+		
 	}
 }

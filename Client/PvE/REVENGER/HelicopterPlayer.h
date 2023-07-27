@@ -26,6 +26,7 @@ public:
 	CGameObject* m_pFrameFragObj9 = NULL;
 	CGameObject* m_pFrameFragObj10 = NULL;
 	CGameObject* m_pFrameFragObj11 = NULL;
+	CGameObject* m_pChairPoint = NULL;
 
 	BoundingOrientedBox ParticleFrame1;
 	BoundingOrientedBox ParticleFrame2;
@@ -88,6 +89,7 @@ public:
 	BoundingOrientedBox m_xoobb = BoundingOrientedBox(XMFLOAT3(),XMFLOAT3(),XMFLOAT4());
 	void LimitAltitude();
 	bool m_bDieState = false;
+	bool m_FallSwitch = false;
 private:
 	GameSound gamesound;
 };

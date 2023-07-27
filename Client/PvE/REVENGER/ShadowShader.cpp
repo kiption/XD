@@ -63,7 +63,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
 		CMaterial* pPlaneMaterial = new CMaterial(4);
 		pPlaneMaterial->SetReflection(4);
-		m_ppObjects[0] = new CGameObject(1);
+		//m_ppObjects[0] = new CGameObject(1);
 		m_ppObjects[2] = new CGameObject(1);
 		m_ppObjects[3] = new CGameObject(1);
 		//m_ppObjects[4] = new CGameObject(1);
@@ -71,10 +71,16 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 		/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
 		{
-			CMaterial* pOtherPlayerMaterial = new CMaterial(4);
-			pOtherPlayerMaterial->SetReflection(4);
+			CMaterial* pOtherPlayerMaterial = new CMaterial(5);
+			pOtherPlayerMaterial->SetReflection(5);
 
 			CLoadedModelInfo* pSModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
+			m_ppObjects[0] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
+			m_ppObjects[0]->SetMaterial(0, pOtherPlayerMaterial);
+			m_ppObjects[0]->SetScale(3, 3, 3);
+			m_ppObjects[0]->SetPosition(XMFLOAT3(150.0, 6.0, 830.0));
+			pSModel->m_pModelRootObject->AddRef();
+			
 			m_ppObjects[1] = new CHumanPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
 			m_ppObjects[1]->SetMaterial(0, pOtherPlayerMaterial);
 			pSModel->m_pModelRootObject->AddRef();
@@ -84,7 +90,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 				m_ppObjects[i] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
 				m_ppObjects[i]->SetMaterial(0, pOtherPlayerMaterial);
 				m_ppObjects[i]->SetScale(5, 5, 5);
-				m_ppObjects[i]->SetPosition(XMFLOAT3(150.0, -6.0, 800.0));
+				m_ppObjects[i]->SetPosition(XMFLOAT3(150.0, 6.0, 800.0));
 				pSModel->m_pModelRootObject->AddRef();
 			}
 			if (pSModel) delete pSModel;
@@ -216,7 +222,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			pHelicopterModel->AddRef();
 		}
 		////////////////////////////////////////////////HELIPLAYER_LOAD////////////////////////////////////////////////////////////
-
+	
 		////////////////////////////////////////////////TREE_LOAD//////////////////////////////////////////////////////////////////
 		{
 			CGameObject* pTreeModels = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/ALL_Tree.bin", NULL);
@@ -229,7 +235,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			pTreeModels->AddRef();
 		}
 		////////////////////////////////////////////////TREE_LOAD/////////////////////////////////////////////////////////////////
-
+	
 	}
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

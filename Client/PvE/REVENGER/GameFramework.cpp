@@ -1099,6 +1099,8 @@ void CGameFramework::ProcessInput()
 						if (m_ingame_role == R_HELI)
 						{
 							((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
+							//((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[0])
+								//->Rotate(cyDelta, cxDelta, 0.0f);
 							if (m_pCamera->m_bHelicopterFreedom==true)
 							{
 								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(0.0,0.0, 0.0f);
@@ -3820,6 +3822,7 @@ void CGameFramework::MyPlayerDieMotion()
 	}
 	if (m_ingame_role == R_HELI)
 	{
+		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_FallSwitch = true;
 		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = true;
 	}
 
@@ -3834,6 +3837,7 @@ void CGameFramework::MyPlayerRespawnMotion()
 	if (m_ingame_role == R_HELI)
 	{
 		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = false;
+		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_FallSwitch = false;
 		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Resetpartition();
 	}
 }
