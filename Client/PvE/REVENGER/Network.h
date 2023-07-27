@@ -533,7 +533,6 @@ void processPacket(char* ptr)
 		SC_LOGIN_INFO_PACKET* recv_packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(ptr);
 		// Player 초기정보 설정
 		players_info[my_id].m_hp = recv_packet->hp;
-		strcpy_s(players_info[my_id].m_name, recv_packet->name);
 		players_info[my_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
 		players_info[my_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
 		players_info[my_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
@@ -732,6 +731,7 @@ void processPacket(char* ptr)
 			else if (0 <= recv_id && recv_id < MAX_USER) {
 				// 상대 Player 없애기
 				players_info[recv_id].m_id = -1;
+				strcpy_s(players_info[recv_id].m_name, "\0");
 				players_info[recv_id].m_pos = { 0.f ,0.f ,0.f };
 				players_info[recv_id].m_state = OBJ_ST_LOGOUT;
 

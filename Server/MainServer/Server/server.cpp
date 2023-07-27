@@ -322,8 +322,6 @@ void SESSION::send_login_packet() {
 
 void SESSION::send_add_obj_packet(int obj_id, short obj_type)
 {
-	if (curr_stage == 2) return;// 스테이지2 서버동기화 이전까지 사용하는 임시코드.
-
 	switch (obj_type) {
 	case TARGET_PLAYER:
 		SC_ADD_OBJECT_PACKET add_player_packet;
@@ -332,7 +330,7 @@ void SESSION::send_add_obj_packet(int obj_id, short obj_type)
 
 		add_player_packet.target = TARGET_PLAYER;
 		add_player_packet.id = clients[obj_id].id;
-		strcpy_s(add_player_packet.name, name);
+		strcpy_s(add_player_packet.name, clients[obj_id].name);
 		add_player_packet.obj_state = clients[obj_id].pl_state;
 		add_player_packet.role = clients[obj_id].role;
 
@@ -943,7 +941,6 @@ void process_packet(int client_id, char* packet)
 		for (auto& pl : clients) {
 			if (pl.s_state != ST_INGAME) continue;
 			if (pl.id == client_id) continue;
-			if (pl.curr_stage != 1) continue;// 로그인을 하면 1스테이지로 넘어가지기 때문
 
 			lock_guard<mutex> lg{ pl.s_lock };
 			pl.send_add_obj_packet(client_id, TARGET_PLAYER);
@@ -953,7 +950,6 @@ void process_packet(int client_id, char* packet)
 		for (auto& pl : clients) {
 			if (pl.s_state != ST_INGAME) continue;
 			if (pl.id == client_id) continue;
-			if (pl.curr_stage != 1) continue;// 로그인을 하면 1스테이지로 넘어가지기 때문.
 
 			lock_guard<mutex> lg{ pl.s_lock };
 			clients[client_id].send_add_obj_packet(pl.id, TARGET_PLAYER);

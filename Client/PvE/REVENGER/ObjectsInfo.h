@@ -27,7 +27,7 @@ struct ObjectsInfo
 
 	ObjectsInfo() {
 		m_id = -1;
-		m_name[0] = '\n';
+		strcpy(m_name, "\0");
 		m_role = ROLE_NOTCHOOSE;
 		m_hp = 100;
 		m_bullet = MAX_BULLET;
@@ -47,7 +47,7 @@ struct ObjectsInfo
 
 	void InfoClear() {
 		m_id = -1;
-		m_name[0] = '\n';
+		strcpy(m_name, "\0");
 		m_role = ROLE_NOTCHOOSE;
 		m_hp = 100;
 		m_bullet = MAX_BULLET;
