@@ -377,8 +377,15 @@ void processPacket(char* ptr)
 		for (int i = 1; i < MAX_USER; ++i) { new_room.user_state[i] = RM_ST_EMPTY; }
 		lobby_rooms.push_back(new_room);
 
-		cout << "새로운 Room을 추가합니다. [ID: " << new_room.room_id << ", Name: " << new_room.room_name << "]\n" << endl;
+		cout << "새로운 Room을 추가합니다." << endl;
+		cout << "[ID: " << new_room.room_id << ", 이름: " << new_room.room_name;
+		cout << ", 현재 인원: " << new_room.user_count << "명, 방 상태: ";
+		if (new_room.room_state == R_ST_WAIT) cout << "대기중";
+		else if (new_room.room_state == R_ST_FULL) cout << "가득참";
+		else if (new_room.room_state == R_ST_INGAME) cout << "게임중";
+		cout << ".] \n" << endl;
 
+		trigger_lobby_update = true;
 		break;
 	}// LBYC_ADD_ROOM case end
 	case LBYC_ROOM_USERCOUNT:
@@ -401,6 +408,7 @@ void processPacket(char* ptr)
 				}
 			}
 		}
+		trigger_lobby_update = true;
 
 		break;
 	}// LBYC_ROOM_USERCOUNT case end

@@ -1056,15 +1056,15 @@ void uiThreadFunc() {
 
 			case gGameFramework.LS_LOBBY:	// 로비
 				if (trigger_lobby_update) {	// 로비에 있는 방 정보 업데이트 트리거
-					gGameFramework.m_LobbyRoom_Info.clear();	// 한번 초기화했다가 다시 값을 집어넣는다.
+					// 한번 초기화했다가
+					gGameFramework.m_LobbyRoom_Info.clear();
 
+					// 다시 값을 집어넣는다.
 					for (auto& curr_room : lobby_rooms) {
 						LobbyRoom new_room;
 
 						new_room.currnum_of_people = curr_room.user_count;
-
-						new_room.name = charToWchar(curr_room.room_name);
-
+						memcpy(new_room.name, charToWchar(curr_room.room_name), 40);
 						new_room.num = curr_room.room_id;
 						if (curr_room.room_state == R_ST_WAIT) {
 							new_room.ready_state = 1;
@@ -1078,6 +1078,8 @@ void uiThreadFunc() {
 
 						gGameFramework.m_LobbyRoom_Info.emplace_back(new_room);
 					}
+
+					trigger_lobby_update = false;
 				}
 				break;
 

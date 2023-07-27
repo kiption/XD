@@ -50,7 +50,7 @@ struct SendChat {
 
 struct LobbyRoom {
 	int num;
-	WCHAR* name;
+	WCHAR name[20];
 	int currnum_of_people; // current number of people
 	int ready_state;
 };
