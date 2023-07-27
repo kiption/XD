@@ -1234,13 +1234,13 @@ void CGameFramework::AnimateObjects()
 				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[i])->FallDown(m_GameTimer.GetTimeElapsed());
 			}
 		}
-
 		if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
 		if (m_ingame_role == R_RIFLE)
 			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 		if (m_ingame_role == R_HELI)
 			((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 
+		((Stage1*)m_pScene)->PlayerByPlayerCollision();
 
 		if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA && m_bDieMotion == false)
 		{

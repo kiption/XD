@@ -1013,7 +1013,7 @@ void Stage1::PlayerFirevalkan(CCamera* pCamera, XMFLOAT3 Look)
 		XMFLOAT3 xmf3Direction = PlayerLook;
 		xmf3Direction.y += 0.0f;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 60.0f, false));
-		pBulletObject->m_xmf4x4ToParent = m_pPlayer->m_xmf4x4World;		
+		pBulletObject->m_xmf4x4ToParent = m_pPlayer->m_xmf4x4World;
 		pBulletObject->m_xmf4x4ToParent._31 = PlayerLook.x;
 		pBulletObject->m_xmf4x4ToParent._32 = PlayerLook.y;
 		pBulletObject->m_xmf4x4ToParent._33 = PlayerLook.z;
@@ -1280,26 +1280,40 @@ void Stage1::ParticleAnimation()
 void Stage1::PlayerByPlayerCollision()
 {
 	XMFLOAT3 P1Pos = XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._41,
-		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._42, 
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._42,
 		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._43);
 	XMFLOAT3 P2Pos = XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._41,
 		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._42,
 		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._43);
+	XMFLOAT3 P0Pos = XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->m_xmf4x4ToParent._41,
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->m_xmf4x4ToParent._42,
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->m_xmf4x4ToParent._43);
 	XMFLOAT3 MyPos = XMFLOAT3(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().x,
 		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().y,
 		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().z);
 	// 1. 다른 사람 플레이어의 바운딩박스 + 자기 자신 플레이어의 바운딩박스
-	BoundingOrientedBox Other1Poobb = BoundingOrientedBox(XMFLOAT3(P1Pos),XMFLOAT3(2.0,4.0,2.0), XMFLOAT4(0, 0, 0, 1));
-	BoundingOrientedBox Other2Poobb = BoundingOrientedBox(XMFLOAT3(P2Pos),XMFLOAT3(2.0, 4.0, 2.0), XMFLOAT4(0, 0, 0, 1));
-	BoundingOrientedBox MyPoobb = BoundingOrientedBox(XMFLOAT3(MyPos),XMFLOAT3(2.0, 4.0,2.0), XMFLOAT4(0, 0, 0, 1));
+	BoundingOrientedBox Other0Poobb = BoundingOrientedBox(XMFLOAT3(P0Pos), XMFLOAT3(2.0, 4.0, 2.0), XMFLOAT4(0, 0, 0, 1));
+	BoundingOrientedBox Other1Poobb = BoundingOrientedBox(XMFLOAT3(P1Pos), XMFLOAT3(2.0, 4.0, 2.0), XMFLOAT4(0, 0, 0, 1));
+	BoundingOrientedBox Other2Poobb = BoundingOrientedBox(XMFLOAT3(P2Pos), XMFLOAT3(2.0, 4.0, 2.0), XMFLOAT4(0, 0, 0, 1));
+	BoundingOrientedBox MyPoobb = BoundingOrientedBox(XMFLOAT3(MyPos), XMFLOAT3(2.0, 4.0, 2.0), XMFLOAT4(0, 0, 0, 1));
 
+	if (MyPoobb.Intersects(Other0Poobb)) {
+		cout << "Collision P0!" << endl;
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->SetPosition(XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->GetPosition().x,
+			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->GetPosition().y,
+			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._43 - 3.0f));
+	}
 	if (MyPoobb.Intersects(Other2Poobb)) {
 
-		cout << "Collision P2!" << endl; 
-		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._43 -= 1.0f;
+		cout << "Collision P2!" << endl;
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->SetPosition(XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->GetPosition().x,
+			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->GetPosition().y,
+			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._43 - 3.0f));
 	}
 	if (MyPoobb.Intersects(Other1Poobb)) {
-		cout << "Collision P1!" << endl; 
-		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._43 -= 1.0f;
+		cout << "Collision P1!" << endl;
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->SetPosition(XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->GetPosition().x,
+			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->GetPosition().y,
+			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->m_xmf4x4ToParent._43 -3.0f));
 	}
 }
