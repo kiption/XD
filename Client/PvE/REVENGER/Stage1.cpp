@@ -1241,10 +1241,6 @@ void Stage1::BillBoardRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 
 	if (m_pBillboardShader[1]) m_pBillboardShader[1]->Render(pd3dCommandList, pCamera, 0);
 	if (((BulletMarkBillboard*)m_pBillboardShader[4])) ((BulletMarkBillboard*)m_pBillboardShader[4])->Render(pd3dCommandList, pCamera, 0);
-	//if (((MuzzleFrameBillboard*)m_pBillboardShader[7])) ((MuzzleFrameBillboard*)m_pBillboardShader[7])->Render(pd3dCommandList, pCamera, Position);
-
-
-
 	for (int i = 0; i < m_nSpriteBillboards; i++) if (m_ppSpriteBillboard[i]) m_ppSpriteBillboard[i]->Render(pd3dCommandList, pCamera, 0);
 }
 

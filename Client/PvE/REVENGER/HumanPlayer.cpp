@@ -7,7 +7,6 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	SetChild(playermodel->m_pModelRootObject, true);
 	playermodel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
-	SetScale(XMFLOAT3(7, 7, 7));
 	m_pBulletFindFrame = playermodel->m_pModelRootObject->FindFrame("Rifle__1_");
 	m_pHeadFindFrame = playermodel->m_pModelRootObject->FindFrame("head");
 
@@ -112,15 +111,15 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	case CLOSEUP_PERSON_CAMERA:
 		SetFriction(600);
 		SetGravity(XMFLOAT3(0.0f, 0.f, 0.0f));
-		SetMaxVelocityXZ(30.0);
+		SetMaxVelocityXZ(32.0);
 		SetMaxVelocityY(0.0f);
 		m_pCamera = OnChangeCamera(CLOSEUP_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(-0.6f, 0.16f, 0.21f));
+		m_pCamera->SetOffset(XMFLOAT3(-0.6f, 0.14f, 0.4f));
 		m_pCamera->SetPosition(Vector3::Add(
 			XMFLOAT3(m_pHeadFindFrame->GetPosition().x, m_pHeadFindFrame->GetPosition().y, m_pHeadFindFrame->GetPosition().z)
 			,m_pCamera->GetOffset()));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 4500.0f, ASPECT_RATIO, 70.0f);
+		m_pCamera->GenerateProjectionMatrix(0.7f, 4000.0f, ASPECT_RATIO, 70.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;

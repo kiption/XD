@@ -1244,7 +1244,7 @@ void CGameFramework::AnimateObjects()
 			((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 			if (m_bHeliDyingState == true)
 			{
-				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->FallDown(m_GameTimer.GetTimeElapsed());
+				//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->FallDown(m_GameTimer.GetTimeElapsed());
 			}
 			if (m_bHeliHittingMotion == true)
 			{
@@ -1372,7 +1372,7 @@ float g_WarnningSwitchtime = 0.0f;
 void CGameFramework::FrameAdvance()
 {
 
-	m_GameTimer.Tick(60);
+	m_GameTimer.Tick();
 	AnimateObjects();
 
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();

@@ -437,7 +437,7 @@ void MuzzleFrameBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	pSpriteMaterial->SetTexture(ppSpriteTextures, 0);
 
 	CTexturedRectMesh* pSpriteMesh;
-	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.5f, 1.5f, 0.0f, 0.0f, 0.0f, 0.0f);
+	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	m_nObjects = 1;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -471,9 +471,8 @@ void MuzzleFrameBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, CC
 		XMFLOAT3 CameraLook = pCamera->GetLookVector();
 		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
-		XMFLOAT3 xmf3Position = Vector3::Add(Position, Vector3::ScalarProduct(CameraLook, 4.0f, false));
-		xmf3Position.y += 0.35f;
-		xmf3Position.x -= 0.00f;
+		XMFLOAT3 xmf3Position = Vector3::Add(Position, Vector3::ScalarProduct(CameraLook, 3.0f, false));
+		xmf3Position.y += 0.2f;
 		for (int j = 0; j < m_nObjects; j++)
 		{
 

@@ -1312,10 +1312,6 @@ void uiThreadFunc() {
 
 				gGameFramework.m_BloodSplatterOn = true;
 				players_info[my_id].m_damaged_effect_on = false;
-				if (players_info[my_id].m_role == ROLE_HELI)
-				{
-					gGameFramework.m_bHeliHittingMotion = true;
-				}
 			}
 			
 			// 9. HP 적을때 UI
@@ -1325,7 +1321,7 @@ void uiThreadFunc() {
 				}
 				else if (players_info[my_id].m_role == ROLE_HELI) {
 					gGameFramework.m_HeliPlayerWarnningUISwitch = true;
-
+					gGameFramework.m_bHeliHittingMotion = true;
 				}
 			}
 			else {
