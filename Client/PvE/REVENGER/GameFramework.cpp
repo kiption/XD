@@ -1141,6 +1141,7 @@ void CGameFramework::ProcessInput()
 
 							if (abs(cos(radian)) < forwardDotResultAbs) {
 								if (forwardDotResult < 0) {
+									cout << "1" << endl;
 									XMVECTOR reversedLocalForward = XMVectorNegate(XMLoadFloat3(&normalizedLocalForward));
 									XMStoreFloat3(&normalizedLocalForward, reversedLocalForward);
 
@@ -1148,12 +1149,14 @@ void CGameFramework::ProcessInput()
 									XMStoreFloat3(&PlayerMoveDir, AddVector);
 								}
 								else {
+									cout << "2" << endl;
 									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2PlayerVector), XMLoadFloat3(&normalizedLocalForward));
 									XMStoreFloat3(&PlayerMoveDir, AddVector);
 								}
 							}
 							else {
 								if (rightDotResult < 0) {
+									cout << "3" << endl;
 									XMVECTOR reversedLocalRight = XMVectorNegate(XMLoadFloat3(&normalizedLocalRight));
 									XMStoreFloat3(&normalizedLocalRight, reversedLocalRight);
 
@@ -1161,6 +1164,7 @@ void CGameFramework::ProcessInput()
 									XMStoreFloat3(&PlayerMoveDir, AddVector);
 								}
 								else {
+									cout << "4" << endl;
 									XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2PlayerVector), XMLoadFloat3(&normalizedLocalRight));
 									XMStoreFloat3(&PlayerMoveDir, AddVector);
 								}

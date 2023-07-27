@@ -669,7 +669,7 @@ void NPC::NPC_State_Manegement(int state)
 		}
 		case NPC_ATTACK:
 		{
-			if (m_chaseID == -1 || ChaseTime - AttackTime > 5000ms) {
+			if (m_chaseID == -1 || ChaseTime - AttackTime > 5000ms || m_Distance[m_chaseID] >= 200.0f) {
 				//cout << "NPC ID: " << id << "원래의 상태로 돌아갑니다." << endl;
 				m_state = NPC_IDLE;
 				if (!path.empty()) path.clear();
@@ -1583,69 +1583,65 @@ bool NPC::NPC_BulletRaycast()
 void NPC::NPC_CalculationCollide()
 {
 	if (m_collideBox.size() >= 2) {
-		
-	}
-	else {
-
-		XMFLOAT3 localforwark = m_collideBox[0].getLocalForward();
-		XMFLOAT3 localright = m_collideBox[0].getLocalRight();
-
-		XMFLOAT3 normalizedLocalForward;
-		XMVECTOR localForwardNormalized = XMVector3Normalize(XMLoadFloat3(&localforwark));
-		XMStoreFloat3(&normalizedLocalForward, localForwardNormalized);
-
-		XMFLOAT3 normalizedLocalRight;
-		XMVECTOR localRightNormalized = XMVector3Normalize(XMLoadFloat3(&localright));
-		XMStoreFloat3(&normalizedLocalRight, localRightNormalized);
+		XMFLOAT3 totalVector = { 0.0f, 0.0f, 0.0f };
 
 		XMFLOAT3 prevPos = pos;
+		for (int i{}; i < m_collideBox.size(); ++i) {
+			XMFLOAT3 localforwark = m_collideBox[i].getLocalForward();
+			XMFLOAT3 localright = m_collideBox[i].getLocalRight();
 
-		XMFLOAT3 Center2NPCPos = Subtract(prevPos, m_collideBox[0].m_xoobb.Center);//벡터
-		Center2NPCPos = Normalize(Center2NPCPos);
+			XMFLOAT3 normalizedLocalForward;
+			XMVECTOR localForwardNormalized = XMVector3Normalize(XMLoadFloat3(&localforwark));
+			XMStoreFloat3(&normalizedLocalForward, localForwardNormalized);
 
-		float forwardDotResult = DotProduct(Center2NPCPos, localforwark); //객체의 center와 플레이어와 normal간의 cos값   
-		float rightDotResult = DotProduct(Center2NPCPos, localright);
+			XMFLOAT3 normalizedLocalRight;
+			XMVECTOR localRightNormalized = XMVector3Normalize(XMLoadFloat3(&localright));
+			XMStoreFloat3(&normalizedLocalRight, localRightNormalized);
 
-		float forwardDotResultAbs = abs(forwardDotResult);
-		float rightDotResultAbs = abs(rightDotResult);
 
-		float angle_a = m_collideBox[0].getAngleAOB();
-		float radian = XMConvertToRadians(angle_a / 2);
+			XMFLOAT3 Center2NPCPos = Subtract(prevPos, m_collideBox[i].m_xoobb.Center);//벡터
+			Center2NPCPos = Normalize(Center2NPCPos);
 
-		XMFLOAT3 NPCMoveDir;
+			float forwardDotResult = DotProduct(Center2NPCPos, localforwark); //객체의 center와 플레이어와 normal간의 cos값   
+			float rightDotResult = DotProduct(Center2NPCPos, localright);
 
-		if (abs(cos(radian)) < forwardDotResultAbs) {
-			if (forwardDotResult < 0) {
-				XMVECTOR reversedLocalForward = XMVectorNegate(XMLoadFloat3(&normalizedLocalForward));
-				XMStoreFloat3(&normalizedLocalForward, reversedLocalForward);
+			float forwardDotResultAbs = abs(forwardDotResult);
+			float rightDotResultAbs = abs(rightDotResult);
 
-				XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2NPCPos), XMLoadFloat3(&normalizedLocalForward));
-				XMStoreFloat3(&NPCMoveDir, AddVector);
+			float angle_a = m_collideBox[i].getAngleAOB();
+			float radian = XMConvertToRadians(angle_a / 2);
+
+			XMFLOAT3 NPCMoveDir;
+
+			if (abs(cos(radian)) < forwardDotResultAbs) {
+				if (forwardDotResult < 0) {
+					XMVECTOR reversedLocalForward = XMVectorNegate(XMLoadFloat3(&normalizedLocalForward));
+					XMStoreFloat3(&normalizedLocalForward, reversedLocalForward);
+
+					NPCMoveDir = Normalize(normalizedLocalForward);
+					
+				}
+				else {
+					NPCMoveDir = Normalize(normalizedLocalForward);
+				}
 			}
 			else {
-				XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2NPCPos), XMLoadFloat3(&normalizedLocalForward));
-				XMStoreFloat3(&NPCMoveDir, AddVector);
+				if (rightDotResult < 0) {
+					XMVECTOR reversedLocalRight = XMVectorNegate(XMLoadFloat3(&normalizedLocalRight));
+					XMStoreFloat3(&normalizedLocalRight, reversedLocalRight);
+					NPCMoveDir = Normalize(normalizedLocalRight);
+				}
+				else {
+					NPCMoveDir = Normalize(normalizedLocalRight);
+				}
 			}
+			
+			XMStoreFloat3(&totalVector, XMVectorAdd(XMLoadFloat3(&totalVector), XMLoadFloat3(&NPCMoveDir)));
 		}
-		else {
-			if (rightDotResult < 0) {
-				XMVECTOR reversedLocalRight = XMVectorNegate(XMLoadFloat3(&normalizedLocalRight));
-				XMStoreFloat3(&normalizedLocalRight, reversedLocalRight);
-
-				XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2NPCPos), XMLoadFloat3(&normalizedLocalRight));
-				XMStoreFloat3(&NPCMoveDir, AddVector);
-			}
-			else {
-				XMVECTOR AddVector = XMVectorAdd(XMLoadFloat3(&Center2NPCPos), XMLoadFloat3(&normalizedLocalRight));
-				XMStoreFloat3(&NPCMoveDir, AddVector);
-			}
-		}
-		XMVECTOR PlayerMoveNormalized = XMVector3Normalize(XMLoadFloat3(&NPCMoveDir));
-		XMStoreFloat3(&NPCMoveDir, PlayerMoveNormalized);
-
+		totalVector = Normalize(totalVector);
 		XMFLOAT3 DefaultTemp = { 0.0f, 0.0f, 1.0f };
 
-		float angleRadian = atan2(DefaultTemp.z, DefaultTemp.x) - atan2(NPCMoveDir.z, NPCMoveDir.x);
+		float angleRadian = atan2(DefaultTemp.z, DefaultTemp.x) - atan2(totalVector.z, totalVector.x);
 		float angleDegree = XMConvertToDegrees(angleRadian);
 		yaw = angleDegree;
 
@@ -1669,6 +1665,42 @@ void NPC::NPC_CalculationCollide()
 		pos = interpolatedPos;
 
 		m_UpdateTurn = true;
+		m_collideBox.clear();
+	}
+	else {
+		XMFLOAT3 prevPos = pos;
+
+		XMFLOAT3 Center2NPCPos = Subtract(prevPos, m_collideBox[0].m_xoobb.Center);//벡터
+		Center2NPCPos = Normalize(Center2NPCPos);
+
+		
+		XMFLOAT3 DefaultTemp = { 0.0f, 0.0f, 1.0f };
+
+		float angleRadian = atan2(DefaultTemp.z, DefaultTemp.x) - atan2(Center2NPCPos.z, Center2NPCPos.x);
+		float angleDegree = XMConvertToDegrees(angleRadian);
+		yaw = angleDegree;
+
+		if (yaw > 360.0f)
+			yaw -= 360.0f;
+		if (yaw < 0.0f)
+			yaw += 360.0f;
+
+		m_lookvec = NPCcalcLookRotate();
+		m_rightvec = NPCcalcRightRotate();
+
+		prevPos.x += m_lookvec.x * m_Speed;
+		prevPos.z += m_lookvec.z * m_Speed;
+
+		float t = 0.8f; // 보간 시간 (조정 가능)
+		XMFLOAT3 interpolatedPos = Lerp(pos, prevPos, t);
+		if (ConnectingServer) {
+			g_logicservers[a_lgcsvr_num].send_npc_rotate_packet(this->id);
+		}
+
+		pos = interpolatedPos;
+
+		m_UpdateTurn = true;
+		m_collideBox.clear();
 	}
 }
 
@@ -2113,14 +2145,29 @@ void do_worker()
 		}//OP_SEND end
 		case OP_CONNECT: {
 			if (FALSE != ret) {
-				int server_id = key - PORTNUM_LGCNPC_0;
-				std::cout << "성공적으로 Logic Server[" << server_id << "]에 연결되었습니다.\n" << endl;
-				g_logicservers[a_lgcsvr_num].remain_size = 0;
-				CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_logicservers[a_lgcsvr_num].sock), h_iocp, NULL, 0);
-				delete ex_over;
-				g_logicservers[a_lgcsvr_num].do_recv();
-				initNpc();
-				ConnectingServer = true;
+				// 1. Logic Server
+				if (PORTNUM_LGCNPC_0 <= key && key <= PORTNUM_LGCNPC_1) {
+					int server_id = key - PORTNUM_LGCNPC_0;
+					std::cout << "성공적으로 Logic Server[" << server_id << "]에 연결되었습니다.\n" << endl;
+					g_logicservers[a_lgcsvr_num].remain_size = 0;
+					CreateIoCompletionPort(reinterpret_cast<HANDLE>(g_logicservers[a_lgcsvr_num].sock), h_iocp, NULL, 0);
+					delete ex_over;
+					g_logicservers[a_lgcsvr_num].do_recv();
+					initNpc();
+					ConnectingServer = true;
+				}
+				// 2. EX_Server
+				else if (CP_KEY_EX_NPC <= key && key < CP_KEY_EX_NPC_LISTEN) {
+					int server_id = key - CP_KEY_EX_NPC;
+					std::cout << "성공적으로 Server[" << server_id << "]에 연결되었습니다.\n" << endl;
+					extended_servers[server_id].id = server_id;
+					extended_servers[server_id].remain_size = 0;
+					extended_servers[server_id].socket = right_ex_server_sock;
+					extended_servers[server_id].s_state = ST_ACCEPTED;
+					CreateIoCompletionPort(reinterpret_cast<HANDLE>(right_ex_server_sock), h_iocp, NULL, 0);
+					delete ex_over;
+					extended_servers[server_id].do_recv();
+				}
 			}
 
 		}//OP_CONN end
