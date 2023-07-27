@@ -332,6 +332,7 @@ void processPacket(char* ptr)
 			players_info[i].m_state = ST_INGAME;
 			players_info[i].m_id = i;
 			strcpy_s(players_info[i].m_name, recv_packet->member_name[i]);
+			players_info[i].m_role = recv_packet->member_role[i];
 		}
 
 		// 방과 관련된 그 외 정보를 업데이트합니다.
@@ -447,7 +448,7 @@ void processPacket(char* ptr)
 
 		// 현재 방 정보 업데이트 (전체 방 정보 lobby_room 은 업데이트할 필요가 없음. lobby_room은 로비에 있을때만 업데이트한다.)
 		curr_room.user_count--;
-
+		
 		// 유저 정보 업데이트
 		players_info[left_member_index].InfoClear();
 

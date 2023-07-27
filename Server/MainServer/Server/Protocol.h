@@ -186,6 +186,7 @@ struct LBYC_ROOM_JOIN_PACKET {
 	short member_count;
 	char member_name[MAX_USER][NAME_SIZE];
 	char member_state[MAX_USER];
+	char member_role[MAX_USER];
 	short your_roomindex;
 	char b_manager;	// 너가 방장인지 (0: 아님, 1: 맞음)
 };

@@ -71,6 +71,7 @@ public:
 	char name[NAME_SIZE];
 	int curr_room;		// -1 이면 방에 없고 로비에 있다는 뜻. (혹은 s_state가 FREE인데 -1이면 접속중이 아닌것)
 	int inroom_state;	// RM_ST_... (EMPTY: 로비, NONREADY: 방에 있지만 준비X, READY: 방에 있고 준비도 O, MANAGER: 방에 있고 그 방의 방장)
+	int inroom_index;	// Id와 room index는 다름.
 	int role;			// ROLE_NOTCHOOSE, ROLE_RIFLE, ROLE_HELI
 	SESSION_STATE s_state;
 	SOCKET sock;
@@ -78,7 +79,7 @@ public:
 	mutex s_lock;
 
 public:
-	SESSION() { remain_size = 0; id = -1; curr_room = -1; inroom_state = RM_ST_EMPTY; role = ROLE_NOTCHOOSE; sock = 0; s_state = ST_FREE; }
+	SESSION() { remain_size = 0; id = -1; curr_room = -1; inroom_state = RM_ST_EMPTY; inroom_index = -1; role = ROLE_NOTCHOOSE; sock = 0; s_state = ST_FREE; }
 
 public:
 	void do_recv()
@@ -113,6 +114,7 @@ public:
 		id = -1;
 		curr_room = -1;
 		inroom_state = RM_ST_EMPTY;
+		inroom_index = -1;
 		role = ROLE_NOTCHOOSE;
 		sock = 0;
 		s_state = ST_FREE;
@@ -247,11 +249,12 @@ int Game_Room::user_join(int c_id) {
 
 			clients[c_id].s_lock.lock();
 			clients[c_id].curr_room = room_id;
-			cout << "Client[" << c_id << "]는 Room[" << room_id << "]에서의 인덱스는 " << i << "입니다." << endl;
 			if (user_count == 1)
 				clients[c_id].inroom_state = RM_ST_MANAGER;
 			else
 				clients[c_id].inroom_state = RM_ST_NONREADY;
+			clients[c_id].inroom_index = i;
+			cout << "Client[" << c_id << "]는 Room[" << room_id << "]에서의 인덱스는 " << clients[c_id].inroom_index << "입니다." << endl;
 			clients[c_id].s_lock.unlock();
 
 			cout << "\n";
@@ -282,6 +285,7 @@ int Game_Room::user_leave(int c_id) {
 			clients[c_id].s_lock.lock();
 			clients[c_id].curr_room = -1;
 			clients[c_id].inroom_state = RM_ST_EMPTY;
+			clients[c_id].inroom_index = -1;
 			clients[c_id].s_lock.unlock();
 
 			return 0;
@@ -413,9 +417,15 @@ void process_packet(int client_id, char* packet)
 		room_join_packet.member_count = game_rooms[matched_room_id].user_count;
 		for (int i = 0; i < MAX_USER; ++i) {
 			int member_id = game_rooms[matched_room_id].users[i];
+			if (member_id == -1) {
+				strcpy_s(room_join_packet.member_name[i], "\0");
+				room_join_packet.member_state[i] = RM_ST_EMPTY;
+				room_join_packet.member_role[i] = ROLE_NOTCHOOSE;
+			}
 
 			strcpy_s(room_join_packet.member_name[i], clients[member_id].name);
 			room_join_packet.member_state[i] = clients[member_id].inroom_state;
+			room_join_packet.member_role[i] = clients[member_id].role;
 
 			if (member_id == client_id) {
 				room_join_packet.your_roomindex = i;
@@ -423,7 +433,7 @@ void process_packet(int client_id, char* packet)
 		}
 		room_join_packet.b_manager = b_FALSE;
 		clients[client_id].do_send(&room_join_packet);
-		cout << "Client[" << client_id << "]에게 Room[" << matched_room_id << "] 참가 패킷을 보냈습니다.\n" << endl;
+		cout << "Client[" << client_id << "]가 Room[" << matched_room_id << "]에 참가합니다. (Index: " << room_join_packet.your_roomindex << ")\n" << endl;
 
 
 		// 그 방에 이전부터 있었던 클라이언트에게 새로운 클라이언트가 참가했음을 알려줍니다.
@@ -500,7 +510,7 @@ void process_packet(int client_id, char* packet)
 			strcpy_s(room_info_pack.room_name, room.room_name);
 
 			clients[client_id].do_send(&room_info_pack);
-			//cout << "Client[" << client_id << "]에게 로비에 보일 Room[" << room.room_id << "]의 정보를 보냈습니다." << endl;
+			cout << "Client[" << client_id << "]에게 로비에 보일 Room[" << room.room_id << "]의 정보를 보냈습니다." << endl;
 		}
 		cout << "Client[" << client_id << "]에게 존재하는 모든 방들의 정보를 보냈습니다.\n" << endl;
 

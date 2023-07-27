@@ -444,23 +444,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					{
 						if (players_info[i].m_role == ROLE_RIFLE)
 						{
-							//// 인덱스 조정
-							//int index_num = 0;
-							//switch (i) {
-							//case 0:	// 자신의 id가 0일때
-							//case 1:	// 자신의 id가 1일때
-							//	index_num = i;	// 그대로 사용
-							//	break;
-							//case 2:	// 자신의 id가 2일때
-							//	if (players_info[0].m_role == ROLE_RIFLE) {	// id 0 클라이언트도 소총수이면
-							//		index_num = 1;
-							//	}
-							//	else {										// id 1 클라이언트도 소충수이면
-							//		index_num = 0;
-							//	}
-							//	break;
-							//}
-
 							// 군인은 무조건 index가 6
 							gGameFramework.setPosition_SoldiarOtherPlayer(players_info[i].m_pos);
 							gGameFramework.setVectors_SoldiarOtherPlayer(players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
@@ -535,8 +518,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 					else if (players_info[otherplayer_attack_id].m_role == ROLE_HELI)
 					{
-						cout << "Client[" << otherplayer_attack_id << "]가 ("
-							<< otherplayer_attack_dir.x << ", " << otherplayer_attack_dir.y << ", " << otherplayer_attack_dir.z << ") 방향으로 총을 쐈다." << endl;
 						gGameFramework.HeliPlayerUnderAttack(otherplayer_attack_dir);
 					}
 
@@ -549,40 +530,42 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				// 2. 객체 인게임 상태 업데이트 (자기 자신 제외, 자기 자신은 클라 독자적으로 돌아가기 때문)
 				//  1) Other Players
 				for (int i = 0; i < MAX_USER; ++i) {
-					if (players_info[i].m_damaged_effect_on) {	// 피격 이펙트
-						if (i == my_id) {
-							// 혈흔 UI
-						}
-						else {
-							// 피격이펙트
-						}
+					if (i == my_id) continue;
+
+					// 피격 이펙트
+					if (players_info[i].m_damaged_effect_on) {
+
 						players_info[i].m_damaged_effect_on = false;
 					}
 
-					if (i == my_id) continue;
-					if (players_info[i].m_new_state_update && players_info[i].m_role == ROLE_RIFLE) {
-						switch (players_info[i].m_ingame_state) {
-						case PL_ST_IDLE:
-							gGameFramework.otherPlayerReturnToIdle();
-							break;
-						case PL_ST_MOVE_FRONT: // 앞으로 이동
-							gGameFramework.otherPlayerForwardMotion();
-							break;
-						case PL_ST_MOVE_BACK: // 뒤로 이동
-							gGameFramework.otherPlayerBackwardMotion();
-							break;
-						case PL_ST_MOVE_SIDE: // 옆으로 이동
-							gGameFramework.otherPlayerSfrateMotion();
-							break;
-						case PL_ST_ATTACK:
-							gGameFramework.otherPlayerShootingMotion();
-							break;
-							// + 구르기 및 점프
-						case PL_ST_DEAD:
-							gGameFramework.otherPlayerDyingMotion();
-							break;
+					// 모션 전환
+					if (players_info[i].m_new_state_update) {
+						if (players_info[i].m_role == ROLE_RIFLE) {
+							switch (players_info[i].m_ingame_state) {
+							case PL_ST_IDLE:
+								gGameFramework.otherPlayerReturnToIdle();
+								break;
+							case PL_ST_MOVE_FRONT: // 앞으로 이동
+								gGameFramework.otherPlayerForwardMotion();
+								break;
+							case PL_ST_MOVE_BACK: // 뒤로 이동
+								gGameFramework.otherPlayerBackwardMotion();
+								break;
+							case PL_ST_MOVE_SIDE: // 옆으로 이동
+								gGameFramework.otherPlayerSfrateMotion();
+								break;
+							case PL_ST_ATTACK:
+								gGameFramework.otherPlayerShootingMotion();
+								break;
+								// + 구르기 및 점프
+							case PL_ST_DEAD:
+								gGameFramework.otherPlayerDyingMotion();
+								break;
+							}
 						}
+						else if (players_info[i].m_role == ROLE_HELI) {
 
+						}
 						players_info[i].m_new_state_update = false;
 					}
 				}
@@ -1131,6 +1114,11 @@ void uiThreadFunc() {
 				if (trigger_leave_member) {	// 다른 유저 방 퇴장 트리거
 					if (0 <= left_member_id && left_member_id < MAX_USER) {
 						gGameFramework.setRoomUserInfo(left_member_id, L"\0", RM_ST_EMPTY);
+
+						gGameFramework.m_MyRoom_Info[left_member_id].armyCheck = false;
+						gGameFramework.m_MyRoom_Info[left_member_id].HeliCheck = false;
+
+						cout << "Client[" << left_member_id << "]의 퇴장 처리가 완료되었습니다." << endl;
 					}
 					left_member_id = -1;
 					trigger_leave_member = false;
@@ -1140,6 +1128,29 @@ void uiThreadFunc() {
 					for (int i = 0; i < MAX_USER; ++i) {
 						if (curr_room.user_state[i] == RM_ST_EMPTY) continue;
 						gGameFramework.setRoomUserInfo(i, charToWchar(players_info[i].m_name), curr_room.user_state[i]);
+
+						if (players_info[i].m_role == ROLE_NOTCHOOSE) {
+							gGameFramework.m_MyRoom_Info[i].armyCheck = false;
+							gGameFramework.m_MyRoom_Info[i].HeliCheck = false;
+							if (i == my_id)
+								gGameFramework.m_ingame_role = gGameFramework.R_NONE;
+							cout << "Client[" << i << "]의 역할이 [선택 안함]으로 바뀌었음." << endl;
+						}
+						else if (players_info[i].m_role == ROLE_RIFLE) {
+							gGameFramework.m_MyRoom_Info[i].armyCheck = true;
+							gGameFramework.m_MyRoom_Info[i].HeliCheck = false;
+							if (i == my_id)
+								gGameFramework.m_ingame_role = gGameFramework.R_RIFLE;
+							cout << "Client[" << i << "]의 역할이 [Rifle]로 바뀌었음." << endl;
+						}
+						else if (players_info[i].m_role == ROLE_HELI) {
+							gGameFramework.m_MyRoom_Info[i].armyCheck = false;
+							gGameFramework.m_MyRoom_Info[i].HeliCheck = true;
+							if (i == my_id)
+								gGameFramework.m_ingame_role = gGameFramework.R_HELI;
+							cout << "Client[" << i << "]의 역할이 [Heli]로 바뀌었음." << endl;
+						}
+
 						cout << "[" << i << "] Name: " << players_info[i].m_name << " is Update." << endl; \
 					}
 
