@@ -647,7 +647,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					XMFLOAT3 ground_collide_pos = q_bullet_hit_pos_ground.front();
 					q_bullet_hit_pos_ground.pop();
 					gGameFramework.CollisionMap_by_BULLET(ground_collide_pos);
-					cout << "바닥 충돌" << ground_collide_pos.x << ", " << ground_collide_pos.y << ", " << ground_collide_pos.z << endl;
 				}
 				else
 				{
@@ -1090,21 +1089,18 @@ void uiThreadFunc() {
 						gGameFramework.m_MyRoom_Info[role_change_member_id].HeliCheck = false;
 						if (role_change_member_id == my_id)
 							gGameFramework.m_ingame_role = gGameFramework.R_NONE;
-						cout << "Client[" << role_change_member_id << "]의 역할이 [선택 안함]으로 바뀌었음." << endl;
 					}
 					else if (players_info[role_change_member_id].m_role == ROLE_RIFLE) {
 						gGameFramework.m_MyRoom_Info[role_change_member_id].armyCheck = true;
 						gGameFramework.m_MyRoom_Info[role_change_member_id].HeliCheck = false;
 						if (role_change_member_id == my_id)
 							gGameFramework.m_ingame_role = gGameFramework.R_RIFLE;
-						cout << "Client[" << role_change_member_id << "]의 역할이 [Rifle]로 바뀌었음." << endl;
 					}
 					else if (players_info[role_change_member_id].m_role == ROLE_HELI) {
 						gGameFramework.m_MyRoom_Info[role_change_member_id].armyCheck = false;
 						gGameFramework.m_MyRoom_Info[role_change_member_id].HeliCheck = true;
 						if (role_change_member_id == my_id)
 							gGameFramework.m_ingame_role = gGameFramework.R_HELI;
-						cout << "Client[" << role_change_member_id << "]의 역할이 [Heli]로 바뀌었음." << endl;
 					}
 					role_change_member_id = -1;
 					trigger_role_change = false;
@@ -1168,21 +1164,18 @@ void uiThreadFunc() {
 							gGameFramework.m_MyRoom_Info[i].HeliCheck = false;
 							if (i == my_id)
 								gGameFramework.m_ingame_role = gGameFramework.R_NONE;
-							cout << "Client[" << i << "]의 역할이 [선택 안함]으로 바뀌었음." << endl;
 						}
 						else if (players_info[i].m_role == ROLE_RIFLE) {
 							gGameFramework.m_MyRoom_Info[i].armyCheck = true;
 							gGameFramework.m_MyRoom_Info[i].HeliCheck = false;
 							if (i == my_id)
 								gGameFramework.m_ingame_role = gGameFramework.R_RIFLE;
-							cout << "Client[" << i << "]의 역할이 [Rifle]로 바뀌었음." << endl;
 						}
 						else if (players_info[i].m_role == ROLE_HELI) {
 							gGameFramework.m_MyRoom_Info[i].armyCheck = false;
 							gGameFramework.m_MyRoom_Info[i].HeliCheck = true;
 							if (i == my_id)
 								gGameFramework.m_ingame_role = gGameFramework.R_HELI;
-							cout << "Client[" << i << "]의 역할이 [Heli]로 바뀌었음." << endl;
 						}
 
 						cout << "[" << i << "] Name: " << players_info[i].m_name << " is Update." << endl; \
