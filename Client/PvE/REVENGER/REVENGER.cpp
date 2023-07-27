@@ -978,7 +978,6 @@ void networkThreadFunc()
 				heli_particle_coll_pack.size = sizeof(CS_PARTICLE_COLLIDE_PACKET);
 				heli_particle_coll_pack.type = CS_PARTICLE_COLLIDE;
 				heli_particle_coll_pack.particle_mass = 1.0f;
-				cout << "파티클 충돌: 헬리" << endl;
 				sendPacket(&heli_particle_coll_pack);
 
 				((Stage1*)gGameFramework.m_pScene)->m_bHeliParticleCollisionCheck = false;
@@ -988,10 +987,28 @@ void networkThreadFunc()
 				human_particle_coll_pack.size = sizeof(CS_PARTICLE_COLLIDE_PACKET);
 				human_particle_coll_pack.type = CS_PARTICLE_COLLIDE;
 				human_particle_coll_pack.particle_mass = 1.0f;
-				cout << "파티클 충돌: 사람" << endl;
 				sendPacket(&human_particle_coll_pack);
 
 				((Stage1*)gGameFramework.m_pScene)->m_bHumanParticleCollisionCheck = false;
+			}
+		}
+
+		// 5. 헬기 벽 충돌
+		if (players_info[my_id].m_role == ROLE_HELI && gGameFramework.b_heli_mapcollide == true) {
+			if (gGameFramework.b_heli_mapcollide_cooldown == 100) {
+				CS_HELI_MAP_COLLIDE_PACKET heli_collide_pack;
+				heli_collide_pack.size = sizeof(CS_HELI_MAP_COLLIDE_PACKET);
+				heli_collide_pack.type = CS_HELI_MAP_COLLIDE;
+				sendPacket(&heli_collide_pack);
+
+				gGameFramework.b_heli_mapcollide_cooldown--;
+			}
+			else {
+				gGameFramework.b_heli_mapcollide_cooldown--;
+
+				if (gGameFramework.b_heli_mapcollide_cooldown == 0) {
+					gGameFramework.b_heli_mapcollide = false;
+				}
 			}
 		}
 
@@ -1025,17 +1042,30 @@ void uiThreadFunc() {
 				break;
 
 			case gGameFramework.LS_LOBBY:	// 로비
-				//if (trigger_lobby_update) {	// 로비에 있는 방 정보 업데이트 트리거
-				//	LobbyRoom temp;
-				//	temp.currnum_of_people = 1;
-				//	WCHAR* tempname = L"빠르게 시작";
-				//	temp.name = tempname;
+				if (trigger_lobby_update) {	// 로비에 있는 방 정보 업데이트 트리거
+					gGameFramework.m_LobbyRoom_Info.clear();	// 한번 초기화했다가 다시 값을 집어넣는다.
 
-				//	temp.num = 12;
-				//	temp.ready_state = 2;
+					for (auto& curr_room : lobby_rooms) {
+						LobbyRoom new_room;
 
-				//	m_LobbyRoom_Info.emplace_back(temp);
-				//}
+						new_room.currnum_of_people = curr_room.user_count;
+
+						new_room.name = charToWchar(curr_room.room_name);
+
+						new_room.num = curr_room.room_id;
+						if (curr_room.room_state == R_ST_WAIT) {
+							new_room.ready_state = 1;
+						}
+						else if (curr_room.room_state == R_ST_FULL) {
+							new_room.ready_state = 2;
+						}
+						else if (curr_room.room_state == R_ST_INGAME) {
+							new_room.ready_state = 3;
+						}
+
+						gGameFramework.m_LobbyRoom_Info.emplace_back(new_room);
+					}
+				}
 				break;
 
 			case gGameFramework.LS_ROOM: // 게임 방

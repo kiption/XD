@@ -207,8 +207,8 @@ public:
 		name[0] = 0;
 
 		pl_state = PL_ST_IDLE;
-		hp = HUMAN_MAXHP;
-		remain_bullet = MAX_BULLET;
+		hp = 0;
+		remain_bullet = 0;
 		pos = { 0.0f, 0.0f, 0.0f };
 		pitch = yaw = roll = 0.0f;
 		m_rightvec = { 1.0f, 0.0f, 0.0f };
@@ -270,8 +270,8 @@ public:
 		name[0] = 0;
 
 		pl_state = PL_ST_IDLE;
-		hp = HUMAN_MAXHP;
-		remain_bullet = MAX_BULLET;
+		hp = 0;
+		remain_bullet = 0;
 		pos = { 0.0f, 0.0f, 0.0f };
 		pitch = yaw = roll = 0.0f;
 		m_rightvec = { 1.0f, 0.0f, 0.0f };
@@ -853,11 +853,13 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].pos.x = RESPAWN_POS_X_HUMAN + 15 * client_id;
 			clients[client_id].pos.y = RESPAWN_POS_Y_HUMAN;
 			clients[client_id].pos.z = RESPAWN_POS_Z_HUMAN;
+			clients[client_id].remain_bullet = MAX_BULLET;
 		}
 		else if (login_packet->role == ROLE_HELI) {
 			clients[client_id].pos.x = RESPAWN_POS_X_HELI;
 			clients[client_id].pos.y = RESPAWN_POS_Y_HELI;
 			clients[client_id].pos.z = RESPAWN_POS_Z_HELI;
+			clients[client_id].remain_bullet = MAX_BULLET_HELI;
 		}
 
 		clients[client_id].m_rightvec = XMFLOAT3{ 1.0f, 0.0f, 0.0f };
@@ -980,43 +982,45 @@ void process_packet(int client_id, char* packet)
 
 		CS_MOVE_PACKET* cl_move_packet = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 		
-		// 1. 헬기는 바닥에 박으면 터지도록하였다.
+		// 1. 헬기는 바닥에 닿으면 폭사한다.
 		if (clients[client_id].role == ROLE_HELI && clients[client_id].pos.y <= 8.5f) {
-			// 우선 NPC서버에게 플레이어 낙사 정보를 보내줍니다.
-			SC_DAMAGED_PACKET damaged_packet;
-			damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
-			damaged_packet.type = SC_DAMAGED;
-			damaged_packet.target = TARGET_PLAYER;
-			damaged_packet.id = client_id;
-			damaged_packet.damage = HELI_MAXHP;
-			{
-				lock_guard<mutex> lg{ npc_server.s_lock };
-				npc_server.do_send(&damaged_packet);
+			if (clients[client_id].pos.y <= 8.5f) {		
+				// 우선 NPC서버에게 플레이어 낙사 정보를 보내줍니다.
+				SC_DAMAGED_PACKET damaged_packet;
+				damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
+				damaged_packet.type = SC_DAMAGED;
+				damaged_packet.target = TARGET_PLAYER;
+				damaged_packet.id = client_id;
+				damaged_packet.damage = HELI_MAXHP;
+				{
+					lock_guard<mutex> lg{ npc_server.s_lock };
+					npc_server.do_send(&damaged_packet);
+				}
+
+				// 사망처리
+				clients[client_id].s_lock.lock();
+				clients[client_id].hp = 0;
+				clients[client_id].pl_state = PL_ST_DEAD;
+				clients[client_id].death_time = system_clock::now();
+				clients[client_id].s_lock.unlock();
+				cout << "Player[" << client_id << "]의 헬리콥터가 지면에 추락하여 폭발하였다." << endl;
+				dead_player_cnt++;
+
+				SC_OBJECT_STATE_PACKET heli_fall_packet;
+				heli_fall_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
+				heli_fall_packet.type = SC_OBJECT_STATE;
+				heli_fall_packet.target = TARGET_PLAYER;
+				heli_fall_packet.id = clients[client_id].id;
+				heli_fall_packet.state = PL_ST_DEAD;
+				for (auto& send_cl : clients) {
+					if (send_cl.s_state != ST_INGAME) continue;
+					if (send_cl.curr_stage == 0) continue;
+
+					lock_guard<mutex> lg{ send_cl.s_lock };
+					send_cl.do_send(&heli_fall_packet);
+				}
+				break;
 			}
-
-			// 사망처리
-			clients[client_id].s_lock.lock();
-			clients[client_id].hp = 0;
-			clients[client_id].pl_state = PL_ST_DEAD;
-			clients[client_id].death_time = system_clock::now();
-			clients[client_id].s_lock.unlock();
-			cout << "Player[" << client_id << "]의 헬리콥터가 지면에 추락하여 폭발하였다." << endl;
-			dead_player_cnt++;
-
-			SC_OBJECT_STATE_PACKET heli_fall_packet;
-			heli_fall_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
-			heli_fall_packet.type = SC_OBJECT_STATE;
-			heli_fall_packet.target = TARGET_PLAYER;
-			heli_fall_packet.id = clients[client_id].id;
-			heli_fall_packet.state = PL_ST_DEAD;
-			for (auto& send_cl : clients) {
-				if (send_cl.s_state != ST_INGAME) continue;
-				if (send_cl.curr_stage == 0) continue;
-
-				lock_guard<mutex> lg{ send_cl.s_lock };
-				send_cl.do_send(&heli_fall_packet);
-			}
-			break;
 		}
 
 		// 2. 정상적인 이동이라면 세션 정보를 업데이트 한다.
@@ -1563,12 +1567,17 @@ void process_packet(int client_id, char* packet)
 		switch (inputkey_p->keytype) {
 		case PACKET_KEY_R:
 			milliseconds reload_term = duration_cast<milliseconds>(system_clock::now() - clients[client_id].reload_time);
-			if (reload_term < milliseconds(RELOAD_TIME)) break;
+			if (clients[client_id].role == ROLE_RIFLE && reload_term < milliseconds(RELOAD_TIME)) break;
+			if (clients[client_id].role == ROLE_HELI && reload_term < milliseconds(RELOAD_TIME_HELI)) break;
 
-			if (clients[client_id].remain_bullet == MAX_BULLET) break;
+			if (clients[client_id].role == ROLE_RIFLE && clients[client_id].remain_bullet == MAX_BULLET) break;
+			if (clients[client_id].role == ROLE_HELI && clients[client_id].remain_bullet == MAX_BULLET_HELI) break;
 
 			clients[client_id].s_lock.lock();
-			clients[client_id].remain_bullet = MAX_BULLET;
+			if (clients[client_id].role == ROLE_RIFLE)
+				clients[client_id].remain_bullet = MAX_BULLET;
+			else if (clients[client_id].role == ROLE_HELI)
+				clients[client_id].remain_bullet = MAX_BULLET_HELI;
 			clients[client_id].reload_time = system_clock::now();
 			clients[client_id].s_lock.unlock();
 
@@ -1581,6 +1590,7 @@ void process_packet(int client_id, char* packet)
 				SC_RELOAD_PACKET reload_packet;
 				reload_packet.size = sizeof(SC_RELOAD_PACKET);
 				reload_packet.type = SC_RELOAD;
+				reload_packet.bullet_cnt = clients[client_id].remain_bullet;
 				reload_packet.id = clients[client_id].id;
 				if (0 <= dist && dist < RELOADSOUND_NEAR_DISTANCE)
 					reload_packet.sound_volume = VOL_HIGH;
@@ -1908,6 +1918,74 @@ void process_packet(int client_id, char* packet)
 
 		break;
 	}// CS_PARTICLE_COLLIDE end
+	case CS_HELI_MAP_COLLIDE:
+	{
+		CS_HELI_MAP_COLLIDE_PACKET* particle_pack = reinterpret_cast<CS_HELI_MAP_COLLIDE_PACKET*>(packet);
+		
+		// 데미지 계산
+		int damage = static_cast<int>(HUMAN_MAXHP / 3);
+		int after_hp = clients[client_id].hp - damage;
+
+		// 우선 NPC서버에게 플레이어 데미지 정보를 보내줍니다.
+		SC_DAMAGED_PACKET damaged_packet;
+		damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
+		damaged_packet.type = SC_DAMAGED;
+		damaged_packet.target = TARGET_PLAYER;
+		damaged_packet.id = clients[client_id].inserver_index;
+		damaged_packet.damage = damage;
+		{
+			lock_guard<mutex> lg{ npc_server.s_lock };
+			npc_server.do_send(&damaged_packet);
+		}
+
+		// 데미지 처리
+		if (after_hp > 0) {		// 데미지 처리
+			clients[client_id].s_lock.lock();
+			clients[client_id].hp -= damage;
+			clients[client_id].s_lock.unlock();
+			cout << "벽에 충돌하여 Player[" << client_id << "]가 피해(-" << damage << ")를 입었다. (HP: " << clients[client_id].hp << " 남음)\n" << endl;
+
+			SC_DAMAGED_PACKET damaged_packet;
+			damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
+			damaged_packet.type = SC_DAMAGED;
+			damaged_packet.target = TARGET_PLAYER;
+			damaged_packet.id = clients[client_id].id;
+			damaged_packet.damage = damage;
+			for (auto& send_cl : clients) {
+				if (send_cl.s_state != ST_INGAME) continue;
+				if (send_cl.curr_stage == 0) continue;
+
+				lock_guard<mutex> lg{ send_cl.s_lock };
+				send_cl.do_send(&damaged_packet);
+			}
+		}
+		else {					// 사망
+			clients[client_id].s_lock.lock();
+			clients[client_id].hp = 0;
+			clients[client_id].pl_state = PL_ST_DEAD;
+			clients[client_id].death_time = system_clock::now();
+			clients[client_id].s_lock.unlock();
+			cout << "벽에 충돌하여 Player[" << client_id << "]가 사망하였다." << endl;
+			dead_player_cnt++;
+
+			SC_OBJECT_STATE_PACKET death_packet;
+			death_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
+			death_packet.type = SC_OBJECT_STATE;
+			death_packet.target = TARGET_PLAYER;
+			death_packet.id = clients[client_id].id;
+			death_packet.state = PL_ST_DEAD;
+			for (auto& send_cl : clients) {
+				if (send_cl.s_state != ST_INGAME) continue;
+				if (send_cl.curr_stage == 0) continue;
+
+				{
+					lock_guard<mutex> lg{ send_cl.s_lock };
+					send_cl.do_send(&death_packet);
+				}
+			}
+		}
+
+	}// CS_HELI_MAP_COLLIDE end
 	case CS_PING:
 	{
 		CS_PING_PACKET* re_login_pack = reinterpret_cast<CS_PING_PACKET*>(packet);
@@ -2265,7 +2343,7 @@ void process_packet(int client_id, char* packet)
 						damage = NPC_RIFLE_DAMAGE;
 					}
 					if (clients[collided_cl_id].role == ROLE_HELI) {	// 헬기 플레이어는 덜 아프게 맞는다.
-						damage = damage - static_cast<int>(damage * 0.4f);
+						damage = damage / 2;
 					}
 					int after_hp = clients[collided_cl_id].hp - damage;	//
 

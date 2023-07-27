@@ -154,17 +154,6 @@ CGameFramework::CGameFramework()
 	choicejob[5].sy = 710.0f;
 	choicejob[5].lx = 1305.0f;
 	choicejob[5].ly = 760.0f;
-
-	// 아래는 지워도 되는 구간 - ui표시 상태 보려고 하는 것
-	//LobbyRoom temp;
-	//temp.currnum_of_people = 1;
-	//WCHAR* tempname = L"빠르게 시작";
-	//temp.name = tempname;
-
-	//temp.num = 12;
-	//temp.ready_state = 2;
-
-	//m_LobbyRoom_Info.emplace_back(temp);
 }
 
 CGameFramework::~CGameFramework()
@@ -1116,6 +1105,10 @@ void CGameFramework::ProcessInput()
 							if (mapcol_info[i].m_xoobb.Intersects(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xoobb)) {
 								temp = mapcol_info[i];
 								isCollide = true;
+								if (b_heli_mapcollide_cooldown == 0) {
+									b_heli_mapcollide = true;	// 헬리 벽 충돌 서버 전송용
+									b_heli_mapcollide_cooldown = 100;	// 계속 충돌판정 나는거 방지
+								}
 								break;
 							}
 						}

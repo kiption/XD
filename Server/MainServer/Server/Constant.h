@@ -39,7 +39,8 @@
 //						공격 관련 상수
 //============================================================
 #define SHOOT_COOLDOWN_BULLET 33		// 총알 발사 쿨타임(ms)
-#define RELOAD_TIME 2500				// 장전완료까지 걸리는 시간(ms)
+#define RELOAD_TIME 2000				// 장전완료까지 걸리는 시간(ms)
+#define RELOAD_TIME_HELI 5000			// 헬기 장전완료까지 걸리는 시간(ms)
 
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
 #define RIFLE_DAMAGE 20					// 총알 피격데미지
@@ -47,17 +48,17 @@
 #define NPC_RIFLE_DAMAGE 15				// NPC(소총) 피격데미지
 #define NPC_VALKAN_DAMAGE 5				// NPC(헬기) 피격데미지
 
-#define BULLET_RANGE 500				// 총알 최대이동거리
+#define BULLET_RANGE 400				// 총알 최대이동거리
 
-#define ATKSOUND_MAX_DISTANCE 600		// 총 소리가 나는 최대 거리
-#define ATKSOUND_FAR_DISTANCE 400		// 작은 총 소리
-#define ATKSOUND_MID_DISTANCE 250		// 적당한 총 소리
-#define ATKSOUND_NEAR_DISTANCE 100		// 큰 총 소리
+#define ATKSOUND_MAX_DISTANCE 500		// 총 소리가 나는 최대 거리
+#define ATKSOUND_FAR_DISTANCE 350		// 작은 총 소리
+#define ATKSOUND_MID_DISTANCE 200		// 적당한 총 소리
+#define ATKSOUND_NEAR_DISTANCE 50		// 큰 총 소리
 
-#define RELOADSOUND_MAX_DISTANCE 400	// 장전 소리가 나는 최대 거리
-#define RELOADSOUND_FAR_DISTANCE 280	// 작게 나는 장전소리
-#define RELOADSOUND_MID_DISTANCE 170	// 적당한 총 소리
-#define RELOADSOUND_NEAR_DISTANCE 60	// 큰 총 소리
+#define RELOADSOUND_MAX_DISTANCE 200	// 장전 소리가 나는 최대 거리
+#define RELOADSOUND_FAR_DISTANCE 150	// 작게 나는 장전소리
+#define RELOADSOUND_MID_DISTANCE 100	// 적당한 장전 소리
+#define RELOADSOUND_NEAR_DISTANCE 50	// 큰 장전 소리
 
 #define PARTICLE_BASIC_DAMAGE 5			// 파티클 충돌 기본 데미지 (최종 데미지는 여기에 질량을 곱한값)
 
