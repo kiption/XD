@@ -12,7 +12,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pHeadFindFrame = playermodel->m_pModelRootObject->FindFrame("head");
 
 	//7°³
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 10, playermodel);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 11, playermodel);
 
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
@@ -24,6 +24,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pSkinnedAnimationController->SetTrackAnimationSet(7, 7);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(8, 8);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(9, 9);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(10, 10);
 
 
 	m_pSkinnedAnimationController->SetTrackEnable(0, true);
@@ -36,6 +37,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pSkinnedAnimationController->SetTrackEnable(7, false);
 	m_pSkinnedAnimationController->SetTrackEnable(8, false);
 	m_pSkinnedAnimationController->SetTrackEnable(9, false);
+	m_pSkinnedAnimationController->SetTrackEnable(10, false);
 
 	m_pSkinnedAnimationController->SetTrackSpeed(6, 0.5f);
 
@@ -114,10 +116,10 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(0.0f);
 		m_pCamera = OnChangeCamera(CLOSEUP_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(-0.6f, 0.16f, 0.19f));
+		m_pCamera->SetOffset(XMFLOAT3(-0.6f, 0.16f, 0.21f));
 		m_pCamera->SetPosition(Vector3::Add(
 			XMFLOAT3(m_pHeadFindFrame->GetPosition().x, m_pHeadFindFrame->GetPosition().y, m_pHeadFindFrame->GetPosition().z)
-			, m_pCamera->GetOffset()));
+			,m_pCamera->GetOffset()));
 		m_pCamera->GenerateProjectionMatrix(1.01f, 4500.0f, ASPECT_RATIO, 70.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -201,6 +203,7 @@ void CHumanPlayer::DieState()
 		m_pSkinnedAnimationController->SetTrackEnable(7, false);
 		m_pSkinnedAnimationController->SetTrackEnable(8, true);
 		m_pSkinnedAnimationController->SetTrackEnable(9, false);
+		m_pSkinnedAnimationController->SetTrackEnable(10, false);
 		m_pSkinnedAnimationController->SetTrackAnimationSet(0, 8);
 	}
 
@@ -220,6 +223,7 @@ void CHumanPlayer::ReloadState()
 		m_pSkinnedAnimationController->SetTrackEnable(7, false);
 		m_pSkinnedAnimationController->SetTrackEnable(8, false);	
 		m_pSkinnedAnimationController->SetTrackEnable(9, false);
+		m_pSkinnedAnimationController->SetTrackEnable(10, false);
 		m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 		m_pSkinnedAnimationController->SetTrackSpeed(5,1.8f);
 		m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
@@ -238,6 +242,7 @@ void CHumanPlayer::ShotState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 	m_pSkinnedAnimationController->SetTrackEnable(7, false);
 	m_pSkinnedAnimationController->SetTrackEnable(8, false);
 	m_pSkinnedAnimationController->SetTrackEnable(9, false);
+	m_pSkinnedAnimationController->SetTrackEnable(10, false);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 6);
 
 	CPlayer::Animate(EleapsedTime, pxmf4x4Parent);
@@ -261,6 +266,7 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 		m_pSkinnedAnimationController->SetTrackEnable(7, false);
 		m_pSkinnedAnimationController->SetTrackEnable(8, false);
 		m_pSkinnedAnimationController->SetTrackEnable(9, false);
+		m_pSkinnedAnimationController->SetTrackEnable(10, false);
 	}
 	if (dwDirection & DIR_BACKWARD)
 	{
@@ -274,6 +280,8 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 		m_pSkinnedAnimationController->SetTrackEnable(7, false);
 		m_pSkinnedAnimationController->SetTrackEnable(8, false);
 		m_pSkinnedAnimationController->SetTrackEnable(9, false);
+		m_pSkinnedAnimationController->SetTrackEnable(10, false);
+
 	}
 	if (dwDirection & DIR_LEFT)
 	{
@@ -287,6 +295,8 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 		m_pSkinnedAnimationController->SetTrackEnable(7, false);
 		m_pSkinnedAnimationController->SetTrackEnable(8, false);
 		m_pSkinnedAnimationController->SetTrackEnable(9, false);
+		m_pSkinnedAnimationController->SetTrackEnable(10, false);
+
 	}
 	if (dwDirection & DIR_RIGHT)
 	{
@@ -300,6 +310,8 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 		m_pSkinnedAnimationController->SetTrackEnable(7, false);
 		m_pSkinnedAnimationController->SetTrackEnable(8, false);
 		m_pSkinnedAnimationController->SetTrackEnable(9, false);
+		m_pSkinnedAnimationController->SetTrackEnable(10, false);
+
 
 	}
 	if (dwDirection & DIR_DOWN)
@@ -314,6 +326,8 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 		m_pSkinnedAnimationController->SetTrackEnable(7, false);
 		m_pSkinnedAnimationController->SetTrackEnable(8, false);
 		m_pSkinnedAnimationController->SetTrackEnable(9, false);
+		m_pSkinnedAnimationController->SetTrackEnable(10, false);
+
 	}
 	if (DIR_UP)
 	{
@@ -359,6 +373,8 @@ void CHumanPlayer::Update(float fTimeElapsed)
 			m_pSkinnedAnimationController->SetTrackEnable(7, false);
 			m_pSkinnedAnimationController->SetTrackEnable(8, false);
 			m_pSkinnedAnimationController->SetTrackEnable(9, false);
+			m_pSkinnedAnimationController->SetTrackEnable(10, false);
+
 			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
 		}
 	}

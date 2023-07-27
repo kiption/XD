@@ -1309,9 +1309,12 @@ void uiThreadFunc() {
 
 				gGameFramework.m_BloodSplatterOn = true;
 				players_info[my_id].m_damaged_effect_on = false;
-
+				if (players_info[my_id].m_role == ROLE_HELI)
+				{
+					gGameFramework.m_bHeliHittingMotion = true;
+				}
 			}
-
+			
 			// 9. HP 적을때 UI
 			if (players_info[my_id].m_near_death_hp) {
 				if (players_info[my_id].m_role == ROLE_RIFLE) {

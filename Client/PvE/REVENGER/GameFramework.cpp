@@ -1024,12 +1024,12 @@ void CGameFramework::ProcessInput()
 			if (pKeysBuffer[KEY_W] & 0xF0) { q_keyboardInput.push(SEND_KEY_W); dwDirection |= DIR_FORWARD; }
 			if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; }
 			if (pKeysBuffer[KEY_A] & 0xF0) { q_keyboardInput.push(SEND_KEY_A); dwDirection |= DIR_LEFT; }
-			if (pKeysBuffer[KEY_D] & 0xF0) { q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT; }
+			if (pKeysBuffer[KEY_D] & 0xF0) {  q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT; }
 
 			if (m_ingame_role == R_HELI)
 			{
-				if (pKeysBuffer[KEY_Q] & 0xF0) { q_keyboardInput.push(SEND_KEY_Q); dwDirection |= DIR_UP; }
-				if (pKeysBuffer[KEY_E] & 0xF0) { q_keyboardInput.push(SEND_KEY_E); dwDirection |= DIR_DOWN; }
+				if (pKeysBuffer[KEY_Q] & 0xF0) { m_bHeliHittingMotion = false;q_keyboardInput.push(SEND_KEY_Q); dwDirection |= DIR_UP; }
+				if (pKeysBuffer[KEY_E] & 0xF0) { m_bHeliHittingMotion = false;q_keyboardInput.push(SEND_KEY_E); dwDirection |= DIR_DOWN; }
 			}
 		}
 
@@ -1090,10 +1090,10 @@ void CGameFramework::ProcessInput()
 							((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
 							//((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[0])
 								//->Rotate(cyDelta, cxDelta, 0.0f);
-							if (m_pCamera->m_bHelicopterFreedom==true)
+							if (m_pCamera->m_bHelicopterFreedom == true)
 							{
-								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(0.0,0.0, 0.0f);
-								m_pCamera->Rotate(cyDelta/6, cxDelta/6,0.0f);
+								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(0.0, 0.0, 0.0f);
+								m_pCamera->Rotate(cyDelta / 6, cxDelta / 6, 0.0f);
 							}
 						}
 						else
@@ -1222,6 +1222,9 @@ void CGameFramework::AnimateObjects()
 	}
 	if (m_nMode == SCENE1STAGE)
 	{
+		if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
+		((Stage1*)m_pScene)->PlayerByPlayerCollision();
+
 		for (int i = 12; i < 16; i++)
 		{
 			if (((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[i])->m_bDyingstate == true && i)
@@ -1229,34 +1232,40 @@ void CGameFramework::AnimateObjects()
 				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[i])->FallDown(m_GameTimer.GetTimeElapsed());
 			}
 		}
-		if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
+
 		if (m_ingame_role == R_RIFLE)
 			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 		if (m_ingame_role == R_HELI)
+		{
+			//m_bHeliHittingMotion = false;
 			((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
-
-		((Stage1*)m_pScene)->PlayerByPlayerCollision();
-
+			if (m_bHeliDyingState == true)
+			{
+				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->FallDown(m_GameTimer.GetTimeElapsed());
+			}
+			if (m_bHeliHittingMotion == true)
+			{
+				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[0])->m_pSkinnedAnimationController
+					->SetTrackAnimationSet(0, 11);
+			}
+		}
+		
 		if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA && m_bDieMotion == false)
 		{
 			if (m_ingame_role == R_RIFLE)
 				m_pCamera = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera(CLOSEUP_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
 			if (m_ingame_role == R_HELI)
 				m_pCamera = ((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ChangeCamera(CLOSEUP_PERSON_CAMERA, m_GameTimer.GetTimeElapsed());
-
 		}
+
 		ShotDelay();
 		if (m_currbullet <= 0)((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
-
-
-		if (NpcShotKey == true)
-		{
-			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[7])->m_bShotActive = true;
-		}
-		if (NpcShotKey == false)
+		if (NpcShotKey == true){((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[7])->m_bShotActive = true;}
+		/*if (NpcShotKey == false)
 		{
 			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[7])->m_bShotActive = false;
-		}
+		}*/
+
 	}
 }
 void CGameFramework::ShotDelay()
@@ -1270,7 +1279,7 @@ void CGameFramework::ShotDelay()
 			((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay = 0.0f;
 
 		}
-		if (ShotKey == false)
+		if (ShotKey == false && m_currbullet != 0)
 		{
 			m_pCamera->m_xmf4x4View._43 += 0.1f;
 			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
@@ -1282,7 +1291,7 @@ void CGameFramework::ShotDelay()
 			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.7, 0.7, 0.7, 1.0);
 			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
 		}
-		if (ShotKey == true)
+		if (ShotKey == true && m_currbullet != 0)
 		{
 			((CHumanPlayer*)m_pScene->m_pPlayer)->Rotate(-0.07, 0.0, 0.0);
 			m_pCamera->m_xmf4x4View._43 -= 0.07f;
@@ -1304,13 +1313,13 @@ void CGameFramework::ShotDelay()
 			ShotKey = false;
 			((HeliPlayer*)m_pScene->m_pPlayer)->m_fShotDelay = 0.0f;
 		}
-		if (ShotKey == false)
+		if (ShotKey == false && m_currbullet != 0)
 		{
 			m_pCamera->m_xmf4x4View._43 += 0.1f;
 			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.7, 0.7, 0.7, 1.0);
 			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
 		}
-		if (ShotKey == true)
+		if (ShotKey == true && m_currbullet != 0)
 		{
 			m_pCamera->m_xmf4x4View._43 -= 0.1f;
 			if (m_nMode == SCENE1STAGE)((Stage1*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
@@ -2082,7 +2091,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-	}
+}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -3562,10 +3571,10 @@ void CGameFramework::setVectors_SoldiarOtherPlayer(int id, XMFLOAT3 rightVec, XM
 {
 	if (m_nMode == SCENE1STAGE) {
 
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4+id])->SetRight(rightVec);
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4+id])->SetUp(upVec);
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4+id])->SetLook(lookVec);
-		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4+id])->SetScale(5.0, 5.0, 5.0);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->SetRight(rightVec);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->SetUp(upVec);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->SetLook(lookVec);
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->SetScale(5.0, 5.0, 5.0);
 
 	}
 }
@@ -3592,8 +3601,8 @@ void CGameFramework::remove_OtherPlayer(int id)
 	if (m_nMode == SCENE1STAGE) {
 		if (m_ingame_role == R_RIFLE)
 		{
-			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4+id]) {
-				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4+id]->SetScale(0.0, 0.0, 0.0);
+			if (((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id]) {
+				((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id]->SetScale(0.0, 0.0, 0.0);
 			}
 		}
 		if (m_ingame_role == R_HELI)
@@ -3778,15 +3787,17 @@ void CGameFramework::otherHeliPlayerDyingMotion()
 	{
 		if (((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]))
 		{
-			((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->FallDown(m_GameTimer.GetTimeElapsed());
+			m_bHeliDyingState = true;
+
 			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[2])->m_pSkinnedAnimationController
 				->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
 			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[2])->m_pSkinnedAnimationController
 				->SetTrackAnimationSet(0, 8);
+
 			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[2])->SetPosition(XMFLOAT3(
-				((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition().x,
-				6.0f,
-				((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition().z));
+				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_xmf4x4ToParent._41,
+				7.5f,
+				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_xmf4x4ToParent._43));
 		}
 	}
 }
@@ -3824,7 +3835,6 @@ void CGameFramework::MyPlayerDieMotion()
 {
 	if (m_ingame_role == R_RIFLE)
 	{
-
 		m_bDieMotion = true;
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType
 			= ANIMATION_TYPE_ONCE;
@@ -3856,6 +3866,10 @@ void CGameFramework::MyPlayerRespawnMotion()
 	}
 	if (m_ingame_role == R_HELI)
 	{
+		m_bHeliDyingState = false;
+		m_bHeliHittingMotion = false;
+		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[0])->m_pSkinnedAnimationController
+			->m_pAnimationTracks->m_nType = ANIMATION_TYPE_LOOP;
 		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = false;
 		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_FallSwitch = false;
 		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Resetpartition();
