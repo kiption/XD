@@ -79,6 +79,9 @@ struct Roomname {
 	WCHAR* str1 = L"R E V E N G E R";
 	WCHAR* str2 = L"빠른 게임 고고";
 	WCHAR* str3 = L"즐거운 게임 해요";
+	WCHAR* str4 = L"우리는 최고의 팀";
+	WCHAR* str5 = L"스피드 게임";
+	WCHAR* str6 = L"빵야 빵야";
 };
 
 struct CollideMapInfo
@@ -309,6 +312,7 @@ public:
 	bool m_LoginClick[4]{ false };
 	bool m_GameClick[3]{ false };
 	bool m_LobbyClick[3]{ false };
+	bool m_LobbyRoomClick[8]{ false };		// 로비 화면에 보이는 방 7칸
 	bool m_RoomClick[3]{ false };
 	bool m_SniperOn = false;
 	bool m_BloodSplatterOn = false;
@@ -318,6 +322,7 @@ public:
 	LoginSceneInfo loginpos[4];
 	LoginSceneInfo gamepos[2];
 	LoginSceneInfo lobbypos[5];
+	LoginSceneInfo lobbyroompos[8];	// 로비 화면에 보이는 방 7칸
 	LoginSceneInfo roompos[3];
 	LoginSceneInfo createpos[2];
 	LoginSceneInfo choicejob[6];

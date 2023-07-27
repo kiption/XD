@@ -100,6 +100,34 @@ CGameFramework::CGameFramework()
 	lobbypos[4].lx = 1025.0f;
 	lobbypos[4].ly = 920.0f;
 
+	for (int i = 0; i < 8; ++i) {
+		lobbyroompos[i].sx = 360.f;
+		lobbyroompos[i].lx = 1590.f;
+	}
+	lobbyroompos[0].sy = 425.f;
+	lobbyroompos[0].ly = 480.f;
+
+	lobbyroompos[1].sy = 485.f;
+	lobbyroompos[1].ly = 535.f;
+
+	lobbyroompos[2].sy = 540.f;
+	lobbyroompos[2].ly = 590.f;
+
+	lobbyroompos[3].sy = 597.f;
+	lobbyroompos[3].ly = 650.f;
+
+	lobbyroompos[4].sy = 655.f;
+	lobbyroompos[4].ly = 705.f;
+
+	lobbyroompos[5].sy = 710.f;
+	lobbyroompos[5].ly = 765.f;
+
+	lobbyroompos[6].sy = 768.f;
+	lobbyroompos[6].ly = 820.f;
+
+	lobbyroompos[7].sy = 825.f;
+	lobbyroompos[7].ly = 878.f;
+
 	roompos[0].sx = 975.0f;
 	roompos[0].sy = 390.0f;
 	roompos[0].lx = 1225.0f;
@@ -517,10 +545,14 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				else if (lobbypos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbypos[1].lx && lobbypos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbypos[1].ly) {
 					random_device rd;
 					default_random_engine dre(rd());
-					uniform_int_distribution <int> uid(1, 3);
-
+					uniform_int_distribution <int> uid(1, 6);
 					int ran = uid(dre);
-					switch (ran)
+
+					srand(time(NULL));
+					int randnum = rand();
+
+					int real_randnum = (randnum + static_cast<int>(m_ptOldCursorPos.x) + static_cast<int>(m_ptOldCursorPos.y)) % ran + 1;
+					switch (real_randnum)
 					{
 					case 1:
 						createRoomName = RoomnameList.str1;
@@ -530,6 +562,15 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 						break;
 					case 3:
 						createRoomName = RoomnameList.str3;
+						break;
+					case 4:
+						createRoomName = RoomnameList.str4;
+						break;
+					case 5:
+						createRoomName = RoomnameList.str5;
+						break;
+					default:
+						createRoomName = RoomnameList.str6;
 						break;
 					}
 
@@ -549,6 +590,20 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 					// page++;
 				}
 				else {
+					bool b_roomclick = false;
+					for (int i = 0; i < 8; ++i) {
+						if (lobbyroompos[i].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < lobbyroompos[i].lx\
+							&& lobbyroompos[i].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbyroompos[i].ly) {
+							m_LobbyRoomClick[i] = true;
+							b_roomclick = true;
+							cout << "방 클릭!!: [" << i << "]" << endl;
+							break;
+						}
+					}
+
+					if (!b_roomclick)
+						memset(m_LobbyRoomClick, 0, sizeof(m_LobbyRoomClick));
+
 					memset(m_LobbyClick, 0, sizeof(m_LobbyClick));
 				}
 				break;
