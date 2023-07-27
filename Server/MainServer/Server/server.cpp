@@ -676,7 +676,6 @@ HANDLE h_iocp;				// IOCP 핸들
 SOCKET g_sc_listensock;		// 클라이언트 통신 listen소켓
 SOCKET g_npc_listensock;	// NPC서버 통신 listen소켓
 SOCKET g_ss_listensock;		// 수평확장 서버 간 통신 listen 소켓
-SOCKET g_relay_sock;		// 릴레이서버 간 통신 listen 소켓
 
 SOCKET left_ex_server_sock;								// 이전 번호의 서버
 SOCKET right_ex_server_sock;							// 다음 번호의 서버

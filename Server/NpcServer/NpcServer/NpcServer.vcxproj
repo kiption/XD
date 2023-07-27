@@ -139,6 +139,7 @@
     <ClInclude Include="..\..\MainServer\Server\Protocol.h" />
     <ClInclude Include="CheckPoint.h" />
     <ClInclude Include="CollideMapData.h" />
+    <ClInclude Include="CP_KEY.h" />
     <ClInclude Include="DirectCalculation.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="Raycast.h" />

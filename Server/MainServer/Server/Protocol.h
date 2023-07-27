@@ -33,6 +33,10 @@ constexpr int HA_PORTNUM_LBY1 = 10011;
 constexpr int HA_PORTNUM_S0 = 10020;
 constexpr int HA_PORTNUM_S1 = 10021;
 
+// 7. NPC서버-NPC서버 통신 (서버 수평확장)
+constexpr int HA_PORTNUM_NPC0 = 10030;
+constexpr int HA_PORTNUM_NPC1 = 10031;
+
 //======================================================================
 // HA 관련
 constexpr int SERIAL_NUM_CLIENT = 0;
