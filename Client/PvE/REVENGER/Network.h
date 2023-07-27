@@ -761,6 +761,19 @@ void processPacket(char* ptr)
 
 		// Player Damaged
 		if (recv_packet->target == TARGET_PLAYER) {
+			if (recv_packet->damage < 0) {	// 힐링치트키를 쓴것
+				cout << "[치트키 사용] HP가 " << recv_packet->damage << "만큼 회복되었다." << endl;
+				players_info[recv_id].m_hp += static_cast<int>(-1.0f * recv_packet->damage);
+				if (players_info[recv_id].m_hp > 100)
+					players_info[recv_id].m_hp = 100;
+				if (players_info[recv_packet->id].m_near_death_hp == true) {
+					players_info[recv_packet->id].m_near_death_hp = false;
+					gamesound.pauseHeartBeat();
+				}
+
+				break;
+			}
+
 			if (players_info[recv_id].m_role == ROLE_RIFLE) gamesound.HumancollisionSound();
 			if (players_info[recv_id].m_role == ROLE_HELI) gamesound.HelicollisionSound();
 

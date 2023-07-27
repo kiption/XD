@@ -887,6 +887,26 @@ void networkThreadFunc()
 				sendPacket(&mv_keyup_pack);
 				break;
 
+			case SEND_KEY_INSERT:	// 치트키: 무적
+				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+
+				CS_INPUT_KEYBOARD_PACKET cheatkey_immortal_pack;
+				cheatkey_immortal_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+				cheatkey_immortal_pack.type = CS_INPUT_KEYBOARD;
+				cheatkey_immortal_pack.keytype = PACKET_KEY_INSERT;
+				sendPacket(&cheatkey_immortal_pack);
+				break;
+
+			case SEND_KEY_DELETE:	// 치트키: 원샷원킬
+				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+
+				CS_INPUT_KEYBOARD_PACKET cheatkey_oneshotonekill_pack;
+				cheatkey_oneshotonekill_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+				cheatkey_oneshotonekill_pack.type = CS_INPUT_KEYBOARD;
+				cheatkey_oneshotonekill_pack.keytype = PACKET_KEY_DELETE;
+				sendPacket(&cheatkey_oneshotonekill_pack);
+				break;
+
 			case SEND_KEY_END:	// 치트키: NPC 전부 죽이기
 				if (gGameFramework.m_nMode == OPENINGSCENE) break;
 
@@ -897,24 +917,14 @@ void networkThreadFunc()
 				sendPacket(&cheatkey_allkill_pack);
 				break;
 
-			case SEND_KEY_PGUP:	// 치트키: 원샷원킬
+			case SEND_KEY_PGUP:	// 치트키: 힐링
 				if (gGameFramework.m_nMode == OPENINGSCENE) break;
 
-				CS_INPUT_KEYBOARD_PACKET cheatkey_oneshotonekill_pack;
-				cheatkey_oneshotonekill_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
-				cheatkey_oneshotonekill_pack.type = CS_INPUT_KEYBOARD;
-				cheatkey_oneshotonekill_pack.keytype = PACKET_KEY_PGUP;
-				sendPacket(&cheatkey_oneshotonekill_pack);
-				break;
-
-			case SEND_KEY_PGDN:	// 치트키: 원샷원킬 해제
-				if (gGameFramework.m_nMode == OPENINGSCENE) break;
-
-				CS_INPUT_KEYBOARD_PACKET cheatkey_oneshotonekillend_pack;
-				cheatkey_oneshotonekillend_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
-				cheatkey_oneshotonekillend_pack.type = CS_INPUT_KEYBOARD;
-				cheatkey_oneshotonekillend_pack.keytype = PACKET_KEY_PGDN;
-				sendPacket(&cheatkey_oneshotonekillend_pack);
+				CS_INPUT_KEYBOARD_PACKET cheatkey_healing_pack;
+				cheatkey_healing_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+				cheatkey_healing_pack.type = CS_INPUT_KEYBOARD;
+				cheatkey_healing_pack.keytype = PACKET_KEY_PGUP;
+				sendPacket(&cheatkey_healing_pack);
 				break;
 
 			default:
