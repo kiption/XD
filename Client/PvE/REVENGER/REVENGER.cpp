@@ -1011,7 +1011,7 @@ void networkThreadFunc()
 				}
 			}
 		}
-
+		
 		this_thread::yield();
 	}
 }
