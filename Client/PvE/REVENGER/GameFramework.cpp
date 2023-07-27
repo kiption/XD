@@ -3822,9 +3822,9 @@ void CGameFramework::MyPlayerDieMotion()
 		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[0])->m_pSkinnedAnimationController
 			->SetTrackAnimationSet(0, 8);
 		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[0])->SetPosition(XMFLOAT3(
-			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[0])->GetPosition().x,
+			((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition().x,
 			6.0f,
-			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[0])->GetPosition().z));
+			((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition().z));
 	}
 
 }
