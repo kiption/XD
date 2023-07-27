@@ -501,7 +501,6 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 				if (gamepos[0].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < gamepos[0].lx && gamepos[0].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < gamepos[0].ly) {
 					memset(m_GameClick, 0, sizeof(m_GameClick));
 					m_GameClick[0] = true;
-					m_LoginScene = LS_LOBBY; // 게임 시작 클릭
 				}
 				else if (gamepos[1].sx < m_ptOldCursorPos.x && m_ptOldCursorPos.x < gamepos[1].lx && gamepos[1].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < gamepos[1].ly) {
 					memset(m_GameClick, 0, sizeof(m_GameClick));

@@ -40,6 +40,9 @@ int timelimit_sec;
 volatile bool stage1_enter_ok;
 volatile bool stage2_enter_ok;
 
+volatile bool game_enter_ok = false;
+volatile bool game_exit_ok = false;
+
 bool trigger_stage1_playerinfo_load = false;
 bool trigger_stage1_mapinfo_load = false;
 
@@ -471,6 +474,8 @@ void processPacket(char* ptr)
 		if (curr_servertype != SERVER_LOBBY) break;
 		LBYC_LOBBY_CLEAR_PACKET* recv_packet = reinterpret_cast<LBYC_LOBBY_CLEAR_PACKET*>(ptr);
 
+		game_enter_ok = true;
+		players_info[my_id].m_role = ROLE_NOTCHOOSE;
 		cout << "로비에 보일 방 정보 전체를 초기화합니다." << endl;
 		lobby_rooms.clear();
 
@@ -514,6 +519,16 @@ void processPacket(char* ptr)
 
 		break;
 	}// LBYC_GAME_START case end
+	case LBYC_GAME_EXIT:
+	{
+		if (curr_servertype != SERVER_LOBBY) break;
+		LBYC_GAME_EXIT_PACKET* recv_packet = reinterpret_cast<LBYC_GAME_EXIT_PACKET*>(ptr);
+
+		cout << "게임 종료를 허가받았습니다.\n" << endl;
+		game_exit_ok = true;
+
+		break;
+	}// LBYC_GAME_EXIT case end
 	case LBYC_POPUP:
 	{
 		if (curr_servertype != SERVER_LOBBY) break;

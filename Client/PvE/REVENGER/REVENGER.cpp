@@ -215,7 +215,34 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				case gGameFramework.LS_LOGIN:	// ID/PW 입력 창
 					break;
 
-				case gGameFramework.LS_OPENING: // 게임 시작, 설정, 종료 
+				case gGameFramework.LS_OPENING: // 게임 시작, 종료 
+					// 게임 시작
+					if (gGameFramework.m_GameClick[0]) {
+						CLBY_REQUEST_LOBBYINFO_PACKET request_lobby_pack;
+						request_lobby_pack.size = sizeof(CLBY_REQUEST_LOBBYINFO_PACKET);
+						request_lobby_pack.type = CLBY_REQUEST_LOBBYINFO;
+						sendPacket(&request_lobby_pack);
+						gGameFramework.m_GameClick[0] = false;
+						game_enter_ok = false;
+					}
+					if (game_enter_ok) {									   // 서버에서 방 진입을 허락해줘야
+						gGameFramework.m_LoginScene = gGameFramework.LS_LOBBY; // 로비 화면으로 이동함.
+						game_enter_ok = false;
+					}
+
+					// 종료
+					if (gGameFramework.m_GameClick[1]) {
+						CLBY_GAME_EXIT_PACKET exit_packet;
+						exit_packet.size = sizeof(CLBY_GAME_EXIT_PACKET);
+						exit_packet.type = CLBY_GAME_EXIT;
+						sendPacket(&exit_packet);
+						gGameFramework.m_GameClick[1] = false;
+						game_exit_ok = false;
+					}
+					if (game_exit_ok) {
+						gGameFramework.OnDestroy();
+						return 0;
+					}
 					break;
 
 				case gGameFramework.LS_LOBBY:	// 로비
@@ -251,10 +278,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						sendPacket(&leave_room_pack);
 
 						CurrRoomInfoClear();
-						gGameFramework.m_LoginScene = gGameFramework.LS_LOBBY;	// 로비으로 이동함.
 						for (int i{}; i < gGameFramework.m_MAX_USER; ++i) {
 							gGameFramework.m_MyRoom_Info[i].clear();
 						}
+						gGameFramework.m_LoginScene = gGameFramework.LS_LOBBY;	// 로비으로 이동함.
 
 						gGameFramework.m_RoomBackButton = false;
 					}
@@ -1056,6 +1083,7 @@ void uiThreadFunc() {
 
 			case gGameFramework.LS_LOBBY:	// 로비
 				if (trigger_lobby_update) {	// 로비에 있는 방 정보 업데이트 트리거
+					game_enter_ok = false;	// 오프닝에서 넘어왔을때
 					// 한번 초기화했다가
 					gGameFramework.m_LobbyRoom_Info.clear();
 

@@ -91,7 +91,7 @@ public:
 
 		int ret = WSARecv(sock, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.overlapped, 0);
 		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "WSARecv Error - " << ret << endl;
+			//cout << "WSARecv Error - " << ret << endl;
 			cout << GetLastError() << endl;
 		}
 	}
@@ -103,7 +103,7 @@ public:
 
 		int ret = WSASend(sock, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, 0);
 		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "WSASend Error - " << ret << endl;
+			//cout << "WSASend Error - " << ret << endl;
 			cout << GetLastError() << endl;
 		}
 	}
@@ -324,6 +324,31 @@ void process_packet(int client_id, char* packet)
 
 		break;
 	}// CLBY_CONNECT case end
+	case CLBY_REQUEST_LOBBYINFO:
+	{
+		CLBY_REQUEST_LOBBYINFO_PACKET* recv_packet = reinterpret_cast<CLBY_REQUEST_LOBBYINFO_PACKET*>(packet);
+
+		// 새로 로비에 입장한 클라이언트에게 로비에 있는 방 데이터 초기화를 명령합니다.
+		LBYC_LOBBY_CLEAR_PACKET lobby_clear_pack;
+		lobby_clear_pack.size = sizeof(LBYC_LOBBY_CLEAR_PACKET);
+		lobby_clear_pack.type = LBYC_LOBBY_CLEAR;
+		clients[client_id].do_send(&lobby_clear_pack);
+
+		// 새로 로비에 입장한 클라이언트에게 로비에 있는 모든 방에 대한 간략한 정보를 보냅니다.
+		for (auto& room : game_rooms) {
+			LBYC_ADD_ROOM_PACKET room_info_pack;
+			room_info_pack.size = sizeof(LBYC_ADD_ROOM_PACKET);
+			room_info_pack.type = LBYC_ADD_ROOM;
+			room_info_pack.room_id = room.room_id;
+			strcpy_s(room_info_pack.room_name, room.room_name);
+
+			clients[client_id].do_send(&room_info_pack);
+			cout << "Client[" << client_id << "]에게 로비에 보일 Room[" << room.room_id << "]의 정보를 보냈습니다." << endl;
+		}
+		cout << "Client[" << client_id << "]에게 존재하는 모든 방들의 정보를 보냈습니다.\n" << endl;
+
+		break;
+	}// CLBY_REQUEST_LOBBYINFO case end
 	case CLBY_CREATE_ROOM:
 	{
 		CLBY_CREATE_ROOM_PACKET* recv_packet = reinterpret_cast<CLBY_CREATE_ROOM_PACKET*>(packet);
@@ -787,6 +812,19 @@ void process_packet(int client_id, char* packet)
 		
 		break;
 	}// CLBY_GAME_START case end
+	case CLBY_GAME_EXIT:
+	{
+		CLBY_GAME_EXIT_PACKET* recv_packet = reinterpret_cast<CLBY_GAME_EXIT_PACKET*>(packet);
+
+		LBYC_GAME_EXIT_PACKET exit_ok_packet;
+		exit_ok_packet.size = sizeof(LBYC_GAME_EXIT_PACKET);
+		exit_ok_packet.type = LBYC_GAME_EXIT;
+		clients[client_id].do_send(&exit_ok_packet);
+		
+		// 정상 종료
+		disconnect(client_id, SESSION_CLIENT);
+		break;
+	}// CLBY_GAME_EXIT case end
 	}// switch end
 }
 
