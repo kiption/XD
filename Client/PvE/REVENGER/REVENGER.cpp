@@ -445,8 +445,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						if (players_info[i].m_role == ROLE_RIFLE)
 						{
 							// 군인은 무조건 index가 5,6
-							gGameFramework.setPosition_SoldiarOtherPlayer(i,players_info[i].m_pos);
-							gGameFramework.setVectors_SoldiarOtherPlayer(i,players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
+							gGameFramework.setPosition_SoldiarOtherPlayer(i, players_info[i].m_pos);
+							gGameFramework.setVectors_SoldiarOtherPlayer(i, players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
 						}
 						else if (players_info[i].m_role == ROLE_HELI)
 						{
@@ -476,7 +476,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						gGameFramework.AttackMotionNPC(i);
 						gGameFramework.NpcUnderAttack(npcs_info[i].m_attack_dir, i);
 						npcs_info[i].m_attack_on = false;
-					
+
 					}
 					if (!npcs_info[i].m_attack_on) {
 						gGameFramework.NpcNoneUnderAttack();
@@ -1301,23 +1301,46 @@ void uiThreadFunc() {
 
 			// 10. HP, 이름 인게임 동기화
 			bool idcheck = false;
+			bool OutCheck = false;
 			for (int i{}; i < gGameFramework.m_CurrentPlayerNum; ++i) {
+				if (players_info[i].m_id == -1) {
+					OutCheck = true;
+					continue;
+				}
 				if (i == my_id) {
 					idcheck = true;
 					continue;
 				}
 				if (idcheck) {
-					gGameFramework.m_otherHP[i - 1] = players_info[i].m_hp;
+					if (OutCheck) {
+						gGameFramework.m_otherHP[i - 2] = players_info[i].m_hp;
 
-					wchar_t* converttext = ConvertToWideChar(players_info[i].m_name);
+						wchar_t* converttext = ConvertToWideChar(players_info[i].m_name);
 
-					wcscpy_s(gGameFramework.m_OtherName[i - 1], converttext);
+						wcscpy_s(gGameFramework.m_OtherName[i - 2], converttext);
+					}
+					else {
+						gGameFramework.m_otherHP[i - 1] = players_info[i].m_hp;
+
+						wchar_t* converttext = ConvertToWideChar(players_info[i].m_name);
+
+						wcscpy_s(gGameFramework.m_OtherName[i - 1], converttext);
+					}
 				}
 				else {
-					gGameFramework.m_otherHP[i] = players_info[i].m_hp;
-					wchar_t* converttext = ConvertToWideChar(players_info[i].m_name);
+					if (OutCheck) {
+						gGameFramework.m_otherHP[i - 1] = players_info[i].m_hp;
 
-					wcscpy_s(gGameFramework.m_OtherName[i], converttext);
+						wchar_t* converttext = ConvertToWideChar(players_info[i].m_name);
+
+						wcscpy_s(gGameFramework.m_OtherName[i - 1], converttext);
+					}
+					else {
+						gGameFramework.m_otherHP[i] = players_info[i].m_hp;
+						wchar_t* converttext = ConvertToWideChar(players_info[i].m_name);
+
+						wcscpy_s(gGameFramework.m_OtherName[i], converttext);
+					}
 				}
 			}
 
