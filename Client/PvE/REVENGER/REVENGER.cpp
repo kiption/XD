@@ -444,9 +444,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					{
 						if (players_info[i].m_role == ROLE_RIFLE)
 						{
-							// 군인은 무조건 index가 6
-							gGameFramework.setPosition_SoldiarOtherPlayer(players_info[i].m_pos);
-							gGameFramework.setVectors_SoldiarOtherPlayer(players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
+							// 군인은 무조건 index가 5,6
+							gGameFramework.setPosition_SoldiarOtherPlayer(i,players_info[i].m_pos);
+							gGameFramework.setVectors_SoldiarOtherPlayer(i,players_info[i].m_right_vec, players_info[i].m_up_vec, players_info[i].m_look_vec);
 						}
 						else if (players_info[i].m_role == ROLE_HELI)
 						{
@@ -457,7 +457,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 					else if (players_info[i].m_state == OBJ_ST_LOGOUT) {
 						players_info[i].InfoClear();
-						gGameFramework.remove_OtherPlayer();
+						gGameFramework.remove_OtherPlayer(i);
 					}
 				}
 
@@ -491,7 +491,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						gGameFramework.setVectors_Self(players_info[my_id].m_right_vec, players_info[my_id].m_up_vec, players_info[my_id].m_look_vec);
 					}
 					else {	// 다른 플레이어 리스폰
-						gGameFramework.OtherPlayerResponeMotion();
+						//gGameFramework.OtherPlayerResponeMotion();
 					}
 
 					respawn_trigger = false;
@@ -543,23 +543,23 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						if (players_info[i].m_role == ROLE_RIFLE) {
 							switch (players_info[i].m_ingame_state) {
 							case PL_ST_IDLE:
-								gGameFramework.otherPlayerReturnToIdle();
+								gGameFramework.otherPlayerReturnToIdle(i);
 								break;
 							case PL_ST_MOVE_FRONT: // 앞으로 이동
-								gGameFramework.otherPlayerForwardMotion();
+								gGameFramework.otherPlayerForwardMotion(i);
 								break;
 							case PL_ST_MOVE_BACK: // 뒤로 이동
-								gGameFramework.otherPlayerBackwardMotion();
+								gGameFramework.otherPlayerBackwardMotion(i);
 								break;
 							case PL_ST_MOVE_SIDE: // 옆으로 이동
-								gGameFramework.otherPlayerSfrateMotion();
+								gGameFramework.otherPlayerSfrateMotion(i);
 								break;
 							case PL_ST_ATTACK:
-								gGameFramework.otherPlayerShootingMotion();
+								gGameFramework.otherPlayerShootingMotion(i);
 								break;
 								// + 구르기 및 점프
 							case PL_ST_DEAD:
-								gGameFramework.otherPlayerDyingMotion();
+								gGameFramework.otherPlayerDyingMotion(i);
 								break;
 							}
 						}

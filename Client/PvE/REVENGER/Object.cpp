@@ -2274,7 +2274,6 @@ CSoldiarOtherPlayerObjects::~CSoldiarOtherPlayerObjects()
 
 void CSoldiarOtherPlayerObjects::MoveForward(float EleapsedTime)
 {
-
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
 	m_pSkinnedAnimationController->SetTrackEnable(1, true);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
@@ -2282,6 +2281,8 @@ void CSoldiarOtherPlayerObjects::MoveForward(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	m_pSkinnedAnimationController->SetTrackEnable(5, false);
 	m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	m_pSkinnedAnimationController->SetTrackEnable(7, false);
+	m_pSkinnedAnimationController->SetTrackEnable(8, false);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
 	CGameObject::Animate(EleapsedTime);
 }
@@ -2295,6 +2296,8 @@ void CSoldiarOtherPlayerObjects::MoveBackward(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	m_pSkinnedAnimationController->SetTrackEnable(5, false);
 	m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	m_pSkinnedAnimationController->SetTrackEnable(7, false);
+	m_pSkinnedAnimationController->SetTrackEnable(8, false);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	CGameObject::Animate(EleapsedTime);
 }
@@ -2307,6 +2310,8 @@ void CSoldiarOtherPlayerObjects::MoveLeft(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	m_pSkinnedAnimationController->SetTrackEnable(5, false);
 	m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	m_pSkinnedAnimationController->SetTrackEnable(7, false);
+	m_pSkinnedAnimationController->SetTrackEnable(8, false);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	CGameObject::Animate(EleapsedTime);
 }
@@ -2319,6 +2324,8 @@ void CSoldiarOtherPlayerObjects::MoveRight(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(4, true);
 	m_pSkinnedAnimationController->SetTrackEnable(5, false);
 	m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	m_pSkinnedAnimationController->SetTrackEnable(7, false);
+	m_pSkinnedAnimationController->SetTrackEnable(8, false);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 	CGameObject::Animate(EleapsedTime);
 }
@@ -2331,6 +2338,8 @@ void CSoldiarOtherPlayerObjects::ReloadState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(4, false);
 	m_pSkinnedAnimationController->SetTrackEnable(5, true);
 	m_pSkinnedAnimationController->SetTrackEnable(6, false);
+	m_pSkinnedAnimationController->SetTrackEnable(7, false);
+	m_pSkinnedAnimationController->SetTrackEnable(8, false);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
 	CGameObject::Animate(EleapsedTime);
 }
@@ -2384,7 +2393,7 @@ void CSoldiarOtherPlayerObjects::IdleState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(6, false);
 	m_pSkinnedAnimationController->SetTrackEnable(7, false);
 	m_pSkinnedAnimationController->SetTrackEnable(8, false);
-	m_pSkinnedAnimationController->SetTrackPosition(0, 0);
+	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 	CGameObject::Animate(EleapsedTime);
 }
 void CSoldiarOtherPlayerObjects::Animate(float fTimeElapsed)

@@ -389,25 +389,25 @@ public:
 	void setVectors_Self(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 
 	// 다른 플레이어 최신화
-	void setPosition_SoldiarOtherPlayer(XMFLOAT3 pos);
+	void setPosition_SoldiarOtherPlayer(int id, XMFLOAT3 pos);
 	void setPosition_HeliOtherPlayer(XMFLOAT3 pos);
-	void setVectors_SoldiarOtherPlayer(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+	void setVectors_SoldiarOtherPlayer(int id,XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void setVectors_HeliOtherPlayer(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
-	void remove_OtherPlayer();
+	void remove_OtherPlayer(int id);
 
 	// 플레이어 상태변화
 	void HeliPlayerUnderAttack(XMFLOAT3 ToLook);
 	void MyPlayerDieMotion();
 	void MyPlayerRespawnMotion();
-	void OtherPlayerResponeMotion();
+	void OtherPlayerResponeMotion(int id);
 
 	// 군인 플레이어 동작상태
-	void otherPlayerReturnToIdle();
-	void otherPlayerForwardMotion();
-	void otherPlayerBackwardMotion();
-	void otherPlayerSfrateMotion();
-	void otherPlayerShootingMotion();
-	void otherPlayerDyingMotion();
+	void otherPlayerReturnToIdle(int id);
+	void otherPlayerForwardMotion(int id);
+	void otherPlayerBackwardMotion(int id);
+	void otherPlayerSfrateMotion(int id);
+	void otherPlayerShootingMotion(int id);
+	void otherPlayerDyingMotion(int id);
 
 	// NPC 최신화
 	void setPosition_Npc(int id, XMFLOAT3 pos);
