@@ -834,14 +834,17 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case VK_F9:
 				ChangeSwapChainState();
 				break;
+			case VK_INSERT:
+				q_keyboardInput.push(SEND_KEY_INSERT);	// 무적 치트키
+				break;
+			case VK_DELETE:
+				q_keyboardInput.push(SEND_KEY_DELETE);	// 원샷원킬
+				break;
 			case VK_END:
 				q_keyboardInput.push(SEND_KEY_END);	// 몰살 치트키
 				break;
 			case VK_PRIOR:	// Page up key
-				q_keyboardInput.push(SEND_KEY_PGUP); // 원샷원킬 치트키
-				break;
-			case VK_NEXT:	// Page down key
-				q_keyboardInput.push(SEND_KEY_PGDN); // 원샷원킬 치트키 해제
+				q_keyboardInput.push(SEND_KEY_PGUP); // 힐링 치트키
 				break;
 			case 'W':
 			case 'A':

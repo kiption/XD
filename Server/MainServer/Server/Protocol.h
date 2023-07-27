@@ -33,6 +33,10 @@ constexpr int HA_PORTNUM_LBY1 = 10011;
 constexpr int HA_PORTNUM_S0 = 10020;
 constexpr int HA_PORTNUM_S1 = 10021;
 
+// 7. NPC서버-NPC서버 통신 (서버 수평확장)
+constexpr int HA_PORTNUM_NPC0 = 10030;
+constexpr int HA_PORTNUM_NPC1 = 10031;
+
 //======================================================================
 // HA 관련
 constexpr int SERIAL_NUM_CLIENT = 0;
@@ -304,7 +308,7 @@ enum PACKET_KEY_TYPE {
 	PACKET_KEY_Q, PACKET_KEY_E,
 	PACKET_KEY_SPACEBAR,
 	PACKET_KEYUP_MOVEKEY,
-	PACKET_KEY_HOME, PACKET_KEY_END, PACKET_KEY_PGUP, PACKET_KEY_PGDN
+	PACKET_KEY_INSERT, PACKET_KEY_DELETE, PACKET_KEY_HOME, PACKET_KEY_END, PACKET_KEY_PGUP
 };
 struct CS_INPUT_KEYBOARD_PACKET {
 	unsigned char size;

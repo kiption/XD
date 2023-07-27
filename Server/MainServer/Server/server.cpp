@@ -196,6 +196,7 @@ public:
 	unordered_set<int> view_list;	// 시야처리 (id값을 넣어주게 된다.) => 그럼 무엇을 해야하냐: 플레이어, npc들의 ID를 완전 다른값으로 설정해줘야한다.
 
 	bool oneshot_onekill_cheat;		//[치트키] 원샷 원킬
+	bool immortal_cheat;			//[치트키] 무적
 
 public:
 	SESSION()
@@ -223,6 +224,7 @@ public:
 		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
 		oneshot_onekill_cheat = false;
+		immortal_cheat = false;
 	}
 
 	~SESSION() {}
@@ -286,7 +288,8 @@ public:
 
 		setBB();
 
-		oneshot_onekill_cheat = false;
+		oneshot_onekill_cheat = false;	// 원샷원킬 치트키
+		immortal_cheat = false;	// 무적 치트키
 	}
 };
 
@@ -673,7 +676,6 @@ HANDLE h_iocp;				// IOCP 핸들
 SOCKET g_sc_listensock;		// 클라이언트 통신 listen소켓
 SOCKET g_npc_listensock;	// NPC서버 통신 listen소켓
 SOCKET g_ss_listensock;		// 수평확장 서버 간 통신 listen 소켓
-SOCKET g_relay_sock;		// 릴레이서버 간 통신 listen 소켓
 
 SOCKET left_ex_server_sock;								// 이전 번호의 서버
 SOCKET right_ex_server_sock;							// 다음 번호의 서버
@@ -1651,6 +1653,48 @@ void process_packet(int client_id, char* packet)
 			}
 			break;
 
+		case PACKET_KEY_INSERT:		// 무적 치트키
+		{
+			if (clients[client_id].s_state != ST_INGAME) break;	// 잘못된 요청
+			if (clients[client_id].curr_stage == 0) break;	// 잘못된 요청
+			if (!b_active_server) break;	// 잘못된 요청
+
+			if (clients[client_id].immortal_cheat == true) {
+				cout << "==무적 치트키 해제==\n" << endl;
+				clients[client_id].s_lock.lock();
+				clients[client_id].immortal_cheat = false;
+				clients[client_id].s_lock.unlock();
+			}
+			else {
+				cout << "==무적 치트키==\n" << endl;
+				clients[client_id].s_lock.lock();
+				clients[client_id].immortal_cheat = true;
+				clients[client_id].s_lock.unlock();
+			}
+
+			break;
+		}// PACKET_KEY_INSERT case end
+		case PACKET_KEY_DELETE:		// 원샷원킬 치트키
+		{
+			if (clients[client_id].s_state != ST_INGAME) break;	// 잘못된 요청
+			if (clients[client_id].curr_stage == 0) break;	// 잘못된 요청
+			if (!b_active_server) break;	// 잘못된 요청
+
+			if (clients[client_id].oneshot_onekill_cheat == true) {
+				cout << "==원샷원킬 치트키 해제==\n" << endl;
+				clients[client_id].s_lock.lock();
+				clients[client_id].oneshot_onekill_cheat = false;
+				clients[client_id].s_lock.unlock();
+			}
+			else {
+				cout << "==원샷원킬 치트키==\n" << endl;
+				clients[client_id].s_lock.lock();
+				clients[client_id].oneshot_onekill_cheat = true;
+				clients[client_id].s_lock.unlock();
+			}
+
+			break;
+		}// PACKET_KEY_DELETE case end
 		case PACKET_KEY_END:	// 몰살 치트키
 		{
 			if (clients[client_id].s_state != ST_INGAME) break;	// 잘못된 요청
@@ -1781,36 +1825,45 @@ void process_packet(int client_id, char* packet)
 			}
 			break;
 		}// PACKET_KEY_END case end
-		case PACKET_KEY_PGUP:		// 원샷원킬 치트키
+		case PACKET_KEY_PGUP:		// 강제회복 치트키
 		{
 			if (clients[client_id].s_state != ST_INGAME) break;	// 잘못된 요청
 			if (clients[client_id].curr_stage == 0) break;	// 잘못된 요청
 			if (!b_active_server) break;	// 잘못된 요청
-			if (curr_mission_stage[clients[client_id].curr_stage] != 0) break;	// 잘못된 요청
-			if (clients[client_id].oneshot_onekill_cheat == true) break;	// 이미 원샷 원킬 적용중임.
+			if (clients[client_id].hp == HUMAN_MAXHP) break;	// 이미 풀HP임.
 
-			cout << "==원샷원킬 치트키==\n" << endl;
+			int damaged_hp = HUMAN_MAXHP - clients[client_id].hp;
+
+			cout << "==힐링 치트키==\n" << endl;
 			clients[client_id].s_lock.lock();
-			clients[client_id].oneshot_onekill_cheat = true;
+			clients[client_id].hp += damaged_hp;
 			clients[client_id].s_lock.unlock();
+			cout << "Player[" << client_id << "]가 HP를 (+" << damaged_hp << ")만큼 회복하였다. (HP: "	<< clients[client_id].hp << " 남음)\n" << endl;
+
+			SC_DAMAGED_PACKET healing_packet;
+			healing_packet.size = sizeof(SC_DAMAGED_PACKET);
+			healing_packet.type = SC_DAMAGED;
+			healing_packet.target = TARGET_PLAYER;
+			healing_packet.id = clients[client_id].id;
+			healing_packet.damage = -damaged_hp;
+
+			// 우선 NPC서버에게 플레이어 데미지 정보를 보내줍니다.
+			{
+				lock_guard<mutex> lg{ npc_server.s_lock };
+				npc_server.do_send(&healing_packet);
+			}
+
+			// 모든 클라이언트한테도 보내줍니다.
+			for (auto& send_cl : clients) {
+				if (send_cl.s_state != ST_INGAME) continue;
+				if (send_cl.curr_stage == 0) continue;
+
+				lock_guard<mutex> lg{ send_cl.s_lock };
+				send_cl.do_send(&healing_packet);
+			}			
 
 			break;
 		}// PACKET_KEY_PGUP case end
-		case PACKET_KEY_PGDN:		// 원샷원킬 치트키 해제
-		{
-			if (clients[client_id].s_state != ST_INGAME) break;	// 잘못된 요청
-			if (clients[client_id].curr_stage == 0) break;	// 잘못된 요청
-			if (!b_active_server) break;	// 잘못된 요청
-			if (curr_mission_stage[clients[client_id].curr_stage] != 0) break;	// 잘못된 요청
-			if (clients[client_id].oneshot_onekill_cheat == false) break;	// 이미 원샷 원킬 치트키가 적용중이지 않음
-
-			cout << "==원샷원킬 치트키 해제==\n" << endl;
-			clients[client_id].s_lock.lock();
-			clients[client_id].oneshot_onekill_cheat = false;
-			clients[client_id].s_lock.unlock();
-
-			break;
-		}// PACKET_KEY_PGDN case end
 		}// switch end
 
 		break;
@@ -2391,6 +2444,12 @@ void process_packet(int client_id, char* packet)
 
 					break;
 				case C_OBJ_PLAYER:
+					// 만약 무적 치트키를 쓴 유저라면 건너뛴다
+					if (clients[collided_cl_id].immortal_cheat == true) {
+						cout << "Client[" << collided_cl_id << "]는 무적이다." << endl;
+						break;
+					}
+
 					// 데미지 계산
 					int damage = 0;
 					if (recv_attack_pack->n_id < MAX_NPC_HELI) {

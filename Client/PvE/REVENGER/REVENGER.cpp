@@ -647,7 +647,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					XMFLOAT3 ground_collide_pos = q_bullet_hit_pos_ground.front();
 					q_bullet_hit_pos_ground.pop();
 					gGameFramework.CollisionMap_by_BULLET(ground_collide_pos);
-					cout << "바닥 충돌" << ground_collide_pos.x << ", " << ground_collide_pos.y << ", " << ground_collide_pos.z << endl;
 				}
 				else
 				{
@@ -888,6 +887,26 @@ void networkThreadFunc()
 				sendPacket(&mv_keyup_pack);
 				break;
 
+			case SEND_KEY_INSERT:	// 치트키: 무적
+				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+
+				CS_INPUT_KEYBOARD_PACKET cheatkey_immortal_pack;
+				cheatkey_immortal_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+				cheatkey_immortal_pack.type = CS_INPUT_KEYBOARD;
+				cheatkey_immortal_pack.keytype = PACKET_KEY_INSERT;
+				sendPacket(&cheatkey_immortal_pack);
+				break;
+
+			case SEND_KEY_DELETE:	// 치트키: 원샷원킬
+				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+
+				CS_INPUT_KEYBOARD_PACKET cheatkey_oneshotonekill_pack;
+				cheatkey_oneshotonekill_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+				cheatkey_oneshotonekill_pack.type = CS_INPUT_KEYBOARD;
+				cheatkey_oneshotonekill_pack.keytype = PACKET_KEY_DELETE;
+				sendPacket(&cheatkey_oneshotonekill_pack);
+				break;
+
 			case SEND_KEY_END:	// 치트키: NPC 전부 죽이기
 				if (gGameFramework.m_nMode == OPENINGSCENE) break;
 
@@ -898,24 +917,14 @@ void networkThreadFunc()
 				sendPacket(&cheatkey_allkill_pack);
 				break;
 
-			case SEND_KEY_PGUP:	// 치트키: 원샷원킬
+			case SEND_KEY_PGUP:	// 치트키: 힐링
 				if (gGameFramework.m_nMode == OPENINGSCENE) break;
 
-				CS_INPUT_KEYBOARD_PACKET cheatkey_oneshotonekill_pack;
-				cheatkey_oneshotonekill_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
-				cheatkey_oneshotonekill_pack.type = CS_INPUT_KEYBOARD;
-				cheatkey_oneshotonekill_pack.keytype = PACKET_KEY_PGUP;
-				sendPacket(&cheatkey_oneshotonekill_pack);
-				break;
-
-			case SEND_KEY_PGDN:	// 치트키: 원샷원킬 해제
-				if (gGameFramework.m_nMode == OPENINGSCENE) break;
-
-				CS_INPUT_KEYBOARD_PACKET cheatkey_oneshotonekillend_pack;
-				cheatkey_oneshotonekillend_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
-				cheatkey_oneshotonekillend_pack.type = CS_INPUT_KEYBOARD;
-				cheatkey_oneshotonekillend_pack.keytype = PACKET_KEY_PGDN;
-				sendPacket(&cheatkey_oneshotonekillend_pack);
+				CS_INPUT_KEYBOARD_PACKET cheatkey_healing_pack;
+				cheatkey_healing_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
+				cheatkey_healing_pack.type = CS_INPUT_KEYBOARD;
+				cheatkey_healing_pack.keytype = PACKET_KEY_PGUP;
+				sendPacket(&cheatkey_healing_pack);
 				break;
 
 			default:
@@ -1090,21 +1099,18 @@ void uiThreadFunc() {
 						gGameFramework.m_MyRoom_Info[role_change_member_id].HeliCheck = false;
 						if (role_change_member_id == my_id)
 							gGameFramework.m_ingame_role = gGameFramework.R_NONE;
-						cout << "Client[" << role_change_member_id << "]의 역할이 [선택 안함]으로 바뀌었음." << endl;
 					}
 					else if (players_info[role_change_member_id].m_role == ROLE_RIFLE) {
 						gGameFramework.m_MyRoom_Info[role_change_member_id].armyCheck = true;
 						gGameFramework.m_MyRoom_Info[role_change_member_id].HeliCheck = false;
 						if (role_change_member_id == my_id)
 							gGameFramework.m_ingame_role = gGameFramework.R_RIFLE;
-						cout << "Client[" << role_change_member_id << "]의 역할이 [Rifle]로 바뀌었음." << endl;
 					}
 					else if (players_info[role_change_member_id].m_role == ROLE_HELI) {
 						gGameFramework.m_MyRoom_Info[role_change_member_id].armyCheck = false;
 						gGameFramework.m_MyRoom_Info[role_change_member_id].HeliCheck = true;
 						if (role_change_member_id == my_id)
 							gGameFramework.m_ingame_role = gGameFramework.R_HELI;
-						cout << "Client[" << role_change_member_id << "]의 역할이 [Heli]로 바뀌었음." << endl;
 					}
 					role_change_member_id = -1;
 					trigger_role_change = false;
@@ -1168,21 +1174,18 @@ void uiThreadFunc() {
 							gGameFramework.m_MyRoom_Info[i].HeliCheck = false;
 							if (i == my_id)
 								gGameFramework.m_ingame_role = gGameFramework.R_NONE;
-							cout << "Client[" << i << "]의 역할이 [선택 안함]으로 바뀌었음." << endl;
 						}
 						else if (players_info[i].m_role == ROLE_RIFLE) {
 							gGameFramework.m_MyRoom_Info[i].armyCheck = true;
 							gGameFramework.m_MyRoom_Info[i].HeliCheck = false;
 							if (i == my_id)
 								gGameFramework.m_ingame_role = gGameFramework.R_RIFLE;
-							cout << "Client[" << i << "]의 역할이 [Rifle]로 바뀌었음." << endl;
 						}
 						else if (players_info[i].m_role == ROLE_HELI) {
 							gGameFramework.m_MyRoom_Info[i].armyCheck = false;
 							gGameFramework.m_MyRoom_Info[i].HeliCheck = true;
 							if (i == my_id)
 								gGameFramework.m_ingame_role = gGameFramework.R_HELI;
-							cout << "Client[" << i << "]의 역할이 [Heli]로 바뀌었음." << endl;
 						}
 
 						cout << "[" << i << "] Name: " << players_info[i].m_name << " is Update." << endl; \
