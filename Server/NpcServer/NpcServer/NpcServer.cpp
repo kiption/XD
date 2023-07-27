@@ -1622,10 +1622,18 @@ bool NPC::NPC_CollideByMap()
 {
 	bool collide = false;
 	m_collideBox.clear();
+
 	for (int i{}; i < mapobjects_info.size(); ++i) {
-		if (mapobjects_info[i].m_xoobb.Intersects(m_xoobb)) {
-			m_collideBox.emplace_back(mapobjects_info[i]);
-			collide = true;
+		float dist_x = pos.x - mapobjects_info[i].getPos().x;
+		float dist_y = pos.y - mapobjects_info[i].getPos().y;
+		float dist_z = pos.z - mapobjects_info[i].getPos().z;
+		float dist = sqrtf(powf(dist_x, 2) + powf(dist_y, 2) + powf(dist_z, 2));
+
+		if (dist <= 300.f) {	// 먼거리는 충돌X
+			if (mapobjects_info[i].m_xoobb.Intersects(m_xoobb)) {
+				m_collideBox.emplace_back(mapobjects_info[i]);
+				collide = true;
+			}
 		}
 	}
 	return collide;
