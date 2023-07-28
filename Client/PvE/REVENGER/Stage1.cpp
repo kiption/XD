@@ -183,7 +183,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	m_pSkyBox->SetCurScene(SCENE1STAGE);
 
-	m_nBillboardShaders = 10;
+	m_nBillboardShaders = 17;
 	m_pBillboardShader = new BillboardShader * [m_nBillboardShaders];
 
 	BillboardParticleShader* pBillboardParticleShader = new BillboardParticleShader();
@@ -250,6 +250,48 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pNPCHeliHittingMarkBillboard->m_bActive = true;
 	m_pBillboardShader[9] = pNPCHeliHittingMarkBillboard;
 
+	HealPackBillboardShader* pHealPack1Shader = new HealPackBillboardShader();
+	pHealPack1Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pHealPack1Shader->SetCurScene(SCENE1STAGE);
+	pHealPack1Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_pBillboardShader[10] = pHealPack1Shader;
+
+	HealPackBillboardShader* pHealPack2Shader = new HealPackBillboardShader();
+	pHealPack2Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pHealPack2Shader->SetCurScene(SCENE1STAGE);
+	pHealPack2Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_pBillboardShader[11] = pHealPack2Shader;
+
+	HealPackBillboardShader* pHealPack3Shader = new HealPackBillboardShader();
+	pHealPack3Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pHealPack3Shader->SetCurScene(SCENE1STAGE);
+	pHealPack3Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_pBillboardShader[12] = pHealPack3Shader;
+
+	HealPackBillboardShader* pHealPack4Shader = new HealPackBillboardShader();
+	pHealPack4Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pHealPack4Shader->SetCurScene(SCENE1STAGE);
+	pHealPack4Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_pBillboardShader[13] = pHealPack4Shader;
+
+	HealPackBillboardShader* pHealPack5Shader = new HealPackBillboardShader();
+	pHealPack5Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pHealPack5Shader->SetCurScene(SCENE1STAGE);
+	pHealPack5Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_pBillboardShader[14] = pHealPack5Shader;
+
+	HealPackBillboardShader* pHealPack6Shader = new HealPackBillboardShader();
+	pHealPack6Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pHealPack6Shader->SetCurScene(SCENE1STAGE);
+	pHealPack6Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_pBillboardShader[15] = pHealPack6Shader;
+
+	HealPackBillboardShader* pHealPack7Shader = new HealPackBillboardShader();
+	pHealPack7Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pHealPack7Shader->SetCurScene(SCENE1STAGE);
+	pHealPack7Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_pBillboardShader[16] = pHealPack7Shader;
+
 	m_nSpriteBillboards = 1;
 	m_ppSpriteBillboard = new CSpriteObjectsShader * [m_nSpriteBillboards];
 	SpriteAnimationBillboard* pSpriteAnimationBillboard = new SpriteAnimationBillboard();
@@ -272,7 +314,6 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pValkanHittingPointShader->SetCurScene(SCENE1STAGE);
 	pValkanHittingPointShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppFragShaders[1] = pValkanHittingPointShader;
-
 
 	CHumanBulletMarkParticleShader* pRifleHittingPointShader = new CHumanBulletMarkParticleShader();
 	pRifleHittingPointShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
@@ -1126,7 +1167,19 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();
 
 	((HealPackBillboardShader*)m_pBillboardShader[1])->m_bActiveMark = true;
-	((HealPackBillboardShader*)m_pBillboardShader[1])->ParticlePosition = XMFLOAT3(-35.0,5.0,750.0);
+	for (int i = 10; i < 17; i++)
+	{
+		((HealPackBillboardShader*)m_pBillboardShader[i])->m_bActiveMark = true;
+	}
+
+	((HealPackBillboardShader*)m_pBillboardShader[1])-> HealParticlePosition = XMFLOAT3( 141.30,6.00,  169.50);
+	((HealPackBillboardShader*)m_pBillboardShader[10])->HealParticlePosition = XMFLOAT3( 560.00,6.00,  938.00);
+	((HealPackBillboardShader*)m_pBillboardShader[11])->HealParticlePosition = XMFLOAT3( 141.30,6.00, -138.00);
+	((HealPackBillboardShader*)m_pBillboardShader[12])->HealParticlePosition = XMFLOAT3( 560.00,6.00, -902.00);
+	((HealPackBillboardShader*)m_pBillboardShader[13])->HealParticlePosition = XMFLOAT3(-217.00,6.00,  169.50);
+	((HealPackBillboardShader*)m_pBillboardShader[14])->HealParticlePosition = XMFLOAT3(-630.00,6.00,  938.00);
+	((HealPackBillboardShader*)m_pBillboardShader[15])->HealParticlePosition = XMFLOAT3(-634.00,6.00, -905.00);
+	((HealPackBillboardShader*)m_pBillboardShader[16])->HealParticlePosition = XMFLOAT3(-215.30,6.00, -136.50);
 
 	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(m_ppShaders[0]->m_ppObjects[30]->GetPosition());
 
