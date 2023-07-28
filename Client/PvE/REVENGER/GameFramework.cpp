@@ -905,7 +905,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case 'S':
 			case 'D':
 				q_keyboardInput.push(SEND_KEYUP_MOVEKEY);
-				if (!player_dead && ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bMoveUpdate == false && m_ingame_role == R_RIFLE) m_isIdle = true;
 				break;
 			case 'R':
 				if (!player_dead && ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bMoveUpdate == false && m_ingame_role == R_RIFLE)
@@ -1079,10 +1078,10 @@ void CGameFramework::ProcessInput()
 	{
 		DWORD dwDirection = 0;
 		if (!UI_Switch && !player_dead) {
-			if (pKeysBuffer[KEY_W] & 0xF0) { q_keyboardInput.push(SEND_KEY_W); dwDirection |= DIR_FORWARD; if (m_ingame_role == R_RIFLE) m_isIdle = false; }
-			if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; if (m_ingame_role == R_RIFLE) m_isIdle = false; }
-			if (pKeysBuffer[KEY_A] & 0xF0) { q_keyboardInput.push(SEND_KEY_A); dwDirection |= DIR_LEFT; if (m_ingame_role == R_RIFLE) m_isIdle = false; }
-			if (pKeysBuffer[KEY_D] & 0xF0) {  q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT; if (m_ingame_role == R_RIFLE) m_isIdle = false; }
+			if (pKeysBuffer[KEY_W] & 0xF0) { q_keyboardInput.push(SEND_KEY_W); dwDirection |= DIR_FORWARD;}
+			if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD;}
+			if (pKeysBuffer[KEY_A] & 0xF0) { q_keyboardInput.push(SEND_KEY_A); dwDirection |= DIR_LEFT;}
+			if (pKeysBuffer[KEY_D] & 0xF0) { q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT; }
 
 			if (m_ingame_role == R_HELI)
 			{
