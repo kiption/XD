@@ -32,8 +32,8 @@ int my_id;
 //==================================================
 float servertime_ms;    // 실제 서버시간
 
-int timelimit_ms;       // 스테이지별 제한시간
-int timelimit_sec;
+volatile int timelimit_ms;       // 스테이지별 제한시간
+volatile int timelimit_sec;
 
 //==================================================
 // 씬 전환 관련

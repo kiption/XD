@@ -1060,7 +1060,7 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].setBB();
 		clients[client_id].pl_state = cl_move_packet->direction + 1;	// MV_FRONT = 0, MV_BACK = 1, MV_SIDE = 2; PL_ST_MOVE_FRONT = 1, PL_ST_MOVE_BACK = 2, PL_ST_MOVE_SIDE = 3;
 		if (clients[client_id].role == ROLE_HELI) {
-			if (clients[client_id].height_alert && clients[client_id].pos.y > 23.0f) {	// 경보가 울리고 있다가 고도가 일정 높이 이상 올라오면 경보를 해제한다.
+			if (clients[client_id].height_alert && clients[client_id].pos.y > 27.0f) {	// 경보가 울리고 있다가 고도가 일정 높이 이상 올라오면 경보를 해제한다.
 				clients[client_id].height_alert = false;
 				SC_HEIGHT_ALERT_PACKET alert_cancel_packet;
 				alert_cancel_packet.size = sizeof(SC_HEIGHT_ALERT_PACKET);
@@ -1068,7 +1068,7 @@ void process_packet(int client_id, char* packet)
 				alert_cancel_packet.alert_on = 0;
 				clients[client_id].do_send(&alert_cancel_packet);
 			}
-			else if (!clients[client_id].height_alert && clients[client_id].pos.y <= 23.0f) {	// 고도가 일정 높이 미만 내려가면 경보를 울린다.
+			else if (!clients[client_id].height_alert && clients[client_id].pos.y <= 27.0f) {	// 고도가 일정 높이 미만 내려가면 경보를 울린다.
 				clients[client_id].height_alert = true;
 				SC_HEIGHT_ALERT_PACKET alert_start_packet;
 				alert_start_packet.size = sizeof(SC_HEIGHT_ALERT_PACKET);
