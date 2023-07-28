@@ -3732,6 +3732,8 @@ void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos)
 	{
 		((BulletMarkBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[4])->m_bActive = true;
 		((BulletMarkBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[4])->ParticlePosition = (mappos);
+		((CHumanBulletMarkParticleShader*)((Stage1*)m_pScene)->m_ppFragShaders[2])->m_bActive = true;
+		((CHumanBulletMarkParticleShader*)((Stage1*)m_pScene)->m_ppFragShaders[2])->ParticlePosition = mappos;
 	}
 	if (m_ingame_role == R_HELI)
 	{

@@ -108,7 +108,6 @@ public:
 public:
 	float m_fBulletEffectiveRange = 2000.0f;
 	CBulletEffectShader* pBCBulletEffectShader = NULL;
-	CTreeObjectShader** m_ppTreeObjectShader = NULL;
 	CValkanObject* pBulletObject = NULL;
 	CValkanObject* m_ppBullets[HELIBULLETS];
 	CValkanObject* pCartridge = NULL;

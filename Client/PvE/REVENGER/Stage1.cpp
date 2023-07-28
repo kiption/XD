@@ -261,7 +261,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pSpriteAnimationBillboard->SetActive(false);
 	m_ppSpriteBillboard[0] = pSpriteAnimationBillboard;
 
-	m_nFragShaders = 2;
+	m_nFragShaders = 3;
 	m_ppFragShaders = new CFragmentsShader * [m_nFragShaders];
 	CFragmentsShader* pFragmentsShader = new CFragmentsShader();
 	pFragmentsShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
@@ -269,11 +269,18 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pFragmentsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppFragShaders[0] = pFragmentsShader;
 
-	CHelicopterBulletMarkParticleShader* pBloodFragmentsShader = new CHelicopterBulletMarkParticleShader();
-	pBloodFragmentsShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
-	pBloodFragmentsShader->SetCurScene(SCENE1STAGE);
-	pBloodFragmentsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_ppFragShaders[1] = pBloodFragmentsShader;
+	CHelicopterBulletMarkParticleShader* pValkanHittingPointShader = new CHelicopterBulletMarkParticleShader();
+	pValkanHittingPointShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pValkanHittingPointShader->SetCurScene(SCENE1STAGE);
+	pValkanHittingPointShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppFragShaders[1] = pValkanHittingPointShader;
+
+
+	CHumanBulletMarkParticleShader* pRifleHittingPointShader = new CHumanBulletMarkParticleShader();
+	pRifleHittingPointShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
+	pRifleHittingPointShader->SetCurScene(SCENE1STAGE);
+	pRifleHittingPointShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppFragShaders[2] = pRifleHittingPointShader;
 
 	m_nShaders = 1;
 	m_ppShaders = new CObjectsShader * [m_nShaders];
@@ -369,15 +376,6 @@ void Stage1::ReleaseObjects()
 			m_ppSpriteBillboard[i]->Release();
 		}
 		delete[] m_ppSpriteBillboard;
-	}
-	if (m_ppTreeObjectShader)
-	{
-		for (int i = 0; i < 1; i++)
-		{
-			m_ppTreeObjectShader[i]->ReleaseShaderVariables();
-			m_ppTreeObjectShader[i]->ReleaseObjects();
-			m_ppTreeObjectShader[i]->Release();
-		}
 	}
 
 	if (m_ppShaders)delete m_ppShaders;
