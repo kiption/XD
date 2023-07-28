@@ -44,9 +44,9 @@
 
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
 #define RIFLE_DAMAGE 20					// 총알 피격데미지
-#define VALKAN_DAMAGE 20				// 총알 피격데미지
-#define NPC_RIFLE_DAMAGE 15				// NPC(소총) 피격데미지
-#define NPC_VALKAN_DAMAGE 10			// NPC(헬기) 피격데미지
+#define VALKAN_DAMAGE 25				// 총알 피격데미지
+#define NPC_RIFLE_DAMAGE 18				// NPC(소총) 피격데미지
+#define NPC_VALKAN_DAMAGE 23			// NPC(헬기) 피격데미지
 
 #define BULLET_RANGE 400				// 총알 최대이동거리
 
@@ -80,11 +80,7 @@
 #define RESPAWN_POS_Y_HUMAN 6.0f
 #define RESPAWN_POS_Z_HUMAN 750.0f
 
-#define RESPAWN_POS_X_HELI -43.5f
-#define RESPAWN_POS_Y_HELI 25.0f
-#define RESPAWN_POS_Z_HELI -750.0f
-
-#define RESPAWN_TIME 5000			// 리스폰 시간 (ms)
+#define RESPAWN_TIME 3000			// 리스폰 시간 (ms)
 
 #define HUMAN_VIEW_RANGE 500.0f
 
@@ -97,8 +93,12 @@
 #define HELI_BBSIZE_Y 10.0f
 #define HELI_BBSIZE_Z 15.0f
 
+#define RESPAWN_POS_X_HELI -43.5f
+#define RESPAWN_POS_Y_HELI 25.0f
+#define RESPAWN_POS_Z_HELI -750.0f
+
 #define AUTO_LEVELOFF_TIME 3000			// 몇 초(ms)동안 키입력이 없어야 자동 수평비행 전환이 되는가
-#define RESPAWN_TIME 3000				// 리스폰 시간 (ms)
+
 #define RESPAWN_TIME_HELI 10000			// 헬기 리스폰 시간 (ms)
 
 //============================================================
@@ -114,3 +114,8 @@
 
 #define STAGE1_MAX_HELI 5
 #define STAGE1_MAX_HUMAN 25
+
+#define STAGE1_SPAWN_AREA_POS_X -35.0f	// 스폰지역 좌표
+#define STAGE1_SPAWN_AREA_POS_Z 690.0f
+#define STAGE1_SPAWN_AREA_SIZE_X 110.0f	// 스폰지역 크기
+#define STAGE1_SPAWN_AREA_SIZE_Z 120.0f

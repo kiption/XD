@@ -794,20 +794,6 @@ void processPacket(char* ptr)
 
 		// Player Damaged
 		if (recv_packet->target == TARGET_PLAYER) {
-			// 힐링치트키를 쓴것
-			if (recv_packet->damage < 0) {	
-				cout << "[치트키 사용] HP가 " << recv_packet->damage << "만큼 회복되었다." << endl;
-				players_info[recv_id].m_hp += static_cast<int>(-1.0f * recv_packet->damage);
-				if (players_info[recv_id].m_hp > 100)
-					players_info[recv_id].m_hp = 100;
-				if (players_info[recv_packet->id].m_near_death_hp == true) {
-					players_info[recv_packet->id].m_near_death_hp = false;
-					gamesound.pauseHeartBeat();
-				}
-
-				break;	// 치트를 통한 회복은 더 작업할 게 없다.
-			}
-
 			// 거리별 사운드 조절
 			if (damaged_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 소리
 				if (players_info[recv_id].m_role == ROLE_RIFLE) gamesound.HumancollisionSound();
@@ -863,6 +849,22 @@ void processPacket(char* ptr)
 
 		break;
 	}//SC_DAMAGED case end
+	case SC_HEALING:
+	{
+		if (curr_servertype != SERVER_LOGIC) break;
+		SC_HEALING_PACKET* recv_packet = reinterpret_cast<SC_HEALING_PACKET*>(ptr);
+		int recv_id = recv_packet->id;
+
+		players_info[recv_id].m_hp += recv_packet->value;
+		if (players_info[recv_id].m_hp > 100)
+			players_info[recv_id].m_hp = 100;
+		else if (players_info[recv_id].m_hp > 30 && players_info[recv_packet->id].m_near_death_hp == true) {
+			players_info[recv_packet->id].m_near_death_hp = false;
+			gamesound.pauseHeartBeat();
+		}
+
+		break;
+	}// SC_HEALING case end
 	case SC_ATTACK:
 	{
 		if (curr_servertype != SERVER_LOGIC) break;

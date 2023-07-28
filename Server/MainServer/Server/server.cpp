@@ -191,6 +191,8 @@ public:
 
 	short curr_stage;
 
+	bool in_spawn_area;		// 스폰지역에 있으면 조금씩 회복된다.
+
 	BoundingOrientedBox m_xoobb;	// Bounding Box
 
 	unordered_set<int> view_list;	// 시야처리 (id값을 넣어주게 된다.) => 그럼 무엇을 해야하냐: 플레이어, npc들의 ID를 완전 다른값으로 설정해줘야한다.
@@ -220,6 +222,8 @@ public:
 		height_alert = false;
 		m_cam_lookvec = m_lookvec;
 		curr_stage = 0;
+
+		in_spawn_area = false;
 
 		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
@@ -285,6 +289,8 @@ public:
 		height_alert = false;
 		m_cam_lookvec = m_lookvec;
 		curr_stage = 0;
+
+		in_spawn_area = false;
 
 		setBB();
 
@@ -1148,6 +1154,25 @@ void process_packet(int client_id, char* packet)
 			}
 		}
 
+		// 7. 스폰지역에 있는지 확인한다.
+		if (clients[client_id].curr_stage == 1) {
+			float spawn_leftup_x = STAGE1_SPAWN_AREA_POS_X - STAGE1_SPAWN_AREA_SIZE_X / 2.0f;
+			float spawn_leftup_z = STAGE1_SPAWN_AREA_POS_Z - STAGE1_SPAWN_AREA_SIZE_Z / 2.0f;
+			float spawn_rightbottom_x = STAGE1_SPAWN_AREA_POS_X + STAGE1_SPAWN_AREA_SIZE_X / 2.0f;
+			float spawn_rightbottom_z = STAGE1_SPAWN_AREA_POS_Z + STAGE1_SPAWN_AREA_SIZE_Z / 2.0f;
+			if (spawn_leftup_x <= clients[client_id].pos.x && clients[client_id].pos.x <= spawn_rightbottom_x\
+				&& spawn_leftup_z <= clients[client_id].pos.z && clients[client_id].pos.z <= spawn_rightbottom_z) {
+				clients[client_id].s_lock.lock();
+				clients[client_id].in_spawn_area = true;
+				clients[client_id].s_lock.unlock();
+			}
+			else {
+				clients[client_id].s_lock.lock();
+				clients[client_id].in_spawn_area = false;
+				clients[client_id].s_lock.unlock();
+			}
+		}
+
 		break;
 	}// CS_MOVE end
 	case CS_ROTATE:
@@ -1851,13 +1876,11 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].s_lock.unlock();
 			cout << "Player[" << client_id << "]가 HP를 (+" << damaged_hp << ")만큼 회복하였다. (HP: "	<< clients[client_id].hp << " 남음)\n" << endl;
 
-			SC_DAMAGED_PACKET healing_packet;
-			healing_packet.size = sizeof(SC_DAMAGED_PACKET);
-			healing_packet.type = SC_DAMAGED;
-			healing_packet.target = TARGET_PLAYER;
+			SC_HEALING_PACKET healing_packet;
+			healing_packet.size = sizeof(SC_HEALING_PACKET);
+			healing_packet.type = SC_HEALING;
 			healing_packet.id = clients[client_id].id;
-			healing_packet.damage = -damaged_hp;
-			healing_packet.sound_volume = VOL_MUTE;
+			healing_packet.value = damaged_hp;
 
 			// 우선 NPC서버에게 플레이어 데미지 정보를 보내줍니다.
 			{
@@ -2965,6 +2988,41 @@ void timerFunc() {
 
 				if (left_time != -1) {
 					cl.do_send(&ticking_packet);
+				}
+			}
+
+			// 스폰지역에서는 HP를 조금씩 회복한다.
+			for (auto& cl : clients) {
+				if (cl.s_state != ST_INGAME) continue;
+				if (cl.curr_stage == 0) continue;
+				if (cl.pl_state == PL_ST_DEAD) continue;
+
+				if (cl.in_spawn_area == true && cl.hp < 100) {
+					cl.s_lock.lock();
+					cl.hp += 1;
+					if (cl.hp >= 100) cl.hp = 100;
+					cl.s_lock.unlock();
+
+					SC_HEALING_PACKET healing_packet;
+					healing_packet.size = sizeof(SC_HEALING_PACKET);
+					healing_packet.type = SC_HEALING;
+					healing_packet.id = cl.id;
+					healing_packet.value = 1;
+
+					// 우선 NPC서버에게 플레이어 데미지 정보를 보내줍니다.
+					{
+						lock_guard<mutex> lg{ npc_server.s_lock };
+						npc_server.do_send(&healing_packet);
+					}
+
+					// 모든 클라이언트한테도 보내줍니다.
+					for (auto& send_cl : clients) {
+						if (send_cl.s_state != ST_INGAME) continue;
+						if (send_cl.curr_stage == 0) continue;
+
+						lock_guard<mutex> lg{ send_cl.s_lock };
+						send_cl.do_send(&healing_packet);
+					}
 				}
 			}
 

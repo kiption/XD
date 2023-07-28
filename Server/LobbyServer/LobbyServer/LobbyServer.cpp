@@ -259,7 +259,7 @@ int Game_Room::user_join(int c_id) {
 
 			cout << "\n";
 
-			return 0;
+			return i;
 		}
 	}
 	return -1;
@@ -373,7 +373,7 @@ void process_packet(int client_id, char* packet)
 		for (auto& room : game_rooms) {
 			if (room.room_id == new_room_id) {
 				int ret = room.user_join(client_id);
-				if (ret == 0) {
+				if (ret != -1) {
 					// 방 생성 요청을 보낸 클라이언트에게 '방 참가 패킷'을 보냄.
 					LBYC_ROOM_JOIN_PACKET join_my_room;
 					join_my_room.size = sizeof(LBYC_ROOM_JOIN_PACKET);
@@ -423,14 +423,14 @@ void process_packet(int client_id, char* packet)
 		Game_Room matched_room;
 		int matched_room_id = -1;
 		int most_user_cnt = 0;
+		int matched_room_index = 0;
 		for (auto& room : game_rooms) {
 			if (room.user_count < MAX_USER && room.user_count > most_user_cnt) {
-				matched_room_id = room.room_id;
-				matched_room = room;
-
 				// 매칭된 방에 입장
 				int ret = room.user_join(client_id);
-				if (ret != 0) {
+				matched_room_id = room.room_id;
+				matched_room = room;
+				if (ret == -1) {
 					cout << "[Error] 매칭된 방에 입장하지 못했습니다." << endl;
 					LBYC_MATCH_FAIL_PACKET match_fail_packet;
 					match_fail_packet.size = sizeof(LBYC_MATCH_FAIL_PACKET);
@@ -438,6 +438,9 @@ void process_packet(int client_id, char* packet)
 					match_fail_packet.fail_reason = MATCH_FAIL_UNKNOWN;
 					clients[client_id].do_send(&match_fail_packet);
 					break;
+				}
+				else {
+					matched_room_index = ret;
 				}
 				break;
 			}
@@ -470,12 +473,9 @@ void process_packet(int client_id, char* packet)
 				strcpy_s(room_join_packet.member_name[i], clients[member_id].name);
 				room_join_packet.member_state[i] = clients[member_id].inroom_state;
 				room_join_packet.member_role[i] = clients[member_id].role;
-			}
-
-			if (member_id == client_id) {
-				room_join_packet.your_roomindex = i;
-			}
+			}			
 		}
+		room_join_packet.your_roomindex = matched_room_index;
 		room_join_packet.b_manager = b_FALSE;
 		clients[client_id].do_send(&room_join_packet);
 		cout << "Client[" << client_id << "]가 Room[" << matched_room_id << "]에 참가합니다. (Index: " << room_join_packet.your_roomindex << ")\n" << endl;
@@ -520,12 +520,13 @@ void process_packet(int client_id, char* packet)
 
 		Game_Room selected_room;
 		int selected_room_id = static_cast<int>(recv_packet->room_id);
+		int selected_room_index = 0;
 		// 선택한 방에 플레이어 입장
 		for (auto& room : game_rooms) {
 			if (room.room_id == selected_room_id) {
 				int ret = room.user_join(client_id);
 				selected_room = room;
-				if (ret != 0) {
+				if (ret == -1) {
 					cout << "[Error] 선택한 방에 입장하지 못했습니다." << endl;
 					LBYC_MATCH_FAIL_PACKET match_fail_packet;
 					match_fail_packet.size = sizeof(LBYC_MATCH_FAIL_PACKET);
@@ -533,6 +534,9 @@ void process_packet(int client_id, char* packet)
 					match_fail_packet.fail_reason = MATCH_FAIL_UNKNOWN;
 					clients[client_id].do_send(&match_fail_packet);
 					break;
+				}
+				else {
+					selected_room_index = ret;
 				}
 			}
 		}
@@ -556,11 +560,8 @@ void process_packet(int client_id, char* packet)
 				room_join_packet.member_state[i] = clients[member_id].inroom_state;
 				room_join_packet.member_role[i] = clients[member_id].role;
 			}
-
-			if (member_id == client_id) {
-				room_join_packet.your_roomindex = i;
-			}
 		}
+		room_join_packet.your_roomindex = selected_room_index;
 		room_join_packet.b_manager = b_FALSE;
 		clients[client_id].do_send(&room_join_packet);
 		cout << "Client[" << client_id << "]가 Room[" << selected_room_id << "]에 참가합니다. (Index: " << room_join_packet.your_roomindex << ")\n" << endl;
