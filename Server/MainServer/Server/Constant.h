@@ -50,15 +50,20 @@
 
 #define BULLET_RANGE 400				// 총알 최대이동거리
 
-#define ATKSOUND_MAX_DISTANCE 500		// 총 소리가 나는 최대 거리
-#define ATKSOUND_FAR_DISTANCE 350		// 작은 총 소리
-#define ATKSOUND_MID_DISTANCE 200		// 적당한 총 소리
+#define ATKSOUND_MAX_DISTANCE 400		// 총 소리가 나는 최대 거리
+#define ATKSOUND_FAR_DISTANCE 290		// 작은 총 소리
+#define ATKSOUND_MID_DISTANCE 170		// 적당한 총 소리
 #define ATKSOUND_NEAR_DISTANCE 50		// 큰 총 소리
 
-#define RELOADSOUND_MAX_DISTANCE 200	// 장전 소리가 나는 최대 거리
-#define RELOADSOUND_FAR_DISTANCE 150	// 작게 나는 장전소리
-#define RELOADSOUND_MID_DISTANCE 100	// 적당한 장전 소리
-#define RELOADSOUND_NEAR_DISTANCE 50	// 큰 장전 소리
+#define RELOADSOUND_MAX_DISTANCE 160	// 장전 소리가 나는 최대 거리
+#define RELOADSOUND_FAR_DISTANCE 120	// 작게 나는 장전소리
+#define RELOADSOUND_MID_DISTANCE 80	// 적당한 장전 소리
+#define RELOADSOUND_NEAR_DISTANCE 40	// 큰 장전 소리
+
+#define DAMAGEDSOUND_MAX_DISTANCE 120	// 피격 소리가 나는 최대 거리
+#define DAMAGEDSOUND_FAR_DISTANCE 90	// 작게 나는 피격소리
+#define DAMAGEDSOUND_MID_DISTANCE 60	// 적당한 피격 소리
+#define DAMAGEDSOUND_NEAR_DISTANCE 30	// 큰 피격 소리
 
 #define PARTICLE_BASIC_DAMAGE 5			// 파티클 충돌 기본 데미지 (최종 데미지는 여기에 질량을 곱한값)
 

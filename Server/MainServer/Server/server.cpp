@@ -1386,6 +1386,15 @@ void process_packet(int client_id, char* packet)
 					for (auto& cl : clients) {
 						if (cl.s_state != ST_INGAME) continue;
 						if (cl.curr_stage != clients[client_id].curr_stage) continue;
+
+						float dist = XMF_Distance(cl.pos, npcs[collided_npc_id].pos);
+						if (dist < DAMAGEDSOUND_NEAR_DISTANCE)
+							npc_damaged_pack.sound_volume = VOL_HIGH;
+						else if (DAMAGEDSOUND_NEAR_DISTANCE <= dist && dist < DAMAGEDSOUND_MID_DISTANCE)
+							npc_damaged_pack.sound_volume = VOL_MID;
+						else if (DAMAGEDSOUND_MID_DISTANCE <= dist && dist < DAMAGEDSOUND_MAX_DISTANCE)
+							npc_damaged_pack.sound_volume = VOL_LOW;
+
 						lock_guard<mutex> lg{ cl.s_lock };
 						cl.do_send(&npc_damaged_pack);
 					}
@@ -1848,6 +1857,7 @@ void process_packet(int client_id, char* packet)
 			healing_packet.target = TARGET_PLAYER;
 			healing_packet.id = clients[client_id].id;
 			healing_packet.damage = -damaged_hp;
+			healing_packet.sound_volume = VOL_MUTE;
 
 			// 우선 NPC서버에게 플레이어 데미지 정보를 보내줍니다.
 			{
@@ -1963,6 +1973,14 @@ void process_packet(int client_id, char* packet)
 				if (send_cl.s_state != ST_INGAME) continue;
 				if (send_cl.curr_stage == 0) continue;
 
+				float dist = XMF_Distance(send_cl.pos, clients[client_id].pos);
+				if (dist < DAMAGEDSOUND_NEAR_DISTANCE)
+					damaged_packet.sound_volume = VOL_HIGH;
+				else if (DAMAGEDSOUND_NEAR_DISTANCE <= dist && dist < DAMAGEDSOUND_MID_DISTANCE)
+					damaged_packet.sound_volume = VOL_MID;
+				else if (DAMAGEDSOUND_MID_DISTANCE <= dist && dist < DAMAGEDSOUND_MAX_DISTANCE)
+					damaged_packet.sound_volume = VOL_LOW;
+
 				lock_guard<mutex> lg{ send_cl.s_lock };
 				send_cl.do_send(&damaged_packet);
 			}
@@ -2049,6 +2067,14 @@ void process_packet(int client_id, char* packet)
 			for (auto& send_cl : clients) {
 				if (send_cl.s_state != ST_INGAME) continue;
 				if (send_cl.curr_stage == 0) continue;
+
+				float dist = XMF_Distance(send_cl.pos, clients[client_id].pos);
+				if (dist < DAMAGEDSOUND_NEAR_DISTANCE)
+					damaged_packet.sound_volume = VOL_HIGH;
+				else if (DAMAGEDSOUND_NEAR_DISTANCE <= dist && dist < DAMAGEDSOUND_MID_DISTANCE)
+					damaged_packet.sound_volume = VOL_MID;
+				else if (DAMAGEDSOUND_MID_DISTANCE <= dist && dist < DAMAGEDSOUND_MAX_DISTANCE)
+					damaged_packet.sound_volume = VOL_LOW;
 
 				lock_guard<mutex> lg{ send_cl.s_lock };
 				send_cl.do_send(&damaged_packet);
@@ -2494,6 +2520,14 @@ void process_packet(int client_id, char* packet)
 						for (auto& send_cl : clients) {
 							if (send_cl.s_state != ST_INGAME) continue;
 							if (send_cl.curr_stage == 0) continue;
+
+							float dist = XMF_Distance(send_cl.pos, clients[collided_cl_id].pos);
+							if (dist < DAMAGEDSOUND_NEAR_DISTANCE)
+								damaged_packet.sound_volume = VOL_HIGH;
+							else if (DAMAGEDSOUND_NEAR_DISTANCE <= dist && dist < DAMAGEDSOUND_MID_DISTANCE)
+								damaged_packet.sound_volume = VOL_MID;
+							else if (DAMAGEDSOUND_MID_DISTANCE <= dist && dist < DAMAGEDSOUND_MAX_DISTANCE)
+								damaged_packet.sound_volume = VOL_LOW;
 
 							lock_guard<mutex> lg{ send_cl.s_lock };
 							send_cl.do_send(&damaged_packet);

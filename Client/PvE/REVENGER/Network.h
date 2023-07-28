@@ -790,10 +790,12 @@ void processPacket(char* ptr)
 		if (curr_servertype != SERVER_LOGIC) break;
 		SC_DAMAGED_PACKET* recv_packet = reinterpret_cast<SC_DAMAGED_PACKET*>(ptr);
 		int recv_id = recv_packet->id;
+		int damaged_sound_volume = recv_packet->sound_volume;
 
 		// Player Damaged
 		if (recv_packet->target == TARGET_PLAYER) {
-			if (recv_packet->damage < 0) {	// 힐링치트키를 쓴것
+			// 힐링치트키를 쓴것
+			if (recv_packet->damage < 0) {	
 				cout << "[치트키 사용] HP가 " << recv_packet->damage << "만큼 회복되었다." << endl;
 				players_info[recv_id].m_hp += static_cast<int>(-1.0f * recv_packet->damage);
 				if (players_info[recv_id].m_hp > 100)
@@ -803,12 +805,24 @@ void processPacket(char* ptr)
 					gamesound.pauseHeartBeat();
 				}
 
-				break;
+				break;	// 치트를 통한 회복은 더 작업할 게 없다.
 			}
 
-			if (players_info[recv_id].m_role == ROLE_RIFLE) gamesound.HumancollisionSound();
-			if (players_info[recv_id].m_role == ROLE_HELI) gamesound.HelicollisionSound();
+			// 거리별 사운드 조절
+			if (damaged_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 소리
+				if (players_info[recv_id].m_role == ROLE_RIFLE) gamesound.HumancollisionSound();
+				if (players_info[recv_id].m_role == ROLE_HELI) gamesound.HelicollisionSound();
+			}
+			else if (damaged_sound_volume == VOL_MID) {		// 적당한 거리에 있어서 적당하게 들리는 소리
+				if (players_info[recv_id].m_role == ROLE_RIFLE) gamesound.HumancollisionSound();
+				if (players_info[recv_id].m_role == ROLE_HELI) gamesound.HelicollisionSound();
+			}
+			else if (damaged_sound_volume == VOL_HIGH) {	// 가까이에 있어서 크게 들리는 소리
+				if (players_info[recv_id].m_role == ROLE_RIFLE) gamesound.HumancollisionSound();
+				if (players_info[recv_id].m_role == ROLE_HELI) gamesound.HelicollisionSound();
+			}
 
+			// 피격 처리
 			players_info[recv_id].m_hp -= recv_packet->damage;
 			players_info[recv_id].m_damaged_effect_on = true;
 			if (players_info[recv_id].m_hp < 0)
@@ -827,8 +841,21 @@ void processPacket(char* ptr)
 		}
 		// NPC Damaged
 		else if (recv_packet->target == TARGET_NPC) {
-			if (recv_id < MAX_NPC_HELI) gamesound.HelicollisionSound();
-			if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN) gamesound.HumancollisionSound();
+			// 거리별 사운드 조절
+			if (damaged_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 소리
+				if (recv_id < MAX_NPC_HELI) gamesound.HelicollisionSound();
+				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN) gamesound.HumancollisionSound();
+			}
+			else if (damaged_sound_volume == VOL_MID) {		// 적당한 거리에 있어서 적당하게 들리는 소리
+				if (recv_id < MAX_NPC_HELI) gamesound.HelicollisionSound();
+				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN) gamesound.HumancollisionSound();
+			}
+			else if (damaged_sound_volume == VOL_HIGH) {	// 가까이에 있어서 크게 들리는 소리
+				if (recv_id < MAX_NPC_HELI) gamesound.HelicollisionSound();
+				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN) gamesound.HumancollisionSound();
+			}
+
+			// 피격 처리
 			npcs_info[recv_id].m_hp -= recv_packet->damage;
 			npcs_info[recv_id].m_damaged_effect_on = true;
 			if (npcs_info[recv_id].m_hp < 0) npcs_info[recv_packet->id].m_hp = 0;

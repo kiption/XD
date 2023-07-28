@@ -452,15 +452,16 @@ struct SC_HEIGHT_ALERT_PACKET {
 };
 
 // 3) ÄÁÅÙÃ÷ °ü·Ã ÆÐÅ¶
+enum SOUND_VOLUME { VOL_MUTE, VOL_LOW, VOL_MID, VOL_HIGH };
 struct SC_DAMAGED_PACKET {
 	unsigned char size;
 	char type;
 	short target;
 	short id;
 	int damage;
+	char sound_volume;
 };
 
-enum SOUND_VOLUME { VOL_MUTE, VOL_LOW, VOL_MID, VOL_HIGH };
 struct SC_ATTACK_PACKET {
 	unsigned char size;
 	char type;
