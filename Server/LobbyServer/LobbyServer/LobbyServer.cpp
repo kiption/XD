@@ -370,44 +370,47 @@ void process_packet(int client_id, char* packet)
 		}
 
 		// 생성된 방에 플레이어 입장
-		int ret = game_rooms[new_room_id].user_join(client_id);
-		if (ret != 0) {
-			cout << "[Error] 생성된 방에 입장하지 못했습니다." << endl;
-			break;
-		}
+		for (auto& room : game_rooms) {
+			if (room.room_id == new_room_id) {
+				int ret = room.user_join(client_id);
+				if (ret == 0) {
+					// 방 생성 요청을 보낸 클라이언트에게 '방 참가 패킷'을 보냄.
+					LBYC_ROOM_JOIN_PACKET join_my_room;
+					join_my_room.size = sizeof(LBYC_ROOM_JOIN_PACKET);
+					join_my_room.type = LBYC_ROOM_JOIN;
+					join_my_room.room_id = new_room_id;
+					strcpy_s(join_my_room.room_name, room.room_name);
+					join_my_room.member_count = 1;
+					// 방 유저의 0번째 인덱스는 방 생성을 요청한 클라이언트이고, 그는 방장이다.
+					strcpy_s(join_my_room.member_name[0], clients[client_id].name);
+					join_my_room.member_state[0] = RM_ST_MANAGER;
+					// 막 만들어진 방이므로 요청한 클라이언트 외에 아무도 없는 것이 정상임.
+					for (int i = 1; i < MAX_USER; ++i) { strcpy_s(join_my_room.member_name[i], "\0"); }
+					for (int i = 1; i < MAX_USER; ++i) { join_my_room.member_state[i] = RM_ST_EMPTY; }
+					join_my_room.your_roomindex = 0;
+					join_my_room.b_manager = b_TRUE;
+					clients[client_id].do_send(&join_my_room);
+					cout << "Client[" << client_id << "]에게 Room[" << new_room_id << "] 참가 패킷을 보냈습니다.\n" << endl;
 
-		// 방 생성 요청을 보낸 클라이언트에게 '방 참가 패킷'을 보냄.
-		LBYC_ROOM_JOIN_PACKET join_my_room;
-		join_my_room.size = sizeof(LBYC_ROOM_JOIN_PACKET);
-		join_my_room.type = LBYC_ROOM_JOIN;
-		join_my_room.room_id = new_room_id;
-		strcpy_s(join_my_room.room_name, game_rooms[new_room_id].room_name);
-		join_my_room.member_count = 1;
-		// 방 유저의 0번째 인덱스는 방 생성을 요청한 클라이언트이고, 그는 방장이다.
-		strcpy_s(join_my_room.member_name[0], clients[client_id].name);
-		join_my_room.member_state[0] = RM_ST_MANAGER;
-		// 막 만들어진 방이므로 요청한 클라이언트 외에 아무도 없는 것이 정상임.
-		for (int i = 1; i < MAX_USER; ++i) { strcpy_s(join_my_room.member_name[i], "\0"); }
-		for (int i = 1; i < MAX_USER; ++i) { join_my_room.member_state[i] = RM_ST_EMPTY; }
-		join_my_room.your_roomindex = 0;
-		join_my_room.b_manager = b_TRUE;
-		clients[client_id].do_send(&join_my_room);
-		cout << "Client[" << client_id << "]에게 Room[" << new_room_id << "] 참가 패킷을 보냈습니다.\n" << endl;
+					// 로비에 접속 중인 다른 클라이언트들에게는 '방 추가 패킷'을 보냄.
+					for (auto& cl : clients) {
+						if (cl.s_state != ST_INGAME) continue;
+						if (cl.curr_room != -1) continue; // 방에 있지않고 로비에 있는 유저에게만 보냅니다.
 
-		// 로비에 접속 중인 다른 클라이언트들에게는 '방 추가 패킷'을 보냄.
-		for (auto& cl : clients) {
-			if (cl.s_state != ST_INGAME) continue;
-			if (cl.curr_room != -1) continue; // 방에 있지않고 로비에 있는 유저에게만 보냅니다.
+						LBYC_ADD_ROOM_PACKET add_room_pack;
+						add_room_pack.size = sizeof(LBYC_ADD_ROOM_PACKET);
+						add_room_pack.type = LBYC_ADD_ROOM;
+						add_room_pack.room_id = new_room_id;
+						add_room_pack.room_state = room.room_state;
+						add_room_pack.user_count = room.user_count;
+						strcpy_s(add_room_pack.room_name, room.room_name);
+						cl.do_send(&add_room_pack);
+						cout << "로비에 있는 Client[" << cl.id << "]에게 Room[" << new_room_id << "] 추가 패킷을 보냈습니다.\n" << endl;
+					}
+				}
 
-			LBYC_ADD_ROOM_PACKET add_room_pack;
-			add_room_pack.size = sizeof(LBYC_ADD_ROOM_PACKET);
-			add_room_pack.type = LBYC_ADD_ROOM;
-			add_room_pack.room_id = new_room_id;
-			add_room_pack.room_state = game_rooms[new_room_id].room_state;
-			add_room_pack.user_count = game_rooms[new_room_id].user_count;
-			strcpy_s(add_room_pack.room_name, game_rooms[new_room_id].room_name);
-			cl.do_send(&add_room_pack);
-			cout << "로비에 있는 Client[" << cl.id << "]에게 Room[" << new_room_id << "] 추가 패킷을 보냈습니다.\n" << endl;
+				break;
+			}
 		}
 
 		break;
@@ -417,11 +420,25 @@ void process_packet(int client_id, char* packet)
 		CLBY_QUICK_MATCH_PACKET* recv_packet = reinterpret_cast<CLBY_QUICK_MATCH_PACKET*>(packet);
 
 		// 입장가능한 방 찾기
+		Game_Room matched_room;
 		int matched_room_id = -1;
 		int most_user_cnt = 0;
 		for (auto& room : game_rooms) {
 			if (room.user_count < MAX_USER && room.user_count > most_user_cnt) {
 				matched_room_id = room.room_id;
+				matched_room = room;
+
+				// 매칭된 방에 입장
+				int ret = room.user_join(client_id);
+				if (ret != 0) {
+					cout << "[Error] 매칭된 방에 입장하지 못했습니다." << endl;
+					LBYC_MATCH_FAIL_PACKET match_fail_packet;
+					match_fail_packet.size = sizeof(LBYC_MATCH_FAIL_PACKET);
+					match_fail_packet.type = LBYC_MATCH_FAIL;
+					match_fail_packet.fail_reason = MATCH_FAIL_UNKNOWN;
+					clients[client_id].do_send(&match_fail_packet);
+					break;
+				}
 				break;
 			}
 		}
@@ -435,27 +452,15 @@ void process_packet(int client_id, char* packet)
 			break;
 		}
 
-		// 매칭된 방에 입장
-		int ret = game_rooms[matched_room_id].user_join(client_id);
-		if (ret != 0) {
-			cout << "[Error] 생성된 방에 입장하지 못했습니다." << endl;
-			LBYC_MATCH_FAIL_PACKET match_fail_packet;
-			match_fail_packet.size = sizeof(LBYC_MATCH_FAIL_PACKET);
-			match_fail_packet.type = LBYC_MATCH_FAIL;
-			match_fail_packet.fail_reason = MATCH_FAIL_UNKNOWN;
-			clients[client_id].do_send(&match_fail_packet);
-			break;
-		}
-
 		// 빠른시작 요청을 보낸 클라이언트에게 '방 참가 패킷'을 보냄.
 		LBYC_ROOM_JOIN_PACKET room_join_packet;
 		room_join_packet.size = sizeof(LBYC_ROOM_JOIN_PACKET);
 		room_join_packet.type = LBYC_ROOM_JOIN;
 		room_join_packet.room_id = matched_room_id;
-		strcpy_s(room_join_packet.room_name, game_rooms[matched_room_id].room_name);
-		room_join_packet.member_count = game_rooms[matched_room_id].user_count;
+		strcpy_s(room_join_packet.room_name, matched_room.room_name);
+		room_join_packet.member_count = matched_room.user_count;
 		for (int i = 0; i < MAX_USER; ++i) {
-			int member_id = game_rooms[matched_room_id].users[i];
+			int member_id = matched_room.users[i];
 			if (member_id == -1) {
 				strcpy_s(room_join_packet.member_name[i], "\0");
 				room_join_packet.member_state[i] = RM_ST_EMPTY;
@@ -478,7 +483,7 @@ void process_packet(int client_id, char* packet)
 
 		// 그 방에 이전부터 있었던 클라이언트에게 새로운 클라이언트가 참가했음을 알려줍니다.
 		for (int i = 0; i < MAX_USER; ++i) {
-			int member_id = game_rooms[matched_room_id].users[i];
+			int member_id = matched_room.users[i];
 			if (member_id == -1) continue;
 			if (member_id == client_id) continue;
 
@@ -501,10 +506,10 @@ void process_packet(int client_id, char* packet)
 			user_increase_pack.size = sizeof(LBYC_ROOM_USERCOUNT_PACKET);
 			user_increase_pack.type = LBYC_ROOM_USERCOUNT;
 			user_increase_pack.room_id = matched_room_id;
-			user_increase_pack.user_count = game_rooms[matched_room_id].user_count;
+			user_increase_pack.user_count = matched_room.user_count;
 			cl.do_send(&user_increase_pack);
 			cout << "로비에 있는 Client[" << cl.id << "]에게 Room[" << matched_room_id << "]의 인원이 "
-				<< game_rooms[matched_room_id].user_count << "명이 되었다고 알려줍니다.\n" << endl;
+				<< matched_room.user_count << "명이 되었다고 알려줍니다.\n" << endl;
 		}
 
 		break;
@@ -513,17 +518,23 @@ void process_packet(int client_id, char* packet)
 	{
 		CLBY_ROOM_ENTER_PACKET* recv_packet = reinterpret_cast<CLBY_ROOM_ENTER_PACKET*>(packet);
 
+		Game_Room selected_room;
 		int selected_room_id = static_cast<int>(recv_packet->room_id);
 		// 선택한 방에 플레이어 입장
-		int ret = game_rooms[selected_room_id].user_join(client_id);
-		if (ret != 0) {
-			cout << "[Error] 생성된 방에 입장하지 못했습니다." << endl;
-			LBYC_MATCH_FAIL_PACKET match_fail_packet;
-			match_fail_packet.size = sizeof(LBYC_MATCH_FAIL_PACKET);
-			match_fail_packet.type = LBYC_MATCH_FAIL;
-			match_fail_packet.fail_reason = MATCH_FAIL_UNKNOWN;
-			clients[client_id].do_send(&match_fail_packet);
-			break;
+		for (auto& room : game_rooms) {
+			if (room.room_id == selected_room_id) {
+				int ret = room.user_join(client_id);
+				selected_room = room;
+				if (ret != 0) {
+					cout << "[Error] 선택한 방에 입장하지 못했습니다." << endl;
+					LBYC_MATCH_FAIL_PACKET match_fail_packet;
+					match_fail_packet.size = sizeof(LBYC_MATCH_FAIL_PACKET);
+					match_fail_packet.type = LBYC_MATCH_FAIL;
+					match_fail_packet.fail_reason = MATCH_FAIL_UNKNOWN;
+					clients[client_id].do_send(&match_fail_packet);
+					break;
+				}
+			}
 		}
 
 		// 방 참가 요청을 보낸 클라이언트에게 '방 참가 패킷'을 보냄.
@@ -531,10 +542,10 @@ void process_packet(int client_id, char* packet)
 		room_join_packet.size = sizeof(LBYC_ROOM_JOIN_PACKET);
 		room_join_packet.type = LBYC_ROOM_JOIN;
 		room_join_packet.room_id = selected_room_id;
-		strcpy_s(room_join_packet.room_name, game_rooms[selected_room_id].room_name);
-		room_join_packet.member_count = game_rooms[selected_room_id].user_count;
+		strcpy_s(room_join_packet.room_name, selected_room.room_name);
+		room_join_packet.member_count = selected_room.user_count;
 		for (int i = 0; i < MAX_USER; ++i) {
-			int member_id = game_rooms[selected_room_id].users[i];
+			int member_id = selected_room.users[i];
 			if (member_id == -1) {
 				strcpy_s(room_join_packet.member_name[i], "\0");
 				room_join_packet.member_state[i] = RM_ST_EMPTY;
@@ -557,7 +568,7 @@ void process_packet(int client_id, char* packet)
 
 		// 그 방에 이전부터 있었던 클라이언트에게 새로운 클라이언트가 참가했음을 알려줍니다.
 		for (int i = 0; i < MAX_USER; ++i) {
-			int member_id = game_rooms[selected_room_id].users[i];
+			int member_id = selected_room.users[i];
 			if (member_id == -1) continue;
 			if (member_id == client_id) continue;
 
@@ -580,10 +591,10 @@ void process_packet(int client_id, char* packet)
 			user_increase_pack.size = sizeof(LBYC_ROOM_USERCOUNT_PACKET);
 			user_increase_pack.type = LBYC_ROOM_USERCOUNT;
 			user_increase_pack.room_id = selected_room_id;
-			user_increase_pack.user_count = game_rooms[selected_room_id].user_count;
+			user_increase_pack.user_count = selected_room.user_count;
 			cl.do_send(&user_increase_pack);
 			cout << "로비에 있는 Client[" << cl.id << "]에게 Room[" << selected_room_id << "]의 인원이 "
-				<< game_rooms[selected_room_id].user_count << "명이 되었다고 알려줍니다.\n" << endl;
+				<< selected_room.user_count << "명이 되었다고 알려줍니다.\n" << endl;
 		}
 
 		break;
@@ -595,22 +606,36 @@ void process_packet(int client_id, char* packet)
 		int room_id = clients[client_id].curr_room;
 
 		// 원래 있던 방에서의 인덱스를 알아냄
+		Game_Room leaved_room;
+		bool b_lastmember = false;
 		int inroom_index = -1;
-		for (int i = 0; i < MAX_USER; ++i) {
-			if (game_rooms[room_id].users[i] == client_id) {
-				inroom_index = i;
+		for (auto& room : game_rooms) {
+			if (room.room_id == room_id) {
+				leaved_room = room;
+				for (int i = 0; i < MAX_USER; ++i) {
+					if (room.users[i] == client_id) {
+						inroom_index = i;
+						break;
+					}
+				}
+
+				// 원래 있던 방에서 퇴장
+				int ret = room.user_leave(client_id);
+				if (ret != 0) {
+					cout << "[Error] 방에서 나오지 못했습니다." << endl;
+					break;
+				}
+				else if (room.user_count == 0) {		// 자신이 그 방에 마지막 인원이었다면
+					b_lastmember = true;
+					game_rooms.erase(remove_if(game_rooms.begin(), game_rooms.end(), [](const Game_Room& curr_room) {
+						return curr_room.user_count == 0;}), game_rooms.end());
+				}
+
 				break;
 			}
 		}
 		if (inroom_index == -1) {
-			cout << "[Error] Unknown Error (Line:388)" << endl;
-			break;
-		}
-
-		// 원래 있던 방에서 퇴장
-		int ret = game_rooms[room_id].user_leave(client_id);
-		if (ret != 0) {
-			cout << "[Error] 방에서 나오지 못했습니다." << endl;
+			cout << "[Error] Unknown Error (Line:638)" << endl;
 			break;
 		}
 
@@ -636,34 +661,65 @@ void process_packet(int client_id, char* packet)
 		cout << "Client[" << client_id << "]에게 존재하는 모든 방들의 정보를 보냈습니다.\n" << endl;
 
 		// 방에 남아있는 클라이언트에게 방 퇴장 요청을 보냈던 클라이언트가 방에서 나왔음을 알려줍니다.
-		for (int i = 0; i < MAX_USER; ++i) {
-			int member_id = game_rooms[room_id].users[i];
-			if (member_id == -1) continue;
-			if (member_id == client_id) continue;
+		if (!b_lastmember) {
+			for (int i = 0; i < MAX_USER; ++i) {
+				int member_id = leaved_room.users[i];
+				if (member_id == -1) continue;
+				if (member_id == client_id) continue;
 
-			LBYC_ROOM_LEFT_MEMBER_PACKET new_member_packet;
-			new_member_packet.size = sizeof(LBYC_ROOM_LEFT_MEMBER_PACKET);
-			new_member_packet.type = LBYC_ROOM_LEFT_MEMBER;
-			strcpy_s(new_member_packet.left_member_name, clients[client_id].name);
-			new_member_packet.left_member_roomindex = inroom_index;
+				LBYC_ROOM_LEFT_MEMBER_PACKET new_member_packet;
+				new_member_packet.size = sizeof(LBYC_ROOM_LEFT_MEMBER_PACKET);
+				new_member_packet.type = LBYC_ROOM_LEFT_MEMBER;
+				strcpy_s(new_member_packet.left_member_name, clients[client_id].name);
+				new_member_packet.left_member_roomindex = inroom_index;
 
-			clients[member_id].do_send(&new_member_packet);
-			cout << "Client[" << member_id << "]에게 유저[" << client_id << "]의 퇴장 패킷을 보냈습니다.\n" << endl;
+				clients[member_id].do_send(&new_member_packet);
+				cout << "Client[" << member_id << "]에게 유저[" << client_id << "]의 퇴장 패킷을 보냈습니다.\n" << endl;
+			}
+
+			// 로비에 있는 클라이언트들에게 해당 방 유저 수가 1 감소하였음을 알려줍니다.
+			for (auto& cl : clients) {
+				if (cl.s_state != ST_INGAME) continue;
+				if (cl.curr_room != -1) continue; // 방에 있지않고 로비에 있는 유저에게만 보냅니다.
+				if (cl.id == client_id) continue; // 얘는 이미 위에서 로비 전체 정보 패킷을 보냈음.
+
+				LBYC_ROOM_USERCOUNT_PACKET user_decrease_pack;
+				user_decrease_pack.size = sizeof(LBYC_ROOM_USERCOUNT_PACKET);
+				user_decrease_pack.type = LBYC_ROOM_USERCOUNT;
+				user_decrease_pack.room_id = room_id;
+				user_decrease_pack.user_count = leaved_room.user_count;
+				cl.do_send(&user_decrease_pack);
+				cout << "로비에 있는 Client[" << cl.id << "]에게 Room[" << room_id << "]의 인원이 " << leaved_room.user_count << "명이 되었다고 알려줍니다.\n" << endl;
+			}
 		}
+		else {
+			// 로비 정보 업데이트
+			for (auto& cl : clients) {
+				if (cl.s_state != ST_INGAME) continue;
+				if (cl.curr_room != -1) continue; // 방에 있지않고 로비에 있는 유저에게만 보냅니다.
+				if (cl.id == client_id) continue; // 얘는 이미 위에서 로비 전체 정보 패킷을 보냈음.
 
-		// 로비에 있는 클라이언트들에게 해당 방 유저 수가 1 감소하였음을 알려줍니다.
-		for (auto& cl : clients) {
-			if (cl.s_state != ST_INGAME) continue;
-			if (cl.curr_room != -1) continue; // 방에 있지않고 로비에 있는 유저에게만 보냅니다.
-			if (cl.id == client_id) continue; // 얘는 이미 위에서 로비 전체 정보 패킷을 보냈음.
+				// 로비에 있는 클라이언트들에게 로비에 있는 방 데이터 초기화를 명령합니다.
+				LBYC_LOBBY_CLEAR_PACKET lobby_clear_pack;
+				lobby_clear_pack.size = sizeof(LBYC_LOBBY_CLEAR_PACKET);
+				lobby_clear_pack.type = LBYC_LOBBY_CLEAR;
+				cl.do_send(&lobby_clear_pack);
 
-			LBYC_ROOM_USERCOUNT_PACKET user_decrease_pack;
-			user_decrease_pack.size = sizeof(LBYC_ROOM_USERCOUNT_PACKET);
-			user_decrease_pack.type = LBYC_ROOM_USERCOUNT;
-			user_decrease_pack.room_id = room_id;
-			user_decrease_pack.user_count = game_rooms[room_id].user_count;
-			cl.do_send(&user_decrease_pack);
-			cout << "로비에 있는 Client[" << cl.id << "]에게 Room[" << room_id << "]의 인원이 " << game_rooms[room_id].user_count << "명이 되었다고 알려줍니다.\n" << endl;
+				// 방 퇴장 요청을 보낸 클라이언트에게 로비에 있는 모든 방에 대한 간략한 정보를 보냅니다.
+				for (auto& room : game_rooms) {
+					LBYC_ADD_ROOM_PACKET room_info_pack;
+					room_info_pack.size = sizeof(LBYC_ADD_ROOM_PACKET);
+					room_info_pack.type = LBYC_ADD_ROOM;
+					room_info_pack.room_id = room.room_id;
+					room_info_pack.room_state = room.room_state;
+					room_info_pack.user_count = room.user_count;
+					strcpy_s(room_info_pack.room_name, room.room_name);
+
+					cl.do_send(&room_info_pack);
+					cout << "Client[" << client_id << "]에게 로비에 보일 Room[" << room.room_id << "]의 정보를 보냈습니다." << endl;
+				}
+				cout << "Client[" << client_id << "]에게 존재하는 모든 방들의 정보를 보냈습니다.\n" << endl;
+			}
 		}
 
 		break;
@@ -729,14 +785,19 @@ void process_packet(int client_id, char* packet)
 
 		// 요청한 클라이언트가 방에서의 몇번째 인덱스인지 알아냄
 		int inroom_index = -1;
-		for (int i = 0; i < MAX_USER; ++i) {
-			if (game_rooms[cur_room].users[i] == client_id) {
-				inroom_index = i;
+		for (auto& room : game_rooms) {
+			if (room.room_id == cur_room) {
+				for (int i = 0; i < MAX_USER; ++i) {
+					if (room.users[i] == client_id) {
+						inroom_index = i;
+						break;
+					}
+				}
 				break;
 			}
 		}
 		if (inroom_index == -1) {
-			cout << "[Error] Unknown Error (Line:524)" << endl;
+			cout << "[Error] Unknown Error (Line:799)" << endl;
 			break;
 		}
 
@@ -769,9 +830,14 @@ void process_packet(int client_id, char* packet)
 
 		// 요청한 클라이언트가 방에서의 몇번째 인덱스인지 알아냄
 		int inroom_index = -1;
-		for (int i = 0; i < MAX_USER; ++i) {
-			if (game_rooms[cur_room].users[i] == client_id) {
-				inroom_index = i;
+		for (auto& room : game_rooms) {
+			if (room.room_id == cur_room) {
+				for (int i = 0; i < MAX_USER; ++i) {
+					if (room.users[i] == client_id) {
+						inroom_index = i;
+						break;
+					}
+				}
 				break;
 			}
 		}
@@ -1358,8 +1424,9 @@ void disconnect(int target_id, int target)
 				if (room.room_id == room_id) {
 					// 원래 있던 방에서의 인덱스를 알아냄
 					int inroom_index = -1;
+					bool b_lastmember = false;
 					for (int i = 0; i < MAX_USER; ++i) {
-						if (game_rooms[room_id].users[i] == target_id) {
+						if (room.users[i] == target_id) {
 							inroom_index = i;
 							break;
 						}
@@ -1373,36 +1440,72 @@ void disconnect(int target_id, int target)
 					if (ret != 0) {//error
 						cout << "[Error] Disconnect - Room Leave Error.\n" << endl;
 					}
-
-					// 방에 남아있는 클라이언트에게 방 퇴장 요청을 보냈던 클라이언트가 방에서 나왔음을 알려줍니다.
-					for (int i = 0; i < MAX_USER; ++i) {
-						int member_id = game_rooms[room_id].users[i];
-						if (member_id == -1) continue;
-						if (member_id == target_id) continue; // 얘는 애초에 지금 접속중이 아님.
-
-						LBYC_ROOM_LEFT_MEMBER_PACKET new_member_packet;
-						new_member_packet.size = sizeof(LBYC_ROOM_LEFT_MEMBER_PACKET);
-						new_member_packet.type = LBYC_ROOM_LEFT_MEMBER;
-						strcpy_s(new_member_packet.left_member_name, clients[target_id].name);
-						new_member_packet.left_member_roomindex = inroom_index;
-
-						clients[member_id].do_send(&new_member_packet);
-						cout << "Client[" << member_id << "]에게 유저[" << target_id << "]의 퇴장 패킷을 보냈습니다.\n" << endl;
+					else if (room.user_count == 0) {		// 자신이 그 방에 마지막 인원이었다면
+						b_lastmember = true;
+						game_rooms.erase(remove_if(game_rooms.begin(), game_rooms.end(), [](const Game_Room& curr_room) {
+							return curr_room.user_count == 0;}), game_rooms.end());
 					}
 
-					// 로비에 있는 클라이언트들에게 해당 방 유저 수가 1 감소하였음을 알려줍니다.
-					for (auto& cl : clients) {
-						if (cl.s_state != ST_INGAME) continue;
-						if (cl.curr_room != -1) continue; // 방에 있지않고 로비에 있는 유저에게만 보냅니다.
-						if (cl.id == target_id) continue; // 얘는 이미 위에서 로비 전체 정보 패킷을 보냈음.
+					if (!b_lastmember) {
+						// 방에 남아있는 클라이언트에게 방 퇴장 요청을 보냈던 클라이언트가 방에서 나왔음을 알려줍니다.
+						for (int i = 0; i < MAX_USER; ++i) {
+							int member_id = room.users[i];
+							if (member_id == -1) continue;
+							if (member_id == target_id) continue; // 얘는 애초에 지금 접속중이 아님.
 
-						LBYC_ROOM_USERCOUNT_PACKET user_decrease_pack;
-						user_decrease_pack.size = sizeof(LBYC_ROOM_USERCOUNT_PACKET);
-						user_decrease_pack.type = LBYC_ROOM_USERCOUNT;
-						user_decrease_pack.room_id = room_id;
-						user_decrease_pack.user_count = game_rooms[room_id].user_count;
-						cl.do_send(&user_decrease_pack);
-						cout << "로비에 있는 Client[" << cl.id << "]에게 Room[" << room_id << "]의 인원이 " << game_rooms[room_id].user_count << "명이 되었다고 알려줍니다.\n" << endl;
+							LBYC_ROOM_LEFT_MEMBER_PACKET new_member_packet;
+							new_member_packet.size = sizeof(LBYC_ROOM_LEFT_MEMBER_PACKET);
+							new_member_packet.type = LBYC_ROOM_LEFT_MEMBER;
+							strcpy_s(new_member_packet.left_member_name, clients[target_id].name);
+							new_member_packet.left_member_roomindex = inroom_index;
+
+							clients[member_id].do_send(&new_member_packet);
+							cout << "Client[" << member_id << "]에게 유저[" << target_id << "]의 퇴장 패킷을 보냈습니다.\n" << endl;
+						}
+
+						// 로비에 있는 클라이언트들에게 해당 방 유저 수가 1 감소하였음을 알려줍니다.
+						for (auto& cl : clients) {
+							if (cl.s_state != ST_INGAME) continue;
+							if (cl.curr_room != -1) continue; // 방에 있지않고 로비에 있는 유저에게만 보냅니다.
+							if (cl.id == target_id) continue; // 얘는 이미 게임 종료했음
+
+							LBYC_ROOM_USERCOUNT_PACKET user_decrease_pack;
+							user_decrease_pack.size = sizeof(LBYC_ROOM_USERCOUNT_PACKET);
+							user_decrease_pack.type = LBYC_ROOM_USERCOUNT;
+							user_decrease_pack.room_id = room_id;
+							user_decrease_pack.user_count = room.user_count;
+							cl.do_send(&user_decrease_pack);
+							cout << "로비에 있는 Client[" << cl.id << "]에게 Room[" << room_id << "]의 인원이 " << room.user_count << "명이 되었다고 알려줍니다.\n" << endl;
+						}
+					}
+					else {
+						// 로비 정보 업데이트
+						for (auto& cl : clients) {
+							if (cl.s_state != ST_INGAME) continue;
+							if (cl.curr_room != -1) continue; // 방에 있지않고 로비에 있는 유저에게만 보냅니다.
+							if (cl.id == target_id) continue; // 얘는 이미 게임 종료했음
+
+							// 로비에 있는 클라이언트들에게 로비에 있는 방 데이터 초기화를 명령합니다.
+							LBYC_LOBBY_CLEAR_PACKET lobby_clear_pack;
+							lobby_clear_pack.size = sizeof(LBYC_LOBBY_CLEAR_PACKET);
+							lobby_clear_pack.type = LBYC_LOBBY_CLEAR;
+							cl.do_send(&lobby_clear_pack);
+
+							// 방 퇴장 요청을 보낸 클라이언트에게 로비에 있는 모든 방에 대한 간략한 정보를 보냅니다.
+							for (auto& room : game_rooms) {
+								LBYC_ADD_ROOM_PACKET room_info_pack;
+								room_info_pack.size = sizeof(LBYC_ADD_ROOM_PACKET);
+								room_info_pack.type = LBYC_ADD_ROOM;
+								room_info_pack.room_id = room.room_id;
+								room_info_pack.room_state = room.room_state;
+								room_info_pack.user_count = room.user_count;
+								strcpy_s(room_info_pack.room_name, room.room_name);
+
+								cl.do_send(&room_info_pack);
+								cout << "Client[" << cl.id << "]에게 로비에 보일 Room[" << room.room_id << "]의 정보를 보냈습니다." << endl;
+							}
+							cout << "Client[" << cl.id << "]에게 존재하는 모든 방들의 정보를 보냈습니다.\n" << endl;
+						}
 					}
 				}
 			}

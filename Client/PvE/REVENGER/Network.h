@@ -478,6 +478,7 @@ void processPacket(char* ptr)
 		players_info[my_id].m_role = ROLE_NOTCHOOSE;
 		cout << "로비에 보일 방 정보 전체를 초기화합니다." << endl;
 		lobby_rooms.clear();
+		trigger_lobby_update = true;
 
 		break;
 	}// LBYC_LOBBY_CLEAR case end
