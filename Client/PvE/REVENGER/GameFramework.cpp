@@ -1297,7 +1297,7 @@ void CGameFramework::AnimateObjects()
 			((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 			if (m_bHeliDyingState == true)
 			{
-				//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->FallDown(m_GameTimer.GetTimeElapsed());
+				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->FallDown(m_GameTimer.GetTimeElapsed());
 			}
 			if (m_bHeliHittingMotion == true)
 			{
@@ -3776,7 +3776,6 @@ void CGameFramework::CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents
 	m_npcoobb = BoundingOrientedBox(npcpos, npcextents, XMFLOAT4(0, 0, 0, 1));
 
 }
-
 void CGameFramework::otherPlayerReturnToIdle(int id)
 {
 	if (m_nMode == SCENE1STAGE)
@@ -3940,7 +3939,7 @@ void CGameFramework::OtherPlayerResponeMotion(int id)
 {
 	if (m_ingame_role == R_HELI)
 	{
-		((CHelicopterObjects*)((Stage1*)m_pScene)->m_pPlayer)->Resetpartition();
+		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->Resetpartition();
 	}
 }
 void CGameFramework::CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents)
