@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "Stage1.h"
-random_device rd;
-uniform_real_distribution<float> distx(-31.0,-39.0);
-uniform_real_distribution<float> distz(745.0,755.0);
+
 float RandomDir(float fMin, float fMax)
 {
 	float fRandomValue = (float)rand();

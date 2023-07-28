@@ -459,7 +459,7 @@ void processPacket(char* ptr)
 
 		// 현재 방 정보 업데이트 (전체 방 정보 lobby_room 은 업데이트할 필요가 없음. lobby_room은 로비에 있을때만 업데이트한다.)
 		curr_room.user_count--;
-		
+
 		// 유저 정보 업데이트
 		players_info[left_member_index].InfoClear();
 
@@ -796,16 +796,42 @@ void processPacket(char* ptr)
 		if (recv_packet->target == TARGET_PLAYER) {
 			// 거리별 사운드 조절
 			if (damaged_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 소리
-				if (players_info[recv_id].m_role == ROLE_RIFLE) gamesound.HumancollisionSound();
-				if (players_info[recv_id].m_role == ROLE_HELI) gamesound.HelicollisionSound();
+				if (players_info[recv_id].m_role == ROLE_RIFLE)
+				{
+					gamesound.HumancollisionSound();
+					gamesound.HumanColliChannel->setVolume(0.05f);
+
+				}
+				if (players_info[recv_id].m_role == ROLE_HELI)
+				{
+					gamesound.HelicollisionSound();
+					gamesound.HeliColliChannel->setVolume(0.05f);
+				}
 			}
 			else if (damaged_sound_volume == VOL_MID) {		// 적당한 거리에 있어서 적당하게 들리는 소리
-				if (players_info[recv_id].m_role == ROLE_RIFLE) gamesound.HumancollisionSound();
-				if (players_info[recv_id].m_role == ROLE_HELI) gamesound.HelicollisionSound();
+				if (players_info[recv_id].m_role == ROLE_RIFLE)
+				{
+					gamesound.HumancollisionSound();
+					gamesound.HumanColliChannel->setVolume(0.25f);
+				}
+				if (players_info[recv_id].m_role == ROLE_HELI)
+				{
+					gamesound.HelicollisionSound();
+					gamesound.HeliColliChannel->setVolume(0.25f);
+				}
+
 			}
 			else if (damaged_sound_volume == VOL_HIGH) {	// 가까이에 있어서 크게 들리는 소리
-				if (players_info[recv_id].m_role == ROLE_RIFLE) gamesound.HumancollisionSound();
-				if (players_info[recv_id].m_role == ROLE_HELI) gamesound.HelicollisionSound();
+				if (players_info[recv_id].m_role == ROLE_RIFLE)
+				{
+					gamesound.HumancollisionSound();
+					gamesound.HumanColliChannel->setVolume(0.5f);
+				}
+				if (players_info[recv_id].m_role == ROLE_HELI)
+				{
+					gamesound.HelicollisionSound();
+					gamesound.HeliColliChannel->setVolume(0.5f);
+				}
 			}
 
 			// 피격 처리
@@ -819,8 +845,14 @@ void processPacket(char* ptr)
 			{
 				if (recv_id == my_id)
 				{
-					if (players_info[recv_id].m_role == ROLE_RIFLE)gamesound.PlayHearBeatSound();
-					if (players_info[recv_id].m_role == ROLE_HELI)gamesound.PlayHeliWarnningSound();
+					if (players_info[recv_id].m_role == ROLE_RIFLE)
+					{
+						gamesound.PlayHearBeatSound();
+					}
+					if (players_info[recv_id].m_role == ROLE_HELI)
+					{
+						gamesound.PlayHeliWarnningSound();
+					}
 					players_info[recv_packet->id].m_near_death_hp = true;
 				}
 			}
@@ -829,16 +861,40 @@ void processPacket(char* ptr)
 		else if (recv_packet->target == TARGET_NPC) {
 			// 거리별 사운드 조절
 			if (damaged_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 소리
-				if (recv_id < MAX_NPC_HELI) gamesound.HelicollisionSound();
-				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN) gamesound.HumancollisionSound();
+				if (recv_id < MAX_NPC_HELI)
+				{
+					gamesound.HelicollisionSound();
+					gamesound.HeliColliChannel->setVolume(0.05f);
+				}
+				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN)
+				{
+					gamesound.HumancollisionSound();
+					gamesound.HumanColliChannel->setVolume(0.05f);
+				}
 			}
 			else if (damaged_sound_volume == VOL_MID) {		// 적당한 거리에 있어서 적당하게 들리는 소리
-				if (recv_id < MAX_NPC_HELI) gamesound.HelicollisionSound();
-				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN) gamesound.HumancollisionSound();
+				if (recv_id < MAX_NPC_HELI)
+				{
+					gamesound.HelicollisionSound();
+					gamesound.HeliColliChannel->setVolume(0.25f);
+				}
+				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN)
+				{
+					gamesound.HumancollisionSound();
+					gamesound.HumanColliChannel->setVolume(0.25f);
+				}
 			}
 			else if (damaged_sound_volume == VOL_HIGH) {	// 가까이에 있어서 크게 들리는 소리
-				if (recv_id < MAX_NPC_HELI) gamesound.HelicollisionSound();
-				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN) gamesound.HumancollisionSound();
+				if (recv_id < MAX_NPC_HELI)
+				{
+					gamesound.HelicollisionSound();
+					gamesound.HeliColliChannel->setVolume(0.5f);
+				}
+				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN)
+				{
+					gamesound.HumancollisionSound();
+					gamesound.HumanColliChannel->setVolume(0.5f);
+				}
 			}
 
 			// 피격 처리
@@ -1061,8 +1117,8 @@ void processPacket(char* ptr)
 			case PL_ST_ATTACK:
 				break;
 			case PL_ST_DEAD:
-				if(players_info[recv_id].m_role==ROLE_RIFLE) gamesound.HumancollisionSound();
-				if(players_info[recv_id].m_role==ROLE_HELI) gamesound.HeliiShotDownSound();
+				if (players_info[recv_id].m_role == ROLE_RIFLE) gamesound.HumancollisionSound();
+				if (players_info[recv_id].m_role == ROLE_HELI) gamesound.HeliiShotDownSound();
 				if (recv_id == my_id) gamesound.pauseHeartBeat(); gamesound.PauseHeliWarnningSound();
 				players_info[recv_id].m_hp = 0;
 				players_info[recv_id].m_life--;
@@ -1082,8 +1138,8 @@ void processPacket(char* ptr)
 			case PL_ST_ATTACK:
 				break;
 			case PL_ST_DEAD:
-				if(recv_id<MAX_NPC_HELI) gamesound.HeliiShotDownSound();
-				if(MAX_NPC_HELI<=recv_id< MAX_NPC_HUMAN) gamesound.HumancollisionSound();
+				if (recv_id < MAX_NPC_HELI) gamesound.HeliiShotDownSound();
+				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN) gamesound.HumancollisionSound();
 				npcs_info[recv_id].m_hp = 0;
 				cout << "NPC[" << recv_id << "] 죽었다" << endl;
 				break;

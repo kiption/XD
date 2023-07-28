@@ -932,9 +932,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case '0':
 				if (MouseResponsivenessY > 400 && MouseResponsivenessY < 600) MouseResponsivenessY += 50.0f;
 				break;
-			case 'M':
-				((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->FallDown(m_GameTimer.GetTimeElapsed());
-				break;
+			
 			case 'Y':
 				((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Resetpartition();
 				break;
@@ -950,7 +948,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				break;
 			case VK_SPACE:
 				break;
-
+			case 'M':
+				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->FallDown(m_GameTimer.GetTimeElapsed());
+				break;
 
 			default:
 				break;
@@ -1297,7 +1297,7 @@ void CGameFramework::AnimateObjects()
 			((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 			if (m_bHeliDyingState == true)
 			{
-				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->FallDown(m_GameTimer.GetTimeElapsed());
+				//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->FallDown(m_GameTimer.GetTimeElapsed());
 			}
 			if (m_bHeliHittingMotion == true)
 			{

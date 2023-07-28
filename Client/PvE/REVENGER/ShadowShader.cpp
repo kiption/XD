@@ -106,7 +106,8 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppObjects[7]->SetChild(pPlayerHelicopterModel, false);
 			m_ppObjects[7]->SetMaterial(0, pOtherPlayerMaterial);
 			m_ppObjects[7]->OnPrepareAnimate();
-			m_ppObjects[7]->SetPosition(XMFLOAT3(50.0, -5.0, 500.0));
+			m_ppObjects[7]->SetScale(5, 5, 5);
+			m_ppObjects[7]->SetPosition(XMFLOAT3(120.0, 100.0, 700.0));
 			pPlayerHelicopterModel->AddRef();
 		}
 		/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
