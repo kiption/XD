@@ -5,11 +5,11 @@
 
 class SceneManager;
 
-class BloodMarkShader : public BillboardShader
+class HealPackBillboardShader : public BillboardShader
 {
 public:
-	BloodMarkShader() {};
-	virtual ~BloodMarkShader() {};
+	HealPackBillboardShader() {};
+	virtual ~HealPackBillboardShader() {};
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);
@@ -25,7 +25,13 @@ public:
 	XMFLOAT3 xmf3Position{};
 	XMFLOAT3 xmf3CameraPosition{};
 
-
+public:
+	XMFLOAT4X4					m_pxmf4x4Transforms[HEAL_EFFECTS_COUNT];
+	float						m_fElapsedTimes = 1.0f;
+	float						m_fDuration = 2.5;
+	float						m_fExplosionSpeed = 10.0f;
+	float						m_fExplosionRotation = 720.0f;
+	XMFLOAT3 m_pxmf3SphereVectors[HEAL_EFFECTS_COUNT];
 	bool m_bActiveMark = false;
 };
 
@@ -90,8 +96,6 @@ public:
 	CMaterial* pSpriteMaterial3 = NULL;
 
 };
-
-
 
 class MuzzleFrameBillboard : public BillboardShader
 {

@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "Stage1.h"
+random_device rd;
+uniform_real_distribution<float> distx(-31.0,-39.0);
+uniform_real_distribution<float> distz(745.0,755.0);
 float RandomDir(float fMin, float fMax)
 {
 	float fRandomValue = (float)rand();
@@ -30,6 +33,21 @@ DirectX::XMFLOAT3 RandomDirection(float fMin, float fMax)
 
 	return result;
 }
+DirectX::XMFLOAT3 RandomPosition(float fMin, float fMax)
+{
+	float x = RandD(-25.0f, -45.0f);
+	float y = 8.0f;
+	float z = RandD(740.0f, 760.0f);
+
+	DirectX::XMVECTOR direction = DirectX::XMVectorSet(x, y, z, 0.0f);
+	direction = DirectX::XMVector3Normalize(direction);
+
+	DirectX::XMFLOAT3 result;
+	DirectX::XMStoreFloat3(&result, direction);
+
+	return result;
+}
+
 ID3D12DescriptorHeap* Stage1::m_pd3dCbvSrvDescriptorHeap = NULL;
 
 D3D12_CPU_DESCRIPTOR_HANDLE	Stage1::m_d3dCbvCPUDescriptorStartHandle;
@@ -176,7 +194,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pBillboardParticleShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[0] = pBillboardParticleShader;
 
-	BloodMarkShader* pCrossHairShader = new BloodMarkShader();
+	HealPackBillboardShader* pCrossHairShader = new HealPackBillboardShader();
 	pCrossHairShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pCrossHairShader->SetCurScene(SCENE1STAGE);
 	pCrossHairShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
@@ -1075,7 +1093,7 @@ bool Stage1::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 
 			break;
 		case 'J':
-			((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveMark = false;
+			((HealPackBillboardShader*)m_pBillboardShader[1])->m_bActiveMark = false;
 			break;
 		default:
 			break;
@@ -1111,14 +1129,10 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nHumanShaders; i++) if (m_ppHumanShaders[i]) m_ppHumanShaders[i]->AnimateObjects(fTimeElapsed);
 	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();
 
-	((BloodMarkShader*)m_pBillboardShader[1])->m_bActiveMark = true;
-
-	/*((CFragmentsShader*)m_ppFragShaders[0])->m_bActive = true;
-	((CFragmentsShader*)m_ppFragShaders[0])->ParticlePosition = XMFLOAT3(120.0, 50.0, 700.0);*/
+	((HealPackBillboardShader*)m_pBillboardShader[1])->m_bActiveMark = true;
+	((HealPackBillboardShader*)m_pBillboardShader[1])->ParticlePosition = XMFLOAT3(-35.0,5.0,750.0);
 
 	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(m_ppShaders[0]->m_ppObjects[30]->GetPosition());
-
-
 
 	for (int i = 0; i < HELIBULLETS; i++)
 	{
