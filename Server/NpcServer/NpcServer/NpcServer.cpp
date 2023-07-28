@@ -2384,7 +2384,7 @@ void initNpc() {
 		uniform_int_distribution<int>drange(0.0f, 20.0f);
 		npcsInfo[i].SetDestinationRange(drange(dre));
 
-		uniform_real_distribution<float>SpdSet(10.0f, 20.0f);
+		uniform_real_distribution<float>SpdSet(5.0f, 12.0f);
 		float speed = SpdSet(dre);
 		npcsInfo[i].SetSpeed(speed);
 		npcsInfo[i].SetChaseID(-1);
