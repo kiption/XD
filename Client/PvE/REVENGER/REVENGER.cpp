@@ -1050,7 +1050,7 @@ void networkThreadFunc()
 				}
 			}
 		}
-		
+
 		this_thread::yield();
 	}
 }
@@ -1336,7 +1336,7 @@ void uiThreadFunc() {
 				gGameFramework.m_BloodSplatterOn = true;
 				players_info[my_id].m_damaged_effect_on = false;
 			}
-			
+
 			// 9. HP 적을때 UI
 			if (players_info[my_id].m_near_death_hp) {
 				if (players_info[my_id].m_role == ROLE_RIFLE) {
@@ -1409,13 +1409,7 @@ void uiThreadFunc() {
 				gGameFramework.m_missionClear = false;
 				gGameFramework.m_missionFailed = false;
 			}
-
-			// 12. Life 표시
-			wchar_t PlayerLifeCount[20];
-			_itow_s(players_info[my_id].m_life, PlayerLifeCount, sizeof(PlayerLifeCount), 10);
-			wcscpy_s(gGameFramework.m_mylifeCount, PlayerLifeCount);
 		}
-
 		this_thread::yield();
 	}
 }
