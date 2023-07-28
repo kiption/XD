@@ -1018,6 +1018,7 @@ void processPacket(char* ptr)
 			players_info[recv_id].m_new_state_update = true;
 			switch (recvd_state) {
 			case PL_ST_IDLE:
+				// 이미 위에서 상태를 바꿔줬기 때문에 여기에서 할 건 없다.
 				break;
 			case PL_ST_ATTACK:
 				break;

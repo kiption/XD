@@ -1632,14 +1632,14 @@ void process_packet(int client_id, char* packet)
 
 		case PACKET_KEYUP_MOVEKEY:
 			if (clients[client_id].pl_state == PL_ST_DEAD) break;	// 죽은 자는 움직일 수 없다.
-			if (PL_ST_MOVE_FRONT <= clients[client_id].pl_state && clients[client_id].pl_state <= PL_ST_MOVE_SIDE) {
+			if (clients[client_id].pl_state == PL_ST_MOVE_FRONT || clients[client_id].pl_state == PL_ST_MOVE_BACK || clients[client_id].pl_state == PL_ST_MOVE_SIDE) {
 				clients[client_id].s_lock.lock();
 				clients[client_id].pl_state = PL_ST_IDLE;
 				clients[client_id].s_lock.unlock();
 
 				SC_OBJECT_STATE_PACKET change2idle_pack;
-				change2idle_pack.type = SC_OBJECT_STATE;
 				change2idle_pack.size = sizeof(SC_OBJECT_STATE_PACKET);
+				change2idle_pack.type = SC_OBJECT_STATE;
 				change2idle_pack.target = TARGET_PLAYER;
 				change2idle_pack.id = clients[client_id].id;
 				change2idle_pack.state = PL_ST_IDLE;
