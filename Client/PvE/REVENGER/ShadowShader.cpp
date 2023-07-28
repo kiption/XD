@@ -96,7 +96,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 				m_ppObjects[i] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
 				m_ppObjects[i]->SetMaterial(0, pOtherPlayerMaterial);
 				m_ppObjects[i]->SetScale(5, 5, 5);
-				m_ppObjects[i]->SetPosition(XMFLOAT3(150.0, 6.0, 800.0));
+				m_ppObjects[i]->SetPosition(XMFLOAT3(150.0, -60.0, 800.0));
 				pSModel->m_pModelRootObject->AddRef();
 			}
 			if (pSModel) delete pSModel;
@@ -107,7 +107,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppObjects[7]->SetMaterial(0, pOtherPlayerMaterial);
 			m_ppObjects[7]->OnPrepareAnimate();
 			m_ppObjects[7]->SetScale(5, 5, 5);
-			m_ppObjects[7]->SetPosition(XMFLOAT3(120.0, 100.0, 700.0));
+			m_ppObjects[7]->SetPosition(XMFLOAT3(120.0, -100.0, 700.0));
 			pPlayerHelicopterModel->AddRef();
 		}
 		/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////

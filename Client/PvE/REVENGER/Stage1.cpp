@@ -1309,15 +1309,15 @@ void Stage1::OtherHeliPlayerTransformStore()
 {
 	m_pMainRotorFrameP = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pMainRotorFrame->m_xmf4x4ToParent;
 	m_pTailRotorFrameP = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pTailRotorFrame->m_xmf4x4ToParent;
-	m_pFrameFragObj1P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj1->m_xmf4x4ToParent;
-	m_pFrameFragObj2P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj2->m_xmf4x4ToParent;
-	m_pFrameFragObj3P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj3->m_xmf4x4ToParent;
-	m_pFrameFragObj4P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj4->m_xmf4x4ToParent;
-	m_pFrameFragObj5P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj5->m_xmf4x4ToParent;
-	m_pFrameFragObj6P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj6->m_xmf4x4ToParent;
-	m_pFrameFragObj7P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj7->m_xmf4x4ToParent;
-	m_pFrameFragObj8P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj8->m_xmf4x4ToParent;
-	m_pFrameFragObj9P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj9->m_xmf4x4ToParent;
+	m_pFrameFragObj1P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj1->m_xmf4x4ToParent;
+	m_pFrameFragObj2P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj2->m_xmf4x4ToParent;
+	m_pFrameFragObj3P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj3->m_xmf4x4ToParent;
+	m_pFrameFragObj4P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj4->m_xmf4x4ToParent;
+	m_pFrameFragObj5P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj5->m_xmf4x4ToParent;
+	m_pFrameFragObj6P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj6->m_xmf4x4ToParent;
+	m_pFrameFragObj7P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj7->m_xmf4x4ToParent;
+	m_pFrameFragObj8P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj8->m_xmf4x4ToParent;
+	m_pFrameFragObj9P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj9->m_xmf4x4ToParent;
 	m_pFrameFragObj10P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj10->m_xmf4x4ToParent;
 }
 
