@@ -84,7 +84,7 @@ GameSound::GameSound()
 	NpcshootChannel->setVolume(0.25f);
 
 	result = soundSystem->playSound(HeliWarrningHighSounds, 0, true, &HeliWarrningHighChannel);
-	HeliWarrningHighChannel->setVolume(0.2f);
+	HeliWarrningHighChannel->setVolume(0.05f);
 
 	shotChannel->setVolume(0.1f);
 	HelishotChannel->setVolume(0.3f);
@@ -149,7 +149,7 @@ void GameSound::backGroundMusic()
 void GameSound::SpeakMusic()
 {
 	result = soundSystem->playSound(speakSound, 0, false, &speakChannel);
-	speakChannel->setVolume(0.7f);
+	speakChannel->setVolume(1.0f);
 }
 void GameSound::HartBeatSound()
 {
