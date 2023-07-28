@@ -224,7 +224,7 @@ void GameSound::PlayHightLimitSound()
 {
 	//HeliWarrningHighChannel->setPaused(false);
 	result = soundSystem->playSound(HeliWarrningHighSounds, 0, false, &HeliWarrningHighChannel);
-	HeliWarrningHighChannel->setVolume(0.5f);
+	HeliWarrningHighChannel->setVolume(0.15f);
 }
 void GameSound::PauseHightLimitSound()
 {
