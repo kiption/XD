@@ -1449,7 +1449,7 @@ void CGameFramework::FrameAdvance()
 		// Logo
 		D2D_POINT_2F D2_OpeningUI = { 50.0f, 50.0f };
 		D2D_RECT_F D2_OpeningUIRect = { 0.0f, 0.0f, 840.0f, 184.0f };
-		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[24], &D2_OpeningUI, &D2_OpeningUIRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[23], &D2_OpeningUI, &D2_OpeningUIRect);
 
 		if (m_LoginScene == LS_OPENING) {
 			POINT CurrMousePoint;
@@ -1469,17 +1469,17 @@ void CGameFramework::FrameAdvance()
 
 			D2D_POINT_2F D2_GameStartUI = { 100.0f, FRAME_BUFFER_HEIGHT / 8 * 5 };
 			D2D_RECT_F D2_GameStartUIRect = { 0.0f, 70.0f * StartOn, 171.0f, 70.0f * (StartOn + 1) };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[52], &D2_GameStartUI, &D2_GameStartUIRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[51], &D2_GameStartUI, &D2_GameStartUIRect);
 
 			D2D_POINT_2F D2_GameExitUI = { 100.0f, FRAME_BUFFER_HEIGHT / 4 * 3 };
 			D2D_RECT_F D2_GameExitUIRect = { 0.0f, 70.0f * ExitOn, 171.0f, 70.0f * (ExitOn + 1) };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[53], &D2_GameExitUI, &D2_GameExitUIRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[52], &D2_GameExitUI, &D2_GameExitUIRect);
 		}
 		else {
 			// 로비 ui
 			D2D_POINT_2F D2_RobbyUI = { FRAME_BUFFER_WIDTH / 2 - 640.0f, FRAME_BUFFER_HEIGHT / 2 - 381.5f };
 			D2D_RECT_F D2_RobbyUIRect = { 0.0f, 0.0f, 1280.0f, 763.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[25], &D2_RobbyUI, &D2_RobbyUIRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[24], &D2_RobbyUI, &D2_RobbyUIRect);
 
 			POINT CurrMousePoint;
 			GetCursorPos(&CurrMousePoint);
@@ -1518,25 +1518,25 @@ void CGameFramework::FrameAdvance()
 			// 빠른시작
 			D2D_POINT_2F D2_RapidStartUI = { 1004.0f, 215.0f };
 			D2D_RECT_F D2_RapidStartUIRect = { 0.0f, 102.5f * Roomin, 260.0f, 102.5f * (Roomin + 1) };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[54], &D2_RapidStartUI, &D2_RapidStartUIRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[53], &D2_RapidStartUI, &D2_RapidStartUIRect);
 
 			// 방만들기
 			D2D_POINT_2F D2_CreateRoomUI = { 1310.0f, 215.0f };
 			D2D_RECT_F D2_CreateRoomUIRect = { 0.0f, 102.5f * CreateRoom, 261.0f, 102.5f * (CreateRoom + 1) };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[55], &D2_CreateRoomUI, &D2_CreateRoomUIRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[54], &D2_CreateRoomUI, &D2_CreateRoomUIRect);
 
 
 			// 왼쪽 페이지
 			D2D_POINT_2F D2_LeftPageUI = { FRAME_BUFFER_WIDTH / 2 - 100.0f, FRAME_BUFFER_HEIGHT / 2 + 315.0f };
 			D2D_RECT_F D2_LeftPageUIRect = { 0.0f, 0.0f, 46.0f, 50.0f };
-			if (!LeftOn) m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[56], &D2_LeftPageUI, &D2_LeftPageUIRect);
-			else m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[57], &D2_LeftPageUI, &D2_LeftPageUIRect);
+			if (!LeftOn) m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[55], &D2_LeftPageUI, &D2_LeftPageUIRect);
+			else m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[56], &D2_LeftPageUI, &D2_LeftPageUIRect);
 			// 오른쪽 페이지
 			D2D_POINT_2F D2_RightPageUI = { FRAME_BUFFER_WIDTH / 2 + 26.0f, FRAME_BUFFER_HEIGHT / 2 + 315.0f };
 			D2D_RECT_F D2_RightPageUIRect = { 0.0f, 0.0f, 46.0f, 50.0f };
 
-			if (!RightOn) m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[58], &D2_RightPageUI, &D2_RightPageUIRect);
-			else m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[59], &D2_RightPageUI, &D2_RightPageUIRect);
+			if (!RightOn) m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[57], &D2_RightPageUI, &D2_RightPageUIRect);
+			else m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[58], &D2_RightPageUI, &D2_RightPageUIRect);
 
 			D2D_POINT_2F D2_RobbyPeopleUI[8];
 			D2D_RECT_F D2_RobbyPeopleUIRect[8];
@@ -1558,18 +1558,18 @@ void CGameFramework::FrameAdvance()
 				// 각 방 현재 인원
 				D2_RobbyPeopleUI[i] = { FRAME_BUFFER_WIDTH / 1.57f, FRAME_BUFFER_HEIGHT / numResultypos };
 				D2_RobbyPeopleUIRect[i] = { 0.0f, (m_LobbyRoom_Info[numberRoom].currnum_of_people - 1) * 36.3f, 100.0f, m_LobbyRoom_Info[numberRoom].currnum_of_people * 36.3f };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[26 + i], &D2_RobbyPeopleUI[i], &D2_RobbyPeopleUIRect[i]);
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[25 + i], &D2_RobbyPeopleUI[i], &D2_RobbyPeopleUIRect[i]);
 
 				// 각 방 준비 상태
 				D2_RobbyReadyUI[i] = { FRAME_BUFFER_WIDTH / 1.42f, textypos };
 				D2_RobbyReadyUIRect[i] = { 0.0f, (m_LobbyRoom_Info[numberRoom].ready_state - 1) * 37.0f, 243.0f, m_LobbyRoom_Info[numberRoom].ready_state * 37.0f };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[34 + i], &D2_RobbyReadyUI[i], &D2_RobbyReadyUIRect[i]);
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[33 + i], &D2_RobbyReadyUI[i], &D2_RobbyReadyUIRect[i]);
 			}
 			if (m_LoginScene == LS_ROOM) {
 				// 방 ui
 				D2D_POINT_2F D2_RoomUI = { (FRAME_BUFFER_WIDTH / 6), FRAME_BUFFER_HEIGHT / 2 - 223.5f };
 				D2D_RECT_F D2_RoomUIRect = { 0.0f, 0.0f, 1280.0f, 447.0f };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[42], &D2_RoomUI, &D2_RoomUIRect);
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[41], &D2_RoomUI, &D2_RoomUIRect);
 
 				// 시작 버튼
 				if (m_RoomClick[0]) m_StartKey = 0.0f;
@@ -1577,7 +1577,7 @@ void CGameFramework::FrameAdvance()
 
 				D2D_POINT_2F D2_RoomStartUI = { FRAME_BUFFER_WIDTH / 2, D2_RoomUI.y + 40.0f };
 				D2D_RECT_F D2_RoomStartUIRect = { 0.0f , 0.0f + m_StartKey, 261.0f, 102.5f + m_StartKey };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[43], &D2_RoomStartUI, &D2_RoomStartUIRect);
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[42], &D2_RoomStartUI, &D2_RoomStartUIRect);
 
 				// 준비 버튼
 				if (m_RoomClick[1]) m_ReadyKey = 102.5f;
@@ -1585,7 +1585,7 @@ void CGameFramework::FrameAdvance()
 
 				D2D_POINT_2F D2_RoomReadyUI = { D2_RoomStartUI.x + 320.0f, D2_RoomStartUI.y };
 				D2D_RECT_F D2_RoomReadyUIRect = { 0.0f, 0.0f + m_ReadyKey, 261.0f, 102.5f + m_ReadyKey };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[44], &D2_RoomReadyUI, &D2_RoomReadyUIRect);
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[43], &D2_RoomReadyUI, &D2_RoomReadyUIRect);
 
 				// 모든 인원 준비 표시
 				D2D_POINT_2F D2_RoomReadyNumUI[3];
@@ -1597,7 +1597,7 @@ void CGameFramework::FrameAdvance()
 
 					D2_RoomReadyNumUI[i] = { FRAME_BUFFER_WIDTH / 1.48f, FRAME_BUFFER_HEIGHT / textypos };
 					D2_RoomReadyNumUIRect[i] = { 0.0f, (m_MyRoom_Info[i].ready_state - 1) * 60.0f, 284.0f, m_MyRoom_Info[i].ready_state * 60.0f };
-					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[45 + i], &D2_RoomReadyNumUI[i], &D2_RoomReadyNumUIRect[i]);
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[44 + i], &D2_RoomReadyNumUI[i], &D2_RoomReadyNumUIRect[i]);
 				}
 
 				// 역할 선택
@@ -1616,35 +1616,35 @@ void CGameFramework::FrameAdvance()
 
 					D2_JobArmyUI[i] = { FRAME_BUFFER_WIDTH * 0.6f + 5.0f, FRAME_BUFFER_HEIGHT / textypos };
 					D2_JobArmyRect[i] = { 0.0f, (m_MyRoom_Info[i].armyCheck) * 50.0f, 50.0f, (m_MyRoom_Info[i].armyCheck + 1) * 50.0f };
-					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[60 + i], &D2_JobArmyUI[i], &D2_JobArmyRect[i]);
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[59 + i], &D2_JobArmyUI[i], &D2_JobArmyRect[i]);
 
 					D2_JobHeliUI[i] = { D2_JobArmyUI[i].x + 75.0f, FRAME_BUFFER_HEIGHT / textypos };
 					D2_JobHeliRect[i] = { 0.0f, (m_MyRoom_Info[i].HeliCheck) * 50.0f, 50.0f, (m_MyRoom_Info[i].HeliCheck + 1) * 50.0f };
-					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[63 + i], &D2_JobHeliUI[i], &D2_JobHeliRect[i]);
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[62 + i], &D2_JobHeliUI[i], &D2_JobHeliRect[i]);
 
 					if (i == m_roominMyId) {
 						D2_MyMarkUI = { (FRAME_BUFFER_WIDTH / 5.0f), FRAME_BUFFER_HEIGHT / textypos + 5.0f };
 						D2_MyMarkRect = { 0.0f, 0.0f, 25.0f, 37.0f };
-						m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[79], &D2_MyMarkUI, &D2_MyMarkRect);
+						m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[78], &D2_MyMarkUI, &D2_MyMarkRect);
 					}
 				}
 
 				if (m_ingame) {
 					D2D_POINT_2F D2_GameLoadingUI = { FRAME_BUFFER_WIDTH / 2 - 404.0f, FRAME_BUFFER_HEIGHT / 2 - 78.0f };
 					D2D_RECT_F D2_GameLoadingUIRect = { 0.0f, 0.0f, 808.0f, 156.0f };
-					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[76], &D2_GameLoadingUI, &D2_GameLoadingUIRect);
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[75], &D2_GameLoadingUI, &D2_GameLoadingUIRect);
 				}
 				if (m_infoReady) {
 					D2D_POINT_2F D2_NotAllReadyUI = { FRAME_BUFFER_WIDTH / 2 - 404.0f, FRAME_BUFFER_HEIGHT / 2 - 84.0f };
 					D2D_RECT_F D2_NotAllReadyUIRect = { 0.0f, 0.0f, 808.0f, 168.0f };
-					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[77], &D2_NotAllReadyUI, &D2_NotAllReadyUIRect);
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[76], &D2_NotAllReadyUI, &D2_NotAllReadyUIRect);
 
 					m_infoReadyTime += 0.1f;
 				}
 				if (m_infoChoose) {
 					D2D_POINT_2F D2_ChoiceJobUI = { FRAME_BUFFER_WIDTH / 2 - 404.0f, FRAME_BUFFER_HEIGHT / 2 - 84.0f };
 					D2D_RECT_F D2_ChoiceJobUIRect = { 0.0f, 0.0f, 808.0f, 168.0f };
-					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[78], &D2_ChoiceJobUI, &D2_ChoiceJobUIRect);
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[77], &D2_ChoiceJobUI, &D2_ChoiceJobUIRect);
 
 					m_infoChooseTime += 0.1f;
 				}
@@ -1653,7 +1653,7 @@ void CGameFramework::FrameAdvance()
 			if (m_LoginScene == LS_CREATE_ROOM) {
 				D2D_POINT_2F D2_RoomUI = { (FRAME_BUFFER_WIDTH / 6) + 100.0f, FRAME_BUFFER_HEIGHT / 2 - 146.5f };
 				D2D_RECT_F D2_RoomUIRect = { 0.0f, 0.0f, 1080.0f, 293.0f };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[51], &D2_RoomUI, &D2_RoomUIRect);
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[50], &D2_RoomUI, &D2_RoomUIRect);
 			}
 		}
 	}
@@ -1750,60 +1750,55 @@ void CGameFramework::FrameAdvance()
 		D2D_RECT_F D2_HPBarRect = { 0.0f, 0.0f, 3.97f * m_currHp, 40.0f };
 		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[16], &D2_HPBar, &D2_HPBarRect);
 
-		// Remain NPC
-		D2D_POINT_2F D2_RemainNPCBG = { FRAME_BUFFER_WIDTH - 191.0f, FRAME_BUFFER_HEIGHT / 128 };
-		D2D_RECT_F D2_RemainNPCBGRect = { 0.0f, 0.0f, 133.0f, 75.0f };
-		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[17], &D2_RemainNPCBG, &D2_RemainNPCBGRect);
-
 		// Mission
-		D2D_POINT_2F D2_MainMissionUI = { FRAME_BUFFER_WIDTH - 300.0f, D2_RemainNPCBG.y + 65.0f };
+		D2D_POINT_2F D2_MainMissionUI = { FRAME_BUFFER_WIDTH - 300.0f, FRAME_BUFFER_HEIGHT / 128 + 65.0f };
 		D2D_RECT_F D2_MainMissionUIRect = { 271.5f * m_mainmissionnum, 0.0f, 271.5f + (271.5f * m_mainmissionnum), 167.0f };
-		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[18], &D2_MainMissionUI, &D2_MainMissionUIRect);
+		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[17], &D2_MainMissionUI, &D2_MainMissionUIRect);
 
 		// Cross Hair
 		if (!m_SniperOn) {
 			D2D_POINT_2F D2_CrossHairUI = { (FRAME_BUFFER_WIDTH / 2) - 166.5f, (FRAME_BUFFER_HEIGHT / 2) - 125.0f };
 			D2D_RECT_F D2_CrossHairRect = { 0.0f, 0.0f, 333.0f, 250.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[19], &D2_CrossHairUI, &D2_CrossHairRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[18], &D2_CrossHairUI, &D2_CrossHairRect);
 		}
 
 		// Team
 		if (m_CurrentPlayerNum > 1) {
 			D2D_POINT_2F D2_Team1UI = { FRAME_BUFFER_WIDTH / 128, FRAME_BUFFER_HEIGHT / 5 * 3 };
 			D2D_RECT_F D2_Team1UIRect = { 0.0f, 0.0f, 323.0f, 60.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[20], &D2_Team1UI, &D2_Team1UIRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[19], &D2_Team1UI, &D2_Team1UIRect);
 
 			D2D_POINT_2F D2_Team1UIHP = { FRAME_BUFFER_WIDTH / 128 + 14.0f, D2_Team1UI.y + 44.0f };
 			D2D_RECT_F D2_Team1UIHPRect = { 0.0f, 0.0f, m_otherHP[0] * 2.95f, 11.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[22], &D2_Team1UIHP, &D2_Team1UIHPRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[21], &D2_Team1UIHP, &D2_Team1UIHPRect);
 		}
 
 		if (m_CurrentPlayerNum > 2) {
 			D2D_POINT_2F D2_Team2UI = { FRAME_BUFFER_WIDTH / 128, FRAME_BUFFER_HEIGHT / 5 * 3 + 75.0f };
 			D2D_RECT_F D2_Team2UIRect = { 0.0f, 0.0f, 323.0f, 60.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[21], &D2_Team2UI, &D2_Team2UIRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[20], &D2_Team2UI, &D2_Team2UIRect);
 
 			D2D_POINT_2F D2_Team2UIHP = { FRAME_BUFFER_WIDTH / 128 + 14.0f, D2_Team2UI.y + 44.0f };
 			D2D_RECT_F D2_Team2UIHPRect = { 0.0f, 0.0f, m_otherHP[1] * 2.95f, 11.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[23], &D2_Team2UIHP, &D2_Team2UIHPRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[22], &D2_Team2UIHP, &D2_Team2UIHPRect);
 		}
 
 		// Chat UI
 		if (UI_Switch) {
 			D2D_POINT_2F D2_ChatUI = { FRAME_BUFFER_WIDTH - 782.0f, (FRAME_BUFFER_HEIGHT / 2) - 145.5f };
 			D2D_RECT_F D2_ChatUIRect = { 0.0f, 0.0f, 782.0f, 291.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[48], &D2_ChatUI, &D2_ChatUIRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[47], &D2_ChatUI, &D2_ChatUIRect);
 
 			D2D_POINT_2F D2_InsertChatUI = { FRAME_BUFFER_WIDTH - 782.0f, D2_ChatUI.y + D2_ChatUIRect.bottom + 5.0f };
 			D2D_RECT_F D2_InsertChatUIRect = { 0.0f, 0.0f, 782.0f, 69.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[49], &D2_InsertChatUI, &D2_InsertChatUIRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[48], &D2_InsertChatUI, &D2_InsertChatUIRect);
 		}
 
 		// Sniper UI
 		if (m_SniperOn) {
 			D2D_POINT_2F D2_SniperAimUI = { FRAME_BUFFER_WIDTH / 2 - 457.5f, FRAME_BUFFER_HEIGHT - 725.0f };
 			D2D_RECT_F D2_SniperAimUIRect = { 0.0f, 0.0f, 950.0f, 787.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[50], &D2_SniperAimUI, &D2_SniperAimUIRect);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[49], &D2_SniperAimUI, &D2_SniperAimUIRect);
 
 		}
 
@@ -1813,7 +1808,7 @@ void CGameFramework::FrameAdvance()
 			if (m_BloodSplatterOn) {
 				D2D_POINT_2F D2_HumanSplatterUI = { (FRAME_BUFFER_WIDTH - 2000.0f) / 2, (FRAME_BUFFER_HEIGHT - 1491.0f) / 2 };
 				D2D_RECT_F D2_Splatter = { 0.0f, 0.0f, 2000.0f, 1491.0f };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[66], &D2_HumanSplatterUI, &D2_Splatter);
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[65], &D2_HumanSplatterUI, &D2_Splatter);
 			}
 
 			if (m_BloodSplatterOn == true) g_Hittingtime++;
@@ -1832,11 +1827,11 @@ void CGameFramework::FrameAdvance()
 				{
 					D2D_POINT_2F D2_HeliWarrningBannerUI = { (FRAME_BUFFER_WIDTH - 2500.0) / 2, (FRAME_BUFFER_HEIGHT - 1559.0) / 2 };
 					D2D_RECT_F D2_HeliWarrningRECT = { 0.0f, 0.0f, 2500.0, 1559.0 };
-					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[68], &D2_HeliWarrningBannerUI, &D2_HeliWarrningRECT);
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[67], &D2_HeliWarrningBannerUI, &D2_HeliWarrningRECT);
 
 					D2D_POINT_2F D2_HeliWarrningIconUI = { 20.0, 150.0 };
 					D2D_RECT_F D2_HeliWarrningIconRECT = { 0.0f, 0.0f, 200.0, 57.0 };
-					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[69], &D2_HeliWarrningIconUI, &D2_HeliWarrningIconRECT);
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[68], &D2_HeliWarrningIconUI, &D2_HeliWarrningIconRECT);
 				}
 				g_WarnningSwitchtime++;
 				if (g_WarnningSwitchtime > 12.0f)
@@ -1850,23 +1845,23 @@ void CGameFramework::FrameAdvance()
 		{
 			D2D_POINT_2F D2_DyingBannerUI = { (FRAME_BUFFER_WIDTH - 2500.0) / 2, (FRAME_BUFFER_HEIGHT - 1730.0) / 2 };
 			D2D_RECT_F D2_DyingBanner = { 0.0f, 0.0f, 2500.0, 1730.0 };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[67], &D2_DyingBannerUI, &D2_DyingBanner);
+			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[66], &D2_DyingBannerUI, &D2_DyingBanner);
 		}
 
 		if (m_missionClear && !m_missionFailed && !m_spendYourlife) {
 			if (m_printTime < 120) {
 				D2D_POINT_2F D2_MissionclearedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 163.0f };
 				D2D_RECT_F D2_MissionclearedBGUIRect = { 0.0f, 0.0f, m_missionClearUI * 19.6f, 326.0f };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[70], &D2_MissionclearedBGUI, &D2_MissionclearedBGUIRect);
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[69], &D2_MissionclearedBGUI, &D2_MissionclearedBGUIRect);
 
 				if (m_missionClearUI >= 100) {
 					D2D_POINT_2F D2_MissionclearedTextUI = { FRAME_BUFFER_WIDTH / 2 - 416.0f, FRAME_BUFFER_HEIGHT / 2 - 170.0f };
 					D2D_RECT_F D2_MissionclearedTextUIRect = { 0.0f, 0.0f, 832.0f, 176.0f };
-					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[71], &D2_MissionclearedTextUI, &D2_MissionclearedTextUIRect);
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[70], &D2_MissionclearedTextUI, &D2_MissionclearedTextUIRect);
 
 					D2D_POINT_2F D2_CongratulationUI = { FRAME_BUFFER_WIDTH / 2 - 399.0f, FRAME_BUFFER_HEIGHT / 2 };
 					D2D_RECT_F D2_CongratulationUIRect = { 0.0f, 0.0f, 792.0f, 176.0f };
-					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[72], &D2_CongratulationUI, &D2_CongratulationUIRect);
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[71], &D2_CongratulationUI, &D2_CongratulationUIRect);
 					m_printTime++;
 				}
 				else {
@@ -1881,16 +1876,16 @@ void CGameFramework::FrameAdvance()
 			if (m_printTime < 120) {
 				D2D_POINT_2F D2_MissionFailedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 181.5f };
 				D2D_RECT_F D2_MissionFailedBGUIRect = { 0.0f, 0.0f, m_missionFailedUI * 19.6f, 363.0f };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[73], &D2_MissionFailedBGUI, &D2_MissionFailedBGUIRect);
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[72], &D2_MissionFailedBGUI, &D2_MissionFailedBGUIRect);
 
 				if (m_missionFailedUI >= 100) {
 					D2D_POINT_2F D2_MissionFailedTextUI = { FRAME_BUFFER_WIDTH / 2 - 345.0f, FRAME_BUFFER_HEIGHT / 2 - 170.0f };
 					D2D_RECT_F D2_MissionFailedTextUIRect = { 0.0f, 0.0f, 690.0f, 176.0f };
-					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[74], &D2_MissionFailedTextUI, &D2_MissionFailedTextUIRect);
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[73], &D2_MissionFailedTextUI, &D2_MissionFailedTextUIRect);
 
 					D2D_POINT_2F D2_TimeOverUI = { FRAME_BUFFER_WIDTH / 2 - 314.0f, FRAME_BUFFER_HEIGHT / 2 + 10.0f };
 					D2D_RECT_F D2_TimeOverUIRect = { 0.0f, 0.0f, 628.0f, 175.0f };
-					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[75], &D2_TimeOverUI, &D2_TimeOverUIRect);
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[74], &D2_TimeOverUI, &D2_TimeOverUIRect);
 
 				}
 				else {
@@ -1905,16 +1900,16 @@ void CGameFramework::FrameAdvance()
 			if (m_printTime < 120) {
 				D2D_POINT_2F D2_MissionFailedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 181.5f };
 				D2D_RECT_F D2_MissionFailedBGUIRect = { 0.0f, 0.0f, m_missionFailedUI * 19.6f, 363.0f };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[73], &D2_MissionFailedBGUI, &D2_MissionFailedBGUIRect);
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[72], &D2_MissionFailedBGUI, &D2_MissionFailedBGUIRect);
 
 				if (m_missionFailedUI >= 100) {
 					D2D_POINT_2F D2_MissionFailedTextUI = { FRAME_BUFFER_WIDTH / 2 - 345.0f, FRAME_BUFFER_HEIGHT / 2 - 170.0f };
 					D2D_RECT_F D2_MissionFailedTextUIRect = { 0.0f, 0.0f, 690.0f, 176.0f };
-					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[74], &D2_MissionFailedTextUI, &D2_MissionFailedTextUIRect);
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[73], &D2_MissionFailedTextUI, &D2_MissionFailedTextUIRect);
 
 					D2D_POINT_2F D2_SpendLifeUI = { FRAME_BUFFER_WIDTH / 2 - 589.0f, FRAME_BUFFER_HEIGHT / 2 + 10.0f };
 					D2D_RECT_F D2_SpendLifeUIRect = { 0.0f, 0.0f, 1178.0f, 176.0f };
-					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[80], &D2_SpendLifeUI, &D2_SpendLifeUIRect);
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[79], &D2_SpendLifeUI, &D2_SpendLifeUIRect);
 					m_printTime++;
 				}
 				else {
@@ -1962,9 +1957,6 @@ void CGameFramework::FrameAdvance()
 				int resultY = 590 + 60 * i;
 				float textypos = (((float)FRAME_BUFFER_HEIGHT) / ((float)resultY));
 
-				//wchar_t roomnum_tmp[20];
-				//_itow_s(m_LobbyRoom_Info[i].num, roomnum_tmp, 20, 10);
-
 				D2_UserNameText[i] = D2D1::RectF((FRAME_BUFFER_WIDTH * 0.22f), (FRAME_BUFFER_HEIGHT / textypos), (FRAME_BUFFER_WIDTH * 0.5f), (FRAME_BUFFER_HEIGHT / textypos));
 				m_pd2dDeviceContext->DrawTextW(m_MyRoom_Info[i].User_name, (UINT32)wcslen(m_MyRoom_Info[i].User_name), m_pdwFont[2], &D2_UserNameText[i], m_pd2dbrText[2]);
 			}
@@ -1976,9 +1968,6 @@ void CGameFramework::FrameAdvance()
 		}
 	}
 	else if (m_nMode == SCENE1STAGE) {
-		D2D1_RECT_F D2_RemainNPCText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 57, 0.0f, (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 16) * 1);
-		m_pd2dDeviceContext->DrawTextW(m_mylifeCount, (UINT32)wcslen(m_mylifeCount), m_pdwFont[0], &D2_RemainNPCText, m_pd2dbrText[0]);
-
 		switch (m_mainmissionnum)
 		{
 		case 0:
@@ -2529,8 +2518,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[16]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[16]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Remain NPC
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/MyLife.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Mission
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/MainMission.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2547,8 +2536,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[17]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[17]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Mission
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/MainMission.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Cross hair
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/CrossHair2.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2565,8 +2554,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[18]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[18]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Cross hair
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/CrossHair2.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Team_Info
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/TeamUIBG.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2583,14 +2572,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[19]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[19]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Team_Info
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/TeamUIBG.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
-	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
-	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
 	m_pd2dfxBitmapSource[20]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-
 	m_pd2dfxGaussianBlur[20]->SetInputEffect(0, m_pd2dfxBitmapSource[20]);
 	m_pd2dfxGaussianBlur[20]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
 
@@ -2601,7 +2583,13 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[20]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[20]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/TeamHP.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
 	m_pd2dfxBitmapSource[21]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
 	m_pd2dfxGaussianBlur[21]->SetInputEffect(0, m_pd2dfxBitmapSource[21]);
 	m_pd2dfxGaussianBlur[21]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
 
@@ -2612,13 +2600,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[21]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[21]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/TeamHP.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
-	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
-	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
 	m_pd2dfxBitmapSource[22]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-
 	m_pd2dfxGaussianBlur[22]->SetInputEffect(0, m_pd2dfxBitmapSource[22]);
 	m_pd2dfxGaussianBlur[22]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
 
@@ -2629,7 +2611,14 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[22]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[22]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
+	// Logo
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Logo.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
 	m_pd2dfxBitmapSource[23]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
 	m_pd2dfxGaussianBlur[23]->SetInputEffect(0, m_pd2dfxBitmapSource[23]);
 	m_pd2dfxGaussianBlur[23]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
 
@@ -2640,8 +2629,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[23]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[23]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Logo
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Logo.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Lobby
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LobbyUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2658,8 +2647,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[24]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[24]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Lobby
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LobbyUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Lobby People UI
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LobbyPeopleUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2676,35 +2665,17 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[25]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[25]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Lobby People UI
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LobbyPeopleUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
-	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
-	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
-	m_pd2dfxBitmapSource[26]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-
-	m_pd2dfxGaussianBlur[26]->SetInputEffect(0, m_pd2dfxBitmapSource[26]);
-	m_pd2dfxGaussianBlur[26]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
-
-	m_pd2dfxEdgeDetection[26]->SetInputEffect(0, m_pd2dfxBitmapSource[26]);
-	m_pd2dfxEdgeDetection[26]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
-	m_pd2dfxEdgeDetection[26]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
-	m_pd2dfxEdgeDetection[26]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
-	m_pd2dfxEdgeDetection[26]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
-	m_pd2dfxEdgeDetection[26]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
-
 	for (int i{}; i < 7; ++i) {
-		m_pd2dfxBitmapSource[27 + i]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
-		m_pd2dfxGaussianBlur[27 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[27 + i]);
-		m_pd2dfxGaussianBlur[27 + i]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+		m_pd2dfxBitmapSource[26 + i]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+		m_pd2dfxGaussianBlur[26 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[26 + i]);
+		m_pd2dfxGaussianBlur[26 + i]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
 
-		m_pd2dfxEdgeDetection[27 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[27 + i]);
-		m_pd2dfxEdgeDetection[27 + i]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
-		m_pd2dfxEdgeDetection[27 + i]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
-		m_pd2dfxEdgeDetection[27 + i]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
-		m_pd2dfxEdgeDetection[27 + i]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
-		m_pd2dfxEdgeDetection[27 + i]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+		m_pd2dfxEdgeDetection[26 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[26 + i]);
+		m_pd2dfxEdgeDetection[26 + i]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+		m_pd2dfxEdgeDetection[26 + i]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+		m_pd2dfxEdgeDetection[26 + i]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+		m_pd2dfxEdgeDetection[26 + i]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+		m_pd2dfxEdgeDetection[26 + i]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 	}
 
 
@@ -2713,34 +2684,52 @@ void CGameFramework::CreateDirect2DDevice()
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
-	m_pd2dfxBitmapSource[34]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	m_pd2dfxBitmapSource[33]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
 	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 
-	m_pd2dfxGaussianBlur[34]->SetInputEffect(0, m_pd2dfxBitmapSource[34]);
-	m_pd2dfxGaussianBlur[34]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+	m_pd2dfxGaussianBlur[33]->SetInputEffect(0, m_pd2dfxBitmapSource[33]);
+	m_pd2dfxGaussianBlur[33]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
 
-	m_pd2dfxEdgeDetection[34]->SetInputEffect(0, m_pd2dfxBitmapSource[34]);
-	m_pd2dfxEdgeDetection[34]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
-	m_pd2dfxEdgeDetection[34]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
-	m_pd2dfxEdgeDetection[34]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
-	m_pd2dfxEdgeDetection[34]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
-	m_pd2dfxEdgeDetection[34]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+	m_pd2dfxEdgeDetection[33]->SetInputEffect(0, m_pd2dfxBitmapSource[33]);
+	m_pd2dfxEdgeDetection[33]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[33]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[33]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[33]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[33]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	for (int i{}; i < 7; ++i) {
-		m_pd2dfxBitmapSource[35 + i]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
-		m_pd2dfxGaussianBlur[35 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[35 + i]);
-		m_pd2dfxGaussianBlur[35 + i]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+		m_pd2dfxBitmapSource[34 + i]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+		m_pd2dfxGaussianBlur[34 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[34 + i]);
+		m_pd2dfxGaussianBlur[34 + i]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
 
-		m_pd2dfxEdgeDetection[35 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[35 + i]);
-		m_pd2dfxEdgeDetection[35 + i]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
-		m_pd2dfxEdgeDetection[35 + i]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
-		m_pd2dfxEdgeDetection[35 + i]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
-		m_pd2dfxEdgeDetection[35 + i]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
-		m_pd2dfxEdgeDetection[35 + i]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+		m_pd2dfxEdgeDetection[34 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[34 + i]);
+		m_pd2dfxEdgeDetection[34 + i]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+		m_pd2dfxEdgeDetection[34 + i]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+		m_pd2dfxEdgeDetection[34 + i]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+		m_pd2dfxEdgeDetection[34 + i]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+		m_pd2dfxEdgeDetection[34 + i]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 	}
 
 	// Room UI
 	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/RoomUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[41]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[41]->SetInputEffect(0, m_pd2dfxBitmapSource[41]);
+	m_pd2dfxGaussianBlur[41]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[41]->SetInputEffect(0, m_pd2dfxBitmapSource[41]);
+	m_pd2dfxEdgeDetection[41]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[41]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[41]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[41]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[41]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// Room Start UI
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/RoomStartUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2757,8 +2746,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[42]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[42]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Room Start UI
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/RoomStartUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Room Ready UI
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/RoomReadyUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2775,8 +2764,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[43]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[43]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Room Ready UI
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/RoomReadyUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Room Ready Status UI
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/RoomReadyStatusUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2793,39 +2782,39 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[44]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[44]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Room Ready Status UI
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/RoomReadyStatusUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
-	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
-	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
-	m_pd2dfxBitmapSource[45]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-
-	m_pd2dfxGaussianBlur[45]->SetInputEffect(0, m_pd2dfxBitmapSource[45]);
-	m_pd2dfxGaussianBlur[45]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
-
-	m_pd2dfxEdgeDetection[45]->SetInputEffect(0, m_pd2dfxBitmapSource[45]);
-	m_pd2dfxEdgeDetection[45]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
-	m_pd2dfxEdgeDetection[45]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
-	m_pd2dfxEdgeDetection[45]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
-	m_pd2dfxEdgeDetection[45]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
-	m_pd2dfxEdgeDetection[45]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
-
 	for (int i{}; i < 2; ++i) {
-		m_pd2dfxBitmapSource[46 + i]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
-		m_pd2dfxGaussianBlur[46 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[46 + i]);
-		m_pd2dfxGaussianBlur[46 + i]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+		m_pd2dfxBitmapSource[45 + i]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+		m_pd2dfxGaussianBlur[45 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[45 + i]);
+		m_pd2dfxGaussianBlur[45 + i]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
 
-		m_pd2dfxEdgeDetection[46 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[46 + i]);
-		m_pd2dfxEdgeDetection[46 + i]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
-		m_pd2dfxEdgeDetection[46 + i]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
-		m_pd2dfxEdgeDetection[46 + i]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
-		m_pd2dfxEdgeDetection[46 + i]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
-		m_pd2dfxEdgeDetection[46 + i]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+		m_pd2dfxEdgeDetection[45 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[45 + i]);
+		m_pd2dfxEdgeDetection[45 + i]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+		m_pd2dfxEdgeDetection[45 + i]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+		m_pd2dfxEdgeDetection[45 + i]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+		m_pd2dfxEdgeDetection[45 + i]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+		m_pd2dfxEdgeDetection[45 + i]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 	}
 
 	// ChattingUI
 	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/ChattingUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[47]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	m_pd2dfxGaussianBlur[47]->SetInputEffect(0, m_pd2dfxBitmapSource[47]);
+	m_pd2dfxGaussianBlur[47]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+
+	m_pd2dfxEdgeDetection[47]->SetInputEffect(0, m_pd2dfxBitmapSource[47]);
+	m_pd2dfxEdgeDetection[47]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[47]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[47]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[47]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[47]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// InsertChattingUI
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/InsertChattingUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2842,8 +2831,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[48]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[48]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// InsertChattingUI
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/InsertChattingUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// SniperAim
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Hologram_2.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2860,8 +2849,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[49]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[49]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// SniperAim
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Hologram_2.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Create Room UI
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/CreateRoomUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2878,8 +2867,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[50]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[50]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Create Room UI
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/CreateRoomUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Game Start Button
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/GameLoginAfterStartUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2896,8 +2885,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[51]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[51]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Game Start Button
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/GameLoginAfterStartUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Game Exit Button
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/GameLoginAfterExitUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2914,8 +2903,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[52]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[52]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Game Exit Button
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/GameLoginAfterExitUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Lobby Game in Button
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LobbyRoomInUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2932,8 +2921,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[53]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[53]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Lobby Game in Button
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LobbyRoomInUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Lobby Game Create Room Button
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LobbyRoomCreateUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2950,8 +2939,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[54]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[54]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Lobby Game Create Room Button
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LobbyRoomCreateUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Lobby Game Left Page Button
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LeftPageButtonNonActiveUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2969,7 +2958,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[55]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	// Lobby Game Left Page Button
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LeftPageButtonNonActiveUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LeftPageButtonActiveUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -2986,8 +2975,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[56]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[56]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Lobby Game Left Page Button
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LeftPageButtonActiveUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Lobby Game Right Page Button
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/RightPageButtonNonActiveUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3005,7 +2994,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[57]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	// Lobby Game Right Page Button
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/RightPageButtonNonActiveUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/RightPageButtonActiveUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3022,8 +3011,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[58]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[58]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Lobby Game Right Page Button
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/RightPageButtonActiveUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// job Choice - Army
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Job_Army.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3040,35 +3029,17 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[59]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[59]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// job Choice - Army
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Job_Army.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
-	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
-	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
-	m_pd2dfxBitmapSource[60]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-
-	m_pd2dfxGaussianBlur[60]->SetInputEffect(0, m_pd2dfxBitmapSource[60]);
-	m_pd2dfxGaussianBlur[60]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
-
-	m_pd2dfxEdgeDetection[60]->SetInputEffect(0, m_pd2dfxBitmapSource[60]);
-	m_pd2dfxEdgeDetection[60]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
-	m_pd2dfxEdgeDetection[60]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
-	m_pd2dfxEdgeDetection[60]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
-	m_pd2dfxEdgeDetection[60]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
-	m_pd2dfxEdgeDetection[60]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
-
 	for (int i{}; i < 2; ++i) {
-		m_pd2dfxBitmapSource[61 + i]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
-		m_pd2dfxGaussianBlur[61 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[61 + i]);
-		m_pd2dfxGaussianBlur[61 + i]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+		m_pd2dfxBitmapSource[60 + i]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+		m_pd2dfxGaussianBlur[60 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[60 + i]);
+		m_pd2dfxGaussianBlur[60 + i]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
 
-		m_pd2dfxEdgeDetection[61 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[61 + i]);
-		m_pd2dfxEdgeDetection[61 + i]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
-		m_pd2dfxEdgeDetection[61 + i]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
-		m_pd2dfxEdgeDetection[61 + i]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
-		m_pd2dfxEdgeDetection[61 + i]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
-		m_pd2dfxEdgeDetection[61 + i]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+		m_pd2dfxEdgeDetection[60 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[60 + i]);
+		m_pd2dfxEdgeDetection[60 + i]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+		m_pd2dfxEdgeDetection[60 + i]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+		m_pd2dfxEdgeDetection[60 + i]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+		m_pd2dfxEdgeDetection[60 + i]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+		m_pd2dfxEdgeDetection[60 + i]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 	}
 
 	// job Choice - Helicopter
@@ -3076,34 +3047,50 @@ void CGameFramework::CreateDirect2DDevice()
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
-	m_pd2dfxBitmapSource[63]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	m_pd2dfxBitmapSource[62]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
 	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 
-	m_pd2dfxGaussianBlur[63]->SetInputEffect(0, m_pd2dfxBitmapSource[63]);
-	m_pd2dfxGaussianBlur[63]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+	m_pd2dfxGaussianBlur[62]->SetInputEffect(0, m_pd2dfxBitmapSource[62]);
+	m_pd2dfxGaussianBlur[62]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
 
-	m_pd2dfxEdgeDetection[63]->SetInputEffect(0, m_pd2dfxBitmapSource[63]);
-	m_pd2dfxEdgeDetection[63]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
-	m_pd2dfxEdgeDetection[63]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
-	m_pd2dfxEdgeDetection[63]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
-	m_pd2dfxEdgeDetection[63]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
-	m_pd2dfxEdgeDetection[63]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+	m_pd2dfxEdgeDetection[62]->SetInputEffect(0, m_pd2dfxBitmapSource[62]);
+	m_pd2dfxEdgeDetection[62]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[62]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[62]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[62]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[62]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	for (int i{}; i < 2; ++i) {
-		m_pd2dfxBitmapSource[64 + i]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
-		m_pd2dfxGaussianBlur[64 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[64 + i]);
-		m_pd2dfxGaussianBlur[64 + i]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+		m_pd2dfxBitmapSource[63 + i]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+		m_pd2dfxGaussianBlur[63 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[63 + i]);
+		m_pd2dfxGaussianBlur[63 + i]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
 
-		m_pd2dfxEdgeDetection[64 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[64 + i]);
-		m_pd2dfxEdgeDetection[64 + i]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
-		m_pd2dfxEdgeDetection[64 + i]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
-		m_pd2dfxEdgeDetection[64 + i]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
-		m_pd2dfxEdgeDetection[64 + i]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
-		m_pd2dfxEdgeDetection[64 + i]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+		m_pd2dfxEdgeDetection[63 + i]->SetInputEffect(0, m_pd2dfxBitmapSource[63 + i]);
+		m_pd2dfxEdgeDetection[63 + i]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+		m_pd2dfxEdgeDetection[63 + i]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+		m_pd2dfxEdgeDetection[63 + i]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+		m_pd2dfxEdgeDetection[63 + i]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+		m_pd2dfxEdgeDetection[63 + i]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 	}
 
 	// HittingSplatter
 	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/BloodSplatter51.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
+	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
+	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
+	m_pd2dfxBitmapSource[65]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	m_pd2dfxGaussianBlur[65]->SetInputEffect(0, m_pd2dfxBitmapSource[65]);
+	m_pd2dfxGaussianBlur[65]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
+	m_pd2dfxEdgeDetection[65]->SetInputEffect(0, m_pd2dfxBitmapSource[65]);
+	m_pd2dfxEdgeDetection[65]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
+	m_pd2dfxEdgeDetection[65]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
+	m_pd2dfxEdgeDetection[65]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
+	m_pd2dfxEdgeDetection[65]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
+	m_pd2dfxEdgeDetection[65]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
+
+	// HittingSplatter
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Respawning_BannerUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3118,8 +3105,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[66]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[66]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// HittingSplatter
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/Respawning_BannerUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// HelicopterWarnningBanner
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/HelicopterWarnning_Banner.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3134,8 +3121,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[67]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[67]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// HelicopterWarnningBanner
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/HelicopterWarnning_Banner.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// HelicopterWarnningIcon
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/HelicopterWarnning.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3150,8 +3137,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[68]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[68]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// HelicopterWarnningIcon
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/HelicopterWarnning.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Clear Background
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/ClearBackGroundUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3166,8 +3153,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[69]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[69]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Clear Background
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/ClearBackGroundUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Clear MissionClearTextUI
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/MissionClearTextUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3183,7 +3170,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[70]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	// Clear MissionClearTextUI
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/MissionClearTextUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/CongratulationUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3198,8 +3185,9 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[71]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[71]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Clear MissionClearTextUI
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/CongratulationUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+
+	// Fail Background
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/FailedBackGroundUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3214,9 +3202,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[72]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[72]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-
-	// Fail Background
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/FailedBackGroundUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// MissionFailedTextUI
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/MissionFailedUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3231,8 +3218,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[73]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[73]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// MissionFailedTextUI
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/MissionFailedUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// TimeOver TextUI
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/TimeOverTextUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3247,8 +3234,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[74]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[74]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// TimeOver TextUI
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/TimeOverTextUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// info_loading
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/info_InGameLoadingUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3263,8 +3250,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[75]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[75]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// info_loading
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/info_InGameLoadingUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// All Not Ready
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/info_NotReadyAllPlayerUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3279,8 +3266,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[76]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[76]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// All Not Ready
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/info_NotReadyAllPlayerUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Press Ready before Job
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/info_PressReadybeforeChooseUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3295,8 +3282,8 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[77]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[77]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
-	// Press Ready before Job
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/info_PressReadybeforeChooseUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	// Lobby My Mark
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LobbyMymark.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3312,7 +3299,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[78]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	// Lobby My Mark
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/LobbyMymark.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/SpendAllLifeText.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3326,22 +3313,6 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[79]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
 	m_pd2dfxEdgeDetection[79]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[79]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
-
-	// Lobby My Mark
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/SpendAllLifeText.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
-	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
-	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
-	m_pd2dfxBitmapSource[80]->SetValue(D2D1_BITMAPSOURCE_PROP_WIC_BITMAP_SOURCE, m_pwicFormatConverter);
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
-	m_pd2dfxGaussianBlur[80]->SetInputEffect(0, m_pd2dfxBitmapSource[80]);
-	m_pd2dfxGaussianBlur[80]->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, 0.0f);
-	m_pd2dfxEdgeDetection[80]->SetInputEffect(0, m_pd2dfxBitmapSource[80]);
-	m_pd2dfxEdgeDetection[80]->SetValue(D2D1_EDGEDETECTION_PROP_STRENGTH, 0.5f);
-	m_pd2dfxEdgeDetection[80]->SetValue(D2D1_EDGEDETECTION_PROP_BLUR_RADIUS, 0.0f);
-	m_pd2dfxEdgeDetection[80]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
-	m_pd2dfxEdgeDetection[80]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
-	m_pd2dfxEdgeDetection[80]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	if (pwicBitmapDecoder) pwicBitmapDecoder->Release();
 	if (pwicFrameDecode) pwicFrameDecode->Release();
@@ -3883,4 +3854,24 @@ void CGameFramework::NpcUnderAttack(XMFLOAT3 ToLook, int npc_id)
 void CGameFramework::NpcNoneUnderAttack()
 {
 	NpcShotKey = false;
+}
+
+void CGameFramework::updateHealpack(int h_id, bool isEffectOn)
+{
+	if (h_id == 0)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[1])->m_bActiveMark = isEffectOn;
+	else if (h_id == 1)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[10])->m_bActiveMark = isEffectOn;
+	else if (h_id == 2)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[11])->m_bActiveMark = isEffectOn;
+	else if (h_id == 3)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[12])->m_bActiveMark = isEffectOn;
+	else if (h_id == 4)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[13])->m_bActiveMark = isEffectOn;
+	else if (h_id == 5)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[14])->m_bActiveMark = isEffectOn;
+	else if (h_id == 6)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[15])->m_bActiveMark = isEffectOn;
+	else if (h_id == 7)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[16])->m_bActiveMark = isEffectOn;
 }

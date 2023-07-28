@@ -510,21 +510,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 				}
 
-				// 3. 리스폰할 때
-				if (respawn_trigger) {
-					if (respawn_id == my_id) {	// 자기 자신
-						gGameFramework.setPosition_Self(players_info[my_id].m_pos);
-						gGameFramework.setVectors_Self(players_info[my_id].m_right_vec, players_info[my_id].m_up_vec, players_info[my_id].m_look_vec);
-					}
-					else {	// 다른 플레이어 리스폰
-						//gGameFramework.OtherPlayerResponeMotion();
-					}
-
-					respawn_trigger = false;
-					respawn_id = -1;
-				}
-
-				// 4. 만약 죽어있는 상태면 캐릭터 조작이 불가능하게 막아야합니다.
+				// 3. 만약 죽어있는 상태면 캐릭터 조작이 불가능하게 막아야합니다.
 				if ((players_info[my_id].m_ingame_state == PL_ST_DEAD) && (!gGameFramework.player_dead)) {
 					gGameFramework.MyPlayerDieMotion();
 					gGameFramework.m_HeliPlayerWarnningUISwitch = false;
@@ -536,7 +522,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					gGameFramework.player_dead = false;
 				}
 
-				// 5. 총쏘는거
+				// 4. 총쏘는거
 				if (trigger_otherplayer_attack) {
 					// 여기에서 총알 연출!
 					if (players_info[otherplayer_attack_id].m_role == ROLE_RIFLE) {
@@ -654,6 +640,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 				}
 
+				//==================================================
+				//					힐팩 이펙트 관련
+				//==================================================
+				if (trigger_healpack_update) {
+					gGameFramework.updateHealpack(updated_healpack_id, healpack_effect_on);
+
+					trigger_healpack_update = false;
+					updated_healpack_id = -1;
+				}
 
 				//==================================================
 				//					Map 충돌 관련
@@ -1050,7 +1045,7 @@ void networkThreadFunc()
 				}
 			}
 		}
-		
+
 		this_thread::yield();
 	}
 }
@@ -1343,7 +1338,7 @@ void uiThreadFunc() {
 				gGameFramework.m_BloodSplatterOn = true;
 				players_info[my_id].m_damaged_effect_on = false;
 			}
-			
+
 			// 9. HP 적을때 UI
 			if (players_info[my_id].m_near_death_hp) {
 				if (players_info[my_id].m_role == ROLE_RIFLE) {
@@ -1416,13 +1411,7 @@ void uiThreadFunc() {
 				gGameFramework.m_missionClear = false;
 				gGameFramework.m_missionFailed = false;
 			}
-
-			// 12. Life 표시
-			wchar_t PlayerLifeCount[20];
-			_itow_s(players_info[my_id].m_life, PlayerLifeCount, sizeof(PlayerLifeCount), 10);
-			wcscpy_s(gGameFramework.m_mylifeCount, PlayerLifeCount);
 		}
-
 		this_thread::yield();
 	}
 }

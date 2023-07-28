@@ -76,9 +76,9 @@
 #define HUMAN_BBSIZE_Y 10.0f
 #define HUMAN_BBSIZE_Z 4.0f
 
-#define RESPAWN_POS_X_HUMAN -15.0f
-#define RESPAWN_POS_Y_HUMAN 6.0f
-#define RESPAWN_POS_Z_HUMAN 750.0f
+#define SPAWN_POS_X_HUMAN -15.0f
+#define SPAWN_POS_Y_HUMAN 6.0f
+#define SPAWN_POS_Z_HUMAN 750.0f
 
 #define RESPAWN_TIME 3000			// 리스폰 시간 (ms)
 
@@ -93,9 +93,9 @@
 #define HELI_BBSIZE_Y 10.0f
 #define HELI_BBSIZE_Z 15.0f
 
-#define RESPAWN_POS_X_HELI -43.5f
-#define RESPAWN_POS_Y_HELI 25.0f
-#define RESPAWN_POS_Z_HELI -750.0f
+#define SPAWN_POS_X_HELI -43.5f
+#define SPAWN_POS_Y_HELI 25.0f
+#define SPAWN_POS_Z_HELI -750.0f
 
 #define AUTO_LEVELOFF_TIME 3000			// 몇 초(ms)동안 키입력이 없어야 자동 수평비행 전환이 되는가
 
@@ -119,3 +119,31 @@
 #define STAGE1_SPAWN_AREA_POS_Z 690.0f
 #define STAGE1_SPAWN_AREA_SIZE_X 110.0f	// 스폰지역 크기
 #define STAGE1_SPAWN_AREA_SIZE_Z 120.0f
+
+#define HEALPACK_SIZE 10.f				// 힐팩 크기 (정사각형)
+#define HEALPACK_RECOVER_HP 50			// 힐팩으로 회복되는 HP수치
+#define HEALPACK_RESPAWN_TIME 10000		// 힐팩 재생성 시간 (단위: ms)
+
+#define HEALPACK_0_CENTER_X 141.3f	// 힐팩7 위치
+#define HEALPACK_0_CENTER_Z 169.5f
+
+#define HEALPACK_1_CENTER_X 560.0f	// 힐팩1 위치
+#define HEALPACK_1_CENTER_Z 938.0f
+
+#define HEALPACK_2_CENTER_X 141.3f	// 힐팩2 위치
+#define HEALPACK_2_CENTER_Z -138.0f
+
+#define HEALPACK_3_CENTER_X 560.0f	// 힐팩3 위치
+#define HEALPACK_3_CENTER_Z -902.0f
+
+#define HEALPACK_4_CENTER_X -217.0f	// 힐팩3 위치
+#define HEALPACK_4_CENTER_Z 169.5f
+
+#define HEALPACK_5_CENTER_X -630.0f	// 힐팩4 위치
+#define HEALPACK_5_CENTER_Z 938.0f
+
+#define HEALPACK_6_CENTER_X -634.0f	// 힐팩5 위치
+#define HEALPACK_6_CENTER_Z -905.0f
+
+#define HEALPACK_7_CENTER_X -215.3f	// 힐팩6 위치
+#define HEALPACK_7_CENTER_Z -136.5f

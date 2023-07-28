@@ -73,6 +73,10 @@ bool trigger_otherplayer_attack = false;	// ´Ù¸¥ ÇÃ·¹ÀÌ¾î °ø°Ý ¿¬Ãâ
 int otherplayer_attack_id;					// " id
 XMFLOAT3 otherplayer_attack_dir;			// " ¹æÇâ
 
+bool trigger_healpack_update = false;	// ÈúÆÑ on/off Æ®¸®°Å
+bool healpack_effect_on = true;			// ÈúÆÑ on ¾÷µ¥ÀÌÆ®ÀÎ°¡ ?
+int updated_healpack_id = -1;			// ¾÷µ¥ÀÌÆ®µÇ´Â ÈúÆÑ ID
+
 bool b_gameover = false;	// °ÔÀÓ ¿À¹ö Æ®¸®°Å
 
 bool b_height_alert = false;						// Çï±â °íµµ °æº¸
@@ -505,15 +509,6 @@ void processPacket(char* ptr)
 		int member_index = recv_packet->member_id;
 
 		players_info[member_index].m_role = recv_packet->role;
-		if (players_info[member_index].m_role == ROLE_RIFLE) {
-			players_info[member_index].m_life = 3;
-		}
-		else if (players_info[member_index].m_role == ROLE_HELI) {
-			players_info[member_index].m_life = 2;
-		}
-		else {
-			players_info[member_index].m_life = 0;
-		}
 		role_change_member_id = member_index;
 		trigger_role_change = true;
 		break;
@@ -921,6 +916,26 @@ void processPacket(char* ptr)
 
 		break;
 	}// SC_HEALING case end
+	case SC_HEALPACK:
+	{
+		if (curr_servertype != SERVER_LOGIC) break;
+		SC_HEALPACK_PACKET* recv_packet = reinterpret_cast<SC_HEALPACK_PACKET*>(ptr);
+		int recv_id = recv_packet->healpack_id;
+
+		if (recv_packet->isused == 1) {
+			healpack_effect_on = false;
+			cout << recv_id << "¹øÂ° ÈúÆÑ »ç¿ëµÊ." << endl;
+		}
+		else if (recv_packet->isused == 0) {
+			healpack_effect_on = true;
+			cout << recv_id << "¹øÂ° ÈúÆÑ »ý¼ºµÊ." << endl;
+		}
+
+		trigger_healpack_update = true;
+		updated_healpack_id = recv_id;
+
+		break;
+	}// SC_HEALPACK case end
 	case SC_ATTACK:
 	{
 		if (curr_servertype != SERVER_LOGIC) break;
@@ -1119,10 +1134,12 @@ void processPacket(char* ptr)
 			case PL_ST_DEAD:
 				if (players_info[recv_id].m_role == ROLE_RIFLE) gamesound.HumancollisionSound();
 				if (players_info[recv_id].m_role == ROLE_HELI) gamesound.HeliiShotDownSound();
-				if (recv_id == my_id) gamesound.pauseHeartBeat(); gamesound.PauseHeliWarnningSound();
+				if (recv_id == my_id) {
+					gamesound.pauseHeartBeat();
+					gamesound.PauseHeliWarnningSound();
+					b_gameover = true;
+				}
 				players_info[recv_id].m_hp = 0;
-				players_info[recv_id].m_life--;
-				cout << "LIFE: " << players_info[recv_id].m_life << endl;
 				players_info[recv_id].m_damaged_effect_on = true;
 				break;
 			}
@@ -1148,33 +1165,6 @@ void processPacket(char* ptr)
 
 		break;
 	}//SC_OBJECT_STATE case end
-	case SC_RESPAWN:
-	{
-		if (curr_servertype != SERVER_LOGIC) break;
-		SC_RESPAWN_PACKET* recv_packet = reinterpret_cast<SC_RESPAWN_PACKET*>(ptr);
-
-		short recv_id = recv_packet->id;
-		players_info[recv_id].m_hp = recv_packet->hp;
-		players_info[recv_id].m_pos = { recv_packet->x, recv_packet->y, recv_packet->z };
-		players_info[recv_id].m_right_vec = { recv_packet->right_x, recv_packet->right_y, recv_packet->right_z };
-		players_info[recv_id].m_up_vec = { recv_packet->up_x, recv_packet->up_y, recv_packet->up_z };
-		players_info[recv_id].m_look_vec = { recv_packet->look_x, recv_packet->look_y, recv_packet->look_z };
-		players_info[recv_id].m_ingame_state = recv_packet->state;
-		players_info[recv_packet->id].m_near_death_hp = false;
-
-		respawn_trigger = true;
-		respawn_id = recv_id;
-		break;
-	}//SC_RESPAWN case end
-	case SC_GAMEOVER:
-	{
-		if (curr_servertype != SERVER_LOGIC) break;
-		SC_GAMEOVER_PACKET* recv_packet = reinterpret_cast<SC_GAMEOVER_PACKET*>(ptr);
-
-		if (recv_packet->id == my_id)
-			b_gameover = true;
-		break;
-	}// SC_GAMEOVER case end
 	case SC_BULLET_COLLIDE_POS:
 	{
 		SC_BULLET_COLLIDE_POS_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COLLIDE_POS_PACKET*>(ptr);

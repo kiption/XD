@@ -341,7 +341,6 @@ public:
 	wchar_t occupationPrint[100];
 	WCHAR m_OtherName[2][20];
 
-	WCHAR m_mylifeCount[10];
 	WCHAR m_CompleteChat[60];
 	WCHAR m_InsertChat[60];
 
@@ -431,6 +430,9 @@ public:
 	void DyingMotionNPC(int id);
 	void AttackMotionNPC(int id);
 	void MoveMotionNPC(int id);
+
+	// »˙∆— √÷Ω≈»≠
+	void updateHealpack(int h_id, bool isEffectOn);
 
 	int a_id;
 	bool active = false;

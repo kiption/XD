@@ -934,15 +934,26 @@ void process_packet(int client_id, char* packet)
 				for (int i = 0; i < room.user_count; ++i) {
 					int member_id = room.users[i];
 					// 방에 있는 인원 모두 준비 상태인가
-					if (clients[member_id].inroom_state == RM_ST_MANAGER) continue;	// 방장은 준비 X
 					if (clients[member_id].inroom_state == RM_ST_NONREADY) {
 						gamestart = false;
-						cout << "Client[" << client_id << "]가 아직 준비를 하지 않아 시작할 수 없습니다.\n" << endl;
+						cout << "Client[" << member_id << "]가 아직 준비를 하지 않아 시작할 수 없습니다.\n" << endl;
 						LBYC_POPUP_PACKET anyonenotready_packet;
 						anyonenotready_packet.size = sizeof(LBYC_POPUP_PACKET);
 						anyonenotready_packet.type = LBYC_POPUP;
 						anyonenotready_packet.msg = POPUPMSG_ANYONENOTREADY;
 						clients[client_id].do_send(&anyonenotready_packet);
+						break;
+					}
+
+					// 방에 있는 인원 모두 역할이 있는가
+					if (clients[member_id].role == ROLE_NOTCHOOSE) {
+						gamestart = false;
+						cout << "Client[" << member_id << "]가 아직 역할을 선택하지 않아 시작할 수 없습니다.\n" << endl;
+						LBYC_POPUP_PACKET anyonenotchoose_packet;
+						anyonenotchoose_packet.size = sizeof(LBYC_POPUP_PACKET);
+						anyonenotchoose_packet.type = LBYC_POPUP;
+						anyonenotchoose_packet.msg = POPUPMSG_PLZCHOOSEROLE;
+						clients[client_id].do_send(&anyonenotchoose_packet);
 						break;
 					}
 				}
