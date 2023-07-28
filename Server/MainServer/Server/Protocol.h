@@ -217,6 +217,8 @@ struct LBYC_ADD_ROOM_PACKET {
 	char type;
 	short room_id;
 	char room_name[ROOM_NAME_SIZE];
+	char room_state;
+	short user_count;
 };
 
 struct LBYC_ROOM_USERCOUNT_PACKET {

@@ -376,10 +376,8 @@ void processPacket(char* ptr)
 		RoomInfo new_room;
 		new_room.room_id = recv_packet->room_id;
 		strcpy_s(new_room.room_name, recv_packet->room_name);
-		new_room.room_state = R_ST_WAIT;
-		new_room.user_count = 1;	// 막 만들어진 방이므로 1명 (방 생성 유저)
-		new_room.user_state[0] = RM_ST_MANAGER;
-		for (int i = 1; i < MAX_USER; ++i) { new_room.user_state[i] = RM_ST_EMPTY; }
+		new_room.room_state = recv_packet->room_state;
+		new_room.user_count = recv_packet->user_count;
 		lobby_rooms.push_back(new_room);
 
 		cout << "새로운 Room을 추가합니다." << endl;

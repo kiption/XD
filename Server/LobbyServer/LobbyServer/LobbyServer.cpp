@@ -345,6 +345,8 @@ void process_packet(int client_id, char* packet)
 			room_info_pack.size = sizeof(LBYC_ADD_ROOM_PACKET);
 			room_info_pack.type = LBYC_ADD_ROOM;
 			room_info_pack.room_id = room.room_id;
+			room_info_pack.room_state = room.room_state;
+			room_info_pack.user_count = room.user_count;
 			strcpy_s(room_info_pack.room_name, room.room_name);
 
 			clients[client_id].do_send(&room_info_pack);
@@ -401,6 +403,8 @@ void process_packet(int client_id, char* packet)
 			add_room_pack.size = sizeof(LBYC_ADD_ROOM_PACKET);
 			add_room_pack.type = LBYC_ADD_ROOM;
 			add_room_pack.room_id = new_room_id;
+			add_room_pack.room_state = game_rooms[new_room_id].room_state;
+			add_room_pack.user_count = game_rooms[new_room_id].user_count;
 			strcpy_s(add_room_pack.room_name, game_rooms[new_room_id].room_name);
 			cl.do_send(&add_room_pack);
 			cout << "로비에 있는 Client[" << cl.id << "]에게 Room[" << new_room_id << "] 추가 패킷을 보냈습니다.\n" << endl;
@@ -414,8 +418,9 @@ void process_packet(int client_id, char* packet)
 
 		// 입장가능한 방 찾기
 		int matched_room_id = -1;
+		int most_user_cnt = 0;
 		for (auto& room : game_rooms) {
-			if (room.user_count < MAX_USER) {
+			if (room.user_count < MAX_USER && room.user_count > most_user_cnt) {
 				matched_room_id = room.room_id;
 				break;
 			}
@@ -621,6 +626,8 @@ void process_packet(int client_id, char* packet)
 			room_info_pack.size = sizeof(LBYC_ADD_ROOM_PACKET);
 			room_info_pack.type = LBYC_ADD_ROOM;
 			room_info_pack.room_id = room.room_id;
+			room_info_pack.room_state = room.room_state;
+			room_info_pack.user_count = room.user_count;
 			strcpy_s(room_info_pack.room_name, room.room_name);
 
 			clients[client_id].do_send(&room_info_pack);
