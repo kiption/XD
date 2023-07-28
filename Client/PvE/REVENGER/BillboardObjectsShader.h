@@ -23,6 +23,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void ReleaseUploadBuffers();
 	XMFLOAT3 xmf3Position{};
+	XMFLOAT3 HealParticlePosition{};
 	XMFLOAT3 xmf3CameraPosition{};
 
 public:

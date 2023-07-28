@@ -151,14 +151,15 @@ void HealPackBillboardShader::ReleaseObjects()
 
 void HealPackBillboardShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	for (int i = 0; i < m_nObjects; i++)
+	if (m_bActiveMark == true)
 	{
-		xmf3CameraPosition = pCamera->GetPosition();
-		m_ppObjects[i]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0, 1, 0));
-		//m_ppObjects[i]->SetPosition(120.f, 12.0, 800.f);
-		BillboardShader::Render(pd3dCommandList, pCamera, nPipelineState);
+		for (int i = 0; i < m_nObjects; i++)
+		{
+			xmf3CameraPosition = pCamera->GetPosition();
+			m_ppObjects[i]->SetLookAt(xmf3CameraPosition, XMFLOAT3(0, 1, 0));
+			BillboardShader::Render(pd3dCommandList, pCamera, nPipelineState);
+		}
 	}
-
 }
 
 void HealPackBillboardShader::AnimateObjects(float fTimeElapsed)
@@ -172,11 +173,11 @@ void HealPackBillboardShader::AnimateObjects(float fTimeElapsed)
 		{
 			for (int i = 0; i < HEAL_EFFECTS_COUNT; i++)
 			{
-				m_fExplosionSpeed = RandomBillboard(3.0f, 6.0f);
+				m_fExplosionSpeed = RandomBillboard(1.0f, 9.0f);
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
-				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.x *m_fElapsedTimes* m_fElapsedTimes;
-				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;
-				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.z *m_fElapsedTimes* m_fElapsedTimes;
+				m_pxmf4x4Transforms[i]._41 = HealParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.x *m_fElapsedTimes* m_fElapsedTimes;
+				m_pxmf4x4Transforms[i]._42 = HealParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;
+				m_pxmf4x4Transforms[i]._43 = HealParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.z *m_fElapsedTimes* m_fElapsedTimes;
 				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
 
 				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
