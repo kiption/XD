@@ -10,7 +10,6 @@ struct ObjectsInfo
 	char m_name[20];
 	int m_role;
 	int m_hp;
-	int m_life;
 	int m_bullet;
 	XMFLOAT3 m_pos;
 	XMFLOAT3 m_right_vec;
@@ -31,7 +30,6 @@ struct ObjectsInfo
 		strcpy_s(m_name, "\0");
 		m_role = ROLE_NOTCHOOSE;
 		m_hp = 100;
-		m_life = 0;
 		m_bullet = MAX_BULLET;
 		m_pos = { 0.0f, 0.0f, 0.0f };
 		m_right_vec = { 1.0f, 0.0f, 0.0f };
@@ -52,7 +50,6 @@ struct ObjectsInfo
 		strcpy_s(m_name, "\0");
 		m_role = ROLE_NOTCHOOSE;
 		m_hp = 100;
-		m_life = 0;
 		m_bullet = MAX_BULLET;
 		m_pos = { 0.0f, 0.0f, 0.0f };
 		m_right_vec = { 1.0f, 0.0f, 0.0f };
@@ -170,3 +167,7 @@ int removeRoom(int target_room_id) {
 //==================================================
 queue<XMFLOAT3> q_bullet_hit_pos_mapobj;
 queue<XMFLOAT3> q_bullet_hit_pos_ground;
+
+
+//==================================================
+bool healpack_effect_on[8] = { true, };	// »˙∆— ¿Ã∆Â∆Æ On/Off ø©∫Œ

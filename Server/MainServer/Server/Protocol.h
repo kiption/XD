@@ -92,7 +92,7 @@ enum PacketID {
 	, LBYC_LOBBY_CLEAR, LBYC_MEMBER_STATE, LBYC_ROLE_CHANGE, LBYC_GAME_START, LBYC_GAME_EXIT, LBYC_POPUP
 	, CS_LOGIN, CS_MOVE, CS_ROTATE, CS_ATTACK, CS_INPUT_KEYBOARD, CS_INPUT_MOUSE, CS_CHAT, CS_PARTICLE_COLLIDE, CS_HELI_MAP_COLLIDE, CS_PING, CS_RELOGIN
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT, SC_HEIGHT_ALERT
-	, SC_DAMAGED, SC_HEALING, SC_ATTACK, SC_RELOAD, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_RESPAWN, SC_TIMEOUT, SC_GAMEOVER, SC_BULLET_COLLIDE_POS, SC_MISSION, SC_MISSION_COMPLETE
+	, SC_DAMAGED, SC_HEALING, SC_HEALPACK, SC_ATTACK, SC_RELOAD, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_TIMEOUT, SC_BULLET_COLLIDE_POS, SC_MISSION, SC_MISSION_COMPLETE
 	, SC_TIME_TICKING, SC_CHAT, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN
 	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
 	, NPC_FULL_INFO, NPC_MOVE, NPC_ROTATE, NPC_CHECK_POS, NPC_REMOVE, NPC_ATTACK, NPC_CHANGE_STATE
@@ -469,6 +469,13 @@ struct SC_HEALING_PACKET {
 	int value;
 };
 
+struct SC_HEALPACK_PACKET {
+	unsigned char size;
+	char type;
+	short healpack_id;
+	char isused;	// 0: false, 1: true
+};
+
 struct SC_ATTACK_PACKET {
 	unsigned char size;
 	char type;
@@ -501,26 +508,7 @@ struct SC_OBJECT_STATE_PACKET {
 	short state;
 };
 
-struct SC_RESPAWN_PACKET {
-	unsigned char size;
-	char type;
-	short target;
-	short id;
-	int hp;
-	short state;
-	float x, y, z;
-	float right_x, right_y, right_z;
-	float up_x, up_y, up_z;
-	float look_x, look_y, look_z;
-};
-
 struct SC_TIMEOUT_PACKET {
-	unsigned char size;
-	char type;
-	short id;
-};
-
-struct SC_GAMEOVER_PACKET {
 	unsigned char size;
 	char type;
 	short id;
