@@ -596,7 +596,6 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 							&& lobbyroompos[i].sy < m_ptOldCursorPos.y && m_ptOldCursorPos.y < lobbyroompos[i].ly) {
 							m_LobbyRoomClick[i] = true;
 							b_roomclick = true;
-							cout << "방 클릭!!: [" << i << "]" << endl;
 							break;
 						}
 					}

@@ -456,10 +456,11 @@ void process_packet(int client_id, char* packet)
 				room_join_packet.member_state[i] = RM_ST_EMPTY;
 				room_join_packet.member_role[i] = ROLE_NOTCHOOSE;
 			}
-
-			strcpy_s(room_join_packet.member_name[i], clients[member_id].name);
-			room_join_packet.member_state[i] = clients[member_id].inroom_state;
-			room_join_packet.member_role[i] = clients[member_id].role;
+			else {
+				strcpy_s(room_join_packet.member_name[i], clients[member_id].name);
+				room_join_packet.member_state[i] = clients[member_id].inroom_state;
+				room_join_packet.member_role[i] = clients[member_id].role;
+			}
 
 			if (member_id == client_id) {
 				room_join_packet.your_roomindex = i;
@@ -503,6 +504,85 @@ void process_packet(int client_id, char* packet)
 
 		break;
 	}// CLBY_QUICK_MATCH case end
+	case CLBY_ROOM_ENTER:
+	{
+		CLBY_ROOM_ENTER_PACKET* recv_packet = reinterpret_cast<CLBY_ROOM_ENTER_PACKET*>(packet);
+
+		int selected_room_id = static_cast<int>(recv_packet->room_id);
+		// 선택한 방에 플레이어 입장
+		int ret = game_rooms[selected_room_id].user_join(client_id);
+		if (ret != 0) {
+			cout << "[Error] 생성된 방에 입장하지 못했습니다." << endl;
+			LBYC_MATCH_FAIL_PACKET match_fail_packet;
+			match_fail_packet.size = sizeof(LBYC_MATCH_FAIL_PACKET);
+			match_fail_packet.type = LBYC_MATCH_FAIL;
+			match_fail_packet.fail_reason = MATCH_FAIL_UNKNOWN;
+			clients[client_id].do_send(&match_fail_packet);
+			break;
+		}
+
+		// 방 참가 요청을 보낸 클라이언트에게 '방 참가 패킷'을 보냄.
+		LBYC_ROOM_JOIN_PACKET room_join_packet;
+		room_join_packet.size = sizeof(LBYC_ROOM_JOIN_PACKET);
+		room_join_packet.type = LBYC_ROOM_JOIN;
+		room_join_packet.room_id = selected_room_id;
+		strcpy_s(room_join_packet.room_name, game_rooms[selected_room_id].room_name);
+		room_join_packet.member_count = game_rooms[selected_room_id].user_count;
+		for (int i = 0; i < MAX_USER; ++i) {
+			int member_id = game_rooms[selected_room_id].users[i];
+			if (member_id == -1) {
+				strcpy_s(room_join_packet.member_name[i], "\0");
+				room_join_packet.member_state[i] = RM_ST_EMPTY;
+				room_join_packet.member_role[i] = ROLE_NOTCHOOSE;
+			}
+			else {
+				strcpy_s(room_join_packet.member_name[i], clients[member_id].name);
+				room_join_packet.member_state[i] = clients[member_id].inroom_state;
+				room_join_packet.member_role[i] = clients[member_id].role;
+			}
+
+			if (member_id == client_id) {
+				room_join_packet.your_roomindex = i;
+			}
+		}
+		room_join_packet.b_manager = b_FALSE;
+		clients[client_id].do_send(&room_join_packet);
+		cout << "Client[" << client_id << "]가 Room[" << selected_room_id << "]에 참가합니다. (Index: " << room_join_packet.your_roomindex << ")\n" << endl;
+
+
+		// 그 방에 이전부터 있었던 클라이언트에게 새로운 클라이언트가 참가했음을 알려줍니다.
+		for (int i = 0; i < MAX_USER; ++i) {
+			int member_id = game_rooms[selected_room_id].users[i];
+			if (member_id == -1) continue;
+			if (member_id == client_id) continue;
+
+			LBYC_ROOM_NEW_MEMBER_PACKET new_member_packet;
+			new_member_packet.size = sizeof(LBYC_ROOM_NEW_MEMBER_PACKET);
+			new_member_packet.type = LBYC_ROOM_NEW_MEMBER;
+			strcpy_s(new_member_packet.new_member_name, clients[client_id].name);
+			new_member_packet.new_member_roomindex = room_join_packet.your_roomindex;
+
+			clients[member_id].do_send(&new_member_packet);
+			cout << "Client[" << member_id << "]에게 새로운 유저[" << client_id << "]의 합류 패킷을 보냈습니다.\n" << endl;
+		}
+
+		// 로비에 있는 클라이언트들에게 해당 방 유저 수가 1 증가하였음을 알려줍니다.
+		for (auto& cl : clients) {
+			if (cl.s_state != ST_INGAME) continue;
+			if (cl.curr_room != -1) continue; // 방에 있지않고 로비에 있는 유저에게만 보냅니다.
+
+			LBYC_ROOM_USERCOUNT_PACKET user_increase_pack;
+			user_increase_pack.size = sizeof(LBYC_ROOM_USERCOUNT_PACKET);
+			user_increase_pack.type = LBYC_ROOM_USERCOUNT;
+			user_increase_pack.room_id = selected_room_id;
+			user_increase_pack.user_count = game_rooms[selected_room_id].user_count;
+			cl.do_send(&user_increase_pack);
+			cout << "로비에 있는 Client[" << cl.id << "]에게 Room[" << selected_room_id << "]의 인원이 "
+				<< game_rooms[selected_room_id].user_count << "명이 되었다고 알려줍니다.\n" << endl;
+		}
+
+		break;
+	}// case CLBY_ROOM_ENTER case end
 	case CLBY_LEAVE_ROOM:
 	{
 		CLBY_LEAVE_ROOM_PACKET* recv_packet = reinterpret_cast<CLBY_LEAVE_ROOM_PACKET*>(packet);
