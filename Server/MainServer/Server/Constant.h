@@ -93,7 +93,7 @@
 #define HELI_BBSIZE_Z 15.0f
 
 #define AUTO_LEVELOFF_TIME 3000			// 몇 초(ms)동안 키입력이 없어야 자동 수평비행 전환이 되는가
-#define RESPAWN_TIME 5000				// 리스폰 시간 (ms)
+#define RESPAWN_TIME 3000				// 리스폰 시간 (ms)
 #define RESPAWN_TIME_HELI 10000			// 헬기 리스폰 시간 (ms)
 
 //============================================================

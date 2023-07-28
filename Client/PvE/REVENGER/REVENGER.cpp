@@ -267,6 +267,23 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						ls_room_enter_ok = false;
 					}
 
+					// 방 선택 입장
+					for (int i = 0; i < 8; ++i) {
+						if (gGameFramework.m_LobbyRoomClick[i]) {
+							if (i + 1 > lobby_rooms.size()) break;
+							cout << "선택한 방ID: " << lobby_rooms[i].room_id << ", 이름: " << lobby_rooms[i].room_name << endl;
+
+							CLBY_ROOM_ENTER_PACKET room_enter_pack;
+							room_enter_pack.size = sizeof(CLBY_ROOM_ENTER_PACKET);
+							room_enter_pack.type = CLBY_ROOM_ENTER;
+							room_enter_pack.room_id = lobby_rooms[i].room_id;
+							sendPacket(&room_enter_pack);
+
+							gGameFramework.m_LobbyRoomClick[i] = false;
+							break;
+						}
+					}
+
 					break;
 
 				case gGameFramework.LS_ROOM: // 게임 방
@@ -1409,6 +1426,14 @@ void uiThreadFunc() {
 					}
 				}
 			}
+
+			// 11. 게임 오버 UI
+			if (b_gameover) {
+
+			}
+
+			// 12. Life 표시
+			//players_info[my_id].m_life;		// 여기에 라이프 업데이트 되고있음. 이거 갖고 UI 띄워주면 대
 
 		}
 
