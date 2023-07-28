@@ -1410,6 +1410,14 @@ void uiThreadFunc() {
 				}
 			}
 
+			// 11. 게임 오버 UI
+			if (b_gameover) {
+
+			}
+
+			// 12. Life 표시
+			//players_info[my_id].m_life;		// 여기에 라이프 업데이트 되고있음. 이거 갖고 UI 띄워주면 대
+
 		}
 
 		this_thread::yield();

@@ -295,6 +295,11 @@ int Game_Room::user_leave(int c_id) {
 }
 
 int create_new_room(string new_name) {
+	if (game_rooms.size() >= 8) {
+		cout << "방은 8개가 최대 입니다. 더 이상 방을 만들 수 없습니다." << endl;
+		return -1;
+	}
+
 	Game_Room new_room;
 	new_room.room_id = room_count++;
 	new_room.user_count = 0;
@@ -357,6 +362,10 @@ void process_packet(int client_id, char* packet)
 		r_lock.lock();
 		int new_room_id = create_new_room(recv_packet->room_name);
 		r_lock.unlock();
+		if (new_room_id == -1) {	// 방 생성 실패
+			cout << "방 생성이 실패했습니다." << endl;
+			break;
+		}
 
 		// 생성된 방에 플레이어 입장
 		int ret = game_rooms[new_room_id].user_join(client_id);

@@ -1030,7 +1030,7 @@ void process_packet(int client_id, char* packet)
 				}
 
 				if (clients[client_id].life == 0) {
-					cout << "Player[" << client_id << "] 게임 오버" << endl;
+					cout << "Player[" << clients[client_id].id << "] 게임 오버" << endl;
 					SC_GAMEOVER_PACKET heli_gameover_packet;
 					heli_gameover_packet.size = sizeof(SC_GAMEOVER_PACKET);
 					heli_gameover_packet.type = SC_GAMEOVER;
@@ -1041,7 +1041,7 @@ void process_packet(int client_id, char* packet)
 					}
 				}
 				else {
-					cout << "Player[" << client_id << "] 남은 목숨: " << clients[client_id].life << "개" << endl;
+					cout << "Player[" << clients[client_id].id << "] 남은 목숨: " << clients[client_id].life << "개" << endl;
 				}
 				break;
 			}
@@ -1974,7 +1974,7 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].pl_state = PL_ST_DEAD;
 			clients[client_id].death_time = system_clock::now();
 			clients[client_id].s_lock.unlock();
-			cout << "파티클에 충돌하여 Player[" << client_id << "]가 사망하였다." << endl;
+			cout << "파티클에 충돌하여 Player[" << clients[client_id].id << "]가 사망하였다." << endl;
 			dead_player_cnt++;
 
 			SC_OBJECT_STATE_PACKET death_packet;
@@ -1995,7 +1995,7 @@ void process_packet(int client_id, char* packet)
 
 			// 라이프를 다 쓰면 게임오버
 			if (clients[client_id].life == 0) {
-				cout << "Player[" << client_id << "] 게임 오버" << endl;
+				cout << "Player[" << clients[client_id].id << "] 게임 오버" << endl;
 				SC_GAMEOVER_PACKET player_gameover_packet;
 				player_gameover_packet.size = sizeof(SC_GAMEOVER_PACKET);
 				player_gameover_packet.type = SC_GAMEOVER;
@@ -2006,7 +2006,7 @@ void process_packet(int client_id, char* packet)
 				}
 			}
 			else {
-				cout << "Player[" << client_id << "] 남은 목숨: " << clients[client_id].life << "개" << endl;
+				cout << "Player[" << clients[client_id].id << "] 남은 목숨: " << clients[client_id].life << "개" << endl;
 			}
 		}
 
@@ -2038,7 +2038,7 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].s_lock.lock();
 			clients[client_id].hp -= damage;
 			clients[client_id].s_lock.unlock();
-			cout << "벽에 충돌하여 Player[" << client_id << "]가 피해(-" << damage << ")를 입었다. (HP: " << clients[client_id].hp << " 남음)\n" << endl;
+			cout << "벽에 충돌하여 Player[" << clients[client_id].id << "]가 피해(-" << damage << ")를 입었다. (HP: " << clients[client_id].hp << " 남음)\n" << endl;
 
 			SC_DAMAGED_PACKET damaged_packet;
 			damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
@@ -2061,7 +2061,7 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].pl_state = PL_ST_DEAD;
 			clients[client_id].death_time = system_clock::now();
 			clients[client_id].s_lock.unlock();
-			cout << "벽에 충돌하여 Player[" << client_id << "]가 사망하였다." << endl;
+			cout << "벽에 충돌하여 Player[" << clients[client_id].id << "]가 사망하였다." << endl;
 			dead_player_cnt++;
 
 			SC_OBJECT_STATE_PACKET death_packet;
@@ -2082,7 +2082,7 @@ void process_packet(int client_id, char* packet)
 
 			// 게임 오버
 			if (clients[client_id].life == 0) {
-				cout << "Player[" << client_id << "] 게임 오버" << endl;
+				cout << "Player[" << clients[client_id].id << "] 게임 오버" << endl;
 				SC_GAMEOVER_PACKET heli_gameover_packet;
 				heli_gameover_packet.size = sizeof(SC_GAMEOVER_PACKET);
 				heli_gameover_packet.type = SC_GAMEOVER;
@@ -2093,7 +2093,7 @@ void process_packet(int client_id, char* packet)
 				}
 			}
 			else {
-				cout << "Player[" << client_id << "] 남은 목숨: " << clients[client_id].life << "개" << endl;
+				cout << "Player[" << clients[client_id].id << "] 남은 목숨: " << clients[client_id].life << "개" << endl;
 			}
 		}
 
@@ -2538,7 +2538,7 @@ void process_packet(int client_id, char* packet)
 							}
 						}
 						else {
-							cout << "Player[" << client_id << "] 남은 목숨: " << clients[client_id].life << "개" << endl;
+							cout << "Player[" << clients[client_id].id << "] 남은 목숨: " << clients[client_id].life << "개" << endl;
 						}
 					}
 

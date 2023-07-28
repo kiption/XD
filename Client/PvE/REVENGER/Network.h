@@ -73,6 +73,8 @@ bool trigger_otherplayer_attack = false;	// 다른 플레이어 공격 연출
 int otherplayer_attack_id;					// " id
 XMFLOAT3 otherplayer_attack_dir;			// " 방향
 
+bool b_gameover = false;	// 게임 오버 트리거
+
 bool b_height_alert = false;						// 헬기 고도 경보
 bool b_first_height_alert = false;
 chrono::system_clock::time_point height_alert_time; // 경보 울린 시간
@@ -504,7 +506,15 @@ void processPacket(char* ptr)
 		int member_index = recv_packet->member_id;
 
 		players_info[member_index].m_role = recv_packet->role;
-
+		if (players_info[member_index].m_role == ROLE_RIFLE) {
+			players_info[member_index].m_life = 3;
+		}
+		else if (players_info[member_index].m_role == ROLE_HELI) {
+			players_info[member_index].m_life = 2;
+		}
+		else {
+			players_info[member_index].m_life = 0;
+		}
 		role_change_member_id = member_index;
 		trigger_role_change = true;
 		break;
@@ -1027,6 +1037,8 @@ void processPacket(char* ptr)
 				if(players_info[recv_id].m_role==ROLE_HELI) gamesound.HeliiShotDownSound();
 				if (recv_id == my_id) gamesound.pauseHeartBeat(); gamesound.PauseHeliWarnningSound();
 				players_info[recv_id].m_hp = 0;
+				players_info[recv_id].m_life--;
+				cout << "LIFE: " << players_info[recv_id].m_life << endl;
 				players_info[recv_id].m_damaged_effect_on = true;
 				break;
 			}
@@ -1070,6 +1082,15 @@ void processPacket(char* ptr)
 		respawn_id = recv_id;
 		break;
 	}//SC_RESPAWN case end
+	case SC_GAMEOVER:
+	{
+		if (curr_servertype != SERVER_LOGIC) break;
+		SC_GAMEOVER_PACKET* recv_packet = reinterpret_cast<SC_GAMEOVER_PACKET*>(ptr);
+
+		if (recv_packet->id == my_id)
+			b_gameover = true;
+		break;
+	}// SC_GAMEOVER case end
 	case SC_BULLET_COLLIDE_POS:
 	{
 		SC_BULLET_COLLIDE_POS_PACKET* recv_packet = reinterpret_cast<SC_BULLET_COLLIDE_POS_PACKET*>(ptr);
