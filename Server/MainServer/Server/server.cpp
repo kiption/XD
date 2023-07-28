@@ -1015,6 +1015,7 @@ void process_packet(int client_id, char* packet)
 				clients[client_id].s_lock.lock();
 				clients[client_id].hp = 0;
 				clients[client_id].life--;
+				if (clients[client_id].life < 0) clients[client_id].life = 0;
 				clients[client_id].pl_state = PL_ST_DEAD;
 				clients[client_id].death_time = system_clock::now();
 				clients[client_id].s_lock.unlock();
@@ -2012,6 +2013,7 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].s_lock.lock();
 			clients[client_id].hp = 0;
 			clients[client_id].life--;
+			if (clients[client_id].life < 0) clients[client_id].life = 0;
 			clients[client_id].pl_state = PL_ST_DEAD;
 			clients[client_id].death_time = system_clock::now();
 			clients[client_id].s_lock.unlock();
@@ -2107,6 +2109,7 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].s_lock.lock();
 			clients[client_id].hp = 0;
 			clients[client_id].life--;
+			if (clients[client_id].life < 0) clients[client_id].life = 0;
 			clients[client_id].pl_state = PL_ST_DEAD;
 			clients[client_id].death_time = system_clock::now();
 			clients[client_id].s_lock.unlock();
@@ -2560,6 +2563,7 @@ void process_packet(int client_id, char* packet)
 						clients[collided_cl_id].s_lock.lock();
 						clients[collided_cl_id].hp = 0;
 						clients[collided_cl_id].life--;
+						if (clients[collided_cl_id].life < 0) clients[collided_cl_id].life = 0;
 						clients[collided_cl_id].pl_state = PL_ST_DEAD;
 						clients[collided_cl_id].death_time = system_clock::now();
 						clients[collided_cl_id].s_lock.unlock();
