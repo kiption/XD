@@ -148,7 +148,7 @@ const int VK_CLOSE_BRACKET = 0xDD;
 #define UICOUNTERS				81
 
 #define EXPLOSION_SPARK 30
-#define HEAL_EFFECTS_COUNT 20
+#define HEAL_EFFECTS_COUNT 40
 #define HITTINGMARKS 10
 
 //====

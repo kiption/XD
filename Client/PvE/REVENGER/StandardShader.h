@@ -61,6 +61,7 @@ public:
 	virtual void ReleaseUploadBuffers();
 	virtual void ReleaseObjects();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
+	bool m_bActive = false;
 	XMFLOAT3 newPosition = XMFLOAT3(0, 0, 0);
 	XMFLOAT3 NextPosition = XMFLOAT3(0, 0, 0);
 	XMFLOAT3 ParticlePosition{};

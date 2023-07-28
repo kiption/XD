@@ -904,9 +904,11 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case VK_SPACE:
 				break;
 			case 'M':
-				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->FallDown(m_GameTimer.GetTimeElapsed());
+				m_bHeliDyingState = true;
 				break;
-
+			case 'L':
+				((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[10])->SetActive(false);
+				break;
 			default:
 				break;
 			}
@@ -1243,17 +1245,17 @@ void CGameFramework::AnimateObjects()
 				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[i])->FallDown(m_GameTimer.GetTimeElapsed());
 			}
 		}
-
+		if (m_bHeliDyingState == true)
+		{
+			((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->FallDown(m_GameTimer.GetTimeElapsed());
+		}
 		if (m_ingame_role == R_RIFLE)
 			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 		if (m_ingame_role == R_HELI)
 		{
 			//m_bHeliHittingMotion = false;
 			((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
-			if (m_bHeliDyingState == true)
-			{
-				//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->FallDown(m_GameTimer.GetTimeElapsed());
-			}
+			
 			if (m_bHeliHittingMotion == true)
 			{
 				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[0])->m_pSkinnedAnimationController
@@ -3788,6 +3790,7 @@ void CGameFramework::OtherPlayerResponeMotion(int id)
 {
 	if (m_ingame_role == R_HELI)
 	{
+		((Stage1*)m_pScene)->OtherHeliPlayerTransfromReset();
 		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->Resetpartition();
 
 		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[2])->SetPosition(XMFLOAT3(

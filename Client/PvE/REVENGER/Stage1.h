@@ -31,6 +31,8 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	void OtherHeliPlayerTransformStore();
+	void OtherHeliPlayerTransfromReset();
 	void BillBoardRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera,XMFLOAT3 Position);
 	void MuzzleFlameRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera,XMFLOAT3 Position);
 	void NPCMuzzleFlamedRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera,XMFLOAT3 Position);
@@ -114,5 +116,18 @@ public:
 	CValkanObject* m_ppCartridge[CARTRIDGES];
 	CValkanObject* pValkan = NULL;
 	CValkanObject* m_ppValkan[HELICOPTERVALKANS];
-	
+public:
+		XMFLOAT4X4 m_pMainRotorFrameP{};
+		XMFLOAT4X4 m_pTailRotorFrameP{};
+		XMFLOAT4X4 m_pFrameFragObj1P{};
+		XMFLOAT4X4 m_pFrameFragObj2P{};
+		XMFLOAT4X4 m_pFrameFragObj3P{};
+		XMFLOAT4X4 m_pFrameFragObj4P{};
+		XMFLOAT4X4 m_pFrameFragObj5P{};
+		XMFLOAT4X4 m_pFrameFragObj6P{};
+		XMFLOAT4X4 m_pFrameFragObj7P{};
+		XMFLOAT4X4 m_pFrameFragObj8P{};
+		XMFLOAT4X4 m_pFrameFragObj9P{};
+		XMFLOAT4X4 m_pFrameFragObj10P{};
+		XMFLOAT4X4 m_pFrameFragObj11P{};
 };

@@ -151,7 +151,7 @@ void HealPackBillboardShader::ReleaseObjects()
 
 void HealPackBillboardShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	if (m_bActiveMark == true)
+	if (m_bActive == true)
 	{
 		for (int i = 0; i < m_nObjects; i++)
 		{
@@ -165,15 +165,15 @@ void HealPackBillboardShader::Render(ID3D12GraphicsCommandList* pd3dCommandList,
 void HealPackBillboardShader::AnimateObjects(float fTimeElapsed)
 {
 
-	if (m_bActiveMark == true)
+	if (m_bActive == true)
 	{
-		XMFLOAT3 gravity = XMFLOAT3(0.0, 9.8f, 0.0);
-		m_fElapsedTimes += fTimeElapsed * 0.5f;
+		m_fElapsedTimes += fTimeElapsed * 2.0f;
 		if (m_fElapsedTimes <= m_fDuration)
 		{
 			for (int i = 0; i < HEAL_EFFECTS_COUNT; i++)
 			{
-				m_fExplosionSpeed = RandomBillboard(1.0f, 9.0f);
+				XMFLOAT3 gravity = XMFLOAT3(0.0, RandomBillboard(1.0f, 9.0f), 0.0);
+				m_fExplosionSpeed = RandomBillboard(2.0f, 8.0f);
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
 				m_pxmf4x4Transforms[i]._41 = HealParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.x *m_fElapsedTimes* m_fElapsedTimes;
 				m_pxmf4x4Transforms[i]._42 = HealParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;

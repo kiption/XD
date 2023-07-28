@@ -254,12 +254,14 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pHealPack1Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHealPack1Shader->SetCurScene(SCENE1STAGE);
 	pHealPack1Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	pHealPack1Shader->m_bActive = true;
 	m_pBillboardShader[10] = pHealPack1Shader;
 
 	HealPackBillboardShader* pHealPack2Shader = new HealPackBillboardShader();
 	pHealPack2Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHealPack2Shader->SetCurScene(SCENE1STAGE);
 	pHealPack2Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	pHealPack2Shader->m_bActive = true;
 	m_pBillboardShader[11] = pHealPack2Shader;
 
 	HealPackBillboardShader* pHealPack3Shader = new HealPackBillboardShader();
@@ -272,24 +274,28 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 	pHealPack4Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHealPack4Shader->SetCurScene(SCENE1STAGE);
 	pHealPack4Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	pHealPack4Shader->m_bActive = true;
 	m_pBillboardShader[13] = pHealPack4Shader;
 
 	HealPackBillboardShader* pHealPack5Shader = new HealPackBillboardShader();
 	pHealPack5Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHealPack5Shader->SetCurScene(SCENE1STAGE);
 	pHealPack5Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	pHealPack5Shader->m_bActive = true;
 	m_pBillboardShader[14] = pHealPack5Shader;
 
 	HealPackBillboardShader* pHealPack6Shader = new HealPackBillboardShader();
 	pHealPack6Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHealPack6Shader->SetCurScene(SCENE1STAGE);
 	pHealPack6Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	pHealPack6Shader->m_bActive = true;
 	m_pBillboardShader[15] = pHealPack6Shader;
 
 	HealPackBillboardShader* pHealPack7Shader = new HealPackBillboardShader();
 	pHealPack7Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHealPack7Shader->SetCurScene(SCENE1STAGE);
 	pHealPack7Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	pHealPack7Shader->m_bActive = true;
 	m_pBillboardShader[16] = pHealPack7Shader;
 
 	m_nSpriteBillboards = 1;
@@ -382,7 +388,7 @@ void Stage1::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* p
 		m_ppValkan[i] = pValkan;
 		pHelicopterValkanMesh->AddRef();
 	}
-
+	OtherHeliPlayerTransformStore();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }
@@ -1130,7 +1136,7 @@ bool Stage1::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 
 			break;
 		case 'J':
-			((HealPackBillboardShader*)m_pBillboardShader[1])->m_bActiveMark = false;
+			((HealPackBillboardShader*)m_pBillboardShader[1])->m_bActive = false;
 			break;
 		default:
 			break;
@@ -1166,20 +1172,20 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nHumanShaders; i++) if (m_ppHumanShaders[i]) m_ppHumanShaders[i]->AnimateObjects(fTimeElapsed);
 	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();
 
-	((HealPackBillboardShader*)m_pBillboardShader[1])->m_bActiveMark = true;
+	((HealPackBillboardShader*)m_pBillboardShader[1])->m_bActive = true;
 	for (int i = 10; i < 17; i++)
 	{
-		((HealPackBillboardShader*)m_pBillboardShader[i])->m_bActiveMark = true;
+		((HealPackBillboardShader*)m_pBillboardShader[i])->m_bActive = true;
 	}
 
-	((HealPackBillboardShader*)m_pBillboardShader[1])-> HealParticlePosition = XMFLOAT3( 141.30,6.00,  169.50);
-	((HealPackBillboardShader*)m_pBillboardShader[10])->HealParticlePosition = XMFLOAT3( 560.00,6.00,  938.00);
-	((HealPackBillboardShader*)m_pBillboardShader[11])->HealParticlePosition = XMFLOAT3( 141.30,6.00, -138.00);
-	((HealPackBillboardShader*)m_pBillboardShader[12])->HealParticlePosition = XMFLOAT3( 560.00,6.00, -902.00);
-	((HealPackBillboardShader*)m_pBillboardShader[13])->HealParticlePosition = XMFLOAT3(-217.00,6.00,  169.50);
-	((HealPackBillboardShader*)m_pBillboardShader[14])->HealParticlePosition = XMFLOAT3(-630.00,6.00,  938.00);
-	((HealPackBillboardShader*)m_pBillboardShader[15])->HealParticlePosition = XMFLOAT3(-634.00,6.00, -905.00);
-	((HealPackBillboardShader*)m_pBillboardShader[16])->HealParticlePosition = XMFLOAT3(-215.30,6.00, -136.50);
+	((HealPackBillboardShader*)m_pBillboardShader[1])->HealParticlePosition = XMFLOAT3(141.30, 6.00, 169.50);
+	((HealPackBillboardShader*)m_pBillboardShader[10])->HealParticlePosition = XMFLOAT3(560.00, 6.00, 938.00);
+	((HealPackBillboardShader*)m_pBillboardShader[11])->HealParticlePosition = XMFLOAT3(141.30, 6.00, -138.00);
+	((HealPackBillboardShader*)m_pBillboardShader[12])->HealParticlePosition = XMFLOAT3(560.00, 6.00, -902.00);
+	((HealPackBillboardShader*)m_pBillboardShader[13])->HealParticlePosition = XMFLOAT3(-217.00, 6.00, 169.50);
+	((HealPackBillboardShader*)m_pBillboardShader[14])->HealParticlePosition = XMFLOAT3(-630.00, 6.00, 938.00);
+	((HealPackBillboardShader*)m_pBillboardShader[15])->HealParticlePosition = XMFLOAT3(-634.00, 6.00, -905.00);
+	((HealPackBillboardShader*)m_pBillboardShader[16])->HealParticlePosition = XMFLOAT3(-215.30, 6.00, -136.50);
 
 	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(m_ppShaders[0]->m_ppObjects[30]->GetPosition());
 
@@ -1239,6 +1245,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 		}
 
 	}
+	NpcByPlayerCollsiion();
 	PlayerByPlayerCollision();
 	ParticleCollisionResult();
 	ParticleAnimation();
@@ -1296,6 +1303,38 @@ void Stage1::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 		D3D12_GPU_VIRTUAL_ADDRESS d3dcbMaterialsGpuVirtualAddress = m_pd3dcbMaterials->GetGPUVirtualAddress();
 		pd3dCommandList->SetGraphicsRootConstantBufferView(20, d3dcbMaterialsGpuVirtualAddress); //Materials
 	}
+}
+
+void Stage1::OtherHeliPlayerTransformStore()
+{
+	m_pMainRotorFrameP = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pMainRotorFrame->m_xmf4x4ToParent;
+	m_pTailRotorFrameP = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pTailRotorFrame->m_xmf4x4ToParent;
+	m_pFrameFragObj1P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj1->m_xmf4x4ToParent;
+	m_pFrameFragObj2P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj2->m_xmf4x4ToParent;
+	m_pFrameFragObj3P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj3->m_xmf4x4ToParent;
+	m_pFrameFragObj4P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj4->m_xmf4x4ToParent;
+	m_pFrameFragObj5P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj5->m_xmf4x4ToParent;
+	m_pFrameFragObj6P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj6->m_xmf4x4ToParent;
+	m_pFrameFragObj7P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj7->m_xmf4x4ToParent;
+	m_pFrameFragObj8P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj8->m_xmf4x4ToParent;
+	m_pFrameFragObj9P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj9->m_xmf4x4ToParent;
+	m_pFrameFragObj10P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj10->m_xmf4x4ToParent;
+}
+
+void Stage1::OtherHeliPlayerTransfromReset()
+{
+	((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pMainRotorFrame->m_xmf4x4ToParent = m_pMainRotorFrameP;
+	((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pTailRotorFrame->m_xmf4x4ToParent = m_pTailRotorFrameP;
+	((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj1->m_xmf4x4ToParent = m_pFrameFragObj1P;
+	((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj2->m_xmf4x4ToParent = m_pFrameFragObj2P;
+	((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj3->m_xmf4x4ToParent = m_pFrameFragObj3P;
+	((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj4->m_xmf4x4ToParent = m_pFrameFragObj4P;
+	((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj5->m_xmf4x4ToParent = m_pFrameFragObj5P;
+	((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj6->m_xmf4x4ToParent = m_pFrameFragObj6P;
+	((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj7->m_xmf4x4ToParent = m_pFrameFragObj7P;
+	((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj8->m_xmf4x4ToParent = m_pFrameFragObj8P;
+	((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj9->m_xmf4x4ToParent = m_pFrameFragObj9P;
+	((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj10->m_xmf4x4ToParent = m_pFrameFragObj10P;
 }
 
 void Stage1::BillBoardRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, XMFLOAT3 Position)
@@ -1402,18 +1441,27 @@ void Stage1::SetPositionPilotHuman()
 
 void Stage1::NpcByPlayerCollsiion()
 {
-	/*XMFLOAT3 NpcPos{};
+	XMFLOAT3 NpcPos{};
 	BoundingOrientedBox Npcoobb{};
 	for (int i = 21; i < 42; i++)
 	{
 		NpcPos = XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[i])->m_xmf4x4ToParent._41,
 			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[i])->m_xmf4x4ToParent._42,
 			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[i])->m_xmf4x4ToParent._43);
-	}
-	Npcoobb = BoundingOrientedBox(XMFLOAT3(NpcPos), XMFLOAT3(3.0, 5.0, 3.0), XMFLOAT4(0, 0, 0, 1));
-	XMFLOAT3 MyPos = XMFLOAT3(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().x,
-		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().y,
-		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().z);
-	BoundingOrientedBox MyPoobb = BoundingOrientedBox(XMFLOAT3(MyPos), XMFLOAT3(3.0, 5.0, 3.0), XMFLOAT4(0, 0, 0, 1));*/
+		Npcoobb = BoundingOrientedBox(XMFLOAT3(NpcPos), XMFLOAT3(3.0, 5.0, 3.0), XMFLOAT4(0, 0, 0, 1));
 
+		XMFLOAT3 MyPos = XMFLOAT3(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().x,
+			((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().y,
+			((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().z);
+		BoundingOrientedBox MyPoobb = BoundingOrientedBox(XMFLOAT3(MyPos), XMFLOAT3(3.0, 5.0, 3.0), XMFLOAT4(0, 0, 0, 1));
+
+		if (MyPoobb.Intersects(Npcoobb)) {
+			(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->SetPosition(XMFLOAT3(
+				((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_xmf4x4ToParent._41-2.0f,
+				((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().y,
+				((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().z)));
+		}
+	}
+	
+	
 }
