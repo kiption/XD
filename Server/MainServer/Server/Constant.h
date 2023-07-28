@@ -99,13 +99,13 @@
 //============================================================
 //					  스테이지 관련 상수
 //============================================================
-#define STAGE1_MISSION1_GOAL 25.0f		// 스테이지1 미션 목표
-#define STAGE1_MISSION2_GOAL 10.0f
+#define STAGE1_MISSION1_GOAL 25.0f		// 스테이지1 미션1 목표 (처치 단위: 명)
+#define STAGE1_MISSION2_GOAL 60.0f		// 스테이지1 미션2 목표 (점령 단위: 초)
 
-#define ST1_OCCUPY_AREA_POS_X -90.0f		// 스테이지1 점령지역 좌표
-#define ST1_OCCUPY_AREA_POS_Z -795.0f
-#define ST1_OCCUPY_AREA_SIZE_X 100.0f		// 스테이지1 점령지역 크기
-#define ST1_OCCUPY_AREA_SIZE_Z 130.0f
+#define ST1_OCCUPY_AREA_POS_X -45.0f			// 스테이지1 점령지역 좌표
+#define ST1_OCCUPY_AREA_POS_Z -727.5f
+#define ST1_OCCUPY_AREA_SIZE_X 90.0f		// 스테이지1 점령지역 크기
+#define ST1_OCCUPY_AREA_SIZE_Z 95.0f
 
 #define STAGE1_MAX_HELI 5
 #define STAGE1_MAX_HUMAN 25

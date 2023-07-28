@@ -64,7 +64,7 @@ void setMissions() {
 	cout << "[Init Missions...]";
 	// 스테이지1 미션
 	stage1_missions[0] = setMission(MISSION_KILL, STAGE1_MISSION1_GOAL, 0.0f);
-	stage1_missions[1] = setMission(MISSION_OCCUPY, STAGE1_MISSION2_GOAL * 50'000.f, 0.0f);
+	stage1_missions[1] = setMission(MISSION_OCCUPY, STAGE1_MISSION2_GOAL * 1'000.f, 0.0f);
 
 	//
 	cout << " ---- OK." << endl;
@@ -1121,27 +1121,29 @@ void process_packet(int client_id, char* packet)
 		}
 
 		if (is_mission_occupy) {
-			if (!b_occupying) {
-				if (in_occupy_area) {
+			if (!b_occupying) {			// 점령 중이 아니었다가
+				if (in_occupy_area) {	// 새롭게 점령지역에 들어온 경우
 					occupying_people_cnt++;
-					if (occupying_people_cnt >= 1/*MAX_USER*/) {	// MAX_USER 명이 모두 점령지역에 모이면 점령이 시작된다.
+					if (occupying_people_cnt == 1) {	// 내가 점령을 처음 시작한 경우
 						mission_lock.lock();
-						b_occupying = true;
+						b_occupying = true;				// 점령을 진행시킨다.
 						occupy_start_time = static_cast<int>(g_curr_servertime.count());
+						cout << "점령을 시작합니다. (START TIME: " << occupy_start_time << ", 현재 점령인원: " << occupying_people_cnt << "명)\n" << endl;
 						mission_lock.unlock();
-
-						cout << "점령을 진행합니다. (START TIME: " << occupy_start_time << ")\n" << endl;
 					}
 				}
 			}
-			else {
-				if (!in_occupy_area) {	// 한 명이라도 점령 지역을 이탈하면 점령이 진행되지 않는다.
-					mission_lock.lock();
-					b_occupying = false;
-					occupy_start_time = 0;
-					mission_lock.unlock();
+			else {						// 원래 점령이 진행 중이었는데
+				if (!in_occupy_area) {	// 점령지역 밖으로 탈출한 경우
+					occupying_people_cnt--;
+					if (occupying_people_cnt == 0) {	// 점령 지역에 아무도 안남게 되면
+						mission_lock.lock();
+						b_occupying = false;			// 점령을 종료한다.
+						occupy_start_time = 0;
+						cout << "점령을 중단합니다.\n" << endl;
+						mission_lock.unlock();
+					}
 
-					cout << "점령을 중단합니다.\n" << endl;
 				}
 			}
 		}
@@ -2939,17 +2941,9 @@ void timerFunc() {
 					if (cl.curr_stage == 0) continue;
 
 					if (cl.curr_stage == 1) {
-						// 미션 진행 업데이트
 						int curr_mission_id = curr_mission_stage[1];
-						mission_lock.lock();
-						stage1_missions[curr_mission_id].curr += static_cast<int>(g_curr_servertime.count()) - occupy_start_time;
-						mission_lock.unlock();
-
 						// 미션 완료
 						if (stage1_missions[curr_mission_id].curr >= stage1_missions[curr_mission_id].goal) {
-							//cout << "점령 완료!\n" << endl;
-							//cout << "스테이지[1]의 미션[" << curr_mission_id << "] 완료!" << endl;
-
 							// 미션 완료 패킷
 							SC_MISSION_COMPLETE_PACKET mission_complete;
 							mission_complete.type = SC_MISSION_COMPLETE;
@@ -2963,35 +2957,16 @@ void timerFunc() {
 								cl.do_send(&mission_complete);
 							}
 
-							if (curr_mission_id + 1 >= ST1_MISSION_NUM) {	// 모든 미션 완료
-								//cout << "스테이지[1]의 모든 미션을 완료하였습니다.\n" << endl;
-							}
-							else {	// 아직 스테이지의 미션이 남은 경우
-								curr_mission_stage[1]++;
-								curr_mission_id = curr_mission_stage[1];
+							// 점령 미션이 마지막 미션임. 클라이언트들을 내보내고 게임을 초기화한다.
 
-								// 다음 미션 전달
-								for (auto& cl : clients) {
-									if (cl.s_state != ST_INGAME) continue;
-									if (cl.curr_stage != 1) continue;
-									lock_guard<mutex> lg{ cl.s_lock };
-									cl.send_mission_packet(1);
-								}
-
-								stage1_missions[curr_mission_id].start = static_cast<int>(g_curr_servertime.count());
-								cout << "[" << stage1_missions[curr_mission_id].start << "] 새로운 미션 추가: ";
-								switch (stage1_missions[curr_mission_id].type) {
-								case MISSION_KILL:
-									cout << "[처치] ";
-									break;
-								case MISSION_OCCUPY:
-									cout << "[점령] ";
-									break;
-								}
-								cout << stage1_missions[curr_mission_id].curr << " / " << stage1_missions[curr_mission_id].goal << "\n" << endl;
-							}
 						}
-						else {
+						else {	// 아직 점령 진행중
+							// 미션 진행 업데이트
+							mission_lock.lock();
+							stage1_missions[curr_mission_id].curr += 50 * occupying_people_cnt;	// 점령중인 사람이 많을 수록 게이지가 빨리 차오른다.
+							cout << "점령 진행율: " << stage1_missions[curr_mission_id].curr << " / " << stage1_missions[curr_mission_id].goal << endl;
+							mission_lock.unlock();
+
 							for (auto& cl : clients) {
 								if (cl.s_state != ST_INGAME) continue;
 								if (cl.curr_stage != 1) continue;
