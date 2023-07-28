@@ -1255,6 +1255,9 @@ void process_packet(int client_id, char* packet)
 			atk_pack.obj_type = TARGET_PLAYER;
 			atk_pack.id = clients[client_id].id;
 			atk_pack.sound_volume = atksound_vol;
+			atk_pack.atklook_x = clients[client_id].m_cam_lookvec.x;
+			atk_pack.atklook_y = clients[client_id].m_cam_lookvec.y;
+			atk_pack.atklook_z = clients[client_id].m_cam_lookvec.z;
 			lock_guard<mutex> lg{ cl.s_lock };
 			cl.do_send(&atk_pack);
 		}
@@ -1961,6 +1964,8 @@ void process_packet(int client_id, char* packet)
 	{
 		CS_PARTICLE_COLLIDE_PACKET* particle_pack = reinterpret_cast<CS_PARTICLE_COLLIDE_PACKET*>(packet);
 
+		if (clients[client_id].pl_state == PL_ST_DEAD) break;	// 죽으면 충돌X
+
 		// 데미지 계산
 		int damage = static_cast<int>(PARTICLE_BASIC_DAMAGE * particle_pack->particle_mass);
 		if (clients[client_id].role == ROLE_HELI) {	// 헬기 플레이어는 덜 아프게 맞는다.
@@ -2059,6 +2064,7 @@ void process_packet(int client_id, char* packet)
 	{
 		CS_HELI_MAP_COLLIDE_PACKET* particle_pack = reinterpret_cast<CS_HELI_MAP_COLLIDE_PACKET*>(packet);
 		if (clients[client_id].role != ROLE_HELI) break;	// 잘못된 요청
+		if (clients[client_id].pl_state == PL_ST_DEAD) break;	// 죽으면 충돌X
 		
 		// 데미지 계산
 		int damage = static_cast<int>(HUMAN_MAXHP / 3) + 1;
@@ -2979,7 +2985,7 @@ void timerFunc() {
 				switch (cl.curr_stage) {
 				case 1:
 					left_time = STAGE1_TIMELIMIT * 1000 - static_cast<int>(g_curr_servertime.count());
-					if (left_time < 0) {
+					if (left_time <= 0) {
 						ticking_packet.servertime_ms = STAGE1_TIMELIMIT * 1000;
 					}
 					else {
