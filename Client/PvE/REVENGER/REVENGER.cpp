@@ -195,26 +195,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		{
 			if (gGameFramework.m_nMode == OPENINGSCENE)
 			{
-				if (gGameFramework.m_bLoginInfoSend && gGameFramework.m_LoginClick[3]) {
-					// id, pw, ip 받은 거 char로 바꾸는 곳		
-					char id[20] = { 0 };
-					char pw[20] = { 0 };
-					char ip[20] = { 0 };
-
-					size_t idLength = wcslen(gGameFramework.m_LoginID);
-					size_t pwLength = wcslen(gGameFramework.m_LoginPW);
-
-					wcstombs_s(nullptr, id, sizeof(id), gGameFramework.m_LoginID, idLength);
-					wcstombs_s(nullptr, pw, sizeof(pw), gGameFramework.m_LoginPW, pwLength);
-
-					gGameFramework.m_bLoginInfoSend = false;
-				}
-
 				// UI를 통한 조작 구현
 				switch (gGameFramework.m_LoginScene) {
-				case gGameFramework.LS_LOGIN:	// ID/PW 입력 창
-					break;
-
 				case gGameFramework.LS_OPENING: // 게임 시작, 종료 
 					// 게임 시작
 					if (gGameFramework.m_GameClick[0]) {
@@ -1092,9 +1074,6 @@ void uiThreadFunc() {
 		if (gGameFramework.m_nMode == OPENINGSCENE) {
 			// UI를 통한 조작 구현
 			switch (gGameFramework.m_LoginScene) {
-			case gGameFramework.LS_LOGIN:	// ID/PW 입력 창
-				break;
-
 			case gGameFramework.LS_OPENING: // 게임 시작, 설정, 종료 
 				break;
 
@@ -1260,10 +1239,11 @@ void uiThreadFunc() {
 			gGameFramework.m_10SecOftime = (timelimit_sec - gGameFramework.m_1MinOfTime * 60) / 10;
 			gGameFramework.m_1SecOfTime = timelimit_sec % 10;
 
-			if (!gGameFramework.m_missionClear && b_startTime) {
+			if (!gGameFramework.m_missionClear && b_startTime && !b_gameover) {
 				if (timelimit_sec <= 0) {
 					gGameFramework.m_missionFailed = true;
 					gGameFramework.m_missionClear = false;
+					gGameFramework.m_spendYourlife = false;
 				}
 			}
 
@@ -1296,10 +1276,6 @@ void uiThreadFunc() {
 				//gGameFramework.m_remainNPC = stage_missions[2].goal - stage_missions[2].curr;
 				break;
 			}
-
-			wchar_t lateNPC[20];
-			_itow_s(gGameFramework.m_remainNPC, lateNPC, sizeof(lateNPC), 10);
-			wcscpy_s(gGameFramework.m_remainNPCPrint, lateNPC);
 
 			// 5. 미션 종류 동기화
 			if (trigger_stage_clear) {
@@ -1428,13 +1404,16 @@ void uiThreadFunc() {
 			}
 
 			// 11. 게임 오버 UI
-			if (b_gameover) {
-
+			if (b_gameover && !gGameFramework.m_missionClear && !gGameFramework.m_missionFailed) {
+				gGameFramework.m_spendYourlife = true;
+				gGameFramework.m_missionClear = false;
+				gGameFramework.m_missionFailed = false;
 			}
 
 			// 12. Life 표시
-			//players_info[my_id].m_life;		// 여기에 라이프 업데이트 되고있음. 이거 갖고 UI 띄워주면 대
-
+			wchar_t PlayerLifeCount[20];
+			_itow_s(players_info[my_id].m_life, PlayerLifeCount, sizeof(PlayerLifeCount), 10);
+			wcscpy_s(gGameFramework.m_mylifeCount, PlayerLifeCount);
 		}
 
 		this_thread::yield();

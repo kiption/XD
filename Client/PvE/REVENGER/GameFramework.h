@@ -257,119 +257,120 @@ public:
 	//			  서버 통신을 위한 것들...
 	//==================================================
 public:
-	int m_MAX_USER;
-	int m_roominMyId;
 	enum INGAME_ROLE { R_NONE, R_RIFLE, R_HELI };
-	int m_ingame_role = R_NONE;	// 역할 (소총수, 헬기)
-
+	enum LOGINSCENE { LS_OPENING, LS_LOBBY, LS_ROOM, LS_CREATE_ROOM };
 	SceneManager* m_pScene = NULL;
-	// 서버로 보낼 키보드 입력값
-	queue<short> q_keyboardInput;
 
-	// 서버로 보낼 마우스 입력값
-	queue<MouseInputVal> q_mouseInput;
+	// 기본 정보
+	int m_NumOfUI = UICOUNTERS;
+	int m_myID = -1;
+	int m_MAX_USER;
+	int m_Max_NPCs;
+	int m_CurrentPlayerNum;
+	queue<short> q_keyboardInput;			// 서버로 보낼 키보드 입력값
 
-	WCHAR m_remainNPCPrint[20];
+	queue<MouseInputVal> q_mouseInput;		// 서버로 보낼 마우스 입력값
+
+	// 로비 관련 UI
+	int m_roominMyId;
+	int m_ingame_role = R_NONE;				// 역할 (소총수, 헬기)
+	int m_LobbyPage = 0;
+
+	// 로비 정보
+	int m_myRoomNum = 99;
+	int m_LoginScene = 0;
+
 	Roomname RoomnameList;
-	WCHAR m_LoginID[20];
-	WCHAR m_LoginPW[20];
-	WCHAR m_CompleteChat[60];
-	WCHAR m_InsertChat[60];
 	WCHAR* createRoomName;
 	WCHAR* currRoomName;
-	int m_myRoomNum = 99;
+	vector <LobbyRoom> m_LobbyRoom_Info;
+	array <MYRoomUser, 3> m_MyRoom_Info;
 
-	int m_mainmissionnum = 0;
-	int m_submissionnum = 0;
+	// 로비 UI 관련 변수
+	bool m_ingame = false;
+	bool m_infoReady = false;
+	bool m_infoChoose = false;
+	bool m_CreateRoomOkButton = false;
+	bool m_RoomBackButton = false;
+	bool m_bRollState = false;
+	bool role_change_a2h_click = false;		// army -> heli
+	bool role_change_h2a_click = false;		// heli -> human
+
+	float m_infoReadyTime = 0.0f;
+	float m_infoChooseTime = 0.0f;
+
+	float m_StartKey = 0;
+	float m_ReadyKey = 0;
+
+	// 오프닝 씬 각 클릭 좌표
+	bool m_GameClick[3]{ false };
+	bool m_LobbyClick[3]{ false };
+	bool m_LobbyRoomClick[8]{ false };		// 로비 화면에 보이는 방 7칸
+	bool m_RoomClick[3]{ false };
+
+	LoginSceneInfo gamepos[2];
+	LoginSceneInfo lobbypos[5];
+	LoginSceneInfo lobbyroompos[8];			// 로비 화면에 보이는 방 7칸
+	LoginSceneInfo roompos[3];
+	LoginSceneInfo createpos[2];
+	LoginSceneInfo choicejob[6];
+
+	// 인게임
+	// 인 게임 자신 정보
 	int m_currHp;
 	int m_currbullet;
 
+
+	// 인 게임 시간 정보
 	int m_10MinOfTime;
 	int m_1MinOfTime;
 	int m_10SecOftime;
 	int m_1SecOfTime;
 
-	int m_remainNPC;
-
-	int m_killArmy;
-	int m_AttackFly;
-	int m_survive = 12;
-	int m_Max_NPCs;
-	int m_CurrentPlayerNum;
-
-	int m_occupationnum = 0;
-	int m_LobbyPage = 0;
-	int m_myID = -1;
-	int m_otherHP[2];
-	WCHAR m_OtherName[2][20];
-
-	bool b_heli_mapcollide = false;
-	int b_heli_mapcollide_cooldown = 0;
-
-	int m_NumOfUI = UICOUNTERS;
-	bool UI_Switch = false;
-	bool m_bRollState = false;
-	bool m_LoginClick[4]{ false };
-	bool m_GameClick[3]{ false };
-	bool m_LobbyClick[3]{ false };
-	bool m_LobbyRoomClick[8]{ false };		// 로비 화면에 보이는 방 7칸
-	bool m_RoomClick[3]{ false };
+	// 인 게임 이미지 UI
 	bool m_SniperOn = false;
 	bool m_BloodSplatterOn = false;
 	bool m_bHeliHittingMotion = false;
 	bool m_HeliPlayerWarnningSwitch = false;
 	bool m_HeliPlayerWarnningUISwitch = false;
-	LoginSceneInfo loginpos[4];
-	LoginSceneInfo gamepos[2];
-	LoginSceneInfo lobbypos[5];
-	LoginSceneInfo lobbyroompos[8];	// 로비 화면에 보이는 방 7칸
-	LoginSceneInfo roompos[3];
-	LoginSceneInfo createpos[2];
-	LoginSceneInfo choicejob[6];
+	bool UI_Switch = false;
 
-	bool m_bLoginInfoSend = false;
-	enum LOGINSCENE { LS_LOGIN, LS_OPENING, LS_LOBBY, LS_ROOM, LS_CREATE_ROOM };
-	int m_LoginScene = 0;
-	bool m_CreateRoomOkButton = false;
-	bool m_CameraShaking = false;
-	bool m_RoomBackButton = false;
-	float m_StartKey = 0;
-	float m_ReadyKey = 0;
+	// 인게임 글자 UI Print
+	int m_otherHP[2];
+	wchar_t killNPCprint[100];
+	wchar_t occupationPrint[100];
+	WCHAR m_OtherName[2][20];
 
-	// UI Info
-	vector<CollideMapInfo> mapcol_info;
-	vector<LobbyRoom>m_LobbyRoom_Info;
-	array<MYRoomUser, 3> m_MyRoom_Info;
-	queue<BulletPos> m_shoot_info;
+	WCHAR m_mylifeCount[10];
+	WCHAR m_CompleteChat[60];
+	WCHAR m_InsertChat[60];
 
 	queue<ChatInfo> m_chat_info;
 	queue<SendChat> m_mychat_log;
 
-	// UI Print
-	wchar_t killNPCprint[100];
-	wchar_t occupationPrint[100];
-	wchar_t SurviveSecPrint[20];
-	wchar_t FlyAtkPrint[20];
-	wchar_t KillArmyPrint[20];
-
-	bool W_KEY, A_KEY, S_KEY, D_KEY, SPACE_KEY, SHOOT_KEY = false;
-	bool isComplete = false;
-	bool player_dead = false;
-	bool role_change_a2h_click = false;	// army -> heli
-	bool role_change_h2a_click = false;	// heli -> human
-
 	// 미션 UI 관련 변수
 	bool m_missionFailed = false;
 	bool m_missionClear = false;
+	bool m_spendYourlife = false;
+
+	int m_remainNPC;
+	int m_mainmissionnum = 0;
+	int m_occupationnum = 0;
+	int m_printTime = 0;
 	float m_missionFailedUI = 0.0f;
 	float m_missionClearUI = 0.0f;
 
-	// 인게임 UI 관련 변수
-	bool m_ingame = false;
-	bool m_infoReady = false;
-	bool m_infoChoose = false;
-	float m_infoReadyTime = 0.0f;
-	float m_infoChooseTime = 0.0f;
+	// 인 게임 오브젝트 정보
+	bool b_heli_mapcollide = false;
+	bool m_CameraShaking = false;
+	bool W_KEY, A_KEY, S_KEY, D_KEY, SPACE_KEY, SHOOT_KEY = false;
+	bool isComplete = false;
+	bool player_dead = false;
+
+	int b_heli_mapcollide_cooldown = 0;
+
+	vector<CollideMapInfo> mapcol_info;
+	queue<BulletPos> m_shoot_info;
 
 	//==================================================
 
@@ -401,7 +402,7 @@ public:
 	// 다른 플레이어 최신화
 	void setPosition_SoldiarOtherPlayer(int id, XMFLOAT3 pos);
 	void setPosition_HeliOtherPlayer(XMFLOAT3 pos);
-	void setVectors_SoldiarOtherPlayer(int id,XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
+	void setVectors_SoldiarOtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void setVectors_HeliOtherPlayer(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void remove_OtherPlayer(int id);
 
@@ -463,6 +464,6 @@ public:
 	float m_fResponCount = 0.0;
 	//=================================================
 	//NPC Attack
-	void NpcUnderAttack(XMFLOAT3 ToLook,int npc_id);
+	void NpcUnderAttack(XMFLOAT3 ToLook, int npc_id);
 	void NpcNoneUnderAttack();
 };
