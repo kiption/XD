@@ -431,6 +431,9 @@ public:
 	void AttackMotionNPC(int id);
 	void MoveMotionNPC(int id);
 
+	// »˙∆— √÷Ω≈»≠
+	void updateHealpack(int h_id, bool isEffectOn);
+
 	int a_id;
 	bool active = false;
 	bool m_bDamageOn = false;

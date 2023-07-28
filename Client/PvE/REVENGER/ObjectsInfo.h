@@ -168,6 +168,3 @@ int removeRoom(int target_room_id) {
 queue<XMFLOAT3> q_bullet_hit_pos_mapobj;
 queue<XMFLOAT3> q_bullet_hit_pos_ground;
 
-
-//==================================================
-bool healpack_effect_on[8] = { true, };	// »˙∆— ¿Ã∆Â∆Æ On/Off ø©∫Œ

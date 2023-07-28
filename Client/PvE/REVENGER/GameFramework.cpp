@@ -3852,3 +3852,23 @@ void CGameFramework::NpcNoneUnderAttack()
 {
 	NpcShotKey = false;
 }
+
+void CGameFramework::updateHealpack(int h_id, bool isEffectOn)
+{
+	if (h_id == 0)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[1])->m_bActiveMark = isEffectOn;
+	else if (h_id == 1)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[10])->m_bActiveMark = isEffectOn;
+	else if (h_id == 2)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[11])->m_bActiveMark = isEffectOn;
+	else if (h_id == 3)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[12])->m_bActiveMark = isEffectOn;
+	else if (h_id == 4)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[13])->m_bActiveMark = isEffectOn;
+	else if (h_id == 5)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[14])->m_bActiveMark = isEffectOn;
+	else if (h_id == 6)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[15])->m_bActiveMark = isEffectOn;
+	else if (h_id == 7)
+		((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[16])->m_bActiveMark = isEffectOn;
+}

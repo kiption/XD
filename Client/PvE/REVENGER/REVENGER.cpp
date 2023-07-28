@@ -640,6 +640,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					}
 				}
 
+				//==================================================
+				//					힐팩 이펙트 관련
+				//==================================================
+				if (trigger_healpack_update) {
+					gGameFramework.updateHealpack(updated_healpack_id, healpack_effect_on);
+
+					trigger_healpack_update = false;
+					updated_healpack_id = -1;
+				}
 
 				//==================================================
 				//					Map 충돌 관련

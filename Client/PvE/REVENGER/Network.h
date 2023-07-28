@@ -73,6 +73,10 @@ bool trigger_otherplayer_attack = false;	// ´Ù¸¥ ÇÃ·¹ÀÌ¾î °ø°Ý ¿¬Ãâ
 int otherplayer_attack_id;					// " id
 XMFLOAT3 otherplayer_attack_dir;			// " ¹æÇâ
 
+bool trigger_healpack_update = false;	// ÈúÆÑ on/off Æ®¸®°Å
+bool healpack_effect_on = true;			// ÈúÆÑ on ¾÷µ¥ÀÌÆ®ÀÎ°¡ ?
+int updated_healpack_id = -1;			// ¾÷µ¥ÀÌÆ®µÇ´Â ÈúÆÑ ID
+
 bool b_gameover = false;	// °ÔÀÓ ¿À¹ö Æ®¸®°Å
 
 bool b_height_alert = false;						// Çï±â °íµµ °æº¸
@@ -919,13 +923,16 @@ void processPacket(char* ptr)
 		int recv_id = recv_packet->healpack_id;
 
 		if (recv_packet->isused == 1) {
-			healpack_effect_on[recv_id] = false;
+			healpack_effect_on = false;
 			cout << recv_id << "¹øÂ° ÈúÆÑ »ç¿ëµÊ." << endl;
 		}
 		else if (recv_packet->isused == 0) {
-			healpack_effect_on[recv_id] = true;
+			healpack_effect_on = true;
 			cout << recv_id << "¹øÂ° ÈúÆÑ »ý¼ºµÊ." << endl;
 		}
+
+		trigger_healpack_update = true;
+		updated_healpack_id = recv_id;
 
 		break;
 	}// SC_HEALPACK case end

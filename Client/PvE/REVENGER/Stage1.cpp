@@ -1166,11 +1166,11 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nHumanShaders; i++) if (m_ppHumanShaders[i]) m_ppHumanShaders[i]->AnimateObjects(fTimeElapsed);
 	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();
 
-	((HealPackBillboardShader*)m_pBillboardShader[1])->m_bActiveMark = true;
-	for (int i = 10; i < 17; i++)
-	{
-		((HealPackBillboardShader*)m_pBillboardShader[i])->m_bActiveMark = true;
-	}
+	//((HealPackBillboardShader*)m_pBillboardShader[1])->m_bActiveMark = true;
+	//for (int i = 10; i < 17; i++)
+	//{
+	//	((HealPackBillboardShader*)m_pBillboardShader[i])->m_bActiveMark = true;
+	//}
 
 	((HealPackBillboardShader*)m_pBillboardShader[1])-> HealParticlePosition = XMFLOAT3( 141.30,6.00,  169.50);
 	((HealPackBillboardShader*)m_pBillboardShader[10])->HealParticlePosition = XMFLOAT3( 560.00,6.00,  938.00);
