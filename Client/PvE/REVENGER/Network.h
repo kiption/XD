@@ -32,8 +32,8 @@ int my_id;
 //==================================================
 float servertime_ms;    // 실제 서버시간
 
-int timelimit_ms;       // 스테이지별 제한시간
-int timelimit_sec;
+volatile int timelimit_ms;       // 스테이지별 제한시간
+volatile int timelimit_sec;
 
 //==================================================
 // 씬 전환 관련
@@ -1230,6 +1230,7 @@ void processPacket(char* ptr)
 		SC_TIME_TICKING_PACKET* recv_packet = reinterpret_cast<SC_TIME_TICKING_PACKET*>(ptr);
 
 		servertime_ms = recv_packet->servertime_ms;
+		if (servertime_ms <= 0) servertime_ms = 1;
 		timelimit_ms = STAGE1_TIMELIMIT * 1000 - servertime_ms;
 		timelimit_sec = timelimit_ms / 1000;
 		b_startTime = true;

@@ -1015,6 +1015,7 @@ void process_packet(int client_id, char* packet)
 				clients[client_id].s_lock.lock();
 				clients[client_id].hp = 0;
 				clients[client_id].life--;
+				if (clients[client_id].life < 0) clients[client_id].life = 0;
 				clients[client_id].pl_state = PL_ST_DEAD;
 				clients[client_id].death_time = system_clock::now();
 				clients[client_id].s_lock.unlock();
@@ -1059,7 +1060,7 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].setBB();
 		clients[client_id].pl_state = cl_move_packet->direction + 1;	// MV_FRONT = 0, MV_BACK = 1, MV_SIDE = 2; PL_ST_MOVE_FRONT = 1, PL_ST_MOVE_BACK = 2, PL_ST_MOVE_SIDE = 3;
 		if (clients[client_id].role == ROLE_HELI) {
-			if (clients[client_id].height_alert && clients[client_id].pos.y > 23.0f) {	// 경보가 울리고 있다가 고도가 일정 높이 이상 올라오면 경보를 해제한다.
+			if (clients[client_id].height_alert && clients[client_id].pos.y > 27.0f) {	// 경보가 울리고 있다가 고도가 일정 높이 이상 올라오면 경보를 해제한다.
 				clients[client_id].height_alert = false;
 				SC_HEIGHT_ALERT_PACKET alert_cancel_packet;
 				alert_cancel_packet.size = sizeof(SC_HEIGHT_ALERT_PACKET);
@@ -1067,7 +1068,7 @@ void process_packet(int client_id, char* packet)
 				alert_cancel_packet.alert_on = 0;
 				clients[client_id].do_send(&alert_cancel_packet);
 			}
-			else if (!clients[client_id].height_alert && clients[client_id].pos.y <= 23.0f) {	// 고도가 일정 높이 미만 내려가면 경보를 울린다.
+			else if (!clients[client_id].height_alert && clients[client_id].pos.y <= 27.0f) {	// 고도가 일정 높이 미만 내려가면 경보를 울린다.
 				clients[client_id].height_alert = true;
 				SC_HEIGHT_ALERT_PACKET alert_start_packet;
 				alert_start_packet.size = sizeof(SC_HEIGHT_ALERT_PACKET);
@@ -1254,6 +1255,9 @@ void process_packet(int client_id, char* packet)
 			atk_pack.obj_type = TARGET_PLAYER;
 			atk_pack.id = clients[client_id].id;
 			atk_pack.sound_volume = atksound_vol;
+			atk_pack.atklook_x = clients[client_id].m_cam_lookvec.x;
+			atk_pack.atklook_y = clients[client_id].m_cam_lookvec.y;
+			atk_pack.atklook_z = clients[client_id].m_cam_lookvec.z;
 			lock_guard<mutex> lg{ cl.s_lock };
 			cl.do_send(&atk_pack);
 		}
@@ -1960,6 +1964,8 @@ void process_packet(int client_id, char* packet)
 	{
 		CS_PARTICLE_COLLIDE_PACKET* particle_pack = reinterpret_cast<CS_PARTICLE_COLLIDE_PACKET*>(packet);
 
+		if (clients[client_id].pl_state == PL_ST_DEAD) break;	// 죽으면 충돌X
+
 		// 데미지 계산
 		int damage = static_cast<int>(PARTICLE_BASIC_DAMAGE * particle_pack->particle_mass);
 		if (clients[client_id].role == ROLE_HELI) {	// 헬기 플레이어는 덜 아프게 맞는다.
@@ -2012,6 +2018,7 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].s_lock.lock();
 			clients[client_id].hp = 0;
 			clients[client_id].life--;
+			if (clients[client_id].life < 0) clients[client_id].life = 0;
 			clients[client_id].pl_state = PL_ST_DEAD;
 			clients[client_id].death_time = system_clock::now();
 			clients[client_id].s_lock.unlock();
@@ -2057,6 +2064,7 @@ void process_packet(int client_id, char* packet)
 	{
 		CS_HELI_MAP_COLLIDE_PACKET* particle_pack = reinterpret_cast<CS_HELI_MAP_COLLIDE_PACKET*>(packet);
 		if (clients[client_id].role != ROLE_HELI) break;	// 잘못된 요청
+		if (clients[client_id].pl_state == PL_ST_DEAD) break;	// 죽으면 충돌X
 		
 		// 데미지 계산
 		int damage = static_cast<int>(HUMAN_MAXHP / 3) + 1;
@@ -2107,6 +2115,7 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].s_lock.lock();
 			clients[client_id].hp = 0;
 			clients[client_id].life--;
+			if (clients[client_id].life < 0) clients[client_id].life = 0;
 			clients[client_id].pl_state = PL_ST_DEAD;
 			clients[client_id].death_time = system_clock::now();
 			clients[client_id].s_lock.unlock();
@@ -2560,6 +2569,7 @@ void process_packet(int client_id, char* packet)
 						clients[collided_cl_id].s_lock.lock();
 						clients[collided_cl_id].hp = 0;
 						clients[collided_cl_id].life--;
+						if (clients[collided_cl_id].life < 0) clients[collided_cl_id].life = 0;
 						clients[collided_cl_id].pl_state = PL_ST_DEAD;
 						clients[collided_cl_id].death_time = system_clock::now();
 						clients[collided_cl_id].s_lock.unlock();
@@ -2975,7 +2985,7 @@ void timerFunc() {
 				switch (cl.curr_stage) {
 				case 1:
 					left_time = STAGE1_TIMELIMIT * 1000 - static_cast<int>(g_curr_servertime.count());
-					if (left_time < 0) {
+					if (left_time <= 0) {
 						ticking_packet.servertime_ms = STAGE1_TIMELIMIT * 1000;
 					}
 					else {
