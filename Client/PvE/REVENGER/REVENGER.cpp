@@ -195,26 +195,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		{
 			if (gGameFramework.m_nMode == OPENINGSCENE)
 			{
-				if (gGameFramework.m_bLoginInfoSend && gGameFramework.m_LoginClick[3]) {
-					// id, pw, ip 받은 거 char로 바꾸는 곳		
-					char id[20] = { 0 };
-					char pw[20] = { 0 };
-					char ip[20] = { 0 };
-
-					size_t idLength = wcslen(gGameFramework.m_LoginID);
-					size_t pwLength = wcslen(gGameFramework.m_LoginPW);
-
-					wcstombs_s(nullptr, id, sizeof(id), gGameFramework.m_LoginID, idLength);
-					wcstombs_s(nullptr, pw, sizeof(pw), gGameFramework.m_LoginPW, pwLength);
-
-					gGameFramework.m_bLoginInfoSend = false;
-				}
-
 				// UI를 통한 조작 구현
 				switch (gGameFramework.m_LoginScene) {
-				case gGameFramework.LS_LOGIN:	// ID/PW 입력 창
-					break;
-
 				case gGameFramework.LS_OPENING: // 게임 시작, 종료 
 					// 게임 시작
 					if (gGameFramework.m_GameClick[0]) {
@@ -1092,9 +1074,6 @@ void uiThreadFunc() {
 		if (gGameFramework.m_nMode == OPENINGSCENE) {
 			// UI를 통한 조작 구현
 			switch (gGameFramework.m_LoginScene) {
-			case gGameFramework.LS_LOGIN:	// ID/PW 입력 창
-				break;
-
 			case gGameFramework.LS_OPENING: // 게임 시작, 설정, 종료 
 				break;
 
