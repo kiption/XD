@@ -267,13 +267,13 @@ public:
 	int m_MAX_USER;
 	int m_Max_NPCs;
 	int m_CurrentPlayerNum;
-	queue<short> q_keyboardInput;		// 서버로 보낼 키보드 입력값
+	queue<short> q_keyboardInput;			// 서버로 보낼 키보드 입력값
 
-	queue<MouseInputVal> q_mouseInput;	// 서버로 보낼 마우스 입력값
+	queue<MouseInputVal> q_mouseInput;		// 서버로 보낼 마우스 입력값
 
 	// 로비 관련 UI
 	int m_roominMyId;
-	int m_ingame_role = R_NONE;	// 역할 (소총수, 헬기)
+	int m_ingame_role = R_NONE;				// 역할 (소총수, 헬기)
 	int m_LobbyPage = 0;
 
 	// 로비 정보
@@ -293,12 +293,12 @@ public:
 	bool m_CreateRoomOkButton = false;
 	bool m_RoomBackButton = false;
 	bool m_bRollState = false;
-	bool role_change_a2h_click = false;	// army -> heli
-	bool role_change_h2a_click = false;	// heli -> human
+	bool role_change_a2h_click = false;		// army -> heli
+	bool role_change_h2a_click = false;		// heli -> human
 
 	float m_infoReadyTime = 0.0f;
 	float m_infoChooseTime = 0.0f;
-	
+
 	float m_StartKey = 0;
 	float m_ReadyKey = 0;
 
@@ -310,7 +310,7 @@ public:
 
 	LoginSceneInfo gamepos[2];
 	LoginSceneInfo lobbypos[5];
-	LoginSceneInfo lobbyroompos[8];	// 로비 화면에 보이는 방 7칸
+	LoginSceneInfo lobbyroompos[8];			// 로비 화면에 보이는 방 7칸
 	LoginSceneInfo roompos[3];
 	LoginSceneInfo createpos[2];
 	LoginSceneInfo choicejob[6];
@@ -319,6 +319,7 @@ public:
 	// 인 게임 자신 정보
 	int m_currHp;
 	int m_currbullet;
+
 
 	// 인 게임 시간 정보
 	int m_10MinOfTime;
@@ -340,7 +341,7 @@ public:
 	wchar_t occupationPrint[100];
 	WCHAR m_OtherName[2][20];
 
-	WCHAR m_remainNPCPrint[20];
+	WCHAR m_mylifeCount[10];
 	WCHAR m_CompleteChat[60];
 	WCHAR m_InsertChat[60];
 
@@ -350,11 +351,12 @@ public:
 	// 미션 UI 관련 변수
 	bool m_missionFailed = false;
 	bool m_missionClear = false;
-	
+	bool m_spendYourlife = false;
+
 	int m_remainNPC;
 	int m_mainmissionnum = 0;
 	int m_occupationnum = 0;
-
+	int m_printTime = 0;
 	float m_missionFailedUI = 0.0f;
 	float m_missionClearUI = 0.0f;
 

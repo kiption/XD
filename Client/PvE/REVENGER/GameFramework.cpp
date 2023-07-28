@@ -1032,15 +1032,15 @@ void CGameFramework::ProcessInput()
 	{
 		DWORD dwDirection = 0;
 		if (!UI_Switch && !player_dead) {
-			if (pKeysBuffer[KEY_W] & 0xF0) { q_keyboardInput.push(SEND_KEY_W); dwDirection |= DIR_FORWARD;}
-			if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD;}
-			if (pKeysBuffer[KEY_A] & 0xF0) { q_keyboardInput.push(SEND_KEY_A); dwDirection |= DIR_LEFT;}
+			if (pKeysBuffer[KEY_W] & 0xF0) { q_keyboardInput.push(SEND_KEY_W); dwDirection |= DIR_FORWARD; }
+			if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; }
+			if (pKeysBuffer[KEY_A] & 0xF0) { q_keyboardInput.push(SEND_KEY_A); dwDirection |= DIR_LEFT; }
 			if (pKeysBuffer[KEY_D] & 0xF0) { q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT; }
 
 			if (m_ingame_role == R_HELI)
 			{
-				if (pKeysBuffer[KEY_Q] & 0xF0) { m_bHeliHittingMotion = false;q_keyboardInput.push(SEND_KEY_Q); dwDirection |= DIR_UP; }
-				if (pKeysBuffer[KEY_E] & 0xF0) { m_bHeliHittingMotion = false;q_keyboardInput.push(SEND_KEY_E); dwDirection |= DIR_DOWN; }
+				if (pKeysBuffer[KEY_Q] & 0xF0) { m_bHeliHittingMotion = false; q_keyboardInput.push(SEND_KEY_Q); dwDirection |= DIR_UP; }
+				if (pKeysBuffer[KEY_E] & 0xF0) { m_bHeliHittingMotion = false; q_keyboardInput.push(SEND_KEY_E); dwDirection |= DIR_DOWN; }
 			}
 		}
 
@@ -1260,7 +1260,7 @@ void CGameFramework::AnimateObjects()
 					->SetTrackAnimationSet(0, 11);
 			}
 		}
-		
+
 		if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA && m_bDieMotion == false)
 		{
 			if (m_ingame_role == R_RIFLE)
@@ -1271,7 +1271,7 @@ void CGameFramework::AnimateObjects()
 
 		ShotDelay();
 		if (m_currbullet <= 0)((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
-		if (NpcShotKey == true){((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[7])->m_bShotActive = true;}
+		if (NpcShotKey == true) { ((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[7])->m_bShotActive = true; }
 		/*if (NpcShotKey == false)
 		{
 			((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[7])->m_bShotActive = false;
@@ -1448,7 +1448,7 @@ void CGameFramework::FrameAdvance()
 		D2D_POINT_2F D2_OpeningUI = { 50.0f, 50.0f };
 		D2D_RECT_F D2_OpeningUIRect = { 0.0f, 0.0f, 840.0f, 184.0f };
 		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[24], &D2_OpeningUI, &D2_OpeningUIRect);
-		
+
 		if (m_LoginScene == LS_OPENING) {
 			POINT CurrMousePoint;
 			GetCursorPos(&CurrMousePoint);
@@ -1724,7 +1724,7 @@ void CGameFramework::FrameAdvance()
 		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[10], &D2_Compress, &D2_CompressRect);
 
 		// My
-		D2D_POINT_2F D2_BulletUIBG = { FRAME_BUFFER_WIDTH - 420.0f, FRAME_BUFFER_HEIGHT / 4 * 3 };
+		D2D_POINT_2F D2_BulletUIBG = { FRAME_BUFFER_WIDTH - 420.0f, FRAME_BUFFER_HEIGHT / 16 * 13 };
 		D2D_RECT_F D2_BulletUIBGRect = { 0.0f, 0.0f, 402.0f, 65.0f };
 		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[11], &D2_BulletUIBG, &D2_BulletUIBGRect);
 
@@ -1750,7 +1750,7 @@ void CGameFramework::FrameAdvance()
 
 		// Remain NPC
 		D2D_POINT_2F D2_RemainNPCBG = { FRAME_BUFFER_WIDTH - 191.0f, FRAME_BUFFER_HEIGHT / 128 };
-		D2D_RECT_F D2_RemainNPCBGRect = { 0.0f, 0.0f, 135.0f, 50.0f };
+		D2D_RECT_F D2_RemainNPCBGRect = { 0.0f, 0.0f, 133.0f, 75.0f };
 		m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[17], &D2_RemainNPCBG, &D2_RemainNPCBGRect);
 
 		// Mission
@@ -1850,48 +1850,81 @@ void CGameFramework::FrameAdvance()
 			D2D_RECT_F D2_DyingBanner = { 0.0f, 0.0f, 2500.0, 1730.0 };
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[67], &D2_DyingBannerUI, &D2_DyingBanner);
 		}
-		if (m_missionClear && !m_missionFailed) {
-			D2D_POINT_2F D2_MissionclearedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 163.0f };
-			D2D_RECT_F D2_MissionclearedBGUIRect = { 0.0f, 0.0f, m_missionClearUI * 19.6f, 326.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[70], &D2_MissionclearedBGUI, &D2_MissionclearedBGUIRect);
 
-			if (m_missionClearUI >= 100) {
-				D2D_POINT_2F D2_MissionclearedTextUI = { FRAME_BUFFER_WIDTH / 2 - 416.0f, FRAME_BUFFER_HEIGHT / 2 - 170.0f };
-				D2D_RECT_F D2_MissionclearedTextUIRect = { 0.0f, 0.0f, 832.0f, 176.0f };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[71], &D2_MissionclearedTextUI, &D2_MissionclearedTextUIRect);
+		if (m_missionClear && !m_missionFailed && !m_spendYourlife) {
+			if (m_printTime < 120) {
+				D2D_POINT_2F D2_MissionclearedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 163.0f };
+				D2D_RECT_F D2_MissionclearedBGUIRect = { 0.0f, 0.0f, m_missionClearUI * 19.6f, 326.0f };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[70], &D2_MissionclearedBGUI, &D2_MissionclearedBGUIRect);
 
-				D2D_POINT_2F D2_CongratulationUI = { FRAME_BUFFER_WIDTH / 2 - 399.0f, FRAME_BUFFER_HEIGHT / 2 };
-				D2D_RECT_F D2_CongratulationUIRect = { 0.0f, 0.0f, 792.0f, 176.0f };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[72], &D2_CongratulationUI, &D2_CongratulationUIRect);
-			}
-			else {
-				m_missionClearUI += 2.5f;
 				if (m_missionClearUI >= 100) {
-					m_missionClearUI = 100.0f;
+					D2D_POINT_2F D2_MissionclearedTextUI = { FRAME_BUFFER_WIDTH / 2 - 416.0f, FRAME_BUFFER_HEIGHT / 2 - 170.0f };
+					D2D_RECT_F D2_MissionclearedTextUIRect = { 0.0f, 0.0f, 832.0f, 176.0f };
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[71], &D2_MissionclearedTextUI, &D2_MissionclearedTextUIRect);
+
+					D2D_POINT_2F D2_CongratulationUI = { FRAME_BUFFER_WIDTH / 2 - 399.0f, FRAME_BUFFER_HEIGHT / 2 };
+					D2D_RECT_F D2_CongratulationUIRect = { 0.0f, 0.0f, 792.0f, 176.0f };
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[72], &D2_CongratulationUI, &D2_CongratulationUIRect);
+					m_printTime++;
+				}
+				else {
+					m_missionClearUI += 2.5f;
+					if (m_missionClearUI >= 100) {
+						m_missionClearUI = 100.0f;
+					}
 				}
 			}
 		}
-		if (m_missionFailed) {
-			D2D_POINT_2F D2_MissionFailedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 181.5f };
-			D2D_RECT_F D2_MissionFailedBGUIRect = { 0.0f, 0.0f, m_missionFailedUI * 19.6f, 363.0f };
-			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[73], &D2_MissionFailedBGUI, &D2_MissionFailedBGUIRect);
+		if (m_missionFailed && !m_missionClear && !m_spendYourlife) {
+			if (m_printTime < 120) {
+				D2D_POINT_2F D2_MissionFailedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 181.5f };
+				D2D_RECT_F D2_MissionFailedBGUIRect = { 0.0f, 0.0f, m_missionFailedUI * 19.6f, 363.0f };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[73], &D2_MissionFailedBGUI, &D2_MissionFailedBGUIRect);
 
-			if (m_missionFailedUI >= 100) {
-				D2D_POINT_2F D2_MissionFailedTextUI = { FRAME_BUFFER_WIDTH / 2 - 345.0f, FRAME_BUFFER_HEIGHT / 2 - 170.0f };
-				D2D_RECT_F D2_MissionFailedTextUIRect = { 0.0f, 0.0f, 690.0f, 176.0f };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[74], &D2_MissionFailedTextUI, &D2_MissionFailedTextUIRect);
-
-				D2D_POINT_2F D2_TimeOverUI = { FRAME_BUFFER_WIDTH / 2 - 314.0f, FRAME_BUFFER_HEIGHT / 2 + 10.0f };
-				D2D_RECT_F D2_TimeOverUIRect = { 0.0f, 0.0f, 628.0f, 175.0f };
-				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[75], &D2_TimeOverUI, &D2_TimeOverUIRect);
-			}
-			else {
-				m_missionFailedUI += 2.5f;
 				if (m_missionFailedUI >= 100) {
-					m_missionFailedUI = 100.0f;
+					D2D_POINT_2F D2_MissionFailedTextUI = { FRAME_BUFFER_WIDTH / 2 - 345.0f, FRAME_BUFFER_HEIGHT / 2 - 170.0f };
+					D2D_RECT_F D2_MissionFailedTextUIRect = { 0.0f, 0.0f, 690.0f, 176.0f };
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[74], &D2_MissionFailedTextUI, &D2_MissionFailedTextUIRect);
+
+					D2D_POINT_2F D2_TimeOverUI = { FRAME_BUFFER_WIDTH / 2 - 314.0f, FRAME_BUFFER_HEIGHT / 2 + 10.0f };
+					D2D_RECT_F D2_TimeOverUIRect = { 0.0f, 0.0f, 628.0f, 175.0f };
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[75], &D2_TimeOverUI, &D2_TimeOverUIRect);
+
+				}
+				else {
+					m_missionFailedUI += 2.5f;
+					if (m_missionFailedUI >= 100) {
+						m_missionFailedUI = 100.0f;
+					}
 				}
 			}
 		}
+		if (m_spendYourlife && !m_missionClear && !m_missionFailed) {
+			if (m_printTime < 120) {
+				D2D_POINT_2F D2_MissionFailedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 181.5f };
+				D2D_RECT_F D2_MissionFailedBGUIRect = { 0.0f, 0.0f, m_missionFailedUI * 19.6f, 363.0f };
+				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[73], &D2_MissionFailedBGUI, &D2_MissionFailedBGUIRect);
+
+				if (m_missionFailedUI >= 100) {
+					D2D_POINT_2F D2_MissionFailedTextUI = { FRAME_BUFFER_WIDTH / 2 - 345.0f, FRAME_BUFFER_HEIGHT / 2 - 170.0f };
+					D2D_RECT_F D2_MissionFailedTextUIRect = { 0.0f, 0.0f, 690.0f, 176.0f };
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[74], &D2_MissionFailedTextUI, &D2_MissionFailedTextUIRect);
+
+					D2D_POINT_2F D2_SpendLifeUI = { FRAME_BUFFER_WIDTH / 2 - 589.0f, FRAME_BUFFER_HEIGHT / 2 + 10.0f };
+					D2D_RECT_F D2_SpendLifeUIRect = { 0.0f, 0.0f, 1178.0f, 176.0f };
+					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[80], &D2_SpendLifeUI, &D2_SpendLifeUIRect);
+					m_printTime++;
+				}
+				else {
+					m_missionFailedUI += 2.5f;
+					if (m_missionFailedUI >= 100) {
+						m_missionFailedUI = 100.0f;
+					}
+				}
+			}
+
+		}
+
 	}
 
 #endif
@@ -1942,7 +1975,7 @@ void CGameFramework::FrameAdvance()
 	}
 	else if (m_nMode == SCENE1STAGE) {
 		D2D1_RECT_F D2_RemainNPCText = D2D1::RectF((FRAME_BUFFER_WIDTH / 64) * 57, 0.0f, (FRAME_BUFFER_WIDTH / 16) * 15, (FRAME_BUFFER_HEIGHT / 16) * 1);
-		m_pd2dDeviceContext->DrawTextW(m_remainNPCPrint, (UINT32)wcslen(m_remainNPCPrint), m_pdwFont[0], &D2_RemainNPCText, m_pd2dbrText[0]);
+		m_pd2dDeviceContext->DrawTextW(m_mylifeCount, (UINT32)wcslen(m_mylifeCount), m_pdwFont[0], &D2_RemainNPCText, m_pd2dbrText[0]);
 
 		switch (m_mainmissionnum)
 		{
@@ -2495,7 +2528,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[16]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
 
 	// Remain NPC
-	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/RemainNPC.jpg", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
+	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/MyLife.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
 	pwicBitmapDecoder->GetFrame(0, &pwicFrameDecode);
 	m_pwicImagingFactory->CreateFormatConverter(&m_pwicFormatConverter);
 	m_pwicFormatConverter->Initialize(pwicFrameDecode, GUID_WICPixelFormat32bppPBGRA, WICBitmapDitherTypeNone, NULL, 0.0f, WICBitmapPaletteTypeCustom);
@@ -3178,7 +3211,7 @@ void CGameFramework::CreateDirect2DDevice()
 	m_pd2dfxEdgeDetection[72]->SetValue(D2D1_EDGEDETECTION_PROP_MODE, D2D1_EDGEDETECTION_MODE_SOBEL);
 	m_pd2dfxEdgeDetection[72]->SetValue(D2D1_EDGEDETECTION_PROP_OVERLAY_EDGES, false);
 	m_pd2dfxEdgeDetection[72]->SetValue(D2D1_EDGEDETECTION_PROP_ALPHA_MODE, D2D1_ALPHA_MODE_PREMULTIPLIED);
-	
+
 
 	// Fail Background
 	hResult = m_pwicImagingFactory->CreateDecoderFromFilename(L"UI/XDUI/FailedBackGroundUI.png", NULL, GENERIC_READ, WICDecodeMetadataCacheOnDemand, &pwicBitmapDecoder);
