@@ -1174,6 +1174,7 @@ void processPacket(char* ptr)
 		SC_TIME_TICKING_PACKET* recv_packet = reinterpret_cast<SC_TIME_TICKING_PACKET*>(ptr);
 
 		servertime_ms = recv_packet->servertime_ms;
+		if (servertime_ms <= 0) servertime_ms = 1;
 		timelimit_ms = STAGE1_TIMELIMIT * 1000 - servertime_ms;
 		timelimit_sec = timelimit_ms / 1000;
 		b_startTime = true;
