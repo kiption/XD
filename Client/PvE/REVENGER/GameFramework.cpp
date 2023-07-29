@@ -3761,8 +3761,8 @@ void CGameFramework::OtherPlayerResponeMotion(int id)
 {
 	if (m_ingame_role == R_HELI)
 	{
-		((Stage1*)m_pScene)->OtherHeliPlayerTransfromReset();
-		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->Resetpartition();
+	/*	((Stage1*)m_pScene)->OtherHeliPlayerTransfromReset();*/
+		//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->Resetpartition();
 
 		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[2])->SetPosition(XMFLOAT3(
 			((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_xmf4x4ToParent._41,

@@ -40,6 +40,10 @@ GameSound::GameSound()
 	result = soundSystem->createSound("Sound/AlamSound.mp3", FMOD_UNIQUE, 0, &WarnningSound);
 	result = WarnningSound->setMode(FMOD_UNIQUE);
 
+	result = soundSystem->init(16, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
+	result = soundSystem->createSound("Sound/HealingSound.wav", FMOD_UNIQUE, 0, &HealingSounds);
+	result = HealingSounds->setMode(FMOD_UNIQUE);
+
 	result = soundSystem->init(32, FMOD_INIT_3D_RIGHTHANDED, extradriverdata);
 	result = soundSystem->createSound("Sound/HighLimit.mp3", FMOD_UNIQUE, 0, &HeliWarrningHighSounds);
 	result = HeliWarrningHighSounds->setMode(FMOD_UNIQUE);
@@ -78,13 +82,17 @@ GameSound::GameSound()
 	WarnningChannel->setVolume(0.5f);
 
 	result = soundSystem->playSound(BackGroundSound, 0, true, &BackGroundChannel);
-	BackGroundChannel->setVolume(0.05f);
+	BackGroundChannel->setVolume(0.25f);
 
 	result = soundSystem->playSound(NpcshotSound, 0, true, &NpcshootChannel);
 	NpcshootChannel->setVolume(0.25f);
 
 	result = soundSystem->playSound(HeliWarrningHighSounds, 0, true, &HeliWarrningHighChannel);
 	HeliWarrningHighChannel->setVolume(0.05f);
+
+
+	result = soundSystem->playSound(HealingSounds, 0, true, &HealingChannel);
+	HealingChannel->setVolume(0.9f);
 
 	shotChannel->setVolume(0.1f);
 	HelishotChannel->setVolume(0.3f);
@@ -101,6 +109,7 @@ GameSound::~GameSound()
 	result = WarnningSound->release();
 	result = HeliShotDownSounds->release();
 	result = EmptyShotSounds->release();
+	result = HealingSounds->release();
 	result = speakSound->release();
 	result = bgmSound->release();
 	result = HartbeatSound->release();
@@ -121,6 +130,10 @@ void GameSound::PauseHeliWarnningSound()
 void GameSound::PlayHeliWarnningSound()
 {
 	WarnningChannel->setPaused(false);
+}
+void GameSound::PlayHealingSound()
+{
+	HealingChannel->setPaused(false);
 }
 void GameSound::PlayFallDownEmptyBullet()
 {

@@ -909,6 +909,7 @@ void processPacket(char* ptr)
 		players_info[recv_id].m_hp += recv_packet->value;
 		if (players_info[recv_id].m_hp > 100)
 			players_info[recv_id].m_hp = 100;
+
 		else if (players_info[recv_id].m_hp > 30 && players_info[recv_packet->id].m_near_death_hp == true) {
 			players_info[recv_packet->id].m_near_death_hp = false;
 			gamesound.pauseHeartBeat();
@@ -924,6 +925,7 @@ void processPacket(char* ptr)
 
 		if (recv_packet->isused == 1) {
 			healpack_effect_on = false;
+			gamesound.PlayHealingSound();
 			cout << recv_id << "¹øÂ° ÈúÆÑ »ç¿ëµÊ." << endl;
 		}
 		else if (recv_packet->isused == 0) {

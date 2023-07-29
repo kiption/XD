@@ -397,7 +397,6 @@ void Stage1::ReleaseObjects()
 {
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
 	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
-	//if (m_pBoundingBoxShader) m_pBoundingBoxShader->Release();
 	for (int i = 0; i < HELIBULLETS; i++) if (m_ppBullets[i]) delete[] m_ppBullets[i];
 	for (int i = 0; i < CARTRIDGES; i++) if (m_ppCartridge[i]) delete[] m_ppCartridge[i];
 	for (int i = 0; i < HELICOPTERVALKANS; i++) if (m_ppValkan[i]) delete[] m_ppValkan[i];
@@ -1171,13 +1170,6 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 	for (int i = 0; i < m_nHumanShaders; i++) if (m_ppHumanShaders[i]) m_ppHumanShaders[i]->AnimateObjects(fTimeElapsed);
 	XMFLOAT3 xmfPosition = m_pPlayer->GetPosition();
-
-	//((HealPackBillboardShader*)m_pBillboardShader[1])->m_bActiveMark = true;
-	//for (int i = 10; i < 17; i++)
-	//{
-	//	((HealPackBillboardShader*)m_pBillboardShader[i])->m_bActiveMark = true;
-	//}
-
 	((HealPackBillboardShader*)m_pBillboardShader[1])->HealParticlePosition = XMFLOAT3(141.30, 6.00, 169.50);
 	((HealPackBillboardShader*)m_pBillboardShader[10])->HealParticlePosition = XMFLOAT3(560.00, 6.00, 938.00);
 	((HealPackBillboardShader*)m_pBillboardShader[11])->HealParticlePosition = XMFLOAT3(141.30, 6.00, -138.00);
@@ -1186,9 +1178,6 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 	((HealPackBillboardShader*)m_pBillboardShader[14])->HealParticlePosition = XMFLOAT3(-630.00, 6.00, 938.00);
 	((HealPackBillboardShader*)m_pBillboardShader[15])->HealParticlePosition = XMFLOAT3(-634.00, 6.00, -905.00);
 	((HealPackBillboardShader*)m_pBillboardShader[16])->HealParticlePosition = XMFLOAT3(-215.30, 6.00, -136.50);
-
-	m_pBillboardShader[1]->m_ppObjects[0]->SetPosition(m_ppShaders[0]->m_ppObjects[30]->GetPosition());
-
 	for (int i = 0; i < HELIBULLETS; i++)
 	{
 		if (m_ppBullets[i]->m_bActive)
@@ -1236,17 +1225,17 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 			m_ppShaders[0]->m_ppObjects[i]->SetPosition(xmf3PlayerPosition);
 		}
 	}
-
+	
 	for (int i = 12; i < 17; i++)
 	{
 		if (((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_bPartitionfalldownEnd == true)
 		{
 			m_bPartitionEnd = true;
 		}
-
 	}
 	NpcByPlayerCollsiion();
 	PlayerByPlayerCollision();
+
 	ParticleCollisionResult();
 	ParticleAnimation();
 	SetPositionPilotHuman();

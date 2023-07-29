@@ -59,6 +59,9 @@ public:
 	FMOD::Sound* HeliWarrningHighSounds;
 	FMOD::Channel* HeliWarrningHighChannel;
 
+	FMOD::Sound* HealingSounds;
+	FMOD::Channel* HealingChannel;
+
 	FMOD_RESULT  result;
 	void* extradriverdata = 0;
 	
@@ -70,6 +73,7 @@ public:
 	bool m_bStopSound = false;
 	void SpeakMusic();
 	void PlayHeliWarnningSound();
+	void PlayHealingSound();
 	void PauseHeliWarnningSound();
 	void PlayFallDownEmptyBullet();
 	void PlayEmptyShot();

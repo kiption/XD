@@ -59,15 +59,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	{
 		m_nObjects = 45;
 		m_ppObjects = new CGameObject * [m_nObjects];
-
-		CPlaneMeshIlluminated* pPlaneMesh = new CPlaneMeshIlluminated(pd3dDevice, pd3dCommandList, _PLANE_WIDTH + 2000.0, 0.0f, _PLANE_HEIGHT + 2000.0, 0.0f, 0.0f, 0.0f);
-		CMaterial* pPlaneMaterial = new CMaterial(4);
-		pPlaneMaterial->SetReflection(4);
-		//m_ppObjects[0] = new CGameObject(1);
-		//m_ppObjects[2] = new CGameObject(1);
 		m_ppObjects[3] = new CGameObject(1);
-		//m_ppObjects[4] = new CGameObject(1);
-
 
 		/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
 		{
@@ -231,11 +223,12 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		////////////////////////////////////////////////HELIPLAYER_LOAD////////////////////////////////////////////////////////////
 	
 		////////////////////////////////////////////////TREE_LOAD//////////////////////////////////////////////////////////////////
-		{
+		{	CMaterial* pTreeMaterial = new CMaterial(1);
+		pTreeMaterial->SetReflection(1);
 			CGameObject* pTreeModels = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/ALL_Tree.bin", NULL);
 			m_ppObjects[44] = new CCityObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			m_ppObjects[44]->SetChild(pTreeModels, false);
-			m_ppObjects[44]->SetMaterial(0, pPlaneMaterial);
+			m_ppObjects[44]->SetMaterial(0, pTreeMaterial);
 			m_ppObjects[44]->OnPrepareAnimate();
 			m_ppObjects[44]->SetScale(1.0, 1.0, 1.0);
 			m_ppObjects[44]->SetPosition(0, 0, 0);
