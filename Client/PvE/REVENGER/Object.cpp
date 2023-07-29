@@ -1873,19 +1873,19 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 
 void CHelicopterObjects::FallDown(float fTimeElapsed)
 {
-	XMFLOAT3 gravity = XMFLOAT3(0.0, -3.5, 0);
+	XMFLOAT3 gravity = XMFLOAT3(0.0, -5.5, 0);
 	m_fElapsedTimes += fTimeElapsed * 1.1f;
 	
 	float FallingMaxHeight = -17.5f;
 	float staticValue = 7.3f;
 	float staticValueZ = 6.3f;
-	XMVECTOR staticDir1 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.4, 0.95, 0.0)));
-	XMVECTOR staticDir2 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.95, -0.4, 0.85, 0.0)));
-	XMVECTOR staticDir3 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.4, 0.95, 0.0)));
-	XMVECTOR staticDir4 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.4, -0.95, 0.0)));
-	XMVECTOR staticDir5 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.95, -0.4, -0.85, 0.0)));
-	XMVECTOR staticDir6 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.4, 0.95, 0.0)));
-	XMVECTOR staticDir7 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.93, -0.4, -0.95, 0.0)));
+	XMVECTOR staticDir1 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.5, 0.95, 0.0)));
+	XMVECTOR staticDir2 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.95, -0.5, 0.85, 0.0)));
+	XMVECTOR staticDir3 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.5, 0.95, 0.0)));
+	XMVECTOR staticDir4 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.5, -0.95, 0.0)));
+	XMVECTOR staticDir5 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.95, -0.5, -0.85, 0.0)));
+	XMVECTOR staticDir6 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.5, 0.95, 0.0)));
+	XMVECTOR staticDir7 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.93, -0.5, -0.95, 0.0)));
 	for (int i = 0; i < 2; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir1);
 	for (int i = 2; i < 4; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir2);
 	for (int i = 4; i < 5; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir3);

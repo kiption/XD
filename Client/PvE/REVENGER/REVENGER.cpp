@@ -1007,7 +1007,9 @@ void networkThreadFunc()
 
 		// 4. 파티클 충돌
 		if (gGameFramework.m_nMode == SCENE1STAGE) {
-			if (players_info[my_id].m_role == ROLE_HELI && ((Stage1*)gGameFramework.m_pScene)->m_bHeliParticleCollisionCheck == true) {
+
+			if (players_info[my_id].m_role == ROLE_HELI && ((Stage1*)gGameFramework.m_pScene)->m_bHeliParticleCollisionCheck) 
+			{
 				CS_PARTICLE_COLLIDE_PACKET heli_particle_coll_pack;
 				heli_particle_coll_pack.size = sizeof(CS_PARTICLE_COLLIDE_PACKET);
 				heli_particle_coll_pack.type = CS_PARTICLE_COLLIDE;
@@ -1016,7 +1018,8 @@ void networkThreadFunc()
 
 				((Stage1*)gGameFramework.m_pScene)->m_bHeliParticleCollisionCheck = false;
 			}
-			if (players_info[my_id].m_role == ROLE_RIFLE && ((Stage1*)gGameFramework.m_pScene)->m_bHumanParticleCollisionCheck == true) {
+			if (players_info[my_id].m_role == ROLE_RIFLE && ((Stage1*)gGameFramework.m_pScene)->m_bHumanParticleCollisionCheck)
+			{
 				CS_PARTICLE_COLLIDE_PACKET human_particle_coll_pack;
 				human_particle_coll_pack.size = sizeof(CS_PARTICLE_COLLIDE_PACKET);
 				human_particle_coll_pack.type = CS_PARTICLE_COLLIDE;
@@ -1025,6 +1028,7 @@ void networkThreadFunc()
 
 				((Stage1*)gGameFramework.m_pScene)->m_bHumanParticleCollisionCheck = false;
 			}
+
 		}
 
 		// 5. 헬기 벽 충돌
