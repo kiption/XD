@@ -1820,6 +1820,7 @@ void CHelicopterObjects::OnPrepareAnimate()
 	m_pFrameFragObj10 = FindFrame("back_tyre");
 	m_pTailRotorFrame = FindFrame("rescue_2");
 	m_pMainRotorFrame = FindFrame("rescue_1");
+	m_pChairPoint = FindFrame("ChairPoint");
 
 
 	/*glass,,right_door,,left_tyre,helicopter,,cleanser,,back_door

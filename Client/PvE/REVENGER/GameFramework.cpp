@@ -888,14 +888,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				if (MouseResponsivenessY > 400 && MouseResponsivenessY < 600) MouseResponsivenessY += 50.0f;
 				break;
 			case 'V':
-				if (player_dead&& m_ingame_role == R_RIFLE)
-				{
-					m_bFreeViewCamera = true;
-				}
-				if (player_dead && m_ingame_role == R_HELI)
-				{
-					m_bFreeViewCamera = true;
-				}
+				m_AfterDieChangeCameraSwitch = true;
 				break;
 			case 'Y':
 				/*((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Resetpartition();*/
@@ -908,12 +901,12 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			switch (wParam)
 			{
 			case VK_CONTROL:
-		/*		((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;*/
+				/*		((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;*/
 				break;
 			case VK_SPACE:
 				break;
 			case 'M':
-		/*		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_bDyingstate = true;*/
+				/*		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_bDyingstate = true;*/
 				break;
 			case 'L':
 				//((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[10])->SetActive(false);
@@ -1047,7 +1040,7 @@ void CGameFramework::ProcessInput()
 			if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; }
 			if (pKeysBuffer[KEY_A] & 0xF0) { q_keyboardInput.push(SEND_KEY_A); dwDirection |= DIR_LEFT; }
 			if (pKeysBuffer[KEY_D] & 0xF0) { q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT; }
-			
+
 			if (m_ingame_role == R_HELI)
 			{
 				if (pKeysBuffer[KEY_Q] & 0xF0) { m_bHeliHittingMotion = false; q_keyboardInput.push(SEND_KEY_Q); dwDirection |= DIR_UP; }
@@ -1130,7 +1123,7 @@ void CGameFramework::ProcessInput()
 							XMFLOAT3 O_pos = mapcol_info[i].m_pos;
 							XMFLOAT3 NtoO_vec = Vector3::Subtract(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition(), O_pos);
 							float NtoODistance = Vector3::Length(NtoO_vec);
-							
+
 							if (NtoODistance > 200.0f) continue;
 							if (mapcol_info[i].m_xoobb.Intersects(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xoobb)) {
 								temp = mapcol_info[i];
@@ -1206,7 +1199,7 @@ void CGameFramework::ProcessInput()
 								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
 
 
-							
+
 						} 	//--------Human Player-----------// 
 						else
 						{
@@ -1265,7 +1258,7 @@ void CGameFramework::AnimateObjects()
 			}
 		}
 
-		if (((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_bDyingstate==true
+		if (((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_bDyingstate == true
 			&& ((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]))
 		{
 			((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->FallDown(m_GameTimer.GetTimeElapsed());
@@ -1277,7 +1270,7 @@ void CGameFramework::AnimateObjects()
 		{
 			//m_bHeliHittingMotion = false;
 			((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
-			
+
 			if (m_bHeliHittingMotion == true)
 			{
 				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[0])->m_pSkinnedAnimationController
@@ -1411,8 +1404,16 @@ void CGameFramework::FrameAdvance()
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-	m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
-	m_pScene->OnPreRender(m_pd3dCommandList, m_pCamera);
+	if (m_nMode == OPENINGSCENE)
+	{
+		((SceneManager*)m_pScene)->OnPrepareRender(m_pd3dCommandList, m_pCamera);
+		((SceneManager*)m_pScene)->OnPreRender(m_pd3dCommandList, m_pCamera);
+	}
+	if (m_nMode == SCENE1STAGE)
+	{
+		((Stage1*)m_pScene)->OnPrepareRender(m_pd3dCommandList, m_pCamera);
+		((Stage1*)m_pScene)->OnPreRender(m_pd3dCommandList, m_pCamera);
+	}
 	UpdateShaderVariables();
 
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
@@ -2188,7 +2189,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-}
+	}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -3701,7 +3702,7 @@ void CGameFramework::otherHeliPlayerDyingMotion()
 				7.5f,
 				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_xmf4x4ToParent._43));
 
-			
+
 		}
 	}
 }
@@ -3744,10 +3745,15 @@ void CGameFramework::MyPlayerDieMotion()
 			= ANIMATION_TYPE_ONCE;
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = true;
 		((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->DieState();
-		m_pCamera->GenerateProjectionMatrix(1.01f, 8000.0f, ASPECT_RATIO, 70.0f);
+		m_pCamera->GenerateProjectionMatrix(0.9f, 7000.0f, ASPECT_RATIO, 70.0f);
+		m_pCamera->SetPosition(XMFLOAT3(((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_pChairPoint->GetPosition().x,
+			((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_pChairPoint->GetPosition().y+2.5f,
+			((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_pChairPoint->GetPosition().z));
+		m_pCamera->GetLookVector() = ((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->GetLook();
 	}
 	if (m_ingame_role == R_HELI)
 	{
+		m_bFreeViewCamera = true;
 		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_FallSwitch = true;
 		((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bDieState = true;
 		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[0])->m_pSkinnedAnimationController
@@ -3758,8 +3764,21 @@ void CGameFramework::MyPlayerDieMotion()
 			((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition().x,
 			6.0f,
 			((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition().z));
+
+
 	}
 
+}
+void CGameFramework::FreeViewMyCamera()
+{
+	if (m_bFreeViewCamera == true && m_AfterDieChangeCameraSwitch==true)
+	{
+		
+
+
+		//XMFLOAT3 CameraLook = m_pCamera->GetLookVector();
+		//CameraLook = ((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->GetLook();
+	}
 }
 void CGameFramework::MyPlayerRespawnMotion()
 {
@@ -3783,8 +3802,8 @@ void CGameFramework::OtherPlayerResponeMotion(int id)
 {
 	if (m_ingame_role == R_HELI)
 	{
-	/*	((Stage1*)m_pScene)->OtherHeliPlayerTransfromReset();*/
-		//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->Resetpartition();
+		/*	((Stage1*)m_pScene)->OtherHeliPlayerTransfromReset();*/
+			//((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->Resetpartition();
 
 		((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[2])->SetPosition(XMFLOAT3(
 			((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_xmf4x4ToParent._41,

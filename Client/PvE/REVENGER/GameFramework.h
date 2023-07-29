@@ -162,6 +162,7 @@ public:
 	DWORD m_nMode = OPENINGSCENE;
 	bool m_bDieMotion = false;
 	bool m_bHeliDyingState = false;
+	bool m_AfterDieChangeCameraSwitch = false;
 	GameSound gamesound;
 
 	float deltax = 0.0;
@@ -409,6 +410,7 @@ public:
 	// 플레이어 상태변화
 	void HeliPlayerUnderAttack(XMFLOAT3 ToLook);
 	void MyPlayerDieMotion();
+	void FreeViewMyCamera();
 	void MyPlayerRespawnMotion();
 	void OtherPlayerResponeMotion(int id);
 

@@ -609,6 +609,7 @@ public:
 	CGameObject* m_pFrameFragObj9 = NULL;
 	CGameObject* m_pFrameFragObj10 = NULL;
 	CGameObject* m_pFrameFragObj11 = NULL;
+	CGameObject* m_pChairPoint = NULL;
 
 	BoundingOrientedBox ParticleFrame1;
 	BoundingOrientedBox ParticleFrame2;
