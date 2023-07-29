@@ -43,10 +43,10 @@
 #define RELOAD_TIME_HELI 5000			// 헬기 장전완료까지 걸리는 시간(ms)
 
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
-#define RIFLE_DAMAGE 20					// 총알 피격데미지
-#define VALKAN_DAMAGE 25				// 총알 피격데미지
-#define NPC_RIFLE_DAMAGE 13				// NPC(소총) 피격데미지
-#define NPC_VALKAN_DAMAGE 18			// NPC(헬기) 피격데미지
+#define RIFLE_DAMAGE 22					// 총알 피격데미지
+#define VALKAN_DAMAGE 26				// 총알 피격데미지
+#define NPC_RIFLE_DAMAGE 8				// NPC(소총) 피격데미지
+#define NPC_VALKAN_DAMAGE 12			// NPC(헬기) 피격데미지
 
 #define BULLET_RANGE 400				// 총알 최대이동거리
 
@@ -121,8 +121,8 @@
 #define STAGE1_SPAWN_AREA_SIZE_Z 120.0f
 
 #define HEALPACK_SIZE 10.f				// 힐팩 크기 (정사각형)
-#define HEALPACK_RECOVER_HP 50			// 힐팩으로 회복되는 HP수치
-#define HEALPACK_RESPAWN_TIME 10000		// 힐팩 재생성 시간 (단위: ms)
+#define HEALPACK_RECOVER_HP 60			// 힐팩으로 회복되는 HP수치
+#define HEALPACK_RESPAWN_TIME 7000		// 힐팩 재생성 시간 (단위: ms)
 
 #define HEALPACK_0_CENTER_X 141.3f	// 힐팩7 위치
 #define HEALPACK_0_CENTER_Z 169.5f
