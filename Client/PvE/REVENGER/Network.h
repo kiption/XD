@@ -1077,14 +1077,6 @@ void processPacket(char* ptr)
 		if (recv_packet->id == my_id) {
 			players_info[recv_packet->id].m_bullet = recv_packet->bullet_cnt;
 		}
-		if (players_info[recv_packet->id].m_role == ROLE_RIFLE)
-		{
-			gamesound.reloadSound();
-		}
-		if (players_info[recv_packet->id].m_role == ROLE_HELI)
-		{
-			gamesound.reloadSound();
-		}
 		// 장전 소리
 		int sound_volume = recv_packet->sound_volume;
 		if (sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 소리

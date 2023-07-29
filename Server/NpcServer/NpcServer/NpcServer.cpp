@@ -210,7 +210,7 @@ public:
 		name[0] = 0;
 
 		state = PL_ST_IDLE;
-		hp = 1000;
+		hp = 100;
 		remain_bullet = MAX_BULLET;
 
 		pos = { 0.0f, 0.0f, 0.0f };
@@ -2107,7 +2107,13 @@ void process_packet(char* packet)
 		SC_RESET_GAME_PACKET* mapobj_packet = reinterpret_cast<SC_RESET_GAME_PACKET*>(packet);
 
 		ResetNPC();
-		cout << "NPC 초기화\n" << endl;
+		cout << "NPC 초기화" << endl;
+
+		for (auto& cl : playersInfo) {
+			cl.memberClear();
+		}
+		cout << "Player 초기화" << endl;
+		
 		break;
 	}// SC_RESET_GAME end
 	}
@@ -2450,8 +2456,10 @@ void initNpc() {
 
 //======================================================================
 void ResetNPC() {
+	ClientConnected = false;
 	for (int i = 0; i < MAX_NPCS; ++i) {
 		npcsInfo[i].SetState(NPC_IDLE);
+		npcsInfo[i].state = PL_ST_IDLE;
 	}
 	initNpc();
 }
