@@ -541,7 +541,7 @@ struct SC_MISSION_COMPLETE_PACKET {
 };
 
 // 4) UI 관련 패킷
-#define STAGE1_TIMELIMIT 316 // 스테이지1 제한시간 (단위: sec)
+#define STAGE1_TIMELIMIT 310 // 스테이지1 제한시간 (단위: sec)
 struct SC_TIME_TICKING_PACKET {
 	unsigned char size;
 	char type;
