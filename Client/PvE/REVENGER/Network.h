@@ -30,7 +30,7 @@ SOCKET lgc_socket;	// 로직서버 소켓
 int my_id;
 
 //==================================================
-float servertime_ms;    // 실제 서버시간
+volatile float servertime_ms;    // 실제 서버시간
 
 volatile int timelimit_ms;       // 스테이지별 제한시간
 volatile int timelimit_sec;
