@@ -2897,7 +2897,7 @@ void disconnect(int target_id, int target)
 	switch (target) {
 	case SESSION_LOGIC:
 	{
-
+		break;
 	}
 	case SESSION_NPC:
 	{
