@@ -973,6 +973,11 @@ void CGameFramework::ProcessInput()
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
 	if (!bProcessedByScene)
 	{
+		if (m_bFreeViewCamera == true && m_AfterDieChangeCameraSwitch == true)
+		{
+			if (pKeysBuffer[KEY_W] & 0xF0) { m_pCamera->m_xmf3Position.z -= 1.0f; }
+			if (pKeysBuffer[KEY_S] & 0xF0) { m_pCamera->m_xmf3Position.z += 1.0f; }
+		}
 		DWORD dwDirection = 0;
 		if (!UI_Switch && !b_imdeadplayer) {
 			if (pKeysBuffer[KEY_W] & 0xF0) { q_keyboardInput.push(SEND_KEY_W); dwDirection |= DIR_FORWARD; }
@@ -982,8 +987,8 @@ void CGameFramework::ProcessInput()
 
 			if (m_ingame_role == R_HELI)
 			{
-				if (pKeysBuffer[KEY_Q] & 0xF0) { m_bHeliHittingMotion = false; q_keyboardInput.push(SEND_KEY_Q); dwDirection |= DIR_UP; }
-				if (pKeysBuffer[KEY_E] & 0xF0) { m_bHeliHittingMotion = false; q_keyboardInput.push(SEND_KEY_E); dwDirection |= DIR_DOWN; }
+				if (pKeysBuffer[KEY_Q] & 0xF0) { q_keyboardInput.push(SEND_KEY_Q); dwDirection |= DIR_UP; }
+				if (pKeysBuffer[KEY_E] & 0xF0) { q_keyboardInput.push(SEND_KEY_E); dwDirection |= DIR_DOWN; }
 			}
 		}
 
@@ -1001,7 +1006,7 @@ void CGameFramework::ProcessInput()
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 		}
 
-		if (pKeysBuffer[VK_LBUTTON] & 0xF0) {
+		if (pKeysBuffer[VK_LBUTTON] & 0xF0 && !b_imdeadplayer) {
 			if (m_nMode == SCENE1STAGE && m_ingame_role == R_RIFLE)
 			{
 				if (((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_fShotDelay < 0.01 && m_currbullet != 0)
@@ -1030,10 +1035,15 @@ void CGameFramework::ProcessInput()
 
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
+			if (m_bFreeViewCamera == true && m_AfterDieChangeCameraSwitch == true)
+			{
+				m_pCamera->Rotate(cyDelta, cxDelta, 0.0f);
+			}
 			if (!b_imdeadplayer) {
 				if (m_nMode == SCENE1STAGE) {
 					if (cxDelta || cyDelta)
 					{
+						
 						MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
 						q_mouseInput.push(mousemove);//s
 						if (m_ingame_role == R_RIFLE)
@@ -1210,10 +1220,6 @@ void CGameFramework::AnimateObjects()
 		if (m_ingame_role == R_RIFLE)
 		{
 			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
-			if (m_bFreeViewCamera == true && m_AfterDieChangeCameraSwitch == true)
-			{
-				FreeHumanToHeliViewMyCamera();
-			}
 		}
 		if (m_ingame_role == R_HELI)
 		{
@@ -1242,7 +1248,7 @@ void CGameFramework::AnimateObjects()
 }
 void CGameFramework::ShotDelay()
 {
-	if (m_ingame_role == R_RIFLE)
+	if (m_ingame_role == R_RIFLE&&!b_imdeadplayer)
 	{
 		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay += m_GameTimer.GetTimeElapsed();
 		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay > 0.17)
@@ -2013,7 +2019,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-	}
+}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -2133,7 +2139,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-}
+	}
 	pd3dInfoQueue->Release();
 #endif
 
