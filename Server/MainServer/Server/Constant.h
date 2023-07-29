@@ -45,8 +45,8 @@
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
 #define RIFLE_DAMAGE 20					// 총알 피격데미지
 #define VALKAN_DAMAGE 25				// 총알 피격데미지
-#define NPC_RIFLE_DAMAGE 18				// NPC(소총) 피격데미지
-#define NPC_VALKAN_DAMAGE 23			// NPC(헬기) 피격데미지
+#define NPC_RIFLE_DAMAGE 13				// NPC(소총) 피격데미지
+#define NPC_VALKAN_DAMAGE 18			// NPC(헬기) 피격데미지
 
 #define BULLET_RANGE 400				// 총알 최대이동거리
 
