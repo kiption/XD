@@ -68,10 +68,6 @@ void setMissions() {
 	cout << " ---- OK." << endl;
 }
 
-bool b_occupying = false;	// 점령 중인지
-int occupying_people_cnt;	// 점령 중인 사람 수
-int occupy_start_time = 0;	// 점령 시작 시간
-
 //======================================================================
 array<MapObject, TOTAL_STAGE + 1> occupy_areas;	// 스테이지별 점령지역
 void setOccupyAreas() {
@@ -180,6 +176,7 @@ public:
 	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;		// 현재 Look, Right, Up Vectors
 	XMFLOAT3 m_cam_lookvec;							// 카메라 룩벡터 (조준을 여기에 하고 있음)
 
+	bool b_occupying;	// 점령 중인지
 	bool height_alert;	// 헬기는 일정고도 아래로 내려가면 경보음을 울린다.
 
 	chrono::system_clock::time_point shoot_time;	// 총을 발사한 시간
@@ -218,6 +215,7 @@ public:
 		m_cam_lookvec = m_lookvec;
 		curr_stage = 0;
 
+		b_occupying = false;
 		in_spawn_area = false;
 
 		m_xoobb = BoundingOrientedBox(XMFLOAT3(pos.x, pos.y, pos.z), XMFLOAT3(HELI_BBSIZE_X, HELI_BBSIZE_Y, HELI_BBSIZE_Z), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -284,6 +282,7 @@ public:
 		m_cam_lookvec = m_lookvec;
 		curr_stage = 0;
 
+		b_occupying = false;
 		in_spawn_area = false;
 
 		setBB();
@@ -1179,54 +1178,36 @@ void process_packet(int client_id, char* packet)
 		}
 
 		// 6. 점령미션 중이라면 점령지역에 있는지 확인한다.
-		bool is_mission_occupy = false;
-		bool in_occupy_area = false;
 		short curr_mission = curr_mission_stage[clients[client_id].curr_stage];
-		if (clients[client_id].curr_stage == 1) {
-			if (stage1_missions[curr_mission].type == MISSION_OCCUPY) {
-				is_mission_occupy = true;
+		if (clients[client_id].curr_stage == 1 && stage1_missions[curr_mission].type == MISSION_OCCUPY) {
+			// 점령지역 세팅
+			float occupy_leftup_x = occupy_areas[1].getPosX() - occupy_areas[1].getScaleX() / 2.0f;
+			float occupy_leftup_z = occupy_areas[1].getPosZ() - occupy_areas[1].getScaleZ() / 2.0f;
+			float occupy_rightbottom_x = occupy_areas[1].getPosX() + occupy_areas[1].getScaleX() / 2.0f;
+			float occupy_rightbottom_z = occupy_areas[1].getPosZ() + occupy_areas[1].getScaleZ() / 2.0f;
 
-				float occupy_leftup_x = occupy_areas[1].getPosX() - occupy_areas[1].getScaleX() / 2.0f;
-				float occupy_leftup_z = occupy_areas[1].getPosZ() - occupy_areas[1].getScaleZ() / 2.0f;
-				float occupy_rightbottom_x = occupy_areas[1].getPosX() + occupy_areas[1].getScaleX() / 2.0f;
-				float occupy_rightbottom_z = occupy_areas[1].getPosZ() + occupy_areas[1].getScaleZ() / 2.0f;
-
-				if (occupy_leftup_x <= clients[client_id].pos.x && clients[client_id].pos.x <= occupy_rightbottom_x) {
-					if (occupy_leftup_z <= clients[client_id].pos.z && clients[client_id].pos.z <= occupy_rightbottom_z) {
-						in_occupy_area = true;
-					}
+			// 점령 지역에 있는지 검사
+			if (occupy_leftup_x <= clients[client_id].pos.x && clients[client_id].pos.x <= occupy_rightbottom_x && \
+				occupy_leftup_z <= clients[client_id].pos.z && clients[client_id].pos.z <= occupy_rightbottom_z) {
+				// 안에 있다면
+				if (!clients[client_id].b_occupying) {		// 점령지역에 새로 들어온 경우
+					clients[client_id].s_lock.lock();
+					clients[client_id].b_occupying = true;	// 점령 상태 On
+					cout << "Client[" << client_id << "]가 점령을 시작합니다. (START TIME: " << static_cast<int>(g_curr_servertime.count()) << ")\n" << endl;
+					clients[client_id].s_lock.unlock();
+				}
+			}
+			else {
+				// 밖에 있다면
+				if (clients[client_id].b_occupying) {		// 점령지역 밖으로 탈출한 경우
+					clients[client_id].s_lock.lock();
+					clients[client_id].b_occupying = false;	// 점령 상태 Off
+					cout << "Client[" << client_id << "]가 점령을 종료합니다. (END TIME: " << static_cast<int>(g_curr_servertime.count()) << ")\n" << endl;
+					clients[client_id].s_lock.unlock();
 				}
 			}
 		}
 		else if (clients[client_id].curr_stage == 2) {
-		}
-
-		if (is_mission_occupy) {
-			if (!b_occupying) {			// 점령 중이 아니었다가
-				if (in_occupy_area) {	// 새롭게 점령지역에 들어온 경우
-					occupying_people_cnt++;
-					if (occupying_people_cnt == 1) {	// 내가 점령을 처음 시작한 경우
-						mission_lock.lock();
-						b_occupying = true;				// 점령을 진행시킨다.
-						occupy_start_time = static_cast<int>(g_curr_servertime.count());
-						cout << "점령을 시작합니다. (START TIME: " << occupy_start_time << ", 현재 점령인원: " << occupying_people_cnt << "명)\n" << endl;
-						mission_lock.unlock();
-					}
-				}
-			}
-			else {						// 원래 점령이 진행 중이었는데
-				if (!in_occupy_area) {	// 점령지역 밖으로 탈출한 경우
-					occupying_people_cnt--;
-					if (occupying_people_cnt == 0) {	// 점령 지역에 아무도 안남게 되면
-						mission_lock.lock();
-						b_occupying = false;			// 점령을 종료한다.
-						occupy_start_time = 0;
-						cout << "점령을 중단합니다.\n" << endl;
-						mission_lock.unlock();
-					}
-
-				}
-			}
 		}
 
 		// 7. 스폰지역에 있는지 확인한다.
@@ -3134,47 +3115,44 @@ void timerFunc() {
 			}
 
 			// 만약 현재 미션이 점령 중이라면 점령 관련 계산을 한다.
-			if (b_occupying) {
-				for (auto& cl : clients) {
-					if (cl.s_state != ST_INGAME) continue;
-					if (cl.curr_stage == 0) continue;
+			int occupy_member_cnt = 0;
+			for (auto& cl : clients) {
+				if (cl.s_state != ST_INGAME) continue;
+				if (cl.curr_stage == 0) continue;
 
-					if (cl.curr_stage == 1) {
-						int curr_mission_id = curr_mission_stage[1];
-						// 미션 완료
-						if (stage1_missions[curr_mission_id].curr >= stage1_missions[curr_mission_id].goal) {
-							// 미션 완료 패킷
-							SC_MISSION_COMPLETE_PACKET mission_complete;
-							mission_complete.type = SC_MISSION_COMPLETE;
-							mission_complete.size = sizeof(SC_MISSION_COMPLETE_PACKET);
-							mission_complete.stage_num = 1;
-							mission_complete.mission_num = curr_mission_id;
-							for (auto& cl : clients) {
-								if (cl.s_state != ST_INGAME) continue;
-								if (cl.curr_stage != 1) continue;
-								lock_guard<mutex> lg{ cl.s_lock };
-								cl.do_send(&mission_complete);
-							}
+				// 점령 인원 계산
+				if (cl.curr_stage == 1 && cl.b_occupying) {
+					occupy_member_cnt++;
+				}
+			}
 
-							// 점령 미션이 마지막 미션임. 클라이언트들을 내보내고 게임을 초기화한다.
-
-						}
-						else {	// 아직 점령 진행중
-							// 미션 진행 업데이트
-							mission_lock.lock();
-							stage1_missions[curr_mission_id].curr += 50 * occupying_people_cnt;	// 점령중인 사람이 많을 수록 게이지가 빨리 차오른다.
-							//cout << "점령 진행율: " << stage1_missions[curr_mission_id].curr << " / " << stage1_missions[curr_mission_id].goal << endl;
-							mission_lock.unlock();
-
-							for (auto& cl : clients) {
-								if (cl.s_state != ST_INGAME) continue;
-								if (cl.curr_stage != 1) continue;
-								lock_guard<mutex> lg{ cl.s_lock };
-								cl.send_mission_packet(1);
-							}
-						}
+			if (occupy_member_cnt >= 1) {	// 한 명 이상 점령 중이라면
+				int curr_mission_id = curr_mission_stage[1];
+				if (stage1_missions[curr_mission_id].curr >= stage1_missions[curr_mission_id].goal) {	// 미션 완료
+					// 미션 완료 패킷
+					SC_MISSION_COMPLETE_PACKET mission_complete;
+					mission_complete.type = SC_MISSION_COMPLETE;
+					mission_complete.size = sizeof(SC_MISSION_COMPLETE_PACKET);
+					mission_complete.stage_num = 1;
+					mission_complete.mission_num = curr_mission_id;
+					for (auto& cl : clients) {
+						if (cl.s_state != ST_INGAME) continue;
+						if (cl.curr_stage != 1) continue;
+						lock_guard<mutex> lg{ cl.s_lock };
+						cl.do_send(&mission_complete);
 					}
-					else if (cl.curr_stage == 2) {
+				}
+				else {	// 아직 점령 진행중
+					// 미션 진행 업데이트
+					mission_lock.lock();
+					stage1_missions[curr_mission_id].curr += 25 * occupy_member_cnt * occupy_member_cnt;	// 점령중인 사람이 많을 수록 게이지가 빨리 차오른다.
+					mission_lock.unlock();
+
+					for (auto& cl : clients) {
+						if (cl.s_state != ST_INGAME) continue;
+						if (cl.curr_stage != 1) continue;
+						lock_guard<mutex> lg{ cl.s_lock };
+						cl.send_mission_packet(1);
 					}
 				}
 			}
