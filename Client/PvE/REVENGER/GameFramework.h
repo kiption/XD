@@ -364,7 +364,8 @@ public:
 	bool m_CameraShaking = false;
 	bool W_KEY, A_KEY, S_KEY, D_KEY, SPACE_KEY, SHOOT_KEY = false;
 	bool isComplete = false;
-	bool player_dead = false;
+	bool b_imdeadplayer = false;
+	bool b_players_dead[3] = { false, };
 
 	int b_heli_mapcollide_cooldown = 0;
 
