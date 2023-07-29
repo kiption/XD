@@ -2450,6 +2450,7 @@ void initNpc() {
 
 //======================================================================
 void ResetNPC() {
+	ClientConnected = false;
 	for (int i = 0; i < MAX_NPCS; ++i) {
 		npcsInfo[i].SetState(NPC_IDLE);
 	}
