@@ -1115,8 +1115,14 @@ void CGameFramework::ProcessInput()
 					if (dwDirection)
 					{
 						bool isCollide = false;
+
 						CollideMapInfo temp;
 						for (int i{}; i < mapcol_info.size(); ++i) {
+							XMFLOAT3 O_pos = mapcol_info[i].m_pos;
+							XMFLOAT3 NtoO_vec = Vector3::Subtract(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition(), O_pos);
+							float NtoODistance = Vector3::Length(NtoO_vec);
+							
+							if (NtoODistance > 200.0f) continue;
 							if (mapcol_info[i].m_xoobb.Intersects(((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_xoobb)) {
 								temp = mapcol_info[i];
 								isCollide = true;
