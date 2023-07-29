@@ -40,7 +40,6 @@ public:
 	float goal;
 	float curr;
 	int start;				// 미션 시작 시간
-	int time_since_start;	// 미션 진행 시간
 
 public:
 	Mission() {
@@ -66,7 +65,6 @@ void setMissions() {
 	stage1_missions[0] = setMission(MISSION_KILL, STAGE1_MISSION1_GOAL, 0.0f);
 	stage1_missions[1] = setMission(MISSION_OCCUPY, STAGE1_MISSION2_GOAL * 1'000.f, 0.0f);
 
-	//
 	cout << " ---- OK." << endl;
 }
 
@@ -726,10 +724,63 @@ bool b_active_server;									// Active 서버인가?
 bool b_npcsvr_conn;										// NPC서버가 연결되었는가?
 
 //======================================================================
+void resetGame() {	// 한판이 끝날때마다 모든 게임정보를 초기상태로 돌려놓는다.
+	cout << "===Reset Game===" << endl;
+	SC_RESET_GAME_PACKET reset_game_packet;
+	reset_game_packet.size = sizeof(SC_RESET_GAME_PACKET);
+	reset_game_packet.type = SC_RESET_GAME;
+
+	// Player
+	cout << "Players Info Reset...";
+	for (auto& cl : clients) {
+		cl.s_lock.lock();
+		cl.sessionClear();
+		cl.s_lock.unlock();
+	}
+	cout << " - OK." << endl;
+
+	// Time
+	cout << "Server Time Reset...";
+	servertime_lock.lock();
+	g_s_start_time = system_clock::now();
+	g_curr_servertime = milliseconds(0);
+	b_isfirstplayer = true;
+	servertime_lock.unlock();
+	cout << " - OK." << endl;
+
+	// Missions
+	cout << "Missions Info Reset...";
+	mission_lock.lock();
+	curr_mission_stage[1] = 0;
+	stage1_missions[0].curr = 0.f;
+	stage1_missions[1].curr = 0.f;
+	stage1_missions[0].start = static_cast<int>(g_curr_servertime.count());
+	stage1_missions[1].start = static_cast<int>(g_curr_servertime.count());
+	mission_lock.unlock();
+	cout << " - OK." << endl;
+
+	// NPC
+	cout << "NPCs Info Reset...";
+	for (auto& npc : npcs) {
+		npc.s_lock.lock();
+		npc.sessionClear();
+		npc.s_lock.unlock();
+	}
+	if (b_npcsvr_conn) {
+		lock_guard<mutex> lg{ npc_server.s_lock };
+		npc_server.do_send(&reset_game_packet);
+	}
+	cout << " - OK." << endl;
+
+	cout << "====\n" << endl;
+}
+
+//======================================================================
 void disconnect(int target_id, int target)
 {
 	switch (target) {
 	case SESSION_CLIENT:
+	{
 		clients[target_id].s_lock.lock();
 		if (clients[target_id].s_state == ST_FREE) {
 			clients[target_id].s_lock.unlock();
@@ -742,6 +793,7 @@ void disconnect(int target_id, int target)
 		cout << "Player[ID: " << clients[target_id].id << ", name: " << clients[target_id].name << "] is log out\n" << endl;	// server message
 
 		// 남아있는 모든 클라이언트들에게 target_id번 클라이언트가 접속 종료한 사실을 알립니다.
+		int remain_user_cnt = 0;
 		for (int i = 0; i < MAX_USER; i++) {
 			auto& pl = clients[i];
 
@@ -752,6 +804,7 @@ void disconnect(int target_id, int target)
 				pl.s_lock.unlock();
 				continue;
 			}
+			remain_user_cnt++;
 			pl.send_remove_packet(target_id, TARGET_PLAYER);
 			pl.s_lock.unlock();
 		}
@@ -762,8 +815,14 @@ void disconnect(int target_id, int target)
 			npc_server.send_remove_packet(target_id, TARGET_PLAYER);
 		}
 
-		break;
+		// 만약 남아있는 플레이어가 없다면 게임을 초기화합니다.
+		if (remain_user_cnt == 0) {
+			cout << "방금 접속 종료한 클라이언트가 마지막 클라이언트였습니다. 게임을 초기화합니다." << endl;
+			resetGame();
+		}
 
+		break;
+	}
 	case SESSION_NPC:
 		cout << "NPC 서버가 다운되었습니다." << endl;
 		closesocket(npc_server.socket);
@@ -2039,6 +2098,7 @@ void process_packet(int client_id, char* packet)
 		CS_PARTICLE_COLLIDE_PACKET* particle_pack = reinterpret_cast<CS_PARTICLE_COLLIDE_PACKET*>(packet);
 
 		if (clients[client_id].pl_state == PL_ST_DEAD) break;	// 죽으면 충돌X
+		if (clients[client_id].immortal_cheat) break;	// 무적은 충돌X
 
 		// 데미지 계산
 		int damage = static_cast<int>(PARTICLE_BASIC_DAMAGE * particle_pack->particle_mass);
@@ -2119,6 +2179,7 @@ void process_packet(int client_id, char* packet)
 		CS_HELI_MAP_COLLIDE_PACKET* particle_pack = reinterpret_cast<CS_HELI_MAP_COLLIDE_PACKET*>(packet);
 		if (clients[client_id].role != ROLE_HELI) break;	// 잘못된 요청
 		if (clients[client_id].pl_state == PL_ST_DEAD) break;	// 죽으면 충돌X
+		if (clients[client_id].immortal_cheat) break;	// 무적은 충돌X
 		
 		// 데미지 계산
 		int damage = static_cast<int>(HUMAN_MAXHP / 3) + 1;

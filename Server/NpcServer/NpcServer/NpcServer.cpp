@@ -1912,6 +1912,7 @@ void NPC::NPC_SetObjectList()
 		}
 	}
 }
+void ResetNPC();
 
 //======================================================================
 void process_packet(char* packet)
@@ -2099,7 +2100,16 @@ void process_packet(char* packet)
 		temp.setAngleBOC(mapobj_packet->boc);
 		temp.setBB();
 		mapobjects_info.push_back(temp);
-	}
+		break;
+	}// SC_MAP_OBJINFO end
+	case SC_RESET_GAME:
+	{
+		SC_RESET_GAME_PACKET* mapobj_packet = reinterpret_cast<SC_RESET_GAME_PACKET*>(packet);
+
+		ResetNPC();
+		cout << "NPC ÃÊ±âÈ­\n" << endl;
+		break;
+	}// SC_RESET_GAME end
 	}
 }
 
@@ -2436,6 +2446,14 @@ void initNpc() {
 			g_logicservers[a_lgcsvr_num].send_npc_init_packet(npc_id);
 		}
 	}
+}
+
+//======================================================================
+void ResetNPC() {
+	for (int i = 0; i < MAX_NPCS; ++i) {
+		npcsInfo[i].SetState(NPC_IDLE);
+	}
+	initNpc();
 }
 
 //======================================================================
