@@ -990,29 +990,22 @@ void Stage1::ParticleCollisionResult()
 		P10 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pTailRotorFrame->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
 		P11 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pMainRotorFrame->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Quaternion);
 
-		if (HeliPlayeroobb.Intersects(P1)) { cout << "Heli Collision P1!" << endl; m_bHeliParticleCollisionCheck = true; }
-		if (HeliPlayeroobb.Intersects(P2)) { cout << "Heli Collision P2!" << endl; m_bHeliParticleCollisionCheck = true; }
-		if (HeliPlayeroobb.Intersects(P3)) { cout << "Heli Collision P3!" << endl; m_bHeliParticleCollisionCheck = true; }
-		if (HeliPlayeroobb.Intersects(P4)) { cout << "Heli Collision P4!" << endl; m_bHeliParticleCollisionCheck = true; }
-		if (HeliPlayeroobb.Intersects(P5)) { cout << "Heli Collision P5!" << endl; m_bHeliParticleCollisionCheck = true; }
-		if (HeliPlayeroobb.Intersects(P6)) { cout << "Heli Collision P6!" << endl; m_bHeliParticleCollisionCheck = true; }
-		if (HeliPlayeroobb.Intersects(P7)) { cout << "Heli Collision P7!" << endl; m_bHeliParticleCollisionCheck = true; }
-		if (HeliPlayeroobb.Intersects(P8)) { cout << "Heli Collision P8!" << endl; m_bHeliParticleCollisionCheck = true; }
-		if (HeliPlayeroobb.Intersects(P9)) { cout << "Heli Collision P9!" << endl; m_bHeliParticleCollisionCheck = true; }
-		if (HeliPlayeroobb.Intersects(P10)) { cout << "Heli Collision P10!" << endl; m_bHeliParticleCollisionCheck = true; }
-		if (HeliPlayeroobb.Intersects(P11)) { cout << "Heli Collision P11!" << endl; m_bHeliParticleCollisionCheck = true; }
+		if (HeliPlayeroobb.Intersects(P1) || HeliPlayeroobb.Intersects(P2) || HeliPlayeroobb.Intersects(P3) || HeliPlayeroobb.Intersects(P4)
+			|| HeliPlayeroobb.Intersects(P5) || HeliPlayeroobb.Intersects(P6) || HeliPlayeroobb.Intersects(P7) || HeliPlayeroobb.Intersects(P8)
+			|| HeliPlayeroobb.Intersects(P9) || HeliPlayeroobb.Intersects(P10) || HeliPlayeroobb.Intersects(P11))
+		{
+			cout << "Heli Collision Particle!" << endl;
+			m_bHeliParticleCollisionCheck = true;
+		}
 
-		if (HumanPlayeroobb.Intersects(P1)) { cout << "Human Collision P1!" << endl; m_bHumanParticleCollisionCheck = true; }
-		if (HumanPlayeroobb.Intersects(P2)) { cout << "Human Collision P2!" << endl; m_bHumanParticleCollisionCheck = true; }
-		if (HumanPlayeroobb.Intersects(P3)) { cout << "Human Collision P3!" << endl; m_bHumanParticleCollisionCheck = true; }
-		if (HumanPlayeroobb.Intersects(P4)) { cout << "Human Collision P4!" << endl; m_bHumanParticleCollisionCheck = true; }
-		if (HumanPlayeroobb.Intersects(P5)) { cout << "Human Collision P5!" << endl; m_bHumanParticleCollisionCheck = true; }
-		if (HumanPlayeroobb.Intersects(P6)) { cout << "Human Collision P6!" << endl; m_bHumanParticleCollisionCheck = true; }
-		if (HumanPlayeroobb.Intersects(P7)) { cout << "Human Collision P7!" << endl; m_bHumanParticleCollisionCheck = true; }
-		if (HumanPlayeroobb.Intersects(P8)) { cout << "Human Collision P8!" << endl; m_bHumanParticleCollisionCheck = true; }
-		if (HumanPlayeroobb.Intersects(P9)) { cout << "Human Collision P9!" << endl; m_bHumanParticleCollisionCheck = true; }
-		if (HumanPlayeroobb.Intersects(P10)) { cout << "Human Collision P10!" << endl; m_bHumanParticleCollisionCheck = true; }
-		if (HumanPlayeroobb.Intersects(P11)) { cout << "Human Collision P11!" << endl; m_bHumanParticleCollisionCheck = true; }
+		if (HumanPlayeroobb.Intersects(P1) || HumanPlayeroobb.Intersects(P2) || HumanPlayeroobb.Intersects(P3) || HumanPlayeroobb.Intersects(P4)
+			|| HumanPlayeroobb.Intersects(P5) || HumanPlayeroobb.Intersects(P6) || HumanPlayeroobb.Intersects(P7) || HumanPlayeroobb.Intersects(P8)
+			|| HumanPlayeroobb.Intersects(P9) || HumanPlayeroobb.Intersects(P10) || HumanPlayeroobb.Intersects(P11))
+		{
+			cout << "Human Collision Particle!" << endl;
+			m_bHumanParticleCollisionCheck = true;
+		}
+
 	}
 
 
@@ -1224,7 +1217,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 			m_ppShaders[0]->m_ppObjects[i]->SetPosition(xmf3PlayerPosition);
 		}
 	}
-	
+
 	for (int i = 12; i < 17; i++)
 	{
 		if (((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_bPartitionfalldownEnd == true)
@@ -1298,15 +1291,15 @@ void Stage1::OtherHeliPlayerTransformStore()
 {
 	m_pMainRotorFrameP = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pMainRotorFrame->m_xmf4x4ToParent;
 	m_pTailRotorFrameP = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pTailRotorFrame->m_xmf4x4ToParent;
-	m_pFrameFragObj1P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj1->m_xmf4x4ToParent;
-	m_pFrameFragObj2P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj2->m_xmf4x4ToParent;
-	m_pFrameFragObj3P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj3->m_xmf4x4ToParent;
-	m_pFrameFragObj4P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj4->m_xmf4x4ToParent;
-	m_pFrameFragObj5P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj5->m_xmf4x4ToParent;
-	m_pFrameFragObj6P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj6->m_xmf4x4ToParent;
-	m_pFrameFragObj7P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj7->m_xmf4x4ToParent;
-	m_pFrameFragObj8P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj8->m_xmf4x4ToParent;
-	m_pFrameFragObj9P  = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj9->m_xmf4x4ToParent;
+	m_pFrameFragObj1P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj1->m_xmf4x4ToParent;
+	m_pFrameFragObj2P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj2->m_xmf4x4ToParent;
+	m_pFrameFragObj3P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj3->m_xmf4x4ToParent;
+	m_pFrameFragObj4P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj4->m_xmf4x4ToParent;
+	m_pFrameFragObj5P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj5->m_xmf4x4ToParent;
+	m_pFrameFragObj6P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj6->m_xmf4x4ToParent;
+	m_pFrameFragObj7P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj7->m_xmf4x4ToParent;
+	m_pFrameFragObj8P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj8->m_xmf4x4ToParent;
+	m_pFrameFragObj9P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj9->m_xmf4x4ToParent;
 	m_pFrameFragObj10P = ((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[7])->m_pFrameFragObj10->m_xmf4x4ToParent;
 }
 
@@ -1446,11 +1439,11 @@ void Stage1::NpcByPlayerCollsiion()
 
 		if (MyPoobb.Intersects(Npcoobb)) {
 			(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->SetPosition(XMFLOAT3(
-				((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_xmf4x4ToParent._41-2.0f,
+				((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_xmf4x4ToParent._41 - 2.0f,
 				((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().y,
 				((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().z)));
 		}
 	}
-	
-	
+
+
 }
