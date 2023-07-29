@@ -1423,7 +1423,7 @@ void process_packet(int client_id, char* packet)
 			if (b_collide) {
 				switch (collided_obj) {
 				case C_OBJ_MAPOBJ:
-					cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+					//cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
 					SC_BULLET_COLLIDE_POS_PACKET map_collide_pack;
 					map_collide_pack.size = sizeof(SC_BULLET_COLLIDE_POS_PACKET);
 					map_collide_pack.type = SC_BULLET_COLLIDE_POS;
@@ -1441,7 +1441,7 @@ void process_packet(int client_id, char* packet)
 
 					break;
 				case C_OBJ_GROUND:
-					cout << "바닥 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+					//cout << "바닥 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
 					SC_BULLET_COLLIDE_POS_PACKET ground_collide_pack;
 					ground_collide_pack.size = sizeof(SC_BULLET_COLLIDE_POS_PACKET);
 					ground_collide_pack.type = SC_BULLET_COLLIDE_POS;
@@ -1511,8 +1511,8 @@ void process_packet(int client_id, char* packet)
 						npcs[collided_npc_id].s_lock.lock();
 						npcs[collided_npc_id].hp -= damage;
 						npcs[collided_npc_id].s_lock.unlock();
-						cout << "Player[" << client_id << "]의 공격에 NPC[" << collided_npc_id << "]가 피해(-" << damage << ")를 입었다."
-							<< " (남은 HP : " << npcs[collided_npc_id].hp << ")\n" << endl;
+						//cout << "Player[" << client_id << "]의 공격에 NPC[" << collided_npc_id << "]가 피해(-" << damage << ")를 입었다."
+						//	<< " (남은 HP : " << npcs[collided_npc_id].hp << ")\n" << endl;
 					}
 					else {	// npc 사망
 						npcs[collided_npc_id].s_lock.lock();
@@ -1826,7 +1826,7 @@ void process_packet(int client_id, char* packet)
 				npc.hp = 0;
 				npc.pl_state = PL_ST_DEAD;
 				npc.s_lock.unlock();
-				cout << "[치트키] Player[" << client_id << "]의 치트키에 NPC[" << npc.id << "]가 사망하였다." << endl;
+				//cout << "[치트키] Player[" << client_id << "]의 치트키에 NPC[" << npc.id << "]가 사망하였다." << endl;
 
 				if (npc.id < STAGE1_MAX_HELI) {
 					// 1) 헬기NPC인 경우 NPC서버에게 상태패킷을 보냅니다.
@@ -2426,7 +2426,7 @@ void process_packet(int client_id, char* packet)
 		bullet.m_lookvec = XMFLOAT3{ recv_attack_pack->atklook_x, recv_attack_pack->atklook_y, recv_attack_pack->atklook_z };
 		bullet.m_xoobb = BoundingOrientedBox(XMFLOAT3(bullet.pos.x, bullet.pos.y, bullet.pos.z)\
 			, XMFLOAT3(0.1f, 0.1f, 0.3f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
-		cout << "총알 진행방향: " << bullet.m_lookvec.x << ", " << bullet.m_lookvec.y << ", " << bullet.m_lookvec.z << endl;
+		//cout << "총알 진행방향: " << bullet.m_lookvec.x << ", " << bullet.m_lookvec.y << ", " << bullet.m_lookvec.z << endl;
 
 		XMFLOAT3 bullet_initpos = bullet.pos;
 		XMFLOAT3 collide_pos = XMF_fault;
@@ -2502,7 +2502,7 @@ void process_packet(int client_id, char* packet)
 			if (b_collide) {
 				switch (collided_obj) {
 				case C_OBJ_MAPOBJ:
-					cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+					//cout << "맵 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
 					SC_BULLET_COLLIDE_POS_PACKET map_collide_pack;
 					map_collide_pack.size = sizeof(SC_BULLET_COLLIDE_POS_PACKET);
 					map_collide_pack.type = SC_BULLET_COLLIDE_POS;
@@ -2520,7 +2520,7 @@ void process_packet(int client_id, char* packet)
 
 					break;
 				case C_OBJ_GROUND:
-					cout << "바닥 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
+					//cout << "바닥 오브젝트와 충돌하였음 (POS: " << collide_pos.x << ", " << collide_pos.y << ", " << collide_pos.z << ")\n" << endl;
 					SC_BULLET_COLLIDE_POS_PACKET ground_collide_pack;
 					ground_collide_pack.size = sizeof(SC_BULLET_COLLIDE_POS_PACKET);
 					ground_collide_pack.type = SC_BULLET_COLLIDE_POS;
@@ -2574,8 +2574,8 @@ void process_packet(int client_id, char* packet)
 						clients[collided_cl_id].s_lock.lock();
 						clients[collided_cl_id].hp -= damage;
 						clients[collided_cl_id].s_lock.unlock();
-						cout << "NPC[" << recv_attack_pack->n_id << "]의 공격에 Player[" << collided_cl_id << "]가 피해(-" << damage << ")를 입었다. (HP: "
-							<< clients[collided_cl_id].hp << " 남음)\n" << endl;
+						//cout << "NPC[" << recv_attack_pack->n_id << "]의 공격에 Player[" << collided_cl_id << "]가 피해(-" << damage << ")를 입었다. (HP: "
+						//	<< clients[collided_cl_id].hp << " 남음)\n" << endl;
 
 						SC_DAMAGED_PACKET damaged_packet;
 						damaged_packet.size = sizeof(SC_DAMAGED_PACKET);
@@ -2604,7 +2604,7 @@ void process_packet(int client_id, char* packet)
 						clients[collided_cl_id].hp = 0;
 						clients[collided_cl_id].pl_state = PL_ST_DEAD;
 						clients[collided_cl_id].s_lock.unlock();
-						cout << "Npc[" << recv_attack_pack->n_id << "]의 공격에 Player[" << collided_cl_id << "]가 사망하였다." << endl;
+						//cout << "Npc[" << recv_attack_pack->n_id << "]의 공격에 Player[" << collided_cl_id << "]가 사망하였다." << endl;
 
 						SC_OBJECT_STATE_PACKET death_packet;
 						death_packet.size = sizeof(SC_OBJECT_STATE_PACKET);
@@ -3102,7 +3102,7 @@ void timerFunc() {
 							// 미션 진행 업데이트
 							mission_lock.lock();
 							stage1_missions[curr_mission_id].curr += 50 * occupying_people_cnt;	// 점령중인 사람이 많을 수록 게이지가 빨리 차오른다.
-							cout << "점령 진행율: " << stage1_missions[curr_mission_id].curr << " / " << stage1_missions[curr_mission_id].goal << endl;
+							//cout << "점령 진행율: " << stage1_missions[curr_mission_id].curr << " / " << stage1_missions[curr_mission_id].goal << endl;
 							mission_lock.unlock();
 
 							for (auto& cl : clients) {
