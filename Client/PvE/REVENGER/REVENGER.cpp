@@ -18,7 +18,7 @@ TCHAR							szWindowClass[MAX_LOADSTRING];
 
 
 CGameFramework					gGameFramework;
-
+wchar_t* converttext;
 
 ATOM MyRegisterClass(HINSTANCE hInstance);
 BOOL InitInstance(HINSTANCE, int);
@@ -1309,9 +1309,11 @@ void uiThreadFunc() {
 
 					cout << temptext << endl;
 
-					wchar_t* converttext = ConvertToWideChar(temptext);
+					converttext = ConvertToWideChar(temptext);
 
 					wcscpy_s(textinfo.chatData, converttext);
+
+					delete[] converttext;
 
 					gGameFramework.m_chat_info.push(textinfo);
 				}
@@ -1376,31 +1378,39 @@ void uiThreadFunc() {
 					if (OutCheck) {
 						gGameFramework.m_otherHP[i - 2] = players_info[i].m_hp;
 
-						wchar_t* converttext = ConvertToWideChar(players_info[i].m_name);
+						converttext = ConvertToWideChar(players_info[i].m_name);
 
 						wcscpy_s(gGameFramework.m_OtherName[i - 2], converttext);
+
+						delete[] converttext;
 					}
 					else {
 						gGameFramework.m_otherHP[i - 1] = players_info[i].m_hp;
 
-						wchar_t* converttext = ConvertToWideChar(players_info[i].m_name);
+						converttext = ConvertToWideChar(players_info[i].m_name);
 
 						wcscpy_s(gGameFramework.m_OtherName[i - 1], converttext);
+
+						delete[] converttext;
 					}
 				}
 				else {
 					if (OutCheck) {
 						gGameFramework.m_otherHP[i - 1] = players_info[i].m_hp;
 
-						wchar_t* converttext = ConvertToWideChar(players_info[i].m_name);
+						converttext = ConvertToWideChar(players_info[i].m_name);
 
 						wcscpy_s(gGameFramework.m_OtherName[i - 1], converttext);
+
+						delete[] converttext;
 					}
 					else {
 						gGameFramework.m_otherHP[i] = players_info[i].m_hp;
-						wchar_t* converttext = ConvertToWideChar(players_info[i].m_name);
+						converttext = ConvertToWideChar(players_info[i].m_name);
 
 						wcscpy_s(gGameFramework.m_OtherName[i], converttext);
+
+						delete[] converttext;
 					}
 				}
 			}
