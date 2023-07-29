@@ -1028,7 +1028,7 @@ void processPacket(char* ptr)
 					gamesound.PlayHeliShotSound();
 					gamesound.HelishotChannel->setVolume(0.05f);
 				}
-				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN)
+				if (MAX_NPC_HELI <= recv_id && recv_id < MAX_NPCS)
 				{
 					gamesound.PlayShotSound();
 					gamesound.shotChannel->setVolume(0.05f);
@@ -1041,7 +1041,7 @@ void processPacket(char* ptr)
 					gamesound.PlayHeliShotSound();
 					gamesound.HelishotChannel->setVolume(0.25f);
 				}
-				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN)
+				if (MAX_NPC_HELI <= recv_id && recv_id < MAX_NPCS)
 				{
 					gamesound.PlayShotSound();
 					gamesound.shotChannel->setVolume(0.25f);
@@ -1054,7 +1054,7 @@ void processPacket(char* ptr)
 					gamesound.PlayHeliShotSound();
 					gamesound.HelishotChannel->setVolume(0.5f);
 				}
-				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN)
+				if (MAX_NPC_HELI <= recv_id && recv_id < MAX_NPCS)
 				{
 					gamesound.PlayShotSound();
 					gamesound.shotChannel->setVolume(0.5f);
