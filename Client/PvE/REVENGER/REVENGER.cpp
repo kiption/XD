@@ -511,15 +511,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				}
 
 				// 3. 만약 죽어있는 상태면 캐릭터 조작이 불가능하게 막아야합니다.
-				if ((players_info[my_id].m_ingame_state == PL_ST_DEAD) && (!gGameFramework.player_dead)) {
+				if ((players_info[my_id].m_ingame_state == PL_ST_DEAD) && (!gGameFramework.b_imdeadplayer)) {
 					gGameFramework.MyPlayerDieMotion();
 					gGameFramework.m_HeliPlayerWarnningUISwitch = false;
-					gGameFramework.player_dead = true;
+					gGameFramework.b_imdeadplayer = true;
 				}
-				if ((players_info[my_id].m_ingame_state != PL_ST_DEAD) && (gGameFramework.player_dead)) {
+				if ((players_info[my_id].m_ingame_state != PL_ST_DEAD) && (gGameFramework.b_imdeadplayer)) {
 					gGameFramework.MyPlayerRespawnMotion();
 					gGameFramework.m_HeliPlayerWarnningUISwitch = false;
-					gGameFramework.player_dead = false;
+					gGameFramework.b_imdeadplayer = false;
 				}
 
 				// 4. 총쏘는거
@@ -572,6 +572,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 								// + 구르기 및 점프
 							case PL_ST_DEAD:
 								gGameFramework.otherPlayerDyingMotion(i);
+								gGameFramework.b_players_dead[i] = true;
 								break;
 							}
 						}
@@ -579,6 +580,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							switch (players_info[i].m_ingame_state) {
 							case PL_ST_DEAD:
 								gGameFramework.otherHeliPlayerDyingMotion();
+								gGameFramework.b_players_dead[i] = true;
 								break;
 							}
 						}

@@ -861,14 +861,14 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				q_keyboardInput.push(SEND_KEYUP_MOVEKEY);
 				break;
 			case 'R':
-				if (!player_dead && ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bMoveUpdate == false && m_ingame_role == R_RIFLE)
+				if (!b_imdeadplayer && ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bMoveUpdate == false && m_ingame_role == R_RIFLE)
 				{
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->m_bReloadState = true;
 					((MuzzleFrameBillboard*)((Stage1*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
 					((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->ReloadState();
 					q_keyboardInput.push(SEND_KEY_R);
 				}
-				if (!player_dead && m_ingame_role == R_HELI)
+				if (!b_imdeadplayer && m_ingame_role == R_HELI)
 				{
 					q_keyboardInput.push(SEND_KEY_R);
 				}
@@ -1042,15 +1042,7 @@ void CGameFramework::ProcessInput()
 	if (!bProcessedByScene)
 	{
 		DWORD dwDirection = 0;
-		if (m_bFreeViewCamera == true)
-		{
-			if (pKeysBuffer[KEY_W] & 0xF0) { m_pCamera->Move(XMFLOAT3(0, 0, 1)); }
-			if (pKeysBuffer[KEY_S] & 0xF0) { m_pCamera->Move(XMFLOAT3(0, 0, -1)); }
-			if (pKeysBuffer[KEY_A] & 0xF0) { m_pCamera->Move(XMFLOAT3(-1, 0, 0)); }
-			if (pKeysBuffer[KEY_D] & 0xF0) { m_pCamera->Move(XMFLOAT3(1, 0, 0)); }
-
-		}
-		if (!UI_Switch && !player_dead) {
+		if (!UI_Switch && !b_imdeadplayer) {
 			if (pKeysBuffer[KEY_W] & 0xF0) { q_keyboardInput.push(SEND_KEY_W); dwDirection |= DIR_FORWARD; }
 			if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; }
 			if (pKeysBuffer[KEY_A] & 0xF0) { q_keyboardInput.push(SEND_KEY_A); dwDirection |= DIR_LEFT; }
@@ -1063,7 +1055,7 @@ void CGameFramework::ProcessInput()
 			}
 		}
 
-		if (!player_dead) { if (pKeysBuffer[VK_SPACE] & 0xF0) { q_keyboardInput.push(SEND_KEY_SPACEBAR); } }
+		if (!b_imdeadplayer) { if (pKeysBuffer[VK_SPACE] & 0xF0) { q_keyboardInput.push(SEND_KEY_SPACEBAR); } }
 
 		float cxDelta = 0.0f, cyDelta = 0.0f, czDelta = 0.0f;
 		POINT ptCursorPos;
@@ -1106,7 +1098,7 @@ void CGameFramework::ProcessInput()
 
 		if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 		{
-			if (!player_dead) {
+			if (!b_imdeadplayer) {
 				if (m_nMode == SCENE1STAGE) {
 					if (cxDelta || cyDelta /*|| ((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true*/)
 					{
@@ -1871,7 +1863,7 @@ void CGameFramework::FrameAdvance()
 			}
 		}
 		// DyingBanner
-		if (player_dead == true)
+		if (b_imdeadplayer == true)
 		{
 			D2D_POINT_2F D2_DyingBannerUI = { (FRAME_BUFFER_WIDTH - 2500.0) / 2, (FRAME_BUFFER_HEIGHT - 1730.0) / 2 };
 			D2D_RECT_F D2_DyingBanner = { 0.0f, 0.0f, 2500.0, 1730.0 };
