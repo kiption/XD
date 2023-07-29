@@ -1423,14 +1423,12 @@ void Stage1::SetPositionPilotHuman()
 
 void Stage1::NpcByPlayerCollsiion()
 {
-	XMFLOAT3 NpcPos{};
-	BoundingOrientedBox Npcoobb{};
 	for (int i = 21; i < 42; i++)
 	{
-		NpcPos = XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[i])->m_xmf4x4ToParent._41,
+		XMFLOAT3 NpcPos = XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[i])->m_xmf4x4ToParent._41,
 			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[i])->m_xmf4x4ToParent._42,
 			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[i])->m_xmf4x4ToParent._43);
-		Npcoobb = BoundingOrientedBox(XMFLOAT3(NpcPos), XMFLOAT3(3.0, 5.0, 3.0), XMFLOAT4(0, 0, 0, 1));
+		BoundingOrientedBox Npcoobb = BoundingOrientedBox(XMFLOAT3(NpcPos), XMFLOAT3(3.0, 5.0, 3.0), XMFLOAT4(0, 0, 0, 1));
 
 		XMFLOAT3 MyPos = XMFLOAT3(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().x,
 			((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().y,

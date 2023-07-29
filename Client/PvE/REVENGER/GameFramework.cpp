@@ -887,7 +887,16 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case '0':
 				if (MouseResponsivenessY > 400 && MouseResponsivenessY < 600) MouseResponsivenessY += 50.0f;
 				break;
-			
+			case 'V':
+				if (player_dead&& m_ingame_role == R_RIFLE)
+				{
+					m_bFreeViewCamera = true;
+				}
+				if (player_dead && m_ingame_role == R_HELI)
+				{
+					m_bFreeViewCamera = true;
+				}
+				break;
 			case 'Y':
 				/*((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Resetpartition();*/
 				break;
@@ -1033,12 +1042,20 @@ void CGameFramework::ProcessInput()
 	if (!bProcessedByScene)
 	{
 		DWORD dwDirection = 0;
+		if (m_bFreeViewCamera == true)
+		{
+			if (pKeysBuffer[KEY_W] & 0xF0) { m_pCamera->Move(XMFLOAT3(0, 0, 1)); }
+			if (pKeysBuffer[KEY_S] & 0xF0) { m_pCamera->Move(XMFLOAT3(0, 0, -1)); }
+			if (pKeysBuffer[KEY_A] & 0xF0) { m_pCamera->Move(XMFLOAT3(-1, 0, 0)); }
+			if (pKeysBuffer[KEY_D] & 0xF0) { m_pCamera->Move(XMFLOAT3(1, 0, 0)); }
+
+		}
 		if (!UI_Switch && !player_dead) {
 			if (pKeysBuffer[KEY_W] & 0xF0) { q_keyboardInput.push(SEND_KEY_W); dwDirection |= DIR_FORWARD; }
 			if (pKeysBuffer[KEY_S] & 0xF0) { q_keyboardInput.push(SEND_KEY_S); dwDirection |= DIR_BACKWARD; }
 			if (pKeysBuffer[KEY_A] & 0xF0) { q_keyboardInput.push(SEND_KEY_A); dwDirection |= DIR_LEFT; }
 			if (pKeysBuffer[KEY_D] & 0xF0) { q_keyboardInput.push(SEND_KEY_D); dwDirection |= DIR_RIGHT; }
-
+			
 			if (m_ingame_role == R_HELI)
 			{
 				if (pKeysBuffer[KEY_Q] & 0xF0) { m_bHeliHittingMotion = false; q_keyboardInput.push(SEND_KEY_Q); dwDirection |= DIR_UP; }
@@ -1195,6 +1212,9 @@ void CGameFramework::ProcessInput()
 								((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 1750.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
 							else
 								((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Move(dwDirection, 850.0f * m_GameTimer.GetTimeElapsed(), true, PlayerMoveDir);
+
+
+							
 						} 	//--------Human Player-----------// 
 						else
 						{
@@ -1212,6 +1232,7 @@ void CGameFramework::ProcessInput()
 						//--------Human Player-----------// 
 						if (m_ingame_role == R_RIFLE)
 							((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Rotate(cyDelta, cxDelta, 0.0f);
+
 
 					}
 				}

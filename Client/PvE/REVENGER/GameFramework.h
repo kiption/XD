@@ -441,7 +441,7 @@ public:
 	bool HeliCollsiion = false;
 	float m_pPlayerRotate_z = 0.0f;
 	float m_pPlayerRotate_x = 0.0f;
-
+	bool m_bFreeViewCamera = false;
 	// MYRoomUser
 	void setRoomUserInfo(int index, wchar_t* user_name, int user_state) {
 		m_MyRoom_Info[index].ready_state = user_state;
