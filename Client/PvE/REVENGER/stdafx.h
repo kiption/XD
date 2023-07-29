@@ -187,7 +187,7 @@ extern float ReadFloatFromFile(FILE *pInFile);
 #define RANDOM_COLOR			XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
 
 #define EPSILON					1.0e-10f
-#define EXPLOSION_DEBRISES		60
+#define EXPLOSION_DEBRISES		70
 #define EXPLOSION_HELICOPTER		12
 #define BLOODEXPLOSION_DEBRISES		50
 

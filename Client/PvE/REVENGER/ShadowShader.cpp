@@ -76,7 +76,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppObjects[2] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
 			m_ppObjects[2]->SetMaterial(0, pOtherPlayerMaterial);
 			m_ppObjects[2]->SetScale(3, 3, 3);
-			m_ppObjects[2]->SetPosition(XMFLOAT3(150.0, -60.0, 830.0));
+			m_ppObjects[2]->SetPosition(XMFLOAT3(150.0, 6.0, 830.0));
 			pSModel->m_pModelRootObject->AddRef();
 
 			m_ppObjects[1] = new CHumanPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
@@ -88,7 +88,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 				m_ppObjects[i] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
 				m_ppObjects[i]->SetMaterial(0, pOtherPlayerMaterial);
 				m_ppObjects[i]->SetScale(5, 5, 5);
-				m_ppObjects[i]->SetPosition(XMFLOAT3(150.0, -60.0, 800.0));
+				m_ppObjects[i]->SetPosition(XMFLOAT3(150.0, 6.0, 800.0));
 				pSModel->m_pModelRootObject->AddRef();
 			}
 			if (pSModel) delete pSModel;

@@ -71,10 +71,10 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	switch (nNewCameraMode)
 	{
 	case FIRST_PERSON_CAMERA:
-		SetFriction(250.0f);
+		SetFriction(300.0f);
 		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		SetMaxVelocityXZ(300.0f);
-		SetMaxVelocityY(400.0f);
+		SetMaxVelocityXZ(30.0f);
+		SetMaxVelocityY(5.0f);
 		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 10.0f, -80.0f));
@@ -363,8 +363,8 @@ void HeliPlayer::FallDown(float fTimeElapsed)
 
 void HeliPlayer::LimitAltitude()
 {
-	if (this->m_xmf4x4ToParent._42>120.0f)
+	if (this->m_xmf4x4ToParent._42>90.0)
 	{
-		SetPosition(XMFLOAT3(this->GetPosition().x,119.99f, this->GetPosition().z));
+		SetPosition(XMFLOAT3(this->GetPosition().x,89.99f, this->GetPosition().z));
 	}
 }

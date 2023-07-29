@@ -975,8 +975,12 @@ void CGameFramework::ProcessInput()
 	{
 		if (m_bFreeViewCamera == true && m_AfterDieChangeCameraSwitch == true)
 		{
-			if (pKeysBuffer[KEY_W] & 0xF0) { m_pCamera->m_xmf3Position.z -= 1.0f; }
-			if (pKeysBuffer[KEY_S] & 0xF0) { m_pCamera->m_xmf3Position.z += 1.0f; }
+			if (pKeysBuffer[KEY_W] & 0xF0) { m_pCamera->Move(XMFLOAT3(0,0,1)); }
+			if (pKeysBuffer[KEY_S] & 0xF0) { m_pCamera->Move(XMFLOAT3(0, 0,-1)); }
+			if (pKeysBuffer[KEY_A] & 0xF0) { m_pCamera->Move(XMFLOAT3(-1, 0,0)); }
+			if (pKeysBuffer[KEY_D] & 0xF0) { m_pCamera->Move(XMFLOAT3(1, 0,0)); }
+			if (pKeysBuffer[KEY_Q] & 0xF0) { m_pCamera->Move(XMFLOAT3(0,1,0)); }
+			if (pKeysBuffer[KEY_E] & 0xF0) { m_pCamera->Move(XMFLOAT3(0,-1,0)); }
 		}
 		DWORD dwDirection = 0;
 		if (!UI_Switch && !b_imdeadplayer) {
@@ -2013,11 +2017,11 @@ void CGameFramework::FrameAdvance()
 
 	if (m_nMode == SCENE1STAGE)
 	{
-		m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
-		size_t nLength = _tcslen(m_pszFrameRate);
-		XMFLOAT3 xmf3Position = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition();
-		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
-		::SetWindowText(m_hWnd, m_pszFrameRate);
+		//m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
+		//size_t nLength = _tcslen(m_pszFrameRate);
+		//XMFLOAT3 xmf3Position = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition();
+		//_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
+		//::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
 }
 
@@ -3627,6 +3631,11 @@ void CGameFramework::otherPlayerDyingMotion(int id)
 	{
 		if (((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id]))
 		{
+			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->SetPosition(XMFLOAT3(
+				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->GetPosition().x,
+				7.0f,
+				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->GetPosition().z));
+
 			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType
 				= ANIMATION_TYPE_ONCE;
 			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 8);
@@ -3648,7 +3657,7 @@ void CGameFramework::otherHeliPlayerDyingMotion()
 
 			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[2])->SetPosition(XMFLOAT3(
 				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_xmf4x4ToParent._41,
-				7.5f,
+				7.0f,
 				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_xmf4x4ToParent._43));
 		}
 	}

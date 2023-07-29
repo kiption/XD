@@ -553,7 +553,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					// 모션 전환
 					if (players_info[i].m_new_state_update) {
 						if (players_info[i].m_role == ROLE_RIFLE) {
-							switch (players_info[i].m_ingame_state) {
+							switch (players_info[i].m_ingame_state)
+							{
 							case PL_ST_IDLE:
 								gGameFramework.otherPlayerReturnToIdle(i);
 								break;
@@ -721,7 +722,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	RECT rc = { 0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT };
 	DWORD dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_BORDER;
 	AdjustWindowRect(&rc, dwStyle, FALSE);
-	HWND hMainWnd = CreateWindow(szWindowClass, L"Loading...", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
+	HWND hMainWnd = CreateWindow(szWindowClass, L"REVENGER", dwStyle, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, NULL, NULL, hInstance, NULL);
 
 	if (!hMainWnd) return(FALSE);
 
