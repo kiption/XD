@@ -212,7 +212,6 @@ void CFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		m_ppObjects[i]->SetChild(pFragmentModel, false);
 		m_ppObjects[i]->SetScale(0.5, 1.5, 0.5);
 		pFragmentModel->AddRef();
-		//ParticlePosition = m_ppObjects[i]->GetPosition();
 	}
 	for (int i = 0; i < EXPLOSION_DEBRISES; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomUnitVectorOnSphere());
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -439,9 +438,6 @@ void CHelicopterBulletMarkParticleShader::ReleaseUploadBuffers()
 
 void CHumanBulletMarkParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-
-
 	m_nObjects = BLOODEXPLOSION_DEBRISES;
 	m_ppObjects = new CGameObject * [m_nObjects];
 	CGameObject* pFragmentModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Sphere.bin", this);

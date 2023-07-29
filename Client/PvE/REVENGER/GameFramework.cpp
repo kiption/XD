@@ -889,7 +889,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				break;
 			
 			case 'Y':
-				((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Resetpartition();
+				/*((HeliPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Resetpartition();*/
 				break;
 			default:
 				break;
@@ -899,15 +899,15 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			switch (wParam)
 			{
 			case VK_CONTROL:
-				((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;
+		/*		((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;*/
 				break;
 			case VK_SPACE:
 				break;
 			case 'M':
-				m_bHeliDyingState = true;
+		/*		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_bDyingstate = true;*/
 				break;
 			case 'L':
-				((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[10])->SetActive(false);
+				//((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[10])->SetActive(false);
 				break;
 			default:
 				break;
@@ -1251,10 +1251,13 @@ void CGameFramework::AnimateObjects()
 				((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[i])->FallDown(m_GameTimer.GetTimeElapsed());
 			}
 		}
-		if (m_bHeliDyingState == true)
+
+		if (((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_bDyingstate==true
+			&& ((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]))
 		{
 			((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->FallDown(m_GameTimer.GetTimeElapsed());
 		}
+
 		if (m_ingame_role == R_RIFLE)
 			((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 		if (m_ingame_role == R_HELI)
@@ -3673,8 +3676,8 @@ void CGameFramework::otherHeliPlayerDyingMotion()
 	{
 		if (((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7]))
 		{
-			m_bHeliDyingState = true;
-
+			//m_bHeliDyingState = true;
+			((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_bDyingstate = true;
 			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[2])->m_pSkinnedAnimationController
 				->m_pAnimationTracks->m_nType = ANIMATION_TYPE_ONCE;
 			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[2])->m_pSkinnedAnimationController

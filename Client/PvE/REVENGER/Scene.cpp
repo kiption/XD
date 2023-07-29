@@ -60,6 +60,7 @@ void SceneManager::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandL
 
 	::memcpy(m_pcbMappedLights, m_pLights, sizeof(LIGHTS));
 	::memcpy(&m_pcbMappedLights->m_xmf4GlobalAmbient, &m_xmf4GlobalAmbient, sizeof(XMFLOAT4));
+
 	::memcpy(m_pcbMappedMaterials, &m_pMaterials, sizeof(MATERIALS));
 
 }
@@ -81,9 +82,8 @@ void SceneManager::ReleaseShaderVariables()
 
 void SceneManager::BuildDefaultLightsAndMaterials()
 {
-	m_nLights = 2;
-	m_pLights = new LIGHTS[m_nLights];
-	::ZeroMemory(m_pLights, sizeof(LIGHTS) * m_nLights);
+	m_pLights = new LIGHTS;
+	::ZeroMemory(m_pLights, sizeof(LIGHTS));
 
 
 	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
@@ -186,7 +186,7 @@ void SceneManager::ReleaseObjects()
 	if (m_pShadowShader)delete m_pShadowShader;
 	if (m_pSkyBox) delete m_pSkyBox;
 	ReleaseShaderVariables();
-	if (m_pLights) delete[] m_pLights;
+	if (m_pLights) delete m_pLights;
 	if (m_pMaterials) delete m_pMaterials;
 }
 

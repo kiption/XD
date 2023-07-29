@@ -827,7 +827,7 @@ CGameObject::~CGameObject()
 		}
 		delete[] m_ppMaterials;
 	}
-	if (m_pMaterials) m_pMaterials->Release();
+	//if (m_pMaterials) m_pMaterials->Release();
 	if (m_pSkinnedAnimationController) delete m_pSkinnedAnimationController;
 }
 
@@ -1047,15 +1047,6 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 		m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
 	OnPrepareRender();
-	//if (m_pShaderInfo != NULL)
-	//{
-	//	m_pShaderInfo->Render(pd3dCommandList, pCamera, 0, bPrerender);
-	//	m_pShaderInfo->UpdateShaderVariables(pd3dCommandList);
-	//	if (m_pTextureInfo != NULL)
-	//	{
-	//		m_pTextureInfo->UpdateShaderVariables(pd3dCommandList);
-	//	}
-	//}
 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 	if (m_pMesh)
@@ -1075,7 +1066,6 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 					}
 
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
-
 
 					for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
 					{
@@ -1101,15 +1091,15 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
 	OnPrepareRender();
-	if (m_pShaderInfo != NULL)
-	{
-		m_pShaderInfo->Render(pd3dCommandList, pCamera, 0, bPrerender);
-		m_pShaderInfo->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, NULL);
-		if (m_pTextureInfo != NULL)
-		{
-			m_pTextureInfo->UpdateShaderVariables(pd3dCommandList);
-		}
-	}
+	//if (m_pShaderInfo != NULL)
+	//{
+	//	m_pShaderInfo->Render(pd3dCommandList, pCamera, 0, bPrerender);
+	//	m_pShaderInfo->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, NULL);
+	//	if (m_pTextureInfo != NULL)
+	//	{
+	//		m_pTextureInfo->UpdateShaderVariables(pd3dCommandList);
+	//	}
+	//}
 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 	if (m_pMesh)
@@ -1123,7 +1113,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 					if (m_ppMaterials[i]->m_pShader) {
 
 						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, bPrerender);
-						m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, m_ppMaterials[i]);
+						//m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, m_ppMaterials[i]);
 
 						UpdateShaderVariables(pd3dCommandList);
 					}
@@ -1765,7 +1755,7 @@ void CNpcHelicopterObject::Animate(float fTimeElapsed)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "MissileObject.h"
+
 inline float RandomValue(float fMin, float fMax)
 {
 	return(fMin + ((float)rand() / (float)RAND_MAX) * (fMax - fMin));
@@ -1790,18 +1780,18 @@ CHelicopterObjects::CHelicopterObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 }
 void CHelicopterObjects::Resetpartition()
 {
-	m_pMainRotorFrame->m_xmf4x4ToParent = m_pMainRotorFrameP;
-	m_pTailRotorFrame->m_xmf4x4ToParent = m_pTailRotorFrameP;
-	m_pFrameFragObj1->m_xmf4x4ToParent = m_pFrameFragObj1P;
-	m_pFrameFragObj2->m_xmf4x4ToParent = m_pFrameFragObj2P;
-	m_pFrameFragObj3->m_xmf4x4ToParent = m_pFrameFragObj3P;
-	m_pFrameFragObj4->m_xmf4x4ToParent = m_pFrameFragObj4P;
-	m_pFrameFragObj5->m_xmf4x4ToParent = m_pFrameFragObj5P;
-	m_pFrameFragObj6->m_xmf4x4ToParent = m_pFrameFragObj6P;
-	m_pFrameFragObj7->m_xmf4x4ToParent = m_pFrameFragObj7P;
-	m_pFrameFragObj8->m_xmf4x4ToParent = m_pFrameFragObj8P;
-	m_pFrameFragObj9->m_xmf4x4ToParent = m_pFrameFragObj9P;
-	m_pFrameFragObj10->m_xmf4x4ToParent = m_pFrameFragObj10P;
+	//m_pMainRotorFrame->m_xmf4x4ToParent = m_pMainRotorFrameP;
+	//m_pTailRotorFrame->m_xmf4x4ToParent = m_pTailRotorFrameP;
+	//m_pFrameFragObj1->m_xmf4x4ToParent = m_pFrameFragObj1P;
+	//m_pFrameFragObj2->m_xmf4x4ToParent = m_pFrameFragObj2P;
+	//m_pFrameFragObj3->m_xmf4x4ToParent = m_pFrameFragObj3P;
+	//m_pFrameFragObj4->m_xmf4x4ToParent = m_pFrameFragObj4P;
+	//m_pFrameFragObj5->m_xmf4x4ToParent = m_pFrameFragObj5P;
+	//m_pFrameFragObj6->m_xmf4x4ToParent = m_pFrameFragObj6P;
+	//m_pFrameFragObj7->m_xmf4x4ToParent = m_pFrameFragObj7P;
+	//m_pFrameFragObj8->m_xmf4x4ToParent = m_pFrameFragObj8P;
+	//m_pFrameFragObj9->m_xmf4x4ToParent = m_pFrameFragObj9P;
+	//m_pFrameFragObj10->m_xmf4x4ToParent = m_pFrameFragObj10P;
 
 }
 CHelicopterObjects::~CHelicopterObjects()
@@ -1818,20 +1808,6 @@ void CHelicopterObjects::OnPrepareAnimate()
 {
 
 	CGameObject::OnPrepareAnimate();
-
-
-	//m_pMainRotorFrameP = m_pMainRotorFrame->m_xmf4x4ToParent;
-	//m_pTailRotorFrameP = m_pTailRotorFrame->m_xmf4x4ToParent;
-	//m_pFrameFragObj1P= m_pFrameFragObj1->m_xmf4x4ToParent;
-	//m_pFrameFragObj2P= m_pFrameFragObj2->m_xmf4x4ToParent;
-	//m_pFrameFragObj3P= m_pFrameFragObj3->m_xmf4x4ToParent;
-	//m_pFrameFragObj4P= m_pFrameFragObj4->m_xmf4x4ToParent;
-	//m_pFrameFragObj5P= m_pFrameFragObj5->m_xmf4x4ToParent;
-	//m_pFrameFragObj6P= m_pFrameFragObj6->m_xmf4x4ToParent;
-	//m_pFrameFragObj7P= m_pFrameFragObj7->m_xmf4x4ToParent;
-	//m_pFrameFragObj8P= m_pFrameFragObj8->m_xmf4x4ToParent;
-	//m_pFrameFragObj9P= m_pFrameFragObj9->m_xmf4x4ToParent;
-	//m_pFrameFragObj10P = m_pFrameFragObj10->m_xmf4x4ToParent;
 	m_pFrameFragObj1 = FindFrame("glass");
 	m_pFrameFragObj2 = FindFrame("cleanser");
 	m_pFrameFragObj3 = FindFrame("left_tyre");
@@ -1897,19 +1873,19 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 
 void CHelicopterObjects::FallDown(float fTimeElapsed)
 {
-	XMFLOAT3 gravity = XMFLOAT3(0.0, -1.5, 0);
+	XMFLOAT3 gravity = XMFLOAT3(0.0, -3.5, 0);
 	m_fElapsedTimes += fTimeElapsed * 1.1f;
 	
 	float FallingMaxHeight = -17.5f;
-	float staticValue = 5.3f;
+	float staticValue = 7.3f;
 	float staticValueZ = 6.3f;
-	XMVECTOR staticDir1 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.75, -0.3, 0.65, 0.0)));
-	XMVECTOR staticDir2 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.65, -0.3, 0.85, 0.0)));
-	XMVECTOR staticDir3 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.85, -0.3, 0.75, 0.0)));
-	XMVECTOR staticDir4 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.75, -0.3, -0.55, 0.0)));
-	XMVECTOR staticDir5 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.75, -0.3, -0.85, 0.0)));
-	XMVECTOR staticDir6 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.75, -0.3, 0.65, 0.0)));
-	XMVECTOR staticDir7 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.63, -0.3, -0.75, 0.0)));
+	XMVECTOR staticDir1 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.4, 0.95, 0.0)));
+	XMVECTOR staticDir2 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.95, -0.4, 0.85, 0.0)));
+	XMVECTOR staticDir3 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.4, 0.95, 0.0)));
+	XMVECTOR staticDir4 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.4, -0.95, 0.0)));
+	XMVECTOR staticDir5 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.95, -0.4, -0.85, 0.0)));
+	XMVECTOR staticDir6 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.4, 0.95, 0.0)));
+	XMVECTOR staticDir7 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.93, -0.4, -0.95, 0.0)));
 	for (int i = 0; i < 2; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir1);
 	for (int i = 2; i < 4; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir2);
 	for (int i = 4; i < 5; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir3);

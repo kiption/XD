@@ -133,7 +133,8 @@ void GameSound::PlayHeliWarnningSound()
 }
 void GameSound::PlayHealingSound()
 {
-	HealingChannel->setPaused(false);
+	result = soundSystem->playSound(HealingSounds, 0, false, &HealingChannel);
+	HealingChannel->setVolume(1.2f);
 }
 void GameSound::PlayFallDownEmptyBullet()
 {

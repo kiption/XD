@@ -70,9 +70,8 @@ Stage1::~Stage1()
 
 void Stage1::BuildDefaultLightsAndMaterials()
 {
-	m_nLights = 7;
-	m_pLights = new LIGHTS[m_nLights];
-	::ZeroMemory(m_pLights, sizeof(LIGHTS) * m_nLights);
+	m_pLights = new LIGHTS;
+	::ZeroMemory(m_pLights, sizeof(LIGHTS));
 
 
 	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -89,12 +88,12 @@ void Stage1::BuildDefaultLightsAndMaterials()
 
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 30000.0f;
+	m_pLights->m_pLights[1].m_fRange = 40000.0f;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6, 0.6, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7, 0.7, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-600, 650.0f, 1200.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.5f, -1.0f, -1.0f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-650, 700.0f, 1200.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.4f, -1.0f, -1.0f);
 
 	m_pLights->m_pLights[2].m_bEnable = true;
 	m_pLights->m_pLights[2].m_nType = SPOT_LIGHT;
@@ -411,6 +410,7 @@ void Stage1::ReleaseObjects()
 		}
 		delete[] m_pBillboardShader;
 	}
+
 	if (m_ppSpriteBillboard)
 	{
 		for (int i = 0; i < m_nSpriteBillboards; i++)
@@ -447,7 +447,7 @@ void Stage1::ReleaseObjects()
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
 	ReleaseShaderVariables();
-	if (m_pLights) delete[] m_pLights;
+	if (m_pLights) delete m_pLights;
 	if (m_pMaterials) delete m_pMaterials;
 
 }
@@ -1107,7 +1107,6 @@ void Stage1::Reflectcartridgecase(CGameObject* Objects)
 		pBulletObject->m_xmf4x4ToParent = m_pPlayer->m_xmf4x4World;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
 		xmf3FirePosition.y += 0.7f;
-		//xmf3FirePosition.z += 0.8f;
 		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->SetScale(0.05, 0.05, 0.05);
@@ -1233,6 +1232,7 @@ void Stage1::AnimateObjects(float fTimeElapsed)
 			m_bPartitionEnd = true;
 		}
 	}
+
 	NpcByPlayerCollsiion();
 	PlayerByPlayerCollision();
 

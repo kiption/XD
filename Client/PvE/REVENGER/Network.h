@@ -1003,7 +1003,16 @@ void processPacket(char* ptr)
 					if (players_info[recv_packet->id].m_role == ROLE_RIFLE)gamesound.PlayEmptyShot();
 				}*/
 			}
+		}	/*	if (recv_id < MAX_NPC_HELI)
+		{
+			gamesound.HelicollisionSound();
+			gamesound.HeliColliChannel->setVolume(0.05f);
 		}
+		if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN)
+		{
+			gamesound.HumancollisionSound();
+			gamesound.HumanColliChannel->setVolume(0.05f);
+		}*/
 		else if (recv_packet->obj_type == TARGET_NPC) {
 			//cout << "NPC[" << recv_packet->id << "]가 공격했음." << endl;
 
@@ -1014,18 +1023,42 @@ void processPacket(char* ptr)
 			npcs_info[recv_id].m_attack_on = true;
 
 			if (atk_sound_volume == VOL_LOW) {			// 멀리 있어서 작게 들리는 총성
-				gamesound.PlayNpcShotSound();
-				gamesound.NpcshootChannel->setVolume(0.05f);
+				if (recv_id < MAX_NPC_HELI)
+				{
+					gamesound.PlayHeliShotSound();
+					gamesound.HelishotChannel->setVolume(0.05f);
+				}
+				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN)
+				{
+					gamesound.PlayShotSound();
+					gamesound.shotChannel->setVolume(0.05f);
+				}
 				//cout << "작은 총성" << endl;
 			}
 			else if (atk_sound_volume == VOL_MID) {		// 적당한 거리에 있어서 적당하게 들리는 총성
-				gamesound.PlayNpcShotSound();
-				gamesound.NpcshootChannel->setVolume(0.25f);
+				if (recv_id < MAX_NPC_HELI)
+				{
+					gamesound.PlayHeliShotSound();
+					gamesound.HelishotChannel->setVolume(0.25f);
+				}
+				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN)
+				{
+					gamesound.PlayShotSound();
+					gamesound.shotChannel->setVolume(0.25f);
+				}
 				//cout << "적당한 총성" << endl;
 			}
 			else if (atk_sound_volume == VOL_HIGH) {	// 가까이에 있어서 크게 들리는 총성
-				gamesound.PlayNpcShotSound();
-				gamesound.NpcshootChannel->setVolume(0.4f);
+				if (recv_id < MAX_NPC_HELI)
+				{
+					gamesound.PlayHeliShotSound();
+					gamesound.HelishotChannel->setVolume(0.5f);
+				}
+				if (MAX_NPC_HELI <= recv_id < MAX_NPC_HUMAN)
+				{
+					gamesound.PlayShotSound();
+					gamesound.shotChannel->setVolume(0.5f);
+				}
 				//cout << "큰 총성" << endl;
 			}
 			/*else
