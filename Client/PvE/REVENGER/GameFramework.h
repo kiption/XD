@@ -410,7 +410,8 @@ public:
 	// 플레이어 상태변화
 	void HeliPlayerUnderAttack(XMFLOAT3 ToLook);
 	void MyPlayerDieMotion();
-	void FreeViewMyCamera();
+	void FreeHumanToHeliViewMyCamera();
+	void FreeHeliToHumanViewMyCamera(int id);
 	void MyPlayerRespawnMotion();
 	void OtherPlayerResponeMotion(int id);
 

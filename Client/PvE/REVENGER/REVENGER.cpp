@@ -581,7 +581,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 							case PL_ST_DEAD:
 								gGameFramework.otherHeliPlayerDyingMotion();
 								gGameFramework.b_players_dead[i] = true;
-								gGameFramework.m_bFreeViewCamera = true;
+								
 								break;
 							}
 						}
