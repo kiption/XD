@@ -144,31 +144,39 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 	gGameFramework.m_MAX_USER = MAX_USER;
 
-	// 로비 서버에 연결
-	curr_servertype = SERVER_LOBBY;
-	active_servernum = MAX_LOBBY_SERVER - 1;
-
-	lby_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-	SOCKADDR_IN lby_addr;
-	ZeroMemory(&lby_addr, sizeof(lby_addr));
-	lby_addr.sin_family = AF_INET;
-	int new_portnum = PORTNUM_LOBBY_0 + active_servernum;
-	lby_addr.sin_port = htons(new_portnum);
-	inet_pton(AF_INET, IPADDR_LOBBY1, &lby_addr.sin_addr);
-	connect(lby_socket, reinterpret_cast<sockaddr*>(&lby_addr), sizeof(lby_addr));
-
-	CLBY_CONNECT_PACKET conn_packet;
-	conn_packet.size = sizeof(CLBY_CONNECT_PACKET);
-	conn_packet.type = CLBY_CONNECT;
 	srand(time(NULL));
 	int randnum = rand() % 100;
 	string static_str = "Player";
 	string variable_str = to_string(randnum);
 	string full_name = static_str + variable_str;
-	strcpy_s(conn_packet.name, full_name.c_str());
 
-	sendPacket(&conn_packet);
-	recvPacket();
+	// 로비 서버에 연결
+	curr_servertype = SERVER_LOBBY;
+	for (int i = 0; i < MAX_LOBBY_SERVER; ++i) {
+		// 모든 로비서버에 일단 접속은 해놓는다. (이후에 실제 데이터를 주고받는 것은 Active 서버와만 한다.
+		active_servernum = i;
+
+		lby_socket[i] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+		SOCKADDR_IN lby_addr;
+		ZeroMemory(&lby_addr, sizeof(lby_addr));
+		lby_addr.sin_family = AF_INET;
+		int new_portnum = PORTNUM_LOBBY_0 + i;
+		lby_addr.sin_port = htons(new_portnum);
+		if (i == 0)
+			inet_pton(AF_INET, IPADDR_LOBBY0, &lby_addr.sin_addr);
+		else
+			inet_pton(AF_INET, IPADDR_LOBBY1, &lby_addr.sin_addr);
+		connect(lby_socket[i], reinterpret_cast<sockaddr*>(&lby_addr), sizeof(lby_addr));
+
+		CLBY_CONNECT_PACKET conn_packet;
+		conn_packet.size = sizeof(CLBY_CONNECT_PACKET);
+		conn_packet.type = CLBY_CONNECT;
+		strcpy_s(conn_packet.name, full_name.c_str());
+
+		sendPacket(&conn_packet);
+		recvPacket();
+	}
+	active_servernum = MAX_LOBBY_SERVER - 1;	// 가장 오른쪽 서버가 Active서버이다.
 
 	// 스레드 생성
 	thread networkThread(networkThreadFunc);
@@ -373,27 +381,34 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 						// 로직 서버에 연결
 						curr_servertype = SERVER_LOGIC;
+						for (int i = 0; i < MAX_LOBBY_SERVER; ++i) {
+							// 모든 로비서버에 일단 접속은 해놓는다. (이후에 실제 데이터를 주고받는 것은 Active 서버와만 한다.
+							active_servernum = i;
+
+							lgc_socket[i] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+							SOCKADDR_IN server0_addr;
+							ZeroMemory(&server0_addr, sizeof(server0_addr));
+							server0_addr.sin_family = AF_INET;
+							int new_portnum = PORTNUM_LOGIC_0 + i;
+							server0_addr.sin_port = htons(new_portnum);
+							//inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);// 루프백
+							if (i == 0)
+								inet_pton(AF_INET, IPADDR_LOGIC0, &server0_addr.sin_addr);
+							else
+								inet_pton(AF_INET, IPADDR_LOGIC1, &server0_addr.sin_addr);
+							connect(lgc_socket[i], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
+
+							CS_LOGIN_PACKET login_pack;
+							login_pack.size = sizeof(CS_LOGIN_PACKET);
+							login_pack.type = CS_LOGIN;
+							strcpy_s(login_pack.name, full_name.c_str());
+							login_pack.role = players_info[my_id].m_role;
+							login_pack.inroom_index = my_id;
+							login_pack.room_id = curr_room_id;
+							sendPacket(&login_pack);
+							recvPacket();
+						}
 						active_servernum = MAX_LOGIC_SERVER - 1;
-
-						lgc_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-						SOCKADDR_IN server0_addr;
-						ZeroMemory(&server0_addr, sizeof(server0_addr));
-						server0_addr.sin_family = AF_INET;
-						int new_portnum = PORTNUM_LOGIC_0 + active_servernum;
-						server0_addr.sin_port = htons(new_portnum);
-						//inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);// 루프백
-						inet_pton(AF_INET, IPADDR_LOGIC1, &server0_addr.sin_addr);
-						connect(lgc_socket, reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
-
-						CS_LOGIN_PACKET login_pack;
-						login_pack.size = sizeof(CS_LOGIN_PACKET);
-						login_pack.type = CS_LOGIN;
-						strcpy_s(login_pack.name, full_name.c_str());
-						login_pack.role = players_info[my_id].m_role;
-						login_pack.inroom_index = my_id;
-						login_pack.room_id = curr_room_id;
-						sendPacket(&login_pack);
-						recvPacket();
 
 						stage1_enter_ok = false;
 						gGameFramework.m_Max_NPCs = MAX_NPCS;

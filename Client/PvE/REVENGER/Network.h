@@ -22,9 +22,8 @@ char IPADDR_LOBBY1[16];
 char IPADDR_LOGIC0[16];
 char IPADDR_LOGIC1[16];
 
-SOCKET lgn_socket;	// 로그인서버 소켓
-SOCKET lby_socket;	// 로비서버 소켓
-SOCKET lgc_socket;	// 로직서버 소켓
+SOCKET lby_socket[MAX_LOBBY_SERVER];	// 로비서버 소켓
+SOCKET lgc_socket[MAX_LOGIC_SERVER];	// 로직서버 소켓
 
 //==================================================
 int my_id;
@@ -150,7 +149,7 @@ public:
 void disconnect() {
 	curr_servertype = -1;
 	active_servernum = -1;
-	lby_socket = 0;
+	lby_socket[active_servernum] = 0;
 }
 
 void CALLBACK recvCallback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED lp_over, DWORD s_flag);
@@ -169,13 +168,13 @@ void recvPacket()
 	case SERVER_LOGIN:
 		break;
 	case SERVER_LOBBY:
-		if (WSARecv(lby_socket, &g_recv_over.wsabuf, 1, 0, &recv_flag, &g_recv_over.overlapped, recvCallback) == SOCKET_ERROR) {
+		if (WSARecv(lby_socket[active_servernum], &g_recv_over.wsabuf, 1, 0, &recv_flag, &g_recv_over.overlapped, recvCallback) == SOCKET_ERROR) {
 			if (GetLastError() != WSA_IO_PENDING)
 				cout << "[WSARecv Error] code: " << GetLastError() << "\n" << endl;
 		}
 		break;
 	case SERVER_LOGIC:
-		if (WSARecv(lgc_socket, &g_recv_over.wsabuf, 1, 0, &recv_flag, &g_recv_over.overlapped, recvCallback) == SOCKET_ERROR) {
+		if (WSARecv(lgc_socket[active_servernum], &g_recv_over.wsabuf, 1, 0, &recv_flag, &g_recv_over.overlapped, recvCallback) == SOCKET_ERROR) {
 			if (GetLastError() != WSA_IO_PENDING)
 				cout << "[WSARecv Error] code: " << GetLastError() << "\n" << endl;
 		}
@@ -191,37 +190,19 @@ void sendPacket(void* packet)
 	case SERVER_LOGIN:
 		break;
 	case SERVER_LOBBY:
-		if (WSASend(lby_socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback) == SOCKET_ERROR) {
+		if (WSASend(lby_socket[active_servernum], &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback) == SOCKET_ERROR) {
 			int err_no = GetLastError();
 			if (err_no == WSAECONNRESET) {   // 서버가 끊어진 상황
-				closesocket(lby_socket);
+				closesocket(lby_socket[active_servernum]);
 
 				int new_portnum = 0;
 				if (active_servernum == 0) {		// Active: 0 -> 1
 					active_servernum = 1;
-					new_portnum = PORTNUM_LOBBY_1;
 				}
 				else if (active_servernum == 1) {	// Active: 1 -> 0
 					active_servernum = 0;
-					new_portnum = PORTNUM_LOBBY_0;
 				}
-				cout << "새 포트번호: " << new_portnum << endl;
-
-				lby_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-				SOCKADDR_IN newserver_addr;
-				ZeroMemory(&newserver_addr, sizeof(newserver_addr));
-				newserver_addr.sin_family = AF_INET;
-				newserver_addr.sin_port = htons(new_portnum);
-				//inet_pton(AF_INET, SERVER_ADDR, &newserver_addr.sin_addr);//루프백
-
-				// REMOTE
-				if (active_servernum == 0) {
-					inet_pton(AF_INET, IPADDR_LOGIC0, &newserver_addr.sin_addr);
-				}
-				else if (active_servernum == 1) {
-					inet_pton(AF_INET, IPADDR_LOGIC1, &newserver_addr.sin_addr);
-				}
-				connect(lby_socket, reinterpret_cast<sockaddr*>(&newserver_addr), sizeof(newserver_addr));
+				cout << "[Failover] 서버[" << active_servernum << "]로 전환." << endl;
 
 				CS_RELOGIN_PACKET re_login_pack;
 				re_login_pack.size = sizeof(CS_RELOGIN_PACKET);
@@ -234,10 +215,10 @@ void sendPacket(void* packet)
 		}
 		break;
 	case SERVER_LOGIC:
-		if (WSASend(lgc_socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback) == SOCKET_ERROR) {
+		if (WSASend(lgc_socket[active_servernum], &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, sendCallback) == SOCKET_ERROR) {
 			int err_no = GetLastError();
 			if (err_no == WSAECONNRESET) {   // 서버가 끊어진 상황
-				closesocket(lgc_socket);
+				closesocket(lgc_socket[active_servernum]);
 
 				int new_portnum = 0;
 				if (active_servernum == 0) {		// Active: 0 -> 1
@@ -249,7 +230,7 @@ void sendPacket(void* packet)
 					new_portnum = PORTNUM_LOGIC_0;
 				}
 
-				lgc_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+				lgc_socket[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 				SOCKADDR_IN newserver_addr;
 				ZeroMemory(&newserver_addr, sizeof(newserver_addr));
 				newserver_addr.sin_family = AF_INET;
@@ -263,7 +244,7 @@ void sendPacket(void* packet)
 				else if (active_servernum == 1) {
 					inet_pton(AF_INET, IPADDR_LOGIC1, &newserver_addr.sin_addr);
 				}
-				connect(lby_socket, reinterpret_cast<sockaddr*>(&newserver_addr), sizeof(newserver_addr));
+				connect(lby_socket[active_servernum], reinterpret_cast<sockaddr*>(&newserver_addr), sizeof(newserver_addr));
 
 				CS_RELOGIN_PACKET re_login_pack;
 				re_login_pack.size = sizeof(CS_RELOGIN_PACKET);

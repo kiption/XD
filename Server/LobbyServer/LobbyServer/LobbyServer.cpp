@@ -325,7 +325,11 @@ void process_packet(int client_id, char* packet)
 	{
 		CLBY_CONNECT_PACKET* recv_packet = reinterpret_cast<CLBY_CONNECT_PACKET*>(packet);
 		strcpy_s(clients[client_id].name, recv_packet->name);
-		cout << "새로운 클라이언트가 접속하였습니다. (ID: " << client_id << ", Name: " << clients[client_id].name << " )\n" << endl;
+		if (b_active_server)
+			cout << "새로운 클라이언트가 접속하였습니다. (ID: " << client_id << ", Name: " << clients[client_id].name << " )\n" << endl;
+		else
+			cout << "새로운 클라이언트(Name: " << clients[client_id].name << ")가 접속하였으나, 대기 서버이므로 실제 통신은 하지않습니다.\n" << endl;
+
 
 		LBYC_UNIQUE_ID_PACKET unique_id_packet;
 		unique_id_packet.size = sizeof(LBYC_UNIQUE_ID_PACKET);
