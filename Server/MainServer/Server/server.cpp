@@ -173,7 +173,6 @@ public:
 	int hp;
 	int remain_bullet;
 	XMFLOAT3 pos;									// Position (x, y, z)
-	float pitch, yaw, roll;							// Rotated Degree
 	XMFLOAT3 m_rightvec, m_upvec, m_lookvec;		// 현재 Look, Right, Up Vectors
 	XMFLOAT3 m_cam_lookvec;							// 카메라 룩벡터 (조준을 여기에 하고 있음)
 
@@ -208,7 +207,6 @@ public:
 		hp = 0;
 		remain_bullet = 0;
 		pos = { 0.0f, 0.0f, 0.0f };
-		pitch = yaw = roll = 0.0f;
 		m_rightvec = { 1.0f, 0.0f, 0.0f };
 		m_upvec = { 0.0f, 1.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 1.0f };
@@ -275,7 +273,6 @@ public:
 		hp = 0;
 		remain_bullet = 0;
 		pos = { 0.0f, 0.0f, 0.0f };
-		pitch = yaw = roll = 0.0f;
 		m_rightvec = { 1.0f, 0.0f, 0.0f };
 		m_upvec = { 0.0f, 1.0f, 0.0f };
 		m_lookvec = { 0.0f, 0.0f, 1.0f };
@@ -1131,7 +1128,7 @@ void process_packet(int client_id, char* packet)
 		clients[client_id].setBB();
 		clients[client_id].pl_state = cl_move_packet->direction + 1;	// MV_FRONT = 0, MV_BACK = 1, MV_SIDE = 2; PL_ST_MOVE_FRONT = 1, PL_ST_MOVE_BACK = 2, PL_ST_MOVE_SIDE = 3;
 		if (clients[client_id].role == ROLE_HELI) {
-			if (clients[client_id].height_alert && clients[client_id].pos.y > 30.0f) {	// 경보가 울리고 있다가 고도가 일정 높이 이상 올라오면 경보를 해제한다.
+			if (clients[client_id].height_alert && clients[client_id].pos.y > 23.0f) {	// 경보가 울리고 있다가 고도가 일정 높이 이상 올라오면 경보를 해제한다.
 				clients[client_id].height_alert = false;
 				SC_HEIGHT_ALERT_PACKET alert_cancel_packet;
 				alert_cancel_packet.size = sizeof(SC_HEIGHT_ALERT_PACKET);
@@ -1139,7 +1136,7 @@ void process_packet(int client_id, char* packet)
 				alert_cancel_packet.alert_on = 0;
 				clients[client_id].do_send(&alert_cancel_packet);
 			}
-			else if (!clients[client_id].height_alert && clients[client_id].pos.y <= 30.0f) {	// 고도가 일정 높이 미만 내려가면 경보를 울린다.
+			else if (!clients[client_id].height_alert && clients[client_id].pos.y <= 23.0f) {	// 고도가 일정 높이 미만 내려가면 경보를 울린다.
 				clients[client_id].height_alert = true;
 				SC_HEIGHT_ALERT_PACKET alert_start_packet;
 				alert_start_packet.size = sizeof(SC_HEIGHT_ALERT_PACKET);
@@ -2273,40 +2270,103 @@ void process_packet(int client_id, char* packet)
 		}
 		break;
 	}// SS_HEARTBEAT end
-	case SS_DATA_REPLICA:
+	case SS_USER_REPLICA:
 	{
-		SS_DATA_REPLICA_PACKET* replica_pack = reinterpret_cast<SS_DATA_REPLICA_PACKET*>(packet);
+		SS_USER_REPLICA_PACKET* replica_pack = reinterpret_cast<SS_USER_REPLICA_PACKET*>(packet);
+		int replica_id = replica_pack->inserver_index;
 
-		int replica_id = replica_pack->id;
+		// 1. 패킷에서 받은 값으로 설정
 		clients[replica_id].s_lock.lock();
-		clients[replica_id].id = replica_id;
-		clients[replica_id].s_state = ST_FREE;
+
+		clients[replica_id].id = replica_pack->id;
+		clients[replica_id].inserver_index = replica_pack->inserver_index;
+		clients[replica_id].curr_stage = replica_pack->curr_stage;
+		clients[replica_id].role = replica_pack->role;
+		clients[replica_id].hp = replica_pack->hp;
+		clients[replica_id].pl_state = replica_pack->state;
+		clients[replica_id].remain_bullet = replica_pack->remain_bullet;
 		strcpy_s(clients[replica_id].name, replica_pack->name);
 
 		clients[replica_id].pos = { replica_pack->x, replica_pack->y, replica_pack->z };
-
 		clients[replica_id].m_rightvec = { replica_pack->right_x, replica_pack->right_y, replica_pack->right_z };
 		clients[replica_id].m_upvec = { replica_pack->up_x, replica_pack->up_y, replica_pack->up_z };
-		clients[replica_id].m_lookvec = { replica_pack->look_x, replica_pack->look_y, replica_pack->look_z };
+		clients[replica_id].m_lookvec = { replica_pack->look_x,	replica_pack->look_y, replica_pack->look_z };
+		clients[replica_id].m_cam_lookvec = { replica_pack->cam_lookvec_x, replica_pack->cam_lookvec_y, replica_pack->cam_lookvec_z };
 
-		clients[replica_id].pl_state = replica_pack->state;
-		clients[replica_id].hp = replica_pack->hp;
-		clients[replica_id].remain_bullet = replica_pack->bullet_cnt;
-		clients[replica_id].curr_stage = replica_pack->curr_stage;
-
+		// 2. 패킷에 있는 것과 관련된 것들 설정
+		clients[replica_id].setBB();
+		if (clients[replica_id].role == ROLE_HELI) {
+			if (clients[replica_id].pos.y > 23.0f) {	// 경보가 울리고 있다가 고도가 일정 높이 이상 올라오면 경보를 해제한다.
+				clients[replica_id].height_alert = false;
+			}
+			else {
+				clients[replica_id].height_alert = true;
+			}
+		}
+		clients[replica_id].update_viewlist();
+		clients[replica_id].oneshot_onekill_cheat = false;
+		clients[replica_id].immortal_cheat = false;
+		clients[replica_id].shoot_time = system_clock::now();
+		clients[replica_id].reload_time = system_clock::now();
 		clients[replica_id].s_lock.unlock();
 
-		cout << "Client[" << replica_id << "]의 데이터가 복제되었습니다." << endl;
+		// Debug
 		cout << "===================================" << endl;
-		cout << "Name: " << clients[replica_id].name << endl;
+		cout << "Client[ID: " << replica_id << "Name: " << clients[replica_id].name << "]의 데이터가 복제되었습니다." << endl;
 		cout << "Stage: " << clients[replica_id].curr_stage << endl;
+		cout << "Role: " << static_cast<int>(clients[replica_id].role) << endl;
+		cout << "HP: " << clients[replica_id].hp << endl;
+		cout << "Bullet: " << clients[replica_id].remain_bullet << endl;
 		cout << "State: " << clients[replica_id].pl_state << endl;
 		cout << "Pos: " << clients[replica_id].pos.x << ", " << clients[replica_id].pos.y << ", " << clients[replica_id].pos.z << endl;
 		cout << "LookVec: " << clients[replica_id].m_lookvec.x << ", " << clients[replica_id].m_lookvec.y << ", " << clients[replica_id].m_lookvec.z << endl;
-		cout << "STime: " << replica_pack->curr_stage << "ms." << endl;
 		cout << "===================================\n" << endl;
+
 		break;
-	}// SS_DATA_REPLICA end
+	}// SS_USER_REPLICA end
+	case SS_GAME_REPLICA:
+	{
+		SS_GAME_REPLICA_PACKET* replica_pack = reinterpret_cast<SS_GAME_REPLICA_PACKET*>(packet);
+
+		g_curr_servertime = milliseconds(replica_pack->curr_servertime);
+		//g_s_start_time = time_point<system_clock>(milliseconds(replica_pack->s_start_time));
+		g_s_start_time = std::chrono::system_clock::time_point(std::chrono::milliseconds(replica_pack->s_start_time));
+
+		curr_mission_stage[0] = replica_pack->curr_mission_stage[0];
+		curr_mission_stage[1] = replica_pack->curr_mission_stage[1];
+		stage1_missions[0].curr = replica_pack->missions_curr[0];
+		stage1_missions[1].curr = replica_pack->missions_curr[1];
+		stage1_missions[0].start = replica_pack->missions_start[0];
+		stage1_missions[1].start = replica_pack->missions_start[1];
+
+		for (int i = 0; i < 8; ++i) {
+			if (replica_pack->healpack_isused[i] == 0)
+				g_healpacks[i].is_used = false;
+			else
+				g_healpacks[i].is_used = true;
+
+			g_healpacks[i].used_time = system_clock::now();
+		}
+
+		// Debug
+		cout << "===================================" << endl;
+		cout << "게임 세부 데이터가 복제되었습니다." << endl;
+		cout << "서버 시작시간: " << static_cast<int>(g_s_start_time.time_since_epoch().count()) << endl;
+		cout << "현재 서버시간: " << g_curr_servertime << endl;
+		cout << "현재 미션: " << curr_mission_stage[1] << endl;
+		cout << "미션 0 - 시작: " << stage1_missions[0].start << ", 진행: " << stage1_missions[0].curr << endl;
+		cout << "미션 0 - 시작: " << stage1_missions[1].start << ", 진행: " << stage1_missions[1].curr << endl;
+		cout << "힐팩: ";
+		for (int i = 0; i < 8; ++i) {
+			if (g_healpacks[i].is_used)
+				cout << "Used ";
+			else
+				cout << "NotUsed ";
+		}
+		cout << "===================================\n" << endl;
+		
+		break;
+	}// SS_GAME_REPLICA end
 	case NPC_FULL_INFO:
 	{
 		NPC_FULL_INFO_PACKET* npc_info_pack = reinterpret_cast<NPC_FULL_INFO_PACKET*>(packet);
@@ -3196,7 +3256,7 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 			if (extended_servers[my_server_id - 1].s_state == ST_ACCEPTED) {
 				if (chrono::system_clock::now() > extended_servers[my_server_id - 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
 					cout << "Server[" << my_server_id - 1 << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
-					disconnect(my_server_id - 1, SESSION_EXTENDED_SERVER);
+					//disconnect(my_server_id - 1, SESSION_EXTENDED_SERVER);
 				}
 			}
 		}
@@ -3205,7 +3265,7 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 			if (extended_servers[my_server_id + 1].s_state == ST_ACCEPTED) {
 				if (chrono::system_clock::now() > extended_servers[my_server_id + 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
 					cout << "Server[" << my_server_id + 1 << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
-					disconnect(my_server_id + 1, SESSION_EXTENDED_SERVER);
+					//disconnect(my_server_id + 1, SESSION_EXTENDED_SERVER);
 				}
 			}
 		}
@@ -3221,17 +3281,23 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 				standby_id = 0;
 
 			if (extended_servers[standby_id].s_state == ST_ACCEPTED) {
+				// 1. 유저 정보 복제
 				for (auto& cl : clients) {
 					if (cl.s_state != ST_INGAME) continue;
 					if (cl.curr_stage == 0) continue;
 
-					SS_DATA_REPLICA_PACKET replica_pack;
-					replica_pack.type = SS_DATA_REPLICA;
-					replica_pack.size = sizeof(SS_DATA_REPLICA_PACKET);
+					SS_USER_REPLICA_PACKET replica_pack;
+					replica_pack.type = SS_USER_REPLICA;
+					replica_pack.size = sizeof(SS_USER_REPLICA_PACKET);
 
-					replica_pack.target = TARGET_PLAYER;
 					replica_pack.id = cl.id;
+					replica_pack.inserver_index = cl.inserver_index;
 					strcpy_s(replica_pack.name, cl.name);
+					replica_pack.curr_stage = cl.curr_stage;
+					replica_pack.hp = cl.hp;
+					replica_pack.role = cl.role;
+					replica_pack.remain_bullet = cl.remain_bullet;
+					replica_pack.state = cl.pl_state;
 
 					replica_pack.x = cl.pos.x;
 					replica_pack.y = cl.pos.y;
@@ -3240,27 +3306,64 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 					replica_pack.right_x = cl.m_rightvec.x;
 					replica_pack.right_y = cl.m_rightvec.y;
 					replica_pack.right_z = cl.m_rightvec.z;
-
 					replica_pack.up_x = cl.m_upvec.x;
 					replica_pack.up_y = cl.m_upvec.y;
 					replica_pack.up_z = cl.m_upvec.z;
-
 					replica_pack.look_x = cl.m_lookvec.x;
 					replica_pack.look_y = cl.m_lookvec.y;
 					replica_pack.look_z = cl.m_lookvec.z;
-
-					replica_pack.state = cl.pl_state;
-					replica_pack.hp = cl.hp;
-					replica_pack.bullet_cnt = cl.remain_bullet;
-					replica_pack.curr_stage = cl.curr_stage;
-
+					replica_pack.cam_lookvec_x = cl.m_cam_lookvec.x;
+					replica_pack.cam_lookvec_y = cl.m_cam_lookvec.y;
+					replica_pack.cam_lookvec_z = cl.m_cam_lookvec.z;
+					
 					extended_servers[standby_id].do_send(&replica_pack);
 
-					cout << "[REPLICA TEST] Client[" << cl.id << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다. - line: 1413" << endl;
-					cout << "Stage: " << replica_pack.curr_stage << ", State: " << replica_pack.state
-						<< ", Pos: " << replica_pack.x << ", " << replica_pack.y << ", " << replica_pack.z
-						<< ", Look: " << replica_pack.look_x << ", " << replica_pack.look_y << ", " << replica_pack.look_z << "\n" << endl;
+					cout << "[REPLICA TEST] Client[ID: " << replica_pack.id << ", Name: " << replica_pack.name << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다." << endl;
+					cout << "Stage: " << replica_pack.curr_stage << ", Role: " << static_cast<int>(replica_pack.role) << endl;
+					cout << "HP: " << replica_pack.hp << ", State: " << replica_pack.state << ", Bullet: " << replica_pack.remain_bullet << endl;
+					cout << "Pos: " << replica_pack.x << ", " << replica_pack.y << ", " << replica_pack.z << endl;
+					cout << "Look: " << replica_pack.look_x << ", " << replica_pack.look_y << ", " << replica_pack.look_z << "\n" << endl;
 				}
+
+				// 2. 게임 정보 복제
+				SS_GAME_REPLICA_PACKET game_replica_pack;
+				game_replica_pack.size = sizeof(SS_GAME_REPLICA_PACKET);
+				game_replica_pack.type = SS_GAME_REPLICA;
+				auto start_ms = g_s_start_time.time_since_epoch().count();
+				game_replica_pack.s_start_time = static_cast<unsigned int>(start_ms);
+				game_replica_pack.curr_servertime = static_cast<int>(g_curr_servertime.count());
+
+				game_replica_pack.curr_mission_stage[0] = curr_mission_stage[0];
+				game_replica_pack.curr_mission_stage[1] = curr_mission_stage[1];
+				game_replica_pack.missions_curr[0] = stage1_missions[0].curr;
+				game_replica_pack.missions_curr[1] = stage1_missions[1].curr;
+				game_replica_pack.missions_start[0] = stage1_missions[0].start;
+				game_replica_pack.missions_start[1] = stage1_missions[0].start;
+
+				for (int i = 0; i < 8; ++i) {
+					if (!g_healpacks[i].is_used)
+						game_replica_pack.healpack_isused[i] = 0;
+					else 
+						game_replica_pack.healpack_isused[i] = 1;
+					game_replica_pack.healpack_usedtime[i] = static_cast<int>(g_healpacks[i].used_time.time_since_epoch().count());
+				}
+
+				extended_servers[standby_id].do_send(&game_replica_pack);
+
+				cout << "[REPLICA TEST] 게임 정보를 Sever[" << standby_id << "]에게 전달합니다." << endl;
+				cout << "서버 시작시간: " << game_replica_pack.s_start_time << endl;
+				cout << "현재 서버시간: " << game_replica_pack.curr_servertime << endl;
+				cout << "현재 미션: " << game_replica_pack.curr_mission_stage[1] << endl;
+				cout << "미션 0 - 시작: " << game_replica_pack.missions_start[0] << ", 진행: " << game_replica_pack.missions_curr[0] << endl;
+				cout << "미션 1 - 시작: " << game_replica_pack.missions_start[1] << ", 진행: " << game_replica_pack.missions_curr[1] << endl;
+				cout << "힐팩: ";
+				for (int i = 0; i < 8; ++i) {
+					if (game_replica_pack.healpack_isused[i] == 0)
+						cout << "NotUsed ";
+					else
+						cout << "Used ";
+				}
+				cout << "\n" << endl;
 			}
 		}
 

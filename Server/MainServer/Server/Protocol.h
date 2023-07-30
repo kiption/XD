@@ -98,7 +98,7 @@ enum PacketID {
 	, SC_LOGIN_INFO, SC_ADD_OBJECT, SC_REMOVE_OBJECT, SC_MOVE_OBJECT, SC_ROTATE_OBJECT, SC_MOVE_ROTATE_OBJECT, SC_HEIGHT_ALERT
 	, SC_DAMAGED, SC_HEALING, SC_HEALPACK, SC_ATTACK, SC_RELOAD, SC_CHANGE_SCENE, SC_OBJECT_STATE, SC_TIMEOUT, SC_BULLET_COLLIDE_POS, SC_MISSION, SC_MISSION_COMPLETE
 	, SC_TIME_TICKING, SC_CHAT, SC_MAP_OBJINFO, SC_PING_RETURN, SC_ACTIVE_DOWN, SC_STANDBY_RUN, SC_RESET_GAME
-	, SS_CONNECT, SS_HEARTBEAT, SS_DATA_REPLICA
+	, SS_CONNECT, SS_HEARTBEAT, SS_USER_REPLICA, SS_GAME_REPLICA
 	, NPC_FULL_INFO, NPC_MOVE, NPC_ROTATE, NPC_CHECK_POS, NPC_REMOVE, NPC_ATTACK, NPC_CHANGE_STATE
 };
 
@@ -649,20 +649,34 @@ struct SS_HEARTBEAT_PACKET {
 	short sender_id;
 };
 
-struct SS_DATA_REPLICA_PACKET {
+struct SS_USER_REPLICA_PACKET {
 	unsigned char size;
 	char type;
-	short target;
+	short inserver_index;
 	short id;
 	char name[NAME_SIZE];
+	char role;
 	float x, y, z;
 	float right_x, right_y, right_z;
 	float up_x, up_y, up_z;
 	float look_x, look_y, look_z;
+	float cam_lookvec_x, cam_lookvec_y, cam_lookvec_z;
 	short state;
 	short hp;
-	short bullet_cnt;
+	short remain_bullet;
 	short curr_stage;
+};
+
+struct SS_GAME_REPLICA_PACKET {
+	unsigned char size;
+	char type;
+	unsigned int s_start_time;
+	int curr_servertime;
+	int curr_mission_stage[2];
+	float missions_curr[2];
+	int missions_start[2];
+	char healpack_isused[8];
+	int healpack_usedtime[8];
 };
 
 
