@@ -258,13 +258,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// 원격으로 모든 서버를 실행한다.
 	// 서버매니저는 외부 실행(exe 실행)만 고려하여 제작되었다. 제작과정에서의 테스트를 하고싶다면 모든 서버의 실행파일을 Servers 디렉토리로 가져와야한다.
-	//ShellExecute(NULL, L"open", L"Server.exe", L"1", L"./Servers", SW_SHOW);
-	//ShellExecute(NULL, L"open", L"LobbyServer.exe", L"1", L"./Servers", SW_SHOW);
-	//ShellExecute(NULL, L"open", L"NpcServer.exe", L"1", L"./Servers", SW_SHOW);
+	ShellExecute(NULL, L"open", L"Server.exe", L"1", L"./Servers", SW_SHOW);
+	ShellExecute(NULL, L"open", L"LobbyServer.exe", L"1", L"./Servers", SW_SHOW);
+	ShellExecute(NULL, L"open", L"NpcServer.exe", L"1", L"./Servers", SW_SHOW);
 
-	//Sleep(100);
-	//ShellExecute(NULL, L"open", L"Server.exe", L"0", L"./Servers", SW_SHOW);
-	//ShellExecute(NULL, L"open", L"LobbyServer.exe", L"0", L"./Servers", SW_SHOW);
+	Sleep(100);
+	ShellExecute(NULL, L"open", L"Server.exe", L"0", L"./Servers", SW_SHOW);
+	ShellExecute(NULL, L"open", L"LobbyServer.exe", L"0", L"./Servers", SW_SHOW);
 
 	// Dialog 실행
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, DlgProc);

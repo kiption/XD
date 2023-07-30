@@ -2175,7 +2175,7 @@ void process_packet(int client_id, char* packet)
 		if (clients[client_id].immortal_cheat) break;	// 무적은 충돌X
 		
 		// 데미지 계산
-		int damage = static_cast<int>(HUMAN_MAXHP / 3) + 1;
+		int damage = static_cast<int>(HUMAN_MAXHP / 10) + 1;
 		int after_hp = clients[client_id].hp - damage;
 
 		// 우선 NPC서버에게 플레이어 데미지 정보를 보내줍니다.
