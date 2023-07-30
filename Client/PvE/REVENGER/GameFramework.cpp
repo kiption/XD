@@ -483,7 +483,6 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	{
 		::GetCursorPos(&m_ptOldCursorPos);
 		if (m_nMode == OPENINGSCENE) {
-			cout << "x: " << m_ptOldCursorPos.x << ", y: " << m_ptOldCursorPos.y << endl;
 			switch (m_LoginScene)
 			{
 			case LS_OPENING: // 게임 시작, 종료 
@@ -1832,7 +1831,7 @@ void CGameFramework::FrameAdvance()
 			m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[66], &D2_DyingBannerUI, &D2_DyingBanner);
 		}
 
-		if (m_missionClear && !m_missionFailed && !m_spendYourlife) {
+		if (m_missionClear && !m_missionFailed) {
 			if (m_printTime < 120) {
 				D2D_POINT_2F D2_MissionclearedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 163.0f };
 				D2D_RECT_F D2_MissionclearedBGUIRect = { 0.0f, 0.0f, m_missionClearUI * 19.6f, 326.0f };
@@ -1856,7 +1855,7 @@ void CGameFramework::FrameAdvance()
 				}
 			}
 		}
-		if (m_missionFailed && !m_missionClear && !m_spendYourlife) {
+		if (m_missionFailed && !m_missionClear) {
 			if (m_printTime < 120) {
 				D2D_POINT_2F D2_MissionFailedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 181.5f };
 				D2D_RECT_F D2_MissionFailedBGUIRect = { 0.0f, 0.0f, m_missionFailedUI * 19.6f, 363.0f };

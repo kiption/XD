@@ -1264,7 +1264,7 @@ void uiThreadFunc() {
 			gGameFramework.m_10SecOftime = (timelimit_sec - gGameFramework.m_1MinOfTime * 60) / 10;
 			gGameFramework.m_1SecOfTime = timelimit_sec % 10;
 
-			if (!gGameFramework.m_missionClear && b_startTime && !b_gameover) {
+			if (!gGameFramework.m_missionClear && b_startTime) {
 				if (timelimit_sec <= 0) {
 					gGameFramework.m_missionFailed = true;
 					gGameFramework.m_missionClear = false;

@@ -117,7 +117,6 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 				string num = to_string(i + 1);
 				filename += num;
 				filename += ").bin";
-				cout << filename << endl;
 				char* c_filename = const_cast<char*>(filename.c_str());
 				CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, c_filename, NULL);
 
