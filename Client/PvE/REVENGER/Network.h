@@ -211,7 +211,8 @@ void sendPacket(void* packet)
 				sendPacket(&re_login_pack);
 				recvPacket();
 			}
-			cout << "[WSASend Error] code: " << err_no << "\n" << endl;
+			else
+				cout << "[WSASend Error] code: " << err_no << "\n" << endl;
 		}
 		break;
 	case SERVER_LOGIC:
@@ -253,7 +254,8 @@ void sendPacket(void* packet)
 				sendPacket(&re_login_pack);
 				recvPacket();
 			}
-			cout << "[WSASend Error] code: " << err_no << "\n" << endl;
+			else
+				cout << "[WSASend Error] code: " << err_no << "\n" << endl;
 		}
 		break;
 	}
