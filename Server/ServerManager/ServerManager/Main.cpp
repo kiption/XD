@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS // 구형 C 함수 사용 시 경고 끄기
+#define _WINSOCK_DEPRECATED_NO_WARNINGS // 구형 소켓 API 사용 시 경고 끄기
 #include <iostream>
 #include <WS2tcpip.h>
 #include <MSWSock.h>
@@ -220,16 +222,33 @@ void process_packet(int server_id, char* packet)
 	}
 }
 
+
 //==================================================
 // Dialog
 INT_PTR CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM); // 대화상자 프로시저
 
-HWND hServerStatus[6];					// 서버상태
-HWND hServerName[6];					// 서버이름
-HWND hServerPort[6];					// 서버이름
+HWND hServerStatus[4];					// 서버상태
+HWND hServerName[4];					// 서버이름
+HWND hServerPort[4];					// 서버이름
+
+HBRUSH hbrBkgnd;
 
 constexpr int nameMsgSize = 7;			// 윈도우에 띄울 메시지 길이
 constexpr int portMsgSize = 6;
+
+constexpr int MSGSIZE = 512;
+void DisplayText(HWND handle, const char* fmt, ...)
+{
+	va_list arg;
+	va_start(arg, fmt);
+	char cbuf[MSGSIZE * 2];
+	vsprintf(cbuf, fmt, arg);
+	va_end(arg);
+
+	int nLength = GetWindowTextLength(handle);
+	SendMessage(handle, EM_SETSEL, nLength, nLength);
+	SendMessageA(handle, EM_REPLACESEL, FALSE, (LPARAM)cbuf);
+}
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -239,13 +258,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// 원격으로 모든 서버를 실행한다.
 	// 서버매니저는 외부 실행(exe 실행)만 고려하여 제작되었다. 제작과정에서의 테스트를 하고싶다면 모든 서버의 실행파일을 Servers 디렉토리로 가져와야한다.
-	ShellExecute(NULL, L"open", L"Server.exe", L"1", L"./Servers", SW_SHOW);
-	ShellExecute(NULL, L"open", L"LobbyServer.exe", L"1", L"./Servers", SW_SHOW);
-	ShellExecute(NULL, L"open", L"NpcServer.exe", L"1", L"./Servers", SW_SHOW);
+	//ShellExecute(NULL, L"open", L"Server.exe", L"1", L"./Servers", SW_SHOW);
+	//ShellExecute(NULL, L"open", L"LobbyServer.exe", L"1", L"./Servers", SW_SHOW);
+	//ShellExecute(NULL, L"open", L"NpcServer.exe", L"1", L"./Servers", SW_SHOW);
 
-	Sleep(100);
-	ShellExecute(NULL, L"open", L"Server.exe", L"0", L"./Servers", SW_SHOW);
-	ShellExecute(NULL, L"open", L"LobbyServer.exe", L"0", L"./Servers", SW_SHOW);
+	//Sleep(100);
+	//ShellExecute(NULL, L"open", L"Server.exe", L"0", L"./Servers", SW_SHOW);
+	//ShellExecute(NULL, L"open", L"LobbyServer.exe", L"0", L"./Servers", SW_SHOW);
 
 	// Dialog 실행
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, DlgProc);
@@ -286,26 +305,30 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg) {
 	case WM_INITDIALOG:
-		hServerStatus[0] = GetDlgItem(hDlg, IDC_STATUS0);
-		hServerStatus[1] = GetDlgItem(hDlg, IDC_STATUS1);
-		hServerStatus[2] = GetDlgItem(hDlg, IDC_STATUS2);
-		hServerStatus[3] = GetDlgItem(hDlg, IDC_STATUS3);
-		hServerStatus[4] = GetDlgItem(hDlg, IDC_STATUS4);
-		hServerStatus[5] = GetDlgItem(hDlg, IDC_STATUS5);
-
+		hServerStatus[0] = GetDlgItem(hDlg, IDC_STAT1);
+		hServerStatus[1] = GetDlgItem(hDlg, IDC_STAT2);
+		hServerStatus[2] = GetDlgItem(hDlg, IDC_STAT3);
+		hServerStatus[3] = GetDlgItem(hDlg, IDC_STAT4);
+		
 		hServerName[0] = GetDlgItem(hDlg, IDC_NAME0);
 		hServerName[1] = GetDlgItem(hDlg, IDC_NAME1);
 		hServerName[2] = GetDlgItem(hDlg, IDC_NAME2);
 		hServerName[3] = GetDlgItem(hDlg, IDC_NAME3);
-		hServerName[4] = GetDlgItem(hDlg, IDC_NAME4);
-		hServerName[5] = GetDlgItem(hDlg, IDC_NAME5);
 
 		hServerPort[0] = GetDlgItem(hDlg, IDC_PORT0);
 		hServerPort[1] = GetDlgItem(hDlg, IDC_PORT1);
 		hServerPort[2] = GetDlgItem(hDlg, IDC_PORT2);
 		hServerPort[3] = GetDlgItem(hDlg, IDC_PORT3);
-		hServerPort[4] = GetDlgItem(hDlg, IDC_PORT4);
-		hServerPort[5] = GetDlgItem(hDlg, IDC_PORT5);
+
+		DisplayText(hServerName[0], "로비 0\n");
+		DisplayText(hServerName[1], "로비 1\n");
+		DisplayText(hServerName[2], "로직 0\n");
+		DisplayText(hServerName[3], "로직 0\n");
+
+		DisplayText(hServerPort[0], "9910\n");
+		DisplayText(hServerPort[1], "9911\n");
+		DisplayText(hServerPort[2], "9920\n");
+		DisplayText(hServerPort[3], "9921\n");
 
 		return TRUE;
 	case WM_COMMAND:
@@ -315,6 +338,38 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 		}
 		return FALSE;
+
+	case WM_CTLCOLORSTATIC:
+	{
+		if (hbrBkgnd) { DeleteObject(hbrBkgnd); hbrBkgnd = NULL; }
+
+		if (lParam == (LPARAM)hServerStatus[0]) {
+			SetBkColor((HDC)wParam, RGB(255, 0, 0));
+			SetTextColor((HDC)wParam, RGB(255, 255, 255));
+			return (BOOL)(hbrBkgnd = CreateSolidBrush(RGB(255, 0, 0)));
+		}
+		if (lParam == (LPARAM)hServerStatus[1]) {
+			SetBkColor((HDC)wParam, RGB(255, 0, 0));
+			SetTextColor((HDC)wParam, RGB(255, 255, 255));
+			return (BOOL)(hbrBkgnd = CreateSolidBrush(RGB(255, 0, 0)));
+		}
+		if (lParam == (LPARAM)hServerStatus[2]) {
+			SetBkColor((HDC)wParam, RGB(255, 0, 0));
+			SetTextColor((HDC)wParam, RGB(255, 255, 255));
+			return (BOOL)(hbrBkgnd = CreateSolidBrush(RGB(255, 0, 0)));
+		}
+		if (lParam == (LPARAM)hServerStatus[3]) {
+			SetBkColor((HDC)wParam, RGB(255, 0, 0));
+			SetTextColor((HDC)wParam, RGB(255, 255, 255));
+			return (BOOL)(hbrBkgnd = CreateSolidBrush(RGB(255, 0, 0)));
+		}
+		else
+			return FALSE;
+	}
+
+	case WM_DESTROY:
+		DeleteObject(hbrBkgnd);
+		return TRUE;
 	}
 	return FALSE;
 }

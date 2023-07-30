@@ -2383,6 +2383,23 @@ void process_packet(int client_id, char* packet)
 		
 		break;
 	}// SS_GAME_REPLICA end
+	case SS_NPC_REPLICA:
+	{
+		SS_NPC_REPLICA_PACKET* replica_pack = reinterpret_cast<SS_NPC_REPLICA_PACKET*>(packet);
+		int n_id = replica_pack->id;
+
+		npcs[n_id].id = replica_pack->id;
+		npcs[n_id].hp = replica_pack->hp;
+		npcs[n_id].pl_state = replica_pack->state;
+
+		// Debug
+		cout << "===================================" << endl;
+		cout << "NPC[" << npcs[n_id].id << "] 데이터가 복제되었습니다." << endl;
+		cout << "HP: " << npcs[n_id].hp << ", State: " << npcs[n_id].pl_state << endl;
+		cout << "===================================\n" << endl;
+
+		break;
+	}// SS_NPC_REPLICA end
 	case NPC_FULL_INFO:
 	{
 		NPC_FULL_INFO_PACKET* npc_info_pack = reinterpret_cast<NPC_FULL_INFO_PACKET*>(packet);
@@ -2391,7 +2408,6 @@ void process_packet(int client_id, char* packet)
 
 		npcs[npc_id].s_lock.lock();
 		npcs[npc_id].hp = npc_info_pack->hp;
-		strcpy_s(npcs[npc_id].name, npc_info_pack->name);
 		npcs[npc_id].id = npc_info_pack->n_id;
 		npcs[npc_id].pos = { npc_info_pack->x, npc_info_pack->y, npc_info_pack->z };
 		npcs[npc_id].m_rightvec = { npc_info_pack->right_x, npc_info_pack->right_y, npc_info_pack->right_z };
@@ -2419,9 +2435,11 @@ void process_packet(int client_id, char* packet)
 	case NPC_MOVE:
 	{
 		NPC_MOVE_PACKET* npc_move_pack = reinterpret_cast<NPC_MOVE_PACKET*>(packet);
-
 		short npc_id = npc_move_pack->n_id;
+		if (npcs[npc_id].pl_state == PL_ST_DEAD) break; // 잘못된 요청
+
 		npcs[npc_id].s_lock.lock();
+		npcs[npc_id].pl_state = PL_ST_MOVE_FRONT;
 		npcs[npc_id].pos = { npc_move_pack->x, npc_move_pack->y, npc_move_pack->z };
 		if (npc_id < 5) {	// 헬기
 			npcs[npc_id].m_xoobb = BoundingOrientedBox(XMFLOAT3(npcs[npc_id].pos.x, npcs[npc_id].pos.y, npcs[npc_id].pos.z)
@@ -2449,6 +2467,7 @@ void process_packet(int client_id, char* packet)
 		NPC_ROTATE_PACKET* npc_rotate_pack = reinterpret_cast<NPC_ROTATE_PACKET*>(packet);
 
 		short npc_id = npc_rotate_pack->n_id;
+		if (npcs[npc_id].pl_state == PL_ST_DEAD) break; // 잘못된 요청
 
 		// 서버 내 NPC 정보 업데이트
 		npcs[npc_id].s_lock.lock();
@@ -2502,6 +2521,8 @@ void process_packet(int client_id, char* packet)
 	case NPC_ATTACK:
 	{
 		NPC_ATTACK_PACKET* recv_attack_pack = reinterpret_cast<NPC_ATTACK_PACKET*>(packet);
+
+		if (npcs[recv_attack_pack->n_id].pl_state == PL_ST_DEAD) break; // 잘못된 요청
 
 		// 총알을 발사했다는 정보를 모든 클라이언트에게 알려줍니다.
 		for (auto& cl : clients) {
@@ -3357,6 +3378,21 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 				//		cout << "Used ";
 				//}
 				//cout << "\n" << endl;
+
+				// 3. NPC 정보 복제
+				if (b_npcsvr_conn) {
+					for (auto& npc : npcs) {
+						if (npc.id == -1) continue;
+						SS_NPC_REPLICA_PACKET npc_replica_pack;
+						npc_replica_pack.size = sizeof(SS_NPC_REPLICA_PACKET);
+						npc_replica_pack.type = SS_NPC_REPLICA;
+						npc_replica_pack.hp = npc.hp;
+						npc_replica_pack.id = npc.id;
+						npc_replica_pack.state = npc.pl_state;
+
+						extended_servers[standby_id].do_send(&npc_replica_pack);
+					}
+				}
 			}
 		}
 

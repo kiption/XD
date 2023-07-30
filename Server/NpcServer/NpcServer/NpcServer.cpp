@@ -551,7 +551,6 @@ void SERVER::send_npc_init_packet(int npc_id)
 	npc_init_packet.n_id = npc_id;
 	npc_init_packet.speed = npcsInfo[npc_id].GetSpeed();
 	npc_init_packet.ishuman = npcsInfo[npc_id].type;
-	strcpy_s(npc_init_packet.name, npcsInfo[npc_id].name);
 	npc_init_packet.hp = npcsInfo[npc_id].hp;
 	npc_init_packet.x = npcsInfo[npc_id].pos.x;
 	npc_init_packet.y = npcsInfo[npc_id].pos.y;

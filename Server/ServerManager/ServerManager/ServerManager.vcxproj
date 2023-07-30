@@ -143,6 +143,10 @@
   <ItemGroup>
     <ResourceCompile Include="ServerManager.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="light_green.bmp" />
+    <Image Include="light_red.bmp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
