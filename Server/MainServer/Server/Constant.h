@@ -93,9 +93,9 @@
 #define HELI_BBSIZE_Y 10.0f
 #define HELI_BBSIZE_Z 15.0f
 
-#define SPAWN_POS_X_HELI -43.5f
-#define SPAWN_POS_Y_HELI 25.0f
-#define SPAWN_POS_Z_HELI -750.0f
+#define SPAWN_POS_X_HELI -15.0f
+#define SPAWN_POS_Y_HELI 30.0f
+#define SPAWN_POS_Z_HELI 750.0f
 
 #define AUTO_LEVELOFF_TIME 3000			// 몇 초(ms)동안 키입력이 없어야 자동 수평비행 전환이 되는가
 

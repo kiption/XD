@@ -2310,21 +2310,6 @@ void process_packet(int client_id, char* packet)
 		clients[replica_id].m_lookvec = { replica_pack->look_x,	replica_pack->look_y, replica_pack->look_z };
 		clients[replica_id].m_cam_lookvec = { replica_pack->cam_lookvec_x, replica_pack->cam_lookvec_y, replica_pack->cam_lookvec_z };
 
-		// 2. 패킷에 있는 것과 관련된 것들 설정
-		clients[replica_id].setBB();
-		if (clients[replica_id].role == ROLE_HELI) {
-			if (clients[replica_id].pos.y > 23.0f) {	// 경보가 울리고 있다가 고도가 일정 높이 이상 올라오면 경보를 해제한다.
-				clients[replica_id].height_alert = false;
-			}
-			else {
-				clients[replica_id].height_alert = true;
-			}
-		}
-		clients[replica_id].update_viewlist();
-		clients[replica_id].oneshot_onekill_cheat = false;
-		clients[replica_id].immortal_cheat = false;
-		clients[replica_id].shoot_time = system_clock::now();
-		clients[replica_id].reload_time = system_clock::now();
 		clients[replica_id].s_lock.unlock();
 
 		// Debug
@@ -3380,19 +3365,19 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 				//cout << "\n" << endl;
 
 				// 3. NPC 정보 복제
-				if (b_npcsvr_conn) {
-					for (auto& npc : npcs) {
-						if (npc.id == -1) continue;
-						SS_NPC_REPLICA_PACKET npc_replica_pack;
-						npc_replica_pack.size = sizeof(SS_NPC_REPLICA_PACKET);
-						npc_replica_pack.type = SS_NPC_REPLICA;
-						npc_replica_pack.hp = npc.hp;
-						npc_replica_pack.id = npc.id;
-						npc_replica_pack.state = npc.pl_state;
+				//if (b_npcsvr_conn) {
+				//	for (auto& npc : npcs) {
+				//		if (npc.id == -1) continue;
+				//		SS_NPC_REPLICA_PACKET npc_replica_pack;
+				//		npc_replica_pack.size = sizeof(SS_NPC_REPLICA_PACKET);
+				//		npc_replica_pack.type = SS_NPC_REPLICA;
+				//		npc_replica_pack.hp = npc.hp;
+				//		npc_replica_pack.id = npc.id;
+				//		npc_replica_pack.state = npc.pl_state;
 
-						extended_servers[standby_id].do_send(&npc_replica_pack);
-					}
-				}
+				//		extended_servers[standby_id].do_send(&npc_replica_pack);
+				//	}
+				//}
 			}
 		}
 
