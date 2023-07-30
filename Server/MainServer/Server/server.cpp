@@ -2393,10 +2393,10 @@ void process_packet(int client_id, char* packet)
 		npcs[n_id].pl_state = replica_pack->state;
 
 		// Debug
-		cout << "===================================" << endl;
-		cout << "NPC[" << npcs[n_id].id << "] 데이터가 복제되었습니다." << endl;
-		cout << "HP: " << npcs[n_id].hp << ", State: " << npcs[n_id].pl_state << endl;
-		cout << "===================================\n" << endl;
+		//cout << "===================================" << endl;
+		//cout << "NPC[" << npcs[n_id].id << "] 데이터가 복제되었습니다." << endl;
+		//cout << "HP: " << npcs[n_id].hp << ", State: " << npcs[n_id].pl_state << endl;
+		//cout << "===================================\n" << endl;
 
 		break;
 	}// SS_NPC_REPLICA end
