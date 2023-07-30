@@ -975,12 +975,12 @@ void CGameFramework::ProcessInput()
 	{
 		if (m_bFreeViewCamera == true && m_AfterDieChangeCameraSwitch == true)
 		{
-			if (pKeysBuffer[KEY_W] & 0xF0) { m_pCamera->Move(XMFLOAT3(0,0,1)); }
-			if (pKeysBuffer[KEY_S] & 0xF0) { m_pCamera->Move(XMFLOAT3(0, 0,-1)); }
-			if (pKeysBuffer[KEY_A] & 0xF0) { m_pCamera->Move(XMFLOAT3(-1, 0,0)); }
-			if (pKeysBuffer[KEY_D] & 0xF0) { m_pCamera->Move(XMFLOAT3(1, 0,0)); }
-			if (pKeysBuffer[KEY_Q] & 0xF0) { m_pCamera->Move(XMFLOAT3(0,1,0)); }
-			if (pKeysBuffer[KEY_E] & 0xF0) { m_pCamera->Move(XMFLOAT3(0,-1,0)); }
+			if (pKeysBuffer[KEY_W] & 0xF0) { m_pCamera->Move(XMFLOAT3(0, 0, 1)); }
+			if (pKeysBuffer[KEY_S] & 0xF0) { m_pCamera->Move(XMFLOAT3(0, 0, -1)); }
+			if (pKeysBuffer[KEY_A] & 0xF0) { m_pCamera->Move(XMFLOAT3(-1, 0, 0)); }
+			if (pKeysBuffer[KEY_D] & 0xF0) { m_pCamera->Move(XMFLOAT3(1, 0, 0)); }
+			if (pKeysBuffer[KEY_Q] & 0xF0) { m_pCamera->Move(XMFLOAT3(0, 1, 0)); }
+			if (pKeysBuffer[KEY_E] & 0xF0) { m_pCamera->Move(XMFLOAT3(0, -1, 0)); }
 		}
 		DWORD dwDirection = 0;
 		if (!UI_Switch && !b_imdeadplayer) {
@@ -1004,7 +1004,14 @@ void CGameFramework::ProcessInput()
 		{
 			SetCursor(NULL);
 			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / MouseResponsivenessX;
+			if (m_ingame_role == R_RIFLE)
+			{
+				cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / (MouseResponsivenessX);
+			}
+			if (m_ingame_role == R_HELI)
+			{
+				cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / (MouseResponsivenessX-200.0f);
+			}
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / MouseResponsivenessY;
 			czDelta = ((float)(ptCursorPos.y - m_ptOldCursorPos.y) + (float)(ptCursorPos.x - m_ptOldCursorPos.x)) / MouseResponsivenessX;
 			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
@@ -1047,7 +1054,7 @@ void CGameFramework::ProcessInput()
 				if (m_nMode == SCENE1STAGE) {
 					if (cxDelta || cyDelta)
 					{
-						
+
 						MouseInputVal mousemove{ SEND_NONCLICK, 0.f, 0.f };//s
 						q_mouseInput.push(mousemove);//s
 						if (m_ingame_role == R_RIFLE)
@@ -1252,7 +1259,7 @@ void CGameFramework::AnimateObjects()
 }
 void CGameFramework::ShotDelay()
 {
-	if (m_ingame_role == R_RIFLE&&!b_imdeadplayer)
+	if (m_ingame_role == R_RIFLE && !b_imdeadplayer)
 	{
 		((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay += m_GameTimer.GetTimeElapsed();
 		if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_fShotDelay > 0.17)
@@ -2023,7 +2030,7 @@ void CGameFramework::FrameAdvance()
 		//_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		//::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-}
+	}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -2143,7 +2150,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-	}
+}
 	pd3dInfoQueue->Release();
 #endif
 

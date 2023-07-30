@@ -168,7 +168,7 @@ public:
 	float deltax = 0.0;
 
 	// 마우스 민감도
-	float MouseResponsivenessX = 350.0f;
+	float MouseResponsivenessX = 400.0f;
 	float MouseResponsivenessY = 550.0f;
 public:
 	PostProcessShader* m_pPostProcessingShader = NULL;
