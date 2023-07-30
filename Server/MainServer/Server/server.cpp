@@ -855,9 +855,25 @@ void disconnect(int target_id, int target)
 		}
 
 		// Standby서버였다면 Active로 승격
+		// Standby서버였다면 Active로 승격
 		if (!b_active_server) {	// 내가 Active가 아니면 상대가 Active임. (서버가 2개밖에 없기 때문)
 			b_active_server = true;
 			cout << "현재 Server[" << my_server_id << "] 가 Active 서버로 승격되었습니다. [ MODE: Stand-by -> Active ]\n" << endl;
+
+			SC_STANDBY_RUN_PACKET standby_run_packet;
+			standby_run_packet.size = sizeof(SC_STANDBY_RUN_PACKET);
+			standby_run_packet.type = SC_STANDBY_RUN;
+			if (my_server_id == 0)
+				standby_run_packet.standby_s_id = 1;
+			else
+				standby_run_packet.standby_s_id = 0;
+			for (auto& send_cl : clients) {
+				if (send_cl.s_state != ST_INGAME) continue;
+
+				send_cl.s_lock.lock();
+				send_cl.do_send(&standby_run_packet);
+				send_cl.s_lock.unlock();
+			}
 		}
 
 		// 만약 자신의 오른쪽 서버가 다운되었는데, 그 서버가 서버군의 마지막 서버인 경우 재실행된 서버에게 ConnectEx 요청을 보냅니다.
@@ -2312,16 +2328,16 @@ void process_packet(int client_id, char* packet)
 		clients[replica_id].s_lock.unlock();
 
 		// Debug
-		cout << "===================================" << endl;
-		cout << "Client[ID: " << replica_id << "Name: " << clients[replica_id].name << "]의 데이터가 복제되었습니다." << endl;
-		cout << "Stage: " << clients[replica_id].curr_stage << endl;
-		cout << "Role: " << static_cast<int>(clients[replica_id].role) << endl;
-		cout << "HP: " << clients[replica_id].hp << endl;
-		cout << "Bullet: " << clients[replica_id].remain_bullet << endl;
-		cout << "State: " << clients[replica_id].pl_state << endl;
-		cout << "Pos: " << clients[replica_id].pos.x << ", " << clients[replica_id].pos.y << ", " << clients[replica_id].pos.z << endl;
-		cout << "LookVec: " << clients[replica_id].m_lookvec.x << ", " << clients[replica_id].m_lookvec.y << ", " << clients[replica_id].m_lookvec.z << endl;
-		cout << "===================================\n" << endl;
+		//cout << "===================================" << endl;
+		//cout << "Client[ID: " << replica_id << "Name: " << clients[replica_id].name << "]의 데이터가 복제되었습니다." << endl;
+		//cout << "Stage: " << clients[replica_id].curr_stage << endl;
+		//cout << "Role: " << static_cast<int>(clients[replica_id].role) << endl;
+		//cout << "HP: " << clients[replica_id].hp << endl;
+		//cout << "Bullet: " << clients[replica_id].remain_bullet << endl;
+		//cout << "State: " << clients[replica_id].pl_state << endl;
+		//cout << "Pos: " << clients[replica_id].pos.x << ", " << clients[replica_id].pos.y << ", " << clients[replica_id].pos.z << endl;
+		//cout << "LookVec: " << clients[replica_id].m_lookvec.x << ", " << clients[replica_id].m_lookvec.y << ", " << clients[replica_id].m_lookvec.z << endl;
+		//cout << "===================================\n" << endl;
 
 		break;
 	}// SS_USER_REPLICA end
@@ -2349,7 +2365,7 @@ void process_packet(int client_id, char* packet)
 		}
 
 		// Debug
-		cout << "===================================" << endl;
+		/*cout << "===================================" << endl;
 		cout << "게임 세부 데이터가 복제되었습니다." << endl;
 		cout << "서버 시작시간: " << g_start_t << endl;
 		cout << "현재 서버시간: " << g_curr_t << endl;
@@ -2363,7 +2379,7 @@ void process_packet(int client_id, char* packet)
 			else
 				cout << "NotUsed ";
 		}
-		cout << "===================================\n" << endl;
+		cout << "===================================\n" << endl;*/
 		
 		break;
 	}// SS_GAME_REPLICA end
@@ -3235,40 +3251,18 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 		// ================================
 		// 1. Heartbeat 전송
 		// : 오른쪽 서버로 Heartbeat를 보냅니다. (왼쪽 서버가 오른쪽 서버로 전송하기 때문에 가장 마지막 서버는 보내지 않습니다.)
-		if (my_server_id != MAX_LOGIC_SERVER - 1) {
-			if (extended_servers[my_server_id].s_state != ST_ACCEPTED)	continue;
-			if (extended_servers[my_server_id + 1].s_state != ST_ACCEPTED) continue;
+		//if (my_server_id != MAX_LOGIC_SERVER - 1) {
+		//	if (extended_servers[my_server_id].s_state != ST_ACCEPTED)	continue;
+		//	if (extended_servers[my_server_id + 1].s_state != ST_ACCEPTED) continue;
 
-			SS_HEARTBEAT_PACKET hb_packet;
-			hb_packet.size = sizeof(SS_HEARTBEAT_PACKET);
-			hb_packet.type = SS_HEARTBEAT;
-			hb_packet.sender_id = my_server_id;
-			extended_servers[my_server_id + 1].do_send(&hb_packet);	// 오른쪽 서버에 전송합니다.
+		//	SS_HEARTBEAT_PACKET hb_packet;
+		//	hb_packet.size = sizeof(SS_HEARTBEAT_PACKET);
+		//	hb_packet.type = SS_HEARTBEAT;
+		//	hb_packet.sender_id = my_server_id;
+		//	extended_servers[my_server_id + 1].do_send(&hb_packet);	// 오른쪽 서버에 전송합니다.
 
-			extended_servers[my_server_id].heartbeat_send_time = chrono::system_clock::now();	// 전송한 시간을 업데이트
-		}
-
-		// ================================
-		// 2. Heartbeat 수신검사
-		// 오랫동안 Heartbeat를 받지 못한 서버구성원이 있는지 확인합니다.
-		//   1) 오른쪽 서버 검사 (가장 왼쪽에 있는 서버 구성원은 검사를 하지 않습니다.)
-		if (my_server_id != 0) {
-			if (extended_servers[my_server_id - 1].s_state == ST_ACCEPTED) {
-				if (chrono::system_clock::now() > extended_servers[my_server_id - 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
-					cout << "Server[" << my_server_id - 1 << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
-					//disconnect(my_server_id - 1, SESSION_EXTENDED_SERVER);
-				}
-			}
-		}
-		//   2) 왼쪽 서버 검사 (가장 오른쪽에 있는 서버 구성원은 검사를 하지 않습니다.)
-		if (my_server_id != MAX_LOGIC_SERVER - 1) {
-			if (extended_servers[my_server_id + 1].s_state == ST_ACCEPTED) {
-				if (chrono::system_clock::now() > extended_servers[my_server_id + 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
-					cout << "Server[" << my_server_id + 1 << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
-					//disconnect(my_server_id + 1, SESSION_EXTENDED_SERVER);
-				}
-			}
-		}
+		//	extended_servers[my_server_id].heartbeat_send_time = chrono::system_clock::now();	// 전송한 시간을 업데이트
+		//}
 
 		// ================================
 		// 3. Data Replica 전송 (자신이 Active서버 일때에만)
@@ -3318,11 +3312,11 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 					
 					extended_servers[standby_id].do_send(&replica_pack);
 
-					cout << "[REPLICA TEST] Client[ID: " << replica_pack.id << ", Name: " << replica_pack.name << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다." << endl;
-					cout << "Stage: " << replica_pack.curr_stage << ", Role: " << static_cast<int>(replica_pack.role) << endl;
-					cout << "HP: " << replica_pack.hp << ", State: " << replica_pack.state << ", Bullet: " << replica_pack.remain_bullet << endl;
-					cout << "Pos: " << replica_pack.x << ", " << replica_pack.y << ", " << replica_pack.z << endl;
-					cout << "Look: " << replica_pack.look_x << ", " << replica_pack.look_y << ", " << replica_pack.look_z << "\n" << endl;
+					//cout << "[REPLICA TEST] Client[ID: " << replica_pack.id << ", Name: " << replica_pack.name << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다." << endl;
+					//cout << "Stage: " << replica_pack.curr_stage << ", Role: " << static_cast<int>(replica_pack.role) << endl;
+					//cout << "HP: " << replica_pack.hp << ", State: " << replica_pack.state << ", Bullet: " << replica_pack.remain_bullet << endl;
+					//cout << "Pos: " << replica_pack.x << ", " << replica_pack.y << ", " << replica_pack.z << endl;
+					//cout << "Look: " << replica_pack.look_x << ", " << replica_pack.look_y << ", " << replica_pack.look_z << "\n" << endl;
 				}
 
 				// 2. 게임 정보 복제
@@ -3349,20 +3343,20 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 
 				extended_servers[standby_id].do_send(&game_replica_pack);
 
-				cout << "[REPLICA TEST] 게임 정보를 Sever[" << standby_id << "]에게 전달합니다." << endl;
-				cout << "서버 시작시간: " << game_replica_pack.s_start_time << endl;
-				cout << "현재 서버시간: " << game_replica_pack.curr_servertime << endl;
-				cout << "현재 미션: " << game_replica_pack.curr_mission_stage[1] << endl;
-				cout << "미션 0 - 시작: " << game_replica_pack.missions_start[0] << ", 진행: " << game_replica_pack.missions_curr[0] << endl;
-				cout << "미션 1 - 시작: " << game_replica_pack.missions_start[1] << ", 진행: " << game_replica_pack.missions_curr[1] << endl;
-				cout << "힐팩: ";
-				for (int i = 0; i < 8; ++i) {
-					if (game_replica_pack.healpack_isused[i] == 0)
-						cout << "NotUsed ";
-					else
-						cout << "Used ";
-				}
-				cout << "\n" << endl;
+				//cout << "[REPLICA TEST] 게임 정보를 Sever[" << standby_id << "]에게 전달합니다." << endl;
+				//cout << "서버 시작시간: " << game_replica_pack.s_start_time << endl;
+				//cout << "현재 서버시간: " << game_replica_pack.curr_servertime << endl;
+				//cout << "현재 미션: " << game_replica_pack.curr_mission_stage[1] << endl;
+				//cout << "미션 0 - 시작: " << game_replica_pack.missions_start[0] << ", 진행: " << game_replica_pack.missions_curr[0] << endl;
+				//cout << "미션 1 - 시작: " << game_replica_pack.missions_start[1] << ", 진행: " << game_replica_pack.missions_curr[1] << endl;
+				//cout << "힐팩: ";
+				//for (int i = 0; i < 8; ++i) {
+				//	if (game_replica_pack.healpack_isused[i] == 0)
+				//		cout << "NotUsed ";
+				//	else
+				//		cout << "Used ";
+				//}
+				//cout << "\n" << endl;
 			}
 		}
 

@@ -1394,41 +1394,6 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 		auto start_t = system_clock::now();
 
 		// ================================
-		// 1. Heartbeat 전송: 오른쪽 서버로 Heartbeat를 보냅니다.
-		if (my_server_id != MAX_LOGIC_SERVER - 1) {	// 가장 마지막 서버는 보내지 않는다. (마지막 서버는 자기가 하트비트를 받았을때 되받아치기만 한다.)
-			if (extended_servers[my_server_id + 1].s_state != ST_ACCEPTED) continue;
-
-			SS_HEARTBEAT_PACKET hb_packet;
-			hb_packet.size = sizeof(SS_HEARTBEAT_PACKET);
-			hb_packet.type = SS_HEARTBEAT;
-			hb_packet.sender_id = my_server_id;
-			extended_servers[my_server_id + 1].do_send(&hb_packet);	// 오른쪽 서버에 전송합니다.
-
-			extended_servers[my_server_id].heartbeat_send_time = chrono::system_clock::now();	// 전송한 시간을 업데이트
-		}
-
-		// ================================
-		// 2. Heartbeat 수신검사
-		// 오랫동안 Heartbeat를 받지 못한 서버구성원이 있는지 확인합니다.
-		if (my_server_id == 0) {
-			if (extended_servers[my_server_id + 1].s_state == ST_ACCEPTED) {	// 오른쪽 서버 검사
-				time_point nowtime = system_clock::now();
-				if (nowtime > extended_servers[my_server_id + 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
-					cout << "LobbyServer[" << my_server_id + 1 << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
-					disconnect(my_server_id + 1 + CP_KEY_EX_LBY, SESSION_LOBBY);
-				}
-			}
-		}
-		else if (my_server_id == 1) {
-			if (extended_servers[my_server_id - 1].s_state == ST_ACCEPTED) {	// 왼쪽 서버 검사
-				if (chrono::system_clock::now() > extended_servers[my_server_id - 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
-					cout << "LobbyServer[" << my_server_id - 1 << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
-					disconnect(my_server_id - 1 + CP_KEY_EX_LBY, SESSION_LOBBY);
-				}
-			}
-		}
-
-		// ================================
 		// 3. Data Replica 전송 (자신이 Active서버 일때에만)
 		if (b_active_server) {
 			// 데이터복제 패킷을 받게될 Standby서버의 id를 알아냅니다.

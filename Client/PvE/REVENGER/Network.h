@@ -221,31 +221,12 @@ void sendPacket(void* packet)
 			if (err_no == WSAECONNRESET) {   // 서버가 끊어진 상황
 				closesocket(lgc_socket[active_servernum]);
 
-				int new_portnum = 0;
 				if (active_servernum == 0) {		// Active: 0 -> 1
 					active_servernum = 1;
-					new_portnum = PORTNUM_LOGIC_1;
 				}
 				else if (active_servernum == 1) {	// Active: 1 -> 0
 					active_servernum = 0;
-					new_portnum = PORTNUM_LOGIC_0;
 				}
-
-				lgc_socket[active_servernum] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
-				SOCKADDR_IN newserver_addr;
-				ZeroMemory(&newserver_addr, sizeof(newserver_addr));
-				newserver_addr.sin_family = AF_INET;
-				newserver_addr.sin_port = htons(new_portnum);
-				//inet_pton(AF_INET, SERVER_ADDR, &newserver_addr.sin_addr);//루프백
-
-				// REMOTE
-				if (active_servernum == 0) {
-					inet_pton(AF_INET, IPADDR_LOGIC0, &newserver_addr.sin_addr);
-				}
-				else if (active_servernum == 1) {
-					inet_pton(AF_INET, IPADDR_LOGIC1, &newserver_addr.sin_addr);
-				}
-				connect(lby_socket[active_servernum], reinterpret_cast<sockaddr*>(&newserver_addr), sizeof(newserver_addr));
 
 				CS_RELOGIN_PACKET re_login_pack;
 				re_login_pack.size = sizeof(CS_RELOGIN_PACKET);

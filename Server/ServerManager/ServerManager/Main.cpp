@@ -243,6 +243,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ShellExecute(NULL, L"open", L"LobbyServer.exe", L"1", L"./Servers", SW_SHOW);
 	ShellExecute(NULL, L"open", L"NpcServer.exe", L"1", L"./Servers", SW_SHOW);
 
+	Sleep(100);
+	ShellExecute(NULL, L"open", L"Server.exe", L"0", L"./Servers", SW_SHOW);
+	ShellExecute(NULL, L"open", L"LobbyServer.exe", L"0", L"./Servers", SW_SHOW);
+
 	// Dialog ½ÇÇà
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, DlgProc);
 

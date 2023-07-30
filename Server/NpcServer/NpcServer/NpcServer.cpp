@@ -2561,6 +2561,8 @@ int main(int argc, char* argv[])
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
 
+	a_lgcsvr_num = 1;
+
 	//======================================================================	
 	// [ HA - 서버 ID, 포트번호 지정 ]
 	// 어떤 서버를 가동할 것인지를 명령행 인수로 입력받아서 그 서버에 포트 번호를 부여합니다.

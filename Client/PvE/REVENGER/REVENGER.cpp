@@ -381,8 +381,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 						// 로직 서버에 연결
 						curr_servertype = SERVER_LOGIC;
-						for (int i = 0; i < MAX_LOBBY_SERVER; ++i) {
-							// 모든 로비서버에 일단 접속은 해놓는다. (이후에 실제 데이터를 주고받는 것은 Active 서버와만 한다.
+						for (int i = 0; i < MAX_LOGIC_SERVER; ++i) {
+							// 모든 로직서버에 일단 접속은 해놓는다. (이후에 실제 데이터를 주고받는 것은 Active 서버와만 한다.
 							active_servernum = i;
 
 							lgc_socket[i] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
