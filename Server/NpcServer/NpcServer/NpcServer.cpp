@@ -2946,7 +2946,7 @@ void disconnect(int target_id, int target)
 		// XD폴더 내에서 동작할 때(내부 테스트)와 외부에서 실행할 때를 구분해줍니다.
 		string XDFolderKeyword = "XD";
 		if (filesystem::current_path().string().find(XDFolderKeyword) != string::npos) {
-			ShellExecute(NULL, L"open", L"NpcServer.exe", wchar_buf, L"./x64/Release", SW_SHOW);	// 내부 테스트용
+			ShellExecute(NULL, L"open", L"NpcServer.exe", wchar_buf, L"../../ServerManager/ServerManager/Servers", SW_SHOW);	// 내부 테스트용
 		}
 		else {
 			ShellExecute(NULL, L"open", L"NpcServer.exe", wchar_buf, L".", SW_SHOW);					// 외부 수출용 (exe로 실행될때)
