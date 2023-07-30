@@ -204,6 +204,7 @@ void sendPacket(void* packet)
 					active_servernum = 0;
 					new_portnum = PORTNUM_LOBBY_0;
 				}
+				cout << "새 포트번호: " << new_portnum << endl;
 
 				lby_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 				SOCKADDR_IN newserver_addr;

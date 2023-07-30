@@ -239,9 +239,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// 원격으로 모든 서버를 실행한다.
 	// 서버매니저는 외부 실행(exe 실행)만 고려하여 제작되었다. 제작과정에서의 테스트를 하고싶다면 모든 서버의 실행파일을 Servers 디렉토리로 가져와야한다.
-	/*ShellExecute(NULL, L"open", L"Server.exe", L"1", L"./Servers", SW_SHOW);
+	ShellExecute(NULL, L"open", L"Server.exe", L"1", L"./Servers", SW_SHOW);
 	ShellExecute(NULL, L"open", L"LobbyServer.exe", L"1", L"./Servers", SW_SHOW);
-	ShellExecute(NULL, L"open", L"NpcServer.exe", L"1", L"./Servers", SW_SHOW);*/
+	ShellExecute(NULL, L"open", L"NpcServer.exe", L"1", L"./Servers", SW_SHOW);
 
 	// Dialog 실행
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, DlgProc);
@@ -270,8 +270,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	setsockopt(g_listensock, IPPROTO_TCP, TCP_NODELAY, (const char*)&option, sizeof(option));
 	AcceptEx(g_listensock, c_socket, a_over.send_buf, 0, addr_size + 16, addr_size + 16, 0, &a_over.overlapped);
 
-	thread worker_thread(do_worker);	// 통신용 Worker스레드
-	worker_thread.join();
+	//thread worker_thread(do_worker);	// 통신용 Worker스레드
+	//worker_thread.join();
 
 	WSACleanup();
 	closesocket(g_listensock);
