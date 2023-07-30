@@ -146,7 +146,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 	// 로비 서버에 연결
 	curr_servertype = SERVER_LOBBY;
-	active_servernum = 0;
+	active_servernum = MAX_LOBBY_SERVER - 1;
 
 	lby_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
 	SOCKADDR_IN lby_addr;
@@ -154,7 +154,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	lby_addr.sin_family = AF_INET;
 	int new_portnum = PORTNUM_LOBBY_0 + active_servernum;
 	lby_addr.sin_port = htons(new_portnum);
-	inet_pton(AF_INET, IPADDR_LOBBY0, &lby_addr.sin_addr);
+	inet_pton(AF_INET, IPADDR_LOBBY1, &lby_addr.sin_addr);
 	connect(lby_socket, reinterpret_cast<sockaddr*>(&lby_addr), sizeof(lby_addr));
 
 	CLBY_CONNECT_PACKET conn_packet;

@@ -999,6 +999,114 @@ void process_packet(int client_id, char* packet)
 		disconnect(client_id, SESSION_CLIENT);
 		break;
 	}// CLBY_GAME_EXIT case end
+	case CS_RELOGIN:
+	{
+		CS_RELOGIN_PACKET* re_login_pack = reinterpret_cast<CS_RELOGIN_PACKET*>(packet);
+
+		int re_login_id = re_login_pack->id;
+		clients[re_login_id].s_lock.lock();
+		clients[re_login_id].s_state = ST_INGAME;
+		clients[re_login_id].s_lock.unlock();
+
+		cout << "[HA] Clients[" << re_login_id << "]와 다시 연결되었습니다.\n" << endl;
+
+		break;
+	}// CS_RELOGIN end
+	case SS_HEARTBEAT:
+	{
+		SS_HEARTBEAT_PACKET* heartbeat_pack = reinterpret_cast<SS_HEARTBEAT_PACKET*>(packet);
+		int recv_id = heartbeat_pack->sender_id;
+
+		extended_servers[recv_id].heartbeat_recv_time = chrono::system_clock::now();	// 받은 시간 업데이트
+
+		if (recv_id < my_server_id) {	// A->B->A로 heartbeat의 한 사이클이 끝나도록하기 위함. (즉, 오른쪽 서버로부터 Heartbeat를 받으면 하트비트를 되받아치지 않는다.)
+			// Heartbeat를 먼저 보낸 서버에게 자신의 Heartbeat를 전송합니다.
+			SS_HEARTBEAT_PACKET hb_packet;
+			hb_packet.size = sizeof(SS_HEARTBEAT_PACKET);
+			hb_packet.type = SS_HEARTBEAT;
+			hb_packet.sender_id = my_server_id;
+			extended_servers[recv_id].do_send(&hb_packet);										// 자신에게 Heartbeat를 보낸 서버에게 전송합니다.
+			extended_servers[my_server_id].heartbeat_send_time = chrono::system_clock::now();	// 전송한 시간을 업데이트
+		}
+		break;
+	}// SS_HEARTBEAT end
+	case LBYLBY_MEMBER_REPLICA:
+	{
+		if (b_active_server) break;	// 대기서버만 복제 받는다.
+		LBYLBY_MEMBER_REPLICA_PACKET* recv_pack = reinterpret_cast<LBYLBY_MEMBER_REPLICA_PACKET*>(packet);
+		int replica_id = recv_pack->id;
+
+		clients[replica_id].curr_room = recv_pack->curr_room;
+		clients[replica_id].inroom_index = recv_pack->inroom_index;
+		clients[replica_id].inroom_state = recv_pack->inroom_state;
+		strcpy_s(clients[replica_id].name, recv_pack->name);
+		clients[replica_id].role = recv_pack->role;
+
+		// Debug
+		//cout << "===================================" << endl;
+		//cout << "Client[ID: " << replica_id << ", Name: " << clients[replica_id].name << "]의 데이터가 복제되었습니다." << endl;
+		//cout << "Room: " << clients[replica_id].curr_room << endl;
+		//cout << "RoomIndex: " << clients[replica_id].inroom_index << endl;
+		//cout << "ReadyState: " << clients[replica_id].inroom_state << endl;
+		//cout << "Role: " << clients[replica_id].role << endl;
+		//cout << "===================================\n" << endl;
+		break;
+	}// LBYLBY_MEMBER_REPLICA end
+	case LBYLBY_ROOM_REPLICA:
+	{
+		if (b_active_server) break;	// 대기서버만 복제 받는다.
+		LBYLBY_ROOM_REPLICA_PACKET* recv_pack = reinterpret_cast<LBYLBY_ROOM_REPLICA_PACKET*>(packet);
+		int replica_roomid = recv_pack->room_id;
+		bool already_created = false;
+
+		// 우선 이미 만들어진 방인지 확인합니다.
+		for (auto& room : game_rooms) {
+			if (room.room_id == replica_roomid) {
+				// 이미 있는 방이면 그곳에 정보를 복제합니다.
+				strcpy_s(room.room_name, recv_pack->room_name);
+				room.room_state = static_cast<int>(recv_pack->room_state);
+				for (int i = 0; i < MAX_USER; ++i)
+					room.users[i] = recv_pack->users[i];
+				room.user_count = recv_pack->user_count;
+
+				already_created = true;
+
+				// Debug
+				//cout << "===================================" << endl;
+				//cout << "Room[ID: " << replica_roomid << ", Name: " << room.room_name << "]의 데이터가 복제되었습니다." << endl;
+				//cout << "Usercount: " << room.user_count << " 명" << endl;
+				//cout << "RoomState: " << room.room_state << endl;
+				//for (int i = 0; i < MAX_USER; ++i)
+				//	cout << "User[" << i << "]\'s ID: " << room.users[i] << endl;
+				//cout << "===================================\n" << endl;
+				break;
+			}
+		}
+
+		// 처음 복제받는 방이면 새로 방을 만듭니다.
+		if (!already_created) {
+			Game_Room replica_room;
+			replica_room.room_id = replica_roomid;
+			strcpy_s(replica_room.room_name, recv_pack->room_name);
+			replica_room.room_state = static_cast<int>(recv_pack->room_state);
+			for (int i = 0; i < MAX_USER; ++i)
+				replica_room.users[i] = recv_pack->users[i];
+			replica_room.user_count = recv_pack->user_count;
+
+			game_rooms.push_back(replica_room);
+
+			// Debug
+			//cout << "===================================" << endl;
+			//cout << "Room[ID: " << replica_roomid << ", Name: " << replica_room.room_name << "]의 데이터가 복제되었습니다." << endl;
+			//cout << "Usercount: " << replica_room.user_count << " 명" << endl;
+			//cout << "RoomState: " << replica_room.room_state << endl;
+			//for (int i = 0; i < MAX_USER; ++i)
+			//	cout << "User[" << i << "]\'s ID: " << replica_room.users[i] << endl;
+			//cout << "===================================\n" << endl;
+		}
+
+		break;
+	}// LBYLBY_ROOM_REPLICA end
 	}// switch end
 }
 
@@ -1215,6 +1323,110 @@ void do_worker()
 	}
 }
 
+//======================================================================
+void heartBeatFunc() {	// Heartbeat관련 스레드 함수
+	while (true) {
+		auto start_t = system_clock::now();
+
+		// ================================
+		// 1. Heartbeat 전송: 오른쪽 서버로 Heartbeat를 보냅니다.
+		if (my_server_id != MAX_LOGIC_SERVER - 1) {	// 가장 마지막 서버는 보내지 않는다. (마지막 서버는 자기가 하트비트를 받았을때 되받아치기만 한다.)
+			if (extended_servers[my_server_id + 1].s_state != ST_ACCEPTED) continue;
+
+			SS_HEARTBEAT_PACKET hb_packet;
+			hb_packet.size = sizeof(SS_HEARTBEAT_PACKET);
+			hb_packet.type = SS_HEARTBEAT;
+			hb_packet.sender_id = my_server_id;
+			extended_servers[my_server_id + 1].do_send(&hb_packet);	// 오른쪽 서버에 전송합니다.
+
+			extended_servers[my_server_id].heartbeat_send_time = chrono::system_clock::now();	// 전송한 시간을 업데이트
+		}
+
+		// ================================
+		// 2. Heartbeat 수신검사
+		// 오랫동안 Heartbeat를 받지 못한 서버구성원이 있는지 확인합니다.
+		if (my_server_id == 0) {
+			if (extended_servers[my_server_id + 1].s_state == ST_ACCEPTED) {	// 오른쪽 서버 검사
+				time_point nowtime = system_clock::now();
+				if (nowtime > extended_servers[my_server_id + 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
+					cout << "LobbyServer[" << my_server_id + 1 << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
+					disconnect(my_server_id + 1 + CP_KEY_EX_LBY, SESSION_LOBBY);
+				}
+			}
+		}
+		else if (my_server_id == 1) {
+			if (extended_servers[my_server_id - 1].s_state == ST_ACCEPTED) {	// 왼쪽 서버 검사
+				if (chrono::system_clock::now() > extended_servers[my_server_id - 1].heartbeat_recv_time + chrono::milliseconds(HB_GRACE_PERIOD)) {
+					cout << "LobbyServer[" << my_server_id - 1 << "]에게 Heartbeat를 오랫동안 받지 못했습니다. 서버 다운으로 간주합니다." << endl;
+					disconnect(my_server_id - 1 + CP_KEY_EX_LBY, SESSION_LOBBY);
+				}
+			}
+		}
+
+		// ================================
+		// 3. Data Replica 전송 (자신이 Active서버 일때에만)
+		if (b_active_server) {
+			// 데이터복제 패킷을 받게될 Standby서버의 id를 알아냅니다.
+			int standby_id = -1;
+			if (my_server_id == 0)
+				standby_id = 1;
+			else
+				standby_id = 0;
+
+			if (extended_servers[standby_id].s_state == ST_ACCEPTED) {
+				// 1. 유저 정보 복제
+				for (auto& cl : clients) {
+					if (cl.s_state != ST_INGAME) continue;
+
+					LBYLBY_MEMBER_REPLICA_PACKET member_replica_pack;
+					member_replica_pack.size = sizeof(LBYLBY_MEMBER_REPLICA_PACKET);
+					member_replica_pack.type = LBYLBY_MEMBER_REPLICA;
+					member_replica_pack.id = cl.id;
+					member_replica_pack.curr_room = cl.curr_room;
+					member_replica_pack.inroom_index = cl.inroom_index;
+					member_replica_pack.inroom_state = cl.inroom_state;
+					strcpy_s(member_replica_pack.name, cl.name);
+					member_replica_pack.role = cl.role;
+
+					extended_servers[standby_id].do_send(&member_replica_pack);
+
+					//cout << "[REPLICA TEST] Client[ID: " << cl.id << ", Name: " << member_replica_pack.name << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다." << endl;
+					//cout << "Room: " << member_replica_pack.curr_room << ", RoomIndex: " << member_replica_pack.inroom_index
+					//	<< ", ReadyState: " << (int)member_replica_pack.inroom_state << ", GameRole: " << (int)member_replica_pack.role << "\n" << endl;
+				}
+
+				// 2. 게임 방 정보 복제
+				for (auto& room : game_rooms) {
+					LBYLBY_ROOM_REPLICA_PACKET room_replica_pack;
+					room_replica_pack.size = sizeof(LBYLBY_ROOM_REPLICA_PACKET);
+					room_replica_pack.type = LBYLBY_ROOM_REPLICA;
+					room_replica_pack.room_id = room.room_id;
+					strcpy_s(room_replica_pack.room_name, room.room_name);
+					room_replica_pack.room_state = room_replica_pack.room_state;
+					for (int i = 0; i < MAX_USER; ++i)
+						room_replica_pack.users[i] = room.users[i];
+					room_replica_pack.user_count = room.user_count;
+
+					extended_servers[standby_id].do_send(&room_replica_pack);
+
+					//cout << "[REPLICA TEST] Room[ID: " << room_replica_pack.room_id << ", Name: " << room_replica_pack.room_name
+					//	<< "]의 정보를 Sever[" << standby_id << "]에게 전달합니다." << endl;
+					//cout << "RoomState: " << (int)room_replica_pack.room_state << ", UserCount: " << room_replica_pack.user_count << endl;
+					//for (int i = 0; i < MAX_USER; ++i)
+					//	cout << "User[" << i << "]\'s ID: " << room_replica_pack.users[i] << endl;
+					//cout << "\n";
+				}
+			}
+		}
+
+		// ================================
+		// 4. 스레드 대기 (과부하 방지)
+		auto curr_t = system_clock::now();
+		if (curr_t - start_t < static_cast<milliseconds>(HB_SEND_CYCLE)) {
+			this_thread::sleep_for(static_cast<milliseconds>(HB_SEND_CYCLE) - (curr_t - start_t));
+		}
+	}
+}
 
 //======================================================================
 int main(int argc, char* argv[])
@@ -1389,7 +1601,7 @@ int main(int argc, char* argv[])
 	SOCKADDR_IN server_addr;
 	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(PORTNUM_LOBBY_0);
+	server_addr.sin_port = htons(sc_portnum);
 	server_addr.sin_addr.S_un.S_addr = INADDR_ANY;
 	bind(g_sc_listensock, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 	listen(g_sc_listensock, SOMAXCONN);
@@ -1415,9 +1627,12 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < 6; ++i)
 		worker_threads.emplace_back(do_worker);			// 메인서버-npc서버 통신용 Worker스레드
 
+	thread HA_thread(heartBeatFunc);
+
 	for (auto& th : worker_threads)
 		th.join();
 
+	HA_thread.join();
 
 	//closesocket(g_sc_listensock);
 	WSACleanup();
@@ -1559,7 +1774,7 @@ void disconnect(int target_id, int target)
 		// XD폴더 내에서 동작할 때(내부 테스트)와 외부에서 실행할 때를 구분해줍니다.
 		string XDFolderKeyword = "XD";
 		if (filesystem::current_path().string().find(XDFolderKeyword) != string::npos) {
-			ShellExecute(NULL, L"open", L"LobbyServer.exe", wchar_buf, L"./x64/Release", SW_SHOW);	// 내부 테스트용
+			ShellExecute(NULL, L"open", L"LobbyServer.exe", wchar_buf, L"../../ServerManager/ServerManager/Servers", SW_SHOW);	// 내부 테스트용
 		}
 		else {
 			ShellExecute(NULL, L"open", L"LobbyServer.exe", wchar_buf, L".", SW_SHOW);					// 외부 수출용 (exe로 실행될때)

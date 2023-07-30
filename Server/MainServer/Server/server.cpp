@@ -25,6 +25,7 @@ enum PACKET_PROCESS_TYPE { OP_ACCEPT, OP_RECV, OP_SEND, OP_CONNECT };
 enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_RUNNING_SERVER, ST_DOWN_SERVER };
 enum SESSION_TYPE { SESSION_CLIENT, SESSION_EXTENDED_SERVER, SESSION_NPC };
 
+SOCKET manager_socket;
 
 //======================================================================
 chrono::system_clock::time_point g_s_start_time;	// 서버 시작시간  (단위: ms)
@@ -849,7 +850,7 @@ void disconnect(int target_id, int target)
 		// XD폴더 내에서 동작할 때(내부 테스트)와 외부에서 실행할 때를 구분해줍니다.
 		string XDFolderKeyword = "XD";
 		if (filesystem::current_path().string().find(XDFolderKeyword) != string::npos) {
-			ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L"../../../Execute/Execute_S", SW_SHOW);	// 내부 테스트용
+			ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L"../../ServerManager/ServerManager/Servers", SW_SHOW);	// 내부 테스트용
 		}
 		else {
 			ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L".", SW_SHOW);					// 외부 수출용 (exe로 실행될때)
@@ -2298,15 +2299,15 @@ void process_packet(int client_id, char* packet)
 
 		clients[replica_id].s_lock.unlock();
 
-		//cout << "Client[" << replica_id << "]의 데이터가 복제되었습니다." << endl;
-		//cout << "===================================" << endl;
-		//cout << "Name: " << clients[replica_id].name << endl;
-		//cout << "Stage: " << clients[replica_id].curr_stage << endl;
-		//cout << "State: " << clients[replica_id].pl_state << endl;
-		//cout << "Pos: " << clients[replica_id].pos.x << ", " << clients[replica_id].pos.y << ", " << clients[replica_id].pos.z << endl;
-		//cout << "LookVec: " << clients[replica_id].m_lookvec.x << ", " << clients[replica_id].m_lookvec.y << ", " << clients[replica_id].m_lookvec.z << endl;
-		//cout << "STime: " << replica_pack->curr_stage << "ms." << endl;
-		//cout << "===================================\n" << endl;
+		cout << "Client[" << replica_id << "]의 데이터가 복제되었습니다." << endl;
+		cout << "===================================" << endl;
+		cout << "Name: " << clients[replica_id].name << endl;
+		cout << "Stage: " << clients[replica_id].curr_stage << endl;
+		cout << "State: " << clients[replica_id].pl_state << endl;
+		cout << "Pos: " << clients[replica_id].pos.x << ", " << clients[replica_id].pos.y << ", " << clients[replica_id].pos.z << endl;
+		cout << "LookVec: " << clients[replica_id].m_lookvec.x << ", " << clients[replica_id].m_lookvec.y << ", " << clients[replica_id].m_lookvec.z << endl;
+		cout << "STime: " << replica_pack->curr_stage << "ms." << endl;
+		cout << "===================================\n" << endl;
 		break;
 	}// SS_DATA_REPLICA end
 	case NPC_FULL_INFO:
@@ -3258,10 +3259,10 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 
 					extended_servers[standby_id].do_send(&replica_pack);
 
-					//cout << "[REPLICA TEST] Client[" << cl.id << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다. - line: 1413" << endl;
-					//cout << "Stage: " << replica_pack.curr_stage << ", State: " << replica_pack.state
-					//	<< ", Pos: " << replica_pack.x << ", " << replica_pack.y << ", " << replica_pack.z
-					//	<< ", Look: " << replica_pack.look_x << ", " << replica_pack.look_y << ", " << replica_pack.look_z << "\n" << endl;
+					cout << "[REPLICA TEST] Client[" << cl.id << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다. - line: 1413" << endl;
+					cout << "Stage: " << replica_pack.curr_stage << ", State: " << replica_pack.state
+						<< ", Pos: " << replica_pack.x << ", " << replica_pack.y << ", " << replica_pack.z
+						<< ", Look: " << replica_pack.look_x << ", " << replica_pack.look_y << ", " << replica_pack.look_z << "\n" << endl;
 				}
 			}
 		}
@@ -3453,6 +3454,17 @@ int main(int argc, char* argv[])
 	}
 	extended_servers[my_server_id].id = my_server_id;
 	extended_servers[my_server_id].s_state = ST_ACCEPTED;
+
+	//======================================================================
+	// [ HA - 서버 매니저 연결 ]
+	manager_socket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+	SOCKADDR_IN manager_addr;
+	ZeroMemory(&manager_addr, sizeof(manager_addr));
+	manager_addr.sin_family = AF_INET;
+	manager_addr.sin_port = htons(PORTNUM_MANAGER);
+	inet_pton(AF_INET, "127.0.0.1", &manager_addr.sin_addr);
+	connect(manager_socket, reinterpret_cast<sockaddr*>(&manager_addr), sizeof(manager_addr));
+
 
 	//======================================================================
 	// [ Main ]
