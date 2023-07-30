@@ -1448,11 +1448,10 @@ void uiThreadFunc() {
 			// 11. 게임 오버 UI
 			if (b_gameover && !gGameFramework.m_missionClear && !gGameFramework.m_missionFailed) {
 				gGameFramework.m_spendYourlife = true;
-				gGameFramework.m_missionClear = false;
-				gGameFramework.m_missionFailed = false;
 			}
 		}
 		this_thread::yield();
 	}
 }
+
 

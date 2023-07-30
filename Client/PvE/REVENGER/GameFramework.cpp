@@ -1682,6 +1682,7 @@ void CGameFramework::FrameAdvance()
 
 			if (m_occupationnum >= 99 && !m_missionFailed) {
 				m_missionClear = true;
+				m_spendYourlife = false;
 			}
 		}
 		// Compress
@@ -1879,7 +1880,7 @@ void CGameFramework::FrameAdvance()
 				}
 			}
 		}
-		if (m_spendYourlife && !m_missionClear && !m_missionFailed) {
+		if (m_spendYourlife) {
 			if (m_printTime < 120) {
 				D2D_POINT_2F D2_MissionFailedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 181.5f };
 				D2D_RECT_F D2_MissionFailedBGUIRect = { 0.0f, 0.0f, m_missionFailedUI * 19.6f, 363.0f };
@@ -3641,6 +3642,7 @@ void CGameFramework::otherPlayerDyingMotion(int id)
 				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->GetPosition().x,
 				7.0f,
 				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->GetPosition().z));
+			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->DieState(m_GameTimer.GetTimeElapsed());
 
 			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType
 				= ANIMATION_TYPE_ONCE;
