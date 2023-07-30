@@ -25,15 +25,18 @@ constexpr int MAX_NPC_SERVER = 2;
 constexpr int PORTNUM_LGCNPC_0 = 9930;
 constexpr int PORTNUM_LGCNPC_1 = 9931;
 
-// 5. 로비서버-로비서버 통신 (서버 수평확장)
+// 5. 서버 매니저 통신
+constexpr int PORTNUM_MANAGER = 9990;
+
+// 6. 로비서버-로비서버 통신 (서버 수평확장)
 constexpr int HA_PORTNUM_LBY0 = 10010;
 constexpr int HA_PORTNUM_LBY1 = 10011;
 
-// 6. 로직서버-로직서버 통신 (서버 수평확장)
+// 7. 로직서버-로직서버 통신 (서버 수평확장)
 constexpr int HA_PORTNUM_S0 = 10020;
 constexpr int HA_PORTNUM_S1 = 10021;
 
-// 7. NPC서버-NPC서버 통신 (서버 수평확장)
+// 8. NPC서버-NPC서버 통신 (서버 수평확장)
 constexpr int HA_PORTNUM_NPC0 = 10030;
 constexpr int HA_PORTNUM_NPC1 = 10031;
 
