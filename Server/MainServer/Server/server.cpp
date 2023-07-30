@@ -3,6 +3,7 @@
 #include <MSWSock.h>
 #include <thread>
 #include <array>
+#include <ctime>
 #include <vector>
 #include <unordered_set>
 #include <chrono>
@@ -28,8 +29,8 @@ enum SESSION_TYPE { SESSION_CLIENT, SESSION_EXTENDED_SERVER, SESSION_NPC };
 SOCKET manager_socket;
 
 //======================================================================
-chrono::system_clock::time_point g_s_start_time;	// 서버 시작시간  (단위: ms)
-milliseconds g_curr_servertime;
+time_t g_start_t;
+unsigned int g_curr_t;
 bool b_isfirstplayer;	// 첫 player입장인지. (첫 클라 접속부터 서버시간이 흐르도록 하기 위함)
 mutex servertime_lock;	// 서버시간 lock
 
@@ -739,8 +740,8 @@ void resetGame() {	// 한판이 끝날때마다 모든 게임정보를 초기상태로 돌려놓는다.
 	// Time
 	cout << "Server Time Reset...";
 	servertime_lock.lock();
-	g_s_start_time = system_clock::now();
-	g_curr_servertime = milliseconds(0);
+	g_start_t = time(NULL);
+	g_curr_t = 0;
 	b_isfirstplayer = true;
 	servertime_lock.unlock();
 	cout << " - OK." << endl;
@@ -751,8 +752,8 @@ void resetGame() {	// 한판이 끝날때마다 모든 게임정보를 초기상태로 돌려놓는다.
 	curr_mission_stage[1] = 0;
 	stage1_missions[0].curr = 0.f;
 	stage1_missions[1].curr = 0.f;
-	stage1_missions[0].start = static_cast<int>(g_curr_servertime.count());
-	stage1_missions[1].start = static_cast<int>(g_curr_servertime.count());
+	stage1_missions[0].start = 0.f;
+	stage1_missions[1].start = 0.f;
 	mission_lock.unlock();
 	cout << " - OK." << endl;
 
@@ -936,7 +937,7 @@ void process_packet(int client_id, char* packet)
 		// 서버구동 이후 첫번째 클라이언트의 접속이라면 그때부터 서버시간이 흐르기 시작합니다.
 		if (b_isfirstplayer) {
 			cout << "서버 시간이 흐르기 시작합니다.\n" << endl;
-			g_s_start_time = system_clock::now();
+			g_start_t = time(NULL);
 			b_isfirstplayer = false;
 		}
 
@@ -990,7 +991,7 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].send_mission_packet(clients[client_id].curr_stage);
 		}
 
-		stage1_missions[0].start = static_cast<int>(g_curr_servertime.count());
+		stage1_missions[0].start = g_curr_t;
 		cout << "[" << stage1_missions[0].start << "]  새로운 미션 추가: ";
 		switch (stage1_missions[0].type) {
 		case MISSION_KILL:
@@ -1188,7 +1189,7 @@ void process_packet(int client_id, char* packet)
 				if (!clients[client_id].b_occupying) {		// 점령지역에 새로 들어온 경우
 					clients[client_id].s_lock.lock();
 					clients[client_id].b_occupying = true;	// 점령 상태 On
-					cout << "Client[" << client_id << "]가 점령을 시작합니다. (START TIME: " << static_cast<int>(g_curr_servertime.count()) << ")\n" << endl;
+					cout << "Client[" << client_id << "]가 점령을 시작합니다. (START TIME: " << g_curr_t << ")\n" << endl;
 					clients[client_id].s_lock.unlock();
 				}
 			}
@@ -1197,7 +1198,7 @@ void process_packet(int client_id, char* packet)
 				if (clients[client_id].b_occupying) {		// 점령지역 밖으로 탈출한 경우
 					clients[client_id].s_lock.lock();
 					clients[client_id].b_occupying = false;	// 점령 상태 Off
-					cout << "Client[" << client_id << "]가 점령을 종료합니다. (END TIME: " << static_cast<int>(g_curr_servertime.count()) << ")\n" << endl;
+					cout << "Client[" << client_id << "]가 점령을 종료합니다. (END TIME: " << g_curr_t << ")\n" << endl;
 					clients[client_id].s_lock.unlock();
 				}
 			}
@@ -1663,7 +1664,7 @@ void process_packet(int client_id, char* packet)
 										cl.send_mission_packet(clients[client_id].curr_stage);
 									}
 
-									stage1_missions[curr_mission].start = static_cast<int>(g_curr_servertime.count());
+									stage1_missions[curr_mission].start = g_curr_t;
 									cout << "[" << stage1_missions[curr_mission].start << "] 새로운 미션 추가: ";
 									switch (stage1_missions[curr_mission].type) {
 									case MISSION_KILL:
@@ -1960,7 +1961,7 @@ void process_packet(int client_id, char* packet)
 					cl.send_mission_packet(clients[client_id].curr_stage);
 				}
 
-				stage1_missions[curr_mission].start = static_cast<int>(g_curr_servertime.count());
+				stage1_missions[curr_mission].start = g_curr_t;
 				cout << "[" << stage1_missions[curr_mission].start << "] 새로운 미션 추가: ";
 				switch (stage1_missions[curr_mission].type) {
 				case MISSION_KILL:
@@ -2328,9 +2329,8 @@ void process_packet(int client_id, char* packet)
 	{
 		SS_GAME_REPLICA_PACKET* replica_pack = reinterpret_cast<SS_GAME_REPLICA_PACKET*>(packet);
 
-		g_curr_servertime = milliseconds(replica_pack->curr_servertime);
-		//g_s_start_time = time_point<system_clock>(milliseconds(replica_pack->s_start_time));
-		g_s_start_time = std::chrono::system_clock::time_point(std::chrono::milliseconds(replica_pack->s_start_time));
+		g_start_t = replica_pack->s_start_time;
+		g_curr_t = replica_pack->curr_servertime;
 
 		curr_mission_stage[0] = replica_pack->curr_mission_stage[0];
 		curr_mission_stage[1] = replica_pack->curr_mission_stage[1];
@@ -2351,8 +2351,8 @@ void process_packet(int client_id, char* packet)
 		// Debug
 		cout << "===================================" << endl;
 		cout << "게임 세부 데이터가 복제되었습니다." << endl;
-		cout << "서버 시작시간: " << static_cast<int>(g_s_start_time.time_since_epoch().count()) << endl;
-		cout << "현재 서버시간: " << g_curr_servertime << endl;
+		cout << "서버 시작시간: " << g_start_t << endl;
+		cout << "현재 서버시간: " << g_curr_t << endl;
 		cout << "현재 미션: " << curr_mission_stage[1] << endl;
 		cout << "미션 0 - 시작: " << stage1_missions[0].start << ", 진행: " << stage1_missions[0].curr << endl;
 		cout << "미션 0 - 시작: " << stage1_missions[1].start << ", 진행: " << stage1_missions[1].curr << endl;
@@ -3086,7 +3086,7 @@ void timerFunc() {
 		if (b_active_server && !b_isfirstplayer) {
 			// 서버 시간 업데이트
 			servertime_lock.lock();
-			g_curr_servertime = duration_cast<milliseconds>(start_t - g_s_start_time);
+			g_curr_t = time(NULL) - g_start_t;
 			servertime_lock.unlock();
 			for (auto& cl : clients) {
 				if (cl.s_state != ST_INGAME) continue;
@@ -3098,12 +3098,12 @@ void timerFunc() {
 				int left_time;
 				switch (cl.curr_stage) {
 				case 1:
-					left_time = STAGE1_TIMELIMIT * 1000 - static_cast<int>(g_curr_servertime.count());
+					left_time = STAGE1_TIMELIMIT - g_curr_t;
 					if (left_time <= 0) {
 						ticking_packet.servertime_ms = STAGE1_TIMELIMIT * 1000;
 					}
 					else {
-						ticking_packet.servertime_ms = static_cast<int>(g_curr_servertime.count());
+						ticking_packet.servertime_ms = g_curr_t * 1000;
 					}
 					break;
 				default:
@@ -3203,7 +3203,7 @@ void timerFunc() {
 				else {	// 아직 점령 진행중
 					// 미션 진행 업데이트
 					mission_lock.lock();
-					stage1_missions[curr_mission_id].curr += 30 * occupy_member_cnt * occupy_member_cnt;	// 점령중인 사람이 많을 수록 게이지가 빨리 차오른다.
+					stage1_missions[curr_mission_id].curr += 40 * occupy_member_cnt * 2;	// 점령중인 사람이 많을 수록 게이지가 빨리 차오른다.
 					mission_lock.unlock();
 
 					for (auto& cl : clients) {
@@ -3329,9 +3329,8 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 				SS_GAME_REPLICA_PACKET game_replica_pack;
 				game_replica_pack.size = sizeof(SS_GAME_REPLICA_PACKET);
 				game_replica_pack.type = SS_GAME_REPLICA;
-				auto start_ms = g_s_start_time.time_since_epoch().count();
-				game_replica_pack.s_start_time = static_cast<unsigned int>(start_ms);
-				game_replica_pack.curr_servertime = static_cast<int>(g_curr_servertime.count());
+				game_replica_pack.s_start_time = g_start_t;
+				game_replica_pack.curr_servertime = g_curr_t;
 
 				game_replica_pack.curr_mission_stage[0] = curr_mission_stage[0];
 				game_replica_pack.curr_mission_stage[1] = curr_mission_stage[1];
