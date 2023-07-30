@@ -2017,11 +2017,11 @@ void CGameFramework::FrameAdvance()
 
 	if (m_nMode == SCENE1STAGE)
 	{
-		m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
-		size_t nLength = _tcslen(m_pszFrameRate);
-		XMFLOAT3 xmf3Position = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition();
-		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
-		::SetWindowText(m_hWnd, m_pszFrameRate);
+		//m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
+		//size_t nLength = _tcslen(m_pszFrameRate);
+		//XMFLOAT3 xmf3Position = ((CHumanPlayer*)((Stage1*)m_pScene)->m_pPlayer)->GetPosition();
+		//_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
+		//::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
 }
 
