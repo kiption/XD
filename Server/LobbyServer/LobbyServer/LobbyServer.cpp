@@ -638,6 +638,21 @@ void process_packet(int client_id, char* packet)
 				}
 				else if (room.user_count == 0) {		// 자신이 그 방에 마지막 인원이었다면
 					b_lastmember = true;
+
+					// 수평확장 서버로 방이 삭제되었음을 알려줍니다.
+					int ext_svr_id = 0;
+					if (my_server_id == 0) ext_svr_id = 1;
+					else if (my_server_id == 1) ext_svr_id = 0;
+					if (b_active_server && extended_servers[ext_svr_id].s_state == ST_ACCEPTED) {
+						LBYLBY_ROOM_ERASE_PACKET room_erase_packet;
+						room_erase_packet.size = sizeof(LBYLBY_ROOM_ERASE_PACKET);
+						room_erase_packet.type = LBYLBY_ROOM_ERASE;
+						room_erase_packet.room_id = room.room_id;
+						extended_servers[ext_svr_id].do_send(&room_erase_packet);
+						cout << "[HA] 대기서버에게 Room[" << room_erase_packet.room_id << "] 삭제 패킷을 전송하였습니다.\n" << endl;
+					}
+
+					// 서버에서 방 삭제
 					game_rooms.erase(remove_if(game_rooms.begin(), game_rooms.end(), [](const Game_Room& curr_room) {
 						return curr_room.user_count == 0;}), game_rooms.end());
 				}
@@ -1068,13 +1083,13 @@ void process_packet(int client_id, char* packet)
 		clients[replica_id].role = recv_pack->role;
 
 		// Debug
-		cout << "===================================" << endl;
-		cout << "Client[ID: " << replica_id << ", Name: " << clients[replica_id].name << "]의 데이터가 복제되었습니다." << endl;
-		cout << "Room: " << clients[replica_id].curr_room << endl;
-		cout << "RoomIndex: " << clients[replica_id].inroom_index << endl;
-		cout << "ReadyState: " << clients[replica_id].inroom_state << endl;
-		cout << "Role: " << clients[replica_id].role << endl;
-		cout << "===================================\n" << endl;
+		//cout << "===================================" << endl;
+		//cout << "Client[ID: " << replica_id << ", Name: " << clients[replica_id].name << "]의 데이터가 복제되었습니다." << endl;
+		//cout << "Room: " << clients[replica_id].curr_room << endl;
+		//cout << "RoomIndex: " << clients[replica_id].inroom_index << endl;
+		//cout << "ReadyState: " << clients[replica_id].inroom_state << endl;
+		//cout << "Role: " << clients[replica_id].role << endl;
+		//cout << "===================================\n" << endl;
 		break;
 	}// LBYLBY_MEMBER_REPLICA end
 	case LBYLBY_ROOM_REPLICA:
@@ -1083,6 +1098,8 @@ void process_packet(int client_id, char* packet)
 		LBYLBY_ROOM_REPLICA_PACKET* recv_pack = reinterpret_cast<LBYLBY_ROOM_REPLICA_PACKET*>(packet);
 		int replica_roomid = recv_pack->room_id;
 		bool already_created = false;
+
+		room_count = recv_pack->total_room_count;
 
 		// 우선 이미 만들어진 방인지 확인합니다.
 		for (auto& room : game_rooms) {
@@ -1103,6 +1120,7 @@ void process_packet(int client_id, char* packet)
 				//cout << "RoomState: " << room.room_state << endl;
 				//for (int i = 0; i < MAX_USER; ++i)
 				//	cout << "User[" << i << "]\'s ID: " << room.users[i] << endl;
+				//cout << "TotalRoom: " << room_count << " 개" << endl;
 				//cout << "===================================\n" << endl;
 				break;
 			}
@@ -1122,7 +1140,8 @@ void process_packet(int client_id, char* packet)
 
 			// Debug
 			//cout << "===================================" << endl;
-			//cout << "Room[ID: " << replica_roomid << ", Name: " << replica_room.room_name << "]의 데이터가 복제되었습니다." << endl;
+			//cout << "처음 복제받는 정보의 방입니다. 방을 새로 추가합니다." << endl;
+			//cout << "Room[ID: " << replica_roomid << ", Name: " << replica_room.room_name << "]의 데이터가 추가되었습니다." << endl;
 			//cout << "Usercount: " << replica_room.user_count << " 명" << endl;
 			//cout << "RoomState: " << replica_room.room_state << endl;
 			//for (int i = 0; i < MAX_USER; ++i)
@@ -1132,6 +1151,25 @@ void process_packet(int client_id, char* packet)
 
 		break;
 	}// LBYLBY_ROOM_REPLICA end
+	case LBYLBY_ROOM_ERASE:
+	{
+		if (b_active_server) break;	// 대기서버만 삭제 명령을 받는다.
+		LBYLBY_ROOM_ERASE_PACKET* recv_pack = reinterpret_cast<LBYLBY_ROOM_ERASE_PACKET*>(packet);
+
+		for (auto& room : game_rooms) {
+			if (room.room_id == recv_pack->room_id) {
+				room.user_count = 0;
+
+				// 서버에서 방을 삭제합니다.
+				game_rooms.erase(remove_if(game_rooms.begin(), game_rooms.end(), [](const Game_Room& curr_room) {
+					return curr_room.user_count == 0;}), game_rooms.end());
+				//cout << "[HA] 비어있는 방 삭제\n" << endl;
+				break;
+			}
+		}
+
+		break;
+	}// LBYLBY_ROOM_ERASE end
 	}// switch end
 }
 
@@ -1415,9 +1453,9 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 
 					extended_servers[standby_id].do_send(&member_replica_pack);
 
-					cout << "[REPLICA TEST] Client[ID: " << cl.id << ", Name: " << member_replica_pack.name << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다." << endl;
-					cout << "Room: " << member_replica_pack.curr_room << ", RoomIndex: " << member_replica_pack.inroom_index
-						<< ", ReadyState: " << (int)member_replica_pack.inroom_state << ", GameRole: " << (int)member_replica_pack.role << "\n" << endl;
+					//cout << "[REPLICA TEST] Client[ID: " << cl.id << ", Name: " << member_replica_pack.name << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다." << endl;
+					//cout << "Room: " << member_replica_pack.curr_room << ", RoomIndex: " << member_replica_pack.inroom_index
+					//	<< ", ReadyState: " << (int)member_replica_pack.inroom_state << ", GameRole: " << (int)member_replica_pack.role << "\n" << endl;
 				}
 
 				// 2. 게임 방 정보 복제
@@ -1431,6 +1469,7 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 					for (int i = 0; i < MAX_USER; ++i)
 						room_replica_pack.users[i] = room.users[i];
 					room_replica_pack.user_count = room.user_count;
+					room_replica_pack.total_room_count = room_count;
 
 					extended_servers[standby_id].do_send(&room_replica_pack);
 
@@ -1439,6 +1478,7 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 					//cout << "RoomState: " << (int)room_replica_pack.room_state << ", UserCount: " << room_replica_pack.user_count << endl;
 					//for (int i = 0; i < MAX_USER; ++i)
 					//	cout << "User[" << i << "]\'s ID: " << room_replica_pack.users[i] << endl;
+					//cout << "TotalRoom: " << room_replica_pack.total_room_count << " 개" << endl;
 					//cout << "\n";
 				}
 			}
@@ -1694,6 +1734,21 @@ void disconnect(int target_id, int target)
 					}
 					else if (room.user_count == 0) {		// 자신이 그 방에 마지막 인원이었다면
 						b_lastmember = true;
+
+						// 수평확장 서버로 방이 삭제되었음을 알려줍니다.
+						int ext_svr_id = 0;
+						if (my_server_id == 0) ext_svr_id = 1;
+						else if (my_server_id == 1) ext_svr_id = 0;
+						if (b_active_server && extended_servers[ext_svr_id].s_state == ST_ACCEPTED) {
+							LBYLBY_ROOM_ERASE_PACKET room_erase_packet;
+							room_erase_packet.size = sizeof(LBYLBY_ROOM_ERASE_PACKET);
+							room_erase_packet.type = LBYLBY_ROOM_ERASE;
+							room_erase_packet.room_id = room.room_id;
+							extended_servers[ext_svr_id].do_send(&room_erase_packet);
+							cout << "[HA] 대기서버에게 Room[" << room_erase_packet.room_id << "] 삭제 패킷을 전송하였습니다.\n" << endl;
+						}						
+
+						// 서버에서 방을 삭제합니다.
 						game_rooms.erase(remove_if(game_rooms.begin(), game_rooms.end(), [](const Game_Room& curr_room) {
 							return curr_room.user_count == 0;}), game_rooms.end());
 					}
@@ -1805,10 +1860,25 @@ void disconnect(int target_id, int target)
 			ShellExecute(NULL, L"open", L"LobbyServer.exe", wchar_buf, L".", SW_SHOW);					// 외부 수출용 (exe로 실행될때)
 		}
 
-		// 클라이언트에게 Active서버가 다운되었다고 알려줌.
+		// Standby서버였다면 Active로 승격
 		if (!b_active_server) {	// 내가 Active가 아니면 상대가 Active임. (서버가 2개밖에 없기 때문)
 			b_active_server = true;
 			cout << "현재 Server[" << my_server_id << "] 가 Active 서버로 승격되었습니다. [ MODE: Stand-by -> Active ]\n" << endl;
+
+			SC_STANDBY_RUN_PACKET standby_run_packet;
+			standby_run_packet.size = sizeof(SC_STANDBY_RUN_PACKET);
+			standby_run_packet.type = SC_STANDBY_RUN;
+			if (my_server_id == 0)
+				standby_run_packet.standby_s_id = 1;
+			else
+				standby_run_packet.standby_s_id = 0;
+			for (auto& send_cl : clients) {
+				if (send_cl.s_state != ST_INGAME) continue;
+
+				send_cl.s_lock.lock();
+				send_cl.do_send(&standby_run_packet);
+				send_cl.s_lock.unlock();
+			}
 		}
 
 		// 만약 자신의 오른쪽 서버가 다운되었는데, 그 서버가 서버군의 마지막 서버인 경우 재실행된 서버에게 ConnectEx 요청을 보냅니다.

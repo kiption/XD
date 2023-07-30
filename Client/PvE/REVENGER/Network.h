@@ -1285,14 +1285,71 @@ void processPacket(char* ptr)
 	}//SC_PING_RETURN case end
 	case SC_ACTIVE_DOWN:
 	{
-		if (curr_servertype != SERVER_LOGIC) break;
 		SC_ACTIVE_DOWN_PACKET* recv_packet = reinterpret_cast<SC_ACTIVE_DOWN_PACKET*>(ptr);
 
 		if (recv_packet->prev_s_id == active_servernum) {
 			active_servernum = recv_packet->my_s_id;
 		}
 		break;
-	}//SC_BULLET_COUNT case end
+	}//SC_ACTIVE_DOWN case end
+	case SC_STANDBY_RUN:
+	{
+		SC_STANDBY_RUN_PACKET* recv_packet = reinterpret_cast<SC_STANDBY_RUN_PACKET*>(ptr);
+		int server_id = recv_packet->standby_s_id;
+
+		int origin_active_svrnum = active_servernum;	// 저장
+		active_servernum = server_id;
+		cout << "다운되었다 살아난 서버[" << server_id << "]로 다시 연결합니다." << endl;
+		// 소켓 재연결
+		if (curr_servertype == SERVER_LOBBY) {
+			lby_socket[server_id] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+			SOCKADDR_IN lby_addr;
+			ZeroMemory(&lby_addr, sizeof(lby_addr));
+			lby_addr.sin_family = AF_INET;
+			int new_portnum = PORTNUM_LOBBY_0 + server_id;
+			lby_addr.sin_port = htons(new_portnum);
+			if (server_id == 0)
+				inet_pton(AF_INET, IPADDR_LOBBY0, &lby_addr.sin_addr);
+			else
+				inet_pton(AF_INET, IPADDR_LOBBY1, &lby_addr.sin_addr);
+			connect(lby_socket[server_id], reinterpret_cast<sockaddr*>(&lby_addr), sizeof(lby_addr));
+
+			CLBY_CONNECT_PACKET conn_packet;
+			conn_packet.size = sizeof(CLBY_CONNECT_PACKET);
+			conn_packet.type = CLBY_CONNECT;
+			strcpy_s(conn_packet.name, players_info[my_id].m_name);
+
+			sendPacket(&conn_packet);
+			recvPacket();
+		}
+		else {
+			lgc_socket[server_id] = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 0, 0, WSA_FLAG_OVERLAPPED);
+			SOCKADDR_IN server0_addr;
+			ZeroMemory(&server0_addr, sizeof(server0_addr));
+			server0_addr.sin_family = AF_INET;
+			int new_portnum = PORTNUM_LOGIC_0 + server_id;
+			server0_addr.sin_port = htons(new_portnum);
+			//inet_pton(AF_INET, SERVER_ADDR, &server0_addr.sin_addr);// 루프백
+			if (server_id == 0)
+				inet_pton(AF_INET, IPADDR_LOGIC0, &server0_addr.sin_addr);
+			else
+				inet_pton(AF_INET, IPADDR_LOGIC1, &server0_addr.sin_addr);
+			connect(lgc_socket[server_id], reinterpret_cast<sockaddr*>(&server0_addr), sizeof(server0_addr));
+
+			CS_LOGIN_PACKET login_pack;
+			login_pack.size = sizeof(CS_LOGIN_PACKET);
+			login_pack.type = CS_LOGIN;
+			strcpy_s(login_pack.name, players_info[my_id].m_name);
+			login_pack.role = players_info[my_id].m_role;
+			login_pack.inroom_index = my_id;
+			login_pack.room_id = curr_room_id;
+			sendPacket(&login_pack);
+			recvPacket();
+		}
+		active_servernum = origin_active_svrnum;
+
+		break;
+	}//SC_STANDBY_RUN case end
 	//==========
 	// NPC서버
 	case NPC_MOVE:

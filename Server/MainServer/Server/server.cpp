@@ -856,10 +856,7 @@ void disconnect(int target_id, int target)
 			ShellExecute(NULL, L"open", L"Server.exe", wchar_buf, L".", SW_SHOW);					// 외부 수출용 (exe로 실행될때)
 		}
 
-		// 원격 이중화를 위해선 실행되는 PC의 "외부 IP"를 알아야 한다.
-
-
-		// 클라이언트에게 Active서버가 다운되었다고 알려줌.
+		// Standby서버였다면 Active로 승격
 		if (!b_active_server) {	// 내가 Active가 아니면 상대가 Active임. (서버가 2개밖에 없기 때문)
 			b_active_server = true;
 			cout << "현재 Server[" << my_server_id << "] 가 Active 서버로 승격되었습니다. [ MODE: Stand-by -> Active ]\n" << endl;
