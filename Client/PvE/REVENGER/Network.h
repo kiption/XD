@@ -562,7 +562,6 @@ void processPacket(char* ptr)
 		players_info[my_id].m_new_state_update = true;
 		cout << "자기 자신의 정보를 받았습니다. (Myid: " << my_id << ")" << endl;
 
-		trigger_stage1_playerinfo_load = true;
 		break;
 	}// SC_LOGIN_INFO case end
 	case SC_ADD_OBJECT:
@@ -588,6 +587,10 @@ void processPacket(char* ptr)
 				cout << "다른 플레이어(ID: " << recv_id << ")의 정보를 받았습니다." << endl;
 
 				curr_connection_num++;
+				if (curr_connection_num >= 3) {
+					curr_connection_num = 3;
+					trigger_stage1_playerinfo_load = true; 
+				}
 			}
 			else {
 				cout << "[SC_ADD Error] Unknown ID. (Input ID: " << recv_id << ")" << endl;
