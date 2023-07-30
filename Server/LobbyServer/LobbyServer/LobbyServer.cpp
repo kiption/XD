@@ -671,6 +671,8 @@ void process_packet(int client_id, char* packet)
 		lobby_clear_pack.type = LBYC_LOBBY_CLEAR;
 		clients[client_id].do_send(&lobby_clear_pack);
 
+		Sleep(10);
+
 		// 방 퇴장 요청을 보낸 클라이언트에게 로비에 있는 모든 방에 대한 간략한 정보를 보냅니다.
 		for (auto& room : game_rooms) {
 			LBYC_ADD_ROOM_PACKET room_info_pack;
