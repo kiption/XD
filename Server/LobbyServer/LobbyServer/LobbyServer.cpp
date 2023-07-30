@@ -60,7 +60,7 @@ public:
 };
 
 //======================================================================
-enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_LOGOUT };
+enum SESSION_STATE { ST_FREE, ST_ACCEPTED, ST_INGAME, ST_LOGOUT, ST_INGAME_BUTSTANDBY };
 enum SESSION_TYPE { SESSION_CLIENT, SESSION_LOBBY };
 void disconnect(int target_id, int target);
 class SESSION {
@@ -326,6 +326,12 @@ void process_packet(int client_id, char* packet)
 		CLBY_CONNECT_PACKET* recv_packet = reinterpret_cast<CLBY_CONNECT_PACKET*>(packet);
 		strcpy_s(clients[client_id].name, recv_packet->name);
 		cout << "새로운 클라이언트가 접속하였습니다. (ID: " << client_id << ", Name: " << clients[client_id].name << " )\n" << endl;
+
+		LBYC_UNIQUE_ID_PACKET unique_id_packet;
+		unique_id_packet.size = sizeof(LBYC_UNIQUE_ID_PACKET);
+		unique_id_packet.type = LBYC_UNIQUE_ID;
+		unique_id_packet.unique_id = client_id;	// 오직 얘만 가질 수 있는 ID값.
+		clients[client_id].do_send(&unique_id_packet);
 
 		break;
 	}// CLBY_CONNECT case end
@@ -999,11 +1005,24 @@ void process_packet(int client_id, char* packet)
 		disconnect(client_id, SESSION_CLIENT);
 		break;
 	}// CLBY_GAME_EXIT case end
+	case CS_PING:
+	{
+		CS_PING_PACKET* ping_pack = reinterpret_cast<CS_PING_PACKET*>(packet);
+
+		SC_PING_RETURN_PACKET ping_ret_pack;
+		ping_ret_pack.type = SC_PING_RETURN;
+		ping_ret_pack.size = sizeof(SC_PING_RETURN_PACKET);
+		ping_ret_pack.ping_sender_id = clients[client_id].id;
+		clients[client_id].do_send(&ping_ret_pack);
+
+		break;
+	}// CS_PING end
 	case CS_RELOGIN:
 	{
 		CS_RELOGIN_PACKET* re_login_pack = reinterpret_cast<CS_RELOGIN_PACKET*>(packet);
 
 		int re_login_id = re_login_pack->id;
+
 		clients[re_login_id].s_lock.lock();
 		clients[re_login_id].s_state = ST_INGAME;
 		clients[re_login_id].s_lock.unlock();
@@ -1036,6 +1055,8 @@ void process_packet(int client_id, char* packet)
 		LBYLBY_MEMBER_REPLICA_PACKET* recv_pack = reinterpret_cast<LBYLBY_MEMBER_REPLICA_PACKET*>(packet);
 		int replica_id = recv_pack->id;
 
+		clients[replica_id].id = replica_id;
+		//clients[replica_id].s_state = ST_INGAME_BUTSTANDBY;		// 클라는 게임중이지만 서버가 대기 서버임.
 		clients[replica_id].curr_room = recv_pack->curr_room;
 		clients[replica_id].inroom_index = recv_pack->inroom_index;
 		clients[replica_id].inroom_state = recv_pack->inroom_state;
@@ -1043,13 +1064,13 @@ void process_packet(int client_id, char* packet)
 		clients[replica_id].role = recv_pack->role;
 
 		// Debug
-		//cout << "===================================" << endl;
-		//cout << "Client[ID: " << replica_id << ", Name: " << clients[replica_id].name << "]의 데이터가 복제되었습니다." << endl;
-		//cout << "Room: " << clients[replica_id].curr_room << endl;
-		//cout << "RoomIndex: " << clients[replica_id].inroom_index << endl;
-		//cout << "ReadyState: " << clients[replica_id].inroom_state << endl;
-		//cout << "Role: " << clients[replica_id].role << endl;
-		//cout << "===================================\n" << endl;
+		cout << "===================================" << endl;
+		cout << "Client[ID: " << replica_id << ", Name: " << clients[replica_id].name << "]의 데이터가 복제되었습니다." << endl;
+		cout << "Room: " << clients[replica_id].curr_room << endl;
+		cout << "RoomIndex: " << clients[replica_id].inroom_index << endl;
+		cout << "ReadyState: " << clients[replica_id].inroom_state << endl;
+		cout << "Role: " << clients[replica_id].role << endl;
+		cout << "===================================\n" << endl;
 		break;
 	}// LBYLBY_MEMBER_REPLICA end
 	case LBYLBY_ROOM_REPLICA:
@@ -1390,9 +1411,9 @@ void heartBeatFunc() {	// Heartbeat관련 스레드 함수
 
 					extended_servers[standby_id].do_send(&member_replica_pack);
 
-					//cout << "[REPLICA TEST] Client[ID: " << cl.id << ", Name: " << member_replica_pack.name << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다." << endl;
-					//cout << "Room: " << member_replica_pack.curr_room << ", RoomIndex: " << member_replica_pack.inroom_index
-					//	<< ", ReadyState: " << (int)member_replica_pack.inroom_state << ", GameRole: " << (int)member_replica_pack.role << "\n" << endl;
+					cout << "[REPLICA TEST] Client[ID: " << cl.id << ", Name: " << member_replica_pack.name << "]의 정보를 Sever[" << standby_id << "]에게 전달합니다." << endl;
+					cout << "Room: " << member_replica_pack.curr_room << ", RoomIndex: " << member_replica_pack.inroom_index
+						<< ", ReadyState: " << (int)member_replica_pack.inroom_state << ", GameRole: " << (int)member_replica_pack.role << "\n" << endl;
 				}
 
 				// 2. 게임 방 정보 복제

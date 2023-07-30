@@ -28,6 +28,7 @@ SOCKET lgc_socket;	// 로직서버 소켓
 
 //==================================================
 int my_id;
+volatile int unique_id;	// 서버에 오직 얘만 가질 수 있는 ID (Clients 배열의 인덱스이기도 하다.) -> 서버 Failover때 이 값을 던져주도록하자.
 
 //==================================================
 volatile float servertime_ms;    // 실제 서버시간
@@ -225,7 +226,7 @@ void sendPacket(void* packet)
 				CS_RELOGIN_PACKET re_login_pack;
 				re_login_pack.size = sizeof(CS_RELOGIN_PACKET);
 				re_login_pack.type = CS_RELOGIN;
-				re_login_pack.id = my_id;
+				re_login_pack.id = unique_id;
 				sendPacket(&re_login_pack);
 				recvPacket();
 			}
@@ -300,8 +301,17 @@ void processPacket(char* ptr)
 {
 	switch (ptr[1])
 	{
-		//==========
-		// 로비서버
+	//==========
+	// 로비서버
+	case LBYC_UNIQUE_ID:
+	{
+		if (curr_servertype != SERVER_LOBBY) break;
+		LBYC_UNIQUE_ID_PACKET* recv_packet = reinterpret_cast<LBYC_UNIQUE_ID_PACKET*>(ptr);
+
+		unique_id = recv_packet->unique_id;
+
+		break;
+	}// LBYC_UNIQUE_ID case end
 	case LBYC_MATCH_FAIL:
 	{
 		if (curr_servertype != SERVER_LOBBY) break;
@@ -1286,13 +1296,10 @@ void processPacket(char* ptr)
 	}//SC_MAP_OBJINFO case end
 	case SC_PING_RETURN:
 	{
-		if (curr_servertype != SERVER_LOGIC) break;
 		SC_PING_RETURN_PACKET* recv_packet = reinterpret_cast<SC_PING_RETURN_PACKET*>(ptr);
 
-		if (recv_packet->ping_sender_id == my_id) {
-			last_pong = chrono::system_clock::now();
-			//cout << "pong\n" << endl;
-		}
+		last_pong = chrono::system_clock::now();
+
 		break;
 	}//SC_PING_RETURN case end
 	case SC_ACTIVE_DOWN:

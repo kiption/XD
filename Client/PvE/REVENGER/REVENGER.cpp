@@ -195,6 +195,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		{
 			if (gGameFramework.m_nMode == OPENINGSCENE)
 			{
+				// 1초마다 서버로 핑을 던져서 살아있는지 확인합니다.
+				if (chrono::system_clock::now() > last_ping + chrono::seconds(1)) {
+					CS_PING_PACKET ping_packet;
+					ping_packet.type = CS_PING;
+					ping_packet.size = sizeof(CS_PING_PACKET);
+					sendPacket(&ping_packet);
+					last_ping = chrono::system_clock::now();
+				}
+
 				// UI를 통한 조작 구현
 				switch (gGameFramework.m_LoginScene) {
 				case gGameFramework.LS_OPENING: // 게임 시작, 종료 
@@ -449,7 +458,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				//==================================================
 				//					서버 연결 확인
 				//==================================================
-				// 1초마다 서버로 핑을 던져서 살아있는지 확인합니다.
+				// 3초마다 서버로 핑을 던져서 살아있는지 확인합니다.
 				if (chrono::system_clock::now() > last_ping + chrono::seconds(3)) {
 					CS_PING_PACKET ping_packet;
 					ping_packet.type = CS_PING;
