@@ -3225,7 +3225,7 @@ void timerFunc() {
 				else {	// 아직 점령 진행중
 					// 미션 진행 업데이트
 					mission_lock.lock();
-					stage1_missions[curr_mission_id].curr += 80 * occupy_member_cnt;	// 점령중인 사람이 많을 수록 게이지가 빨리 차오른다.
+					stage1_missions[curr_mission_id].curr += 100 * occupy_member_cnt;	// 점령중인 사람이 많을 수록 게이지가 빨리 차오른다.
 					mission_lock.unlock();
 
 					for (auto& cl : clients) {

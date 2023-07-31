@@ -323,7 +323,7 @@ INT_PTR CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		DisplayText(hServerName[0], "로비 0\n");
 		DisplayText(hServerName[1], "로비 1\n");
 		DisplayText(hServerName[2], "로직 0\n");
-		DisplayText(hServerName[3], "로직 0\n");
+		DisplayText(hServerName[3], "로직 1\n");
 
 		DisplayText(hServerPort[0], "9910\n");
 		DisplayText(hServerPort[1], "9911\n");

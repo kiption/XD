@@ -761,6 +761,8 @@ void process_packet(int client_id, char* packet)
 		cout << "Before: " << before_role << ", After: " << after_role << endl;
 		if (before_role == after_role) break;	// 이미 같은 역할임.
 
+		if (clients[client_id].inroom_state == RM_ST_READY) break;	// 준비중에는 역할 선택 불가
+
 		int cur_room = clients[client_id].curr_room;
 		if (cur_room == -1) break;	// 비정상 요청 (나중에 접속을 끊어버리던가 하자)
 
