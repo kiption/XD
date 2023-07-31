@@ -1009,7 +1009,7 @@ void CGameFramework::ProcessInput()
 			}
 			if (m_ingame_role == R_HELI)
 			{
-				cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / (MouseResponsivenessX-200.0f);
+				cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / (MouseResponsivenessX - 200.0f);
 			}
 			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / MouseResponsivenessY;
 			czDelta = ((float)(ptCursorPos.y - m_ptOldCursorPos.y) + (float)(ptCursorPos.x - m_ptOldCursorPos.x)) / MouseResponsivenessX;
@@ -1833,7 +1833,7 @@ void CGameFramework::FrameAdvance()
 		}
 
 		if (m_missionClear && !m_missionFailed) {
-			if (m_printTime < 120) {
+			if (m_ClearPrintTime < 120) {
 				D2D_POINT_2F D2_MissionclearedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 163.0f };
 				D2D_RECT_F D2_MissionclearedBGUIRect = { 0.0f, 0.0f, m_missionClearUI * 19.6f, 326.0f };
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[69], &D2_MissionclearedBGUI, &D2_MissionclearedBGUIRect);
@@ -1846,7 +1846,7 @@ void CGameFramework::FrameAdvance()
 					D2D_POINT_2F D2_CongratulationUI = { FRAME_BUFFER_WIDTH / 2 - 399.0f, FRAME_BUFFER_HEIGHT / 2 };
 					D2D_RECT_F D2_CongratulationUIRect = { 0.0f, 0.0f, 792.0f, 176.0f };
 					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[71], &D2_CongratulationUI, &D2_CongratulationUIRect);
-					m_printTime++;
+					m_ClearPrintTime++;
 				}
 				else {
 					m_missionClearUI += 2.5f;
@@ -1857,7 +1857,7 @@ void CGameFramework::FrameAdvance()
 			}
 		}
 		if (m_missionFailed && !m_missionClear) {
-			if (m_printTime < 120) {
+			if (m_FailedPrintTime < 120) {
 				D2D_POINT_2F D2_MissionFailedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 181.5f };
 				D2D_RECT_F D2_MissionFailedBGUIRect = { 0.0f, 0.0f, m_missionFailedUI * 19.6f, 363.0f };
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[72], &D2_MissionFailedBGUI, &D2_MissionFailedBGUIRect);
@@ -1870,7 +1870,7 @@ void CGameFramework::FrameAdvance()
 					D2D_POINT_2F D2_TimeOverUI = { FRAME_BUFFER_WIDTH / 2 - 314.0f, FRAME_BUFFER_HEIGHT / 2 + 10.0f };
 					D2D_RECT_F D2_TimeOverUIRect = { 0.0f, 0.0f, 628.0f, 175.0f };
 					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[74], &D2_TimeOverUI, &D2_TimeOverUIRect);
-
+					m_FailedPrintTime++;
 				}
 				else {
 					m_missionFailedUI += 2.5f;
@@ -1881,7 +1881,7 @@ void CGameFramework::FrameAdvance()
 			}
 		}
 		if (m_spendYourlife) {
-			if (m_printTime < 120) {
+			if (m_SpentprintTime < 120) {
 				D2D_POINT_2F D2_MissionFailedBGUI = { 0.0f, FRAME_BUFFER_HEIGHT / 2 - 181.5f };
 				D2D_RECT_F D2_MissionFailedBGUIRect = { 0.0f, 0.0f, m_missionFailedUI * 19.6f, 363.0f };
 				m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[72], &D2_MissionFailedBGUI, &D2_MissionFailedBGUIRect);
@@ -1894,7 +1894,7 @@ void CGameFramework::FrameAdvance()
 					D2D_POINT_2F D2_SpendLifeUI = { FRAME_BUFFER_WIDTH / 2 - 589.0f, FRAME_BUFFER_HEIGHT / 2 + 10.0f };
 					D2D_RECT_F D2_SpendLifeUIRect = { 0.0f, 0.0f, 1178.0f, 176.0f };
 					m_pd2dDeviceContext->DrawImage(m_pd2dfxGaussianBlur[79], &D2_SpendLifeUI, &D2_SpendLifeUIRect);
-					m_printTime++;
+					m_SpentprintTime++;
 				}
 				else {
 					m_missionFailedUI += 2.5f;
@@ -2030,7 +2030,7 @@ void CGameFramework::FrameAdvance()
 		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 		::SetWindowText(m_hWnd, m_pszFrameRate);
 	}
-	}
+}
 
 void CGameFramework::ChangeScene(DWORD nMode)
 {
@@ -2150,7 +2150,7 @@ void CGameFramework::CreateDirect2DDevice()
 		d3dInforQueueFilter.DenyList.pIDList = pd3dDenyIds;
 
 		pd3dInfoQueue->PushStorageFilter(&d3dInforQueueFilter);
-}
+	}
 	pd3dInfoQueue->Release();
 #endif
 
@@ -3642,10 +3642,10 @@ void CGameFramework::otherPlayerDyingMotion(int id)
 				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->GetPosition().x,
 				7.0f,
 				((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->GetPosition().z));
-			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->DieState(m_GameTimer.GetTimeElapsed());
 
 			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType
 				= ANIMATION_TYPE_ONCE;
+			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->DieState(m_GameTimer.GetTimeElapsed());
 			((CSoldiarOtherPlayerObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 8);
 		}
 	}

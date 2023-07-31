@@ -356,7 +356,10 @@ public:
 	int m_remainNPC;
 	int m_mainmissionnum = 0;
 	int m_occupationnum = 0;
-	int m_printTime = 0;
+	int m_SpentprintTime = 0;
+	int m_ClearPrintTime = 0;
+	int m_FailedPrintTime = 0;
+
 	float m_missionFailedUI = 0.0f;
 	float m_missionClearUI = 0.0f;
 
