@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "Skybox.h"
-#include "Scene.h"
+#include "SceneMgr.h"
 
 CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
 {
 	CSkyBoxMesh* pSkyBoxMesh = new CSkyBoxMesh(pd3dDevice, pd3dCommandList, 200.0f, 200.0f, 0.0f);
 	SetMesh(pSkyBoxMesh);
-	SceneManager* m_pScene = NULL;
+	SceneMgr* m_pScene = NULL;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	CTexture* pSkyBoxTexture[1];
@@ -17,7 +17,7 @@ CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	pSkyBoxShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,0);
 	pSkyBoxShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	m_pScene->CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture[0], 0, 10);
+	m_pScene->CreateSRVs(pd3dDevice, pSkyBoxTexture[0], 0, 10);
 
 	CMaterial* pSkyBoxMaterial = new CMaterial(1);
 	pSkyBoxMaterial->SetTexture(pSkyBoxTexture[0],0);
@@ -52,7 +52,7 @@ COpeningBackScene::COpeningBackScene(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pSkyBoxShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
 	pSkyBoxShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	SceneManager::CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 0, 10);
+	SceneMgr::CreateSRVs(pd3dDevice, pSkyBoxTexture, 0, 10);
 
 	CMaterial* pSkyBoxMaterial = new CMaterial(1);
 	pSkyBoxMaterial->SetTexture(pSkyBoxTexture,0);

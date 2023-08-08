@@ -7,8 +7,8 @@
 #include "Shader.h"
 #include "ObjcetsShaderList.h"
 #include "MissileObject.h"
-#include "Scene.h"
-#include "Stage1.h"
+#include "SceneMgr.h"
+#include "StageScene.h"
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootParameters, int nRows, int nCols)
@@ -382,7 +382,7 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			(*ppTexture)->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, pwstrTextureName, RESOURCE_TEXTURE2D, 0);
 			if (*ppTexture) (*ppTexture)->AddRef();
 
-			SceneManager::CreateShaderResourceViews(pd3dDevice, *ppTexture, 0, nRootParameter);
+			SceneMgr::CreateSRVs(pd3dDevice, *ppTexture, 0, nRootParameter);
 		}
 		else
 		{
@@ -2022,7 +2022,7 @@ void CHelicopterObjects::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(21)
 {
 	SetChild(pModel->m_pModelRootObject, true);
-	pModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
+	pModel->m_pModelRootObject->SetCurScene(INGAME_SCENE);
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 5, pModel);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
@@ -2212,7 +2212,7 @@ CSoldiarOtherPlayerObjects::CSoldiarOtherPlayerObjects(ID3D12Device* pd3dDevice,
 {
 
 	SetChild(pModel->m_pModelRootObject, true);
-	pModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
+	pModel->m_pModelRootObject->SetCurScene(INGAME_SCENE);
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 11, pModel);
 
@@ -2450,7 +2450,7 @@ void COpeningHuman::Animate(float fTimeElapsed)
 CInsideHelicopterHuman::CInsideHelicopterHuman(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(1)
 {
 	SetChild(pModel->m_pModelRootObject, true);
-	pModel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
+	pModel->m_pModelRootObject->SetCurScene(INGAME_SCENE);
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 3, pModel);
 

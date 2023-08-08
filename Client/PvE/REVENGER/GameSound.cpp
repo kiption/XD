@@ -82,7 +82,7 @@ GameSound::GameSound()
 	WarnningChannel->setVolume(0.5f);
 
 	result = soundSystem->playSound(BackGroundSound, 0, true, &BackGroundChannel);
-	BackGroundChannel->setVolume(0.25f);
+	BackGroundChannel->setVolume(0.05f);
 
 	result = soundSystem->playSound(NpcshotSound, 0, true, &NpcshootChannel);
 	NpcshootChannel->setVolume(0.25f);

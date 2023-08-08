@@ -1,7 +1,7 @@
 #pragma once
 #include "Shader.h"
 
-class SceneManager;
+class SceneMgr;
 class PostProcessShader: public CShader
 {
 public:

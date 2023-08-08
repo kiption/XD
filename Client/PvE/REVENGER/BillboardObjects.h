@@ -1,6 +1,6 @@
 #pragma once
 #include "Object.h"
-class SceneManager;
+class SceneMgr;
 class CBillboardObject : public CGameObject
 {
 public:

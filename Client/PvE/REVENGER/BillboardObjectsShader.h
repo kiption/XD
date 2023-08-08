@@ -3,7 +3,7 @@
 #include "BillboardObjects.h"
 #include "MissileObject.h"
 
-class SceneManager;
+class SceneMgr;
 
 class HealPackBillboardShader : public BillboardShader
 {

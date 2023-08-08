@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "PostProcessShader.h"
-#include "Scene.h"
+#include "SceneMgr.h"
 PostProcessShader::PostProcessShader()
 {
 
@@ -137,7 +137,7 @@ void PostProcessShader::CreateResourcesAndRtvsSrvs(ID3D12Device* pd3dDevice, ID3
 #ifdef _WITH_SCENE_ROOT_SIGNATURE
 	SceneManager::CreateShaderResourceViews(pd3dDevice, m_pTexture, 0, 3);
 #else
-	SceneManager::CreateShaderResourceViews(pd3dDevice, m_pTexture, 0, 0);
+	SceneMgr::CreateSRVs(pd3dDevice, m_pTexture, 0, 0);
 #endif
 
 	D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;

@@ -433,7 +433,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 						trigger_stage1_playerinfo_load = false;
 						trigger_stage1_mapinfo_load = false;
 
-						gGameFramework.ChangeScene(SCENE1STAGE);
+						gGameFramework.ChangeScene(INGAME_SCENE);
 						gGameFramework.setPosition_Self(players_info[my_id].m_pos);
 						gGameFramework.setVectors_Self(players_info[my_id].m_right_vec, players_info[my_id].m_up_vec, players_info[my_id].m_look_vec);
 					}
@@ -520,7 +520,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 					gGameFramework.setPosition_Npc(npcs_info[i].m_id, npcs_info[i].m_pos);
 					gGameFramework.setVectors_Npc(npcs_info[i].m_id, npcs_info[i].m_right_vec, npcs_info[i].m_up_vec, npcs_info[i].m_look_vec);
-					((Stage1*)gGameFramework.m_pScene)->SmokePosition = npcs_info[i].m_pos;
+					((MainGameScene*)gGameFramework.m_pScene)->SmokePosition = npcs_info[i].m_pos;
 
 					if (npcs_info[i].m_attack_on) {
 						gGameFramework.AttackMotionNPC(i);
@@ -689,7 +689,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 				}
 				else
 				{
-					((CSpriteObjectsShader*)((Stage1*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0])->m_bActive = false;
+					((CSpriteObjectsShader*)((MainGameScene*)gGameFramework.m_pScene)->m_ppSpriteBillboard[0])->m_bActive = false;
 				}
 
 				if (!q_bullet_hit_pos_ground.empty()) {
@@ -1034,25 +1034,25 @@ void networkThreadFunc()
 		}
 
 		// 4. 파티클 충돌
-		if (gGameFramework.m_nMode == SCENE1STAGE) {
+		if (gGameFramework.m_nMode == INGAME_SCENE) {
 			if (servertime_ms >= 1000.f) {
-				if (players_info[my_id].m_role == ROLE_HELI && ((Stage1*)gGameFramework.m_pScene)->m_bHeliParticleCollisionCheck == true) {
+				if (players_info[my_id].m_role == ROLE_HELI && ((MainGameScene*)gGameFramework.m_pScene)->m_bHeliParticleCollisionCheck == true) {
 					CS_PARTICLE_COLLIDE_PACKET heli_particle_coll_pack;
 					heli_particle_coll_pack.size = sizeof(CS_PARTICLE_COLLIDE_PACKET);
 					heli_particle_coll_pack.type = CS_PARTICLE_COLLIDE;
 					heli_particle_coll_pack.particle_mass = 1.0f;
 					sendPacket(&heli_particle_coll_pack);
 
-					((Stage1*)gGameFramework.m_pScene)->m_bHeliParticleCollisionCheck = false;
+					((MainGameScene*)gGameFramework.m_pScene)->m_bHeliParticleCollisionCheck = false;
 				}
-				if (players_info[my_id].m_role == ROLE_RIFLE && ((Stage1*)gGameFramework.m_pScene)->m_bHumanParticleCollisionCheck == true) {
+				if (players_info[my_id].m_role == ROLE_RIFLE && ((MainGameScene*)gGameFramework.m_pScene)->m_bHumanParticleCollisionCheck == true) {
 					CS_PARTICLE_COLLIDE_PACKET human_particle_coll_pack;
 					human_particle_coll_pack.size = sizeof(CS_PARTICLE_COLLIDE_PACKET);
 					human_particle_coll_pack.type = CS_PARTICLE_COLLIDE;
 					human_particle_coll_pack.particle_mass = 1.0f;
 					sendPacket(&human_particle_coll_pack);
 
-					((Stage1*)gGameFramework.m_pScene)->m_bHumanParticleCollisionCheck = false;
+					((MainGameScene*)gGameFramework.m_pScene)->m_bHumanParticleCollisionCheck = false;
 				}
 			}
 		}
@@ -1276,7 +1276,7 @@ void uiThreadFunc() {
 			switch (gGameFramework.m_nMode) {
 			case OPENINGSCENE:
 				break;
-			case SCENE1STAGE:
+			case INGAME_SCENE:
 				if (gGameFramework.m_mainmissionnum == 0) {	// 0번 미션
 					// ~~ 생존
 					gGameFramework.m_remainNPC = stage_missions[1].goal - stage_missions[1].curr;
@@ -1308,7 +1308,7 @@ void uiThreadFunc() {
 				curr_mission_num = 0;
 
 				// 스테이지 전환
-				if (gGameFramework.m_nMode == SCENE1STAGE) {
+				if (gGameFramework.m_nMode == INGAME_SCENE) {
 				}
 				else if (gGameFramework.m_nMode == SCENE2STAGE) {
 				}

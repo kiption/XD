@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "Shader.h"
-#include "Scene.h"
+#include "SceneMgr.h"
 CShader::CShader()
 {
 	//m_d3dSrvCPUDescriptorStartHandle.ptr = NULL;

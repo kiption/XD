@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ParticleMesh.h"
 #include "ParticleShader.h"
-#include "Scene.h"
+#include "SceneMgr.h"
 
 ParticleShader::ParticleShader()
 {

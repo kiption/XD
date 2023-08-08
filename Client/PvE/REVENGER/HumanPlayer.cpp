@@ -6,7 +6,7 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
 	SetChild(playermodel->m_pModelRootObject, true);
-	playermodel->m_pModelRootObject->SetCurScene(SCENE1STAGE);
+	playermodel->m_pModelRootObject->SetCurScene(INGAME_SCENE);
 	m_pBulletFindFrame = playermodel->m_pModelRootObject->FindFrame("Rifle__1_");
 	m_pHeadFindFrame = playermodel->m_pModelRootObject->FindFrame("head");
 

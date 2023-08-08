@@ -2,7 +2,7 @@
 #include "Player.h"
 #include "MissileObject.h"
 #include "ObjcetsShaderList.h"
-class SceneManager;
+class SceneMgr;
 class CShadowMapShader;
 class CHumanPlayer : public CPlayer
 {

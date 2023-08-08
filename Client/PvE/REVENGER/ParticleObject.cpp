@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Scene.h"
+#include "SceneMgr.h"
 #include "ParticleMesh.h"
 #include "ParticleObject.h"
 #include "ParticleShader.h"

@@ -13,7 +13,7 @@ HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	SetChild(pGameObject, false);
 	pGameObject->SetScale(1.1, 1.0, 1.2);
-	pGameObject->SetCurScene(SCENE1STAGE);
+	pGameObject->SetCurScene(INGAME_SCENE);
 
 	SetPlayerUpdatedContext(pContext);
 	SetCameraUpdatedContext(pContext);

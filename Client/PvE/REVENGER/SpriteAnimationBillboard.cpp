@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "SpriteAnimationBillboard.h"
-#include "Scene.h"
-#include "Stage1.h"
+#include "SceneMgr.h"
 D3D12_INPUT_LAYOUT_DESC CSpriteTexturedShader::CreateInputLayout(int nPipelineState)
 {
 	UINT nInputElementDescs = 2;
@@ -192,13 +191,13 @@ void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 
 
 
-	SceneManager* pScene = NULL;
+	SceneMgr* pScene = NULL;
 	m_nObjects = 2;
 	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	pScene->CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[0], 0, 15);//+
-	pScene->CreateShaderResourceViews(pd3dDevice, ppSpriteTextures[1], 0, 15);//+
-	pScene->CreateConstantBufferView(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
+	pScene->CreateSRVs(pd3dDevice, ppSpriteTextures[0], 0, 15);//+
+	pScene->CreateSRVs(pd3dDevice, ppSpriteTextures[1], 0, 15);//+
+	pScene->CreateCBV(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
 	m_ppObjects = new CGameObject * [m_nObjects];
 	CMultiSpriteObject** pThirdObject = new CMultiSpriteObject * [m_nObjects];
 

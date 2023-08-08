@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ShadowShader.h"
 #include "DDSTextureLoader12.h"
-#include "Scene.h"
+#include "SceneMgr.h"
 #include "Terrain.h"
 #include "SkinAnimationShader.h"
 
@@ -55,7 +55,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		if (psHumanModel) delete psHumanModel;
 
 	}
-	if (m_nCurScene == SCENE1STAGE)
+	if (m_nCurScene == INGAME_SCENE)
 	{
 		m_nObjects = 45;
 		m_ppObjects = new CGameObject * [m_nObjects];
@@ -431,7 +431,7 @@ void CShadowMapShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	m_pDepthTexture = (CTexture*)pContext;
 	m_pDepthTexture->AddRef();
-	SceneManager::CreateShaderResourceViews(pd3dDevice, m_pDepthTexture, 0, 22, false);
+	SceneMgr::CreateSRVs(pd3dDevice, m_pDepthTexture, 0, 22, false);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 }
@@ -482,7 +482,7 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 		}
 	}
 
-	if (m_nCurScene == SCENE1STAGE)
+	if (m_nCurScene == INGAME_SCENE)
 	{
 		for (int i = 0; i < m_pObjectsShader->m_nObjects - 1; i++)
 		{
@@ -939,7 +939,7 @@ void CTreeBlendingShadowShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 {
 	m_pDepthTexture = (CTexture*)pContext;
 	m_pDepthTexture->AddRef();
-	SceneManager::CreateShaderResourceViews(pd3dDevice, m_pDepthTexture, 0, 22, false);
+	SceneMgr::CreateSRVs(pd3dDevice, m_pDepthTexture, 0, 22, false);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 

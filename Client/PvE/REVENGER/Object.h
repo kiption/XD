@@ -533,7 +533,7 @@ public:
 	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0x00); }
 
 	void SetCurScene(int nCurScene) { m_nCurScene = nCurScene; }
-	int m_nCurScene = SCENE1STAGE;
+	int m_nCurScene = INGAME_SCENE;
 public:
 	CSkinnedMesh* FindSkinnedMesh(char* pstrSkinnedMeshName);
 	void FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnSkinnedMesh);

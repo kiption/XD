@@ -1,7 +1,7 @@
 #pragma once
 #include "Object.h"
 
-class SceneManager;
+class SceneMgr;
 class CTerrainShader;
 
 class CHeightMapTerrain : public CGameObject

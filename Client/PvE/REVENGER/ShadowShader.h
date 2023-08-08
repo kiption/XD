@@ -107,7 +107,7 @@ public:
 
 
 public:
-	SceneManager* m_pScene = NULL;
+	SceneMgr* m_pScene = NULL;
 	LIGHT* m_pLights = NULL;
 	TOLIGHTSPACES* m_pToLightSpaces;
 

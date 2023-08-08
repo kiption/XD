@@ -1,7 +1,7 @@
 #pragma once
 #include "Shader.h"
 #include "BillboardObjectsShader.h"
-class SceneManager;
+class SceneMgr;
 class CSpriteTexturedShader : public CShader
 {
 public:

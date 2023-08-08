@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "BillboardObjects.h"
 #include "Shader.h"
-#include "Scene.h"
-#include "Stage1.h"
+#include "SceneMgr.h"
+#include "StageScene.h"
 CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
 {
 }
@@ -92,7 +92,7 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 {
 	OnPrepareRender();
 
-	SceneManager* m_pScene = NULL;
+	SceneMgr* m_pScene = NULL;
 
 	if (m_ppMaterials)
 	{

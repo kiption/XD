@@ -1,21 +1,14 @@
-//-----------------------------------------------------------------------------
-// File: Scene.h
-//-----------------------------------------------------------------------------
-
 #pragma once
 
 #include "Shader.h"
 #include "Skybox.h"
-
 #include "ObjcetsShaderList.h"
 #include "BillboardObjectsShader.h"
 #include "SkyboxShader.h"
 #include "TerrainShader.h"
-
 #include "ShadowShader.h"
 #include "PostProcessShader.h"
 #include "BoundingWire.h"
-
 #include "Player.h"
 #include "HumanPlayer.h"
 #include "HelicopterPlayer.h"
@@ -23,14 +16,7 @@
 #include "MissileObject.h"
 #include "ParticleObject.h"
 #include "GameSound.h"
-#include "TreeShader.h"
-//struct MATERIAL
-//{
-//	XMFLOAT4						m_xmf4Ambient;
-//	XMFLOAT4						m_xmf4Diffuse;
-//	XMFLOAT4						m_xmf4Specular; //(r,g,b,a=power)
-//	XMFLOAT4						m_xmf4Emissive;
-//};
+
 struct MATERIALS
 {
 	MATERIAL				m_pReflections[MAX_MATERIALS];
@@ -60,11 +46,11 @@ struct LIGHTS
 	XMFLOAT4							m_xmf4GlobalAmbient;
 	int									m_nLights;
 };
-class SceneManager
+class SceneMgr
 {
 public:
-	SceneManager();
-	~SceneManager();
+	SceneMgr();
+	~SceneMgr();
 public:
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
@@ -74,23 +60,22 @@ public:
 	virtual void BuildDefaultLightsAndMaterials();
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle, ID3D12Resource* pd3dDepthStencilBuffer);
 
-	virtual void ReleaseObjects();
-	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	ID3D12RootSignature* GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
-	bool ProcessInput(UCHAR* pKeysBuffer);
-	virtual void AnimateObjects(float fTimeElapsed);
+	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
+
 	//virtual void AnimateObjects(CCamera* pCamera, float fTimeElapsed);
+	virtual void ReleaseObjects();
+	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+	bool ProcessInput(UCHAR* pKeysBuffer);
+	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) {};
+	void LightMotion();
+	void SetCurScene(int nCurScene) { m_nCurScene = nCurScene; }
+	int GetCurScene() { return m_nCurScene; }
 
 	virtual void ReleaseUploadBuffers();
-	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera) {};
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-	void RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-	void OnPostRenderParticle();
-	int GetCurScene() { return m_nCurScene; }
-	void SetCurScene(int nCurScene) { m_nCurScene = nCurScene; }
-	void ParticleAnimation();
 
 
 	BoundingWireShader* m_pBoundingBoxShader = NULL;
@@ -101,11 +86,8 @@ public:
 	GameSound gamesound;
 	CGameObject** m_ppGameObject = NULL;
 	int m_nObjects = 0;
-	CParticleObject** m_ppParticleObjects = NULL;
-	int							m_nParticleObjects;
 	ID3D12Resource* m_pd3dcbMaterials = NULL;
 	MATERIAL* m_pcbMappedMaterials = NULL;
-
 	MATERIALS* m_pMaterials = NULL;
 public:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
@@ -137,12 +119,12 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUSrvDescriptorNextHandle() { return(m_d3dSrvCPUDescriptorNextHandle); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUSrvDescriptorNextHandle() { return(m_d3dSrvGPUDescriptorNextHandle); }
 
-	static void CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
-	static void CreateConstantBufferView(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride);
-	static D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferViews(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride);
-	static void CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex);
-	static void CreateShaderResourceViews(ID3D12Device* pd3dDevice, int nResources, ID3D12Resource** ppd3dResources, DXGI_FORMAT* pdxgiSrvFormats) {};
-	static void CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex, ID3D12Resource* pShadowMap);
+	static void CreateDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
+	static void CreateCBV(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride);
+	static D3D12_GPU_DESCRIPTOR_HANDLE CreateCBVs(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride);
+	static void CreateSRVs(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex);
+	static void CreateSRVs(ID3D12Device* pd3dDevice, int nResources, ID3D12Resource** ppd3dResources, DXGI_FORMAT* pdxgiSrvFormats) {};
+	static void CreateSRVs(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex, ID3D12Resource* pShadowMap);
 
 	void SetCbvGPUDescriptorHandlePtr(UINT64 nCbvGPUDescriptorHandlePtr) { m_d3dCbvGPUDescriptorStartHandle.ptr = nCbvGPUDescriptorHandlePtr; }
 	float m_fBulletEffectiveRange = 2000.0f;

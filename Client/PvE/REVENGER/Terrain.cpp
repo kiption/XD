@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Terrain.h"
-#include "Scene.h"
+#include "SceneMgr.h"
 
 CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale, XMFLOAT3 xmf3Normal) : CGameObject(3)
 {
@@ -8,7 +8,7 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	m_nLength = nLength;
 
 	m_xmf3Scale = xmf3Scale;
-	SceneManager* m_pScene = NULL;
+	SceneMgr* m_pScene = NULL;
 	m_pHeightMapImage = new CHeightMapImage(pFileName, nWidth, nLength, xmf3Scale);
 
 	CHeightMapGridMesh* pMesh = new CHeightMapGridMesh(pd3dDevice, pd3dCommandList, 0, 0, nWidth, nLength, xmf3Scale, xmf3Normal, m_pHeightMapImage);
@@ -27,8 +27,8 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pTerrainShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,0);
 	pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	m_pScene->CreateShaderResourceViews(pd3dDevice, pTerrainBaseTexture[0], 0, 13);
-	m_pScene->CreateShaderResourceViews(pd3dDevice, pTerrainBaseTexture[1], 0, 14);
+	m_pScene->CreateSRVs(pd3dDevice, pTerrainBaseTexture[0], 0, 13);
+	m_pScene->CreateSRVs(pd3dDevice, pTerrainBaseTexture[1], 0, 14);
 
 	CMaterial* pTerrainMaterial = new CMaterial(2);
 	pTerrainMaterial->SetTexture(pTerrainBaseTexture[0], 0);

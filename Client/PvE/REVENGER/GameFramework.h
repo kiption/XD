@@ -6,9 +6,8 @@
 #include "Player.h"
 #include "HumanPlayer.h"
 #include "HelicopterPlayer.h"
-#include "Scene.h"
-#include "Stage1.h"
-#include "Stage2.h"
+#include "SceneMgr.h"
+#include "StageScene.h"
 #include "GameSound.h"
 #include "PostProcessShader.h"
 // Server
@@ -144,6 +143,7 @@ public:
 	void ProcessInput();
 	void AnimateObjects();
 	void FrameAdvance();
+	void DrawUIList();
 
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
@@ -260,7 +260,7 @@ public:
 public:
 	enum INGAME_ROLE { R_NONE, R_RIFLE, R_HELI };
 	enum LOGINSCENE { LS_OPENING, LS_LOBBY, LS_ROOM, LS_CREATE_ROOM };
-	SceneManager* m_pScene = NULL;
+	SceneMgr* m_pScene = NULL;
 
 	// 기본 정보
 	int m_NumOfUI = UICOUNTERS;

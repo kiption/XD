@@ -1,13 +1,15 @@
 #pragma once
-#include "Scene.h"
-
+#include "SceneMgr.h"
+#include "SpriteAnimationBillboard.h"
+#include "BoundingWire.h"
 class Player;
 class CHumanPlayer;
-class Stage2 : public SceneManager
+
+class MainGameScene : public SceneMgr
 {
 public:
-	Stage2();
-	~Stage2();
+	MainGameScene();
+	~MainGameScene();
 
 	virtual bool OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	virtual bool OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
@@ -23,21 +25,28 @@ public:
 	ID3D12RootSignature* CreateGraphicsRootSignature(ID3D12Device* pd3dDevice);
 	ID3D12RootSignature* GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 
+	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	bool ProcessInput(UCHAR* pKeysBuffer);
 	virtual void AnimateObjects(float fTimeElapsed);
+
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 	virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-
+	void OtherHeliPlayerTransformStore();
+	void OtherHeliPlayerTransfromReset();
+	void BillBoardRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, XMFLOAT3 Position);
+	void MuzzleFlameRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, XMFLOAT3 Position);
+	void NPCMuzzleFlamedRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, XMFLOAT3 Position);
+	void HealPackZoneInfo();
 	void ReleaseUploadBuffers();
-
-	bool IsIntersecting(BoundingOrientedBox box1, BoundingOrientedBox box2);
-	bool CheckCollision( DirectX::BoundingOrientedBox& box1,  DirectX::BoundingOrientedBox& box2, DirectX::XMFLOAT3& posA, DirectX::XMFLOAT3& lookA, DirectX::XMFLOAT3& upA, DirectX::XMFLOAT3& rightA);
+	void PlayerByPlayerCollision();
+	void SetPositionPilotHuman();
+	void NpcByPlayerCollsiion();
 public:
-	static void CreateCbvSrvDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
-
-	static D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferViews(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride);
-	static void CreateShaderResourceViews(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex);
+	static void CreateDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
+	static void CreateSRVs(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex);
+	static void CreateCBV(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride);
+	static D3D12_GPU_DESCRIPTOR_HANDLE CreateCBVs(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride);
 public:
 	static ID3D12DescriptorHeap* m_pd3dCbvSrvDescriptorHeap;
 
@@ -60,28 +69,49 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUCbvDescriptorNextHandle() { return(m_d3dCbvGPUDescriptorNextHandle); }
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUSrvDescriptorNextHandle() { return(m_d3dSrvCPUDescriptorNextHandle); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUSrvDescriptorNextHandle() { return(m_d3dSrvGPUDescriptorNextHandle); }
-	float								m_fElapsedTime = 0.0f;
+	float m_fElapsedTime = 0.0f;
+	bool m_bPartitionEnd = false;
+	int	m_nBillboardShaders = 0;
+	int m_nSpriteBillboards = 0;
 
-	int									m_nPlayerObjects = 0;
-	CGameObject** m_ppPlayerObjects = NULL;
-
-	int									m_nHierarchicalGameObjects = 0;
-	CGameObject** m_ppHierarchicalGameObjects = NULL;
-
-	XMFLOAT3							m_xmf3RotatePosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
-
-	int									m_nShaders = 0;
-	CSkinnedAnimationObjectsShader** m_ppShaders = NULL;
-	int									m_nBillboardShaders = 0;
-	CShader** m_pBillboardShader = NULL;
-
+	BillboardShader** m_pBillboardShader = NULL;
+	CSpriteObjectsShader** m_ppSpriteBillboard = NULL;
 	CSkyBox* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;
 
-	int									m_nLights = 0;
-
-	XMFLOAT4							m_xmf4GlobalAmbient;
-
+	int	m_nLights = 0;
+	XMFLOAT4 m_xmf4GlobalAmbient;
 	ID3D12Resource* m_pd3dcbLights = NULL;
 	LIGHTS* m_pcbMappedLights = NULL;
+
+	void Firevalkan(CGameObject* Objects, XMFLOAT3 ToPlayerLook);
+	void ParticleCollisionResult();
+	void OtherPlayerFirevalkan(CGameObject* Objects, XMFLOAT3 ToPlayerLook);
+	void PlayerFirevalkan(CCamera* pCamera, XMFLOAT3 Look);
+	void Reflectcartridgecase(CGameObject* Objects);
+public:
+	bool m_bHeliParticleCollisionCheck = false;
+	bool m_bHumanParticleCollisionCheck = false;
+	float m_fBulletEffectiveRange = 2000.0f;
+	CBulletEffectShader* pBCBulletEffectShader = NULL;
+	CValkanObject* pBulletObject = NULL;
+	CValkanObject* m_ppBullets[HELIBULLETS];
+	CValkanObject* pCartridge = NULL;
+	CValkanObject* m_ppCartridge[CARTRIDGES];
+	CValkanObject* pValkan = NULL;
+	CValkanObject* m_ppValkan[HELICOPTERVALKANS];
+public:
+	XMFLOAT4X4 m_pMainRotorFrameP{};
+	XMFLOAT4X4 m_pTailRotorFrameP{};
+	XMFLOAT4X4 m_pFrameFragObj1P{};
+	XMFLOAT4X4 m_pFrameFragObj2P{};
+	XMFLOAT4X4 m_pFrameFragObj3P{};
+	XMFLOAT4X4 m_pFrameFragObj4P{};
+	XMFLOAT4X4 m_pFrameFragObj5P{};
+	XMFLOAT4X4 m_pFrameFragObj6P{};
+	XMFLOAT4X4 m_pFrameFragObj7P{};
+	XMFLOAT4X4 m_pFrameFragObj8P{};
+	XMFLOAT4X4 m_pFrameFragObj9P{};
+	XMFLOAT4X4 m_pFrameFragObj10P{};
+	XMFLOAT4X4 m_pFrameFragObj11P{};
 };

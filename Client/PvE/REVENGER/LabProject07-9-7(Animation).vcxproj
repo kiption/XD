@@ -177,7 +177,6 @@
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SoldiarPlayerObject.h" />
     <ClInclude Include="SpriteAnimationBillboard.h" />
-    <ClInclude Include="Stage2.h" />
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="GameFramework.h" />
     <ClInclude Include="GameSound.h" />
@@ -188,19 +187,18 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneMgr.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="SkinAnimationShader.h" />
     <ClInclude Include="SkinMesh.h" />
     <ClInclude Include="SkyboxShader.h" />
     <ClInclude Include="StandardShader.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Stage1.h" />
+    <ClInclude Include="StageScene.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="TerrainMesh.h" />
     <ClInclude Include="TerrainShader.h" />
     <ClInclude Include="Timer.h" />
-    <ClInclude Include="TreeShader.h" />
     <ClInclude Include="WICTextureLoader12.h" />
   </ItemGroup>
   <ItemGroup>
@@ -218,7 +216,6 @@
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="SoldiarPlayerObject.cpp" />
     <ClCompile Include="SpriteAnimationBillboard.cpp" />
-    <ClCompile Include="Stage2.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="GameSound.cpp" />
@@ -229,7 +226,7 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneMgr.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="SkinAnimationShader.cpp" />
     <ClCompile Include="SkinMesh.cpp" />
@@ -241,12 +238,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Stage1.cpp" />
+    <ClCompile Include="StageScene.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="TerrainMesh.cpp" />
     <ClCompile Include="TerrainShader.cpp" />
     <ClCompile Include="Timer.cpp" />
-    <ClCompile Include="TreeShader.cpp" />
     <ClCompile Include="WICTextureLoader12.cpp" />
   </ItemGroup>
   <ItemGroup>
