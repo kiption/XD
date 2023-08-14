@@ -303,11 +303,11 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTreeBlendShadowShader->SetCurScene(INGAME_SCENE);
 	m_pTreeBlendShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
-	pBCBulletEffectShader = new CBulletEffectShader();
+	pBCBulletEffectShader = new BulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pBCBulletEffectShader->SetCurScene(INGAME_SCENE);
 
-	CGameObject* pBulletMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
+	GameObjectMgr* pBulletMesh = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
 	for (int i = 0; i < HELIBULLETS; i++)
 	{
 		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
@@ -318,7 +318,7 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_ppBullets[i] = pBulletObject;
 		pBulletMesh->AddRef();
 	}
-	CGameObject* pCartrudgetMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet4.bin", pBCBulletEffectShader);
+	GameObjectMgr* pCartrudgetMesh = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet4.bin", pBCBulletEffectShader);
 	for (int i = 0; i < CARTRIDGES; i++)
 	{
 		pCartridge = new CValkanObject(1.5);
@@ -331,7 +331,7 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	}
 	for (int i = 0; i < HELICOPTERVALKANS; i++)
 	{
-		CGameObject* pHelicopterValkanMesh = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet4.bin", pBCBulletEffectShader);
+		GameObjectMgr* pHelicopterValkanMesh = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet4.bin", pBCBulletEffectShader);
 		pValkan = new CValkanObject(300.0);
 		pValkan->SetChild(pHelicopterValkanMesh, false);
 		pValkan->SetMovingSpeed(1000.0f);
@@ -340,6 +340,7 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_ppValkan[i] = pValkan;
 		pHelicopterValkanMesh->AddRef();
 	}
+
 	OtherHeliPlayerTransformStore();
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -874,7 +875,7 @@ void MainGameScene::CreateSRVs(ID3D12Device* pd3dDevice, CTexture* pTexture, UIN
 	for (int j = 0; j < nRootParameters; j++) pTexture->SetRootParameterIndex(j, nRootParameterStartIndex + j);
 }
 
-void MainGameScene::Firevalkan(CGameObject* Objects, XMFLOAT3 ToPlayerLook)
+void MainGameScene::Firevalkan(GameObjectMgr* Objects, XMFLOAT3 ToPlayerLook)
 {
 	CValkanObject* pBulletObject = NULL;
 	for (int i = 0; i < HELIBULLETS; i++)
@@ -946,7 +947,7 @@ void MainGameScene::ParticleCollisionResult()
 		}
 	}
 }
-void MainGameScene::OtherPlayerFirevalkan(CGameObject* Objects, XMFLOAT3 ToPlayerLook)
+void MainGameScene::OtherPlayerFirevalkan(GameObjectMgr* Objects, XMFLOAT3 ToPlayerLook)
 {
 	CValkanObject* pBulletObject = NULL;
 	for (int i = 0; i < HELICOPTERVALKANS; i++)
@@ -1012,7 +1013,7 @@ void MainGameScene::PlayerFirevalkan(CCamera* pCamera, XMFLOAT3 Look)
 	}
 }
 
-void MainGameScene::Reflectcartridgecase(CGameObject* Objects)
+void MainGameScene::Reflectcartridgecase(GameObjectMgr* Objects)
 {
 	CValkanObject* pBulletObject = NULL;
 	for (int i = 0; i < CARTRIDGES; i++)
@@ -1121,6 +1122,7 @@ void MainGameScene::AnimateObjects(float fTimeElapsed)
 	PlayerByPlayerCollision();
 	ParticleCollisionResult();
 	SetPositionPilotHuman();
+	HealPackZoneInfo();
 }
 
 void MainGameScene::HealPackZoneInfo()

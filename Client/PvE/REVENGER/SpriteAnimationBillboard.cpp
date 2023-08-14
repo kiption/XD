@@ -21,17 +21,17 @@ void CSpriteTexturedShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 }
 
 D3D12_SHADER_BYTECODE CSpriteTexturedShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSSpritTextured", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSSpritTextured", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CSpriteTexturedShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSpritTextured", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSSpritTextured", "ps_5_1", ppd3dShaderBlob));
 }
 
 void CSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
@@ -163,12 +163,12 @@ void SpriteAnimationBillboard::CreateGraphicsPipelineState(ID3D12Device* pd3dDev
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 }
 
 D3D12_SHADER_BYTECODE SpriteAnimationBillboard::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSSpriteAnimation", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSSpriteAnimation", "vs_5_1", ppd3dShaderBlob));
 }
 
 void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
@@ -198,7 +198,7 @@ void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	pScene->CreateSRVs(pd3dDevice, ppSpriteTextures[0], 0, 15);//+
 	pScene->CreateSRVs(pd3dDevice, ppSpriteTextures[1], 0, 15);//+
 	pScene->CreateCBV(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
-	m_ppObjects = new CGameObject * [m_nObjects];
+	m_ppObjects = new GameObjectMgr * [m_nObjects];
 	CMultiSpriteObject** pThirdObject = new CMultiSpriteObject * [m_nObjects];
 
 	for (int i = 0; i < m_nObjects; i++)
@@ -221,7 +221,7 @@ void SpriteAnimationBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList
 
 		XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
 		XMFLOAT3 xmf3CameraLook= pCamera->GetLookVector();
-		CPlayer* pPlayer = pCamera->GetPlayer();
+		PlayerMgr* pPlayer = pCamera->GetPlayer();
 		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
 

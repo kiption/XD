@@ -20,11 +20,11 @@ struct TOLIGHTSPACES
 };
 struct LIGHT;
 
-class CShader
+class ShaderMgr
 {
 public:
-	CShader();
-	virtual ~CShader();
+	ShaderMgr();
+	virtual ~ShaderMgr();
 
 private:
 	int									m_nReferences = 0;
@@ -91,7 +91,7 @@ public:
 
 	int									m_nCurScene;
 public:
-	CGameObject** m_ppObjects = 0;
+	GameObjectMgr** m_ppObjects = 0;
 	CLoadedModelInfo* m_pSkinObjects = 0;
 	CAnimationController* m_pAnimationController = 0;
 	int									m_nObjects = 0;

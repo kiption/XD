@@ -1,7 +1,7 @@
 #pragma once
 #include "Shader.h"
 
-class CSkyBoxShader : public CShader
+class CSkyBoxShader : public ShaderMgr
 {
 public:
 	CSkyBoxShader();

@@ -31,25 +31,25 @@ DXGI_FORMAT ParticleShader::GetDSVFormat(int nPipelineState)
 D3D12_SHADER_BYTECODE ParticleShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	if (nPipelineState == 0)
-		return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSParticleStreamOutput", "vs_5_1", ppd3dShaderBlob));
+		return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSParticleStreamOutput", "vs_5_1", ppd3dShaderBlob));
 	else
-		return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSParticleDraw", "vs_5_1", ppd3dShaderBlob));
+		return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSParticleDraw", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE ParticleShader::CreateGeometryShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	if (nPipelineState == 0)
-		return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "GSParticleStreamOutput", "gs_5_1", ppd3dShaderBlob));
+		return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "GSParticleStreamOutput", "gs_5_1", ppd3dShaderBlob));
 	else
-		return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "GSParticleDraw", "gs_5_1", ppd3dShaderBlob));
+		return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "GSParticleDraw", "gs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE ParticleShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	if (nPipelineState == 0)
-		return(CShader::CreatePixelShader(ppd3dShaderBlob, 0));
+		return(ShaderMgr::CreatePixelShader(ppd3dShaderBlob, 0));
 	else
-		return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSParticleDraw", "ps_5_1", ppd3dShaderBlob));
+		return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSParticleDraw", "ps_5_1", ppd3dShaderBlob));
 }
 
 D3D12_BLEND_DESC ParticleShader::CreateBlendState(int nPipelineState)
@@ -145,9 +145,9 @@ void ParticleShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D1
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
 		0); //Stream Output Pipeline State
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
 		1); //Draw Pipeline State
 }
 
@@ -177,12 +177,12 @@ D3D12_INPUT_LAYOUT_DESC CTexturedShader::CreateInputLayout(int nPipelineState)
 
 D3D12_SHADER_BYTECODE CTexturedShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSTextured", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSTextured", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CTexturedShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTextured", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSTextured", "ps_5_1", ppd3dShaderBlob));
 }
 void CTexturedShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
 	int nPipelineState)
@@ -191,7 +191,7 @@ void CTexturedShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 }
 
 
@@ -205,12 +205,12 @@ CParticleBillboardShader::~CParticleBillboardShader()
 
 D3D12_SHADER_BYTECODE CParticleBillboardShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSParticleBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSParticleBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CParticleBillboardShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBillBoard", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSBillBoard", "ps_5_1", ppd3dShaderBlob));
 }
 
 D3D12_RASTERIZER_DESC CParticleBillboardShader::CreateRasterizerState(int nPipelineState)

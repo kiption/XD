@@ -12,7 +12,7 @@
 #include "Camera.h"
 #include "GameSound.h"
 
-class CPlayer : public CGameObject
+class PlayerMgr : public GameObjectMgr
 {
 protected:
 	
@@ -36,9 +36,9 @@ protected:
 	CCamera						*m_pCamera = NULL;
 	CHeightMapTerrain* pTerrain = NULL;
 public:
-	CPlayer();
-	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
-	virtual ~CPlayer();
+	PlayerMgr();
+	PlayerMgr(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
+	virtual ~PlayerMgr();
 	XMFLOAT3					m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	XMFLOAT3					m_xmf3BeforeCollidedPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float           			m_fPitch = 0.0f;
@@ -98,7 +98,7 @@ public:
 
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
 	virtual void OnPrepareRender();
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CShader* pShader,CCamera *pCamera = NULL);
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, ShaderMgr* pShader,CCamera *pCamera = NULL);
 	bool m_bCollisionTerrain = false;
 	bool m_bBulletAnimationActive = false;
 	GameSound gamesound;

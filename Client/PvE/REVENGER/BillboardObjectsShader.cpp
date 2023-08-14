@@ -107,17 +107,17 @@ void HealPackBillboardShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevi
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 }
 
 D3D12_SHADER_BYTECODE HealPackBillboardShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE HealPackBillboardShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
 }
 
 void HealPackBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
@@ -132,7 +132,7 @@ void HealPackBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	m_nObjects = HEAL_EFFECTS_COUNT;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SceneMgr::CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
-	m_ppObjects = new CGameObject * [m_nObjects];
+	m_ppObjects = new GameObjectMgr * [m_nObjects];
 	CBillboardObject** ppParticleObject = new CBillboardObject * [m_nObjects];
 	for (int j = 0; j < m_nObjects; j++)
 	{
@@ -262,18 +262,18 @@ void BillboardParticleShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevi
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 
 }
 
 D3D12_SHADER_BYTECODE BillboardParticleShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE BillboardParticleShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSmokeBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSSmokeBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
 }
 
 void BillboardParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
@@ -292,7 +292,7 @@ void BillboardParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SceneMgr::CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
 
-	m_ppObjects = new CGameObject * [m_nObjects];
+	m_ppObjects = new GameObjectMgr * [m_nObjects];
 
 	CBillboardParticleObject** ppParticleObject = new CBillboardParticleObject * [m_nObjects];
 
@@ -317,7 +317,7 @@ void BillboardParticleShader::ReleaseObjects()
 
 void BillboardParticleShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CPlayer* pPlayer = pCamera->GetPlayer();
+	PlayerMgr* pPlayer = pCamera->GetPlayer();
 	XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
 	XMFLOAT3 xmf3Position = Vector3::Add(xmf3PlayerPosition, Vector3::ScalarProduct(xmf3PlayerLook, 0.0f, false));
@@ -422,19 +422,19 @@ void MuzzleFrameBillboard::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice,
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 
 }
 
 
 D3D12_SHADER_BYTECODE MuzzleFrameBillboard::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSmokeBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSSmokeBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE MuzzleFrameBillboard::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
 }
 
 void MuzzleFrameBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
@@ -454,7 +454,7 @@ void MuzzleFrameBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SceneMgr::CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
 
-	m_ppObjects = new CGameObject * [m_nObjects];
+	m_ppObjects = new GameObjectMgr * [m_nObjects];
 	CResponeObject** pResponObject = new CResponeObject * [m_nObjects];
 	for (int j = 0; j < m_nObjects; j++)
 	{
@@ -477,7 +477,7 @@ void MuzzleFrameBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, CC
 	if (m_bShotActive == true)
 	{
 
-		CPlayer* pPlayer = pCamera->GetPlayer();
+		PlayerMgr* pPlayer = pCamera->GetPlayer();
 		XMFLOAT3 CameraPosition = pCamera->GetPosition();
 		XMFLOAT3 CameraLook = pCamera->GetLookVector();
 		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
@@ -532,19 +532,19 @@ void SparkBillboard::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D1
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 
 }
 
 
 D3D12_SHADER_BYTECODE SparkBillboard::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSmokeBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSSmokeBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE SparkBillboard::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
 }
 
 void SparkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
@@ -556,7 +556,7 @@ void SparkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	CTexturedRectMesh* pSpriteMesh;
 	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.4f, 0.9f, 0.0f, 0.0f, 0.0f, 0.0f);
 	m_nObjects = EXPLOSION_SPARK;
-	m_ppObjects = new CGameObject * [m_nObjects];
+	m_ppObjects = new GameObjectMgr * [m_nObjects];
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SceneMgr::CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
 
@@ -583,7 +583,7 @@ void SparkBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 {
 	if (m_bActive == true)
 	{
-		CPlayer* pPlayer = pCamera->GetPlayer();
+		PlayerMgr* pPlayer = pCamera->GetPlayer();
 		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 		XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
 		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
@@ -666,19 +666,19 @@ void BloodHittingBillboard::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 
 }
 
 
 D3D12_SHADER_BYTECODE BloodHittingBillboard::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSmokeBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSSmokeBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE BloodHittingBillboard::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
 }
 void BloodHittingBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
@@ -689,7 +689,7 @@ void BloodHittingBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	CTexturedRectMesh* pSpriteMesh;
 	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 3.0f, 3.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	m_nObjects = 10;
-	m_ppObjects = new CGameObject * [m_nObjects];
+	m_ppObjects = new GameObjectMgr * [m_nObjects];
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SceneMgr::CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
 
@@ -715,7 +715,7 @@ void BloodHittingBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList, C
 {
 	if (m_bActive == true)
 	{
-		CPlayer* pPlayer = pCamera->GetPlayer();
+		PlayerMgr* pPlayer = pCamera->GetPlayer();
 		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 		XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
 		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();
@@ -814,18 +814,18 @@ void BulletMarkBillboard::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, 
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 
 }
 
 D3D12_SHADER_BYTECODE BulletMarkBillboard::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE BulletMarkBillboard::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
 }
 
 void BulletMarkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
@@ -840,7 +840,7 @@ void BulletMarkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_nObjects = 1;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SceneMgr::CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
-	m_ppObjects = new CGameObject * [m_nObjects];
+	m_ppObjects = new GameObjectMgr * [m_nObjects];
 	CBillboardObject** ppParticleObject = new CBillboardObject * [m_nObjects];
 	for (int j = 0; j < 1; j++)
 	{
@@ -935,19 +935,19 @@ void HeliHittingMarkBillboard::CreateGraphicsPipelineState(ID3D12Device* pd3dDev
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 
 }
 
 
 D3D12_SHADER_BYTECODE HeliHittingMarkBillboard::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSmokeBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSSmokeBillBoardTextured", "ps_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE HeliHittingMarkBillboard::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSBillBoardTextured", "vs_5_1", ppd3dShaderBlob));
 }
 void HeliHittingMarkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
@@ -958,7 +958,7 @@ void HeliHittingMarkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	CTexturedRectMesh* pSpriteMesh;
 	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.0f, 5.f, 0.0f, 0.0f, 0.0f, 0.0f);
 	m_nObjects = HITTINGMARKS;
-	m_ppObjects = new CGameObject * [m_nObjects];
+	m_ppObjects = new GameObjectMgr * [m_nObjects];
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	SceneMgr::CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
 
@@ -985,7 +985,7 @@ void HeliHittingMarkBillboard::Render(ID3D12GraphicsCommandList* pd3dCommandList
 	if (m_bActive == true)
 	{
 
-		CPlayer* pPlayer = pCamera->GetPlayer();
+		PlayerMgr* pPlayer = pCamera->GetPlayer();
 		XMFLOAT3 xmf3PlayerPosition = pPlayer->GetPosition();
 		XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
 		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLookVector();

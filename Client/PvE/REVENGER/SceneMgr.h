@@ -84,7 +84,7 @@ public:
 	XMFLOAT3 SmokePosition;
 	XMFLOAT3 ExplosingPosition;
 	GameSound gamesound;
-	CGameObject** m_ppGameObject = NULL;
+	GameObjectMgr** m_ppGameObject = NULL;
 	int m_nObjects = 0;
 	ID3D12Resource* m_pd3dcbMaterials = NULL;
 	MATERIAL* m_pcbMappedMaterials = NULL;
@@ -130,7 +130,7 @@ public:
 	float m_fBulletEffectiveRange = 2000.0f;
 	CBulletObject* pBulletObject = NULL;
 	CBulletObject* m_ppBullets[BULLETS];
-	CGameObject* m_pPlayer = NULL;
+	GameObjectMgr* m_pPlayer = NULL;
 
 public:
 	CShadowMapShader* m_pShadowShader = NULL;
@@ -144,10 +144,10 @@ public:
 	float								m_fElapsedTime = 0.0f;
 
 	int									m_nPlayerObjects = 0;
-	CGameObject** m_ppPlayerObjects = NULL;
+	GameObjectMgr** m_ppPlayerObjects = NULL;
 
 	int									m_nHierarchicalGameObjects = 0;
-	CGameObject** m_ppHierarchicalGameObjects = NULL;
+	GameObjectMgr** m_ppHierarchicalGameObjects = NULL;
 
 	XMFLOAT3							m_xmf3RotatePosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
@@ -155,14 +155,14 @@ public:
 	CObjectsShader** m_ppShaders = NULL;
 
 	int									m_nHumanShaders = 0;
-	CShader** m_ppHumanShaders = NULL;
+	ShaderMgr** m_ppHumanShaders = NULL;
 
 	int									m_nShadowShaders = 0;
 	CObjectsShader** m_ppShadowShaders = NULL;
 
 
-	CShader* m_pShader = NULL;
-	CBulletEffectShader* m_pBulletEffect = NULL;
+	ShaderMgr* m_pShader = NULL;
+	BulletEffectShader* m_pBulletEffect = NULL;
 
 	int									m_nMapShaders = 0;
 	int									m_nStageMapShaders = 0;

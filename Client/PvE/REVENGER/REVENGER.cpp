@@ -1356,14 +1356,7 @@ void uiThreadFunc() {
 					}
 				}
 			}
-		/*	((HealPackBillboardShader*)(Stage1*)gGameFramework.m_pScene->m_pBillboardShader[1])->m_bActiveMark = false;
-			((HealPackBillboardShader*)(Stage1*)gGameFramework.m_pScene->m_pBillboardShader[10])->m_bActiveMark = false;
-			((HealPackBillboardShader*)(Stage1*)gGameFramework.m_pScene->m_pBillboardShader[11])->m_bActiveMark = false;
-			((HealPackBillboardShader*)(Stage1*)gGameFramework.m_pScene->m_pBillboardShader[12])->m_bActiveMark = false;
-			((HealPackBillboardShader*)(Stage1*)gGameFramework.m_pScene->m_pBillboardShader[13])->m_bActiveMark = false;
-			((HealPackBillboardShader*)(Stage1*)gGameFramework.m_pScene->m_pBillboardShader[14])->m_bActiveMark = false;
-			((HealPackBillboardShader*)(Stage1*)gGameFramework.m_pScene->m_pBillboardShader[15])->m_bActiveMark = false;
-			((HealPackBillboardShader*)(Stage1*)gGameFramework.m_pScene->m_pBillboardShader[16])->m_bActiveMark = false;*/
+
 			// 8. 피격 효과 UI
 			if (players_info[my_id].m_damaged_effect_on) {
 

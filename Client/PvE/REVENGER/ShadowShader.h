@@ -7,7 +7,7 @@
 class CFragmentsShader;
 #define _WITH_BATCH_MATERIAL
 class CSkinnedAnimationStandardShader;
-class CObjectsShader : public CShader
+class CObjectsShader : public ShaderMgr
 {
 public:
 	CObjectsShader();
@@ -27,15 +27,15 @@ public:
 public:
 	CHeightMapTerrain* m_pTerrain = NULL;
 	int	m_nHierarchicalGameObjects = 0;
-	CGameObject** m_ppHierarchicalGameObjects = NULL;
-	CGameObject** m_ppCityGameObjects = NULL;
+	GameObjectMgr** m_ppHierarchicalGameObjects = NULL;
+	GameObjectMgr** m_ppCityGameObjects = NULL;
 
 	int	m_nHeliNpcObjects = 0;
 	int	m_nSoldiarNpcObjects = 0;
-	CGameObject** m_ppSoldiarNpcObjects = 0;
+	GameObjectMgr** m_ppSoldiarNpcObjects = 0;
 
 	int	m_nInsideHumanObjects = 0;
-	CGameObject** m_pInsideHumanbjects = 0;
+	GameObjectMgr** m_pInsideHumanbjects = 0;
 
 	CHelicopterObjects** m_ppNpc_Heli_Objects = NULL;
 	int									m_nFragShaders = 0;
@@ -56,7 +56,7 @@ public:
 
 
 
-class CDepthRenderShader : public CShader
+class CDepthRenderShader : public ShaderMgr
 {
 public:
 	CDepthRenderShader(CObjectsShader* pObjectsShader, LIGHT* pLights);
@@ -114,7 +114,7 @@ public:
 	ID3D12Resource* m_pd3dcbToLightSpaces = NULL;
 	TOLIGHTSPACES* m_pcbMappedToLightSpaces = NULL;
 };
-class CShadowMapShader : public CShader
+class CShadowMapShader : public ShaderMgr
 {
 public:
 	CShadowMapShader(CObjectsShader* pObjectsShader);
@@ -144,7 +144,7 @@ public:
 	CObjectsShader* m_pObjectsShader = NULL;
 	CTexture* m_pDepthTexture = NULL;
 };
-class CTreeBlendingShadowShader : public CShader
+class CTreeBlendingShadowShader : public ShaderMgr
 {
 public:
 	CTreeBlendingShadowShader(CObjectsShader* pObjectsShader);

@@ -2,15 +2,15 @@
 #include "StandardShader.h"
 #include "ShadowShader.h"
 
-CStandardShader::CStandardShader()
+StandardShader::StandardShader()
 {
 }
 
-CStandardShader::~CStandardShader()
+StandardShader::~StandardShader()
 {
 }
 
-D3D12_INPUT_LAYOUT_DESC CStandardShader::CreateInputLayout(int nPipelineState)
+D3D12_INPUT_LAYOUT_DESC StandardShader::CreateInputLayout(int nPipelineState)
 {
 	UINT nInputElementDescs = 5;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
@@ -28,23 +28,23 @@ D3D12_INPUT_LAYOUT_DESC CStandardShader::CreateInputLayout(int nPipelineState)
 	return(d3dInputLayoutDesc);
 }
 
-D3D12_SHADER_BYTECODE CStandardShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE StandardShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSStandard", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSStandard", "vs_5_1", ppd3dShaderBlob));
 }
 
-D3D12_SHADER_BYTECODE CStandardShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE StandardShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSStandard", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSStandard", "ps_5_1", ppd3dShaderBlob));
 }
 
 
-void CStandardShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
+void StandardShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 }
 
 //void CStandardShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
@@ -140,12 +140,12 @@ D3D12_INPUT_LAYOUT_DESC BillboardShader::CreateInputLayout(int nPipelineState)
 
 D3D12_SHADER_BYTECODE BillboardShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSStandard", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSStandard", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE BillboardShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSStandard", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSStandard", "ps_5_1", ppd3dShaderBlob));
 
 }
 
@@ -200,7 +200,7 @@ void BillboardShader::ReleaseObjects()
 
 void BillboardShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CShader::Render(pd3dCommandList, pCamera, nPipelineState, false);
+	ShaderMgr::Render(pd3dCommandList, pCamera, nPipelineState, false);
 
 	for (int j = 0; j < m_nObjects; j++)
 	{

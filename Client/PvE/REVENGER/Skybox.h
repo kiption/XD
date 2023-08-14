@@ -4,7 +4,7 @@
 class SceneMgr;
 class CSkyBoxShader;
 
-class CSkyBox : public CGameObject
+class CSkyBox : public GameObjectMgr
 {
 public:
 	CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
@@ -12,7 +12,7 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 };
-class COpeningBackScene : public CGameObject
+class COpeningBackScene : public GameObjectMgr
 {
 public:
 	COpeningBackScene(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);

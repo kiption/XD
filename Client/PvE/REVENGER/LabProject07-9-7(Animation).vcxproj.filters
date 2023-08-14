@@ -181,8 +181,11 @@
     <ClInclude Include="REVENGER.h">
       <Filter>Client\Mesh\Header</Filter>
     </ClInclude>
-    <ClInclude Include="SoldiarPlayerObject.h">
-      <Filter>Client\Player</Filter>
+    <ClInclude Include="Texture.h">
+      <Filter>Client\Object\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>Client\Object\Header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -291,11 +294,14 @@
     <ClCompile Include="BoundingWire.cpp">
       <Filter>Client\Shader\Source</Filter>
     </ClCompile>
-    <ClCompile Include="Skybox.cpp">
-      <Filter>Client\Player</Filter>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Client\Object\Source</Filter>
     </ClCompile>
-    <ClCompile Include="SoldiarPlayerObject.cpp">
-      <Filter>Client\Player</Filter>
+    <ClCompile Include="Animation.cpp">
+      <Filter>Client\Object\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Skybox.cpp">
+      <Filter>Client\Object\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -3,7 +3,7 @@
 #include "Shader.h"
 #include "SceneMgr.h"
 #include "StageScene.h"
-CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
+CBillboardObject::CBillboardObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : GameObjectMgr(1)
 {
 }
 
@@ -20,10 +20,10 @@ void CBillboardObject::Animate(float fTimeElapsed)
 	Move(XMFLOAT3(0.0f, m_fRotationAngle, 0.0));*/
 
 
-	CGameObject::Animate(fTimeElapsed);
+	GameObjectMgr::Animate(fTimeElapsed);
 }
 
-CBillboardParticleObject::CBillboardParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
+CBillboardParticleObject::CBillboardParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : GameObjectMgr(1)
 {
 }
 
@@ -34,10 +34,10 @@ CBillboardParticleObject::~CBillboardParticleObject()
 void CBillboardParticleObject::Animate(float fTimeElapsed)
 {
 
-	CGameObject::Animate(fTimeElapsed);
+	GameObjectMgr::Animate(fTimeElapsed);
 }
 
-CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
+CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : GameObjectMgr(1)
 {
 }
 
@@ -51,7 +51,7 @@ void CMultiSpriteObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12G
 	m_pd3dcbGameObject = ::CreateBufResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
 	m_pd3dcbGameObject->Map(0, NULL, (void**)&m_pcbMappedGameObject);
-	CGameObject::CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	GameObjectMgr::CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 void CMultiSpriteObject::ReleaseShaderVariables()
@@ -85,7 +85,7 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 	}
 				
 
-	CGameObject::Animate(fTimeElapsed);
+	GameObjectMgr::Animate(fTimeElapsed);
 }
 
 void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bPreRender)
@@ -127,11 +127,11 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	pd3dCommandList->SetGraphicsRootDescriptorTable(19, m_pScene->m_d3dCbvGPUDescriptorNextHandle);
 	
 	
-	CGameObject::Render(pd3dCommandList, pCamera, bPreRender);
+	GameObjectMgr::Render(pd3dCommandList, pCamera, bPreRender);
 
 }
 
-CResponeObject::CResponeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
+CResponeObject::CResponeObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : GameObjectMgr(1)
 {
 }
 
@@ -143,5 +143,5 @@ void CResponeObject::Animate(float fTimeElapsed)
 {
 
 	
-	CGameObject::Animate(fTimeElapsed);
+	GameObjectMgr::Animate(fTimeElapsed);
 }

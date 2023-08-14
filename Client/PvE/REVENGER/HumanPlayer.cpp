@@ -244,7 +244,7 @@ void CHumanPlayer::ShotState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 	m_pSkinnedAnimationController->SetTrackEnable(10, false);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 6);
 
-	CPlayer::Animate(EleapsedTime, pxmf4x4Parent);
+	PlayerMgr::Animate(EleapsedTime, pxmf4x4Parent);
 }
 
 void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, XMFLOAT3 slideVec)
@@ -334,7 +334,7 @@ void CHumanPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity
 
 	}
 
-	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity, slideVec);
+	PlayerMgr::Move(dwDirection, fDistance, bUpdateVelocity, slideVec);
 }
 
 
@@ -350,13 +350,13 @@ void CHumanPlayer::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 	}
 
 
-	CPlayer::Animate(fTimeElapsed, pxmf4x4Parent);
+	PlayerMgr::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
 void CHumanPlayer::Update(float fTimeElapsed)
 {
 
-	CPlayer::Update(fTimeElapsed);
+	PlayerMgr::Update(fTimeElapsed);
 	if (m_pSkinnedAnimationController)
 	{
 		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
@@ -381,11 +381,11 @@ void CHumanPlayer::Update(float fTimeElapsed)
 
 }
 
-void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, CCamera* pCamera)
+void CHumanPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, ShaderMgr* pShader, CCamera* pCamera)
 {
 	if (m_bZoomMode == false)
 	{
-		CPlayer::Render(pd3dCommandList, pShader, pCamera);
+		PlayerMgr::Render(pd3dCommandList, pShader, pCamera);
 
 		if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, false);
 		for (int i = 0; i < BULLETS; i++)
@@ -398,7 +398,7 @@ void CHumanPlayer::ResetCamera()
 	m_pCamera->m_xmf4x4View = m_pResetCameraPos;
 }
 
-void CHumanPlayer::FireBullet(CGameObject* pLockedObject)
+void CHumanPlayer::FireBullet(GameObjectMgr* pLockedObject)
 {
 }
 

@@ -67,12 +67,12 @@ D3D12_DEPTH_STENCIL_DESC BoundingWireShader::CreateDepthStencilState(int nPipeli
 
 D3D12_SHADER_BYTECODE BoundingWireShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBoundingBox", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSBoundingBox", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE BoundingWireShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBoundingBox", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSBoundingBox", "ps_5_1", ppd3dShaderBlob));
 }
 
 void BoundingWireShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
@@ -80,11 +80,11 @@ void BoundingWireShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, I
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature,
 		 nPipelineState);
 }
 
 void BoundingWireShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelinestates)
 {
-	CShader::Render(pd3dCommandList, pCamera, 0,false);
+	ShaderMgr::Render(pd3dCommandList, pCamera, 0,false);
 }

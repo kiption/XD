@@ -84,16 +84,16 @@ public:
 	ID3D12Resource* m_pd3dcbLights = NULL;
 	LIGHTS* m_pcbMappedLights = NULL;
 
-	void Firevalkan(CGameObject* Objects, XMFLOAT3 ToPlayerLook);
+	void Firevalkan(GameObjectMgr* Objects, XMFLOAT3 ToPlayerLook);
 	void ParticleCollisionResult();
-	void OtherPlayerFirevalkan(CGameObject* Objects, XMFLOAT3 ToPlayerLook);
+	void OtherPlayerFirevalkan(GameObjectMgr* Objects, XMFLOAT3 ToPlayerLook);
 	void PlayerFirevalkan(CCamera* pCamera, XMFLOAT3 Look);
-	void Reflectcartridgecase(CGameObject* Objects);
+	void Reflectcartridgecase(GameObjectMgr* Objects);
 public:
 	bool m_bHeliParticleCollisionCheck = false;
 	bool m_bHumanParticleCollisionCheck = false;
 	float m_fBulletEffectiveRange = 2000.0f;
-	CBulletEffectShader* pBCBulletEffectShader = NULL;
+	BulletEffectShader* pBCBulletEffectShader = NULL;
 	CValkanObject* pBulletObject = NULL;
 	CValkanObject* m_ppBullets[HELIBULLETS];
 	CValkanObject* pCartridge = NULL;

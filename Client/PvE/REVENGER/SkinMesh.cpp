@@ -64,7 +64,7 @@ void CSkinnedMesh::ReleaseUploadBuffers()
 
 
 
-void CSkinnedMesh::PrepareSkinning(CGameObject* pModelRootObject)
+void CSkinnedMesh::PrepareSkinning(GameObjectMgr* pModelRootObject)
 {
 	for (int j = 0; j < m_nSkinningBones; j++)
 	{
@@ -97,7 +97,7 @@ void CSkinnedMesh::LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12Graphics
 			if (m_nSkinningBones > 0)
 			{
 				m_ppstrSkinningBoneNames = new char[m_nSkinningBones][64];
-				m_ppSkinningBoneFrameCaches = new CGameObject * [m_nSkinningBones];
+				m_ppSkinningBoneFrameCaches = new GameObjectMgr * [m_nSkinningBones];
 				for (int i = 0; i < m_nSkinningBones; i++)
 				{
 					::ReadStringFromFile(pInFile, m_ppstrSkinningBoneNames[i]);

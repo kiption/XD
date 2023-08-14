@@ -5,11 +5,11 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
-HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CGameObject* model, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+HeliPlayer::HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, GameObjectMgr* model, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
-	pGameObject = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
+	pGameObject = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 
 	SetChild(pGameObject, false);
 	pGameObject->SetScale(1.1, 1.0, 1.2);
@@ -60,7 +60,7 @@ void HeliPlayer::Resetpartition()
 
 }
 
-void HeliPlayer::Firevalkan(CGameObject* pLockedObject)
+void HeliPlayer::Firevalkan(GameObjectMgr* pLockedObject)
 {
 }
 
@@ -119,7 +119,7 @@ CCamera* HeliPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 
 void HeliPlayer::OnPrepareAnimate()
 {
-	CPlayer::OnPrepareAnimate();
+	PlayerMgr::OnPrepareAnimate();
 	m_pTailRotorFrame = FindFrame("rescue_2");
 	m_pMainRotorFrame = FindFrame("rescue_1");
 	m_pFrameFragObj1 = FindFrame("glass");
@@ -138,7 +138,7 @@ void HeliPlayer::OnPrepareAnimate()
 
 void HeliPlayer::Animate(float fTimeElapse, XMFLOAT4X4* pxmf4x4Parent)
 {
-	CPlayer::Animate(fTimeElapse, pxmf4x4Parent);
+	PlayerMgr::Animate(fTimeElapse, pxmf4x4Parent);
 
 	if (m_pMainRotorFrame)
 	{
@@ -210,18 +210,18 @@ void HeliPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 void HeliPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	CPlayer::Render(pd3dCommandList, NULL, pCamera);
+	PlayerMgr::Render(pd3dCommandList, NULL, pCamera);
 }
 
 void HeliPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, XMFLOAT3 slideVec)
 {
-	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity, slideVec);
+	PlayerMgr::Move(dwDirection, fDistance, bUpdateVelocity, slideVec);
 }
 
 
 void HeliPlayer::Update(float fTimeElapsed)
 {
-	CPlayer::Update(fTimeElapsed);
+	PlayerMgr::Update(fTimeElapsed);
 
 }
 

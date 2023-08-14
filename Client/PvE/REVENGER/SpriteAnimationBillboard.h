@@ -2,7 +2,7 @@
 #include "Shader.h"
 #include "BillboardObjectsShader.h"
 class SceneMgr;
-class CSpriteTexturedShader : public CShader
+class CSpriteTexturedShader : public ShaderMgr
 {
 public:
 	CSpriteTexturedShader() {};

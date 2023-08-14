@@ -2,7 +2,7 @@
 #include "Shader.h"
 #include "StandardShader.h"
 
-class CSkinnedAnimationStandardShader : public CStandardShader
+class CSkinnedAnimationStandardShader : public StandardShader
 {
 public:
 	CSkinnedAnimationStandardShader();
@@ -31,7 +31,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 
 public:
-	CGameObject** m_ppObjects = 0;
+	GameObjectMgr** m_ppObjects = 0;
 	int								m_nObjects = 0;
 };
 

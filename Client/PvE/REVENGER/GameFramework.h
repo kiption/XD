@@ -142,8 +142,11 @@ public:
 
 	void ProcessInput();
 	void AnimateObjects();
+	void Animate_NpcHelicopterFallDawn();
+	void Animate_PlayerRole();
 	void FrameAdvance();
 	void DrawUIList();
+	void BulletMarkRenderList();
 
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
@@ -246,9 +249,9 @@ private:
 
 public:
 	XMFLOAT3 PrevPosition;
-	CPlayer* m_pPlayer = NULL;
+	PlayerMgr* m_pPlayer = NULL;
 	CCamera* m_pCamera = NULL;
-	CGameObject* m_pGameObject = NULL;
+	GameObjectMgr* m_pGameObject = NULL;
 	POINT m_ptOldCursorPos;
 	CMaterial* m_pMaterial = NULL;
 	_TCHAR	m_pszFrameRate[70];
@@ -455,7 +458,7 @@ public:
 		memcpy(m_MyRoom_Info[index].User_name, user_name, 24);
 	}
 
-	bool CollisionMap_by_PLAYER(XMFLOAT3 mappos, XMFLOAT3 mapextents, CGameObject* pTargetGameObject);
+	bool CollisionMap_by_PLAYER(XMFLOAT3 mappos, XMFLOAT3 mapextents, GameObjectMgr* pTargetGameObject);
 	void CollisionMap_by_BULLET(XMFLOAT3 mappos);
 	void CollisionNPC_by_PLAYER(XMFLOAT3 npcpos, XMFLOAT3 npcextents);
 	void CollisionNPC_by_MAP(XMFLOAT3 npcpos, XMFLOAT3 npcextents, XMFLOAT3 mapcenter, XMFLOAT3 mapextents);

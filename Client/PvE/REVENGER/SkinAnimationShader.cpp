@@ -31,7 +31,7 @@ D3D12_INPUT_LAYOUT_DESC CSkinnedAnimationStandardShader::CreateInputLayout(int n
 
 D3D12_SHADER_BYTECODE CSkinnedAnimationStandardShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shadow.hlsl", "VSSkinnedAnimationStandard", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shadow.hlsl", "VSSkinnedAnimationStandard", "vs_5_1", ppd3dShaderBlob));
 }
 
 
@@ -39,7 +39,7 @@ void CSkinnedAnimationStandardShader::CreateGraphicsPipelineState(ID3D12Device* 
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 }
 
 CEthanObjectsShader::CEthanObjectsShader()
@@ -56,7 +56,7 @@ void CEthanObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 	m_nObjects = (xObjects * 2 + 1) * (zObjects * 2 + 1);
 
-	m_ppObjects = new CGameObject * [m_nObjects];
+	m_ppObjects = new GameObjectMgr * [m_nObjects];
 
 	float fxPitch = 7.0f * 2.5f;
 	float fzPitch = 7.0f * 2.5f;
@@ -64,7 +64,7 @@ void CEthanObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	
 
 	CLoadedModelInfo* pEthanModel = pModel;
-	if (!pEthanModel) pEthanModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
+	if (!pEthanModel) pEthanModel = GameObjectMgr::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Aiming_Idle.bin", NULL);
 
 	int nObjects = 0;
 	for (int x = -xObjects; x <= xObjects; x++)

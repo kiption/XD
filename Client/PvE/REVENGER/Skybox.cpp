@@ -2,7 +2,7 @@
 #include "Skybox.h"
 #include "SceneMgr.h"
 
-CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
+CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : GameObjectMgr(1)
 {
 	CSkyBoxMesh* pSkyBoxMesh = new CSkyBoxMesh(pd3dDevice, pd3dCommandList, 200.0f, 200.0f, 0.0f);
 	SetMesh(pSkyBoxMesh);
@@ -35,10 +35,10 @@ void CSkyBox::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 	XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
 	SetPosition(xmf3CameraPos.x, xmf3CameraPos.y, xmf3CameraPos.z);
 
-	CGameObject::Render(pd3dCommandList, pCamera);
+	GameObjectMgr::Render(pd3dCommandList, pCamera);
 }
 
-COpeningBackScene::COpeningBackScene(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
+COpeningBackScene::COpeningBackScene(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : GameObjectMgr(1)
 {
 	CSkyBoxMesh* pSkyBoxMesh = new CSkyBoxMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 2.0f);
 	SetMesh(pSkyBoxMesh);
@@ -70,5 +70,5 @@ void COpeningBackScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 	XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
 	SetPosition(xmf3CameraPos.x, xmf3CameraPos.y, xmf3CameraPos.z);
 
-	CGameObject::Render(pd3dCommandList, pCamera);
+	GameObjectMgr::Render(pd3dCommandList, pCamera);
 }

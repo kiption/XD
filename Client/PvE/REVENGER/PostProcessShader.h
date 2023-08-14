@@ -2,7 +2,7 @@
 #include "Shader.h"
 
 class SceneMgr;
-class PostProcessShader: public CShader
+class PostProcessShader: public ShaderMgr
 {
 public:
 	PostProcessShader();

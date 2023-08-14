@@ -2,7 +2,7 @@
 #include "Mesh.h"
 
 #define SKINNED_ANIMATION_BONES		256
-class CGameObject;
+class GameObjectMgr;
 
 class CSkinnedMesh : public CStandardMesh
 {
@@ -28,7 +28,7 @@ public:
 	int								m_nSkinningBones = 0;
 
 	char(*m_ppstrSkinningBoneNames)[64];
-	CGameObject** m_ppSkinningBoneFrameCaches = NULL; //[m_nSkinningBones]
+	GameObjectMgr** m_ppSkinningBoneFrameCaches = NULL; //[m_nSkinningBones]
 
 	XMFLOAT4X4* m_pxmf4x4BindPoseBoneOffsets = NULL; //Transposed
 
@@ -39,7 +39,7 @@ public:
 	XMFLOAT4X4* m_pcbxmf4x4MappedSkinningBoneTransforms = NULL;
 
 public:
-	void PrepareSkinning(CGameObject* pModelRootObject);
+	void PrepareSkinning(GameObjectMgr* pModelRootObject);
 	void LoadSkinInfoFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, FILE* pInFile);
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

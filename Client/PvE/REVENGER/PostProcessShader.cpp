@@ -47,12 +47,12 @@ D3D12_DEPTH_STENCIL_DESC PostProcessShader::CreateDepthStencilState(int nPipelin
 
 D3D12_SHADER_BYTECODE PostProcessShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineStates)
 {
-	return(CShader::CompileShaderFromFile(L"Post.hlsl", "VSPostProcessing", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Post.hlsl", "VSPostProcessing", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE PostProcessShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineStates)
 {
-	return(CShader::CompileShaderFromFile(L"Post.hlsl", "PSPostProcessing", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Post.hlsl", "PSPostProcessing", "ps_5_1", ppd3dShaderBlob));
 }
 
 void PostProcessShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE d3dPrimitiveTopology, UINT nRenderTargets, DXGI_FORMAT* pdxgiRtvFormats, DXGI_FORMAT dxgiDsvFormat, int nPipelineState)
@@ -192,7 +192,7 @@ void PostProcessShader::OnPostRenderTarget(ID3D12GraphicsCommandList* pd3dComman
 
 void PostProcessShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, void* pContext, int nPipelineStates)
 {
-	CShader::Render(pd3dCommandList, pCamera, nPipelineStates,false);
+	ShaderMgr::Render(pd3dCommandList, pCamera, nPipelineStates,false);
 
 	if (m_pTexture) m_pTexture->UpdateShaderVariables(pd3dCommandList);
 
@@ -211,12 +211,12 @@ CTextureToFullScreenShader::~CTextureToFullScreenShader()
 
 D3D12_SHADER_BYTECODE CTextureToFullScreenShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineStates)
 {
-	return(CShader::CompileShaderFromFile(L"Post.hlsl", "VSScreenRectSamplingTextured", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Post.hlsl", "VSScreenRectSamplingTextured", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CTextureToFullScreenShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineStates)
 {
-	return(CShader::CompileShaderFromFile(L"Post.hlsl", "PSScreenRectSamplingTextured", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Post.hlsl", "PSScreenRectSamplingTextured", "ps_5_1", ppd3dShaderBlob));
 }
 
 void CTextureToFullScreenShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

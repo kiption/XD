@@ -1,6 +1,6 @@
 #pragma once
 #include "Shader.h"
-class BoundingWireShader : public CShader
+class BoundingWireShader : public ShaderMgr
 {
 public:
 	BoundingWireShader();

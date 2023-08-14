@@ -3,11 +3,11 @@
 #include "Object.h"
 
 
-class CStandardShader : public CShader
+class StandardShader : public ShaderMgr
 {
 public:
-	CStandardShader();
-	virtual ~CStandardShader();
+	StandardShader();
+	virtual ~StandardShader();
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 
@@ -25,7 +25,7 @@ public:
 };
 
 
-class CStandardObjectsShader : public CStandardShader
+class CStandardObjectsShader : public StandardShader
 {
 public:
 	CStandardObjectsShader();
@@ -39,12 +39,12 @@ public:
 	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 
 public:
-	CGameObject** m_ppObjects = 0;
+	GameObjectMgr** m_ppObjects = 0;
 	int								m_nObjects = 0;
 };
 
 
-class BillboardShader : public CStandardShader
+class BillboardShader : public StandardShader
 {
 public:
 	BillboardShader();
@@ -66,6 +66,6 @@ public:
 	XMFLOAT3 NextPosition = XMFLOAT3(0, 0, 0);
 	XMFLOAT3 ParticlePosition{};
 	int								m_nObjects = 0;
-	CGameObject** m_ppObjects = 0;
+	GameObjectMgr** m_ppObjects = 0;
 
 };

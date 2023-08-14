@@ -74,7 +74,6 @@ void SceneMgr::BuildDefaultLightsAndMaterials()
 
 	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 
-	// 방향 조절 -> 2개 쓰면 프레임 떨어짐
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[0].m_fRange = 10000.0f;
@@ -143,6 +142,7 @@ void SceneMgr::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_pShadowShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	m_pShadowShader->SetCurScene(OPENING_SCENE);
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
+
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

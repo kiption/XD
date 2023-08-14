@@ -1,7 +1,7 @@
 #pragma once
 #include "StandardShader.h"
 
-class CTexturedShader : public CShader
+class CTexturedShader : public ShaderMgr
 {
 public:
 	CTexturedShader();

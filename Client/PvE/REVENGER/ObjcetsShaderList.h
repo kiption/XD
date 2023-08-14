@@ -12,36 +12,18 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext = NULL);
 };
 
-class CHumanObjectsShader : public CSkinnedAnimationObjectsShader
+class BulletEffectShader : public CStandardObjectsShader
 {
 public:
-	CHumanObjectsShader();
-	virtual ~CHumanObjectsShader();
-
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext = NULL);
-};
-
-class CAngrybotObjectsShader : public CSkinnedAnimationObjectsShader
-{
-public:
-	CAngrybotObjectsShader();
-	virtual ~CAngrybotObjectsShader();
-
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext = NULL);
-};
-
-class CBulletEffectShader : public CStandardObjectsShader
-{
-public:
-	CBulletEffectShader();
-	virtual ~CBulletEffectShader();
+	BulletEffectShader();
+	virtual ~BulletEffectShader();
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 };
 
-class CFragmentsShader : public CStandardShader
+class CFragmentsShader : public StandardShader
 {
 public:
 	CFragmentsShader() {};

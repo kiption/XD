@@ -6,27 +6,27 @@
 #include "GameSound.h"
 
 
-class HeliPlayer : public CPlayer
+class HeliPlayer : public PlayerMgr
 {
 public:
-	HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,CGameObject* model, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
+	HeliPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList,GameObjectMgr* model, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual ~HeliPlayer();
 
 public:
-	CGameObject* m_pMainRotorFrame = NULL;
-	CGameObject* m_pTailRotorFrame = NULL;
-	CGameObject* m_pFrameFragObj1 = NULL;
-	CGameObject* m_pFrameFragObj2 = NULL;
-	CGameObject* m_pFrameFragObj3 = NULL;
-	CGameObject* m_pFrameFragObj4 = NULL;
-	CGameObject* m_pFrameFragObj5 = NULL;
-	CGameObject* m_pFrameFragObj6 = NULL;
-	CGameObject* m_pFrameFragObj7 = NULL;
-	CGameObject* m_pFrameFragObj8 = NULL;
-	CGameObject* m_pFrameFragObj9 = NULL;
-	CGameObject* m_pFrameFragObj10 = NULL;
-	CGameObject* m_pFrameFragObj11 = NULL;
-	CGameObject* m_pChairPoint = NULL;
+	GameObjectMgr* m_pMainRotorFrame = NULL;
+	GameObjectMgr* m_pTailRotorFrame = NULL;
+	GameObjectMgr* m_pFrameFragObj1 = NULL;
+	GameObjectMgr* m_pFrameFragObj2 = NULL;
+	GameObjectMgr* m_pFrameFragObj3 = NULL;
+	GameObjectMgr* m_pFrameFragObj4 = NULL;
+	GameObjectMgr* m_pFrameFragObj5 = NULL;
+	GameObjectMgr* m_pFrameFragObj6 = NULL;
+	GameObjectMgr* m_pFrameFragObj7 = NULL;
+	GameObjectMgr* m_pFrameFragObj8 = NULL;
+	GameObjectMgr* m_pFrameFragObj9 = NULL;
+	GameObjectMgr* m_pFrameFragObj10 = NULL;
+	GameObjectMgr* m_pFrameFragObj11 = NULL;
+	GameObjectMgr* m_pChairPoint = NULL;
 
 	BoundingOrientedBox ParticleFrame1;
 	BoundingOrientedBox ParticleFrame2;
@@ -49,7 +49,7 @@ public:
 	float						m_fExplosionSpeed = 1.0f;
 	float						m_fExplosionRotation = 5.0f;
 	XMFLOAT3 m_pxmf3SphereVectors[EXPLOSION_HELICOPTER];
-	CGameObject* pGameObject = NULL;
+	GameObjectMgr* pGameObject = NULL;
 
 public:
 	XMFLOAT4X4 m_pMainRotorFramePos ;
@@ -69,10 +69,10 @@ public:
 	void Resetpartition();
 public:
 	float m_fBulletEffectiveRange = 2000.0f;
-	CBulletEffectShader* pBCBulletEffectShader = NULL;
+	BulletEffectShader* pBCBulletEffectShader = NULL;
 	CValkanObject* pBulletObject = NULL;
 	CValkanObject* m_ppBullets[BULLETS];
-	void Firevalkan(CGameObject* pLockedObject);
+	void Firevalkan(GameObjectMgr* pLockedObject);
 public:
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 

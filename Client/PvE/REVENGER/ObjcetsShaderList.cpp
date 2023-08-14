@@ -110,55 +110,17 @@ void CSkinnedAnimationObjectsShader::Render(ID3D12GraphicsCommandList* pd3dComma
 	}
 }
 
-CHumanObjectsShader::CHumanObjectsShader()
+
+BulletEffectShader::BulletEffectShader()
 {
 }
 
-CHumanObjectsShader::~CHumanObjectsShader()
-{
-}
-
-void CHumanObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
-{
-
-	m_nObjects = 10;
-
-	m_ppObjects = new CGameObject * [m_nObjects];
-
-	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
-
-	CLoadedModelInfo* pEthanModel = pModel;
-	if (!pEthanModel) pEthanModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Ethan.bin", NULL);
-
-	for (int x = 0; x <= m_nObjects; x++)
-	{
-
-		m_ppObjects[x] = new CEthanObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pEthanModel, 1);
-		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackSpeed(0, 0.25f);
-		m_ppObjects[x]->m_pSkinnedAnimationController->SetTrackPosition(0, 0);
-		XMFLOAT3 xmf3Position = XMFLOAT3(580.0, 6.0f, 850.0f + x * 10);
-		//xmf3Position.y = pTerrain->GetHeight(xmf3Position.x, xmf3Position.z);
-		m_ppObjects[x]->SetScale(15.0, 15.0, 15.0);
-		m_ppObjects[x]->SetPosition(xmf3Position);
-
-	}
-
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	if (!pModel && pEthanModel) delete pEthanModel;
-}
-
-CBulletEffectShader::CBulletEffectShader()
-{
-}
-
-CBulletEffectShader::~CBulletEffectShader()
+BulletEffectShader::~BulletEffectShader()
 {
 }
 
 
-D3D12_INPUT_LAYOUT_DESC CBulletEffectShader::CreateInputLayout(int nPipelineState)
+D3D12_INPUT_LAYOUT_DESC BulletEffectShader::CreateInputLayout(int nPipelineState)
 {
 	UINT nInputElementDescs = 5;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
@@ -176,36 +138,36 @@ D3D12_INPUT_LAYOUT_DESC CBulletEffectShader::CreateInputLayout(int nPipelineStat
 	return(d3dInputLayoutDesc);
 }
 
-D3D12_SHADER_BYTECODE CBulletEffectShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE BulletEffectShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSStandard", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSStandard", "vs_5_1", ppd3dShaderBlob));
 }
 
-D3D12_SHADER_BYTECODE CBulletEffectShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE BulletEffectShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBulletStandard", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSBulletStandard", "ps_5_1", ppd3dShaderBlob));
 }
 
-void CBulletEffectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+void BulletEffectShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
 	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState, false);
 }
 
 D3D12_SHADER_BYTECODE CFragmentsShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSParticleStandard", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSParticleStandard", "vs_5_1", ppd3dShaderBlob));
 }
 D3D12_SHADER_BYTECODE CFragmentsShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSParticleStandard", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSParticleStandard", "ps_5_1", ppd3dShaderBlob));
 }
 
 
 void CFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	m_nObjects = EXPLOSION_DEBRISES;
-	m_ppObjects = new CGameObject * [m_nObjects];
-	CGameObject* pFragmentModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Wing2_1_Variant.bin", this);
+	m_ppObjects = new GameObjectMgr * [m_nObjects];
+	GameObjectMgr* pFragmentModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Wing2_1_Variant.bin", this);
 	for (int i = 0; i < m_nObjects; i++)
 	{
 		m_ppObjects[i] = new CExplosiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -230,7 +192,7 @@ void CFragmentsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 {
 	if (m_bActive == true)
 	{
-		CShader::Render(pd3dCommandList, pCamera, 0, false);
+		ShaderMgr::Render(pd3dCommandList, pCamera, 0, false);
 
 		for (int j = 0; j < m_nObjects; j++)
 		{
@@ -308,8 +270,8 @@ void CFragmentsShader::ReleaseUploadBuffers()
 void CHelicopterBulletMarkParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	m_nObjects = BLOODEXPLOSION_DEBRISES;
-	m_ppObjects = new CGameObject * [m_nObjects];
-	CGameObject* pFragmentModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Blood_particle.bin", this);
+	m_ppObjects = new GameObjectMgr * [m_nObjects];
+	GameObjectMgr* pFragmentModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Blood_particle.bin", this);
 	for (int i = 0; i < m_nObjects; i++)
 	{
 		m_ppObjects[i] = new CExplosiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -335,7 +297,7 @@ void CHelicopterBulletMarkParticleShader::Render(ID3D12GraphicsCommandList* pd3d
 	if (m_bActive == true)
 	{
 
-		CShader::Render(pd3dCommandList, pCamera, 0, false);
+		ShaderMgr::Render(pd3dCommandList, pCamera, 0, false);
 
 		for (int j = 0; j < m_nObjects; j++)
 		{
@@ -387,13 +349,13 @@ D3D12_INPUT_LAYOUT_DESC CHelicopterBulletMarkParticleShader::CreateInputLayout(i
 
 D3D12_SHADER_BYTECODE CHelicopterBulletMarkParticleShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSParticleStandard", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSParticleStandard", "vs_5_1", ppd3dShaderBlob));
 
 }
 
 D3D12_SHADER_BYTECODE CHelicopterBulletMarkParticleShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBloodParticleStandard", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSBloodParticleStandard", "ps_5_1", ppd3dShaderBlob));
 
 }
 void CHelicopterBulletMarkParticleShader::AnimateObjects(float fTimeElapsed)
@@ -439,8 +401,8 @@ void CHelicopterBulletMarkParticleShader::ReleaseUploadBuffers()
 void CHumanBulletMarkParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	m_nObjects = BLOODEXPLOSION_DEBRISES;
-	m_ppObjects = new CGameObject * [m_nObjects];
-	CGameObject* pFragmentModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Sphere.bin", this);
+	m_ppObjects = new GameObjectMgr * [m_nObjects];
+	GameObjectMgr* pFragmentModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Sphere.bin", this);
 	for (int i = 0; i < m_nObjects; i++)
 	{
 		m_ppObjects[i] = new CExplosiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -464,7 +426,7 @@ void CHumanBulletMarkParticleShader::Render(ID3D12GraphicsCommandList* pd3dComma
 	if (m_bActive == true)
 	{
 
-		CShader::Render(pd3dCommandList, pCamera, 0, false);
+		ShaderMgr::Render(pd3dCommandList, pCamera, 0, false);
 
 		for (int j = 0; j < m_nObjects; j++)
 		{
@@ -495,12 +457,12 @@ D3D12_INPUT_LAYOUT_DESC CHumanBulletMarkParticleShader::CreateInputLayout(int nP
 }
 D3D12_SHADER_BYTECODE CHumanBulletMarkParticleShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSParticleStandard", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "VSParticleStandard", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CHumanBulletMarkParticleShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSRiflePointingStandard", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shaders.hlsl", "PSRiflePointingStandard", "ps_5_1", ppd3dShaderBlob));
 
 }
 

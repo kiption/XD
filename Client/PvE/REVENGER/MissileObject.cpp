@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "MissileObject.h"
 
-CBulletObject::CBulletObject(float fEffectiveRange) : CGameObject()
+CBulletObject::CBulletObject(float fEffectiveRange) : GameObjectMgr()
 {
 	m_fBulletEffectiveRange = fEffectiveRange;
 }
@@ -34,11 +34,11 @@ void CBulletObject::Animate(float fElapsedTime)
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
 	SetPosition(xmf3Position);
 	m_fMovingDistance += fDistance;
-	CGameObject::Animate(fElapsedTime);
+	GameObjectMgr::Animate(fElapsedTime);
 	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)) Reset();
 }
 
-void CBulletObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
+void CBulletObject::SetChild(GameObjectMgr* pChild, bool bReferenceUpdate)
 {
 	if (pChild)
 	{
@@ -59,7 +59,7 @@ void CBulletObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-CValkanObject::CValkanObject(float fEffectiveRange) : CGameObject(10)
+CValkanObject::CValkanObject(float fEffectiveRange) : GameObjectMgr(10)
 {
 	m_fBulletEffectiveRange = fEffectiveRange;
 }
@@ -94,7 +94,7 @@ void CValkanObject::Animate(float fElapsedTime)
 		xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
 		SetPosition(xmf3Position);
 		m_fMovingDistance += fDistance;
-		CGameObject::Animate(fElapsedTime);
+		GameObjectMgr::Animate(fElapsedTime);
 	
 
 	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime))
@@ -103,7 +103,7 @@ void CValkanObject::Animate(float fElapsedTime)
 	}
 }
 
-void CValkanObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
+void CValkanObject::SetChild(GameObjectMgr* pChild, bool bReferenceUpdate)
 {
 	if (pChild)
 	{
@@ -125,7 +125,7 @@ void CValkanObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-CNPCbulletObject::CNPCbulletObject(float fEffectiveRange) : CGameObject()
+CNPCbulletObject::CNPCbulletObject(float fEffectiveRange) : GameObjectMgr()
 {
 	m_fBulletEffectiveRange = fEffectiveRange;
 }
@@ -160,7 +160,7 @@ void CNPCbulletObject::Animate(float fElapsedTime)
 	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
 	SetPosition(xmf3Position);
 	m_fMovingDistance += fDistance;
-	CGameObject::Animate(fElapsedTime);
+	GameObjectMgr::Animate(fElapsedTime);
 
 
 	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime))
@@ -169,7 +169,7 @@ void CNPCbulletObject::Animate(float fElapsedTime)
 	}
 }
 
-void CNPCbulletObject::SetChild(CGameObject* pChild, bool bReferenceUpdate)
+void CNPCbulletObject::SetChild(GameObjectMgr* pChild, bool bReferenceUpdate)
 {
 	if (pChild)
 	{

@@ -19,12 +19,12 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	if (m_nCurScene == OPENING_SCENE)
 	{
 		m_nObjects = 3;
-		m_ppObjects = new CGameObject * [m_nObjects];
+		m_ppObjects = new GameObjectMgr * [m_nObjects];
 		CMaterial* pMaterial = new CMaterial(4);
 		pMaterial->SetReflection(4);
 
-		CGameObject* pModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1_(1).bin", NULL);
-		CGameObject* pChairModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Car_B.bin", NULL);
+		GameObjectMgr* pModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1_(1).bin", NULL);
+		GameObjectMgr* pChairModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Car_B.bin", NULL);
 
 		m_ppObjects[0] = new CBilldingObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[0]->SetChild(pModel, false);
@@ -44,7 +44,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 		CMaterial* pHumanMaterial = new CMaterial(1);
 		pHumanMaterial->SetReflection(1);
-		CLoadedModelInfo* psHumanModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/rifle_soldier_(2)_Variant.bin", NULL);
+		CLoadedModelInfo* psHumanModel = GameObjectMgr::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/rifle_soldier_(2)_Variant.bin", NULL);
 		m_ppObjects[2] = new COpeningHuman(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psHumanModel, 3);
 		m_ppObjects[2]->SetMaterial(0, pHumanMaterial);
 		m_ppObjects[2]->SetScale(5.0, 5.0, 5.0);
@@ -58,15 +58,15 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	if (m_nCurScene == INGAME_SCENE)
 	{
 		m_nObjects = 45;
-		m_ppObjects = new CGameObject * [m_nObjects];
-		m_ppObjects[3] = new CGameObject(1);
+		m_ppObjects = new GameObjectMgr * [m_nObjects];
+		m_ppObjects[3] = new GameObjectMgr(1);
 
 		/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
 		{
 			CMaterial* pOtherPlayerMaterial = new CMaterial(6);
 			pOtherPlayerMaterial->SetReflection(6);
 
-			CLoadedModelInfo* pSModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
+			CLoadedModelInfo* pSModel = GameObjectMgr::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
 			m_ppObjects[0] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
 			m_ppObjects[0]->SetMaterial(0, pOtherPlayerMaterial);
 			m_ppObjects[0]->SetScale(3, 3, 3);
@@ -93,7 +93,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			}
 			if (pSModel) delete pSModel;
 
-			CGameObject* pPlayerHelicopterModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
+			GameObjectMgr* pPlayerHelicopterModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 			m_ppObjects[7] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pPlayerHelicopterModel, pd3dGraphicsRootSignature);
 			m_ppObjects[7]->SetChild(pPlayerHelicopterModel, false);
 			m_ppObjects[7]->SetMaterial(0, pOtherPlayerMaterial);
@@ -110,7 +110,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			pCityMaterial = new CMaterial(4);
 			pCityMaterial->SetReflection(4);
 			int Cities = 4;
-			m_ppCityGameObjects = new CGameObject * [Cities];
+			m_ppCityGameObjects = new GameObjectMgr * [Cities];
 			for (int i = 0; i < Cities; i++)
 			{
 				string filename{ "Model/Stage1_(" };
@@ -118,7 +118,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 				filename += num;
 				filename += ").bin";
 				char* c_filename = const_cast<char*>(filename.c_str());
-				CGameObject* pGeneratorModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, c_filename, NULL);
+				GameObjectMgr* pGeneratorModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, c_filename, NULL);
 
 				m_ppCityGameObjects[i] = new CCityObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 				m_ppCityGameObjects[i]->SetChild(pGeneratorModel, false);
@@ -146,7 +146,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 
 			for (int i = 0; i < m_nHeliNpcObjects; i++)
 			{
-				CGameObject* pNPCHelicopterModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
+				GameObjectMgr* pNPCHelicopterModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 				m_ppNpc_Heli_Objects[i] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pNPCHelicopterModel, pd3dGraphicsRootSignature);
 				m_ppNpc_Heli_Objects[i]->SetChild(pNPCHelicopterModel, false);
 				m_ppNpc_Heli_Objects[i]->SetMaterial(0, pNpcHeliMaterial);
@@ -173,9 +173,9 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_nSoldiarNpcObjects = 22;
 			CMaterial* pSoldiarNpcMaterial = new CMaterial(m_nSoldiarNpcObjects);
 			pSoldiarNpcMaterial->SetReflection(m_nSoldiarNpcObjects);
-			m_ppSoldiarNpcObjects = new CGameObject * [m_nSoldiarNpcObjects];
+			m_ppSoldiarNpcObjects = new GameObjectMgr * [m_nSoldiarNpcObjects];
 
-			CLoadedModelInfo* psModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/fixed.bin", NULL);
+			CLoadedModelInfo* psModel = GameObjectMgr::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/fixed.bin", NULL);
 			for (int i = 0; i < m_nSoldiarNpcObjects; i++)
 			{
 				m_ppSoldiarNpcObjects[i] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, 4);
@@ -208,12 +208,12 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			if (psModel) delete psModel;
 		}
 		////////////////////////////////////////////////SOLDIAR_NPC_LOAD///////////////////////////////////////////////////////////
-		m_ppObjects[42] = new CGameObject(1);
+		m_ppObjects[42] = new GameObjectMgr(1);
 		////////////////////////////////////////////////HELIPLAYER_LOAD////////////////////////////////////////////////////////////
 		{
 			CMaterial* pHeliMaterial = new CMaterial(1);
 			pHeliMaterial->SetReflection(1);
-			CGameObject* pHelicopterModel = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
+			GameObjectMgr* pHelicopterModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 			m_ppObjects[43] = new HeliPlayer(pd3dDevice, pd3dCommandList, pHelicopterModel, pd3dGraphicsRootSignature);
 			m_ppObjects[43]->SetMaterial(0, pHeliMaterial);
 			m_ppObjects[43]->OnPrepareAnimate();
@@ -224,7 +224,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		////////////////////////////////////////////////TREE_LOAD//////////////////////////////////////////////////////////////////
 		{	CMaterial* pTreeMaterial = new CMaterial(1);
 		pTreeMaterial->SetReflection(1);
-			CGameObject* pTreeModels = CGameObject::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/ALL_Tree.bin", NULL);
+			GameObjectMgr* pTreeModels = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/ALL_Tree.bin", NULL);
 			m_ppObjects[44] = new CCityObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 			m_ppObjects[44]->SetChild(pTreeModels, false);
 			m_ppObjects[44]->SetMaterial(0, pTreeMaterial);
@@ -290,7 +290,7 @@ D3D12_INPUT_LAYOUT_DESC CObjectsShader::CreateInputLayout(int nPipelineState)
 
 D3D12_SHADER_BYTECODE CObjectsShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return (CShader::CompileShaderFromFile(L"Shadow.hlsl", "VSLighting", "vs_5_1", ppd3dShaderBlob));
+	return (ShaderMgr::CompileShaderFromFile(L"Shadow.hlsl", "VSLighting", "vs_5_1", ppd3dShaderBlob));
 }
 
 BoundingBox CObjectsShader::CalculateBoundingBox()
@@ -313,7 +313,7 @@ void CObjectsShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D1
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 
 
 }
@@ -402,12 +402,12 @@ D3D12_RASTERIZER_DESC CShadowMapShader::CreateRasterizerState(int nPipelineState
 
 D3D12_SHADER_BYTECODE CShadowMapShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shadow.hlsl", "VSShadowMapShadow", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shadow.hlsl", "VSShadowMapShadow", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CShadowMapShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shadow.hlsl", "PSShadowMapShadow", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shadow.hlsl", "PSShadowMapShadow", "ps_5_1", ppd3dShaderBlob));
 }
 
 void CShadowMapShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -440,7 +440,7 @@ void CShadowMapShader::ReleaseObjects()
 {
 
 	if (m_pDepthTexture) m_pDepthTexture->Release();
-	CShader::ReleaseObjects();
+	ShaderMgr::ReleaseObjects();
 }
 
 void CShadowMapShader::ReleaseUploadBuffers()
@@ -469,7 +469,7 @@ D3D12_BLEND_DESC CShadowMapShader::CreateBlendState(int nPipelineState)
 
 void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CShader::Render(pd3dCommandList, pCamera, nPipelineState, false);
+	ShaderMgr::Render(pd3dCommandList, pCamera, nPipelineState, false);
 
 	UpdateShaderVariables(pd3dCommandList);
 	if (m_nCurScene == OPENING_SCENE)
@@ -508,7 +508,7 @@ void CShadowMapShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 }
 
 
@@ -594,13 +594,13 @@ D3D12_INPUT_LAYOUT_DESC CDepthRenderShader::CreateInputLayout(int nPipelineState
 D3D12_SHADER_BYTECODE CDepthRenderShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	if (nPipelineState == 0)
-		return (CShader::CompileShaderFromFile(L"Shadow.hlsl", "VSLighting", "vs_5_1", ppd3dShaderBlob));
+		return (ShaderMgr::CompileShaderFromFile(L"Shadow.hlsl", "VSLighting", "vs_5_1", ppd3dShaderBlob));
 
 }
 
 D3D12_SHADER_BYTECODE CDepthRenderShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shadow.hlsl", "PSDepthWriteShader", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shadow.hlsl", "PSDepthWriteShader", "ps_5_1", ppd3dShaderBlob));
 }
 
 void CDepthRenderShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -731,7 +731,7 @@ void CDepthRenderShader::ReleaseObjects()
 	if (m_pd3dRtvDescriptorHeap) m_pd3dRtvDescriptorHeap->Release();
 	if (m_pd3dDsvDescriptorHeap) m_pd3dDsvDescriptorHeap->Release();
 
-	CShader::ReleaseObjects();
+	ShaderMgr::ReleaseObjects();
 }
 
 void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -801,7 +801,7 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 
 void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CShader::Render(pd3dCommandList, pCamera, nPipelineState, false);
+	ShaderMgr::Render(pd3dCommandList, pCamera, nPipelineState, false);
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
@@ -821,7 +821,7 @@ void CDepthRenderShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, I
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
 }
 
 CTreeBlendingShadowShader::CTreeBlendingShadowShader(CObjectsShader* pObjectsShader)
@@ -914,12 +914,12 @@ D3D12_RASTERIZER_DESC CTreeBlendingShadowShader::CreateRasterizerState(int nPipe
 
 D3D12_SHADER_BYTECODE CTreeBlendingShadowShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shadow.hlsl", "VSShadowMapShadow", "vs_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shadow.hlsl", "VSShadowMapShadow", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CTreeBlendingShadowShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shadow.hlsl", "PSShadowMapShadow", "ps_5_1", ppd3dShaderBlob));
+	return(ShaderMgr::CompileShaderFromFile(L"Shadow.hlsl", "PSShadowMapShadow", "ps_5_1", ppd3dShaderBlob));
 }
 
 void CTreeBlendingShadowShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -946,7 +946,7 @@ void CTreeBlendingShadowShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 void CTreeBlendingShadowShader::ReleaseObjects()
 {
 	if (m_pDepthTexture) m_pDepthTexture->Release();
-	CShader::ReleaseObjects();
+	ShaderMgr::ReleaseObjects();
 }
 
 void CTreeBlendingShadowShader::ReleaseUploadBuffers()
@@ -955,7 +955,7 @@ void CTreeBlendingShadowShader::ReleaseUploadBuffers()
 
 void CTreeBlendingShadowShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	CShader::Render(pd3dCommandList, pCamera, nPipelineState, false);
+	ShaderMgr::Render(pd3dCommandList, pCamera, nPipelineState, false);
 
 	UpdateShaderVariables(pd3dCommandList);
 	m_pObjectsShader->m_ppObjects[44]->Animate(m_fElapsedTime);
@@ -967,5 +967,5 @@ void CTreeBlendingShadowShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDe
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
-	CShader::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
+	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
 }

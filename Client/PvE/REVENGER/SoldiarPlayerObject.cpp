@@ -46,6 +46,6 @@ void SoldiarPlayerObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 {
 }
 
-void SoldiarPlayerObject::FireBullet(CGameObject* pLockedObject)
+void SoldiarPlayerObject::FireBullet(GameObjectMgr* pLockedObject)
 {
 }

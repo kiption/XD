@@ -4,7 +4,7 @@
 class SceneMgr;
 class CTerrainShader;
 
-class CHeightMapTerrain : public CGameObject
+class CHeightMapTerrain : public GameObjectMgr
 {
 public:
 	CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale, XMFLOAT3 xmf3Normal);

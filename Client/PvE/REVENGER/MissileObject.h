@@ -1,7 +1,7 @@
 #pragma once
 #include "Object.h"
 
-class CBulletObject : public CGameObject
+class CBulletObject : public GameObjectMgr
 {
 public:
 	CBulletObject(float fEffectiveRange);
@@ -9,7 +9,7 @@ public:
 
 public:
 	virtual void Animate(float fElapsedTime);
-	virtual void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
+	virtual void SetChild(GameObjectMgr* pChild, bool bReferenceUpdate = false);
 	float						m_fBulletEffectiveRange = 1500.0f;
 	float						m_fMovingDistance = 0.0f;
 	float						m_fRotationAngle = 0.0f;
@@ -18,14 +18,14 @@ public:
 	float						m_fElapsedTimeAfterFire = 0.0f;
 	float						m_fLockingDelayTime = 0.3f;
 	float						m_fLockingTime = 5.0f;
-	CGameObject* m_pLockedObject = NULL;
+	GameObjectMgr* m_pLockedObject = NULL;
 	CCamera* m_pCamera = NULL;
-	CPlayer* m_pPlayer = NULL;
+	PlayerMgr* m_pPlayer = NULL;
 	void SetFirePosition(XMFLOAT3 xmf3FirePosition);
 	void Reset();
 };
 
-class CValkanObject : public CGameObject
+class CValkanObject : public GameObjectMgr
 {
 public:
 	CValkanObject(float fEffectiveRange);
@@ -33,7 +33,7 @@ public:
 
 public:
 	virtual void Animate(float fElapsedTime);
-	virtual void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
+	virtual void SetChild(GameObjectMgr* pChild, bool bReferenceUpdate = false);
 	float						m_fBulletEffectiveRange = 1500.0f;
 	float						m_fMovingDistance = 0.0f;
 	float						m_fRotationAngle = 0.0f;
@@ -42,15 +42,15 @@ public:
 	float						m_fElapsedTimeAfterFire = 0.0f;
 	float						m_fLockingDelayTime = 0.3f;
 	float						m_fLockingTime = 5.0f;
-	CGameObject* m_pLockedObject = NULL;
+	GameObjectMgr* m_pLockedObject = NULL;
 	CCamera* m_pCamera = NULL;
-	CPlayer* m_pPlayer = NULL;
+	PlayerMgr* m_pPlayer = NULL;
 	float m_fShotDelay = 0.f;
 	void SetFirePosition(XMFLOAT3 xmf3FirePosition);
 	void Reset();
 };
 
-class CNPCbulletObject : public CGameObject
+class CNPCbulletObject : public GameObjectMgr
 {
 public:
 	CNPCbulletObject(float fEffectiveRange);
@@ -58,7 +58,7 @@ public:
 
 public:
 	virtual void Animate(float fElapsedTime);
-	virtual void SetChild(CGameObject* pChild, bool bReferenceUpdate = false);
+	virtual void SetChild(GameObjectMgr* pChild, bool bReferenceUpdate = false);
 	float						m_fBulletEffectiveRange = 1500.0f;
 	float						m_fMovingDistance = 0.0f;
 	float						m_fRotationAngle = 0.0f;
@@ -67,9 +67,9 @@ public:
 	float						m_fElapsedTimeAfterFire = 0.0f;
 	float						m_fLockingDelayTime = 0.3f;
 	float						m_fLockingTime = 5.0f;
-	CGameObject* m_pLockedObject = NULL;
+	GameObjectMgr* m_pLockedObject = NULL;
 	CCamera* m_pCamera = NULL;
-	CPlayer* m_pPlayer = NULL;
+	PlayerMgr* m_pPlayer = NULL;
 	float m_fShotDelay = 0.f;
 	void SetFirePosition(XMFLOAT3 xmf3FirePosition);
 	void Reset();

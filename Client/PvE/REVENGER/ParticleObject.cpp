@@ -4,7 +4,7 @@
 #include "ParticleObject.h"
 #include "ParticleShader.h"
 
-CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles) : CGameObject(1)
+CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles) : GameObjectMgr(1)
 {
 	//CParticleMesh* pMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, fLifetime, xmf3Acceleration, xmf3Color, xmf2Size, nMaxParticles);
 	//SetMesh(pMesh);
@@ -59,12 +59,12 @@ void CParticleObject::ReleaseUploadBuffers()
 	if (m_pRandowmValueTexture) m_pRandowmValueTexture->ReleaseUploadBuffers();
 	if (m_pRandowmValueOnSphereTexture) m_pRandowmValueOnSphereTexture->ReleaseUploadBuffers();
 
-	CGameObject::ReleaseUploadBuffers();
+	GameObjectMgr::ReleaseUploadBuffers();
 }
 
 void CParticleObject::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
-	CGameObject::Animate(fTimeElapsed, pxmf4x4Parent); //D
+	GameObjectMgr::Animate(fTimeElapsed, pxmf4x4Parent); //D
 }
 
 void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
@@ -102,7 +102,7 @@ void CParticleObject::OnPostRender()
 }
 
 
-CExplosiveObject::CExplosiveObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
+CExplosiveObject::CExplosiveObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : GameObjectMgr(1)
 {
 }
 
@@ -114,7 +114,7 @@ void CExplosiveObject::Animate(float fElapsedTime)
 {
 
 
-	CGameObject::Animate(fElapsedTime);
+	GameObjectMgr::Animate(fElapsedTime);
 
 }
 

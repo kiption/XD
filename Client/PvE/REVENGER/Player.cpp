@@ -9,7 +9,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
-CPlayer::CPlayer() :CGameObject(6)
+PlayerMgr::PlayerMgr() :GameObjectMgr(6)
 {
 	m_pCamera = NULL;
 
@@ -32,32 +32,32 @@ CPlayer::CPlayer() :CGameObject(6)
 	m_pCameraUpdatedContext = NULL;
 }
 
-CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+PlayerMgr::PlayerMgr(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 }
 
-CPlayer::~CPlayer()
+PlayerMgr::~PlayerMgr()
 {
 	ReleaseShaderVariables();
 
 	if (m_pCamera) delete m_pCamera;
 }
 
-void CPlayer::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void PlayerMgr::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if (m_pCamera) m_pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
-void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+void PlayerMgr::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
 
-void CPlayer::ReleaseShaderVariables()
+void PlayerMgr::ReleaseShaderVariables()
 {
 	if (m_pCamera) m_pCamera->ReleaseShaderVariables();
 }
 
-void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, XMFLOAT3 slideVec)
+void PlayerMgr::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, XMFLOAT3 slideVec)
 {
 	if (dwDirection)
 	{
@@ -81,7 +81,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, XMF
 //	else m_xmf3Position = xmf3Position;
 //}
 
-void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
+void PlayerMgr::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
 	if (bUpdateVelocity)
 	{
@@ -94,11 +94,11 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	}
 }
 
-void CPlayer::Move(float fxOffset, float fyOffset, float fzOffset)
+void PlayerMgr::Move(float fxOffset, float fyOffset, float fzOffset)
 {
 }
 
-void CPlayer::Rotate(float x, float y, float z)
+void PlayerMgr::Rotate(float x, float y, float z)
 {
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	if ((nCurrentCameraMode == FIRST_PERSON_CAMERA) || (nCurrentCameraMode == THIRD_PERSON_CAMERA))
@@ -193,7 +193,7 @@ void CPlayer::Rotate(float x, float y, float z)
 	m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right, true);
 }
 
-void CPlayer::Update(float fTimeElapsed)
+void PlayerMgr::Update(float fTimeElapsed)
 {
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
 	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
@@ -229,7 +229,7 @@ void CPlayer::Update(float fTimeElapsed)
 
 }
 
-CCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
+CCamera* PlayerMgr::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
 {
 	CCamera* pNewCamera = NULL;
 	switch (nNewCameraMode)
@@ -273,7 +273,7 @@ CCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
 	return(pNewCamera);
 }
 
-void CPlayer::OnPrepareRender()
+void PlayerMgr::OnPrepareRender()
 {
 	m_xmf4x4ToParent._11 = m_xmf3Right.x; m_xmf4x4ToParent._12 = m_xmf3Right.y; m_xmf4x4ToParent._13 = m_xmf3Right.z;
 	m_xmf4x4ToParent._21 = m_xmf3Up.x; m_xmf4x4ToParent._22 = m_xmf3Up.y; m_xmf4x4ToParent._23 = m_xmf3Up.z;
@@ -285,11 +285,11 @@ void CPlayer::OnPrepareRender()
 	UpdateTransform(NULL);
 }
 
-void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, CCamera* pCamera)
+void PlayerMgr::Render(ID3D12GraphicsCommandList* pd3dCommandList, ShaderMgr* pShader, CCamera* pCamera)
 {
-	CGameObject::Render(pd3dCommandList, pCamera, false);
+	GameObjectMgr::Render(pd3dCommandList, pCamera, false);
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
-	if (nCameraMode == THIRD_PERSON_CAMERA || nCameraMode == CLOSEUP_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
+	if (nCameraMode == THIRD_PERSON_CAMERA || nCameraMode == CLOSEUP_PERSON_CAMERA) GameObjectMgr::Render(pd3dCommandList, pCamera);
 }
 
 #define _WITH_DEBUG_CALLBACK_DATA
