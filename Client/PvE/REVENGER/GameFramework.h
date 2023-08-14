@@ -159,7 +159,7 @@ public:
 
 	void ChangeScene(DWORD nMode);
 	void ShotDelay();
-	DWORD m_nMode = OPENINGSCENE;
+	DWORD m_nMode = OPENING_SCENE;
 	bool m_bDieMotion = false;
 	bool m_bHeliDyingState = false;
 	bool m_AfterDieChangeCameraSwitch = false;

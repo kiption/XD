@@ -119,29 +119,29 @@ void SceneMgr::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateDescriptorHeaps(pd3dDevice, 0, 100);
+	CreateDescriptorHeaps(pd3dDevice, 0, 200);
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	BuildDefaultLightsAndMaterials();
 
 	m_pSkyBox = new COpeningBackScene(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	m_pSkyBox->SetCurScene(OPENINGSCENE);
+	m_pSkyBox->SetCurScene(OPENING_SCENE);
 	
 	m_nShaders = 1;
 	m_ppShaders = new CObjectsShader * [m_nShaders];
 	CObjectsShader* pObjectShader = new CObjectsShader();
 	pObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
-	pObjectShader->SetCurScene(OPENINGSCENE);
+	pObjectShader->SetCurScene(OPENING_SCENE);
 	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 	m_ppShaders[0] = pObjectShader;
 
 	m_pDepthRenderShader = new CDepthRenderShader(pObjectShader, m_pLights->m_pLights);
 	m_pDepthRenderShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
-	m_pDepthRenderShader->SetCurScene(OPENINGSCENE);
+	m_pDepthRenderShader->SetCurScene(OPENING_SCENE);
 	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 
 	m_pShadowShader = new CShadowMapShader(pObjectShader);
 	m_pShadowShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
-	m_pShadowShader->SetCurScene(OPENINGSCENE);
+	m_pShadowShader->SetCurScene(OPENING_SCENE);
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);

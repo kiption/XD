@@ -2417,7 +2417,7 @@ CEthanObject::~CEthanObject()
 COpeningHuman::COpeningHuman(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : CGameObject(1)
 {
 	SetChild(pModel->m_pModelRootObject, true);
-	pModel->m_pModelRootObject->SetCurScene(OPENINGSCENE);
+	pModel->m_pModelRootObject->SetCurScene(OPENING_SCENE);
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 3, pModel);
 

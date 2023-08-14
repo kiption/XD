@@ -172,7 +172,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 {
 	m_hInstance = hInstance;
 	m_hWnd = hMainWnd;
-	m_nMode = OPENINGSCENE;
+	m_nMode = OPENING_SCENE;
 
 	CreateDirect3DDevice();
 	CreateCommandQueueAndList();
@@ -482,7 +482,7 @@ void CGameFramework::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM
 	case WM_LBUTTONDOWN:
 	{
 		::GetCursorPos(&m_ptOldCursorPos);
-		if (m_nMode == OPENINGSCENE) {
+		if (m_nMode == OPENING_SCENE) {
 			switch (m_LoginScene)
 			{
 			case LS_OPENING: // 게임 시작, 종료 
@@ -1204,7 +1204,7 @@ void CGameFramework::ProcessInput()
 
 void CGameFramework::AnimateObjects()
 {
-	if (m_nMode == OPENINGSCENE)
+	if (m_nMode == OPENING_SCENE)
 	{
 		if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed());
 	}
@@ -1441,7 +1441,7 @@ void CGameFramework::FrameAdvance()
 void CGameFramework::DrawUIList()
 {
 #ifdef _WITH_DIRECT2D_IMAGE_EFFECT
-	if (m_nMode == OPENINGSCENE) {
+	if (m_nMode == OPENING_SCENE) {
 		// Logo
 		D2D_POINT_2F D2_OpeningUI = { 50.0f, 50.0f };
 		D2D_RECT_F D2_OpeningUIRect = { 0.0f, 0.0f, 840.0f, 184.0f };
@@ -1922,7 +1922,7 @@ void CGameFramework::DrawUIList()
 	}
 
 #endif
-	if (m_nMode == OPENINGSCENE) {
+	if (m_nMode == OPENING_SCENE) {
 		if (m_LoginScene == LS_LOBBY) {
 			D2D_RECT_F D2_LoginRoomNumText[8];
 			D2D_RECT_F D2_LoginRoomNameText[8];

@@ -92,7 +92,7 @@ public:
 public:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 
-	int	m_nCurScene = OPENINGSCENE;
+	int	m_nCurScene = OPENING_SCENE;
 
 public:
 	static ID3D12DescriptorHeap* m_pd3dCbvSrvDescriptorHeap;

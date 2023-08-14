@@ -201,7 +201,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		}
 		else
 		{
-			if (gGameFramework.m_nMode == OPENINGSCENE)
+			if (gGameFramework.m_nMode == OPENING_SCENE)
 			{
 				// 1초마다 서버로 핑을 던져서 살아있는지 확인합니다.
 				if (chrono::system_clock::now() > last_ping + chrono::seconds(1)) {
@@ -852,7 +852,7 @@ void networkThreadFunc()
 
 			switch (keyValue) {
 			case SEND_KEY_W:
-				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+				if (gGameFramework.m_nMode == OPENING_SCENE) break;
 
 				CS_MOVE_PACKET move_front_pack;
 				move_front_pack.size = sizeof(CS_MOVE_PACKET);
@@ -865,7 +865,7 @@ void networkThreadFunc()
 				break;
 
 			case SEND_KEY_S:
-				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+				if (gGameFramework.m_nMode == OPENING_SCENE) break;
 
 				CS_MOVE_PACKET move_back_pack;
 				move_back_pack.size = sizeof(CS_MOVE_PACKET);
@@ -879,7 +879,7 @@ void networkThreadFunc()
 
 			case SEND_KEY_A:
 			case SEND_KEY_D:
-				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+				if (gGameFramework.m_nMode == OPENING_SCENE) break;
 
 				CS_MOVE_PACKET move_side_pack;
 				move_side_pack.size = sizeof(CS_MOVE_PACKET);
@@ -893,7 +893,7 @@ void networkThreadFunc()
 
 			case SEND_KEY_R:
 				// 재장전
-				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+				if (gGameFramework.m_nMode == OPENING_SCENE) break;
 
 				CS_INPUT_KEYBOARD_PACKET input_rkey_pack;
 				input_rkey_pack.type = CS_INPUT_KEYBOARD;
@@ -927,7 +927,7 @@ void networkThreadFunc()
 				break;
 
 			case SEND_KEYUP_MOVEKEY:
-				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+				if (gGameFramework.m_nMode == OPENING_SCENE) break;
 				if (players_info[my_id].m_role != ROLE_RIFLE) break;
 				CS_INPUT_KEYBOARD_PACKET mv_keyup_pack;
 				mv_keyup_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
@@ -937,7 +937,7 @@ void networkThreadFunc()
 				break;
 
 			case SEND_KEY_INSERT:	// 치트키: 무적
-				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+				if (gGameFramework.m_nMode == OPENING_SCENE) break;
 
 				CS_INPUT_KEYBOARD_PACKET cheatkey_immortal_pack;
 				cheatkey_immortal_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
@@ -947,7 +947,7 @@ void networkThreadFunc()
 				break;
 
 			case SEND_KEY_DELETE:	// 치트키: 원샷원킬
-				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+				if (gGameFramework.m_nMode == OPENING_SCENE) break;
 
 				CS_INPUT_KEYBOARD_PACKET cheatkey_oneshotonekill_pack;
 				cheatkey_oneshotonekill_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
@@ -957,7 +957,7 @@ void networkThreadFunc()
 				break;
 
 			case SEND_KEY_END:	// 치트키: NPC 전부 죽이기
-				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+				if (gGameFramework.m_nMode == OPENING_SCENE) break;
 
 				CS_INPUT_KEYBOARD_PACKET cheatkey_allkill_pack;
 				cheatkey_allkill_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
@@ -967,7 +967,7 @@ void networkThreadFunc()
 				break;
 
 			case SEND_KEY_PGUP:	// 치트키: 힐링
-				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+				if (gGameFramework.m_nMode == OPENING_SCENE) break;
 
 				CS_INPUT_KEYBOARD_PACKET cheatkey_healing_pack;
 				cheatkey_healing_pack.size = sizeof(CS_INPUT_KEYBOARD_PACKET);
@@ -988,7 +988,7 @@ void networkThreadFunc()
 
 			switch (mouseValue.button) {
 			case SEND_NONCLICK:
-				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+				if (gGameFramework.m_nMode == OPENING_SCENE) break;
 
 				CS_ROTATE_PACKET yaw_rotate_pack;
 				yaw_rotate_pack.size = sizeof(CS_ROTATE_PACKET);
@@ -1008,7 +1008,7 @@ void networkThreadFunc()
 				sendPacket(&yaw_rotate_pack);
 				break;
 			case SEND_BUTTON_L:
-				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+				if (gGameFramework.m_nMode == OPENING_SCENE) break;
 
 				CS_ATTACK_PACKET attack_pack;
 				attack_pack.size = sizeof(CS_ATTACK_PACKET);
@@ -1016,7 +1016,7 @@ void networkThreadFunc()
 				sendPacket(&attack_pack);
 				break;
 			case SEND_BUTTON_R:
-				if (gGameFramework.m_nMode == OPENINGSCENE) break;
+				if (gGameFramework.m_nMode == OPENING_SCENE) break;
 
 				// 기능 미구현
 				break;
@@ -1096,7 +1096,7 @@ wchar_t* ConvertToWideChar(const char* str) {
 
 void uiThreadFunc() {
 	while (1) {
-		if (gGameFramework.m_nMode == OPENINGSCENE) {
+		if (gGameFramework.m_nMode == OPENING_SCENE) {
 			// UI를 통한 조작 구현
 			switch (gGameFramework.m_LoginScene) {
 			case gGameFramework.LS_OPENING: // 게임 시작, 설정, 종료 
@@ -1274,7 +1274,7 @@ void uiThreadFunc() {
 
 			// 4. 미션 진행상황 동기화
 			switch (gGameFramework.m_nMode) {
-			case OPENINGSCENE:
+			case OPENING_SCENE:
 				break;
 			case INGAME_SCENE:
 				if (gGameFramework.m_mainmissionnum == 0) {	// 0번 미션

@@ -137,7 +137,7 @@ static int FRAME_BUFFER_HEIGHT = GetSystemMetrics(SM_CYSCREEN);
 #define DIRECTIONAL_LIGHT				3
 const int VK_OPEN_BRACKET = 0xDB;
 const int VK_CLOSE_BRACKET = 0xDD;
-#define OPENINGSCENE 0x00
+#define OPENING_SCENE 0x00
 #define INGAME_SCENE 0x01
 #define SCENE2STAGE 0x02
 #define BULLETS					30
@@ -146,7 +146,6 @@ const int VK_CLOSE_BRACKET = 0xDD;
 #define HELICOPTERVALKANS		10
 #define HUMANBULLETS			1
 #define UICOUNTERS				80
-
 #define EXPLOSION_SPARK 30
 #define HEAL_EFFECTS_COUNT 40
 #define HITTINGMARKS 10
@@ -158,6 +157,7 @@ const int VK_CLOSE_BRACKET = 0xDD;
 #define KEY_W         0x57
 #define KEY_Q         0x51
 #define KEY_E		  0x45
+
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 
 extern int gnCurrentParticles;
@@ -185,12 +185,10 @@ extern int ReadIntegerFromFile(FILE *pInFile);
 extern float ReadFloatFromFile(FILE *pInFile);
 
 #define RANDOM_COLOR			XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
-
 #define EPSILON					1.0e-10f
 #define EXPLOSION_DEBRISES		70
 #define EXPLOSION_HELICOPTER		12
 #define BLOODEXPLOSION_DEBRISES		50
-
 
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
 inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }
@@ -198,7 +196,6 @@ inline bool IsZero(float fValue, float fEpsilon) { return((fabsf(fValue) < fEpsi
 inline bool IsEqual(float fA, float fB, float fEpsilon) { return(::IsZero(fA - fB, fEpsilon)); }
 inline float InverseSqrt(float fValue) { return 1.0f / sqrtf(fValue); }
 inline void Swap(float *pfS, float *pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT = fTemp; }
-
 
 namespace Vector3
 {

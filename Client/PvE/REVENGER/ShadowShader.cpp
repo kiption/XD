@@ -16,7 +16,7 @@ CObjectsShader::~CObjectsShader()
 
 void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	if (m_nCurScene == OPENINGSCENE)
+	if (m_nCurScene == OPENING_SCENE)
 	{
 		m_nObjects = 3;
 		m_ppObjects = new CGameObject * [m_nObjects];
@@ -472,7 +472,7 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 	CShader::Render(pd3dCommandList, pCamera, nPipelineState, false);
 
 	UpdateShaderVariables(pd3dCommandList);
-	if (m_nCurScene == OPENINGSCENE)
+	if (m_nCurScene == OPENING_SCENE)
 	{
 		for (int i = 0; i < m_pObjectsShader->m_nObjects; i++)
 		{
