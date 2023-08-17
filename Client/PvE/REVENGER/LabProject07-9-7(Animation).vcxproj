@@ -166,7 +166,6 @@
     <ClInclude Include="BillboardObjectsShader.h" />
     <ClInclude Include="BoundingWire.h" />
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="IlluminateMesh.h" />
     <ClInclude Include="MissileObject.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="ObjectsInfo.h" />
@@ -208,7 +207,6 @@
     <ClCompile Include="BillboardObjectsShader.cpp" />
     <ClCompile Include="BoundingWire.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="IlluminateMesh.cpp" />
     <ClCompile Include="MissileObject.cpp" />
     <ClCompile Include="ParticleMesh.cpp" />
     <ClCompile Include="ParticleObject.cpp" />

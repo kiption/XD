@@ -6,11 +6,11 @@
 #include "Mesh.h"
 #include "Object.h"
 
-CMesh::CMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+Mesh::Mesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
 
-CMesh::~CMesh()
+Mesh::~Mesh()
 {
 	if (m_pd3dPositionBuffer) m_pd3dPositionBuffer->Release();
 	if (m_nSubMeshes > 0)
@@ -31,7 +31,7 @@ CMesh::~CMesh()
 
 }
 
-void CMesh::ReleaseUploadBuffers()
+void Mesh::ReleaseUploadBuffers()
 {
 	if (m_pd3dPositionUploadBuffer) m_pd3dPositionUploadBuffer->Release();
 	m_pd3dPositionUploadBuffer = NULL;
@@ -47,7 +47,7 @@ void CMesh::ReleaseUploadBuffers()
 	}
 }
 
-void CMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
+void Mesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
 {
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, m_nVertexBufferViews, m_d3dVertexBufferView);
@@ -55,9 +55,9 @@ void CMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pConte
 }
 
 
-void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
+void Mesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
 {
-	//Stage2
+	
 	UpdateShaderVariables(pd3dCommandList);
 
 	OnPreRender(pd3dCommandList, NULL);
@@ -78,13 +78,13 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet)
 	}
 }
 
-void CMesh::CalculateBoundingBox(XMFLOAT3* pxmf3Points, UINT nStride)
+void Mesh::CalculateBoundingBox(XMFLOAT3* pxmf3Points, UINT nStride)
 {
 	m_nStride = nStride;
 	BoundingBox::CreateFromPoints(m_xmBoundingBox, m_nVertices, pxmf3Points, nStride);
 }
 
-void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
+void Mesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
@@ -100,10 +100,10 @@ void CMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList)
 	}
 }
 
-void CMesh::OnPostRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
+void Mesh::OnPostRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
 {
 }
-void CMesh::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices)
+void Mesh::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices)
 {
 	int nPrimitives = nVertices / 3;
 	UINT nIndex0, nIndex1, nIndex2;
@@ -118,7 +118,7 @@ void CMesh::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3*
 	}
 }
 
-void CMesh::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices)
+void Mesh::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices)
 {
 	UINT nPrimitives = (pnIndices) ? (nIndices / 3) : (nVertices / 3);
 	XMFLOAT3 xmf3SumOfNormal, xmf3Edge01, xmf3Edge02, xmf3Normal;
@@ -143,7 +143,7 @@ void CMesh::CalculateTriangleListVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3*
 	}
 }
 
-void CMesh::CalculateTriangleStripVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices)
+void Mesh::CalculateTriangleStripVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, UINT nVertices, UINT* pnIndices, UINT nIndices)
 {
 	UINT nPrimitives = (pnIndices) ? (nIndices - 2) : (nVertices - 2);
 	XMFLOAT3 xmf3SumOfNormal(0.0f, 0.0f, 0.0f);
@@ -170,7 +170,7 @@ void CMesh::CalculateTriangleStripVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3
 	}
 }
 
-void CMesh::CalculateVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices, UINT* pnIndices, int nIndices)
+void Mesh::CalculateVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices, UINT* pnIndices, int nIndices)
 {
 	switch (m_d3dPrimitiveTopology)
 	{
@@ -192,7 +192,7 @@ void CMesh::CalculateVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positi
 // 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CSkyBoxMesh::CSkyBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth) : CMesh(pd3dDevice, pd3dCommandList)
+CSkyBoxMesh::CSkyBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth) : Mesh(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = 36;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -258,7 +258,7 @@ CSkyBoxMesh::~CSkyBoxMesh()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CStandardMesh::CStandardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
+CStandardMesh::CStandardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : Mesh(pd3dDevice, pd3dCommandList)
 {
 	
 }
@@ -280,7 +280,7 @@ CStandardMesh::~CStandardMesh()
 
 void CStandardMesh::ReleaseUploadBuffers()
 {
-	CMesh::ReleaseUploadBuffers();
+	Mesh::ReleaseUploadBuffers();
 
 	if (m_pd3dTextureCoord0UploadBuffer) m_pd3dTextureCoord0UploadBuffer->Release();
 	m_pd3dTextureCoord0UploadBuffer = NULL;
@@ -479,7 +479,7 @@ void CStandardMesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
-CTexturedRectMesh::CTexturedRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth, float fxPosition, float fyPosition, float fzPosition) : CMesh(pd3dDevice, pd3dCommandList)
+CTexturedRectMesh::CTexturedRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth, float fxPosition, float fyPosition, float fzPosition) : Mesh(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = 6;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -547,7 +547,7 @@ CTexturedRectMesh::~CTexturedRectMesh()
 
 void CTexturedRectMesh::ReleaseUploadBuffers()
 {
-	CMesh::ReleaseUploadBuffers();
+	Mesh::ReleaseUploadBuffers();
 
 	if (m_pd3dTextureCoord0UploadBuffer) m_pd3dTextureCoord0UploadBuffer->Release();
 	m_pd3dTextureCoord0UploadBuffer = NULL;
@@ -570,7 +570,7 @@ void CTexturedRectMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int n
 	}
 }
 
-CBoundingBoxMesh::CBoundingBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
+CBoundingBoxMesh::CBoundingBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : Mesh(pd3dDevice, pd3dCommandList)
 {
 	m_nVertices = 12 * 2;
 	m_nStride = sizeof(XMFLOAT3);

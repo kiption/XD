@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "ParticleMesh.h"
 
-CParticleMesh::CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles) : CMesh(pd3dDevice, pd3dCommandList)
+CParticleMesh::CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles) : Mesh(pd3dDevice, pd3dCommandList)
 {
 	CreateVertexBuffer(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, fLifetime, xmf3Acceleration, xmf3Color, xmf2Size);
 	CreateStreamOutputBuffer(pd3dDevice, pd3dCommandList, nMaxParticles);
@@ -136,7 +136,7 @@ void CParticleMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipe
 
 		pd3dCommandList->ResolveQueryData(m_pd3dSOQueryHeap, D3D12_QUERY_TYPE_SO_STATISTICS_STREAM0, 0, 1, m_pd3dSOQueryBuffer, 0);
 #else
-		CMesh::Render(pd3dCommandList,0); //Stream Output to m_pd3dStreamOutputBuffer
+		Mesh::Render(pd3dCommandList,0); //Stream Output to m_pd3dStreamOutputBuffer
 		::SynchronizeResourceTransition(pd3dCommandList, m_pd3dDefaultBufferFilledSize, D3D12_RESOURCE_STATE_STREAM_OUT, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		pd3dCommandList->CopyResource(m_pd3dReadBackBufferFilledSize, m_pd3dDefaultBufferFilledSize);
 		::SynchronizeResourceTransition(pd3dCommandList, m_pd3dDefaultBufferFilledSize, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_STREAM_OUT);
@@ -145,7 +145,7 @@ void CParticleMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipe
 	else if (nPipelineState == 1)
 	{
 		pd3dCommandList->SOSetTargets(0, 1, NULL);
-		CMesh::Render(pd3dCommandList,0); //Render m_pd3dDrawBuffer 
+		Mesh::Render(pd3dCommandList,0); //Render m_pd3dDrawBuffer 
 	}
 }
 

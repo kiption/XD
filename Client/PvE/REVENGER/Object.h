@@ -63,8 +63,8 @@ public:
 public:
 	char							m_pstrFrameName[64];
 
-	CMesh* m_pMesh = NULL;
-	CMesh** m_ppMeshes = NULL;
+	Mesh* m_pMesh = NULL;
+	Mesh** m_ppMeshes = NULL;
 	int m_nMeshes = NULL;
 
 	int								m_nMaterials = 0;
@@ -111,8 +111,8 @@ public:
 
 	CAnimationController* m_pSkinnedAnimationController = NULL;
 	CAnimationTrack* m_ppAnimationTrack = NULL;
-	virtual void SetMesh(CMesh* pMesh);
-	virtual void SetMesh(int nIndex, CMesh* pMesh);
+	virtual void SetMesh(Mesh* pMesh);
+	virtual void SetMesh(int nIndex, Mesh* pMesh);
 	void SetShader(ShaderMgr* pShader);
 	void SetShader(int nMaterial, ShaderMgr* pShader);
 	virtual void SetMaterial(int nMaterial, CMaterial* pMaterial);

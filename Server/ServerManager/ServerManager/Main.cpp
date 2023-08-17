@@ -3,6 +3,7 @@
 #include <iostream>
 #include <WS2tcpip.h>
 #include <MSWSock.h>
+#include <mutex>
 #include <math.h>
 #include <array>
 #include <filesystem> // filename

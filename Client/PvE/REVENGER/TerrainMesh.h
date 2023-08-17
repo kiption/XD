@@ -1,6 +1,6 @@
 #pragma once
 #include "Mesh.h"
-#include "IlluminateMesh.h"
+
 class CHeightMapImage
 {
 public:
@@ -23,7 +23,7 @@ public:
 	int GetHeightMapLength() { return(m_nLength); }
 };
 
-class CHeightMapGridMesh : public CMesh
+class CHeightMapGridMesh : public Mesh
 {
 protected:
 	int								m_nWidth;

@@ -154,9 +154,6 @@
     <ClInclude Include="ShadowShader.h">
       <Filter>Client\Shader\Header</Filter>
     </ClInclude>
-    <ClInclude Include="IlluminateMesh.h">
-      <Filter>Client\Mesh\Header</Filter>
-    </ClInclude>
     <ClInclude Include="BillboardObjects.h">
       <Filter>Client\Object\Header</Filter>
     </ClInclude>
@@ -178,14 +175,14 @@
     <ClInclude Include="BoundingWire.h">
       <Filter>Client\Shader\Header</Filter>
     </ClInclude>
-    <ClInclude Include="REVENGER.h">
-      <Filter>Client\Mesh\Header</Filter>
-    </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>Client\Object\Header</Filter>
     </ClInclude>
     <ClInclude Include="Animation.h">
       <Filter>Client\Object\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="REVENGER.h">
+      <Filter>Client\Main</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -278,9 +275,6 @@
     </ClCompile>
     <ClCompile Include="ShadowShader.cpp">
       <Filter>Client\Shader\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="IlluminateMesh.cpp">
-      <Filter>Client\Mesh\Source</Filter>
     </ClCompile>
     <ClCompile Include="SpriteAnimationBillboard.cpp">
       <Filter>Client\Shader\Source</Filter>

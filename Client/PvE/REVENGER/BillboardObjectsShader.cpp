@@ -884,7 +884,7 @@ void BulletMarkBillboard::AnimateObjects(float fTimeElapsed)
 				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes;
 				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes;
 				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes;
-				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], 1.0 * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
+				//m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], 1.0 * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
 
 				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
 				m_ppObjects[i]->m_xmf4x4ToParent._42 = m_pxmf4x4Transforms[i]._42;

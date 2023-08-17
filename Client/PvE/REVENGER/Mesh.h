@@ -1,13 +1,6 @@
-//------------------------------------------------------- ----------------------
-// File: Mesh.h
-//-----------------------------------------------------------------------------
-
 #pragma once
 
 class GameObjectMgr;
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 #define VERTEXT_POSITION				0x0001
 #define VERTEXT_COLOR					0x0002
 #define VERTEXT_NORMAL					0x0004
@@ -24,24 +17,23 @@ class GameObjectMgr;
 #define VERTEXT_NORMAL_DETAIL			(VERTEXT_POSITION | VERTEXT_NORMAL | VERTEXT_TEXTURE_COORD0 | VERTEXT_TEXTURE_COORD1)
 #define VERTEXT_NORMAL_TANGENT__DETAIL	(VERTEXT_POSITION | VERTEXT_NORMAL | VERTEXT_TANGENT | VERTEXT_TEXTURE_COORD0 | VERTEXT_TEXTURE_COORD1)
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-class CVertex
+
+class Vertex
 {
 public:
 	XMFLOAT3						m_xmf3Position;
 
 public:
-	CVertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); }
-	CVertex(XMFLOAT3 xmf3Position) { m_xmf3Position = xmf3Position; }
-	~CVertex() { }
+	Vertex() { m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f); }
+	Vertex(XMFLOAT3 xmf3Position) { m_xmf3Position = xmf3Position; }
+	~Vertex() { }
 };
 
-class CMesh
+class Mesh
 {
 public:
-	CMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual ~CMesh();
+	Mesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual ~Mesh();
 
 private:
 	int								m_nReferences = 0;
@@ -121,7 +113,7 @@ public:
 	void CalculateVertexNormals(XMFLOAT3* pxmf3Normals, XMFLOAT3* pxmf3Positions, int nVertices, UINT* pnIndices, int nIndices);
 };
 
-class CStandardMesh : public CMesh
+class CStandardMesh : public Mesh
 {
 public:
 	CStandardMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
@@ -164,14 +156,14 @@ public:
 	virtual void OnPreRender(ID3D12GraphicsCommandList *pd3dCommandList, void *pContext);
 };
 
-class CSkyBoxMesh : public CMesh
+class CSkyBoxMesh : public Mesh
 {
 public:
 	CSkyBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth = 20.0f, float fHeight = 20.0f, float fDepth = 20.0f);
 	virtual ~CSkyBoxMesh();
 };
 
-class CTexturedRectMesh : public CMesh
+class CTexturedRectMesh : public Mesh
 {
 public:
 	CTexturedRectMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, float fWidth, float fHeight, float fDepth, float fxPosition, float fyPosition, float fzPosition);
@@ -189,7 +181,7 @@ public:
 };
 
 
-class CBoundingBoxMesh : public CMesh
+class CBoundingBoxMesh : public Mesh
 {
 public:
 	CBoundingBoxMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);

@@ -1,6 +1,5 @@
 #pragma once
 #include "Shader.h"
-#include "IlluminateMesh.h"
 #include "MissileObject.h"
 #include "Terrain.h"
 #include "Skybox.h"

@@ -11,7 +11,7 @@
 
 //#define _WITH_QUERY_DATA_SO_STATISTICS
 
-class CParticleVertex : public CVertex
+class CParticleVertex : public Vertex
 {
 public:
 	XMFLOAT3						m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -23,7 +23,7 @@ public:
 	~CParticleVertex() { }
 };
 
-class CParticleMesh : public CMesh
+class CParticleMesh : public Mesh
 {
 public:
 	CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLifetime, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, UINT nMaxParticles);

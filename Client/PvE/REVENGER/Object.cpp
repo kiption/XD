@@ -39,7 +39,7 @@ GameObjectMgr::GameObjectMgr(int nMeshes, int nMaterials)
 	m_pMesh = NULL;
 	if (m_nMeshes > 0)
 	{
-		m_ppMeshes = new CMesh * [m_nMeshes];
+		m_ppMeshes = new Mesh * [m_nMeshes];
 		for (int i = 0; i < m_nMeshes; i++)	m_ppMeshes[i] = NULL;
 	}
 
@@ -157,14 +157,14 @@ void GameObjectMgr::SetLookAt(XMFLOAT3 xmf3Target, XMFLOAT3 xmf3Up)
 
 }
 
-void GameObjectMgr::SetMesh(CMesh* pMesh)
+void GameObjectMgr::SetMesh(Mesh* pMesh)
 {
 	if (m_pMesh) m_pMesh->Release();
 	m_pMesh = pMesh;
 	if (m_pMesh) m_pMesh->AddRef();
 }
 
-void GameObjectMgr::SetMesh(int nIndex, CMesh* pMesh)
+void GameObjectMgr::SetMesh(int nIndex, Mesh* pMesh)
 {
 	if (m_ppMeshes)
 	{
@@ -308,7 +308,6 @@ void GameObjectMgr::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 
 						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, false);
 						pShaderComponent->SetPipelineState(pd3dCommandList, 0);
-						//m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, m_ppMaterials[i]);
 						UpdateShaderVariables(pd3dCommandList);
 					}
 
@@ -338,15 +337,7 @@ void GameObjectMgr::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 		m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
 	OnPrepareRender();
-	//if (m_pShaderInfo != NULL)
-	//{
-	//	m_pShaderInfo->Render(pd3dCommandList, pCamera, 0, bPrerender);
-	//	m_pShaderInfo->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, NULL);
-	//	if (m_pTextureInfo != NULL)
-	//	{
-	//		m_pTextureInfo->UpdateShaderVariables(pd3dCommandList);
-	//	}
-	//}
+	
 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 	if (m_pMesh)
@@ -360,8 +351,6 @@ void GameObjectMgr::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 					if (m_ppMaterials[i]->m_pShader) {
 
 						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, bPrerender);
-						//m_ppMaterials[i]->m_pShader->UpdateShaderVariables(pd3dCommandList, &m_xmf4x4World, m_ppMaterials[i]);
-
 						UpdateShaderVariables(pd3dCommandList);
 					}
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
@@ -373,14 +362,10 @@ void GameObjectMgr::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 				}
 				m_pMesh->Render(pd3dCommandList, i);
 			}
-
 		}
-
 	}
-
 	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera, bPrerender);
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera, bPrerender);
-
 }
 
 void GameObjectMgr::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
