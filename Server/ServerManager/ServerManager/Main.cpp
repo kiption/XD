@@ -5,6 +5,7 @@
 #include <MSWSock.h>
 #include <math.h>
 #include <array>
+#include <mutex>
 #include <filesystem> // filename
 #include <string>
 #include "../../MainServer/Server/Protocol.h"
