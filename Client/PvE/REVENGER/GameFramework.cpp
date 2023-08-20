@@ -801,19 +801,7 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case 'D':
 				q_keyboardInput.push(SEND_KEYUP_MOVEKEY);
 				break;
-			case 'R':
-				if (!b_imdeadplayer && ((CHumanPlayer*)((MainGameScene*)m_pScene)->m_pPlayer)->m_bMoveUpdate == false && m_ingame_role == R_RIFLE)
-				{
-					((CHumanPlayer*)((MainGameScene*)m_pScene)->m_pPlayer)->m_bReloadState = true;
-					((MuzzleFrameBillboard*)((MainGameScene*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
-					((CHumanPlayer*)((MainGameScene*)m_pScene)->m_pPlayer)->ReloadState();
-					q_keyboardInput.push(SEND_KEY_R);
-				}
-				if (!b_imdeadplayer && m_ingame_role == R_HELI)
-				{
-					q_keyboardInput.push(SEND_KEY_R);
-				}
-				break;
+		
 			case '9':
 				if (MouseResponsivenessY > 400 && MouseResponsivenessY < 600) MouseResponsivenessY -= 50.0f;
 				break;
@@ -832,16 +820,18 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 		case WM_KEYDOWN:
 			switch (wParam)
 			{
-			case VK_CONTROL:
-				/*		((Stage1*)m_pScene)->m_ppFragShaders[0]->m_bActive = true;*/
-				break;
-			case VK_SPACE:
-				break;
-			case 'M':
-				/*		((CHelicopterObjects*)((Stage1*)m_pScene)->m_ppShaders[0]->m_ppObjects[7])->m_bDyingstate = true;*/
-				break;
-			case 'L':
-				//((HealPackBillboardShader*)((Stage1*)m_pScene)->m_pBillboardShader[10])->SetActive(false);
+			case 'R':
+				if (!b_imdeadplayer && ((CHumanPlayer*)((MainGameScene*)m_pScene)->m_pPlayer)->m_bMoveUpdate == false && m_ingame_role == R_RIFLE )
+				{
+					((CHumanPlayer*)((MainGameScene*)m_pScene)->m_pPlayer)->m_bReloadState = true;
+					((CHumanPlayer*)((MainGameScene*)m_pScene)->m_pPlayer)->ReloadState();
+					((MuzzleFrameBillboard*)((MainGameScene*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
+					q_keyboardInput.push(SEND_KEY_R);
+				}
+				if (!b_imdeadplayer && m_ingame_role == R_HELI)
+				{
+					q_keyboardInput.push(SEND_KEY_R);
+				}
 				break;
 			default:
 				break;
@@ -1017,9 +1007,9 @@ void CGameFramework::ProcessInput()
 				{
 					ShotKey = true;
 					((MainGameScene*)m_pScene)->Reflectcartridgecase(NULL);
-					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };//s
+					MouseInputVal lclick{ SEND_BUTTON_L, 0.f, 0.f };
 					q_mouseInput.push(lclick);//s
-					((CHumanPlayer*)m_pScene->m_pPlayer)->ShotState(m_GameTimer.GetTimeElapsed());
+					((CHumanPlayer*)((MainGameScene*)m_pScene)->m_pPlayer)->m_bReloadState = false;
 
 				}
 			}
@@ -1359,10 +1349,17 @@ void CGameFramework::FrameAdvance()
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dDsvCPUDescriptorHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
-	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
-	m_pScene->OnPrepareRender(m_pd3dCommandList, m_pCamera);
-	m_pScene->OnPreRender(m_pd3dCommandList, m_pCamera);
-
+	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL); 
+	if (m_nMode == OPENING_SCENE)
+	{
+		((SceneMgr*)m_pScene)->OnPrepareRender(m_pd3dCommandList, m_pCamera);
+		((SceneMgr*)m_pScene)->OnPreRender(m_pd3dCommandList, m_pCamera);
+	}
+	if (m_nMode == INGAME_SCENE)
+	{
+		((MainGameScene*)m_pScene)->OnPrepareRender(m_pd3dCommandList, m_pCamera);
+		((MainGameScene*)m_pScene)->OnPreRender(m_pd3dCommandList, m_pCamera);
+	}
 	UpdateShaderVariables();
 
 	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
@@ -1419,14 +1416,14 @@ void CGameFramework::FrameAdvance()
 
 	MoveToNextFrame();
 
-	if (m_nMode == INGAME_SCENE)
-	{
-		m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
-		size_t nLength = _tcslen(m_pszFrameRate);
-		XMFLOAT3 xmf3Position = (((MainGameScene*)m_pScene)->m_pPlayer)->GetPosition();
-		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position);
-		::SetWindowText(m_hWnd, m_pszFrameRate);
-	}
+	//if (m_nMode == INGAME_SCENE)
+	//{
+	//	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
+	//	size_t nLength = _tcslen(m_pszFrameRate);
+	//	XMFLOAT3 xmf3Position = (((MainGameScene*)m_pScene)->m_pPlayer)->GetPosition();
+	//	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position);
+	//	::SetWindowText(m_hWnd, m_pszFrameRate);
+	//}
 }
 
 void CGameFramework::DrawUIList()

@@ -733,14 +733,14 @@ void BloodHittingBillboard::AnimateObjects(float fTimeElapsed)
 {
 	if (m_bActive == true)
 	{
-		XMFLOAT3 gravity = XMFLOAT3(-9.8f, 8.8f, 0);
+		XMFLOAT3 gravity = XMFLOAT3(-8.8f, 6.8f, 0);
 		m_fElapsedTimes += fTimeElapsed * 6.0f;
 		if (m_fElapsedTimes <= m_fDuration)
 		{
 			for (int i = 0; i < m_nObjects; i++)
 			{
 
-				m_fExplosionSpeed = +RandomBillboard(3.0f, 5.1f);
+				m_fExplosionSpeed = RandomBillboard(3.0f, 4.5f);
 
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
 				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.x * m_fElapsedTimes * m_fElapsedTimes;;

@@ -38,7 +38,6 @@ CHumanPlayer::CHumanPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_pSkinnedAnimationController->SetTrackEnable(9, false);
 	m_pSkinnedAnimationController->SetTrackEnable(10, false);
 
-	m_pSkinnedAnimationController->SetTrackSpeed(6, 0.5f);
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
 	m_pSkinnedAnimationController->SetCallbackKeys(2, 2);
@@ -213,7 +212,7 @@ void CHumanPlayer::ReloadState()
 	if (m_bReloadState == true)
 	{
 		m_pSkinnedAnimationController->SetTrackEnable(0, false);
-		m_pSkinnedAnimationController->SetTrackEnable(1, true);
+		m_pSkinnedAnimationController->SetTrackEnable(1, false);
 		m_pSkinnedAnimationController->SetTrackEnable(2, false);
 		m_pSkinnedAnimationController->SetTrackEnable(3, false);
 		m_pSkinnedAnimationController->SetTrackEnable(4, false);
@@ -224,15 +223,14 @@ void CHumanPlayer::ReloadState()
 		m_pSkinnedAnimationController->SetTrackEnable(9, false);
 		m_pSkinnedAnimationController->SetTrackEnable(10, false);
 		m_pSkinnedAnimationController->SetTrackAnimationSet(0, 5);
-		m_pSkinnedAnimationController->SetTrackSpeed(5,1.8f);
-		m_pSkinnedAnimationController->SetTrackPosition(5, 0.0f);
+		m_pSkinnedAnimationController->SetTrackSpeed(5,0.8f);
 	}
 }
 
 void CHumanPlayer::ShotState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent)
 {
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	m_pSkinnedAnimationController->SetTrackEnable(1, true);
+	m_pSkinnedAnimationController->SetTrackEnable(1, false);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	m_pSkinnedAnimationController->SetTrackEnable(3, false);
 	m_pSkinnedAnimationController->SetTrackEnable(4, false);

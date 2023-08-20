@@ -9,6 +9,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE	MainGameScene::m_d3dCbvCPUDescriptorNextHandle;
 D3D12_GPU_DESCRIPTOR_HANDLE	MainGameScene::m_d3dCbvGPUDescriptorNextHandle;
 D3D12_CPU_DESCRIPTOR_HANDLE	MainGameScene::m_d3dSrvCPUDescriptorNextHandle;
 D3D12_GPU_DESCRIPTOR_HANDLE	MainGameScene::m_d3dSrvGPUDescriptorNextHandle;
+D3D12_GPU_DESCRIPTOR_HANDLE	MainGameScene::m_d3dShadowGPUDescriptorHandle;
 float RandomDir(float fMin, float fMax)
 {
 	float fRandomValue = (float)rand();
@@ -78,12 +79,12 @@ void MainGameScene::BuildDefaultLightsAndMaterials()
 
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 40000.0;
+	m_pLights->m_pLights[1].m_fRange = 55000.0;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
 	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7, 0.7, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-650, 700.0f, 1200.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.4f, -1.0f, -1.0f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-800, 800.0f, 1150.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.6f, -1.0f, -0.8f);
 
 	m_pLights->m_pLights[2].m_bEnable = false;
 	m_pLights->m_pLights[2].m_nType = SPOT_LIGHT;
@@ -850,28 +851,45 @@ D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(D3D12_RESOURCE_DESC d3
 	}
 	return(d3dShaderResourceViewDesc);
 }
-void MainGameScene::CreateSRVs(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex)
+void MainGameScene::CreateSRVs(ID3D12Device* pd3dDevice, CTexture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex, ID3D12Resource* pShadowMap)
 {
 	m_d3dSrvCPUDescriptorNextHandle.ptr += (::gnCbvSrvDescriptorIncrementSize * nDescriptorHeapIndex);
 	m_d3dSrvGPUDescriptorNextHandle.ptr += (::gnCbvSrvDescriptorIncrementSize * nDescriptorHeapIndex);
 
-	if (pTexture)
+	int nTextures = pTexture->GetTextures();
+	UINT nTextureType = pTexture->GetTextureType();
+	int nTotalTextures = nTextures;
+
+	if (pShadowMap != NULL)
+		nTotalTextures = nTextures + 1;
+
+	for (int i = 0; i < nTextures; i++)
 	{
-		int nTextures = pTexture->GetTextures();
-		int nTextureType = pTexture->GetTextureType();
-		for (int i = 0; i < nTextures; i++)
-		{
-			ID3D12Resource* pShaderResource = pTexture->GetResource(i);
-			D3D12_RESOURCE_DESC d3dResourceDesc = pShaderResource->GetDesc();
-			D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = GetShaderResourceViewDesc(d3dResourceDesc, nTextureType);
-			pd3dDevice->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, m_d3dSrvCPUDescriptorNextHandle);
-			m_d3dSrvCPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize * i;
-			pTexture->SetGpuDescriptorHandle(i, m_d3dSrvGPUDescriptorNextHandle);
-			m_d3dSrvGPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize * i;
-		}
+		ID3D12Resource* pShaderResource = pTexture->GetResource(i);
+		D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = pTexture->GetShaderResourceViewDesc(i);
+		pd3dDevice->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, m_d3dSrvCPUDescriptorNextHandle);
+		m_d3dSrvCPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
+		pTexture->SetGpuDescriptorHandle(i, m_d3dSrvGPUDescriptorNextHandle);
+		m_d3dSrvGPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
 	}
 	int nRootParameters = pTexture->GetRootParameters();
-	for (int j = 0; j < nRootParameters; j++) pTexture->SetRootParameterIndex(j, nRootParameterStartIndex + j);
+	for (int i = 0; i < nRootParameters; i++) pTexture->SetRootParameterIndex(i, nRootParameterStartIndex + i);
+
+	if (nTotalTextures > nTextures)
+	{
+		D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceDsec;
+
+		d3dShaderResourceDsec.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+		d3dShaderResourceDsec.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		d3dShaderResourceDsec.Texture2D.MipLevels = 1;
+		d3dShaderResourceDsec.Texture2D.PlaneSlice = 0;
+		d3dShaderResourceDsec.Texture2D.MostDetailedMip = 0;
+		d3dShaderResourceDsec.Texture2D.ResourceMinLODClamp = 0;
+		d3dShaderResourceDsec.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+
+		pd3dDevice->CreateShaderResourceView(pShadowMap, &d3dShaderResourceDsec, m_d3dSrvCPUDescriptorNextHandle);
+		m_d3dShadowGPUDescriptorHandle = m_d3dSrvGPUDescriptorNextHandle;
+	}
 }
 
 void MainGameScene::Firevalkan(GameObjectMgr* Objects, XMFLOAT3 ToPlayerLook)
