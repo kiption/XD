@@ -808,6 +808,9 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 			case '0':
 				if (MouseResponsivenessY > 400 && MouseResponsivenessY < 600) MouseResponsivenessY += 50.0f;
 				break;
+			case '1':
+				ChangeScene(INGAME_SCENE);
+				break;
 			case 'V':
 				m_AfterDieChangeCameraSwitch = true;
 				break;
