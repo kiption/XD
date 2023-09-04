@@ -7,7 +7,8 @@ CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	CSkyBoxMesh* pSkyBoxMesh = new CSkyBoxMesh(pd3dDevice, pd3dCommandList, 200.0f, 200.0f, 0.0f);
 	SetMesh(pSkyBoxMesh);
 	
-	MainGameScene* m_pScene = NULL;
+	SceneMgr* m_pScene = NULL;
+	if(m_nCurScene==INGAME_SCENE)m_pScene= ((MainGameScene* )m_pScene );
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	CTexture* pSkyBoxTexture[1];

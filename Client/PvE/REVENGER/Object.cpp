@@ -597,9 +597,13 @@ void GameObjectMgr::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphi
 	char pstrToken[64] = { '\0' };
 	int nMaterial = 0;
 	UINT nReads = 0;
-	SceneMgr* m_pScene = NULL;
+	
 	if (m_nCurScene == INGAME_SCENE) {
-		m_pScene = ((MainGameScene*)m_pScene);
+		m_pScene=((MainGameScene* )m_pScene);
+	}
+	else
+	{
+		m_pScene = ((SceneMgr*)m_pScene);
 	}
 	m_nMaterials = ReadIntegerFromFile(pInFile);
 
@@ -674,8 +678,7 @@ void GameObjectMgr::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphi
 		}
 		else if (!strcmp(pstrToken, "<AlbedoMap>:"))
 		{
-
-				pMaterial->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_ALBEDO_MAP, 3, pMaterial->m_ppstrTextureNames[0], &(pMaterial->m_ppTextures[0]), pParent, pInFile, pShader, m_pScene);
+			pMaterial->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_ALBEDO_MAP, 3, pMaterial->m_ppstrTextureNames[0], &(pMaterial->m_ppTextures[0]), pParent, pInFile, pShader, m_pScene);
 		}
 		else if (!strcmp(pstrToken, "<SpecularMap>:"))
 		{

@@ -174,6 +174,7 @@ public:
 
 	void SetCurScene(int nCurScene) { m_nCurScene = nCurScene; }
 	int m_nCurScene = INGAME_SCENE;
+	SceneMgr* m_pScene = NULL;
 public:
 	CSkinnedMesh* FindSkinnedMesh(char* pstrSkinnedMeshName);
 	void FindAndSetSkinnedMesh(CSkinnedMesh** ppSkinnedMeshes, int* pnSkinnedMesh);
