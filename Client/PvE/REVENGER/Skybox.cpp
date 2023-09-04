@@ -1,12 +1,13 @@
 #include "stdafx.h"
 #include "Skybox.h"
 #include "SceneMgr.h"
-
+#include "StageScene.h"
 CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : GameObjectMgr(1)
 {
 	CSkyBoxMesh* pSkyBoxMesh = new CSkyBoxMesh(pd3dDevice, pd3dCommandList, 200.0f, 200.0f, 0.0f);
 	SetMesh(pSkyBoxMesh);
-	SceneMgr* m_pScene = NULL;
+	
+	MainGameScene* m_pScene = NULL;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	CTexture* pSkyBoxTexture[1];

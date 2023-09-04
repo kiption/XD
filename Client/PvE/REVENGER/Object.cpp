@@ -337,7 +337,7 @@ void GameObjectMgr::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 		m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
 	OnPrepareRender();
-	
+
 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 	if (m_pMesh)
@@ -597,7 +597,10 @@ void GameObjectMgr::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphi
 	char pstrToken[64] = { '\0' };
 	int nMaterial = 0;
 	UINT nReads = 0;
-
+	SceneMgr* m_pScene = NULL;
+	if (m_nCurScene == INGAME_SCENE) {
+		m_pScene = ((MainGameScene*)m_pScene);
+	}
 	m_nMaterials = ReadIntegerFromFile(pInFile);
 
 	m_ppMaterials = new CMaterial * [m_nMaterials];
@@ -671,34 +674,36 @@ void GameObjectMgr::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphi
 		}
 		else if (!strcmp(pstrToken, "<AlbedoMap>:"))
 		{
-			pMaterial->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_ALBEDO_MAP, 3, pMaterial->m_ppstrTextureNames[0], &(pMaterial->m_ppTextures[0]), pParent, pInFile, pShader);
+
+				pMaterial->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_ALBEDO_MAP, 3, pMaterial->m_ppstrTextureNames[0], &(pMaterial->m_ppTextures[0]), pParent, pInFile, pShader, m_pScene);
 		}
 		else if (!strcmp(pstrToken, "<SpecularMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_SPECULAR_MAP, 4, pMaterial->m_ppstrTextureNames[1], &(pMaterial->m_ppTextures[1]), pParent, pInFile, pShader);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_SPECULAR_MAP, 4, pMaterial->m_ppstrTextureNames[1], &(pMaterial->m_ppTextures[1]), pParent, pInFile, pShader, m_pScene);
 		}
 		else if (!strcmp(pstrToken, "<NormalMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_NORMAL_MAP, 5, pMaterial->m_ppstrTextureNames[2], &(pMaterial->m_ppTextures[2]), pParent, pInFile, pShader);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_NORMAL_MAP, 5, pMaterial->m_ppstrTextureNames[2], &(pMaterial->m_ppTextures[2]), pParent, pInFile, pShader, m_pScene);
 		}
 		else if (!strcmp(pstrToken, "<MetallicMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_METALLIC_MAP, 6, pMaterial->m_ppstrTextureNames[3], &(pMaterial->m_ppTextures[3]), pParent, pInFile, pShader);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_METALLIC_MAP, 6, pMaterial->m_ppstrTextureNames[3], &(pMaterial->m_ppTextures[3]), pParent, pInFile, pShader, m_pScene);
 		}
 		else if (!strcmp(pstrToken, "<EmissionMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_EMISSION_MAP, 7, pMaterial->m_ppstrTextureNames[4], &(pMaterial->m_ppTextures[4]), pParent, pInFile, pShader);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_EMISSION_MAP, 7, pMaterial->m_ppstrTextureNames[4], &(pMaterial->m_ppTextures[4]), pParent, pInFile, pShader, m_pScene);
 		}
 		else if (!strcmp(pstrToken, "<DetailAlbedoMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_DETAIL_ALBEDO_MAP, 8, pMaterial->m_ppstrTextureNames[5], &(pMaterial->m_ppTextures[5]), pParent, pInFile, pShader);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_DETAIL_ALBEDO_MAP, 8, pMaterial->m_ppstrTextureNames[5], &(pMaterial->m_ppTextures[5]), pParent, pInFile, pShader, m_pScene);
 		}
 		else if (!strcmp(pstrToken, "<DetailNormalMap>:"))
 		{
-			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_DETAIL_NORMAL_MAP, 9, pMaterial->m_ppstrTextureNames[6], &(pMaterial->m_ppTextures[6]), pParent, pInFile, pShader);
+			m_ppMaterials[nMaterial]->LoadTextureFromFile(pd3dDevice, pd3dCommandList, MATERIAL_DETAIL_NORMAL_MAP, 9, pMaterial->m_ppstrTextureNames[6], &(pMaterial->m_ppTextures[6]), pParent, pInFile, pShader, m_pScene);
 		}
 		else if (!strcmp(pstrToken, "</Materials>"))
 		{
+
 			break;
 		}
 	}
@@ -948,7 +953,7 @@ CLoadedModelInfo* GameObjectMgr::LoadGeometryAndAnimationFromFile(ID3D12Device* 
 #endif
 
 	return(pLoadedModel);
-}
+	}
 
 
 CNpcHelicopterObject::CNpcHelicopterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :GameObjectMgr(10)
@@ -1089,13 +1094,13 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 	ParticlePosition = this->GetPosition();
 
 	float FallingMaxHeight = -18.5f;
-	if (m_pTailRotorFrame->m_xmf4x4ToParent._42 > FallingMaxHeight&&
-		m_pMainRotorFrame->m_xmf4x4ToParent._42 > FallingMaxHeight&&
-		m_pFrameFragObj4->m_xmf4x4ToParent._42 > FallingMaxHeight&&
-		m_pFrameFragObj5->m_xmf4x4ToParent._42 > FallingMaxHeight&&
-		m_pFrameFragObj6->m_xmf4x4ToParent._42 > FallingMaxHeight&&
-		m_pFrameFragObj8->m_xmf4x4ToParent._42 > FallingMaxHeight&&
-		m_pFrameFragObj9->m_xmf4x4ToParent._42 > FallingMaxHeight&&
+	if (m_pTailRotorFrame->m_xmf4x4ToParent._42 > FallingMaxHeight &&
+		m_pMainRotorFrame->m_xmf4x4ToParent._42 > FallingMaxHeight &&
+		m_pFrameFragObj4->m_xmf4x4ToParent._42 > FallingMaxHeight &&
+		m_pFrameFragObj5->m_xmf4x4ToParent._42 > FallingMaxHeight &&
+		m_pFrameFragObj6->m_xmf4x4ToParent._42 > FallingMaxHeight &&
+		m_pFrameFragObj8->m_xmf4x4ToParent._42 > FallingMaxHeight &&
+		m_pFrameFragObj9->m_xmf4x4ToParent._42 > FallingMaxHeight &&
 		m_pFrameFragObj10->m_xmf4x4ToParent._42 > FallingMaxHeight)
 	{
 		m_bPartitionfalldownEnd = true;
@@ -1108,16 +1113,16 @@ void CHelicopterObjects::FallDown(float fTimeElapsed)
 {
 	XMFLOAT3 gravity = XMFLOAT3(0.0, -5.5, 0);
 	m_fElapsedTimes += fTimeElapsed * 1.1f;
-	
+
 	float FallingMaxHeight = -17.5f;
 	float staticValue = 7.3f;
 	float staticValueZ = 6.3f;
-	XMVECTOR staticDir1 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.5, 0.95, 0.0)));
+	XMVECTOR staticDir1 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95, -0.5, 0.95, 0.0)));
 	XMVECTOR staticDir2 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.95, -0.5, 0.85, 0.0)));
-	XMVECTOR staticDir3 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.5, 0.95, 0.0)));
-	XMVECTOR staticDir4 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.5, -0.95, 0.0)));
+	XMVECTOR staticDir3 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95, -0.5, 0.95, 0.0)));
+	XMVECTOR staticDir4 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95, -0.5, -0.95, 0.0)));
 	XMVECTOR staticDir5 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.95, -0.5, -0.85, 0.0)));
-	XMVECTOR staticDir6 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95,  -0.5, 0.95, 0.0)));
+	XMVECTOR staticDir6 = XMVector3Normalize(XMVECTOR(XMVectorSet(0.95, -0.5, 0.95, 0.0)));
 	XMVECTOR staticDir7 = XMVector3Normalize(XMVECTOR(XMVectorSet(-0.93, -0.5, -0.95, 0.0)));
 	for (int i = 0; i < 2; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir1);
 	for (int i = 2; i < 4; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir2);

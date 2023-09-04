@@ -2,7 +2,7 @@
 #include "Texture.h"
 #include "SceneMgr.h"
 #include "Object.h"
-
+#include "StageScene.h"
 CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRootParameters, int nRows, int nCols)
 {
 	m_nTextureType = nTextureType;
@@ -336,7 +336,7 @@ void CMaterial::ReleaseShaderVariables()
 
 }
 
-void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR* pwstrTextureName, CTexture** ppTexture, GameObjectMgr* pParent, FILE* pInFile, ShaderMgr* pShader)
+void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR* pwstrTextureName, CTexture** ppTexture, GameObjectMgr* pParent, FILE* pInFile, ShaderMgr* pShader, SceneMgr* pScene)
 {
 	char pstrTextureName[64] = { '\0' };
 
@@ -373,8 +373,8 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			*ppTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
 			(*ppTexture)->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, pwstrTextureName, RESOURCE_TEXTURE2D, 0);
 			if (*ppTexture) (*ppTexture)->AddRef();
-
-			SceneMgr::CreateSRVs(pd3dDevice, *ppTexture, 0, nRootParameter);
+			pScene->CreateSRVs(pd3dDevice, *ppTexture, 0, nRootParameter);
+			
 		}
 		else
 		{

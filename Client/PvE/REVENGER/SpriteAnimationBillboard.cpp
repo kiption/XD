@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "SpriteAnimationBillboard.h"
 #include "SceneMgr.h"
+#include "StageScene.h"
 D3D12_INPUT_LAYOUT_DESC CSpriteTexturedShader::CreateInputLayout(int nPipelineState)
 {
 	UINT nInputElementDescs = 2;
@@ -191,7 +192,7 @@ void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 
 
 
-	SceneMgr* pScene = NULL;
+	MainGameScene* pScene = NULL;
 	m_nObjects = 2;
 	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
