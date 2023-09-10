@@ -123,7 +123,7 @@ ID3D12RootSignature* PostProcessShader::CreateGraphicsRootSignature(ID3D12Device
 
 void PostProcessShader::CreateResourcesAndRtvsSrvs(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nRenderTargets, DXGI_FORMAT* pdxgiFormats, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle, UINT nShaderResources)
 {
-	m_pTexture = new CTexture(nRenderTargets, RESOURCE_TEXTURE2D, 0, 1);
+	m_pTexture = new Texture(nRenderTargets, RESOURCE_TEXTURE2D, 0, 1);
 
 	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R8G8B8A8_UNORM, { 1.0f, 1.0f, 1.0f, 1.0f } };
 	for (UINT i = 0; i < nRenderTargets; i++)

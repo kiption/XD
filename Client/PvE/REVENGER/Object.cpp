@@ -545,7 +545,7 @@ void GameObjectMgr::Rotate(XMFLOAT4* pxmf4Quaternion)
 
 //#define _WITH_DEBUG_FRAME_HIERARCHY
 
-CTexture* GameObjectMgr::FindReplicatedTexture(_TCHAR* pstrTextureName)
+Texture* GameObjectMgr::FindReplicatedTexture(_TCHAR* pstrTextureName)
 {
 	for (int i = 0; i < m_nMaterials; i++)
 	{
@@ -560,7 +560,7 @@ CTexture* GameObjectMgr::FindReplicatedTexture(_TCHAR* pstrTextureName)
 			}
 		}
 	}
-	CTexture* pTexture = NULL;
+	Texture* pTexture = NULL;
 	if (m_pSibling) if (pTexture = m_pSibling->FindReplicatedTexture(pstrTextureName)) return(pTexture);
 	if (m_pChild) if (pTexture = m_pChild->FindReplicatedTexture(pstrTextureName)) return(pTexture);
 

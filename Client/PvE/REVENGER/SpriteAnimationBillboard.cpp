@@ -174,10 +174,10 @@ D3D12_SHADER_BYTECODE SpriteAnimationBillboard::CreateVertexShader(ID3DBlob** pp
 
 void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	CTexture* ppSpriteTextures[2];
-	ppSpriteTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 4, 8);
+	Texture* ppSpriteTextures[2];
+	ppSpriteTextures[0] = new Texture(1, RESOURCE_TEXTURE2D, 0, 1, 4, 8);
 	ppSpriteTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explosion4x8.dds", RESOURCE_TEXTURE2D, 0);
-	ppSpriteTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1, 4, 8);
+	ppSpriteTextures[1] = new Texture(1, RESOURCE_TEXTURE2D, 0, 1, 4, 8);
 	ppSpriteTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Billboard/Explosion4x8.dds", RESOURCE_TEXTURE2D, 0);
 
 	CMaterial* pTerrainMaterial[2];

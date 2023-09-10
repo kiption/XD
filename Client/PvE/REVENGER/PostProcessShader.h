@@ -26,13 +26,13 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, void* pContext, int nPipelineStates);
 
 protected:
-	CTexture* m_pTexture = NULL;
-	CTexture** m_ppTextures = NULL;
+	Texture* m_pTexture = NULL;
+	Texture** m_ppTextures = NULL;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE* m_pd3dRtvCPUDescriptorHandles = NULL;
 
 public:
-	CTexture* GetTexture() { return(m_pTexture); }
+	Texture* GetTexture() { return(m_pTexture); }
 	ID3D12Resource* GetTextureResource(UINT nIndex) { return(m_pTexture->GetResource(nIndex)); }
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetRtvCPUDescriptorHandle(UINT nIndex) { return(m_pd3dRtvCPUDescriptorHandles[nIndex]); }

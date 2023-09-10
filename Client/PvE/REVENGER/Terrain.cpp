@@ -16,10 +16,10 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	CTexture* pTerrainBaseTexture[2];
-	pTerrainBaseTexture[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	Texture* pTerrainBaseTexture[2];
+	pTerrainBaseTexture[0] = new Texture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTerrainBaseTexture[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Cliff_2.dds", RESOURCE_TEXTURE2D, 0);
-	pTerrainBaseTexture[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	pTerrainBaseTexture[1] = new Texture(1, RESOURCE_TEXTURE2D, 0, 1);
 	pTerrainBaseTexture[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Terrain/Cliff_1.dds", RESOURCE_TEXTURE2D, 0);
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	

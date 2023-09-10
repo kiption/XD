@@ -78,7 +78,7 @@ public:
 	GameObjectMgr* m_pChild = NULL;
 	GameObjectMgr* m_pSibling = NULL;
 	ShaderMgr* m_pShaderInfo = NULL;
-	CTexture* m_pTextureInfo = NULL;
+	Texture* m_pTextureInfo = NULL;
 
 
 	BoundingBox	m_xmBoundingBox;
@@ -168,7 +168,7 @@ public:
 	void UpdateTransform(XMFLOAT4X4* pxmf4x4Parent = NULL);
 	GameObjectMgr* FindFrame(char* pstrFrameName);
 
-	CTexture* FindReplicatedTexture(_TCHAR* pstrTextureName);
+	Texture* FindReplicatedTexture(_TCHAR* pstrTextureName);
 
 	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0x00); }
 

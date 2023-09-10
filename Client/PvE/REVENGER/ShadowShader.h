@@ -84,7 +84,7 @@ public:
 		int nPipelineState);
 
 public:
-	CTexture* m_pDepthTexture = NULL;
+	Texture* m_pDepthTexture = NULL;
 
 	CCamera* m_ppDepthRenderCameras[MAX_DEPTH_TEXTURES];
 
@@ -98,7 +98,7 @@ public:
 	XMMATRIX						m_xmProjectionToTexture;
 
 public:
-	CTexture* GetDepthTexture() { return(m_pDepthTexture); }
+	Texture* GetDepthTexture() { return(m_pDepthTexture); }
 	ID3D12Resource* GetDepthTextureResource(UINT nIndex) { return(m_pDepthTexture->GetResource(nIndex)); }
 
 public:
@@ -141,7 +141,7 @@ public:
 
 public:
 	CObjectsShader* m_pObjectsShader = NULL;
-	CTexture* m_pDepthTexture = NULL;
+	Texture* m_pDepthTexture = NULL;
 };
 class CTreeBlendingShadowShader : public ShaderMgr
 {
@@ -171,5 +171,5 @@ public:
 
 public:
 	CObjectsShader* m_pObjectsShader = NULL;
-	CTexture* m_pDepthTexture = NULL;
+	Texture* m_pDepthTexture = NULL;
 };

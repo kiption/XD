@@ -31,11 +31,11 @@ struct SRVROOTARGUMENTINFO
 	int								m_nRootParameterIndex = 0;
 	D3D12_GPU_DESCRIPTOR_HANDLE		m_d3dSrvGpuDescriptorHandle;
 };
-class CTexture
+class Texture
 {
 public:
-	CTexture(int nTextureResources, UINT nResourceType, int nSamplers, int nRootParameters, int nRows = 1, int nCols = 1);
-	virtual ~CTexture();
+	Texture(int nTextureResources, UINT nResourceType, int nSamplers, int nRootParameters, int nRows = 1, int nCols = 1);
+	virtual ~Texture();
 
 private:
 	int								m_nReferences = 0;
@@ -134,8 +134,8 @@ public:
 
 	void SetShader(ShaderMgr* pShader);
 	void SetMaterialType(UINT nType) { m_nType |= nType; }
-	virtual void SetTextures(CTexture* pTexture);
-	virtual void SetTexture(CTexture* pTexture, UINT nTexture = 0);
+	virtual void SetTextures(Texture* pTexture);
+	virtual void SetTexture(Texture* pTexture, UINT nTexture = 0);
 	void SetReflection(UINT nReflection) { m_nReflection = nReflection; }
 
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList);
@@ -155,10 +155,10 @@ public:
 public:
 	int 							m_nTextures = 0;
 	_TCHAR(*m_ppstrTextureNames)[64] = NULL;
-	CTexture** m_ppTextures = NULL; //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
-	CTexture* m_pTexture = NULL; //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
+	Texture** m_ppTextures = NULL; //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
+	Texture* m_pTexture = NULL; //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal
 
-	void LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR* pwstrTextureName, CTexture** ppTexture, GameObjectMgr* pParent, FILE* pInFile, ShaderMgr* pShader,SceneMgr* pScene);
+	void LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nType, UINT nRootParameter, _TCHAR* pwstrTextureName, Texture** ppTexture, GameObjectMgr* pParent, FILE* pInFile, ShaderMgr* pShader,SceneMgr* pScene);
 
 public:
 	static ShaderMgr* m_pStandardShader;

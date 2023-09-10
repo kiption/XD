@@ -429,7 +429,7 @@ void CShadowMapShader::ReleaseShaderVariables()
 void CShadowMapShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 
-	m_pDepthTexture = (CTexture*)pContext;
+	m_pDepthTexture = (Texture*)pContext;
 	m_pDepthTexture->AddRef();
 	SceneMgr::CreateSRVs(pd3dDevice, m_pDepthTexture, 0, 22, false);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -642,7 +642,7 @@ void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	d3dDescriptorHeapDesc.NodeMask = 0;
 	HRESULT hResult = pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dRtvDescriptorHeap);
 
-	m_pDepthTexture = new CTexture(MAX_DEPTH_TEXTURES, RESOURCE_TEXTURE2D_ARRAY, 0, 1);
+	m_pDepthTexture = new Texture(MAX_DEPTH_TEXTURES, RESOURCE_TEXTURE2D_ARRAY, 0, 1);
 
 	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R32_FLOAT, { 1.0f,1.0f, 1.0, 1.0f } };
 	for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++)
@@ -937,7 +937,7 @@ void CTreeBlendingShadowShader::ReleaseShaderVariables()
 
 void CTreeBlendingShadowShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	m_pDepthTexture = (CTexture*)pContext;
+	m_pDepthTexture = (Texture*)pContext;
 	m_pDepthTexture->AddRef();
 	SceneMgr::CreateSRVs(pd3dDevice, m_pDepthTexture, 0, 22, false);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);

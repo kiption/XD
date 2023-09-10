@@ -11,8 +11,8 @@ CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	if(m_nCurScene==INGAME_SCENE)m_pScene= ((MainGameScene* )m_pScene );
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	CTexture* pSkyBoxTexture[1];
-	pSkyBoxTexture[0] = new CTexture(1, RESOURCE_TEXTURE_CUBE, 0, 1);
+	Texture* pSkyBoxTexture[1];
+	pSkyBoxTexture[0] = new Texture(1, RESOURCE_TEXTURE_CUBE, 0, 1);
 	pSkyBoxTexture[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"SkyBox/pinksky.dds", RESOURCE_TEXTURE_CUBE, 0);
 
 	CSkyBoxShader* pSkyBoxShader = new CSkyBoxShader();
@@ -47,7 +47,7 @@ COpeningBackScene::COpeningBackScene(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	CTexture* pSkyBoxTexture = new CTexture(1, RESOURCE_TEXTURE_CUBE, 0, 1);
+	Texture* pSkyBoxTexture = new Texture(1, RESOURCE_TEXTURE_CUBE, 0, 1);
 	pSkyBoxTexture->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"SkyBox/moonburst.dds", RESOURCE_TEXTURE_CUBE, 0);
 	DXGI_FORMAT pdxgiRtvBaseFormats[1] = { DXGI_FORMAT_R8G8B8A8_UNORM };
 	CSkyBoxShader* pSkyBoxShader = new CSkyBoxShader();
