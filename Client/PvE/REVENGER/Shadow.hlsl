@@ -44,7 +44,7 @@ VS_LIGHTING_OUTPUT VSLighting(VS_LIGHTING_INPUT input)
 {
 	VS_LIGHTING_OUTPUT output;
 
-	if (!bAnimationShader)
+	if (!gbBoneShader)
 	{
 		output.normalW = mul(input.normal, (float3x3) gmtxGameObject);
 		output.positionW = (float3) mul(float4(input.position, 1.0f), gmtxGameObject);
@@ -53,7 +53,7 @@ VS_LIGHTING_OUTPUT VSLighting(VS_LIGHTING_INPUT input)
 		output.tangentW = mul(input.tangent, (float3x3) gmtxGameObject);
 		output.bitangentW = mul(input.bitangent, (float3x3) gmtxGameObject);
 	}
-	else if (bAnimationShader)
+	else if (gbBoneShader)
 	{
 		float4x4 mtxVertexToBoneWorld = (float4x4) 0.0f;
 		for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
@@ -92,7 +92,7 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 {
 	VS_SHADOW_MAP_OUTPUT output = (VS_SHADOW_MAP_OUTPUT)0;
 	float4 positionW = (float4) 0.0f;
-	if (!bAnimationShader)
+	if (!gbBoneShader)
 	{
 		positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
 		output.positionW = positionW.xyz;
@@ -102,7 +102,7 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 		output.tangentW = mul(input.tangent, (float3x3) gmtxGameObject);
 		output.bitangentW = mul(input.bitangent, (float3x3) gmtxGameObject);
 	}
-	if (bAnimationShader)
+	if (gbBoneShader)
 	{
 		float4x4 mtxVertexToBoneWorld = (float4x4) 0.0f;
 		for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
