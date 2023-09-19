@@ -1263,7 +1263,7 @@ void CGameFramework::ShotDelay()
 			((MuzzleFrameBillboard*)((MainGameScene*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
 			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
 			{
-				//m_pCamera->m_xmf4x4View._42 += 0.20f;
+				
 				m_pCamera->m_xmf4x4View._43 += 0.75f;
 			}
 			((MainGameScene*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.7, 0.7, 0.7, 1.0);
@@ -1272,12 +1272,12 @@ void CGameFramework::ShotDelay()
 		if (ShotKey == true && m_currbullet != 0)
 		{
 			((CHumanPlayer*)m_pScene->m_pPlayer)->Rotate(-0.07, 0.0, 0.0);
-			m_pCamera->m_xmf4x4View._43 -= 0.07f;
+			m_pCamera->m_xmf4x4View._42 -= 0.07f;
 			((MuzzleFrameBillboard*)((MainGameScene*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = true;
 			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
 			{
 				//m_pCamera->m_xmf4x4View._42 -= 0.20f;
-				m_pCamera->m_xmf4x4View._43 -= 0.75f;
+				m_pCamera->m_xmf4x4View._42 -= 0.75f;
 			}
 			((MainGameScene*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
 			((MainGameScene*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
