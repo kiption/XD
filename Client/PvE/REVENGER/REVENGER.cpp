@@ -561,6 +561,24 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 					otherplayer_attack_id = 0;
 					otherplayer_attack_dir = { 0, 0, 0 };
 				}
+				
+				// 5. 리스폰
+				if (respawn_trigger) {
+					if (respawn_id == my_id) {
+						gGameFramework.setPosition_Self(players_info[my_id].m_pos);
+					}
+					else {
+						if (players_info[respawn_id].m_role == ROLE_RIFLE) {
+							gGameFramework.setPosition_SoldiarOtherPlayer(respawn_id, players_info[respawn_id].m_pos);
+						}
+						else if (players_info[respawn_id].m_role == ROLE_HELI) {
+							gGameFramework.setPosition_HeliOtherPlayer(players_info[respawn_id].m_pos);
+						}
+					}
+
+					respawn_trigger = false;
+					respawn_id = -1;
+				}
 
 				//==================================================
 				// 2. 객체 인게임 상태 업데이트 (자기 자신 제외, 자기 자신은 클라 독자적으로 돌아가기 때문)

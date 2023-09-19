@@ -895,6 +895,27 @@ void processPacket(char* ptr)
 
 		break;
 	}// SC_HEALING case end
+	case SC_RESPAWN:
+	{
+		if (curr_servertype != SERVER_LOGIC) break;
+		SC_RESPAWN_PACKET* recv_packet = reinterpret_cast<SC_RESPAWN_PACKET*>(ptr);
+		int recv_id = recv_packet->id;
+
+		players_info[recv_id].m_hp = 100;
+		players_info[recv_id].m_pos.x = recv_packet->x;
+		players_info[recv_id].m_pos.y = recv_packet->y;
+		players_info[recv_id].m_pos.z = recv_packet->z;
+		players_info[recv_id].m_ingame_state = PL_ST_IDLE;
+		players_info[recv_id].m_new_state_update = true;
+
+		players_info[recv_id].m_near_death_hp = false;
+		gamesound.pauseHeartBeat();
+
+		respawn_trigger = true;
+		respawn_id = recv_id;
+
+		break;
+	}// SC_RESPAWN case end
 	case SC_HEALPACK:
 	{
 		if (curr_servertype != SERVER_LOGIC) break;
@@ -1142,7 +1163,7 @@ void processPacket(char* ptr)
 				if (recv_id == my_id) {
 					gamesound.pauseHeartBeat();
 					gamesound.PauseHeliWarnningSound();
-					b_gameover = true;
+					//b_gameover = true;	// 리스폰때문에 잠깐 막음.
 				}
 				players_info[recv_id].m_hp = 0;
 				players_info[recv_id].m_damaged_effect_on = true;

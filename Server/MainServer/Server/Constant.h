@@ -80,7 +80,7 @@
 #define SPAWN_POS_Y_HUMAN 6.0f
 #define SPAWN_POS_Z_HUMAN 750.0f
 
-#define RESPAWN_TIME 3000			// 리스폰 시간 (ms)
+#define RESPAWN_TIME 2000			// 리스폰 시간 (ms)
 
 #define HUMAN_VIEW_RANGE 500.0f
 
@@ -99,7 +99,7 @@
 
 #define AUTO_LEVELOFF_TIME 3000			// 몇 초(ms)동안 키입력이 없어야 자동 수평비행 전환이 되는가
 
-#define RESPAWN_TIME_HELI 10000			// 헬기 리스폰 시간 (ms)
+#define RESPAWN_TIME_HELI 5000			// 헬기 리스폰 시간 (ms)
 
 //============================================================
 //					  스테이지 관련 상수

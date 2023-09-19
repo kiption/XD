@@ -183,6 +183,10 @@ public:
 	chrono::system_clock::time_point shoot_time;	// 총을 발사한 시간
 	chrono::system_clock::time_point reload_time;	// 총알 장전 시작시간
 
+	chrono::system_clock::time_point dead_time;		// 죽은 시간
+	chrono::system_clock::time_point respawn_time;	// 부활 시간
+	bool respawn_nodamage;	// 부활 무적
+
 	short curr_stage;
 
 	bool in_spawn_area;		// 스폰지역에 있으면 조금씩 회복된다.
@@ -235,7 +239,7 @@ public:
 
 		int ret = WSARecv(socket, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.overlapped, 0);
 		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "[Line: 224] WSARecv Error - " << GetLastError() << endl;
+			cout << "[Line: 240] WSARecv Error - " << GetLastError() << endl;
 		}
 	}
 
@@ -247,7 +251,7 @@ public:
 		//cout << "[do_send] Target ID: " << id << "\n" << endl;
 		int ret = WSASend(socket, &s_data->wsabuf, 1, 0, 0, &s_data->overlapped, 0);
 		if (ret != 0 && GetLastError() != WSA_IO_PENDING) {
-			cout << "[Line: 236] WSASend Error - " << GetLastError() << endl;
+			cout << "[Line: 252] WSASend Error - " << GetLastError() << endl;
 		}
 	}
 
@@ -1118,6 +1122,7 @@ void process_packet(int client_id, char* packet)
 				clients[client_id].s_lock.lock();
 				clients[client_id].hp = 0;
 				clients[client_id].pl_state = PL_ST_DEAD;
+				clients[client_id].dead_time = system_clock::now();
 				clients[client_id].s_lock.unlock();
 				cout << "Player[" << client_id << "]의 헬리콥터가 지면에 추락하여 폭발하였다." << endl;
 
@@ -2145,6 +2150,7 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].s_lock.lock();
 			clients[client_id].hp = 0;
 			clients[client_id].pl_state = PL_ST_DEAD;
+			clients[client_id].dead_time = system_clock::now();
 			clients[client_id].s_lock.unlock();
 			cout << "파티클에 충돌하여 Player[" << clients[client_id].id << "]가 사망하였다." << endl;
 
@@ -2223,6 +2229,7 @@ void process_packet(int client_id, char* packet)
 			clients[client_id].s_lock.lock();
 			clients[client_id].hp = 0;
 			clients[client_id].pl_state = PL_ST_DEAD;
+			clients[client_id].dead_time = system_clock::now();
 			clients[client_id].s_lock.unlock();
 			cout << "벽에 충돌하여 Player[" << clients[client_id].id << "]가 사망하였다." << endl;
 
@@ -2660,8 +2667,8 @@ void process_packet(int client_id, char* packet)
 
 					break;
 				case C_OBJ_PLAYER:
-					// 만약 무적 치트키를 쓴 유저라면 건너뛴다
-					if (clients[collided_cl_id].immortal_cheat == true) {
+					// 만약 무적인 유저라면 건너뛴다
+					if (clients[collided_cl_id].immortal_cheat || clients[collided_cl_id].respawn_nodamage) {
 						cout << "Client[" << collided_cl_id << "]는 무적이다." << endl;
 						break;
 					}
@@ -2725,6 +2732,7 @@ void process_packet(int client_id, char* packet)
 						clients[collided_cl_id].s_lock.lock();
 						clients[collided_cl_id].hp = 0;
 						clients[collided_cl_id].pl_state = PL_ST_DEAD;
+						clients[collided_cl_id].dead_time = system_clock::now();
 						clients[collided_cl_id].s_lock.unlock();
 						//cout << "Npc[" << recv_attack_pack->n_id << "]의 공격에 Player[" << collided_cl_id << "]가 사망하였다." << endl;
 
@@ -3137,38 +3145,88 @@ void timerFunc() {
 				}
 			}
 
-			// 스폰지역에서는 HP를 조금씩 회복한다.
-			for (auto& cl : clients) {
-				if (cl.s_state != ST_INGAME) continue;
-				if (cl.curr_stage == 0) continue;
-				if (cl.pl_state == PL_ST_DEAD) continue;
+			for (int i = 0; i < MAX_USER; ++i) {
+				// 죽은 플레이어가 있다면 리스폰 시간을 계산해서 부활시켜준다.
+				if (clients[i].pl_state == PL_ST_DEAD) {
+					if (clients[i].role == ROLE_RIFLE && system_clock::now() > clients[i].dead_time + milliseconds(RESPAWN_TIME)) {
+						clients[i].s_lock.lock();
+						clients[i].hp = HUMAN_MAXHP;
+						clients[i].pl_state = PL_ST_IDLE;
+						clients[i].pos = { SPAWN_POS_X_HUMAN, SPAWN_POS_Y_HUMAN , SPAWN_POS_Z_HUMAN };
+						clients[i].respawn_time = system_clock::now();
+						clients[i].respawn_nodamage = true;
+						cout << "Client[" << i << "]가 부활하였습니다." << endl;
+						clients[i].s_lock.unlock();
 
-				if (cl.in_spawn_area == true && cl.hp < 100) {
-					cl.s_lock.lock();
-					cl.hp += 1;
-					if (cl.hp >= 100) cl.hp = 100;
-					cl.s_lock.unlock();
+						SC_HEALING_PACKET healing_packet;
+						healing_packet.size = sizeof(SC_HEALING_PACKET);
+						healing_packet.type = SC_HEALING;
+						healing_packet.id = i;
+						healing_packet.value = HUMAN_MAXHP;
+						{
+							lock_guard<mutex> lg{ npc_server.s_lock };
+							npc_server.do_send(&healing_packet);
+						}
 
-					SC_HEALING_PACKET healing_packet;
-					healing_packet.size = sizeof(SC_HEALING_PACKET);
-					healing_packet.type = SC_HEALING;
-					healing_packet.id = cl.id;
-					healing_packet.value = 1;
+						SC_RESPAWN_PACKET respawn_pack;
+						respawn_pack.size = sizeof(SC_RESPAWN_PACKET);
+						respawn_pack.type = SC_RESPAWN;
+						respawn_pack.id = i;
+						respawn_pack.x = clients[i].pos.x;
+						respawn_pack.y = clients[i].pos.y;
+						respawn_pack.z = clients[i].pos.z;
 
-					// 우선 NPC서버에게 플레이어 데미지 정보를 보내줍니다.
-					{
-						lock_guard<mutex> lg{ npc_server.s_lock };
-						npc_server.do_send(&healing_packet);
+						for (auto& cl : clients) {
+							if (cl.s_state != ST_INGAME) continue;
+							if (cl.curr_stage == 0) continue;
+
+							lock_guard<mutex> lg{ cl.s_lock };
+							cl.do_send(&respawn_pack);
+						}
 					}
+					else if (clients[i].role == ROLE_HELI && system_clock::now() > clients[i].dead_time + milliseconds(RESPAWN_TIME_HELI)) {
+						clients[i].s_lock.lock();
+						clients[i].hp = HELI_MAXHP;
+						clients[i].pl_state = PL_ST_IDLE;
+						clients[i].pos = { SPAWN_POS_X_HELI, SPAWN_POS_Y_HELI , SPAWN_POS_Z_HELI };
+						clients[i].respawn_time = system_clock::now();
+						clients[i].respawn_nodamage = true;
+						cout << "Client[" << i << "]가 부활하였습니다." << endl;
+						clients[i].s_lock.unlock();
 
-					// 모든 클라이언트한테도 보내줍니다.
-					for (auto& send_cl : clients) {
-						if (send_cl.s_state != ST_INGAME) continue;
-						if (send_cl.curr_stage == 0) continue;
+						SC_HEALING_PACKET healing_packet;
+						healing_packet.size = sizeof(SC_HEALING_PACKET);
+						healing_packet.type = SC_HEALING;
+						healing_packet.id = i;
+						healing_packet.value = HELI_MAXHP;
+						{
+							lock_guard<mutex> lg{ npc_server.s_lock };
+							npc_server.do_send(&healing_packet);
+						}
 
-						lock_guard<mutex> lg{ send_cl.s_lock };
-						send_cl.do_send(&healing_packet);
+						SC_RESPAWN_PACKET respawn_pack;
+						respawn_pack.size = sizeof(SC_RESPAWN_PACKET);
+						respawn_pack.type = SC_RESPAWN;
+						respawn_pack.id = i;
+						respawn_pack.x = clients[i].pos.x;
+						respawn_pack.y = clients[i].pos.y;
+						respawn_pack.z = clients[i].pos.z;
+
+						for (auto& cl : clients) {
+							if (cl.s_state != ST_INGAME) continue;
+							if (cl.curr_stage == 0) continue;
+
+							lock_guard<mutex> lg{ cl.s_lock };
+							cl.do_send(&respawn_pack);
+						}
 					}
+				}
+
+				// 리스폰 부활무적 체크
+				if (clients[i].respawn_nodamage && system_clock::now() > clients[i].respawn_time + milliseconds(2000)) {
+					clients[i].s_lock.lock();
+					clients[i].respawn_nodamage = false;
+					clients[i].s_lock.unlock();
 				}
 			}
 
@@ -3239,9 +3297,6 @@ void timerFunc() {
 		}
 
 		// ================================
-		// --- 업데이트
-
-
 		auto curr_t = system_clock::now();
 		if (curr_t - start_t < 33ms) {
 			this_thread::sleep_for(33ms - (curr_t - start_t));
