@@ -2475,7 +2475,7 @@ void initNpc() {
 		npcsInfo[i].SetOriginNodeIndex(npcsInfo[i].GetNodeIndex());
 		npcsInfo[i].path.clear();
 		npcsInfo[i].SetTargetNodeIndex(-1);
-		npcsInfo[i].SetHp(300);
+		npcsInfo[i].SetHp(240);
 		npcsInfo[i].CurrTime = chrono::system_clock::now();
 		npcsInfo[i].PrevTime = npcsInfo[i].CurrTime;
 		g_logicservers[a_lgcsvr_num].send_npc_init_packet(npc_id);

@@ -34,6 +34,8 @@ unsigned int g_curr_t;
 bool b_isfirstplayer;	// 첫 player입장인지. (첫 클라 접속부터 서버시간이 흐르도록 하기 위함)
 mutex servertime_lock;	// 서버시간 lock
 
+bool b_hardmode;	// 하드모드
+
 //======================================================================
 class Mission
 {
@@ -1276,17 +1278,21 @@ void process_packet(int client_id, char* packet)
 			}
 
 			if (collided_healpack && clients[client_id].hp < HUMAN_MAXHP) {	// 힐팩 위치에 있다면 그 클라이언트를 치료해줍니다.
+				int real_healing = 0;
+				if (b_hardmode) real_healing = HARD_HEALPACK_RECOVER_HP;
+				else			real_healing = HEALPACK_RECOVER_HP;
+
 				clients[client_id].s_lock.lock();
-				clients[client_id].hp += HEALPACK_RECOVER_HP;
+				clients[client_id].hp += real_healing;
 				if (clients[client_id].hp > HUMAN_MAXHP) clients[client_id].hp = HUMAN_MAXHP;
 				clients[client_id].s_lock.unlock();
-				cout << "Player[" << client_id << "]가 힐팩을 얻어 HP를 (+" << HEALPACK_RECOVER_HP << ")만큼 회복하였다. (HP: " << clients[client_id].hp << " 남음)\n" << endl;
+				cout << "Player[" << client_id << "]가 힐팩을 얻어 HP를 (+" << real_healing << ")만큼 회복하였다. (HP: " << clients[client_id].hp << " 남음)\n" << endl;
 
 				SC_HEALING_PACKET healing_packet;
 				healing_packet.size = sizeof(SC_HEALING_PACKET);
 				healing_packet.type = SC_HEALING;
 				healing_packet.id = clients[client_id].id;
-				healing_packet.value = HEALPACK_RECOVER_HP;
+				healing_packet.value = real_healing;
 
 				// 우선 NPC서버에게 플레이어 힐링 정보를 보내줍니다.
 				{
@@ -1996,41 +2002,17 @@ void process_packet(int client_id, char* packet)
 			}
 			break;
 		}// PACKET_KEY_END case end
-		case PACKET_KEY_PGUP:		// 강제회복 치트키
+		case PACKET_KEY_PGUP:		// 하드모드 진입
 		{
 			if (clients[client_id].s_state != ST_INGAME) break;	// 잘못된 요청
 			if (clients[client_id].curr_stage == 0) break;	// 잘못된 요청
 			if (!b_active_server) break;	// 잘못된 요청
-			if (clients[client_id].hp == HUMAN_MAXHP) break;	// 이미 풀HP임.
+			if (b_hardmode) break;	// 이미 하드모드임.
 
 			int damaged_hp = HUMAN_MAXHP - clients[client_id].hp;
 
-			cout << "==힐링 치트키==\n" << endl;
-			clients[client_id].s_lock.lock();
-			clients[client_id].hp += damaged_hp;
-			clients[client_id].s_lock.unlock();
-			cout << "Player[" << client_id << "]가 HP를 (+" << damaged_hp << ")만큼 회복하였다. (HP: "	<< clients[client_id].hp << " 남음)\n" << endl;
-
-			SC_HEALING_PACKET healing_packet;
-			healing_packet.size = sizeof(SC_HEALING_PACKET);
-			healing_packet.type = SC_HEALING;
-			healing_packet.id = clients[client_id].id;
-			healing_packet.value = damaged_hp;
-
-			// 우선 NPC서버에게 플레이어 데미지 정보를 보내줍니다.
-			{
-				lock_guard<mutex> lg{ npc_server.s_lock };
-				npc_server.do_send(&healing_packet);
-			}
-
-			// 모든 클라이언트한테도 보내줍니다.
-			for (auto& send_cl : clients) {
-				if (send_cl.s_state != ST_INGAME) continue;
-				if (send_cl.curr_stage == 0) continue;
-
-				lock_guard<mutex> lg{ send_cl.s_lock };
-				send_cl.do_send(&healing_packet);
-			}			
+			cout << "==하드모드 진입==\n" << endl;
+			b_hardmode = true;
 
 			break;
 		}// PACKET_KEY_PGUP case end
@@ -2179,9 +2161,14 @@ void process_packet(int client_id, char* packet)
 		if (clients[client_id].role != ROLE_HELI) break;	// 잘못된 요청
 		if (clients[client_id].pl_state == PL_ST_DEAD) break;	// 죽으면 충돌X
 		if (clients[client_id].immortal_cheat) break;	// 무적은 충돌X
-		
+
 		// 데미지 계산
-		int damage = static_cast<int>(HUMAN_MAXHP / 10) + 1;
+		int damage = 0;
+		if (b_hardmode)
+			damage = static_cast<int>(HELI_MAXHP / 2) + 1;
+		else
+			damage = static_cast<int>(HELI_MAXHP / 10) + 1;
+		
 		int after_hp = clients[client_id].hp - damage;
 
 		// 우선 NPC서버에게 플레이어 데미지 정보를 보내줍니다.
@@ -2676,13 +2663,20 @@ void process_packet(int client_id, char* packet)
 					// 데미지 계산
 					int damage = 0;
 					if (recv_attack_pack->n_id < MAX_NPC_HELI) {
-						damage = NPC_VALKAN_DAMAGE;
+						if (b_hardmode)
+							damage = HARD_NPC_VALKAN_DAMAGE;
+						else
+							damage = NPC_VALKAN_DAMAGE;
 					}
 					else {
-						damage = NPC_RIFLE_DAMAGE;
+						if (b_hardmode)
+							damage = HARD_NPC_RIFLE_DAMAGE;
+						else
+							damage = NPC_RIFLE_DAMAGE;
 					}
 					if (clients[collided_cl_id].role == ROLE_HELI) {	// 헬기 플레이어는 덜 아프게 맞는다.
-						damage = damage / 2;
+						if (!b_hardmode)								// 하드모드에선 데미지 그대로 받는다.
+							damage = damage / 2;
 					}
 					int after_hp = clients[collided_cl_id].hp - damage;	//
 
@@ -3148,11 +3142,28 @@ void timerFunc() {
 			for (int i = 0; i < MAX_USER; ++i) {
 				// 죽은 플레이어가 있다면 리스폰 시간을 계산해서 부활시켜준다.
 				if (clients[i].pl_state == PL_ST_DEAD) {
-					if (clients[i].role == ROLE_RIFLE && system_clock::now() > clients[i].dead_time + milliseconds(RESPAWN_TIME)) {
+					int real_respawn_time = 0;
+					if (clients[i].role == ROLE_RIFLE) {
+						if (b_hardmode)
+							real_respawn_time = HARD_RESPAWN_TIME;
+						else
+							real_respawn_time = RESPAWN_TIME;
+					}
+					else if (clients[i].role == ROLE_HELI) {
+						if (b_hardmode)
+							real_respawn_time = HARD_RESPAWN_TIME_HELI;
+						else
+							real_respawn_time = RESPAWN_TIME_HELI;
+					}
+
+					if (system_clock::now() > clients[i].dead_time + milliseconds(real_respawn_time)) {
 						clients[i].s_lock.lock();
-						clients[i].hp = HUMAN_MAXHP;
+						clients[i].hp = 100;
 						clients[i].pl_state = PL_ST_IDLE;
-						clients[i].pos = { SPAWN_POS_X_HUMAN, SPAWN_POS_Y_HUMAN , SPAWN_POS_Z_HUMAN };
+						if (clients[i].role == ROLE_RIFLE)
+							clients[i].pos = { SPAWN_POS_X_HUMAN, SPAWN_POS_Y_HUMAN , SPAWN_POS_Z_HUMAN };
+						else if (clients[i].role == ROLE_HELI)
+							clients[i].pos = { SPAWN_POS_X_HELI, SPAWN_POS_Y_HELI , SPAWN_POS_Z_HELI };
 						clients[i].respawn_time = system_clock::now();
 						clients[i].respawn_nodamage = true;
 						cout << "Client[" << i << "]가 부활하였습니다." << endl;
@@ -3163,42 +3174,6 @@ void timerFunc() {
 						healing_packet.type = SC_HEALING;
 						healing_packet.id = i;
 						healing_packet.value = HUMAN_MAXHP;
-						{
-							lock_guard<mutex> lg{ npc_server.s_lock };
-							npc_server.do_send(&healing_packet);
-						}
-
-						SC_RESPAWN_PACKET respawn_pack;
-						respawn_pack.size = sizeof(SC_RESPAWN_PACKET);
-						respawn_pack.type = SC_RESPAWN;
-						respawn_pack.id = i;
-						respawn_pack.x = clients[i].pos.x;
-						respawn_pack.y = clients[i].pos.y;
-						respawn_pack.z = clients[i].pos.z;
-
-						for (auto& cl : clients) {
-							if (cl.s_state != ST_INGAME) continue;
-							if (cl.curr_stage == 0) continue;
-
-							lock_guard<mutex> lg{ cl.s_lock };
-							cl.do_send(&respawn_pack);
-						}
-					}
-					else if (clients[i].role == ROLE_HELI && system_clock::now() > clients[i].dead_time + milliseconds(RESPAWN_TIME_HELI)) {
-						clients[i].s_lock.lock();
-						clients[i].hp = HELI_MAXHP;
-						clients[i].pl_state = PL_ST_IDLE;
-						clients[i].pos = { SPAWN_POS_X_HELI, SPAWN_POS_Y_HELI , SPAWN_POS_Z_HELI };
-						clients[i].respawn_time = system_clock::now();
-						clients[i].respawn_nodamage = true;
-						cout << "Client[" << i << "]가 부활하였습니다." << endl;
-						clients[i].s_lock.unlock();
-
-						SC_HEALING_PACKET healing_packet;
-						healing_packet.size = sizeof(SC_HEALING_PACKET);
-						healing_packet.type = SC_HEALING;
-						healing_packet.id = i;
-						healing_packet.value = HELI_MAXHP;
 						{
 							lock_guard<mutex> lg{ npc_server.s_lock };
 							npc_server.do_send(&healing_packet);

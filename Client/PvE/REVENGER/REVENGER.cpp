@@ -984,7 +984,7 @@ void networkThreadFunc()
 				sendPacket(&cheatkey_allkill_pack);
 				break;
 
-			case SEND_KEY_PGUP:	// 치트키: 힐링
+			case SEND_KEY_PGUP:	// 치트키: 하드모드
 				if (gGameFramework.m_nMode == OPENING_SCENE) break;
 
 				CS_INPUT_KEYBOARD_PACKET cheatkey_healing_pack;

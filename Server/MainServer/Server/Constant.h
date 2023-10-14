@@ -43,10 +43,12 @@
 #define RELOAD_TIME_HELI 2000			// 헬기 장전완료까지 걸리는 시간(ms)
 
 #define COLLIDE_PLAYER_DAMAGE 100		// 플레이어간 충돌데미지
-#define RIFLE_DAMAGE 25					// 총알 피격데미지
-#define VALKAN_DAMAGE 30				// 총알 피격데미지
-#define NPC_RIFLE_DAMAGE 8				// NPC(소총) 피격데미지
-#define NPC_VALKAN_DAMAGE 13			// NPC(헬기) 피격데미지
+#define RIFLE_DAMAGE 25					// 총알 공격데미지
+#define VALKAN_DAMAGE 30				// 총알 공격데미지
+#define NPC_RIFLE_DAMAGE 8				// NPC(소총) 공격데미지
+#define NPC_VALKAN_DAMAGE 13			// NPC(헬기) 공격데미지
+#define HARD_NPC_RIFLE_DAMAGE 12		// NPC(소총, 하드모드) 공격데미지
+#define HARD_NPC_VALKAN_DAMAGE 20		// NPC(헬기, 하드모드) 공격데미지
 
 #define BULLET_RANGE 400				// 총알 최대이동거리
 
@@ -80,7 +82,8 @@
 #define SPAWN_POS_Y_HUMAN 6.0f
 #define SPAWN_POS_Z_HUMAN 750.0f
 
-#define RESPAWN_TIME 2000			// 리스폰 시간 (ms)
+#define RESPAWN_TIME 1500			// 리스폰 시간 (ms)
+#define HARD_RESPAWN_TIME 3000		// 하드모드 리스폰 시간 (ms)
 
 #define HUMAN_VIEW_RANGE 500.0f
 
@@ -100,6 +103,7 @@
 #define AUTO_LEVELOFF_TIME 3000			// 몇 초(ms)동안 키입력이 없어야 자동 수평비행 전환이 되는가
 
 #define RESPAWN_TIME_HELI 5000			// 헬기 리스폰 시간 (ms)
+#define HARD_RESPAWN_TIME_HELI 7000		// 하드모드 헬기 리스폰 시간 (ms)
 
 //============================================================
 //					  스테이지 관련 상수
@@ -121,7 +125,8 @@
 #define STAGE1_SPAWN_AREA_SIZE_Z 120.0f
 
 #define HEALPACK_SIZE 10.f				// 힐팩 크기 (정사각형)
-#define HEALPACK_RECOVER_HP 45			// 힐팩으로 회복되는 HP수치
+#define HEALPACK_RECOVER_HP 90			// 힐팩으로 회복되는 HP수치
+#define HARD_HEALPACK_RECOVER_HP 50		// 하드모드 힐팩으로 회복되는 HP수치
 #define HEALPACK_RESPAWN_TIME 7000		// 힐팩 재생성 시간 (단위: ms)
 
 #define HEALPACK_0_CENTER_X 141.3f	// 힐팩7 위치
