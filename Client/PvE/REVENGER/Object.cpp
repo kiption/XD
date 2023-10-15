@@ -114,21 +114,21 @@ void GameObjectMgr::SetChild(GameObjectMgr* pChild, bool bReferenceUpdate)
 
 void GameObjectMgr::UpdateBoundingBox()
 {
-	/*OnPrepareRender();
-	if (m_pMesh)
-	{
-		m_pMesh->m_xmBoundingOrientedBox.Transform(m_xoobb, XMLoadFloat4x4(&m_xmf4x4World));
-		XMStoreFloat4(&m_xoobb.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xoobb.Orientation)));
-	}*/
+	OnPrepareRender();
+	//if (m_pMesh)
+	//{
+	//	m_pMesh->m_xmBoundingOrientedBox.Transform(m_xoobb, XMLoadFloat4x4(&m_xmf4x4World));
+	//	XMStoreFloat4(&m_xoobb.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xoobb.Orientation)));
+	//}
 }
 
 void GameObjectMgr::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	/*if (m_pBoundingBoxMesh)
+	if (m_pBoundingBoxMesh)
 	{
 		m_pBoundingBoxMesh->UpdateVertexPosition(&m_xoobb);
 		m_pBoundingBoxMesh->Render(pd3dCommandList);
-	}*/
+	}
 }
 
 bool GameObjectMgr::IsVisible(CCamera* pCamera)
@@ -288,7 +288,7 @@ void GameObjectMgr::AnimateObject(CCamera* pCamera, float fTimeElapsed)
 	if (m_pChild) m_pChild->Animate(fTimeElapsed);
 }
 
-void GameObjectMgr::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bPrerender, ShaderMgr* pShaderComponent)
+void GameObjectMgr::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bPrerender, ShaderMgr* pShader)
 {
 	if (m_pSkinnedAnimationController)
 		m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
@@ -296,38 +296,30 @@ void GameObjectMgr::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 	OnPrepareRender();
 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-	if (m_pMesh)
-	{
-		if (m_nMaterials > 0)
-		{
-			for (int i = 0; i < m_nMaterials; i++)
-			{
-				if (m_ppMaterials[i])
-				{
+	if (m_pMesh) {
+		if (m_nMaterials > 0) {
+			for (int i = 0; i < m_nMaterials; i++) {
+
+				if (m_ppMaterials[i]) {
+
 					if (m_ppMaterials[i]->m_pShader) {
 
 						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, false);
-						pShaderComponent->SetPipelineState(pd3dCommandList, 0);
+						pShader->SetPipelineState(pd3dCommandList, 0);
 						UpdateShaderVariables(pd3dCommandList);
 					}
-
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+					for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++) {
 
-					for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
-					{
 						if (m_ppMaterials[i]->m_ppTextures[k]) m_ppMaterials[i]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
 					}
 				}
 				m_pMesh->Render(pd3dCommandList, i);
 			}
-
 		}
-
 	}
-
-	if (m_pSibling) m_pSibling->ShadowRender(pd3dCommandList, pCamera, bPrerender, pShaderComponent);
-	if (m_pChild) m_pChild->ShadowRender(pd3dCommandList, pCamera, bPrerender, pShaderComponent);
-
+	if (m_pSibling) m_pSibling->ShadowRender(pd3dCommandList, pCamera, bPrerender, pShader);
+	if (m_pChild) m_pChild->ShadowRender(pd3dCommandList, pCamera, bPrerender, pShader);
 }
 
 void GameObjectMgr::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bPrerender)
@@ -462,11 +454,6 @@ void GameObjectMgr::SetScale(float x, float y, float z)
 
 void GameObjectMgr::CalculateBoundingBox()
 {
-	/*for (int i = 0; i < m_nMeshes; i++)
-	{
-		m_xmBoundingBox = m_pMesh->m_xmBoundingBox;
-		BoundingBox::CreateMerged(m_xmBoundingBox, m_xmBoundingBox, m_pMesh->m_xmBoundingBox);
-	}*/
 	m_xmBoundingBox.Transform(m_xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
 }
 
@@ -1324,7 +1311,7 @@ void CSoldiarNpcObjects::ReloadState(float EleapsedTime)
 	//CGameObject::Animate(EleapsedTime);
 }
 
-void CSoldiarNpcObjects::DieState(float EleapsedTime)
+void CSoldiarNpcObjects::DyingMotion(float EleapsedTime)
 {
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);
@@ -1367,10 +1354,6 @@ void CSoldiarNpcObjects::Firevalkan(XMFLOAT3 ToPlayerLook)
 {
 
 }
-
-
-
-
 
 CBilldingObject::CBilldingObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :GameObjectMgr(2)
 {
@@ -1534,7 +1517,7 @@ void CSoldiarOtherPlayerObjects::JumpState(float EleapsedTime)
 	m_pSkinnedAnimationController->SetTrackEnable(10, false);
 	GameObjectMgr::Animate(EleapsedTime);
 }
-void CSoldiarOtherPlayerObjects::DieState(float EleapsedTime)
+void CSoldiarOtherPlayerObjects::DyingMotion(float EleapsedTime)
 {
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
 	m_pSkinnedAnimationController->SetTrackEnable(1, false);

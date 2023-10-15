@@ -1419,14 +1419,22 @@ void CGameFramework::FrameAdvance()
 
 	MoveToNextFrame();
 
-	//if (m_nMode == INGAME_SCENE)
-	//{
-	//	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
-	//	size_t nLength = _tcslen(m_pszFrameRate);
-	//	XMFLOAT3 xmf3Position = (((MainGameScene*)m_pScene)->m_pPlayer)->GetPosition();
-	//	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position);
-	//	::SetWindowText(m_hWnd, m_pszFrameRate);
-	//}
+	if (m_nMode == INGAME_SCENE)
+	{
+		m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
+		size_t nLength = _tcslen(m_pszFrameRate);
+		XMFLOAT3 xmf3Position = (((MainGameScene*)m_pScene)->m_pPlayer)->GetPosition();
+		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position);
+		::SetWindowText(m_hWnd, m_pszFrameRate);
+	}
+	if (m_nMode == OPENING_SCENE)
+	{
+		m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
+		size_t nLength = _tcslen(m_pszFrameRate);
+		XMFLOAT3 xmf3Position = (((SceneMgr*)m_pScene)->m_pPlayer)->GetPosition();
+		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position);
+		::SetWindowText(m_hWnd, m_pszFrameRate);
+	}
 }
 
 void CGameFramework::DrawUIList()
@@ -3496,15 +3504,13 @@ void CGameFramework::CollisionMap_by_BULLET(XMFLOAT3 mappos)
 }
 void CGameFramework::CollisionNPC_by_PLAYER(XMFLOAT3 npcpos, XMFLOAT3 npcextents)
 {
-	m_pScene->m_pPlayer->m_xoobb = BoundingOrientedBox(XMFLOAT3(((CHumanPlayer*)((MainGameScene*)m_pScene)->m_pPlayer)->GetPosition()), XMFLOAT3(2.5, 2.0, 4.0), XMFLOAT4(0, 0, 0, 1));
-	m_npcoobb = BoundingOrientedBox(npcpos, npcextents, XMFLOAT4(0, 0, 0, 1));
+	XMFLOAT4 Quaternion = XMFLOAT4(0,0,0,1);
+	m_npcoobb = BoundingOrientedBox(npcpos, npcextents, Quaternion);							// NPC 객체의 Bound 정보 
 
-	if (m_npcoobb.Intersects(((CHumanPlayer*)((MainGameScene*)m_pScene)->m_pPlayer)->m_xoobb))
+	if (m_npcoobb.Intersects(((CHumanPlayer*)((MainGameScene*)m_pScene)->m_pPlayer)->m_xoobb))	// Player의 Bound 정보
 	{
-		// 충돌 모션
-		//cout << "CollisionCheck!" << m_npcoobb.Center.x << m_npcoobb.Center.z << endl;
+		m_bCollisionNpcbyPlayer = true;		// 서버로 전달 
 	}
-
 }
 void CGameFramework::CollisionNPC_by_MAP(XMFLOAT3 npcpos, XMFLOAT3 npcextents, XMFLOAT3 mapcenter, XMFLOAT3 mapextents)
 {
@@ -3583,7 +3589,7 @@ void CGameFramework::otherPlayerDyingMotion(int id)
 
 			((CSoldiarOtherPlayerObjects*)((MainGameScene*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType
 				= ANIMATION_TYPE_ONCE;
-			((CSoldiarOtherPlayerObjects*)((MainGameScene*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->DieState(m_GameTimer.GetTimeElapsed());
+			((CSoldiarOtherPlayerObjects*)((MainGameScene*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->DyingMotion(m_GameTimer.GetTimeElapsed());
 			((CSoldiarOtherPlayerObjects*)((MainGameScene*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 8);
 		}
 	}
@@ -3641,13 +3647,9 @@ void CGameFramework::MyPlayerDieMotion()
 {
 	if (m_ingame_role == R_RIFLE)
 	{
-		m_bFreeViewCamera = true;
 		m_bDieMotion = true;
-		((CHumanPlayer*)((MainGameScene*)m_pScene)->m_pPlayer)->m_pSkinnedAnimationController->m_pAnimationTracks->m_nType
-			= ANIMATION_TYPE_ONCE;
 		((CHumanPlayer*)((MainGameScene*)m_pScene)->m_pPlayer)->m_bDieState = true;
-		((CHumanPlayer*)((MainGameScene*)m_pScene)->m_pPlayer)->DieState();
-		m_pCamera->GenerateProjectionMatrix(0.9f, 7000.0f, ASPECT_RATIO, 70.0f);
+		((CHumanPlayer*)((MainGameScene*)m_pScene)->m_pPlayer)->DyingMotion();
 	}
 	if (m_ingame_role == R_HELI)
 	{

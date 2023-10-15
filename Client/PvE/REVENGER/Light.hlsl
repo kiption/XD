@@ -19,7 +19,7 @@ float Compute5x5ShadowFactor(float2 uv, float fDepth, uint nIndex)
 {
 	float fPercentLit = 0.0f;
 
-	return(fPercentLit / 10.0f);
+	return(fPercentLit / 25.0f);
 }
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)

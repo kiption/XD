@@ -23,7 +23,7 @@ public:
 	virtual void OnCameraUpdateCallback(float fTimeElapsed);
 
 	void Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity, XMFLOAT3 slideVec);
-	void DieState();
+	void DyingMotion();
 	void ReloadState();
 	virtual void ShotState(float EleapsedTime, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);

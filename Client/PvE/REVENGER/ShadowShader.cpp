@@ -23,15 +23,15 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		CMaterial* pMaterial = new CMaterial(4);
 		pMaterial->SetReflection(4);
 
-		GameObjectMgr* pModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1_(1).bin", NULL);
+		GameObjectMgr* pRobbiMapModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Stage1_(1).bin", NULL);
 		GameObjectMgr* pChairModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Car_B.bin", NULL);
 
 		m_ppObjects[0] = new CBilldingObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		m_ppObjects[0]->SetChild(pModel, false);
+		m_ppObjects[0]->SetChild(pRobbiMapModel, false);
 		m_ppObjects[0]->SetMaterial(0, pMaterial);
 		m_ppObjects[0]->SetPosition(-150, -20, -155);
 		m_ppObjects[0]->OnPrepareAnimate();
-		pModel->AddRef();
+		pRobbiMapModel->AddRef();
 
 		m_ppObjects[1] = new CBilldingObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		m_ppObjects[1]->SetChild(pChairModel, false);
@@ -51,7 +51,6 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[2]->SetPosition(7.7, -7.5, -12.5);
 		m_ppObjects[2]->Rotate(0.0, -20, 0.0);
 		psHumanModel->m_pModelRootObject->AddRef();
-
 		if (psHumanModel) delete psHumanModel;
 
 	}
@@ -65,33 +64,33 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		{
 			CMaterial* pOtherPlayerMaterial = new CMaterial(6);
 			pOtherPlayerMaterial->SetReflection(6);
-
-			CLoadedModelInfo* pSModel = GameObjectMgr::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
-			m_ppObjects[0] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
+			CLoadedModelInfo* pPlayerModel = GameObjectMgr::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Rifle_Soldier_(1).bin", NULL);
+			
+			m_ppObjects[0] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pPlayerModel, NULL);
 			m_ppObjects[0]->SetMaterial(0, pOtherPlayerMaterial);
 			m_ppObjects[0]->SetScale(3, 3, 3);
 			m_ppObjects[0]->SetPosition(XMFLOAT3(150.0, -60.0, 830.0));
-			pSModel->m_pModelRootObject->AddRef();
-			
-			m_ppObjects[2] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
+			pPlayerModel->m_pModelRootObject->AddRef();
+
+			m_ppObjects[1] = new CHumanPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pPlayerModel, NULL);
+			m_ppObjects[1]->SetMaterial(0, pOtherPlayerMaterial);
+			pPlayerModel->m_pModelRootObject->AddRef();
+
+			m_ppObjects[2] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pPlayerModel, NULL);
 			m_ppObjects[2]->SetMaterial(0, pOtherPlayerMaterial);
 			m_ppObjects[2]->SetScale(3, 3, 3);
 			m_ppObjects[2]->SetPosition(XMFLOAT3(150.0, -60.0, 830.0));
-			pSModel->m_pModelRootObject->AddRef();
-
-			m_ppObjects[1] = new CHumanPlayer(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
-			m_ppObjects[1]->SetMaterial(0, pOtherPlayerMaterial);
-			pSModel->m_pModelRootObject->AddRef();
+			pPlayerModel->m_pModelRootObject->AddRef();
 
 			for (int i = 4; i <=6; i++)
 			{
-				m_ppObjects[i] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pSModel, NULL);
+				m_ppObjects[i] = new CSoldiarOtherPlayerObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pPlayerModel, NULL);
 				m_ppObjects[i]->SetMaterial(0, pOtherPlayerMaterial);
 				m_ppObjects[i]->SetScale(5, 5, 5);
 				m_ppObjects[i]->SetPosition(XMFLOAT3(150.0, -60.0, 800.0));
-				pSModel->m_pModelRootObject->AddRef();
+				pPlayerModel->m_pModelRootObject->AddRef();
 			}
-			if (pSModel) delete pSModel;
+			if (pPlayerModel) delete pPlayerModel;
 
 			GameObjectMgr* pPlayerHelicopterModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Military_Helicopter.bin", NULL);
 			m_ppObjects[7] = new CHelicopterObjects(pd3dDevice, pd3dCommandList, pPlayerHelicopterModel, pd3dGraphicsRootSignature);
@@ -102,7 +101,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppObjects[7]->SetPosition(XMFLOAT3(120.0, -100.0, 700.0));
 			pPlayerHelicopterModel->AddRef();
 		}
-		/////////////////////////////////////////MY_PLAYER_LOAD & OTHER_PLAYER_LOAD////////////////////////////////////////////////
+		//MY_PLAYER_LOAD & OTHER_PLAYER_LOAD-END//
 
 		////////////////////////////////////////////////////MAP_LOAD///////////////////////////////////////////////////////////////
 		{
@@ -119,14 +118,11 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 				filename += ").bin";
 				char* c_filename = const_cast<char*>(filename.c_str());
 				GameObjectMgr* pGeneratorModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, c_filename, NULL);
-
 				m_ppCityGameObjects[i] = new CCityObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 				m_ppCityGameObjects[i]->SetChild(pGeneratorModel, false);
 				m_ppCityGameObjects[i]->SetMaterial(0, pCityMaterial);
-				m_ppCityGameObjects[i]->Rotate(0.0f, 0.0f, 0.0f);
 				m_ppCityGameObjects[i]->SetScale(1.0f, 1.0f, 1.0f);
 				m_ppCityGameObjects[i]->OnPrepareAnimate();
-				m_ppCityGameObjects[i]->SetPosition(0, 0, 0);
 				pGeneratorModel->AddRef();
 			}
 
@@ -135,9 +131,9 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppObjects[10] = m_ppCityGameObjects[2];
 			m_ppObjects[11] = m_ppCityGameObjects[3];
 		}
-		////////////////////////////////////////////////////MAP_LOAD///////////////////////////////////////////////////////////////
-
-		////////////////////////////////////////////////////HELI_LOAD//////////////////////////////////////////////////////////////
+		//MAP_LOAD-END//
+		
+		////////////////////////////////////////////////////HELI_LOAD///////////////////////////////////////////////////////////////
 		{
 			m_nHeliNpcObjects = 5;
 			m_ppNpc_Heli_Objects = new CHelicopterObjects * [m_nHeliNpcObjects];
@@ -166,7 +162,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppObjects[20] = new CValkanObject(1);
 			m_ppObjects[21] = new CValkanObject(1);
 		}
-		////////////////////////////////////////////////////HELI_LOAD//////////////////////////////////////////////////////////////
+		//HELI_LOAD-END//
 
 		////////////////////////////////////////////////SOLDIAR_NPC_LOAD///////////////////////////////////////////////////////////
 		{
@@ -175,14 +171,14 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			pSoldiarNpcMaterial->SetReflection(m_nSoldiarNpcObjects);
 			m_ppSoldiarNpcObjects = new GameObjectMgr * [m_nSoldiarNpcObjects];
 
-			CLoadedModelInfo* psModel = GameObjectMgr::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/fixed.bin", NULL);
+			CLoadedModelInfo* psNpcSoldiarModel = GameObjectMgr::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/fixed.bin", NULL);
 			for (int i = 0; i < m_nSoldiarNpcObjects; i++)
 			{
-				m_ppSoldiarNpcObjects[i] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psModel, 4);
+				m_ppSoldiarNpcObjects[i] = new CSoldiarNpcObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, psNpcSoldiarModel, 4);
 				m_ppSoldiarNpcObjects[i]->SetMaterial(0, pSoldiarNpcMaterial);
 				m_ppSoldiarNpcObjects[i]->SetScale(5.0, 5.0, 5.0);
-				if (i != 21)m_ppSoldiarNpcObjects[i]->SetPosition(210.0, 6.3, 300.0 + i * 20);
-				psModel->m_pModelRootObject->AddRef();
+				if (i != 21) m_ppSoldiarNpcObjects[i]->SetPosition(210.0, 6.3, 300.0 + i * 20);
+				psNpcSoldiarModel->m_pModelRootObject->AddRef();
 			}
 
 			m_ppObjects[22] = m_ppSoldiarNpcObjects[0];
@@ -205,10 +201,10 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppObjects[39] = m_ppSoldiarNpcObjects[18];
 			m_ppObjects[40] = m_ppSoldiarNpcObjects[19];
 			m_ppObjects[41] = m_ppSoldiarNpcObjects[20];
-			if (psModel) delete psModel;
+			m_ppObjects[42] = new GameObjectMgr(1);
+			if (psNpcSoldiarModel) delete psNpcSoldiarModel;
 		}
-		////////////////////////////////////////////////SOLDIAR_NPC_LOAD///////////////////////////////////////////////////////////
-		m_ppObjects[42] = new GameObjectMgr(1);
+		//SOLDIAR_NPC_LOAD-END//
 		////////////////////////////////////////////////HELIPLAYER_LOAD////////////////////////////////////////////////////////////
 		{
 			CMaterial* pHeliMaterial = new CMaterial(1);
@@ -219,22 +215,22 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 			m_ppObjects[43]->OnPrepareAnimate();
 			pHelicopterModel->AddRef();
 		}
-		////////////////////////////////////////////////HELIPLAYER_LOAD////////////////////////////////////////////////////////////
+		//HELIPLAYER_LOAD-END//
 	
 		////////////////////////////////////////////////TREE_LOAD//////////////////////////////////////////////////////////////////
-		{	CMaterial* pTreeMaterial = new CMaterial(1);
-		pTreeMaterial->SetReflection(1);
-			GameObjectMgr* pTreeModels = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/ALL_Tree.bin", NULL);
+		{	
+			CMaterial* pTreeMaterial = new CMaterial(1);
+			pTreeMaterial->SetReflection(1);
+			GameObjectMgr* pTreesModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/ALL_Tree.bin", NULL);
 			m_ppObjects[44] = new CCityObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-			m_ppObjects[44]->SetChild(pTreeModels, false);
+			m_ppObjects[44]->SetChild(pTreesModel, false);
 			m_ppObjects[44]->SetMaterial(0, pTreeMaterial);
 			m_ppObjects[44]->OnPrepareAnimate();
 			m_ppObjects[44]->SetScale(1.0, 1.0, 1.0);
 			m_ppObjects[44]->SetPosition(0, 0, 0);
-			pTreeModels->AddRef();
+			pTreesModel->AddRef();
 		}
-		////////////////////////////////////////////////TREE_LOAD/////////////////////////////////////////////////////////////////
-	
+		///TREE_LOAD-END//
 	}
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -260,53 +256,7 @@ void CObjectsShader::ReleaseObjects()
 
 void CObjectsShader::ReleaseUploadBuffers()
 {
-
-	if (m_ppObjects)
-	{
-		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
-	}
-}
-
-
-
-D3D12_INPUT_LAYOUT_DESC CObjectsShader::CreateInputLayout(int nPipelineState)
-{
-	UINT nInputElementDescs = 7;
-	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
-	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[3] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 3, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[4] = { "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 4, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[5] = { "BONEINDEX", 0, DXGI_FORMAT_R32G32B32A32_SINT, 5, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[6] = { "BONEWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 6, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
-	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
-	d3dInputLayoutDesc.NumElements = nInputElementDescs;
-
-	return(d3dInputLayoutDesc);
-}
-
-
-D3D12_SHADER_BYTECODE CObjectsShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
-{
-	return (ShaderMgr::CompileShaderFromFile(L"Shadow.hlsl", "VSLighting", "vs_5_1", ppd3dShaderBlob));
-}
-
-BoundingBox CObjectsShader::CalculateBoundingBox()
-{
-
-	BoundingBox xmBoundingBox;
-	/*for (int i = 0; i < m_nObjects; i++)
-	{
-		for (int j = 0; j < m_ppObjects[i]->m_nMeshes; j++)
-		{
-			m_ppObjects[i]->CalculateBoundingBox();
-			xmBoundingBox = m_ppObjects[i]->m_pMesh->m_xmBoundingBox;
-			BoundingBox::CreateMerged(xmBoundingBox, xmBoundingBox, m_ppObjects[i]->m_pMesh->m_xmBoundingBox);
-		}
-	}*/
-	return(xmBoundingBox);
+	if (m_ppObjects) for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
 }
 
 void CObjectsShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
@@ -314,22 +264,8 @@ void CObjectsShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D1
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, nPipelineState);
-
-
 }
 
-void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
-{
-
-}
-
-void CObjectsShader::RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-{
-	/*for (int j = 0; j < m_nObjects; j++)
-	{
-		if (m_ppObjects[j]) m_ppObjects[j]->RenderBoundingBox(pd3dCommandList, pCamera);
-	}*/
-}
 
 CShadowMapShader::CShadowMapShader(CObjectsShader* pObjectsShader)
 {
@@ -416,14 +352,12 @@ void CShadowMapShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Gra
 
 void CShadowMapShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-
 	if (m_pDepthTexture) m_pDepthTexture->UpdateShaderVariables(pd3dCommandList);
-
-
 }
 
 void CShadowMapShader::ReleaseShaderVariables()
 {
+	ShaderMgr::ReleaseShaderVariables();
 }
 
 void CShadowMapShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
@@ -438,7 +372,6 @@ void CShadowMapShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 void CShadowMapShader::ReleaseObjects()
 {
-
 	if (m_pDepthTexture) m_pDepthTexture->Release();
 	ShaderMgr::ReleaseObjects();
 }
@@ -446,6 +379,7 @@ void CShadowMapShader::ReleaseObjects()
 void CShadowMapShader::ReleaseUploadBuffers()
 {
 }
+
 D3D12_BLEND_DESC CShadowMapShader::CreateBlendState(int nPipelineState)
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
@@ -462,15 +396,12 @@ D3D12_BLEND_DESC CShadowMapShader::CreateBlendState(int nPipelineState)
 	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_SUBTRACT;
 	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
 	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
-
-
 	return(d3dBlendDesc);
 }
 
 void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
 	ShaderMgr::Render(pd3dCommandList, pCamera, nPipelineState, false);
-
 	UpdateShaderVariables(pd3dCommandList);
 	if (m_nCurScene == OPENING_SCENE)
 	{
@@ -481,7 +412,6 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 			m_pObjectsShader->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera, true, this);
 		}
 	}
-
 	if (m_nCurScene == INGAME_SCENE)
 	{
 		for (int i = 0; i < m_pObjectsShader->m_nObjects - 1; i++)
@@ -492,7 +422,6 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 				m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
 				m_pObjectsShader->m_ppObjects[i]->ShadowRender(pd3dCommandList, pCamera, true, this);
 			}
-
 		}
 		if (((CHumanPlayer*)m_pObjectsShader->m_ppObjects[1])->m_bZoomMode == false)
 		{
@@ -593,9 +522,7 @@ D3D12_INPUT_LAYOUT_DESC CDepthRenderShader::CreateInputLayout(int nPipelineState
 
 D3D12_SHADER_BYTECODE CDepthRenderShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	if (nPipelineState == 0)
-		return (ShaderMgr::CompileShaderFromFile(L"Shadow.hlsl", "VSLighting", "vs_5_1", ppd3dShaderBlob));
-
+	if (nPipelineState == 0) return (ShaderMgr::CompileShaderFromFile(L"Shadow.hlsl", "VSLighting", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CDepthRenderShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
@@ -610,14 +537,12 @@ void CDepthRenderShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12G
 	ncbDepthElementBytes = ((sizeof(TOLIGHTSPACES) + 255) & ~255); //256ÀÇ ¹è¼ö
 	m_pd3dcbToLightSpaces = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbDepthElementBytes,
 		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-
 	m_pd3dcbToLightSpaces->Map(0, NULL, (void**)&m_pcbMappedToLightSpaces);
 }
 
 void CDepthRenderShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	::memcpy(m_pcbMappedToLightSpaces, m_pToLightSpaces, sizeof(TOLIGHTSPACES));
-
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbToLightGpuVirtualAddress = m_pd3dcbToLightSpaces->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(23, d3dcbToLightGpuVirtualAddress); //ToLight
 }
@@ -736,7 +661,6 @@ void CDepthRenderShader::ReleaseObjects()
 
 void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-
 	for (int j = 0; j < MAX_LIGHTS; j++)
 	{
 
@@ -755,14 +679,15 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 			{
 				float fWidth = 2000, fHeight = 2000;
 				xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
+
 			}
 			else if (m_pLights[j].m_nType == SPOT_LIGHT)
 			{
 				float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
 				/*float fFovAngle = 60.0f; */m_pLights[j].m_fPhi = cos(60.0f);
 				float fAspectRatio = float(_DEPTH_BUFFER_WIDTH) / float(_DEPTH_BUFFER_HEIGHT);
-				xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(m_pLights[j].m_fPhi), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
-				//xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
+				//xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(m_pLights[j].m_fPhi), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
+				xmmtxProjection = XMMatrixOrthographicLH(fWidth, fHeight, fNearPlaneDistance, fFarPlaneDistance);
 			}
 			else if (m_pLights[j].m_nType == POINT_LIGHT)
 			{

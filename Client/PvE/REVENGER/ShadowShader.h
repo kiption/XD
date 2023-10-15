@@ -15,38 +15,23 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 	BoundingBox CalculateBoundingBox();
 	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
 		int nPipelineState);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
-
-	CSkinnedAnimationStandardShader* pSkinnongStandardShader=NULL;
 public:
-	CHeightMapTerrain* m_pTerrain = NULL;
-	int	m_nHierarchicalGameObjects = 0;
-	GameObjectMgr** m_ppHierarchicalGameObjects = NULL;
-	GameObjectMgr** m_ppCityGameObjects = NULL;
 
 	int	m_nHeliNpcObjects = 0;
 	int	m_nSoldiarNpcObjects = 0;
-	GameObjectMgr** m_ppSoldiarNpcObjects = 0;
-
+	int	m_nHierarchicalGameObjects = 0;
 	int	m_nInsideHumanObjects = 0;
+
+	GameObjectMgr** m_ppSoldiarNpcObjects = NULL;
+	GameObjectMgr** m_ppCityGameObjects = NULL;
+	GameObjectMgr** m_ppHierarchicalGameObjects = NULL;
 	GameObjectMgr** m_pInsideHumanbjects = 0;
-
+	CHeightMapTerrain* m_pTerrain = NULL;
 	CHelicopterObjects** m_ppNpc_Heli_Objects = NULL;
-	int									m_nFragShaders = 0;
 
-	CFragmentsShader** m_ppFragShaders = NULL;
-	
-	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-
-	////////////////////////////////////////////
-
-	ID3D12Resource* m_pd3dcbGameObjects = NULL;
-	CB_GAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
 #ifdef _WITH_BATCH_MATERIAL
 	CMaterial** m_ppMaterials = NULL;
 #endif

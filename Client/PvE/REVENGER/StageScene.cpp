@@ -74,17 +74,17 @@ void MainGameScene::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6, 0.6, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-400, 500.0f, 1000.0f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-500, 800.0f, 1200.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.3f, -1.0f, -1.0f);
 
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 55000.0;
+	m_pLights->m_pLights[1].m_fRange = 52000.0;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
 	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7, 0.7, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-800, 800.0f, 1150.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.6f, -1.0f, -0.8f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(0, 1200.0f, 1250.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, -1.0f);
 
 	m_pLights->m_pLights[2].m_bEnable = false;
 	m_pLights->m_pLights[2].m_nType = SPOT_LIGHT;
@@ -309,6 +309,9 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pBCBulletEffectShader->SetCurScene(INGAME_SCENE);
 
+	m_pBoundingBoxShader = new BoundingWireShader(pObjectShader);
+	m_pBoundingBoxShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
+
 	GameObjectMgr* pBulletMesh = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
 	for (int i = 0; i < HELIBULLETS; i++)
 	{
@@ -397,7 +400,7 @@ void MainGameScene::ReleaseObjects()
 		m_pDepthRenderShader->Release();
 
 	}
-
+	if (m_pBoundingBoxShader) m_pBoundingBoxShader->Release();
 	if (m_pShadowShader)delete m_pShadowShader;
 	if (m_pTreeBlendShadowShader)delete m_pTreeBlendShadowShader;
 	if (m_pTerrain) delete m_pTerrain;
@@ -1183,7 +1186,7 @@ void MainGameScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 {
 
 	UpdateShaderVariables(pd3dCommandList);
-
+	
 	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
@@ -1194,7 +1197,9 @@ void MainGameScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 	for (int i = 0; i < HELIBULLETS; i++)if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
 	for (int i = 0; i < CARTRIDGES; i++) if (m_ppCartridge[i]->m_bActive) { m_ppCartridge[i]->Render(pd3dCommandList, pCamera); }
 	for (int i = 0; i < HELICOPTERVALKANS; i++)if (m_ppValkan[i]->m_bActive) { m_ppValkan[i]->Render(pd3dCommandList, pCamera); }
+	//m_pBoundingBoxShader->Render(pd3dCommandList, pCamera, 0);
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
+
 	if (m_pTreeBlendShadowShader) m_pTreeBlendShadowShader->Render(pd3dCommandList, pCamera, 0);
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
@@ -1349,22 +1354,27 @@ void MainGameScene::SetPositionPilotHuman()
 
 void MainGameScene::NpcByPlayerCollsiion()
 {
-	for (int i = 21; i < 42; i++)
-	{
-		XMFLOAT3 NpcPos = XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[i])->m_xmf4x4ToParent._41,
-			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[i])->m_xmf4x4ToParent._42,
-			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[i])->m_xmf4x4ToParent._43);
-		XMFLOAT3 MyPos = XMFLOAT3(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition());
+	for (int i = 21; i < 42; i++) {
+		XMFLOAT3 NpcPos = ((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[i])->GetToParentPosition();
+		XMFLOAT3 PlayerPos = ((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition();
+		XMFLOAT3 BBsize = XMFLOAT3(3.0, 5.0, 3.0);
+		XMFLOAT4 Oriented = XMFLOAT4(0,0,0,1);
+		BoundingOrientedBox Npcoobb = BoundingOrientedBox(NpcPos, BBsize, Oriented);
+		BoundingOrientedBox PlayerPoobb = BoundingOrientedBox(PlayerPos, BBsize, Oriented);
 
-		BoundingOrientedBox Npcoobb = BoundingOrientedBox(XMFLOAT3(NpcPos), XMFLOAT3(3.0, 5.0, 3.0), XMFLOAT4(0, 0, 0, 1));
-		BoundingOrientedBox MyPoobb = BoundingOrientedBox(XMFLOAT3(MyPos), XMFLOAT3(3.0, 5.0, 3.0), XMFLOAT4(0, 0, 0, 1));
-		if (MyPoobb.Intersects(Npcoobb)) {
-			(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->SetPosition(XMFLOAT3(
-				((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_xmf4x4ToParent._41 - 2.0f,
-				((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().y,
-				((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().z)));
+		if (PlayerPoobb.Intersects(Npcoobb)) {
+			PlayersMoveReflect(); // 서버로 충돌 여부를 전송
 		}
 	}
+}
 
 
+
+void MainGameScene::PlayersMoveReflect()
+{
+	(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->SetPosition(XMFLOAT3(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_xmf4x4ToParent._41 - 2.0f,
+		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().y,
+		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().z)));
+
+	m_bSendCollsion = true;
 }

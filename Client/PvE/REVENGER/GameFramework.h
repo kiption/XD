@@ -465,6 +465,8 @@ public:
 	void CollisionNPC_by_BULLET(XMFLOAT3 npcpos, XMFLOAT3 npcextents);
 	void CollisionEndWorldObject(XMFLOAT3 pos, XMFLOAT3 extents);
 
+	BOOL m_bCollisionNpcbyPlayer = false;
+
 	//=================================================
 	// 충돌 모션과 이펙트 처리 함수입니다.
 	BoundingOrientedBox m_mapxmoobb;

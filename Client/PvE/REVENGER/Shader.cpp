@@ -151,7 +151,6 @@ D3D12_STREAM_OUTPUT_DESC ShaderMgr::CreateStreamOuputState(int nPipelineState)
 void ShaderMgr::SetPipelineState(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState)
 {
 	if (m_ppd3dPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
-
 }
 D3D12_SHADER_BYTECODE ShaderMgr::CompileShaderFromFile(WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob)
 {

@@ -50,6 +50,7 @@ public:
 	BoundingBox					m_xmBoundingBox;
 	BoundingBox GetBoundingBox() { return(m_xmBoundingBox); }
 
+
 protected:
 	UINT							m_nType = 0x00;
 

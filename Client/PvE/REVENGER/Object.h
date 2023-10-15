@@ -321,7 +321,7 @@ public:
 	void MoveForward(float EleapsedTime);
 	void HittingState(float EleapsedTime);
 	void ReloadState(float EleapsedTime);
-	void DieState(float EleapsedTime);
+	void DyingMotion(float EleapsedTime);
 	void ShotState(float EleapsedTime);
 	void IdleState(float EleapsedTime);
 	virtual void Animate(float fTimeElapsed);
@@ -364,7 +364,7 @@ public:
 	void MoveRight(float EleapsedTime);
 	void ReloadState(float EleapsedTime);
 	void JumpState(float EleapsedTime);
-	void DieState(float EleapsedTime);
+	void DyingMotion(float EleapsedTime);
 	void ShotState(float EleapsedTime);
 	void IdleState(float EleapsedTime);
 	virtual void Animate(float fTimeElapsed);

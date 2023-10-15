@@ -42,6 +42,8 @@ public:
 	void PlayerByPlayerCollision();
 	void SetPositionPilotHuman();
 	void NpcByPlayerCollsiion();
+	void PlayersMoveReflect();
+	bool m_bSendCollsion = false;
 public:
 	static void CreateDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstantBufferViews, int nShaderResourceViews);
 	static void CreateSRVs(ID3D12Device* pd3dDevice, Texture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex);

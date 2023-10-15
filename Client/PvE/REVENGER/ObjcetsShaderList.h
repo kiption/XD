@@ -65,13 +65,13 @@ public:
 	XMFLOAT3 ParticlePosition{};
 	bool m_bActive = false;
 
-	XMFLOAT4X4					m_pxmf4x4Transforms[BLOODEXPLOSION_DEBRISES];
+	XMFLOAT4X4					m_pxmf4x4Transforms[HELICOPTEREXPLOSION_PARTICLES];
 
 	float						m_fElapsedTimes = 0.0f;
 	float						m_fDuration = 1.0f;
 	float						m_fExplosionSpeed = 3.0f;
 	float						m_fExplosionRotation = 720.0f;
-	XMFLOAT3 m_pxmf3SphereVectors[BLOODEXPLOSION_DEBRISES];
+	XMFLOAT3 m_pxmf3SphereVectors[HELICOPTEREXPLOSION_PARTICLES];
 };
 
 class CHumanBulletMarkParticleShader : public CFragmentsShader
@@ -92,11 +92,11 @@ public:
 	XMFLOAT3 ParticlePosition{};
 	bool m_bActive = false;
 
-	XMFLOAT4X4					m_pxmf4x4Transforms[BLOODEXPLOSION_DEBRISES];
+	XMFLOAT4X4					m_pxmf4x4Transforms[HELICOPTEREXPLOSION_PARTICLES];
 
 	float						m_fElapsedTimes = 0.0f;
 	float						m_fDuration = 1.6f;
 	float						m_fExplosionSpeed = 3.0f;
 	float						m_fExplosionRotation = 720.0f;
-	XMFLOAT3 m_pxmf3SphereVectors[BLOODEXPLOSION_DEBRISES];
+	XMFLOAT3 m_pxmf3SphereVectors[HELICOPTEREXPLOSION_PARTICLES];
 };

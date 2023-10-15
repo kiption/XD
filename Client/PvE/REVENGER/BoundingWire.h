@@ -1,9 +1,10 @@
 #pragma once
 #include "Shader.h"
+#include "ShadowShader.h"
 class BoundingWireShader : public ShaderMgr
 {
 public:
-	BoundingWireShader();
+	BoundingWireShader(CObjectsShader* pObjectsShader);
 	virtual ~BoundingWireShader();
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelinestates);
@@ -12,8 +13,12 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob);
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
 
-	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature,
-		int nPipelineState);
+	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+		ID3D12RootSignature* pd3dGraphicsRootSignature,int nPipelineState);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera,int nPipelinestates);
+	CObjectsShader* m_pObjectsShader = NULL;
+protected:
+	ID3D12Resource* m_pd3dcbGameObjects = NULL;
+	CB_GAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
 };
 

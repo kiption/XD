@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "BoundingWire.h"
 
-BoundingWireShader::BoundingWireShader()
+BoundingWireShader::BoundingWireShader(CObjectsShader* pObjectsShader)
 {
-	
+	pObjectsShader = m_pObjectsShader;
 }
 
 BoundingWireShader::~BoundingWireShader()
@@ -87,4 +87,5 @@ void BoundingWireShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, I
 void BoundingWireShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelinestates)
 {
 	ShaderMgr::Render(pd3dCommandList, pCamera, 0,false);
+	
 }

@@ -187,10 +187,12 @@ void CHumanPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 	}
 }
 
-void CHumanPlayer::DieState()
+void CHumanPlayer::DyingMotion()
 {
 	if (m_bDieState == true)
 	{
+		m_pSkinnedAnimationController->m_pAnimationTracks->m_nType
+			= ANIMATION_TYPE_ONCE;
 		m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		m_pSkinnedAnimationController->SetTrackEnable(1, false);
 		m_pSkinnedAnimationController->SetTrackEnable(2, false);

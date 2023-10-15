@@ -76,12 +76,13 @@ void SceneMgr::BuildDefaultLightsAndMaterials()
 
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[0].m_fRange = 10000.0f;
+	m_pLights->m_pLights[0].m_fRange = 20000.0f;
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6, 0.6, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-100, 450.0f, 450.0f);
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(00.5f, -1.0f, -1.0f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-100, 800.0f, 450.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.4f, -1.0f, -1.0f);
+
 
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
