@@ -136,7 +136,7 @@ public:
 	CShadowMapShader* m_pShadowShader = NULL;
 
 	CDepthRenderShader* m_pDepthRenderShader = NULL;
-	CTreeBlendingShadowShader* m_pTreeBlendShadowShader = NULL;
+	TreeBlendingShader* m_pTreeBlendShadowShader = NULL;
 
 	int count = 0;
 	BoundingBox						m_xmBoundingBox;
@@ -152,13 +152,13 @@ public:
 	XMFLOAT3							m_xmf3RotatePosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	int									m_nShaders = 0;
-	CObjectsShader** m_ppShaders = NULL;
+	ObjectStore** m_ppShaders = NULL;
 
 	int									m_nHumanShaders = 0;
 	ShaderMgr** m_ppHumanShaders = NULL;
 
 	int									m_nShadowShaders = 0;
-	CObjectsShader** m_ppShadowShaders = NULL;
+	ObjectStore** m_ppShadowShaders = NULL;
 
 
 	ShaderMgr* m_pShader = NULL;

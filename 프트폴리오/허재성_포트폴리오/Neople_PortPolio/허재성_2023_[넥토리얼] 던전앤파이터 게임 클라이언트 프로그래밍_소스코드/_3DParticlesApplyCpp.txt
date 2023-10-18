@@ -1,0 +1,271 @@
+#include "stdafx.h"
+
+[·£´ý °ª]
+float Random(float fMin, float fMax)
+{
+	float fRandomValue = (float)rand();
+	if (fRandomValue < fMin) fRandomValue = fMin;
+	if (fRandomValue > fMax) fRandomValue = fMax;
+	return(fRandomValue);
+}
+inline float RandF(float fMin, float fMax)
+{
+	return(fMin + ((float)rand() / (float)RAND_MAX) * (fMax - fMin));
+}
+
+float Random()
+{
+	return(rand() / float(RAND_MAX));
+}
+XMVECTOR RandomUnitVectorOnSphere()
+{
+	XMVECTOR xmvOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
+	XMVECTOR xmvZero = XMVectorZero();
+
+	while (true)
+	{
+		XMVECTOR v = XMVectorSet(RandF(-1.0f, 1.0f), RandF(-1.0f, 1.0f), RandF(-1.0f, 1.0f), 0.0f);
+		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
+	}
+}
+XMVECTOR RandomMarkDir()
+{
+	XMVECTOR xmvOne = XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f);
+	XMVECTOR xmvZero = XMVectorZero();
+
+	while (true)
+	{
+		XMVECTOR v = XMVectorSet(RandF(-0.2f, 0.2f), RandF(-1.f, 1.5f), RandF(-0.2f, 0.2f), 0.0f);
+		if (!XMVector3Greater(XMVector3LengthSq(v), xmvOne)) return(XMVector3Normalize(v));
+	}
+}
+XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn, int nColumnSpace)
+{
+	float fAngle = Random() * 360.0f * (2.0f * 3.14159f / 360.0f);
+
+	XMFLOAT3 xmf3Position;
+	xmf3Position.x = xmf3Center.x + fRadius * sin(fAngle);
+	xmf3Position.y = xmf3Center.y - (nColumn * float(nColumnSpace) / 2.0f) + (nColumn * nColumnSpace) + Random();
+	xmf3Position.z = xmf3Center.z + fRadius * cos(fAngle);
+
+	return(xmf3Position);
+}
+
+[#1.Çï¸®ÄßÅÍ º¸Á¶ ÆÄÆí »ý¼º]
+void CFragmentsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	m_nObjects = EXPLOSION_DEBRISES;
+	m_ppObjects = new GameObjectMgr * [m_nObjects];
+	GameObjectMgr* pFragmentModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Wing2_1_Variant.bin", this);
+	for (int i = 0; i < m_nObjects; i++) {
+		m_ppObjects[i] = new CExplosiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppObjects[i]->SetChild(pFragmentModel, false);
+		m_ppObjects[i]->SetScale(0.5, 1.5, 0.5);
+		pFragmentModel->AddRef();
+	}
+	for (int i = 0; i < EXPLOSION_DEBRISES; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomUnitVectorOnSphere());
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+
+void CFragmentsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+{
+	if (m_bActive == true) {
+		ShaderMgr::Render(pd3dCommandList, pCamera, 0, false);
+
+		for (int j = 0; j < m_nObjects; j++) {
+			if (m_ppObjects[j]) {
+				m_ppObjects[j]->UpdateTransform(NULL);
+				m_ppObjects[j]->Render(pd3dCommandList, pCamera, false);
+			}
+		}
+	}
+
+}
+
+[#1.ÆÄÆí ÀÌµ¿ ·ÎÁ÷]
+void CFragmentsShader::AnimateObjects(float fTimeElapsed)
+{
+	if (m_bActive == true) {
+
+		XMFLOAT3 gravity = XMFLOAT3(0.0, -3.8, 0);
+		m_fElapsedTimes += fTimeElapsed * 6.05f;
+		if (m_fElapsedTimes <= m_fDuration) {
+			for (int i = 0; i < EXPLOSION_DEBRISES; i++) {
+				m_fExplosionSpeed = Random(1.0f, 15.0f);
+				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
+				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes + gravity.x;
+				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;;
+				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes + gravity.z;
+				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
+
+				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
+				m_ppObjects[i]->m_xmf4x4ToParent._42 = m_pxmf4x4Transforms[i]._42;
+				m_ppObjects[i]->m_xmf4x4ToParent._43 = m_pxmf4x4Transforms[i]._43;
+				m_ppObjects[i]->Rotate(2.0, 8.0, 0.0);
+			}
+		}
+		else {
+			m_bActive = false;
+			m_fElapsedTimes = 0.0f;
+		}
+
+	}
+}
+
+
+
+[#2.Çï¸®ÄßÅÍ ÅºÈç ÆÄÆí »ý¼º]
+void CHelicopterBulletMarkParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	m_nObjects = HELICOPTEREXPLOSION_PARTICLES;
+	m_ppObjects = new GameObjectMgr * [m_nObjects];
+	GameObjectMgr* pParticleFragModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Blood_particle.bin", this);
+	for (int i = 0; i < m_nObjects; i++) {
+		m_ppObjects[i] = new CExplosiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppObjects[i]->SetChild(pParticleFragModel, false);
+		m_ppObjects[i]->SetScale(0.5, 0.5, 0.5);
+		pParticleFragModel->AddRef();
+	}
+	for (int i = 0; i < HELICOPTEREXPLOSION_PARTICLES; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomUnitVectorOnSphere());
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+[#2.ÆÄÆí ÀÌµ¿ ·ÎÁ÷]
+void CHelicopterBulletMarkParticleShader::AnimateObjects(float fTimeElapsed)
+{
+	if (m_bActive == true) {
+
+		XMFLOAT3 gravity = XMFLOAT3(0.0, -9.8, 0);
+		m_fElapsedTimes += fTimeElapsed * 5.5f;
+		if (m_fElapsedTimes <= m_fDuration) {
+			for (int i = 0; i < HELICOPTEREXPLOSION_PARTICLES; i++) {
+				m_fExplosionSpeed = Random(5.0f, 10.0f);
+				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
+				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes;// + gravity.x;
+				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes; +0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;;
+				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes;// + gravity.z;
+				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
+
+				m_ppObjects[i]->m_xmf4x4ToParent._41 = m_pxmf4x4Transforms[i]._41;
+				m_ppObjects[i]->m_xmf4x4ToParent._42 = m_pxmf4x4Transforms[i]._42;
+				m_ppObjects[i]->m_xmf4x4ToParent._43 = m_pxmf4x4Transforms[i]._43;
+				m_ppObjects[i]->Rotate(10, 10, 10);
+			}
+		}
+		else {
+			m_bActive = false;
+			m_fElapsedTimes = 0.0f;
+		}
+
+	}
+}
+void CHelicopterBulletMarkParticleShader::ReleaseUploadBuffers()
+{
+	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
+}
+
+
+[#3.±ºÀÎ ÅºÈç ÆÄÆí »ý¼º]
+void CHumanBulletMarkParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	m_nObjects = HELICOPTEREXPLOSION_PARTICLES;
+	m_ppObjects = new GameObjectMgr * [m_nObjects];
+	GameObjectMgr* pFragmentModel = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Sphere.bin", this);
+	for (int i = 0; i < m_nObjects; i++) {
+		m_ppObjects[i] = new CExplosiveObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		m_ppObjects[i]->SetChild(pFragmentModel, false);
+		m_ppObjects[i]->SetScale(6.1, 6.1, 6.1);
+		pFragmentModel->AddRef();
+	}
+	for (int i = 0; i < HELICOPTEREXPLOSION_PARTICLES; i++) XMStoreFloat3(&m_pxmf3SphereVectors[i], RandomUnitVectorOnSphere());
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CHumanBulletMarkParticleShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+{
+	if (m_bActive == true) {
+
+		ShaderMgr::Render(pd3dCommandList, pCamera, 0, false);
+
+		for (int j = 0; j < m_nObjects; j++) {
+			if (m_ppObjects[j]) {
+				m_ppObjects[j]->UpdateTransform(NULL);
+				m_ppObjects[j]->Render(pd3dCommandList, pCamera, false);
+			}
+		}
+	}
+}
+[#3.ÆÄÆí ÀÌµ¿ ·ÎÁ÷]
+void CHumanBulletMarkParticleShader::AnimateObjects(float fTimeElapsed)
+{
+	if (m_bActive == true) {
+
+		XMFLOAT3 gravity = XMFLOAT3(0.0, -9.8, 0);
+		m_fElapsedTimes += fTimeElapsed * 5.5f;
+		if (m_fElapsedTimes <= m_fDuration) {
+			for (int i = 0; i < BULLETTEREXPLOSION_PARTICLES; i++) {
+				m_fExplosionSpeed = Random(5.0f, 6.0f);
+				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();
+				m_pxmf4x4Transforms[i]._41 = ParticlePosition.x + m_pxmf3SphereVectors[i].x * m_fExplosionSpeed * m_fElapsedTimes;// + gravity.x;
+				m_pxmf4x4Transforms[i]._42 = ParticlePosition.y + m_pxmf3SphereVectors[i].y * m_fExplosionSpeed * m_fElapsedTimes + 0.5f * gravity.y * m_fElapsedTimes * m_fElapsedTimes;;
+				m_pxmf4x4Transforms[i]._43 = ParticlePosition.z + m_pxmf3SphereVectors[i].z * m_fExplosionSpeed * m_fElapsedTimes;// + gravity.z;
+				m_pxmf4x4Transforms[i] = Matrix4x4::Multiply(Matrix4x4::RotationAxis(m_pxmf3SphereVectors[i], m_fExplosionRotation * m_fElapsedTimes), m_pxmf4x4Transforms[i]);
+
+				m_ppObjects[i]->SetPosition(m_pxmf4x4Transforms[i]._41, m_pxmf4x4Transforms[i]._42, m_pxmf4x4Transforms[i]._43);
+				m_ppObjects[i]->Rotate(10.0,10.0,10.0);
+			}
+		}
+		else {
+			m_bActive = false;
+			m_fElapsedTimes = 0.0f;
+		}
+	}
+}
+
+[#4.ÅºÇÇ Æ¢´Â ·ÎÁ÷]
+void CtridgeObject::Animate(float fElapsedTime)
+{
+	m_fElapsedTimeAfterFire += fElapsedTime;
+
+	float fDistance = m_fMovingSpeed * fElapsedTime;
+	XMFLOAT4X4 mtxRotate = Matrix4x4::RotationYawPitchRoll(0.0f, m_fRotationSpeed * fElapsedTime, 0.0f);
+	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxRotate, m_xmf4x4World);
+	XMFLOAT3 xmf3Movement = Vector3::ScalarProduct(m_xmf3MovingDirection, fDistance, false);
+	XMFLOAT3 xmf3Position = GetPosition();
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Movement);
+	SetPosition(xmf3Position);
+	m_fMovingDistance += fDistance;
+	GameObjectMgr::Animate(fElapsedTime);
+	
+	if ((m_fMovingDistance > m_fBulletEffectiveRange) || (m_fElapsedTimeAfterFire > m_fLockingTime)) {
+		Reset(); 
+	}
+}
+
+#define CARTRIDGES				10
+
+Reflectcartridgecase(GameObjectMgr* Objects)
+{
+	CatridgeObject* pBulletObject = NULL;
+	for (int i = 0; i < CARTRIDGES; i++) {
+		if (!m_ppCartridge[i]->m_bActive) {
+			pBulletObject = m_ppCartridge[i];
+			pBulletObject->Reset();
+			break;
+		}
+	}
+	if (pBulletObject)
+	{
+		XMFLOAT3 PlayerLook = ((CHumanPlayer*)m_pPlayer)->m_pBulletFindFrame->GetRight();
+		XMFLOAT3 xmf3Position = ((CHumanPlayer*)m_pPlayer)->m_pBulletFindFrame->GetPosition();
+		XMFLOAT3 xmf3Direction = RandomDirection(1, 5);
+		pBulletObject->m_xmf4x4ToParent = m_pPlayer->m_xmf4x4World;
+		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
+		xmf3FirePosition.y += 0.7f;
+		pBulletObject->SetCatridgePosition(XMFLOAT3(xmf3FirePosition));
+		pBulletObject->SetMovingDirection(xmf3Direction);
+		pBulletObject->SetScale(0.05, 0.05, 0.05);
+		pBulletObject->SetActive(true);
+	}
+}

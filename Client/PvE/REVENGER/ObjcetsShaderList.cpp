@@ -492,7 +492,7 @@ void CHumanBulletMarkParticleShader::AnimateObjects(float fTimeElapsed)
 		m_fElapsedTimes += fTimeElapsed * 5.5f;
 		if (m_fElapsedTimes <= m_fDuration)
 		{
-			for (int i = 0; i < HELICOPTEREXPLOSION_PARTICLES; i++)
+			for (int i = 0; i < BULLETTEREXPLOSION_PARTICLES; i++)
 			{
 				m_fExplosionSpeed = Random(5.0f, 6.0f);
 				m_pxmf4x4Transforms[i] = Matrix4x4::Identity();

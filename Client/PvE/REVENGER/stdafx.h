@@ -189,7 +189,9 @@ extern float ReadFloatFromFile(FILE *pInFile);
 #define EXPLOSION_DEBRISES		70
 #define EXPLOSION_HELICOPTER		12
 #define HELICOPTEREXPLOSION_PARTICLES		50
-
+#define BULLETTEREXPLOSION_PARTICLES		50
+#define ANIMATIONTRACTS_HUMANPLAYER			11
+#define ANIMATIONTRACTS_NPCPLAYER			5
 inline bool IsZero(float fValue) { return((fabsf(fValue) < EPSILON)); }
 inline bool IsEqual(float fA, float fB) { return(::IsZero(fA - fB)); }
 inline bool IsZero(float fValue, float fEpsilon) { return((fabsf(fValue) < fEpsilon)); }

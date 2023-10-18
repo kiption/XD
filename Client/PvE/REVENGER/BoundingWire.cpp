@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "BoundingWire.h"
 
-BoundingWireShader::BoundingWireShader(CObjectsShader* pObjectsShader)
+BoundingWireShader::BoundingWireShader(ObjectStore* pObjectsShader)
 {
 	pObjectsShader = m_pObjectsShader;
 }

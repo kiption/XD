@@ -90,7 +90,7 @@ public:
 	LIGHTS* m_pcbMappedLights = NULL;
 
 	void Firevalkan(GameObjectMgr* Objects, XMFLOAT3 ToPlayerLook);
-	void ParticleCollisionResult();
+	void HeliParticlesByPlayerCollisionResult();
 	void OtherPlayerFirevalkan(GameObjectMgr* Objects, XMFLOAT3 ToPlayerLook);
 	void PlayerFirevalkan(CCamera* pCamera, XMFLOAT3 Look);
 	void Reflectcartridgecase(GameObjectMgr* Objects);

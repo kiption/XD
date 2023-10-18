@@ -332,32 +332,34 @@ void GameObjectMgr::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 
 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-	if (m_pMesh)
-	{
-		if (m_nMaterials > 0)
+	if (IsVisible(pCamera)) {
+		if (m_pMesh)
 		{
-			for (int i = 0; i < m_nMaterials; i++)
+			if (m_nMaterials > 0)
 			{
-				if (m_ppMaterials[i])
+				for (int i = 0; i < m_nMaterials; i++)
 				{
-					if (m_ppMaterials[i]->m_pShader) {
-
-						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, bPrerender);
-						UpdateShaderVariables(pd3dCommandList);
-					}
-					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
-
-					for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
+					if (m_ppMaterials[i])
 					{
-						if (m_ppMaterials[i]->m_ppTextures[k]) m_ppMaterials[i]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
+						if (m_ppMaterials[i]->m_pShader) {
+
+							m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, bPrerender);
+							UpdateShaderVariables(pd3dCommandList);
+						}
+						m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+
+						for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
+						{
+							if (m_ppMaterials[i]->m_ppTextures[k]) m_ppMaterials[i]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
+						}
 					}
+					m_pMesh->Render(pd3dCommandList, i);
 				}
-				m_pMesh->Render(pd3dCommandList, i);
 			}
 		}
+		if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera, bPrerender);
+		if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera, bPrerender);
 	}
-	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera, bPrerender);
-	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera, bPrerender);
 }
 
 void GameObjectMgr::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -498,7 +500,7 @@ void GameObjectMgr::MoveUp(float fDistance)
 	GameObjectMgr::SetPosition(xmf3Position);
 }
 
-void GameObjectMgr::MoveForward(float fDistance)
+void GameObjectMgr::Move(float fDistance)
 {
 	XMFLOAT3 xmf3Position = GetPosition();
 	XMFLOAT3 xmf3Look = GetLook();
@@ -707,7 +709,7 @@ GameObjectMgr* GameObjectMgr::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevic
 	int nFrame = 0, nTextures = 0;
 
 	GameObjectMgr* pGameObject = new GameObjectMgr();
-	CObjectsShader* pObjectShader = new CObjectsShader();
+	ObjectStore* pObjectShader = new ObjectStore();
 	for (; ; )
 	{
 		::ReadStringFromFile(pInFile, pstrToken);
@@ -960,21 +962,21 @@ CNpcHelicopterObject::~CNpcHelicopterObject()
 
 void CNpcHelicopterObject::OnPrepareAnimate()
 {
-	m_pTailRotorFrame = FindFrame("rescue_2");
-	m_pMainRotorFrame = FindFrame("rescue_1");
+	m_FrameTailRotor = FindFrame("rescue_2");
+	m_FrameTopRotor = FindFrame("rescue_1");
 }
 
 void CNpcHelicopterObject::Animate(float fTimeElapsed)
 {
-	if (m_pMainRotorFrame)
+	if (m_FrameTopRotor)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 10.0f) * fTimeElapsed);
-		m_pMainRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4ToParent);
+		m_FrameTopRotor->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_FrameTopRotor->m_xmf4x4ToParent);
 	}
-	if (m_pTailRotorFrame)
+	if (m_FrameTailRotor)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 10.0f) * fTimeElapsed);
-		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
+		m_FrameTailRotor->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_FrameTailRotor->m_xmf4x4ToParent);
 	}
 
 	GameObjectMgr::Animate(fTimeElapsed);
@@ -1035,39 +1037,32 @@ void CHelicopterObjects::OnPrepareAnimate()
 {
 
 	GameObjectMgr::OnPrepareAnimate();
-	m_pFrameFragObj1 = FindFrame("glass");
-	m_pFrameFragObj2 = FindFrame("cleanser");
-	m_pFrameFragObj3 = FindFrame("left_tyre");
-	m_pFrameFragObj4 = FindFrame("cleanser_1");
-	m_pFrameFragObj5 = FindFrame("helicopter");
-	m_pFrameFragObj6 = FindFrame("right_door");
-	m_pFrameFragObj7 = FindFrame("back_door");
-	m_pFrameFragObj8 = FindFrame("left_door");
-	m_pFrameFragObj9 = FindFrame("right_tyre");
-	m_pFrameFragObj10 = FindFrame("back_tyre");
-	m_pTailRotorFrame = FindFrame("rescue_2");
-	m_pMainRotorFrame = FindFrame("rescue_1");
+	m_FrameHeliglass = FindFrame("glass");
+	m_FrameCleanse = FindFrame("cleanser");
+	m_FrameCleanser_2 = FindFrame("cleanser_1");
+	m_FrameLefttyre = FindFrame("left_tyre");
+	m_FrameHeliBody = FindFrame("helicopter");
+	m_FrameRightDoor = FindFrame("right_door");
+	m_FrameBackDoor = FindFrame("back_door");
+	m_FrameLeftDoor = FindFrame("left_door");
+	m_FrameRighttyre = FindFrame("right_tyre");
+	m_FrameBacktyre = FindFrame("back_tyre");
+	m_FrameTailRotor = FindFrame("rescue_2");
+	m_FrameTopRotor = FindFrame("rescue_1");
 	m_pChairPoint = FindFrame("ChairPoint");
-
-
-	/*glass,,right_door,,left_tyre,helicopter,,cleanser,,back_door
-	* ,Military_Helicopter
-	*
-	* left_door,right_tyre,cleanser_1,back_tyre
-	*/
 }
 
 void CHelicopterObjects::Animate(float fTimeElapsed)
 {
 	XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 7.1) * fTimeElapsed);
 
-	if (m_pMainRotorFrame)
+	if (m_FrameTopRotor)
 	{
-		m_pMainRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4ToParent);
+		m_FrameTopRotor->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_FrameTopRotor->m_xmf4x4ToParent);
 	}
-	if (m_pTailRotorFrame)
+	if (m_FrameTailRotor)
 	{
-		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
+		m_FrameTailRotor->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_FrameTailRotor->m_xmf4x4ToParent);
 	}
 
 
@@ -1084,14 +1079,14 @@ void CHelicopterObjects::Animate(float fTimeElapsed)
 	ParticlePosition = this->GetPosition();
 
 	float FallingMaxHeight = -18.5f;
-	if (m_pTailRotorFrame->m_xmf4x4ToParent._42 > FallingMaxHeight &&
-		m_pMainRotorFrame->m_xmf4x4ToParent._42 > FallingMaxHeight &&
-		m_pFrameFragObj4->m_xmf4x4ToParent._42 > FallingMaxHeight &&
-		m_pFrameFragObj5->m_xmf4x4ToParent._42 > FallingMaxHeight &&
-		m_pFrameFragObj6->m_xmf4x4ToParent._42 > FallingMaxHeight &&
-		m_pFrameFragObj8->m_xmf4x4ToParent._42 > FallingMaxHeight &&
-		m_pFrameFragObj9->m_xmf4x4ToParent._42 > FallingMaxHeight &&
-		m_pFrameFragObj10->m_xmf4x4ToParent._42 > FallingMaxHeight)
+	if (m_FrameTailRotor->m_xmf4x4ToParent._42 > FallingMaxHeight &&
+		m_FrameTopRotor->m_xmf4x4ToParent._42 > FallingMaxHeight &&
+		m_FrameCleanser_2->m_xmf4x4ToParent._42 > FallingMaxHeight &&
+		m_FrameHeliBody->m_xmf4x4ToParent._42 > FallingMaxHeight &&
+		m_FrameRightDoor->m_xmf4x4ToParent._42 > FallingMaxHeight &&
+		m_FrameLeftDoor->m_xmf4x4ToParent._42 > FallingMaxHeight &&
+		m_FrameRighttyre->m_xmf4x4ToParent._42 > FallingMaxHeight &&
+		m_FrameBacktyre->m_xmf4x4ToParent._42 > FallingMaxHeight)
 	{
 		m_bPartitionfalldownEnd = true;
 	}
@@ -1121,119 +1116,91 @@ void CHelicopterObjects::FallDown(float fTimeElapsed)
 	for (int i = 6; i < 7; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir5);
 	for (int i = 7; i < 9; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir6);
 	for (int i = 9; i < EXPLOSION_HELICOPTER; i++)XMStoreFloat3(&m_pxmf3SphereVectors[i], staticDir7);
-	XMMATRIX xmmtxRotateRow = XMMatrixRotationRollPitchYaw(
-		XMConvertToRadians(360.0f * 0.4) * fTimeElapsed,
-		XMConvertToRadians(360.0f * 0.4) * fTimeElapsed,
-		XMConvertToRadians(360.0f * 0.4) * fTimeElapsed);
 
-	XMMATRIX xmmtxRotateFast = XMMatrixRotationRollPitchYaw(
-		XMConvertToRadians(360.0f * 2.8) * fTimeElapsed,
-		XMConvertToRadians(360.0f * 2.8) * fTimeElapsed,
-		XMConvertToRadians(360.0f * 2.8) * fTimeElapsed);
-	if (m_pTailRotorFrame->m_xmf4x4ToParent._42 > FallingMaxHeight)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationRollPitchYaw(
-			XMConvertToRadians(360.0f * 1.8) * fTimeElapsed,
-			XMConvertToRadians(360.0f * 1.8) * fTimeElapsed,
-			XMConvertToRadians(360.0f * 1.8) * fTimeElapsed);
-		m_pTailRotorFrame->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[0].x * staticValue * fTimeElapsed;
-		m_pTailRotorFrame->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[0].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
-		m_pTailRotorFrame->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[0].z * staticValueZ * fTimeElapsed;
-		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
+	float rotrowValue = XMConvertToRadians(360.0f * 0.4) * fTimeElapsed;
+	XMMATRIX xmmtxRotateRow = XMMatrixRotationRollPitchYaw(rotrowValue, rotrowValue, rotrowValue);
+	float rotFastValue = XMConvertToRadians(360.0f * 1.8) * fTimeElapsed;
+	XMMATRIX xmmtxRotateFast = XMMatrixRotationRollPitchYaw(rotFastValue, rotFastValue, rotFastValue);
+
+	if (m_FrameTailRotor->m_xmf4x4ToParent._42 > FallingMaxHeight) {
+		float rotValue = XMConvertToRadians(360.0f * 1.8) * fTimeElapsed;
+		XMMATRIX xmmtxRotate = XMMatrixRotationRollPitchYaw(rotValue, rotValue, rotValue);
+		m_FrameTailRotor->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[0].x * staticValue * fTimeElapsed;
+		m_FrameTailRotor->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[0].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+		m_FrameTailRotor->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[0].z * staticValueZ * fTimeElapsed;
+		m_FrameTailRotor->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_FrameTailRotor->m_xmf4x4ToParent);
 	}
-	if (m_pMainRotorFrame->m_xmf4x4ToParent._42 > FallingMaxHeight)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationRollPitchYaw(
-			XMConvertToRadians(360.0f * 0.4) * fTimeElapsed,
-			XMConvertToRadians(360.0f * 0.4) * fTimeElapsed,
-			XMConvertToRadians(360.0f * 0.4) * fTimeElapsed);
-		m_pMainRotorFrame->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[1].x * staticValue * fTimeElapsed;
-		m_pMainRotorFrame->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[1].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
-		m_pMainRotorFrame->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[1].z * staticValueZ * fTimeElapsed;
-		m_pMainRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4ToParent);
+	if (m_FrameTopRotor->m_xmf4x4ToParent._42 > FallingMaxHeight) {
+		float rotValue = XMConvertToRadians(360.0f * 0.4) * fTimeElapsed;
+		XMMATRIX xmmtxRotate = XMMatrixRotationRollPitchYaw(rotValue, rotValue, rotValue);
+		m_FrameTopRotor->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[1].x * staticValue * fTimeElapsed;
+		m_FrameTopRotor->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[1].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+		m_FrameTopRotor->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[1].z * staticValueZ * fTimeElapsed;
+		m_FrameTopRotor->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_FrameTopRotor->m_xmf4x4ToParent);
 	}
-
-
-	m_pFrameFragObj1->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[2].x * staticValue * fTimeElapsed;
-	m_pFrameFragObj1->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[2].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
-	m_pFrameFragObj1->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[2].z * staticValueZ * fTimeElapsed;
-	m_pFrameFragObj1->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateRow, m_pFrameFragObj1->m_xmf4x4ToParent);
-
-
-	m_pFrameFragObj2->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[3].x * staticValue * fTimeElapsed;
-	m_pFrameFragObj2->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[3].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
-	m_pFrameFragObj2->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[3].z * staticValueZ * fTimeElapsed;
-	m_pFrameFragObj2->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateFast, m_pFrameFragObj2->m_xmf4x4ToParent);
-
-
-	m_pFrameFragObj3->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[4].x * staticValue * fTimeElapsed;
-	m_pFrameFragObj3->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[4].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
-	m_pFrameFragObj3->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[4].z * staticValueZ * fTimeElapsed;
-	m_pFrameFragObj3->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateFast, m_pFrameFragObj3->m_xmf4x4ToParent);
-
-	if (m_pFrameFragObj4->m_xmf4x4ToParent._42 > FallingMaxHeight)
-	{
-		XMMATRIX xmmtxRotateMid = XMMatrixRotationRollPitchYaw(
-			XMConvertToRadians(360.0f * 1.8) * fTimeElapsed,
-			XMConvertToRadians(360.0f * 1.8) * fTimeElapsed,
-			XMConvertToRadians(360.0f * 1.8) * fTimeElapsed);
-		m_pFrameFragObj4->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[5].x * staticValue * fTimeElapsed;
-		m_pFrameFragObj4->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[5].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
-		m_pFrameFragObj4->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[5].z * staticValueZ * fTimeElapsed;
-		m_pFrameFragObj4->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateMid, m_pFrameFragObj4->m_xmf4x4ToParent);
+	if (m_FrameCleanser_2->m_xmf4x4ToParent._42 > FallingMaxHeight) {
+		float rotValue = XMConvertToRadians(360.0f * 1.8) * fTimeElapsed;
+		XMMATRIX xmmtxRotate = XMMatrixRotationRollPitchYaw(rotValue, rotValue, rotValue);
+		m_FrameCleanser_2->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[5].x * staticValue * fTimeElapsed;
+		m_FrameCleanser_2->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[5].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+		m_FrameCleanser_2->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[5].z * staticValueZ * fTimeElapsed;
+		m_FrameCleanser_2->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_FrameCleanser_2->m_xmf4x4ToParent);
 	}
-	if (m_pFrameFragObj5->m_xmf4x4ToParent._42 > FallingMaxHeight)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationRollPitchYaw(
-			XMConvertToRadians(360.0f * 0.4) * fTimeElapsed,
-			XMConvertToRadians(360.0f * 0.4) * fTimeElapsed,
-			XMConvertToRadians(360.0f * 0.4) * fTimeElapsed);
-		m_pFrameFragObj5->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[6].x * staticValue * fTimeElapsed;
-		m_pFrameFragObj5->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[6].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;		//
-		m_pFrameFragObj5->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[6].z * staticValueZ * fTimeElapsed;
-		m_pFrameFragObj5->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pFrameFragObj5->m_xmf4x4ToParent);
+	if (m_FrameHeliBody->m_xmf4x4ToParent._42 > FallingMaxHeight) {
+		float rotValue = XMConvertToRadians(360.0f * 0.4) * fTimeElapsed;
+		XMMATRIX xmmtxRotate = XMMatrixRotationRollPitchYaw(rotValue, rotValue, rotValue);
+		m_FrameHeliBody->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[6].x * staticValue * fTimeElapsed;
+		m_FrameHeliBody->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[6].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;		//
+		m_FrameHeliBody->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[6].z * staticValueZ * fTimeElapsed;
+		m_FrameHeliBody->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_FrameHeliBody->m_xmf4x4ToParent);
 	}
-	if (m_pFrameFragObj6->m_xmf4x4ToParent._42 > FallingMaxHeight)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationRollPitchYaw(
-			XMConvertToRadians(360.0f * 2.8) * fTimeElapsed,
-			XMConvertToRadians(360.0f * 2.8) * fTimeElapsed,
-			XMConvertToRadians(360.0f * 2.8) * fTimeElapsed);
-		m_pFrameFragObj6->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[7].x * staticValue * fTimeElapsed;
-		m_pFrameFragObj6->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[7].z * staticValueZ * fTimeElapsed;
-		m_pFrameFragObj6->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[7].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
-		m_pFrameFragObj6->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pFrameFragObj6->m_xmf4x4ToParent);
+	if (m_FrameRightDoor->m_xmf4x4ToParent._42 > FallingMaxHeight) {
+		float rotValue = XMConvertToRadians(360.0f * 2.8) * fTimeElapsed;
+		XMMATRIX xmmtxRotate = XMMatrixRotationRollPitchYaw(rotValue, rotValue, rotValue);
+		m_FrameRightDoor->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[7].x * staticValue * fTimeElapsed;
+		m_FrameRightDoor->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[7].z * staticValueZ * fTimeElapsed;
+		m_FrameRightDoor->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[7].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+		m_FrameRightDoor->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_FrameRightDoor->m_xmf4x4ToParent);
 	}
+	if (m_FrameLeftDoor->m_xmf4x4ToParent._42 > FallingMaxHeight) {
+		float rotValue = XMConvertToRadians(360.0f * 0.4) * fTimeElapsed;
+		XMMATRIX xmmtxRotate = XMMatrixRotationRollPitchYaw(rotValue, rotValue, rotValue);
+		m_FrameLeftDoor->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[9].x * staticValue * fTimeElapsed;
+		m_FrameLeftDoor->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[9].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+		m_FrameLeftDoor->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[9].z * staticValueZ * fTimeElapsed;
+		m_FrameLeftDoor->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_FrameLeftDoor->m_xmf4x4ToParent);
+	}
+	if (m_FrameRighttyre->m_xmf4x4ToParent._42 > FallingMaxHeight) {
+		m_FrameRighttyre->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[10].x * staticValue * fTimeElapsed;
+		m_FrameRighttyre->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[10].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+		m_FrameRighttyre->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[10].z * staticValueZ * fTimeElapsed;
+	}
+	if (m_FrameBacktyre->m_xmf4x4ToParent._42 > FallingMaxHeight) {
+		m_FrameBacktyre->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[11].x * staticValue * fTimeElapsed;
+		m_FrameBacktyre->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[11].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+		m_FrameBacktyre->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[11].z * staticValueZ * fTimeElapsed;
+	}
+	m_FrameBackDoor->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[8].x * staticValue * fTimeElapsed;
+	m_FrameBackDoor->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[8].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+	m_FrameBackDoor->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[8].z * staticValueZ * fTimeElapsed;
+	m_FrameBackDoor->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateRow, m_FrameBackDoor->m_xmf4x4ToParent);
+	
+	m_FrameHeliglass->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[2].x * staticValue * fTimeElapsed;
+	m_FrameHeliglass->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[2].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+	m_FrameHeliglass->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[2].z * staticValueZ * fTimeElapsed;
+	m_FrameHeliglass->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateRow, m_FrameHeliglass->m_xmf4x4ToParent);
 
 
-	m_pFrameFragObj7->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[8].x * staticValue * fTimeElapsed;
-	m_pFrameFragObj7->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[8].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
-	m_pFrameFragObj7->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[8].z * staticValueZ * fTimeElapsed;
-	m_pFrameFragObj7->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateRow, m_pFrameFragObj7->m_xmf4x4ToParent);
+	m_FrameCleanse->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[3].x * staticValue * fTimeElapsed;
+	m_FrameCleanse->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[3].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+	m_FrameCleanse->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[3].z * staticValueZ * fTimeElapsed;
+	m_FrameCleanse->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateFast, m_FrameCleanse->m_xmf4x4ToParent);
 
-	if (m_pFrameFragObj8->m_xmf4x4ToParent._42 > FallingMaxHeight)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationRollPitchYaw(
-			XMConvertToRadians(360.0f * 0.4) * fTimeElapsed,
-			XMConvertToRadians(360.0f * 0.4) * fTimeElapsed,
-			XMConvertToRadians(360.0f * 0.4) * fTimeElapsed);
-		m_pFrameFragObj8->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[9].x * staticValue * fTimeElapsed;
-		m_pFrameFragObj8->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[9].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
-		m_pFrameFragObj8->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[9].z * staticValueZ * fTimeElapsed;
-		m_pFrameFragObj8->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pFrameFragObj8->m_xmf4x4ToParent);
-	}
-	if (m_pFrameFragObj9->m_xmf4x4ToParent._42 > FallingMaxHeight)
-	{
-		m_pFrameFragObj9->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[10].x * staticValue * fTimeElapsed;
-		m_pFrameFragObj9->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[10].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
-		m_pFrameFragObj9->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[10].z * staticValueZ * fTimeElapsed;
-	}
-	if (m_pFrameFragObj10->m_xmf4x4ToParent._42 > FallingMaxHeight)
-	{
-		m_pFrameFragObj10->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[11].x * staticValue * fTimeElapsed;
-		m_pFrameFragObj10->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[11].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
-		m_pFrameFragObj10->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[11].z * staticValueZ * fTimeElapsed;
-	}
+
+	m_FrameLefttyre->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[4].x * staticValue * fTimeElapsed;
+	m_FrameLefttyre->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[4].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
+	m_FrameLefttyre->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[4].z * staticValueZ * fTimeElapsed;
+	m_FrameLefttyre->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateFast, m_FrameLefttyre->m_xmf4x4ToParent);
 
 	GameObjectMgr::Animate(fTimeElapsed);
 }
@@ -1251,19 +1218,13 @@ CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	SetChild(pModel->m_pModelRootObject, true);
 	pModel->m_pModelRootObject->SetCurScene(INGAME_SCENE);
 
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 5, pModel);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(2, 2);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(3, 3);
-	m_pSkinnedAnimationController->SetTrackAnimationSet(4, 4);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, ANIMATIONTRACTS_NPCPLAYER, pModel);
 
-	m_pSkinnedAnimationController->SetTrackEnable(0, true);
-	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	m_pSkinnedAnimationController->SetTrackEnable(4, false);
-
+	for (int i = 0; i < ANIMATIONTRACTS_NPCPLAYER; i++) {
+		m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
+		m_pSkinnedAnimationController->SetTrackEnable(0, true);
+		if(i!=0)m_pSkinnedAnimationController->SetTrackEnable(i, false);
+	}
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
@@ -1274,14 +1235,13 @@ CSoldiarNpcObjects::~CSoldiarNpcObjects()
 
 }
 
-void CSoldiarNpcObjects::MoveForward(float EleapsedTime)
+void CSoldiarNpcObjects::Move(float EleapsedTime)
 {
 
-	m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	m_pSkinnedAnimationController->SetTrackEnable(1, true);
-	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	for (int i = 0; i < ANIMATIONTRACTS_NPCPLAYER; i++) {
+		m_pSkinnedAnimationController->SetTrackEnable(1, true);
+		if (i != 1)m_pSkinnedAnimationController->SetTrackEnable(i, false);
+	}
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 1);
 
 
@@ -1291,11 +1251,10 @@ void CSoldiarNpcObjects::MoveForward(float EleapsedTime)
 void CSoldiarNpcObjects::HittingState(float EleapsedTime)
 {
 
-	m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	m_pSkinnedAnimationController->SetTrackEnable(3, true);
-	m_pSkinnedAnimationController->SetTrackEnable(4, true);
+	for (int i = 0; i < ANIMATIONTRACTS_NPCPLAYER; i++) {
+		m_pSkinnedAnimationController->SetTrackEnable(3, true);
+		if (i != 3)m_pSkinnedAnimationController->SetTrackEnable(i, false);
+	}
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 3);
 	GameObjectMgr::Animate(EleapsedTime);
 }
@@ -1313,33 +1272,30 @@ void CSoldiarNpcObjects::ReloadState(float EleapsedTime)
 
 void CSoldiarNpcObjects::DyingMotion(float EleapsedTime)
 {
-	m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	m_pSkinnedAnimationController->SetTrackEnable(4, true);
+	for (int i = 0; i < ANIMATIONTRACTS_NPCPLAYER; i++) {
+		m_pSkinnedAnimationController->SetTrackEnable(4, true);
+		if (i != 4)m_pSkinnedAnimationController->SetTrackEnable(i, false);
+	}
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 4);
 	GameObjectMgr::Animate(EleapsedTime);
 }
 
 void CSoldiarNpcObjects::ShotState(float EleapsedTime)
 {
-	m_pSkinnedAnimationController->SetTrackEnable(0, false);
-	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	m_pSkinnedAnimationController->SetTrackEnable(2, true);
-	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	for (int i = 0; i < ANIMATIONTRACTS_NPCPLAYER; i++) {
+		m_pSkinnedAnimationController->SetTrackEnable(2, true);
+		if (i != 2)m_pSkinnedAnimationController->SetTrackEnable(i, false);
+	}
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 2);
 	GameObjectMgr::Animate(EleapsedTime);
 }
 
 void CSoldiarNpcObjects::IdleState(float EleapsedTime)
 {
-	m_pSkinnedAnimationController->SetTrackEnable(0, true);
-	m_pSkinnedAnimationController->SetTrackEnable(1, false);
-	m_pSkinnedAnimationController->SetTrackEnable(2, false);
-	m_pSkinnedAnimationController->SetTrackEnable(3, false);
-	m_pSkinnedAnimationController->SetTrackEnable(4, false);
+	for (int i = 0; i < ANIMATIONTRACTS_NPCPLAYER; i++) {
+		m_pSkinnedAnimationController->SetTrackEnable(0, true);
+		if (i != 0)m_pSkinnedAnimationController->SetTrackEnable(i, false);
+	}
 	m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
 
 	GameObjectMgr::Animate(EleapsedTime);
@@ -1421,7 +1377,7 @@ CSoldiarOtherPlayerObjects::~CSoldiarOtherPlayerObjects()
 {
 }
 
-void CSoldiarOtherPlayerObjects::MoveForward(float EleapsedTime)
+void CSoldiarOtherPlayerObjects::Move(float EleapsedTime)
 {
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
 	m_pSkinnedAnimationController->SetTrackEnable(1, true);
