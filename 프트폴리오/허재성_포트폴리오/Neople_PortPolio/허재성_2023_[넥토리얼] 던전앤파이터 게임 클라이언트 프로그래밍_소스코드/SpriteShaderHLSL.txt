@@ -1,0 +1,32 @@
+cbuffer cbGameObjectInfo : register(b9)
+{
+	matrix		gmtxWorld : packoffset(c0);
+	EXPLOSIONMATERIAL	gAniMaterial : packoffset(c4);
+};
+
+VS_TEXTURED_OUTPUT VSSpritTextured(VS_TEXTURED_INPUT input)
+{
+	VS_TEXTURED_OUTPUT output;
+
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	output.uv = input.uv;
+
+	return(output);
+}
+
+float4 PSSpritTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
+{
+	float4 cColor = gtxtBillboardTexture.Sample(gssWrap, input.uv);
+
+	return(cColor);
+}
+
+VS_TEXTURED_OUTPUT VSSpriteAnimation(VS_TEXTURED_INPUT input)
+{
+	VS_TEXTURED_OUTPUT output;
+
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxWorld), gmtxView), gmtxProjection);
+	output.uv = mul(float3(input.uv, 1.0f), (float3x3)(gAniMaterial.gmtxTexture)).xy;
+
+	return(output);
+}

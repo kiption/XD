@@ -282,9 +282,9 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_ppFragShaders[2] = pRifleHittingPointShader;
 
 	m_nShaders = 1;
-	m_ppShaders = new CObjectsShader * [m_nShaders];
+	m_ppShaders = new ObjectStore * [m_nShaders];
 
-	CObjectsShader* pObjectShader = new CObjectsShader();
+	ObjectStore* pObjectShader = new ObjectStore();
 	pObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pObjectShader->SetCurScene(INGAME_SCENE);
 	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
@@ -300,7 +300,7 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pShadowShader->SetCurScene(INGAME_SCENE);
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
-	m_pTreeBlendShadowShader = new CTreeBlendingShadowShader(pObjectShader);
+	m_pTreeBlendShadowShader = new TreeBlendingShader(pObjectShader);
 	m_pTreeBlendShadowShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	m_pTreeBlendShadowShader->SetCurScene(INGAME_SCENE);
 	m_pTreeBlendShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
@@ -846,7 +846,7 @@ D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(D3D12_RESOURCE_DESC d3
 	d3dShaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	switch (nTextureType)
 	{
-	case RESOURCE_TEXTURE2D: 
+	case RESOURCE_TEXTURE2D:
 	case RESOURCE_TEXTURE2D_ARRAY:
 		d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		d3dShaderResourceViewDesc.Texture2D.MipLevels = -1;
@@ -950,31 +950,38 @@ void MainGameScene::Firevalkan(GameObjectMgr* Objects, XMFLOAT3 ToPlayerLook)
 		pBulletObject->SetActive(true);
 	}
 }
-void MainGameScene::ParticleCollisionResult()
+void MainGameScene::HeliParticlesByPlayerCollisionResult()
 {
 
 	XMFLOAT4 Oriented = XMFLOAT4(0, 0, 0, 1);
-	BoundingOrientedBox HeliPlayeroobb = BoundingOrientedBox(((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->GetPosition(),XMFLOAT3(8.0, 8.0, 10.0), XMFLOAT4(0, 0, 0, 1));
-	BoundingOrientedBox HumanPlayeroobb = BoundingOrientedBox(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition(),XMFLOAT3(2.0, 4.0, 2.0), XMFLOAT4(0, 0, 0, 1));
+	XMFLOAT3 HumanPos = XMFLOAT3(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition());
+	XMFLOAT3 HumanSize = XMFLOAT3(3.0, 5.0, 3.0);
+	XMFLOAT3 HeliPos = XMFLOAT3(((HeliPlayer*)m_ppShaders[0]->m_ppObjects[43])->GetPosition());
+	XMFLOAT3 HeliSize = XMFLOAT3(8.0, 8.0, 10.0);
+	XMFLOAT3 HeliParticleSize = XMFLOAT3(3.0, 3.0, 3.0);
+	BoundingOrientedBox HeliPlayeroobb = BoundingOrientedBox(HeliPos, HeliSize, Oriented);
+	BoundingOrientedBox HumanPlayeroobb = BoundingOrientedBox(HumanPos, HumanSize, Oriented);
+	BoundingOrientedBox Particleoobb[12]{ BoundingOrientedBox(XMFLOAT3(0,0,0), XMFLOAT3(0,0,0), Oriented) };
+
+	// 공중 Npc의 분해된 기체들과 플레이어들의 충돌
 	for (int i = 12; i < 17; i++)
 	{
-		BoundingOrientedBox P1 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj1->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Oriented);
-		BoundingOrientedBox P2 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj2->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Oriented);
-		BoundingOrientedBox P3 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj3->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Oriented);
-		BoundingOrientedBox P4 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj4->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Oriented);
-		BoundingOrientedBox P5 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj5->GetPosition(), XMFLOAT3(5.0, 5.0, 5.0), Oriented);
-		BoundingOrientedBox P6 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj6->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Oriented);
-		BoundingOrientedBox P7 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj7->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Oriented);
-		BoundingOrientedBox P8 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj8->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Oriented);
-		BoundingOrientedBox P9 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pFrameFragObj9->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Oriented);
-		BoundingOrientedBox P10 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pTailRotorFrame->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Oriented);
-		BoundingOrientedBox P11 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_pMainRotorFrame->GetPosition(), XMFLOAT3(3.0, 3.0, 3.0), Oriented);
+		BoundingOrientedBox P1 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_FrameHeliglass->GetPosition(), HeliParticleSize, Oriented);
+		BoundingOrientedBox P2 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_FrameCleanse->GetPosition(), HeliParticleSize, Oriented);
+		BoundingOrientedBox P3 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_FrameLefttyre->GetPosition(), HeliParticleSize, Oriented);
+		BoundingOrientedBox P4 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_FrameCleanser_2->GetPosition(), HeliParticleSize, Oriented);
+		BoundingOrientedBox P5 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_FrameHeliBody->GetPosition(), HeliParticleSize, Oriented);
+		BoundingOrientedBox P6 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_FrameRightDoor->GetPosition(), HeliParticleSize, Oriented);
+		BoundingOrientedBox P7 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_FrameBackDoor->GetPosition(), HeliParticleSize, Oriented);
+		BoundingOrientedBox P8 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_FrameLeftDoor->GetPosition(), HeliParticleSize, Oriented);
+		BoundingOrientedBox P9 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_FrameRighttyre->GetPosition(), HeliParticleSize, Oriented);
+		BoundingOrientedBox P10 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_FrameTailRotor->GetPosition(), HeliParticleSize, Oriented);
+		BoundingOrientedBox P11 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_FrameTopRotor->GetPosition(), HeliParticleSize, Oriented);
 
 		if (HeliPlayeroobb.Intersects(P1) || HeliPlayeroobb.Intersects(P2) || HeliPlayeroobb.Intersects(P3) || HeliPlayeroobb.Intersects(P4)
 			|| HeliPlayeroobb.Intersects(P5) || HeliPlayeroobb.Intersects(P6) || HeliPlayeroobb.Intersects(P7) || HeliPlayeroobb.Intersects(P8)
 			|| HeliPlayeroobb.Intersects(P9) || HeliPlayeroobb.Intersects(P10) || HeliPlayeroobb.Intersects(P11))
 		{
-			cout << "Heli Collision Particle!" << endl;
 			m_bHeliParticleCollisionCheck = true;
 		}
 
@@ -982,7 +989,6 @@ void MainGameScene::ParticleCollisionResult()
 			|| HumanPlayeroobb.Intersects(P5) || HumanPlayeroobb.Intersects(P6) || HumanPlayeroobb.Intersects(P7) || HumanPlayeroobb.Intersects(P8)
 			|| HumanPlayeroobb.Intersects(P9) || HumanPlayeroobb.Intersects(P10) || HumanPlayeroobb.Intersects(P11))
 		{
-			cout << "Human Collision Particle!" << endl;
 			m_bHumanParticleCollisionCheck = true;
 		}
 
@@ -1165,7 +1171,7 @@ void MainGameScene::AnimateObjects(float fTimeElapsed)
 
 	NpcByPlayerCollsiion();
 	PlayerByPlayerCollision();
-	ParticleCollisionResult();
+	HeliParticlesByPlayerCollisionResult();
 	SetPositionPilotHuman();
 	HealPackZoneInfo();
 }
@@ -1186,12 +1192,12 @@ void MainGameScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 {
 
 	UpdateShaderVariables(pd3dCommandList);
-	
+
 	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
-	for (int i = 0; i < m_nBillboardShaders; i++) if (i!= 6 && m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
+	for (int i = 0; i < m_nBillboardShaders; i++) if (i != 6 && m_pBillboardShader[i]) m_pBillboardShader[i]->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < m_nFragShaders; i++) if (m_ppFragShaders[i]) m_ppFragShaders[i]->Render(pd3dCommandList, pCamera, 0);
 	if (pBCBulletEffectShader) pBCBulletEffectShader->Render(pd3dCommandList, pCamera, 0);
 	for (int i = 0; i < HELIBULLETS; i++)if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
@@ -1293,39 +1299,23 @@ void MainGameScene::NPCMuzzleFlamedRender(ID3D12GraphicsCommandList* pd3dCommand
 void MainGameScene::PlayerByPlayerCollision()
 {
 	XMFLOAT3 HumanSize = XMFLOAT3(3.0, 5.0, 3.0);
-	XMFLOAT4 Orientation = XMFLOAT4(0, 0, 0, 1);
-	XMFLOAT3 P1Pos = XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._41,
-		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._42,
-		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._43);
-	XMFLOAT3 P2Pos = XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._41,
-		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._42,
-		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._43);
-	XMFLOAT3 P0Pos = XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->m_xmf4x4ToParent._41,
-		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->m_xmf4x4ToParent._42,
-		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->m_xmf4x4ToParent._43);
-	XMFLOAT3 MyPos = XMFLOAT3(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().x,
-		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().y,
-		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().z);
+	XMFLOAT4 Oriented = XMFLOAT4(0, 0, 0, 1);
+	XMFLOAT3 P1Pos = ((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->GetToParentPosition();
+	XMFLOAT3 P2Pos = ((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->GetToParentPosition();
+	XMFLOAT3 MyPos = ((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition();
 
-	BoundingOrientedBox Other0Poobb = BoundingOrientedBox(XMFLOAT3(P0Pos), HumanSize, Orientation);
-	BoundingOrientedBox Other1Poobb = BoundingOrientedBox(XMFLOAT3(P1Pos), HumanSize, Orientation);
-	BoundingOrientedBox Other2Poobb = BoundingOrientedBox(XMFLOAT3(P2Pos), HumanSize, Orientation);
-	BoundingOrientedBox MyPoobb = BoundingOrientedBox(XMFLOAT3(MyPos), HumanSize, Orientation);
+	BoundingOrientedBox Other1Poobb = BoundingOrientedBox(XMFLOAT3(P1Pos), HumanSize, Oriented);
+	BoundingOrientedBox Other2Poobb = BoundingOrientedBox(XMFLOAT3(P2Pos), HumanSize, Oriented);
+	BoundingOrientedBox MyPoobb = BoundingOrientedBox(XMFLOAT3(MyPos), HumanSize, Oriented);
 
-	if (MyPoobb.Intersects(Other0Poobb)) {
-		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->SetPosition(XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->GetPosition().x,
-			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->GetPosition().y,
-			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->m_xmf4x4ToParent._43 - 1.0f));
-	}
 	if (MyPoobb.Intersects(Other2Poobb)) {
-		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->SetPosition(XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->GetPosition().x,
-			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->GetPosition().y,
-			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._43 - 1.0f));
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._43 -= 1.0f;
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->SetPosition(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->GetPosition());
 	}
 	if (MyPoobb.Intersects(Other1Poobb)) {
-		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->SetPosition(XMFLOAT3(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->GetPosition().x,
-			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->GetPosition().y,
-			((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->m_xmf4x4ToParent._43 - 1.0f));
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->m_xmf4x4ToParent._43 -= 1.0f;
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->SetPosition(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->GetPosition());
+
 	}
 }
 
@@ -1358,7 +1348,7 @@ void MainGameScene::NpcByPlayerCollsiion()
 		XMFLOAT3 NpcPos = ((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[i])->GetToParentPosition();
 		XMFLOAT3 PlayerPos = ((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition();
 		XMFLOAT3 BBsize = XMFLOAT3(3.0, 5.0, 3.0);
-		XMFLOAT4 Oriented = XMFLOAT4(0,0,0,1);
+		XMFLOAT4 Oriented = XMFLOAT4(0, 0, 0, 1);
 		BoundingOrientedBox Npcoobb = BoundingOrientedBox(NpcPos, BBsize, Oriented);
 		BoundingOrientedBox PlayerPoobb = BoundingOrientedBox(PlayerPos, BBsize, Oriented);
 
@@ -1368,13 +1358,9 @@ void MainGameScene::NpcByPlayerCollsiion()
 	}
 }
 
-
-
 void MainGameScene::PlayersMoveReflect()
 {
-	(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->SetPosition(XMFLOAT3(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_xmf4x4ToParent._41 - 2.0f,
-		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().y,
-		((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition().z)));
-
+	((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_xmf4x4ToParent._41 -= 2.0f;
+	((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->SetPosition(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition());
 	m_bSendCollsion = true;
 }

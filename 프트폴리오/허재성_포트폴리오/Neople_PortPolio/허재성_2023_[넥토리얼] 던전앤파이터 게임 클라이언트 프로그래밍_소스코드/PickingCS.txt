@@ -1,0 +1,112 @@
+﻿    private GameObject guidedBullet; // 유도 중인 총알 저장 변수
+    private float guidedBulletForce = 1000f; // 총알 유도 힘
+    rivate float m_BulletActiveTerm = 0.0f;
+    private float LockingbulletSpeed = 50;
+    public GameObject LockBulletObject;
+    private float LifeLKTime = 2.0f;
+
+void Update()
+{ 
+   if (Input.GetMouseButtonDown(1))
+   {
+       // 마우스 클릭 지점의 스크린 좌표를 얻음
+       Vector3 mousePosition = Input.mousePosition;
+
+       // 스크린 좌표를 월드 좌표로 변환
+       Ray ray = MyCamera.GetComponent<Camera>().ScreenPointToRay(mousePosition);
+
+       // 레이캐스트 수행하여 충돌하는 객체 검출
+       if (Physics.Raycast(ray, out hit))
+       {
+           // 충돌하는 객체가 선택된 경우
+           if (hit.collider.CompareTag("EnermyTerret1"))
+           {
+
+               GameObject target = hit.collider.gameObject;
+               GuidingBullet(target);
+           }
+       }
+   }
+ }
+
+  void LokingVerExplosionAction(Vector3 Position)
+  {
+
+       for (int i = 0; i < ExplosCount; i++)
+       {
+            Vector3 StartPos = Position;
+            ExplosObjects = Instantiate(ExplosionPreb, new Vector3(StartPos.x, StartPos.y, StartPos.z), Quaternion.identity);
+            ExplosObjects.transform.Rotate(10, 10, 10);
+            Rigidbody Exrigidby = ExplosObjects.GetComponent<Rigidbody>();
+            // 랜덤한 방향으로 폭발
+            Vector3 RandomDir = Random.insideUnitSphere * ParticleForce;
+            Exrigidby.AddForce(RandomDir * 5, ForceMode.Impulse);
+            // Lifetime 초 뒤에 사라짐
+            Destroy(ExplosObjects, LifeLKTime);
+        }
+
+    }
+    
+ void GuidingBullet(GameObject Target)
+ {
+    if (guidedBullet == null)
+    {
+
+        Vector3 startPosition = ShootStartPosition.transform.position;
+        bullet = Instantiate(LockBulletObject, startPosition + transform.forward, Quaternion.identity);
+        Vector3 targetDirection = Target.transform.position - bullet.transform.position;
+        //bullet.transform.Rotate(new Vector3(1, 0, 0), 90.0f);
+        bullet.transform.rotation = Quaternion.LookRotation(targetDirection);
+
+
+        float bulletSpeed = LockingbulletSpeed;
+        float curvature = 40.0f; // 곡률 양을 제어
+        float elapsedTime = 0.0f;
+        float maxTime = 30.5f; //곡선 궤적의 지속 시간을 제어
+        float maxLifetime = 10.0f; // 총알의 최대 수명을 설정
+
+
+        guidedBullet = bullet;
+
+        // 시간 경과에 따라 총알의 위치를 ​​업데이트하도록 코루틴 설정
+        StartCoroutine(UpdateBulletPosition(bullet, targetDirection, bulletSpeed, curvature, elapsedTime, maxTime, maxLifetime));
+    }
+}
+
+IEnumerator UpdateBulletPosition(GameObject bullet, Vector3 targetDirection, float bulletSpeed, float curvature, float elapsedTime, float maxTime, float maxLifetime)
+{
+   Rigidbody bulletRigidbody = bullet.GetComponent<Rigidbody>();
+
+   while (elapsedTime < maxTime)
+   {
+       // 경과 시간을 기준으로 현재 곡선 계수 계산
+       float curveFactor = Mathf.Clamp01(elapsedTime / maxTime);
+       curveFactor = Mathf.Pow(curveFactor, curvature);
+
+       // 곡선 궤적을 따라 총알의 위치를 ​​업데이트합니다.
+       Vector3 updatedPosition = bullet.transform.position + bullet.transform.forward * bulletSpeed * Time.deltaTime;
+       Vector3 correctionDirection = targetDirection.normalized - bullet.transform.forward;
+       updatedPosition += curveFactor * correctionDirection * bulletSpeed * Time.deltaTime;
+
+       // 레이캐스트를 수행하여 총알의 경로를 따라 충돌을 확인합니다.
+       RaycastHit hit;
+       if (Physics.Raycast(bullet.transform.position, updatedPosition - bullet.transform.position, out hit, Vector3.Distance(updatedPosition, bullet.transform.position)))
+       {
+           GuidBulletCollision = true;
+           LokingVerExplosionAction(bullet.transform.position); // Destroy 전에 호출
+           Destroy(bullet);
+           guidedBullet = null;
+           yield break;
+       }
+
+       bulletRigidbody.MovePosition(updatedPosition);
+       elapsedTime += Time.deltaTime;
+
+       yield return null;
+   }
+
+   // Destroy the bullet after the remaining lifetime
+   LokingVerExplosionAction(bullet.transform.position);
+   Destroy(bullet);
+   guidedBullet = null; // Reset the guided bullet
+}

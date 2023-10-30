@@ -6,11 +6,11 @@
 class CFragmentsShader;
 #define _WITH_BATCH_MATERIAL
 class CSkinnedAnimationStandardShader;
-class CObjectsShader : public ShaderMgr
+class ObjectStore : public ShaderMgr
 {
 public:
-	CObjectsShader();
-	virtual ~CObjectsShader();
+	ObjectStore();
+	virtual ~ObjectStore();
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void ReleaseObjects();
@@ -43,7 +43,7 @@ public:
 class CDepthRenderShader : public ShaderMgr
 {
 public:
-	CDepthRenderShader(CObjectsShader* pObjectsShader, LIGHT* pLights);
+	CDepthRenderShader(ObjectStore* pObjectsShader, LIGHT* pLights);
 	virtual ~CDepthRenderShader();
 
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState);
@@ -87,7 +87,7 @@ public:
 	ID3D12Resource* GetDepthTextureResource(UINT nIndex) { return(m_pDepthTexture->GetResource(nIndex)); }
 
 public:
-	CObjectsShader* m_pObjectsShader = NULL;
+	ObjectStore* m_pObjectsShader = NULL;
 
 
 public:
@@ -101,7 +101,7 @@ public:
 class CShadowMapShader : public ShaderMgr
 {
 public:
-	CShadowMapShader(CObjectsShader* pObjectsShader);
+	CShadowMapShader(ObjectStore* pObjectsShader);
 	virtual ~CShadowMapShader();
 	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
@@ -125,14 +125,14 @@ public:
 		int nPipelineState);
 
 public:
-	CObjectsShader* m_pObjectsShader = NULL;
+	ObjectStore* m_pObjectsShader = NULL;
 	Texture* m_pDepthTexture = NULL;
 };
-class CTreeBlendingShadowShader : public ShaderMgr
+class TreeBlendingShader : public ShaderMgr
 {
 public:
-	CTreeBlendingShadowShader(CObjectsShader* pObjectsShader);
-	virtual ~CTreeBlendingShadowShader();
+	TreeBlendingShader(ObjectStore* pObjectsShader);
+	virtual ~TreeBlendingShader();
 	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState);
@@ -155,6 +155,6 @@ public:
 		int nPipelineState);
 
 public:
-	CObjectsShader* m_pObjectsShader = NULL;
+	ObjectStore* m_pObjectsShader = NULL;
 	Texture* m_pDepthTexture = NULL;
 };

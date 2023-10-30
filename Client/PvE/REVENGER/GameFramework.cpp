@@ -3541,7 +3541,7 @@ void CGameFramework::otherPlayerForwardMotion(int id)
 	{
 		if (((CSoldiarOtherPlayerObjects*)((MainGameScene*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id]))
 		{
-			((CSoldiarOtherPlayerObjects*)((MainGameScene*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->MoveForward(m_GameTimer.GetTimeElapsed());
+			((CSoldiarOtherPlayerObjects*)((MainGameScene*)m_pScene)->m_ppShaders[0]->m_ppObjects[4 + id])->Move(m_GameTimer.GetTimeElapsed());
 		}
 	}
 }

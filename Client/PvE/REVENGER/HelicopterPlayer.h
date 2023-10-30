@@ -13,18 +13,18 @@ public:
 	virtual ~HeliPlayer();
 
 public:
-	GameObjectMgr* m_pMainRotorFrame = NULL;
-	GameObjectMgr* m_pTailRotorFrame = NULL;
-	GameObjectMgr* m_pFrameFragObj1 = NULL;
-	GameObjectMgr* m_pFrameFragObj2 = NULL;
-	GameObjectMgr* m_pFrameFragObj3 = NULL;
-	GameObjectMgr* m_pFrameFragObj4 = NULL;
-	GameObjectMgr* m_pFrameFragObj5 = NULL;
-	GameObjectMgr* m_pFrameFragObj6 = NULL;
-	GameObjectMgr* m_pFrameFragObj7 = NULL;
-	GameObjectMgr* m_pFrameFragObj8 = NULL;
-	GameObjectMgr* m_pFrameFragObj9 = NULL;
-	GameObjectMgr* m_pFrameFragObj10 = NULL;
+	GameObjectMgr* m_FrameTopRotor = NULL;
+	GameObjectMgr* m_FrameTailRotor = NULL;
+	GameObjectMgr* m_FrameHeliglass = NULL;
+	GameObjectMgr* m_FrameCleanse = NULL;
+	GameObjectMgr* m_FrameLefttyre = NULL;
+	GameObjectMgr* m_FrameCleanser_2 = NULL;
+	GameObjectMgr* m_FrameHeliBody = NULL;
+	GameObjectMgr* m_FrameRightDoor = NULL;
+	GameObjectMgr* m_FrameBackDoor = NULL;
+	GameObjectMgr* m_FrameLeftDoor = NULL;
+	GameObjectMgr* m_FrameRighttyre = NULL;
+	GameObjectMgr* m_FrameBacktyre = NULL;
 	GameObjectMgr* m_pFrameFragObj11 = NULL;
 	GameObjectMgr* m_pChairPoint = NULL;
 

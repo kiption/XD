@@ -127,8 +127,8 @@ void SceneMgr::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_pSkyBox->SetCurScene(OPENING_SCENE);
 	
 	m_nShaders = 1;
-	m_ppShaders = new CObjectsShader * [m_nShaders];
-	CObjectsShader* pObjectShader = new CObjectsShader();
+	m_ppShaders = new ObjectStore * [m_nShaders];
+	ObjectStore* pObjectShader = new ObjectStore();
 	pObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pObjectShader->SetCurScene(OPENING_SCENE);
 	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);

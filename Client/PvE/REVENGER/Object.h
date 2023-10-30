@@ -158,7 +158,7 @@ public:
 
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);
-	void MoveForward(float fDistance = 1.0f);
+	void Move(float fDistance = 1.0f);
 
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3* pxmf3Axis, float fAngle);
@@ -215,8 +215,8 @@ public:
 	virtual ~CNpcHelicopterObject();
 
 private:
-	GameObjectMgr* m_pMainRotorFrame = NULL;
-	GameObjectMgr* m_pTailRotorFrame = NULL;
+	GameObjectMgr* m_FrameTopRotor = NULL;
+	GameObjectMgr* m_FrameTailRotor = NULL;
 	GameObjectMgr* m_pTail2RotorFrame = NULL;
 public:
 	virtual void OnPrepareAnimate();
@@ -232,18 +232,18 @@ public:
 	virtual ~CHelicopterObjects();
 
 public:
-	GameObjectMgr* m_pMainRotorFrame = NULL;
-	GameObjectMgr* m_pTailRotorFrame = NULL;
-	GameObjectMgr* m_pFrameFragObj1 = NULL;
-	GameObjectMgr* m_pFrameFragObj2 = NULL;
-	GameObjectMgr* m_pFrameFragObj3 = NULL;
-	GameObjectMgr* m_pFrameFragObj4 = NULL;
-	GameObjectMgr* m_pFrameFragObj5 = NULL;
-	GameObjectMgr* m_pFrameFragObj6 = NULL;
-	GameObjectMgr* m_pFrameFragObj7 = NULL;
-	GameObjectMgr* m_pFrameFragObj8 = NULL;
-	GameObjectMgr* m_pFrameFragObj9 = NULL;
-	GameObjectMgr* m_pFrameFragObj10 = NULL;
+	GameObjectMgr* m_FrameTopRotor = NULL;
+	GameObjectMgr* m_FrameTailRotor = NULL;
+	GameObjectMgr* m_FrameHeliglass = NULL;
+	GameObjectMgr* m_FrameCleanse = NULL;
+	GameObjectMgr* m_FrameLefttyre = NULL;
+	GameObjectMgr* m_FrameCleanser_2 = NULL;
+	GameObjectMgr* m_FrameHeliBody = NULL;
+	GameObjectMgr* m_FrameRightDoor = NULL;
+	GameObjectMgr* m_FrameBackDoor = NULL;
+	GameObjectMgr* m_FrameLeftDoor = NULL;
+	GameObjectMgr* m_FrameRighttyre = NULL;
+	GameObjectMgr* m_FrameBacktyre = NULL;
 	GameObjectMgr* m_pFrameFragObj11 = NULL;
 	GameObjectMgr* m_pChairPoint = NULL;
 
@@ -318,7 +318,7 @@ class CSoldiarNpcObjects : public GameObjectMgr
 public:
 	CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks);
 	virtual ~CSoldiarNpcObjects();
-	void MoveForward(float EleapsedTime);
+	void Move(float EleapsedTime);
 	void HittingState(float EleapsedTime);
 	void ReloadState(float EleapsedTime);
 	void DyingMotion(float EleapsedTime);
@@ -358,7 +358,7 @@ class CSoldiarOtherPlayerObjects : public GameObjectMgr
 public:
 	CSoldiarOtherPlayerObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks);
 	virtual ~CSoldiarOtherPlayerObjects();
-	void MoveForward(float EleapsedTime);
+	void Move(float EleapsedTime);
 	void MoveBackward(float EleapsedTime);
 	void MoveLeft(float EleapsedTime);
 	void MoveRight(float EleapsedTime);

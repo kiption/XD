@@ -6,15 +6,15 @@
 #include "SkinAnimationShader.h"
 
 
-CObjectsShader::CObjectsShader()
+ObjectStore::ObjectStore()
 {
 }
 
-CObjectsShader::~CObjectsShader()
+ObjectStore::~ObjectStore()
 {
 }
 
-void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+void ObjectStore::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	if (m_nCurScene == OPENING_SCENE)
 	{
@@ -235,7 +235,7 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
-void CObjectsShader::AnimateObjects(float fTimeElapsed)
+void ObjectStore::AnimateObjects(float fTimeElapsed)
 {
 
 	for (int j = 0; j < m_nObjects; j++)
@@ -244,7 +244,7 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 	}
 }
 
-void CObjectsShader::ReleaseObjects()
+void ObjectStore::ReleaseObjects()
 {
 
 	if (m_ppObjects)
@@ -254,12 +254,12 @@ void CObjectsShader::ReleaseObjects()
 	}
 }
 
-void CObjectsShader::ReleaseUploadBuffers()
+void ObjectStore::ReleaseUploadBuffers()
 {
 	if (m_ppObjects) for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
 }
 
-void CObjectsShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
+void ObjectStore::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
@@ -267,7 +267,7 @@ void CObjectsShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D1
 }
 
 
-CShadowMapShader::CShadowMapShader(CObjectsShader* pObjectsShader)
+CShadowMapShader::CShadowMapShader(ObjectStore* pObjectsShader)
 {
 	m_pObjectsShader = pObjectsShader;
 }
@@ -442,7 +442,7 @@ void CShadowMapShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3
 
 
 
-CDepthRenderShader::CDepthRenderShader(CObjectsShader* pObjectsShader, LIGHT* pLights)
+CDepthRenderShader::CDepthRenderShader(ObjectStore* pObjectsShader, LIGHT* pLights)
 {
 	m_pObjectsShader = pObjectsShader;
 
@@ -749,16 +749,16 @@ void CDepthRenderShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, I
 	ShaderMgr::CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, 0);
 }
 
-CTreeBlendingShadowShader::CTreeBlendingShadowShader(CObjectsShader* pObjectsShader)
+TreeBlendingShader::TreeBlendingShader(ObjectStore* pObjectsShader)
 {
 	m_pObjectsShader = pObjectsShader;
 }
 
-CTreeBlendingShadowShader::~CTreeBlendingShadowShader()
+TreeBlendingShader::~TreeBlendingShader()
 {
 }
 
-D3D12_BLEND_DESC CTreeBlendingShadowShader::CreateBlendState(int nPipelineState)
+D3D12_BLEND_DESC TreeBlendingShader::CreateBlendState(int nPipelineState)
 {
 	D3D12_BLEND_DESC d3dBlendDesc;
 	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
@@ -778,7 +778,7 @@ D3D12_BLEND_DESC CTreeBlendingShadowShader::CreateBlendState(int nPipelineState)
 	return(d3dBlendDesc);
 }
 
-D3D12_INPUT_LAYOUT_DESC CTreeBlendingShadowShader::CreateInputLayout(int nPipelineState)
+D3D12_INPUT_LAYOUT_DESC TreeBlendingShader::CreateInputLayout(int nPipelineState)
 {
 	UINT nInputElementDescs = 7;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
@@ -797,7 +797,7 @@ D3D12_INPUT_LAYOUT_DESC CTreeBlendingShadowShader::CreateInputLayout(int nPipeli
 	return(d3dInputLayoutDesc);
 }
 
-D3D12_DEPTH_STENCIL_DESC CTreeBlendingShadowShader::CreateDepthStencilState(int nPipelineState)
+D3D12_DEPTH_STENCIL_DESC TreeBlendingShader::CreateDepthStencilState(int nPipelineState)
 {
 	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
 	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
@@ -819,7 +819,7 @@ D3D12_DEPTH_STENCIL_DESC CTreeBlendingShadowShader::CreateDepthStencilState(int 
 	return(d3dDepthStencilDesc);
 }
 
-D3D12_RASTERIZER_DESC CTreeBlendingShadowShader::CreateRasterizerState(int nPipelineState)
+D3D12_RASTERIZER_DESC TreeBlendingShader::CreateRasterizerState(int nPipelineState)
 {
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
 	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
@@ -837,30 +837,30 @@ D3D12_RASTERIZER_DESC CTreeBlendingShadowShader::CreateRasterizerState(int nPipe
 	return(d3dRasterizerDesc);
 }
 
-D3D12_SHADER_BYTECODE CTreeBlendingShadowShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE TreeBlendingShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(ShaderMgr::CompileShaderFromFile(L"Shadow.hlsl", "VSShadowMapShadow", "vs_5_1", ppd3dShaderBlob));
 }
 
-D3D12_SHADER_BYTECODE CTreeBlendingShadowShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+D3D12_SHADER_BYTECODE TreeBlendingShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(ShaderMgr::CompileShaderFromFile(L"Shadow.hlsl", "PSShadowMapShadow", "ps_5_1", ppd3dShaderBlob));
 }
 
-void CTreeBlendingShadowShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+void TreeBlendingShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
 
-void CTreeBlendingShadowShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+void TreeBlendingShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if (m_pDepthTexture) m_pDepthTexture->UpdateShaderVariables(pd3dCommandList);
 }
 
-void CTreeBlendingShadowShader::ReleaseShaderVariables()
+void TreeBlendingShader::ReleaseShaderVariables()
 {
 }
 
-void CTreeBlendingShadowShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+void TreeBlendingShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	m_pDepthTexture = (Texture*)pContext;
 	m_pDepthTexture->AddRef();
@@ -868,17 +868,17 @@ void CTreeBlendingShadowShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
-void CTreeBlendingShadowShader::ReleaseObjects()
+void TreeBlendingShader::ReleaseObjects()
 {
 	if (m_pDepthTexture) m_pDepthTexture->Release();
 	ShaderMgr::ReleaseObjects();
 }
 
-void CTreeBlendingShadowShader::ReleaseUploadBuffers()
+void TreeBlendingShader::ReleaseUploadBuffers()
 {
 }
 
-void CTreeBlendingShadowShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+void TreeBlendingShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
 	ShaderMgr::Render(pd3dCommandList, pCamera, nPipelineState, false);
 
@@ -888,7 +888,7 @@ void CTreeBlendingShadowShader::Render(ID3D12GraphicsCommandList* pd3dCommandLis
 	m_pObjectsShader->m_ppObjects[44]->ShadowRender(pd3dCommandList, pCamera, true, this);
 }
 
-void CTreeBlendingShadowShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
+void TreeBlendingShader::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
 {
 	m_nPipelineStates = 1;
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
