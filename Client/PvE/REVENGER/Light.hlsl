@@ -45,7 +45,8 @@ float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
 		}
 	}
 
-	return((gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse) +
+	return((gLights[nIndex].m_cAmbient * gMaterial.m_cAmbient) +
+		(gLights[nIndex].m_cDiffuse * fDiffuseFactor * gMaterial.m_cDiffuse) +
 		(gLights[nIndex].m_cSpecular * fSpecularFactor * gMaterial.m_cSpecular));
 }
 

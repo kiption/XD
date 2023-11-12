@@ -8,7 +8,7 @@ CBulletObject::CBulletObject(float fEffectiveRange) : GameObjectMgr()
 CBulletObject::~CBulletObject()
 {
 }
-void CBulletObject::SetFirePosition(XMFLOAT3 xmf3FirePosition)
+void CBulletObject::SetCatridgePosition(XMFLOAT3 xmf3FirePosition)
 {
 	m_xmf3FirePosition = xmf3FirePosition;
 	SetPosition(xmf3FirePosition);
@@ -59,19 +59,19 @@ void CBulletObject::SetChild(GameObjectMgr* pChild, bool bReferenceUpdate)
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-CValkanObject::CValkanObject(float fEffectiveRange) : GameObjectMgr(10)
+CtridgeObject::CtridgeObject(float fEffectiveRange) : GameObjectMgr(10)
 {
 	m_fBulletEffectiveRange = fEffectiveRange;
 }
-CValkanObject::~CValkanObject()
+CtridgeObject::~CtridgeObject()
 {
 }
-void CValkanObject::SetFirePosition(XMFLOAT3 xmf3FirePosition)
+void CtridgeObject::SetCatridgePosition(XMFLOAT3 xmf3FirePosition)
 {
 	m_xmf3FirePosition = xmf3FirePosition;
 	SetPosition(xmf3FirePosition);
 }
-void CValkanObject::Reset()
+void CtridgeObject::Reset()
 {
 	m_pLockedObject = NULL;
 	m_fElapsedTimeAfterFire = 0;
@@ -80,7 +80,7 @@ void CValkanObject::Reset()
 
 	m_bActive = false;
 }
-void CValkanObject::Animate(float fElapsedTime)
+void CtridgeObject::Animate(float fElapsedTime)
 {
 	m_fElapsedTimeAfterFire += fElapsedTime;
 
@@ -103,7 +103,7 @@ void CValkanObject::Animate(float fElapsedTime)
 	}
 }
 
-void CValkanObject::SetChild(GameObjectMgr* pChild, bool bReferenceUpdate)
+void CtridgeObject::SetChild(GameObjectMgr* pChild, bool bReferenceUpdate)
 {
 	if (pChild)
 	{
@@ -132,7 +132,7 @@ CNPCbulletObject::CNPCbulletObject(float fEffectiveRange) : GameObjectMgr()
 CNPCbulletObject::~CNPCbulletObject()
 {
 }
-void CNPCbulletObject::SetFirePosition(XMFLOAT3 xmf3FirePosition)
+void CNPCbulletObject::SetCatridgePosition(XMFLOAT3 xmf3FirePosition)
 {
 	m_xmf3FirePosition = xmf3FirePosition;
 	SetPosition(xmf3FirePosition);

@@ -1,0 +1,46 @@
+[플레이어 , NPC 간의 충돌 검사]
+void NpcByPlayerCollsiion()
+{
+	for (int i = 21; i < 42; i++) {
+		XMFLOAT3 NpcPos = ((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[i])->GetToParentPosition();
+		XMFLOAT3 PlayerPos = ((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition();
+		XMFLOAT3 BBsize = XMFLOAT3(3.0, 5.0, 3.0);
+		XMFLOAT4 Oriented = XMFLOAT4(0, 0, 0, 1);
+		BoundingOrientedBox Npcoobb = BoundingOrientedBox(NpcPos, BBsize, Oriented);
+		BoundingOrientedBox PlayerPoobb = BoundingOrientedBox(PlayerPos, BBsize, Oriented);
+
+		if (PlayerPoobb.Intersects(Npcoobb)) {
+			PlayersMoveReflect(); // 서버로 충돌 여부를 전송
+		}
+	}
+}
+
+void PlayersMoveReflect(){
+	((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->m_xmf4x4ToParent._41 -= 2.0f;
+	((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->SetPosition(((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition());
+	m_bSendCollsion = true;
+}
+
+[플레이어 간의 충돌 검사]
+void MainGameScene::PlayerByPlayerCollision() 
+{
+	XMFLOAT3 HumanSize = XMFLOAT3(3.0, 5.0, 3.0);
+	XMFLOAT4 Oriented = XMFLOAT4(0, 0, 0, 1);
+	XMFLOAT3 P1Pos = ((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[5])->GetToParentPosition();
+	XMFLOAT3 P2Pos = ((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->GetToParentPosition();
+	XMFLOAT3 MyPos = ((CHumanPlayer*)m_ppShaders[0]->m_ppObjects[1])->GetPosition();
+
+	BoundingOrientedBox Other1Poobb = BoundingOrientedBox(XMFLOAT3(P1Pos), HumanSize, Oriented);
+	BoundingOrientedBox Other2Poobb = BoundingOrientedBox(XMFLOAT3(P2Pos), HumanSize, Oriented);
+	BoundingOrientedBox MyPoobb = BoundingOrientedBox(XMFLOAT3(MyPos), HumanSize, Oriented);
+
+	if (MyPoobb.Intersects(Other2Poobb)) {
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->m_xmf4x4ToParent._43 -= 1.0f;
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->SetPosition(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->GetPosition());
+	}
+	if (MyPoobb.Intersects(Other1Poobb)) {
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->m_xmf4x4ToParent._43 -= 1.0f;
+		((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[4])->SetPosition(((CSoldiarOtherPlayerObjects*)m_ppShaders[0]->m_ppObjects[6])->GetPosition());
+
+	}
+}

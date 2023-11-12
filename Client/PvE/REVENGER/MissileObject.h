@@ -21,15 +21,15 @@ public:
 	GameObjectMgr* m_pLockedObject = NULL;
 	CCamera* m_pCamera = NULL;
 	PlayerMgr* m_pPlayer = NULL;
-	void SetFirePosition(XMFLOAT3 xmf3FirePosition);
+	void SetCatridgePosition(XMFLOAT3 xmf3FirePosition);
 	void Reset();
 };
 
-class CValkanObject : public GameObjectMgr
+class CtridgeObject : public GameObjectMgr
 {
 public:
-	CValkanObject(float fEffectiveRange);
-	virtual ~CValkanObject();
+	CtridgeObject(float fEffectiveRange);
+	virtual ~CtridgeObject();
 
 public:
 	virtual void Animate(float fElapsedTime);
@@ -46,7 +46,7 @@ public:
 	CCamera* m_pCamera = NULL;
 	PlayerMgr* m_pPlayer = NULL;
 	float m_fShotDelay = 0.f;
-	void SetFirePosition(XMFLOAT3 xmf3FirePosition);
+	void SetCatridgePosition(XMFLOAT3 xmf3FirePosition);
 	void Reset();
 };
 
@@ -71,6 +71,6 @@ public:
 	CCamera* m_pCamera = NULL;
 	PlayerMgr* m_pPlayer = NULL;
 	float m_fShotDelay = 0.f;
-	void SetFirePosition(XMFLOAT3 xmf3FirePosition);
+	void SetCatridgePosition(XMFLOAT3 xmf3FirePosition);
 	void Reset();
 };

@@ -332,7 +332,7 @@ void GameObjectMgr::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 
 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-	if (IsVisible(pCamera)) {
+
 		if (m_pMesh)
 		{
 			if (m_nMaterials > 0)
@@ -359,7 +359,7 @@ void GameObjectMgr::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 		}
 		if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera, bPrerender);
 		if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera, bPrerender);
-	}
+	
 }
 
 void GameObjectMgr::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

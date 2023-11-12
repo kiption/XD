@@ -80,8 +80,8 @@ void MainGameScene::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[1].m_fRange = 52000.0;
-	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.7f, 0.7, 0.7, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 2.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6, 0.6, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
 	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(0, 1200.0f, 1250.0f);
 	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, -1.0f);
@@ -89,7 +89,7 @@ void MainGameScene::BuildDefaultLightsAndMaterials()
 	m_pLights->m_pLights[2].m_bEnable = false;
 	m_pLights->m_pLights[2].m_nType = SPOT_LIGHT;
 	m_pLights->m_pLights[2].m_fRange = 400.0;
-	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.9f, 0.5f, 0.1f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.5f, 0.5f, 0.1f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.5f, 0.1f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.8f, 0.5f, 0.1f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf4Emissive = XMFLOAT4(0.9f, 0.5f, 0.1f, 1.0f);
@@ -315,7 +315,7 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	GameObjectMgr* pBulletMesh = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
 	for (int i = 0; i < HELIBULLETS; i++)
 	{
-		pBulletObject = new CValkanObject(m_fBulletEffectiveRange);
+		pBulletObject = new CtridgeObject(m_fBulletEffectiveRange);
 		pBulletObject->SetChild(pBulletMesh, false);
 		pBulletObject->SetMovingSpeed(200.0f);
 		pBulletObject->SetActive(false);
@@ -326,7 +326,7 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	GameObjectMgr* pCartrudgetMesh = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet4.bin", pBCBulletEffectShader);
 	for (int i = 0; i < CARTRIDGES; i++)
 	{
-		pCartridge = new CValkanObject(1.5);
+		pCartridge = new CtridgeObject(1.5);
 		pCartridge->SetChild(pCartrudgetMesh, false);
 		pCartridge->SetMovingSpeed(6.5f);
 		pCartridge->SetActive(false);
@@ -337,7 +337,7 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	for (int i = 0; i < HELICOPTERVALKANS; i++)
 	{
 		GameObjectMgr* pHelicopterValkanMesh = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet4.bin", pBCBulletEffectShader);
-		pValkan = new CValkanObject(300.0);
+		pValkan = new CtridgeObject(300.0);
 		pValkan->SetChild(pHelicopterValkanMesh, false);
 		pValkan->SetMovingSpeed(1000.0f);
 		pValkan->SetActive(false);
@@ -922,7 +922,7 @@ void MainGameScene::CreateSRVs(ID3D12Device* pd3dDevice, Texture* pTexture, UINT
 
 void MainGameScene::Firevalkan(GameObjectMgr* Objects, XMFLOAT3 ToPlayerLook)
 {
-	CValkanObject* pBulletObject = NULL;
+	CtridgeObject* pBulletObject = NULL;
 	for (int i = 0; i < HELIBULLETS; i++)
 	{
 		if (!m_ppBullets[i]->m_bActive)
@@ -940,7 +940,7 @@ void MainGameScene::Firevalkan(GameObjectMgr* Objects, XMFLOAT3 ToPlayerLook)
 		XMFLOAT3 xmf3Direction = PlayerLook;
 		pBulletObject->m_xmf4x4ToParent = Objects->m_xmf4x4World;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+		pBulletObject->SetCatridgePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->m_xmf4x4ToParent._31 = ToPlayerLook.x;
 		pBulletObject->m_xmf4x4ToParent._32 = ToPlayerLook.y;
 		pBulletObject->m_xmf4x4ToParent._33 = ToPlayerLook.z;
@@ -1000,7 +1000,7 @@ void MainGameScene::HeliParticlesByPlayerCollisionResult()
 }
 void MainGameScene::OtherPlayerFirevalkan(GameObjectMgr* Objects, XMFLOAT3 ToPlayerLook)
 {
-	CValkanObject* pBulletObject = NULL;
+	CtridgeObject* pBulletObject = NULL;
 	for (int i = 0; i < HELICOPTERVALKANS; i++)
 	{
 		if (!m_ppValkan[i]->m_bActive)
@@ -1022,7 +1022,7 @@ void MainGameScene::OtherPlayerFirevalkan(GameObjectMgr* Objects, XMFLOAT3 ToPla
 
 
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+		pBulletObject->SetCatridgePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->m_xmf4x4ToParent._31 = ToPlayerLook.x;
 		pBulletObject->m_xmf4x4ToParent._32 = ToPlayerLook.y;
 		pBulletObject->m_xmf4x4ToParent._33 = ToPlayerLook.z;
@@ -1035,7 +1035,7 @@ void MainGameScene::OtherPlayerFirevalkan(GameObjectMgr* Objects, XMFLOAT3 ToPla
 }
 void MainGameScene::PlayerFirevalkan(CCamera* pCamera, XMFLOAT3 Look)
 {
-	CValkanObject* pBulletObject = NULL;
+	CtridgeObject* pBulletObject = NULL;
 	for (int i = 0; i < HELICOPTERVALKANS; i++)
 	{
 		if (!m_ppValkan[i]->m_bActive)
@@ -1055,7 +1055,7 @@ void MainGameScene::PlayerFirevalkan(CCamera* pCamera, XMFLOAT3 Look)
 		pBulletObject->m_xmf4x4ToParent._31 = PlayerLook.x;
 		pBulletObject->m_xmf4x4ToParent._32 = PlayerLook.y;
 		pBulletObject->m_xmf4x4ToParent._33 = PlayerLook.z;
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+		pBulletObject->SetCatridgePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->Rotate(90.0, 0.0, 0.0);
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->SetScale(3.5, 7.0, 3.5);
@@ -1066,7 +1066,7 @@ void MainGameScene::PlayerFirevalkan(CCamera* pCamera, XMFLOAT3 Look)
 
 void MainGameScene::Reflectcartridgecase(GameObjectMgr* Objects)
 {
-	CValkanObject* pBulletObject = NULL;
+	CtridgeObject* pBulletObject = NULL;
 	for (int i = 0; i < CARTRIDGES; i++)
 	{
 		if (!m_ppCartridge[i]->m_bActive)
@@ -1084,7 +1084,7 @@ void MainGameScene::Reflectcartridgecase(GameObjectMgr* Objects)
 		pBulletObject->m_xmf4x4ToParent = m_pPlayer->m_xmf4x4World;
 		XMFLOAT3 xmf3FirePosition = Vector3::Add(xmf3Position, Vector3::ScalarProduct(xmf3Direction, 0.0f, false));
 		xmf3FirePosition.y += 0.7f;
-		pBulletObject->SetFirePosition(XMFLOAT3(xmf3FirePosition));
+		pBulletObject->SetCatridgePosition(XMFLOAT3(xmf3FirePosition));
 		pBulletObject->SetMovingDirection(xmf3Direction);
 		pBulletObject->SetScale(0.05, 0.05, 0.05);
 		pBulletObject->SetActive(true);

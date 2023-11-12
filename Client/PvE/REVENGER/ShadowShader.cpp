@@ -156,11 +156,11 @@ void ObjectStore::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 			m_ppObjects[14] = m_ppNpc_Heli_Objects[2];
 			m_ppObjects[15] = m_ppNpc_Heli_Objects[3];
 			m_ppObjects[16] = m_ppNpc_Heli_Objects[4];
-			m_ppObjects[17] = new CValkanObject(1);
-			m_ppObjects[18] = new CValkanObject(1);
-			m_ppObjects[19] = new CValkanObject(1);
-			m_ppObjects[20] = new CValkanObject(1);
-			m_ppObjects[21] = new CValkanObject(1);
+			m_ppObjects[17] = new CtridgeObject(1);
+			m_ppObjects[18] = new CtridgeObject(1);
+			m_ppObjects[19] = new CtridgeObject(1);
+			m_ppObjects[20] = new CtridgeObject(1);
+			m_ppObjects[21] = new CtridgeObject(1);
 		}
 		//HELI_LOAD-END//
 

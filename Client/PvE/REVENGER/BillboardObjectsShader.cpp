@@ -347,8 +347,6 @@ void BillboardParticleShader::AnimateObjects(float fTimeElapsed)
 	uniform_real_distribution<float>uidw(15.0, 30.0);
 	uniform_real_distribution<float>uidh(15.0, 30.0);
 
-
-
 	for (int j = 0; j < m_nObjects; j++)
 	{
 

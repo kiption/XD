@@ -1,6 +1,6 @@
 
 
-#include "PCF.hlsl"
+#include "PCH.hlsl"
 #include "Light.hlsl"
 
 VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
@@ -12,7 +12,7 @@ VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 	output.normalW = mul(input.normal, (float3x3) gmtxGameObject);
 	output.tangentW = mul(input.tangent, (float3x3) gmtxGameObject);
 	output.bitangentW = mul(input.bitangent, (float3x3) gmtxGameObject);
-	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+	output.position = mul(mul(output.positionW, gmtxView), gmtxProjection);//mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 
 	for (int i = 0; i < MAX_LIGHTS; i++)
@@ -297,10 +297,9 @@ VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
 {
 	VS_TERRAIN_OUTPUT output;
 
-	output.normalW = (float3)mul(input.normal, (float3x3)gmtxProjection);
 	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxGameObject);
-
-	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
+	output.position = mul(mul(output.positionW, gmtxView), gmtxProjection);
+	output.normalW = (float3)mul(input.normal, (float3x3)gmtxProjection);
 	//output.color = input.color;
 	output.uv0 = input.uv0;
 	output.uv1 = input.uv1;

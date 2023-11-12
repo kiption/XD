@@ -99,12 +99,12 @@ public:
 	bool m_bHumanParticleCollisionCheck = false;
 	float m_fBulletEffectiveRange = 2000.0f;
 	BulletEffectShader* pBCBulletEffectShader = NULL;
-	CValkanObject* pBulletObject = NULL;
-	CValkanObject* m_ppBullets[HELIBULLETS];
-	CValkanObject* pCartridge = NULL;
-	CValkanObject* m_ppCartridge[CARTRIDGES];
-	CValkanObject* pValkan = NULL;
-	CValkanObject* m_ppValkan[HELICOPTERVALKANS];
+	CtridgeObject* pBulletObject = NULL;
+	CtridgeObject* m_ppBullets[HELIBULLETS];
+	CtridgeObject* pCartridge = NULL;
+	CtridgeObject* m_ppCartridge[CARTRIDGES];
+	CtridgeObject* pValkan = NULL;
+	CtridgeObject* m_ppValkan[HELICOPTERVALKANS];
 public:
 	XMFLOAT4X4 m_pMainRotorFrameP{};
 	XMFLOAT4X4 m_pTailRotorFrameP{};

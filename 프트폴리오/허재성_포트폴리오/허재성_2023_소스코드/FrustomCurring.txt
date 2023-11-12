@@ -1,0 +1,51 @@
+[절두체 평면 교차 판정]
+bool CCamera::IsInFrustum(BoundingBox& xmBoundingBox)
+{
+	return(m_xmFrustum.Intersects(xmBoundingBox));
+}
+
+bool GameObjectMgr::IsVisible(CCamera* pCamera)
+{
+	OnPrepareRender();
+	bool bIsVisible = false;
+	BoundingBox xmBoundingBox = m_pMesh->GetBoundingBox();
+	//모델 좌표계의 바운딩 박스를 월드 좌표계로 변환한다. 
+	xmBoundingBox.Transform(xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
+	if (pCamera) bIsVisible = pCamera->IsInFrustum(xmBoundingBox);
+	return(bIsVisible);
+}
+
+
+[객체 렌더링]
+void GameObjectMgr::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool bPrerender)
+{
+...
+	if (IsVisible(pCamera)) {
+		if (m_pMesh)
+		{
+			if (m_nMaterials > 0)
+			{
+				for (int i = 0; i < m_nMaterials; i++)
+				{
+					if (m_ppMaterials[i])
+					{
+						if (m_ppMaterials[i]->m_pShader) {
+
+							m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, bPrerender);
+							UpdateShaderVariables(pd3dCommandList);
+						}
+						m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+
+						for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
+						{
+							if (m_ppMaterials[i]->m_ppTextures[k]) m_ppMaterials[i]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
+						}
+					}
+					m_pMesh->Render(pd3dCommandList, i);
+				}
+			}
+		}
+		if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera, bPrerender);
+		if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera, bPrerender);
+	}
+}

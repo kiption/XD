@@ -34,7 +34,7 @@ struct CB_GAMEOBJECT_INFO
 class ShaderMgr;
 class StandardShader;
 class BulletEffectShader;
-class CValkanObject;
+class CtridgeObject;
 class PlayerMgr;
 
 
@@ -288,8 +288,8 @@ public:
 public:
 	float m_fBulletEffectiveRange = 2000.0f;
 	BulletEffectShader* pBCBulletEffectShader = NULL;
-	CValkanObject* pBulletObject = NULL;
-	CValkanObject* m_ppBullets[HELIBULLETS];
+	CtridgeObject* pBulletObject = NULL;
+	CtridgeObject* m_ppBullets[HELIBULLETS];
 	void Firevalkan(XMFLOAT3 ToPlayerLook);
 public:
 	virtual void OnPrepareAnimate();

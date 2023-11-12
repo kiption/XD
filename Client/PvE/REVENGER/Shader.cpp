@@ -267,7 +267,6 @@ void ShaderMgr::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 }
 void ShaderMgr::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World, CMaterial* pMaterial)
 {
-	
 	::memcpy(&m_pcbMappedFrameworkInfo->m_bAnimationShader, &pMaterial->m_isAnimationShader, sizeof(bool));
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(21, d3dGpuVirtualAddress);
@@ -282,23 +281,13 @@ void ShaderMgr::ReleaseShaderVariables()
 	}
 }
 
-//void CShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState)
-//{
-//	SceneManager* m_pScene = NULL;
-//	if (m_ppd3dPipelineStates[nPipelineState]) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
-//	UpdateShaderVariables(pd3dCommandList);
-//
-//}
+
 void ShaderMgr::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool bPrerender)
 {
-	//if (pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(pd3dGraphicsRootSignature);
 	if (m_ppd3dPipelineStates && !bPrerender) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
 	UpdateShaderVariables(pd3dCommandList);
 }
-//void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelinestates)
-//{
-//	OnPrepareRender(pd3dCommandList, nPipelinestates);
-//}
+
 
 
 

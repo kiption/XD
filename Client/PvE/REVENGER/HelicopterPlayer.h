@@ -70,8 +70,8 @@ public:
 public:
 	float m_fBulletEffectiveRange = 2000.0f;
 	BulletEffectShader* pBCBulletEffectShader = NULL;
-	CValkanObject* pBulletObject = NULL;
-	CValkanObject* m_ppBullets[BULLETS];
+	CtridgeObject* pBulletObject = NULL;
+	CtridgeObject* m_ppBullets[BULLETS];
 	void Firevalkan(GameObjectMgr* pLockedObject);
 public:
 	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);

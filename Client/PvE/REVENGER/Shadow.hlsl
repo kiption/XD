@@ -96,7 +96,7 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 	{
 		positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
 		output.positionW = positionW.xyz;
-		output.position = mul(mul(positionW, gmtxView), gmtxProjection);
+		output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 		output.normalW = mul(float4(input.normal, 0.0f), gmtxGameObject).xyz;
 		output.uv = input.uv;
 		output.tangentW = mul(input.tangent, (float3x3) gmtxGameObject);
