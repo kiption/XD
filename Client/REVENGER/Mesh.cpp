@@ -50,7 +50,7 @@ void Mesh::ReleaseUploadBuffers()
 void Mesh::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
 {
 	pd3dCommandList->IASetVertexBuffers(m_nSlot, 1, &m_d3dPositionBufferView);
-	pd3dCommandList->IASetVertexBuffers(m_nSlot, m_nVertexBufferViews, m_d3dVertexBufferView);
+	//pd3dCommandList->IASetVertexBuffers(m_nSlot, m_nVertexBufferViews, &m_d3dPositionBufferView);
 	pd3dCommandList->IASetPrimitiveTopology(m_d3dPrimitiveTopology);
 }
 

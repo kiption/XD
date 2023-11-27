@@ -309,8 +309,8 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pBCBulletEffectShader->SetCurScene(INGAME_SCENE);
 
-	m_pBoundingBoxShader = new BoundingWireShader(pObjectShader);
-	m_pBoundingBoxShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
+	//m_pBoundingBoxShader = new BoundingWireShader(pObjectShader);
+	//m_pBoundingBoxShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
 
 	GameObjectMgr* pBulletMesh = GameObjectMgr::LoadGeometryHierachyFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Bullet1(1).bin", pBCBulletEffectShader);
 	for (int i = 0; i < HELIBULLETS; i++)
