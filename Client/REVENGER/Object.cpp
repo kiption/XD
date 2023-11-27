@@ -333,33 +333,33 @@ void GameObjectMgr::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 
-		if (m_pMesh)
+	if (m_pMesh)
+	{
+		if (m_nMaterials > 0)
 		{
-			if (m_nMaterials > 0)
+			for (int i = 0; i < m_nMaterials; i++)
 			{
-				for (int i = 0; i < m_nMaterials; i++)
+				if (m_ppMaterials[i])
 				{
-					if (m_ppMaterials[i])
-					{
-						if (m_ppMaterials[i]->m_pShader) {
+					if (m_ppMaterials[i]->m_pShader) {
 
-							m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, bPrerender);
-							UpdateShaderVariables(pd3dCommandList);
-						}
-						m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
-
-						for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
-						{
-							if (m_ppMaterials[i]->m_ppTextures[k]) m_ppMaterials[i]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
-						}
+						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera, 0, bPrerender);
+						UpdateShaderVariables(pd3dCommandList);
 					}
-					m_pMesh->Render(pd3dCommandList, i);
+					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+
+					for (int k = 0; k < m_ppMaterials[i]->m_nTextures; k++)
+					{
+						if (m_ppMaterials[i]->m_ppTextures[k]) m_ppMaterials[i]->m_ppTextures[k]->UpdateShaderVariables(pd3dCommandList);
+					}
 				}
+				m_pMesh->Render(pd3dCommandList, i);
 			}
 		}
-		if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera, bPrerender);
-		if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera, bPrerender);
-	
+	}
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera, bPrerender);
+	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera, bPrerender);
+
 }
 
 void GameObjectMgr::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -586,9 +586,9 @@ void GameObjectMgr::LoadMaterialsFromFile(ID3D12Device* pd3dDevice, ID3D12Graphi
 	char pstrToken[64] = { '\0' };
 	int nMaterial = 0;
 	UINT nReads = 0;
-	
+
 	if (m_nCurScene == INGAME_SCENE) {
-		m_pScene=((MainGameScene* )m_pScene);
+		m_pScene = ((MainGameScene*)m_pScene);
 	}
 	else
 	{
@@ -945,7 +945,7 @@ CLoadedModelInfo* GameObjectMgr::LoadGeometryAndAnimationFromFile(ID3D12Device* 
 #endif
 
 	return(pLoadedModel);
-	}
+}
 
 
 CNpcHelicopterObject::CNpcHelicopterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) :GameObjectMgr(10)
@@ -1055,26 +1055,18 @@ void CHelicopterObjects::OnPrepareAnimate()
 void CHelicopterObjects::Animate(float fTimeElapsed)
 {
 	XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 7.1) * fTimeElapsed);
-	m_xoobb = BoundingOrientedBox(GetToParentPosition(), { 4, 6,8 }, { 0, 0, 0, 1 });
+	m_xoobb = BoundingOrientedBox(GetToParentPosition(), { 4,6,8 }, { 0, 0, 0, 1 });
 	if (m_FrameTopRotor)
-	{
 		m_FrameTopRotor->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_FrameTopRotor->m_xmf4x4ToParent);
-	}
+
 	if (m_FrameTailRotor)
-	{
 		m_FrameTailRotor->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_FrameTailRotor->m_xmf4x4ToParent);
-	}
 
-
-	if (m_bDyingstate == true) {
+	if (m_bDyingstate == true)
 		m_bDyingMotion = true;
 
-	}
 	if (m_bDyingMotion == true)
-	{
 		FallDown(fTimeElapsed);
-	}
-
 
 	ParticlePosition = this->GetPosition();
 
@@ -1184,7 +1176,7 @@ void CHelicopterObjects::FallDown(float fTimeElapsed)
 	m_FrameBackDoor->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[8].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
 	m_FrameBackDoor->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[8].z * staticValueZ * fTimeElapsed;
 	m_FrameBackDoor->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotateRow, m_FrameBackDoor->m_xmf4x4ToParent);
-	
+
 	m_FrameHeliglass->m_xmf4x4ToParent._41 += m_pxmf3SphereVectors[2].x * staticValue * fTimeElapsed;
 	m_FrameHeliglass->m_xmf4x4ToParent._42 += m_pxmf3SphereVectors[2].y * staticValue * fTimeElapsed + 0.5f * gravity.y * fTimeElapsed * fTimeElapsed;
 	m_FrameHeliglass->m_xmf4x4ToParent._43 += m_pxmf3SphereVectors[2].z * staticValueZ * fTimeElapsed;
@@ -1223,7 +1215,7 @@ CSoldiarNpcObjects::CSoldiarNpcObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	for (int i = 0; i < ANIMATIONTRACTS_NPCPLAYER; i++) {
 		m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
 		m_pSkinnedAnimationController->SetTrackEnable(0, true);
-		if(i!=0)m_pSkinnedAnimationController->SetTrackEnable(i, false);
+		if (i != 0)m_pSkinnedAnimationController->SetTrackEnable(i, false);
 	}
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -1524,7 +1516,7 @@ void CSoldiarOtherPlayerObjects::IdleState(float EleapsedTime)
 }
 void CSoldiarOtherPlayerObjects::Animate(float fTimeElapsed)
 {
-	m_xoobb = BoundingOrientedBox(GetToParentPosition(), {4, 6,4}, {0, 0, 0, 1});
+	m_xoobb = BoundingOrientedBox(GetToParentPosition(), { 4, 6,4 }, { 0, 0, 0, 1 });
 	GameObjectMgr::Animate(fTimeElapsed);
 }
 
