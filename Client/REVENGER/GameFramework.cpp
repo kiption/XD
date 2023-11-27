@@ -2023,11 +2023,12 @@ void CGameFramework::ChangeScene(DWORD nMode)
 {
 	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	d3dRtvCPUDescriptorHandle.ptr += (::gnRtvDescriptorIncrementSize * m_nSwapChainBuffers);
+	ReleaseObjects();
+	m_pd3dCommandAllocator->Reset();
+	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 	if (nMode != m_nMode)
 	{
-		ReleaseObjects();
-		m_pd3dCommandAllocator->Reset();
-		m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
+		
 		switch (nMode)
 		{
 		case INGAME_SCENE:
