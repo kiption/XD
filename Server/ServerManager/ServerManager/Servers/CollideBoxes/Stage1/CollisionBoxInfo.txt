@@ -1,0 +1,3312 @@
+Object Name: Cube1
+Center: (61.00, 113.00, 766.40)
+Scale: (65.70, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 47.30376
+Angle BOC: 132.6962
+
+Object Name: Cube5
+Center: (643.00, 113.00, 1035.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube6
+Center: (468.90, 113.00, 811.10)
+Scale: (53.08, 228.47, 175.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 33.7469
+Angle BOC: 146.2531
+
+Object Name: Cube7
+Center: (253.70, 113.00, 842.40)
+Scale: (125.00, 228.47, 128.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 88.62904
+Angle BOC: 91.37096
+
+Object Name: Cube8
+Center: (451.20, 113.00, 31.00)
+Scale: (75.00, 228.47, 175.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 46.24352
+Angle BOC: 133.7565
+
+Object Name: Cube9
+Center: (-717.00, 113.00, -994.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube10
+Center: (464.00, 113.00, -262.20)
+Scale: (59.26, 228.47, 176.26)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 37.16905
+Angle BOC: 142.8309
+
+Object Name: Cube11
+Center: (250.40, 113.00, -234.00)
+Scale: (125.00, 228.47, 128.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 88.62904
+Angle BOC: 91.37096
+
+Object Name: Cube12
+Center: (223.00, 113.00, 294.00)
+Scale: (50.41, 228.47, 158.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.393
+Angle BOC: 144.607
+
+Object Name: Cube13
+Center: (324.80, 113.00, 259.00)
+Scale: (152.42, 228.47, 88.32)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 119.8203
+Angle BOC: 60.17968
+
+Object Name: Cube14
+Center: (433.90, 113.00, 307.70)
+Scale: (68.50, 228.47, 90.80)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 74.06491
+Angle BOC: 105.9351
+
+Object Name: Cube15
+Center: (221.00, 113.00, -778.80)
+Scale: (51.98, 228.47, 156.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 36.85433
+Angle BOC: 143.1457
+
+Object Name: Cube16
+Center: (324.80, 113.00, -815.00)
+Scale: (152.42, 228.47, 88.32)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 119.8203
+Angle BOC: 60.17968
+
+Object Name: Cube17
+Center: (427.30, 113.00, -774.00)
+Scale: (63.25, 228.47, 69.67)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 84.46392
+Angle BOC: 95.53608
+
+Object Name: Cube18
+Center: (-546.10, 113.00, -780.80)
+Scale: (52.19, 228.47, 180.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 32.34034
+Angle BOC: 147.6597
+
+Object Name: Cube19
+Center: (-455.80, 113.00, -807.00)
+Scale: (131.06, 228.47, 128.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 91.34234
+Angle BOC: 88.65766
+
+Object Name: Cube20
+Center: (-544.30, 113.00, 291.60)
+Scale: (53.49, 228.47, 180.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 33.10267
+Angle BOC: 146.8973
+
+Object Name: Cube21
+Center: (-330.50, 113.00, 265.00)
+Scale: (129.84, 228.47, 128.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 90.80441
+Angle BOC: 89.19559
+
+Object Name: Cube22
+Center: (-301.01, 113.00, -256.90)
+Scale: (56.44, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 41.24134
+Angle BOC: 138.7587
+
+Object Name: Cube23
+Center: (-402.00, 113.00, -225.60)
+Scale: (152.42, 228.47, 88.32)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 119.8203
+Angle BOC: 60.1797
+
+Object Name: Cube24
+Center: (-508.70, 113.00, -262.20)
+Scale: (83.22, 228.47, 65.90)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 103.2501
+Angle BOC: 76.74984
+
+Object Name: Cube25
+Center: (-297.80, 113.00, 816.00)
+Scale: (51.98, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 38.22338
+Angle BOC: 141.7766
+
+Object Name: Cube26
+Center: (-395.00, 113.00, 847.00)
+Scale: (152.42, 228.47, 88.32)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 119.8203
+Angle BOC: 60.17968
+
+Object Name: Cube27
+Center: (-506.90, 113.00, 806.00)
+Scale: (76.78, 228.47, 65.34)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 99.19998
+Angle BOC: 80.80002
+
+Object Name: Cube29
+Center: (-723.30, 113.00, 1044.00)
+Scale: (200.00, 228.47, 112.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 121.2192
+Angle BOC: 58.78083
+
+Object Name: Cube30
+Center: (659.00, 113.00, -1002.00)
+Scale: (200.00, 228.47, 97.23)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 128.1456
+Angle BOC: 51.85439
+
+Object Name: Cube31
+Center: (-32.00, 113.00, 556.00)
+Scale: (175.69, 228.47, 128.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.8367
+Angle BOC: 72.16327
+
+Object Name: Cube32
+Center: (-32.00, 113.00, -588.00)
+Scale: (175.69, 228.47, 128.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.8367
+Angle BOC: 72.16327
+
+Object Name: Cube33
+Center: (433.90, 113.00, 307.70)
+Scale: (68.50, 228.47, 90.80)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 74.06491
+Angle BOC: 105.9351
+
+Object Name: Gared1
+Center: (202.00, 9.40, 654.30)
+Scale: (9.26, 10.73, 259.21)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 4.092325
+Angle BOC: 175.9077
+
+Object Name: Gared2
+Center: (-281.30, 6.00, -617.70)
+Scale: (12.83, 16.37, 254.76)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 5.765548
+Angle BOC: 174.2345
+
+Object Name: Gared3
+Center: (-281.60, 6.00, 449.00)
+Scale: (6.12, 11.48, 261.92)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 2.677738
+Angle BOC: 177.3223
+
+Object Name: Gared4
+Center: (461.70, 10.40, 435.90)
+Scale: (10.44, 11.42, 223.52)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 5.349289
+Angle BOC: 174.6507
+
+Object Name: Gared5
+Center: (129.75, 10.70, 866.90)
+Scale: (10.33, 9.39, 60.67)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 19.31668
+Angle BOC: 160.6833
+
+Object Name: Gared6
+Center: (155.90, 10.70, 779.60)
+Scale: (10.33, 9.39, 23.26)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 47.87442
+Angle BOC: 132.1256
+
+Object Name: Gared7
+Center: (190.50, 17.70, 572.10)
+Scale: (37.70, 23.63, 51.06)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 72.87396
+Angle BOC: 107.126
+
+Object Name: Gared8
+Center: (155.90, 10.70, 452.20)
+Scale: (10.33, 9.39, 27.57)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 41.06551
+Angle BOC: 138.9345
+
+Object Name: Gared9
+Center: (128.80, 10.70, 229.90)
+Scale: (10.33, 9.39, 27.57)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 41.06554
+Angle BOC: 138.9344
+
+Object Name: Gared10
+Center: (405.00, 10.70, 157.10)
+Scale: (22.12, 9.39, 9.29)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 134.4156
+Angle BOC: 45.58435
+
+Object Name: Gared11
+Center: (573.00, 10.70, 218.10)
+Scale: (10.44, 9.39, 25.31)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 44.83501
+Angle BOC: 135.165
+
+Object Name: Gared12
+Center: (545.30, 10.70, 263.50)
+Scale: (10.24, 9.39, 28.87)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 39.05617
+Angle BOC: 140.9438
+
+Object Name: Gared13
+Center: (506.50, 10.70, 220.80)
+Scale: (23.32, 12.04, 23.77)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 88.89872
+Angle BOC: 91.10128
+
+Object Name: Gared14
+Center: (570.70, 10.70, 405.80)
+Scale: (10.24, 9.39, 28.87)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 39.05617
+Angle BOC: 140.9438
+
+Object Name: Gared15
+Center: (547.00, 10.70, 666.10)
+Scale: (10.24, 9.39, 28.87)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 39.05624
+Angle BOC: 140.9438
+
+Object Name: Gared16
+Center: (502.69, 10.70, 951.16)
+Scale: (26.24, 9.39, 9.85)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 138.8442
+Angle BOC: 41.15577
+
+Object Name: Gared17
+Center: (203.00, 10.70, 926.20)
+Scale: (28.40, 10.52, 9.85)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 141.738
+Angle BOC: 38.26199
+
+Object Name: Gared18
+Center: (128.50, 10.70, -196.30)
+Scale: (10.33, 9.39, 32.93)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 34.82127
+Angle BOC: 145.1787
+
+Object Name: Gared19
+Center: (155.90, 10.70, -288.20)
+Scale: (10.33, 9.39, 23.26)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 47.87442
+Angle BOC: 132.1256
+
+Object Name: Gared20
+Center: (207.70, 17.40, -413.70)
+Scale: (12.43, 23.34, 250.29)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 5.686926
+Angle BOC: 174.3131
+
+Object Name: Gared21
+Center: (190.50, 17.70, -501.30)
+Scale: (18.41, 23.63, 45.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 43.91696
+Angle BOC: 136.083
+
+Object Name: Gared22
+Center: (153.70, 10.70, -607.20)
+Scale: (10.33, 9.39, 29.19)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 38.95775
+Angle BOC: 141.0423
+
+Object Name: Gared23
+Center: (128.80, 10.70, -831.60)
+Scale: (10.33, 9.39, 27.57)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 41.06562
+Angle BOC: 138.9344
+
+Object Name: Gared25
+Center: (405.00, 10.70, -916.00)
+Scale: (22.12, 9.39, 9.29)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 134.4158
+Angle BOC: 45.58422
+
+Object Name: Gared26
+Center: (571.20, 10.70, -852.40)
+Scale: (10.44, 9.39, 25.31)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 44.83443
+Angle BOC: 135.1656
+
+Object Name: Gared27
+Center: (542.40, 10.70, -809.30)
+Scale: (10.24, 9.39, 28.87)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 39.05624
+Angle BOC: 140.9438
+
+Object Name: Gared28
+Center: (506.50, 10.70, -856.60)
+Scale: (23.32, 12.04, 23.77)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 88.89872
+Angle BOC: 91.10128
+
+Object Name: Gared29
+Center: (569.70, 10.70, -667.40)
+Scale: (10.24, 9.39, 28.87)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 39.05624
+Angle BOC: 140.9438
+
+Object Name: Gared30
+Center: (544.70, 10.70, -377.30)
+Scale: (10.24, 9.39, 28.87)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 39.05617
+Angle BOC: 140.9438
+
+Object Name: Gared31
+Center: (497.70, 10.70, -122.70)
+Scale: (26.24, 9.39, 9.85)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 138.8442
+Angle BOC: 41.15583
+
+Object Name: Gared32
+Center: (203.90, 10.70, -147.30)
+Scale: (28.40, 10.52, 9.85)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 141.7379
+Angle BOC: 38.2621
+
+Object Name: Gared33
+Center: (466.10, 12.20, -651.40)
+Scale: (12.84, 12.04, 255.26)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 5.760072
+Angle BOC: 174.2399
+
+Object Name: Gared34
+Center: (124.90, 10.70, -434.30)
+Scale: (11.32, 9.39, 29.34)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 42.18715
+Angle BOC: 137.8129
+
+Object Name: Gared35
+Center: (-200.60, 10.70, -846.40)
+Scale: (12.12, 9.39, 31.33)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 42.29207
+Angle BOC: 137.7079
+
+Object Name: Gared36
+Center: (-228.50, 10.70, -753.60)
+Scale: (10.33, 9.39, 23.26)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 47.87442
+Angle BOC: 132.1256
+
+Object Name: Gared37
+Center: (-258.87, 17.70, -548.38)
+Scale: (37.70, 23.63, 51.06)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 72.87396
+Angle BOC: 107.126
+
+Object Name: Gared38
+Center: (-228.80, 10.70, -433.20)
+Scale: (10.33, 9.39, 27.57)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 41.06551
+Angle BOC: 138.9345
+
+Object Name: Gared39
+Center: (-203.50, 10.70, -210.40)
+Scale: (10.33, 9.39, 27.57)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 41.06551
+Angle BOC: 138.9345
+
+Object Name: Gared40
+Center: (-479.10, 10.70, -125.50)
+Scale: (22.12, 9.39, 9.29)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 134.4156
+Angle BOC: 45.58435
+
+Object Name: Gared41
+Center: (-645.60, 10.70, -190.10)
+Scale: (10.44, 9.39, 25.31)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 44.83501
+Angle BOC: 135.165
+
+Object Name: Gared42
+Center: (-617.10, 10.70, -233.50)
+Scale: (10.24, 9.39, 28.87)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 39.05617
+Angle BOC: 140.9438
+
+Object Name: Gared43
+Center: (-579.70, 10.70, -195.97)
+Scale: (23.32, 12.04, 23.77)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 88.89872
+Angle BOC: 91.10128
+
+Object Name: Gared44
+Center: (-643.00, 10.70, -371.20)
+Scale: (10.24, 9.39, 24.89)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 44.72478
+Angle BOC: 135.2752
+
+Object Name: Gared45
+Center: (-619.30, 10.70, -662.10)
+Scale: (10.24, 9.39, 28.87)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 39.05624
+Angle BOC: 140.9438
+
+Object Name: Gared46
+Center: (-571.70, 10.70, -918.30)
+Scale: (26.24, 9.39, 9.85)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 138.8442
+Angle BOC: 41.15577
+
+Object Name: Gared47
+Center: (-276.70, 10.70, -893.00)
+Scale: (28.40, 10.52, 10.85)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 138.173
+Angle BOC: 41.82698
+
+Object Name: Gared48
+Center: (-202.73, 10.70, 224.80)
+Scale: (11.11, 9.39, 32.93)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 37.27449
+Angle BOC: 142.7255
+
+Object Name: Gared49
+Center: (-230.50, 10.70, 326.90)
+Scale: (10.33, 9.39, 23.26)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 47.87442
+Angle BOC: 132.1256
+
+Object Name: Gared50
+Center: (-263.00, 13.30, 540.60)
+Scale: (31.96, 17.45, 45.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 69.99508
+Angle BOC: 110.0049
+
+Object Name: Gared51
+Center: (-230.90, 10.70, 653.50)
+Scale: (10.33, 9.39, 29.19)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 38.95775
+Angle BOC: 141.0423
+
+Object Name: Gared52
+Center: (-204.50, 10.70, 875.60)
+Scale: (10.33, 9.39, 27.57)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 41.0656
+Angle BOC: 138.9344
+
+Object Name: Gared53
+Center: (-479.00, 10.70, 949.80)
+Scale: (24.23, 9.39, 9.29)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 138.0296
+Angle BOC: 41.9704
+
+Object Name: Gared54
+Center: (-646.90, 10.70, 887.10)
+Scale: (10.44, 9.39, 25.31)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 44.83491
+Angle BOC: 135.1651
+
+Object Name: Gared55
+Center: (-620.00, 10.70, 842.50)
+Scale: (10.24, 9.39, 28.87)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 39.05624
+Angle BOC: 140.9438
+
+Object Name: Gared56
+Center: (-578.70, 10.70, 883.40)
+Scale: (23.32, 12.04, 23.77)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 88.89872
+Angle BOC: 91.10128
+
+Object Name: Gared57
+Center: (-646.20, 10.70, 697.73)
+Scale: (10.24, 9.39, 28.87)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 39.05624
+Angle BOC: 140.9438
+
+Object Name: Gared58
+Center: (-622.20, 10.70, 437.80)
+Scale: (10.24, 9.39, 28.87)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 39.05617
+Angle BOC: 140.9438
+
+Object Name: Gared59
+Center: (-579.80, 10.70, 154.40)
+Scale: (26.24, 9.39, 9.85)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 138.8441
+Angle BOC: 41.15589
+
+Object Name: Gared60
+Center: (-277.70, 10.70, 180.76)
+Scale: (28.40, 10.52, 11.10)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 137.2956
+Angle BOC: 42.70436
+
+Object Name: Gared61
+Center: (-542.77, 12.20, 680.64)
+Scale: (12.84, 12.04, 255.26)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 5.760072
+Angle BOC: 174.2399
+
+Object Name: Gared62
+Center: (-204.20, 10.70, 470.70)
+Scale: (11.32, 9.39, 29.34)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 42.18711
+Angle BOC: 137.8129
+
+Object Name: Gared63
+Center: (-543.10, 6.00, -388.10)
+Scale: (12.83, 16.37, 254.77)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 5.765548
+Angle BOC: 174.2345
+
+Object Name: Tree1
+Center: (60.30, 27.60, 873.50)
+Scale: (6.23, 106.63, 8.45)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 72.76051
+Angle BOC: 107.2395
+
+Object Name: Tree2
+Center: (256.20, 27.60, 972.90)
+Scale: (11.00, 44.44, 4.69)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 133.8361
+Angle BOC: 46.16395
+
+Object Name: Tree3
+Center: (204.50, 27.60, 750.80)
+Scale: (8.46, 132.42, 7.97)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 93.42311
+Angle BOC: 86.57689
+
+Object Name: Tree4
+Center: (203.50, 27.60, 606.70)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4376
+Angle BOC: 57.56242
+
+Object Name: Tree5
+Center: (174.60, 27.60, 438.90)
+Scale: (4.83, 44.44, 4.26)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 97.20471
+Angle BOC: 82.79529
+
+Object Name: Tree6
+Center: (-124.30, 27.60, 888.20)
+Scale: (4.95, 44.44, 3.49)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 109.5445
+Angle BOC: 70.45554
+
+Object Name: Tree7
+Center: (107.20, 27.60, 205.20)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4381
+Angle BOC: 57.56186
+
+Object Name: Tree8
+Center: (256.40, 27.60, 533.20)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4376
+Angle BOC: 57.56242
+
+Object Name: Tree9
+Center: (115.70, 27.60, 981.96)
+Scale: (4.83, 44.44, 3.93)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 101.7182
+Angle BOC: 78.28185
+
+Object Name: Tree10
+Center: (433.60, 27.60, 550.20)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4376
+Angle BOC: 57.56242
+
+Object Name: Tree11
+Center: (269.90, 27.60, 518.60)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4376
+Angle BOC: 57.56242
+
+Object Name: Tree12
+Center: (467.00, 27.60, 509.80)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4387
+Angle BOC: 57.5613
+
+Object Name: Tree13
+Center: (446.60, 27.60, 531.50)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4376
+Angle BOC: 57.56242
+
+Object Name: Tree14
+Center: (513.80, 27.60, 443.30)
+Scale: (8.72, 85.95, 6.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 108.7266
+Angle BOC: 71.27338
+
+Object Name: Tree15
+Center: (476.90, 27.60, 520.30)
+Scale: (4.83, 101.96, 5.45)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 83.15887
+Angle BOC: 96.84114
+
+Object Name: Tree16
+Center: (172.70, 27.60, 135.80)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4381
+Angle BOC: 57.56186
+
+Object Name: Tree17
+Center: (477.30, 27.60, 271.30)
+Scale: (4.83, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.6971
+Angle BOC: 72.30292
+
+Object Name: Tree18
+Center: (454.80, 27.60, 255.90)
+Scale: (4.83, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.6971
+Angle BOC: 72.30315
+
+Object Name: Tree19
+Center: (427.90, 27.60, 239.30)
+Scale: (4.83, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.6966
+Angle BOC: 72.30338
+
+Object Name: Tree20
+Center: (414.60, 27.60, 238.40)
+Scale: (4.83, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.6966
+Angle BOC: 72.30338
+
+Object Name: Tree21
+Center: (594.50, 27.60, 645.10)
+Scale: (6.36, 99.57, 5.58)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 97.49093
+Angle BOC: 82.50908
+
+Object Name: Tree22
+Center: (592.90, 27.60, 809.80)
+Scale: (5.84, 60.13, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 117.6477
+Angle BOC: 62.35231
+
+Object Name: Tree23
+Center: (595.10, 27.60, 907.20)
+Scale: (6.29, 103.39, 6.19)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 90.9221
+Angle BOC: 89.0779
+
+Object Name: Tree24
+Center: (519.10, 27.60, 968.80)
+Scale: (8.65, 82.71, 4.47)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 125.3106
+Angle BOC: 54.68941
+
+Object Name: Tree25
+Center: (106.40, 27.60, -167.10)
+Scale: (6.84, 96.48, 6.82)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 90.11867
+Angle BOC: 89.88133
+
+Object Name: Tree26
+Center: (351.90, 27.60, -82.70)
+Scale: (8.39, 63.52, 3.51)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 134.5946
+Angle BOC: 45.40538
+
+Object Name: Tree27
+Center: (207.70, 27.60, -329.90)
+Scale: (7.67, 66.16, 8.52)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 83.99995
+Angle BOC: 96.00005
+
+Object Name: Tree28
+Center: (207.20, 27.60, -472.20)
+Scale: (6.10, 75.51, 6.36)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 87.58777
+Angle BOC: 92.41223
+
+Object Name: Tree29
+Center: (177.20, 27.60, -633.40)
+Scale: (4.83, 67.53, 6.24)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 75.54545
+Angle BOC: 104.4546
+
+Object Name: Tree30
+Center: (62.50, 27.60, -858.90)
+Scale: (12.14, 113.49, 6.10)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 126.6824
+Angle BOC: 53.31765
+
+Object Name: Tree31
+Center: (253.80, 27.60, -559.10)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4374
+Angle BOC: 57.56242
+
+Object Name: Tree32
+Center: (174.80, 27.60, -89.00)
+Scale: (7.28, 75.08, 8.02)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 84.47358
+Angle BOC: 95.52642
+
+Object Name: Tree33
+Center: (430.74, 27.60, -527.82)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4376
+Angle BOC: 57.56242
+
+Object Name: Tree34
+Center: (259.00, 27.60, -571.90)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4376
+Angle BOC: 57.56242
+
+Object Name: Tree35
+Center: (455.19, 27.60, -554.59)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4376
+Angle BOC: 57.56242
+
+Object Name: Tree36
+Center: (450.56, 27.60, -536.95)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4376
+Angle BOC: 57.56242
+
+Object Name: Tree37
+Center: (495.80, 27.60, -627.00)
+Scale: (10.05, 111.60, 7.22)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 108.6149
+Angle BOC: 71.38513
+
+Object Name: Tree38
+Center: (129.00, 27.60, -936.90)
+Scale: (6.27, 50.32, 5.74)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 95.10083
+Angle BOC: 84.89917
+
+Object Name: Tree39
+Center: (468.50, 27.60, -804.20)
+Scale: (2.44, 44.44, 7.49)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 36.14158
+Angle BOC: 143.8584
+
+Object Name: Tree40
+Center: (447.70, 27.60, -818.10)
+Scale: (4.83, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.6962
+Angle BOC: 72.30386
+
+Object Name: Tree41
+Center: (450.31, 27.60, -852.90)
+Scale: (4.83, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.6962
+Angle BOC: 72.30386
+
+Object Name: Tree42
+Center: (417.40, 27.60, -822.20)
+Scale: (4.83, 44.44, 3.84)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 103.0129
+Angle BOC: 76.98711
+
+Object Name: Tree43
+Center: (596.90, 27.60, -415.62)
+Scale: (4.83, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.6964
+Angle BOC: 72.3036
+
+Object Name: Tree44
+Center: (608.47, 27.60, -258.69)
+Scale: (4.83, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.6964
+Angle BOC: 72.3036
+
+Object Name: Tree45
+Center: (615.66, 27.60, -36.12)
+Scale: (4.83, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.696
+Angle BOC: 72.30396
+
+Object Name: Tree46
+Center: (-281.50, 27.60, 346.80)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4387
+Angle BOC: 57.5613
+
+Object Name: Tree47
+Center: (-310.00, 27.60, 565.90)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4376
+Angle BOC: 57.56242
+
+Object Name: Tree48
+Center: (-260.60, 27.60, 721.12)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4376
+Angle BOC: 57.56242
+
+Object Name: Tree49
+Center: (-194.70, 27.60, 970.30)
+Scale: (4.83, 44.44, 3.67)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 105.6278
+Angle BOC: 74.3722
+
+Object Name: Tree50
+Center: (-337.50, 27.60, 594.00)
+Scale: (3.45, 44.44, 4.45)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 75.50131
+Angle BOC: 104.4987
+
+Object Name: Tree51
+Center: (-272.40, 27.60, 134.20)
+Scale: (5.91, 125.01, 5.74)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 91.69029
+Angle BOC: 88.30971
+
+Object Name: Tree52
+Center: (-505.10, 27.60, 563.60)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4376
+Angle BOC: 57.56242
+
+Object Name: Tree54
+Center: (-526.72, 27.60, 592.50)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.437
+Angle BOC: 57.56303
+
+Object Name: Tree55
+Center: (-544.30, 27.60, 832.60)
+Scale: (4.83, 44.44, 6.23)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 75.58603
+Angle BOC: 104.414
+
+Object Name: Tree56
+Center: (-525.80, 27.60, 865.20)
+Scale: (2.44, 44.44, 7.49)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 36.14074
+Angle BOC: 143.8593
+
+Object Name: Tree57
+Center: (-493.61, 27.60, 863.53)
+Scale: (4.83, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.6962
+Angle BOC: 72.30386
+
+Object Name: Tree58
+Center: (-573.00, 27.60, 968.70)
+Scale: (8.41, 59.48, 5.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 118.5674
+Angle BOC: 61.43259
+
+Object Name: Tree59
+Center: (-500.28, 27.60, 883.50)
+Scale: (4.83, 44.44, 3.84)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 103.0129
+Angle BOC: 76.98711
+
+Object Name: Tree60
+Center: (-677.72, 27.60, 453.90)
+Scale: (6.21, 44.44, 5.45)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 97.4385
+Angle BOC: 82.5615
+
+Object Name: Tree61
+Center: (-666.80, 44.60, 290.10)
+Scale: (6.09, 77.86, 7.93)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 75.03594
+Angle BOC: 104.9641
+
+Object Name: Tree62
+Center: (-692.90, 27.60, 69.10)
+Scale: (4.83, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.6962
+Angle BOC: 72.30384
+
+Object Name: Tree63
+Center: (-172.20, 27.60, 215.60)
+Scale: (6.99, 101.34, 3.93)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 121.285
+Angle BOC: 58.71498
+
+Object Name: Tree64
+Center: (-264.30, 27.60, 487.10)
+Scale: (6.65, 116.11, 9.92)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 67.66006
+Angle BOC: 112.3399
+
+Object Name: Tree65
+Center: (-324.80, 27.60, 983.30)
+Scale: (4.83, 44.44, 3.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 112.1211
+Angle BOC: 67.87888
+
+Object Name: Tree66
+Center: (-395.14, 27.60, 901.53)
+Scale: (4.83, 44.44, 3.15)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 113.7579
+Angle BOC: 66.24206
+
+Object Name: Tree67
+Center: (-672.60, 27.60, 887.20)
+Scale: (7.57, 44.44, 6.80)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 96.13744
+Angle BOC: 83.86256
+
+Object Name: Tree68
+Center: (-282.80, 27.60, -726.10)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4376
+Angle BOC: 57.56242
+
+Object Name: Tree69
+Center: (-183.90, 27.60, -619.10)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4376
+Angle BOC: 57.56242
+
+Object Name: Tree70
+Center: (-328.60, 27.60, -481.30)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4387
+Angle BOC: 57.5613
+
+Object Name: Tree71
+Center: (-202.30, 27.60, -100.50)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4384
+Angle BOC: 57.56158
+
+Object Name: Tree72
+Center: (-331.20, 27.60, -466.40)
+Scale: (3.45, 44.44, 4.45)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 75.50131
+Angle BOC: 104.4987
+
+Object Name: Tree73
+Center: (-191.90, 27.60, -949.20)
+Scale: (4.83, 44.44, 3.93)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 101.7182
+Angle BOC: 78.28185
+
+Object Name: Tree74
+Center: (-510.30, 27.60, -517.80)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4373
+Angle BOC: 57.56303
+
+Object Name: Tree76
+Center: (-528.97, 27.60, -491.47)
+Scale: (4.83, 44.44, 2.66)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 122.4381
+Angle BOC: 57.56191
+
+Object Name: Tree77
+Center: (-519.20, 27.60, -219.40)
+Scale: (4.83, 44.44, 6.23)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 75.58603
+Angle BOC: 104.414
+
+Object Name: Tree78
+Center: (-517.20, 27.60, -207.90)
+Scale: (2.44, 44.44, 7.49)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 36.14059
+Angle BOC: 143.8594
+
+Object Name: Tree79
+Center: (-507.30, 27.60, -200.90)
+Scale: (4.83, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.6966
+Angle BOC: 72.30338
+
+Object Name: Tree80
+Center: (-489.50, 27.60, -195.40)
+Scale: (4.83, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.6966
+Angle BOC: 72.30338
+
+Object Name: Tree81
+Center: (-673.51, 27.60, -366.27)
+Scale: (4.83, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.6964
+Angle BOC: 72.3036
+
+Object Name: Tree82
+Center: (-677.80, 27.60, -789.40)
+Scale: (4.83, 67.19, 8.40)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 59.80597
+Angle BOC: 120.194
+
+Object Name: Tree83
+Center: (-609.28, 27.60, -940.20)
+Scale: (8.34, 65.69, 7.68)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 94.73182
+Angle BOC: 85.26819
+
+Object Name: Tree84
+Center: (-151.80, 27.60, -852.30)
+Scale: (14.54, 85.45, 8.93)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 116.8666
+Angle BOC: 63.13336
+
+Object Name: Tree85
+Center: (-257.30, 27.60, -611.80)
+Scale: (4.83, 44.44, 3.69)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 105.2522
+Angle BOC: 74.7478
+
+Object Name: Tree86
+Center: (-182.79, 27.60, -226.64)
+Scale: (4.83, 44.44, 2.89)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 118.2141
+Angle BOC: 61.7859
+
+Object Name: Tree87
+Center: (-130.60, 21.20, -948.10)
+Scale: (4.83, 37.28, 3.15)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 113.7579
+Angle BOC: 66.24206
+
+Object Name: Tree89
+Center: (519.73, 27.60, -938.50)
+Scale: (8.58, 68.86, 6.01)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 109.9356
+Angle BOC: 70.06442
+
+Object Name: Tree90
+Center: (598.90, 27.60, -856.40)
+Scale: (8.75, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 136.0637
+Angle BOC: 43.93631
+
+Object Name: Tree91
+Center: (603.70, 27.60, -671.30)
+Scale: (6.56, 44.44, 7.76)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 80.41174
+Angle BOC: 99.58826
+
+Object Name: Tree92
+Center: (-540.50, 27.60, 575.50)
+Scale: (4.83, 44.44, 3.53)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 107.6955
+Angle BOC: 72.30455
+
+Object Name: Tree93
+Center: (-525.71, 27.60, -232.60)
+Scale: (4.83, 44.44, 6.23)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 75.58603
+Angle BOC: 104.414
+
+Object Name: lamp0
+Center: (180.44, 27.60, 901.40)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3017
+Angle BOC: 79.69833
+
+Object Name: lamp1
+Center: (185.10, 27.60, 625.40)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3017
+Angle BOC: 79.69833
+
+Object Name: lamp2
+Center: (188.30, 27.60, 211.70)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3008
+Angle BOC: 79.69918
+
+Object Name: lamp3
+Center: (513.30, 27.60, 114.00)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3007
+Angle BOC: 79.69897
+
+Object Name: lamp4
+Center: (499.20, 27.60, 444.90)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3008
+Angle BOC: 79.69918
+
+Object Name: lamp5
+Center: (522.30, 27.60, 897.00)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.301
+Angle BOC: 79.69904
+
+Object Name: lamp6
+Center: (173.60, 27.60, -173.50)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3008
+Angle BOC: 79.69918
+
+Object Name: lamp7
+Center: (179.40, 27.60, -450.06)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3008
+Angle BOC: 79.69918
+
+Object Name: lamp8
+Center: (181.20, 27.60, -864.00)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3017
+Angle BOC: 79.69833
+
+Object Name: lamp9
+Center: (505.80, 27.60, -831.10)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3017
+Angle BOC: 79.69833
+
+Object Name: lamp10
+Center: (499.40, 27.60, -616.80)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3017
+Angle BOC: 79.69833
+
+Object Name: lamp11
+Center: (514.53, 27.60, -178.60)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3001
+Angle BOC: 79.69989
+
+Object Name: lamp12
+Center: (-581.20, 27.60, 859.80)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.301
+Angle BOC: 79.69904
+
+Object Name: lamp13
+Center: (-590.50, 27.60, 678.40)
+Scale: (6.65, 81.06, 21.40)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 34.53083
+Angle BOC: 145.4692
+
+Object Name: lamp14
+Center: (-587.80, 27.60, 227.50)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3001
+Angle BOC: 79.69989
+
+Object Name: lamp15
+Center: (-252.80, 27.60, 208.80)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3008
+Angle BOC: 79.69918
+
+Object Name: lamp16
+Center: (-263.90, 27.60, 476.20)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3008
+Angle BOC: 79.69918
+
+Object Name: lamp17
+Center: (-256.99, 27.60, 896.58)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3017
+Angle BOC: 79.69833
+
+Object Name: lamp18
+Center: (-586.00, 27.60, -83.40)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3003
+Angle BOC: 79.69968
+
+Object Name: lamp19
+Center: (-572.80, 27.60, -410.30)
+Scale: (6.82, 112.64, 16.44)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 45.07813
+Angle BOC: 134.9219
+
+Object Name: lamp20
+Center: (-593.57, 27.60, -865.92)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.301
+Angle BOC: 79.69904
+
+Object Name: lamp21
+Center: (-252.70, 27.60, -869.50)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3017
+Angle BOC: 79.69833
+
+Object Name: lamp22
+Center: (-259.40, 27.60, -593.10)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3017
+Angle BOC: 79.69833
+
+Object Name: lamp23
+Center: (-261.64, 27.60, -179.80)
+Scale: (4.83, 44.44, 4.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 100.3008
+Angle BOC: 79.69918
+
+Object Name: Cube29 (1)
+Center: (-525.30, 113.00, 1044.00)
+Scale: (200.00, 228.47, 112.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 121.2192
+Angle BOC: 58.78083
+
+Object Name: Cube29 (2)
+Center: (-327.30, 113.00, 1044.00)
+Scale: (200.00, 228.47, 112.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 121.2192
+Angle BOC: 58.78083
+
+Object Name: Cube29 (3)
+Center: (-127.40, 113.00, 1044.00)
+Scale: (200.00, 228.47, 112.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 121.2192
+Angle BOC: 58.78083
+
+Object Name: Cube29 (4)
+Center: (72.70, 113.00, 1044.00)
+Scale: (200.00, 228.47, 112.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 121.2192
+Angle BOC: 58.78083
+
+Object Name: Cube29 (5)
+Center: (272.10, 113.00, 1044.00)
+Scale: (200.00, 228.47, 112.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 121.2192
+Angle BOC: 58.78083
+
+Object Name: Cube29 (6)
+Center: (472.00, 113.00, 1044.00)
+Scale: (200.00, 228.47, 112.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 121.2192
+Angle BOC: 58.78083
+
+Object Name: Cube5 (1)
+Center: (643.00, 113.00, 835.80)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube5 (2)
+Center: (643.00, 113.00, 638.20)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube5 (3)
+Center: (643.00, 113.00, 439.50)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube5 (4)
+Center: (643.00, 113.00, 241.30)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube5 (5)
+Center: (643.00, 113.00, 42.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube5 (6)
+Center: (643.00, 113.00, -158.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube5 (7)
+Center: (643.00, 113.00, -358.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube5 (8)
+Center: (643.00, 113.00, -556.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube5 (9)
+Center: (643.00, 113.00, -757.00)
+Scale: (63.25, 228.47, 206.68)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 34.02998
+Angle BOC: 145.97
+
+Object Name: Cube30 (1)
+Center: (459.90, 113.00, -1002.00)
+Scale: (200.00, 228.47, 97.23)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 128.1456
+Angle BOC: 51.85439
+
+Object Name: Cube30 (2)
+Center: (263.30, 113.00, -1002.00)
+Scale: (200.00, 228.47, 97.23)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 128.1456
+Angle BOC: 51.85439
+
+Object Name: Cube30 (3)
+Center: (63.90, 113.00, -1002.00)
+Scale: (200.00, 228.47, 97.23)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 128.1456
+Angle BOC: 51.85439
+
+Object Name: Cube30 (4)
+Center: (-134.60, 113.00, -1002.00)
+Scale: (200.00, 228.47, 97.23)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 128.1456
+Angle BOC: 51.85439
+
+Object Name: Cube30 (5)
+Center: (-335.10, 113.00, -1002.00)
+Scale: (200.00, 228.47, 97.23)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 128.1456
+Angle BOC: 51.85439
+
+Object Name: Cube30 (6)
+Center: (-552.10, 113.00, -1002.00)
+Scale: (235.90, 228.47, 97.23)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 135.1996
+Angle BOC: 44.80047
+
+Object Name: Cube9 (1)
+Center: (-717.00, 113.00, -793.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube9 (2)
+Center: (-717.00, 113.00, -593.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube9 (3)
+Center: (-717.00, 113.00, -393.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube9 (4)
+Center: (-717.00, 113.00, -193.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube9 (5)
+Center: (-717.00, 113.00, 7.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube9 (6)
+Center: (-717.00, 113.00, 206.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube9 (7)
+Center: (-717.00, 113.00, 405.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube9 (8)
+Center: (-717.00, 113.00, 603.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube9 (9)
+Center: (-717.00, 113.00, 802.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube29 (7)
+Center: (671.00, 113.00, 1044.00)
+Scale: (200.00, 228.47, 112.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 121.2192
+Angle BOC: 58.78083
+
+Object Name: Cube5 (10)
+Center: (643.00, 113.00, -961.00)
+Scale: (63.25, 228.47, 206.68)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 34.02998
+Angle BOC: 145.97
+
+Object Name: Cube30 (7)
+Center: (-784.00, 113.00, -1002.00)
+Scale: (235.90, 228.47, 97.23)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 135.1996
+Angle BOC: 44.80047
+
+Object Name: Cube9 (10)
+Center: (-717.00, 113.00, 1002.00)
+Scale: (63.25, 228.47, 200.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.09785
+Angle BOC: 144.9021
+
+Object Name: Cube1 (1)
+Center: (61.00, 113.00, 617.00)
+Scale: (65.70, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 47.30376
+Angle BOC: 132.6962
+
+Object Name: Cube1 (2)
+Center: (61.00, 113.00, 466.40)
+Scale: (65.70, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 47.30375
+Angle BOC: 132.6962
+
+Object Name: Cube1 (6)
+Center: (61.00, 113.00, 316.50)
+Scale: (65.70, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 47.30376
+Angle BOC: 132.6962
+
+Object Name: Cube1 (7)
+Center: (61.00, 113.00, 92.00)
+Scale: (65.70, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 47.30376
+Angle BOC: 132.6962
+
+Object Name: Cube1 (8)
+Center: (61.00, 113.00, 204.00)
+Scale: (65.70, 228.47, 76.39)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 81.39163
+Angle BOC: 98.60837
+
+Object Name: Cube8 (1)
+Center: (376.60, 113.00, 31.00)
+Scale: (75.00, 228.47, 175.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 46.24352
+Angle BOC: 133.7565
+
+Object Name: Cube8 (2)
+Center: (302.90, 113.00, 31.00)
+Scale: (75.00, 228.47, 175.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 46.24352
+Angle BOC: 133.7565
+
+Object Name: Cube8 (3)
+Center: (228.30, 113.00, 31.00)
+Scale: (75.00, 228.47, 175.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 46.24352
+Angle BOC: 133.7565
+
+Object Name: Cube8 (4)
+Center: (154.30, 113.00, 31.00)
+Scale: (75.00, 228.47, 175.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 46.24352
+Angle BOC: 133.7565
+
+Object Name: Cube8 (5)
+Center: (79.70, 113.00, 31.00)
+Scale: (75.00, 228.47, 175.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 46.24352
+Angle BOC: 133.7565
+
+Object Name: Cube1 (3)
+Center: (-133.00, 113.00, 775.00)
+Scale: (69.84, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 49.93044
+Angle BOC: 130.0696
+
+Object Name: Cube1 (4)
+Center: (-133.00, 113.00, 625.60)
+Scale: (69.84, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 49.93044
+Angle BOC: 130.0696
+
+Object Name: Cube1 (5)
+Center: (-133.00, 113.00, 475.00)
+Scale: (69.84, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 49.93042
+Angle BOC: 130.0696
+
+Object Name: Cube1 (9)
+Center: (-133.00, 113.00, 325.10)
+Scale: (69.84, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 49.93044
+Angle BOC: 130.0696
+
+Object Name: Cube1 (10)
+Center: (-133.00, 113.00, 101.00)
+Scale: (69.84, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 49.93044
+Angle BOC: 130.0696
+
+Object Name: Cube1 (11)
+Center: (-133.00, 113.00, 212.60)
+Scale: (69.84, 228.47, 76.39)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 84.86752
+Angle BOC: 95.13248
+
+Object Name: Cube1 (12)
+Center: (-136.00, 113.00, -59.60)
+Scale: (65.70, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 47.30376
+Angle BOC: 132.6962
+
+Object Name: Cube1 (13)
+Center: (-136.00, 113.00, -209.00)
+Scale: (65.70, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 47.30376
+Angle BOC: 132.6962
+
+Object Name: Cube1 (14)
+Center: (-136.00, 113.00, -359.60)
+Scale: (65.70, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 47.30376
+Angle BOC: 132.6962
+
+Object Name: Cube1 (15)
+Center: (-136.00, 113.00, -509.50)
+Scale: (65.70, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 47.30376
+Angle BOC: 132.6962
+
+Object Name: Cube1 (16)
+Center: (-136.00, 113.00, -734.00)
+Scale: (65.70, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 47.30376
+Angle BOC: 132.6962
+
+Object Name: Cube1 (17)
+Center: (-136.00, 113.00, -622.00)
+Scale: (65.70, 228.47, 76.39)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 81.3916
+Angle BOC: 98.60841
+
+Object Name: Cube1 (18)
+Center: (53.00, 113.00, -72.00)
+Scale: (69.84, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 49.93044
+Angle BOC: 130.0696
+
+Object Name: Cube1 (19)
+Center: (53.00, 113.00, -221.40)
+Scale: (69.84, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 49.93044
+Angle BOC: 130.0696
+
+Object Name: Cube1 (20)
+Center: (53.00, 113.00, -372.00)
+Scale: (69.84, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 49.93044
+Angle BOC: 130.0696
+
+Object Name: Cube1 (21)
+Center: (53.00, 113.00, -521.90)
+Scale: (69.84, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 49.93044
+Angle BOC: 130.0696
+
+Object Name: Cube1 (22)
+Center: (53.00, 113.00, -746.00)
+Scale: (69.84, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 49.93044
+Angle BOC: 130.0696
+
+Object Name: Cube1 (23)
+Center: (53.00, 113.00, -634.40)
+Scale: (69.84, 228.47, 76.39)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 84.86749
+Angle BOC: 95.13251
+
+Object Name: Cube8 (6)
+Center: (-229.40, 113.00, 4.00)
+Scale: (75.00, 228.47, 175.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 46.24352
+Angle BOC: 133.7565
+
+Object Name: Cube8 (7)
+Center: (-304.00, 113.00, 4.00)
+Scale: (75.00, 228.47, 175.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 46.24352
+Angle BOC: 133.7565
+
+Object Name: Cube8 (8)
+Center: (-377.70, 113.00, 4.00)
+Scale: (75.00, 228.47, 175.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 46.24352
+Angle BOC: 133.7565
+
+Object Name: Cube8 (9)
+Center: (-452.30, 113.00, 4.00)
+Scale: (75.00, 228.47, 175.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 46.24352
+Angle BOC: 133.7565
+
+Object Name: Cube8 (10)
+Center: (-526.30, 113.00, 4.00)
+Scale: (75.00, 228.47, 175.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 46.24352
+Angle BOC: 133.7565
+
+Object Name: Cube8 (11)
+Center: (-156.50, 113.00, 4.00)
+Scale: (75.00, 228.47, 175.65)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 46.24352
+Angle BOC: 133.7565
+
+Object Name: Cube22 (1)
+Center: (-301.01, 113.00, -406.40)
+Scale: (56.44, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 41.24134
+Angle BOC: 138.7587
+
+Object Name: Cube22 (2)
+Center: (-301.01, 113.00, -491.20)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (3)
+Center: (-318.30, 113.00, -461.80)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (4)
+Center: (-335.50, 113.00, -441.20)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (5)
+Center: (-353.20, 113.00, -420.50)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (6)
+Center: (-372.90, 113.00, -400.80)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (7)
+Center: (-390.10, 113.00, -381.00)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (8)
+Center: (-410.90, 113.00, -361.10)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (9)
+Center: (-434.40, 113.00, -340.90)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (10)
+Center: (-454.70, 113.00, -321.10)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (11)
+Center: (-473.10, 113.00, -301.20)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (12)
+Center: (-320.00, 113.00, -734.30)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (13)
+Center: (-337.20, 113.00, -713.70)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (14)
+Center: (-354.90, 113.00, -693.00)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (15)
+Center: (-374.60, 113.00, -673.30)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (16)
+Center: (-399.80, 113.00, -653.50)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (17)
+Center: (-419.90, 113.00, -633.60)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (18)
+Center: (-432.60, 113.00, -613.70)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (19)
+Center: (-450.70, 113.00, -593.60)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (20)
+Center: (-473.40, 113.00, -573.70)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (21)
+Center: (-490.60, 113.00, -552.90)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (22)
+Center: (-508.70, 113.00, -532.80)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube19 (1)
+Center: (-327.90, 113.00, -807.00)
+Scale: (125.00, 228.47, 128.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 88.62904
+Angle BOC: 91.37096
+
+Object Name: Cube18 (1)
+Center: (-546.10, 113.00, -603.20)
+Scale: (52.19, 228.47, 175.56)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 33.11312
+Angle BOC: 146.8869
+
+Object Name: Cube21 (1)
+Center: (-457.00, 113.00, 265.00)
+Scale: (125.00, 228.47, 128.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 88.62904
+Angle BOC: 91.37096
+
+Object Name: Cube20 (1)
+Center: (-544.30, 113.00, 468.70)
+Scale: (53.49, 228.47, 175.20)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 33.95784
+Angle BOC: 146.0422
+
+Object Name: Cube25 (1)
+Center: (-297.80, 113.00, 667.90)
+Scale: (51.98, 228.47, 150.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 38.22338
+Angle BOC: 141.7766
+
+Object Name: Cube22 (23)
+Center: (-299.60, 113.00, 585.90)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (24)
+Center: (-318.30, 113.00, 603.40)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (25)
+Center: (-335.50, 113.00, 624.00)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (26)
+Center: (-353.20, 113.00, 644.70)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (27)
+Center: (-372.90, 113.00, 664.40)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (28)
+Center: (-390.10, 113.00, 684.20)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (29)
+Center: (-410.90, 113.00, 704.10)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (30)
+Center: (-434.40, 113.00, 724.30)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (31)
+Center: (-454.70, 113.00, 744.10)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (32)
+Center: (-473.10, 113.00, 764.00)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (33)
+Center: (-320.00, 113.00, 338.40)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (34)
+Center: (-337.20, 113.00, 359.00)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (35)
+Center: (-354.90, 113.00, 379.70)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (36)
+Center: (-374.60, 113.00, 399.40)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (37)
+Center: (-399.80, 113.00, 419.20)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (38)
+Center: (-419.90, 113.00, 439.10)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (39)
+Center: (-432.60, 113.00, 459.00)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (40)
+Center: (-450.70, 113.00, 479.10)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (41)
+Center: (-473.40, 113.00, 499.00)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (42)
+Center: (-490.60, 113.00, 519.80)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47823
+
+Object Name: Cube22 (43)
+Center: (-508.70, 113.00, 539.90)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube7 (1)
+Center: (377.80, 113.00, 842.40)
+Scale: (128.54, 228.47, 128.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 90.22784
+Angle BOC: 89.77216
+
+Object Name: Cube6 (1)
+Center: (468.90, 113.00, 635.50)
+Scale: (53.08, 228.47, 177.17)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 33.35666
+Angle BOC: 146.6433
+
+Object Name: Cube12 (1)
+Center: (223.00, 113.00, 451.50)
+Scale: (50.41, 228.47, 158.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 35.393
+Angle BOC: 144.607
+
+Object Name: Cube15 (1)
+Center: (221.00, 113.00, -622.50)
+Scale: (51.98, 228.47, 156.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 36.85433
+Angle BOC: 143.1457
+
+Object Name: Cube11 (1)
+Center: (375.10, 113.00, -234.00)
+Scale: (125.00, 228.47, 128.03)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 88.62904
+Angle BOC: 91.37096
+
+Object Name: Cube10 (1)
+Center: (464.00, 113.00, -437.50)
+Scale: (59.26, 228.47, 174.00)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 37.6174
+Angle BOC: 142.3826
+
+Object Name: Cube22 (44)
+Center: (387.00, 113.00, 351.00)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (45)
+Center: (369.80, 113.00, 371.60)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (46)
+Center: (352.10, 113.00, 392.30)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (47)
+Center: (332.40, 113.00, 412.00)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (48)
+Center: (315.20, 113.00, 431.80)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (49)
+Center: (294.40, 113.00, 451.70)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (50)
+Center: (270.90, 113.00, 471.90)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (51)
+Center: (250.60, 113.00, 491.70)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (52)
+Center: (232.20, 113.00, 511.60)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47823
+
+Object Name: Cube22 (53)
+Center: (423.00, 113.00, 586.00)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (54)
+Center: (405.00, 113.00, 607.30)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (55)
+Center: (383.00, 113.00, 628.00)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (56)
+Center: (365.00, 113.00, 647.70)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (57)
+Center: (345.10, 113.00, 667.50)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (58)
+Center: (321.00, 113.00, 687.40)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (59)
+Center: (299.00, 113.00, 707.30)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (60)
+Center: (284.00, 113.00, 727.40)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (61)
+Center: (265.00, 113.00, 747.30)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (62)
+Center: (248.00, 113.00, 768.10)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (63)
+Center: (443.00, 113.00, 565.00)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (64)
+Center: (387.00, 113.00, -721.80)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (65)
+Center: (369.80, 113.00, -701.20)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (66)
+Center: (352.10, 113.00, -680.50)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (67)
+Center: (332.40, 113.00, -660.80)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (68)
+Center: (315.20, 113.00, -641.00)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (69)
+Center: (294.40, 113.00, -621.10)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (70)
+Center: (270.90, 113.00, -600.90)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (71)
+Center: (250.60, 113.00, -581.10)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (72)
+Center: (232.20, 113.00, -561.20)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
+Object Name: Cube22 (73)
+Center: (423.00, 113.00, -486.80)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (74)
+Center: (405.00, 113.00, -465.50)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (75)
+Center: (383.00, 113.00, -444.80)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (76)
+Center: (365.00, 113.00, -425.10)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (77)
+Center: (345.10, 113.00, -405.30)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (78)
+Center: (321.00, 113.00, -385.40)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (79)
+Center: (299.00, 113.00, -365.50)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (80)
+Center: (284.00, 113.00, -345.40)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (81)
+Center: (265.00, 113.00, -325.50)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (82)
+Center: (248.00, 113.00, -304.70)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47817
+
+Object Name: Cube22 (83)
+Center: (443.00, 113.00, -507.80)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5218
+Angle BOC: 39.47823
+
+Object Name: Cube22 (84)
+Center: (410.60, 113.00, -742.60)
+Scale: (56.44, 228.47, 20.25)
+Local Forward: (0.00, 0.00, 1.00)
+Local Right: (1.00, 0.00, 0.00)
+Local Rotate: (0.00, 0.00, 0.00)
+Angle AOB: 140.5217
+Angle BOC: 39.47828
+
