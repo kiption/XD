@@ -465,6 +465,7 @@ void SESSION::send_rotate_packet(int obj_id, short obj_type)
 	}
 	do_send(&rotate_pl_packet);
 }
+
 void SESSION::send_move_rotate_packet(int obj_id, short obj_type, short dir)
 {
 	SC_MOVE_ROTATE_OBJECT_PACKET update_pl_packet;

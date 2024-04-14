@@ -1419,22 +1419,7 @@ void CGameFramework::FrameAdvance()
 
 	MoveToNextFrame();
 
-	if (m_nMode == INGAME_SCENE)
-	{
-		m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
-		size_t nLength = _tcslen(m_pszFrameRate);
-		XMFLOAT3 xmf3Position = (((MainGameScene*)m_pScene)->m_pPlayer)->GetPosition();
-		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position);
-		::SetWindowText(m_hWnd, m_pszFrameRate);
-	}
-	if (m_nMode == OPENING_SCENE)
-	{
-		m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
-		size_t nLength = _tcslen(m_pszFrameRate);
-		XMFLOAT3 xmf3Position = (((SceneMgr*)m_pScene)->m_pPlayer)->GetPosition();
-		_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%5.1f, %5.1f, %5.1f)"), xmf3Position);
-		::SetWindowText(m_hWnd, m_pszFrameRate);
-	}
+	
 }
 
 void CGameFramework::DrawUIList()
