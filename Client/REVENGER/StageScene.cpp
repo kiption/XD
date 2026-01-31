@@ -10,6 +10,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE	MainGameScene::m_d3dCbvGPUDescriptorNextHandle;
 D3D12_CPU_DESCRIPTOR_HANDLE	MainGameScene::m_d3dSrvCPUDescriptorNextHandle;
 D3D12_GPU_DESCRIPTOR_HANDLE	MainGameScene::m_d3dSrvGPUDescriptorNextHandle;
 D3D12_GPU_DESCRIPTOR_HANDLE	MainGameScene::m_d3dShadowGPUDescriptorHandle;
+D3D12_CPU_DESCRIPTOR_HANDLE	MainGameScene::m_d3dDepthSrvCPUHandles[8];
 float RandomDir(float fMin, float fMax)
 {
 	float fRandomValue = (float)rand();
@@ -67,24 +68,24 @@ void MainGameScene::BuildDefaultLightsAndMaterials()
 {
 	m_pLights = new LIGHTS;
 	::ZeroMemory(m_pLights, sizeof(LIGHTS));
-	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.0f);
 	m_pLights->m_pLights[0].m_bEnable = false;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights->m_pLights[0].m_fRange = 40000.0f;
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6, 0.6, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 1.0f);
-	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-500, 800.0f, 1200.0f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(-100, 800.0f, 450.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(0.3f, -1.0f, -1.0f);
 
 	m_pLights->m_pLights[1].m_bEnable = true;
 	m_pLights->m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 52000.0;
-	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2, 0.2f, 2.0f);
+	m_pLights->m_pLights[1].m_fRange = 50000.0;
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.7f, 0.7, 0.7f, 2.0f);
 	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.6f, 0.6, 0.6, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.2f, 0.2, 0.2f, 0.0f);
-	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(0, 1200.0f, 1250.0f);
-	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, -1.0f);
+	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.7f, 0.7, 0.7f, 0.0f);
+	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(00.0f, 1200.0f, 450.0f);
+	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.2f, -1.0f, 0.2f);
 
 	m_pLights->m_pLights[2].m_bEnable = false;
 	m_pLights->m_pLights[2].m_nType = SPOT_LIGHT;
@@ -327,6 +328,11 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pTreeBlendShadowShader->SetScene(this);
 	m_pTreeBlendShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
+	m_pShadowMapDebugShader = new CShadowMapDebugShader();
+	m_pShadowMapDebugShader->SetScene(this);
+	m_pShadowMapDebugShader->CreateDebugResources(pd3dDevice);
+	m_pShadowMapDebugShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pShadowMapDebugShader->GetDebugRootSignature(), 0);
+
 	pBCBulletEffectShader = new BulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pBCBulletEffectShader->SetCurScene(INGAME_SCENE);
@@ -424,8 +430,9 @@ void MainGameScene::ReleaseObjects()
 
 	}
 	if (m_pBoundingBoxShader) m_pBoundingBoxShader->Release();
-	if (m_pShadowShader)delete m_pShadowShader;
-	if (m_pTreeBlendShadowShader)delete m_pTreeBlendShadowShader;
+	if (m_pShadowShader) delete m_pShadowShader;
+	if (m_pTreeBlendShadowShader) delete m_pTreeBlendShadowShader;
+	if (m_pShadowMapDebugShader) { m_pShadowMapDebugShader->ReleaseObjects(); delete m_pShadowMapDebugShader; m_pShadowMapDebugShader = NULL; }
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
 	ReleaseShaderVariables();
@@ -932,12 +939,17 @@ void MainGameScene::CreateSRVs(ID3D12Device* pd3dDevice, Texture* pTexture, UINT
 		ID3D12Resource* pShaderResource = pTexture->GetResource(i);
 		D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = pTexture->GetShaderResourceViewDesc(i);
 		pd3dDevice->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, m_d3dSrvCPUDescriptorNextHandle);
+		if (pShadowMap == NULL && i < 8 && nRootParameterStartIndex == 22)
+			m_d3dDepthSrvCPUHandles[i] = m_d3dSrvCPUDescriptorNextHandle;
 		m_d3dSrvCPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
 		pTexture->SetGpuDescriptorHandle(i, m_d3dSrvGPUDescriptorNextHandle);
 		m_d3dSrvGPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
 	}
 	int nRootParameters = pTexture->GetRootParameters();
 	for (int i = 0; i < nRootParameters; i++) pTexture->SetRootParameterIndex(i, nRootParameterStartIndex + i);
+
+	if (pShadowMap == NULL && nTextures > 0)
+		m_d3dShadowGPUDescriptorHandle = pTexture->GetGpuDescriptorHandle(0);
 
 	if (nTotalTextures > nTextures)
 	{
@@ -1144,6 +1156,9 @@ bool MainGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			break;
 		case 'K':
 			break;
+		case VK_F3:
+			m_bDebugShadowMap = !m_bDebugShadowMap;
+			break;
 		default:
 			break;
 		}
@@ -1238,10 +1253,30 @@ void MainGameScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 	for (int i = 0; i < HELIBULLETS; i++)if (m_ppBullets[i]->m_bActive) { m_ppBullets[i]->Render(pd3dCommandList, pCamera); }
 	for (int i = 0; i < CARTRIDGES; i++) if (m_ppCartridge[i]->m_bActive) { m_ppCartridge[i]->Render(pd3dCommandList, pCamera); }
 	for (int i = 0; i < HELICOPTERVALKANS; i++)if (m_ppValkan[i]->m_bActive) { m_ppValkan[i]->Render(pd3dCommandList, pCamera); }
-	//m_pBoundingBoxShader->Render(pd3dCommandList, pCamera, 0);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+	if (m_pd3dcbLights) pd3dCommandList->SetGraphicsRootConstantBufferView(2, m_pd3dcbLights->GetGPUVirtualAddress());
+	if (m_pd3dcbMaterials) pd3dCommandList->SetGraphicsRootConstantBufferView(20, m_pd3dcbMaterials->GetGPUVirtualAddress());
+	//m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
+	//if (m_pShadowShader && m_pShadowShader->m_pDepthTexture)
+	//	pd3dCommandList->SetGraphicsRootDescriptorTable(22, m_pShadowShader->m_pDepthTexture->GetGpuDescriptorHandle(0));
 	if (m_pShadowShader) m_pShadowShader->Render(pd3dCommandList, pCamera, 0);
+	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+	pCamera->UpdateShaderVariables(pd3dCommandList);
+	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
 
 	if (m_pTreeBlendShadowShader) m_pTreeBlendShadowShader->Render(pd3dCommandList, pCamera, 0);
+
+	if (m_bDebugShadowMap && m_pShadowMapDebugShader && m_pShadowMapDebugShader->GetDebugRootSignature() && m_pShadowMapDebugShader->GetDebugDescriptorHeap())
+	{
+		m_pShadowMapDebugShader->CopyDepthSliceToHeap(m_pd3dDevice, m_d3dDepthSrvCPUHandles[1]);
+		pd3dCommandList->SetGraphicsRootSignature(m_pShadowMapDebugShader->GetDebugRootSignature());
+		pd3dCommandList->SetDescriptorHeaps(1, &m_pShadowMapDebugShader->m_pd3dDebugSrvHeap);
+		pd3dCommandList->SetGraphicsRootDescriptorTable(0, m_pShadowMapDebugShader->GetDebugSrvGpuHandle());
+		pCamera->SetViewportsAndScissorRects(pd3dCommandList);
+		m_pShadowMapDebugShader->Render(pd3dCommandList, pCamera, 0, false);
+		if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
+		if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+	}
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);

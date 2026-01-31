@@ -333,7 +333,8 @@ void CShadowMapShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Gra
 
 void CShadowMapShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	if (m_pDepthTexture) m_pDepthTexture->UpdateShaderVariables(pd3dCommandList);
+	if (m_pDepthTexture)
+		pd3dCommandList->SetGraphicsRootDescriptorTable(22, m_pDepthTexture->GetGpuDescriptorHandle(0));
 }
 
 void CShadowMapShader::ReleaseShaderVariables()
@@ -553,7 +554,7 @@ void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R32_FLOAT, { 1.0f,1.0f, 1.0, 1.0f } };
 	for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++)
-		m_pDepthTexture->CreateTexture(pd3dDevice, pd3dCommandList, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, DXGI_FORMAT_R32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, i);
+		m_pDepthTexture->CreateTexture(pd3dDevice, pd3dCommandList, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, DXGI_FORMAT_R32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, &d3dClearValue, RESOURCE_TEXTURE2D, i);
 
 	D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;
 	d3dRenderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
@@ -685,7 +686,7 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 
 			m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4Position = XMFLOAT4(xmf3Position.x, xmf3Position.y, xmf3Position.z, 1.0f);
 
-			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 			FLOAT pfClearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 			pd3dCommandList->ClearRenderTargetView(m_pd3dRtvCPUDescriptorHandles[j], pfClearColor, 0, NULL);
@@ -696,7 +697,7 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 
 			Render(pd3dCommandList, m_ppDepthRenderCameras[j], 0);
 
-			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
+			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetResource(j), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		}
 		else
 		{
@@ -835,7 +836,8 @@ void TreeBlendingShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12G
 
 void TreeBlendingShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	if (m_pDepthTexture) m_pDepthTexture->UpdateShaderVariables(pd3dCommandList);
+	if (m_pDepthTexture)
+		pd3dCommandList->SetGraphicsRootDescriptorTable(22, m_pDepthTexture->GetGpuDescriptorHandle(0));
 }
 
 void TreeBlendingShader::ReleaseShaderVariables()

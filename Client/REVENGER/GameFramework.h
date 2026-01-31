@@ -76,11 +76,11 @@ struct MYRoomUser {
 
 struct Roomname {
 	WCHAR* str1 = L"R E V E N G E R";
-	WCHAR* str2 = L"ºü¸¥ °ÔÀÓ °í°í";
-	WCHAR* str3 = L"Áñ°Å¿î °ÔÀÓ ÇØ¿ä";
-	WCHAR* str4 = L"¿ì¸®´Â ÃÖ°íÀÇ ÆÀ";
-	WCHAR* str5 = L"½ºÇÇµå °ÔÀÓ";
-	WCHAR* str6 = L"»§¾ß »§¾ß";
+	WCHAR* str2 = L"ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½";
+	WCHAR* str3 = L"ï¿½ï¿½Å¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ø¿ï¿½";
+	WCHAR* str4 = L"ï¿½ì¸®ï¿½ï¿½ ï¿½Ö°ï¿½ï¿½ï¿½ ï¿½ï¿½";
+	WCHAR* str5 = L"ï¿½ï¿½ï¿½Çµï¿½ ï¿½ï¿½ï¿½ï¿½";
+	WCHAR* str6 = L"ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½";
 };
 
 struct CollideMapInfo
@@ -170,7 +170,7 @@ public:
 
 	float deltax = 0.0;
 
-	// ¸¶¿ì½º ¹Î°¨µµ
+	// ï¿½ï¿½ï¿½ì½º ï¿½Î°ï¿½ï¿½ï¿½
 	float MouseResponsivenessX = 400.0f;
 	float MouseResponsivenessY = 550.0f;
 public:
@@ -258,29 +258,29 @@ public:
 	float ShootCnt = 0.0;
 
 	//==================================================
-	//			  ¼­¹ö Åë½ÅÀ» À§ÇÑ °Íµé...
+	//			  ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Íµï¿½...
 	//==================================================
 public:
 	enum INGAME_ROLE { R_NONE, R_RIFLE, R_HELI };
 	enum LOGINSCENE { LS_OPENING, LS_LOBBY, LS_ROOM, LS_CREATE_ROOM };
 	SceneMgr* m_pScene = NULL;
 
-	// ±âº» Á¤º¸
+	// ï¿½âº» ï¿½ï¿½ï¿½ï¿½
 	int m_NumOfUI = UICOUNTERS;
 	int m_myID = -1;
 	int m_MAX_USER;
 	int m_Max_NPCs;
 	int m_CurrentPlayerNum;
-	queue<short> q_keyboardInput;			// ¼­¹ö·Î º¸³¾ Å°º¸µå ÀÔ·Â°ª
+	queue<short> q_keyboardInput;			// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Å°ï¿½ï¿½ï¿½ï¿½ ï¿½Ô·Â°ï¿½
 
-	queue<MouseInputVal> q_mouseInput;		// ¼­¹ö·Î º¸³¾ ¸¶¿ì½º ÀÔ·Â°ª
+	queue<MouseInputVal> q_mouseInput;		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ì½º ï¿½Ô·Â°ï¿½
 
-	// ·Îºñ °ü·Ã UI
+	// ï¿½Îºï¿½ ï¿½ï¿½ï¿½ï¿½ UI
 	int m_roominMyId;
-	int m_ingame_role = R_NONE;				// ¿ªÇÒ (¼ÒÃÑ¼ö, Çï±â)
+	int m_ingame_role = R_NONE;				// ï¿½ï¿½ï¿½ï¿½ (ï¿½ï¿½ï¿½Ñ¼ï¿½, ï¿½ï¿½ï¿½)
 	int m_LobbyPage = 0;
 
-	// ·Îºñ Á¤º¸
+	// ï¿½Îºï¿½ ï¿½ï¿½ï¿½ï¿½
 	int m_myRoomNum = 99;
 	int m_LoginScene = 0;
 
@@ -290,7 +290,7 @@ public:
 	vector <LobbyRoom> m_LobbyRoom_Info;
 	array <MYRoomUser, 3> m_MyRoom_Info;
 
-	// ·Îºñ UI °ü·Ã º¯¼ö
+	// ï¿½Îºï¿½ UI ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	bool m_ingame = false;
 	bool m_infoReady = false;
 	bool m_infoChoose = false;
@@ -306,32 +306,32 @@ public:
 	float m_StartKey = 0;
 	float m_ReadyKey = 0;
 
-	// ¿ÀÇÁ´× ¾À °¢ Å¬¸¯ ÁÂÇ¥
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ Å¬ï¿½ï¿½ ï¿½ï¿½Ç¥
 	bool m_GameClick[3]{ false };
 	bool m_LobbyClick[3]{ false };
-	bool m_LobbyRoomClick[8]{ false };		// ·Îºñ È­¸é¿¡ º¸ÀÌ´Â ¹æ 7Ä­
+	bool m_LobbyRoomClick[8]{ false };		// ï¿½Îºï¿½ È­ï¿½é¿¡ ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ 7Ä­
 	bool m_RoomClick[3]{ false };
 
 	LoginSceneInfo gamepos[2];
 	LoginSceneInfo lobbypos[5];
-	LoginSceneInfo lobbyroompos[8];			// ·Îºñ È­¸é¿¡ º¸ÀÌ´Â ¹æ 7Ä­
+	LoginSceneInfo lobbyroompos[8];			// ï¿½Îºï¿½ È­ï¿½é¿¡ ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ 7Ä­
 	LoginSceneInfo roompos[3];
 	LoginSceneInfo createpos[2];
 	LoginSceneInfo choicejob[6];
 
-	// ÀÎ°ÔÀÓ
-	// ÀÎ °ÔÀÓ ÀÚ½Å Á¤º¸
+	// ï¿½Î°ï¿½ï¿½ï¿½
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ú½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	int m_currHp;
 	int m_currbullet;
 
 
-	// ÀÎ °ÔÀÓ ½Ã°£ Á¤º¸
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½ ï¿½ï¿½ï¿½ï¿½
 	int m_10MinOfTime;
 	int m_1MinOfTime;
 	int m_10SecOftime;
 	int m_1SecOfTime;
 
-	// ÀÎ °ÔÀÓ ÀÌ¹ÌÁö UI
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¹ï¿½ï¿½ï¿½ UI
 	bool m_SniperOn = false;
 	bool m_BloodSplatterOn = false;
 	bool m_bHeliHittingMotion = false;
@@ -339,7 +339,7 @@ public:
 	bool m_HeliPlayerWarnningUISwitch = false;
 	bool UI_Switch = false;
 
-	// ÀÎ°ÔÀÓ ±ÛÀÚ UI Print
+	// ï¿½Î°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ UI Print
 	int m_otherHP[2];
 	wchar_t killNPCprint[100];
 	wchar_t occupationPrint[100];
@@ -351,7 +351,7 @@ public:
 	queue<ChatInfo> m_chat_info;
 	queue<SendChat> m_mychat_log;
 
-	// ¹Ì¼Ç UI °ü·Ã º¯¼ö
+	// ï¿½Ì¼ï¿½ UI ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	bool m_missionFailed = false;
 	bool m_missionClear = false;
 	bool m_spendYourlife = false;
@@ -366,9 +366,11 @@ public:
 	float m_missionFailedUI = 0.0f;
 	float m_missionClearUI = 0.0f;
 
-	// ÀÎ °ÔÀÓ ¿ÀºêÁ§Æ® Á¤º¸
+	// ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
 	bool b_heli_mapcollide = false;
 	bool m_CameraShaking = false;
+	float m_fRecoilToRecover = 0.0f;
+	float m_fRecoilToRecoverHeli = 0.0f;
 	bool W_KEY, A_KEY, S_KEY, D_KEY, SPACE_KEY, SHOOT_KEY = false;
 	bool isComplete = false;
 	bool b_imdeadplayer = false;
@@ -382,38 +384,38 @@ public:
 	//==================================================
 
 	//==================================================
-	//			  ¼­¹ö Åë½Å¿¡ ÇÊ¿äÇÑ ÇÔ¼öµé
+	//			  ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Å¿ï¿½ ï¿½Ê¿ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½
 	//==================================================
 public:
-	// »õ·Î¿î ÀÔ·ÂÀÌ ÀÖ´ÂÁö È®ÀÎÇÏ´Â ÇÔ¼öÀÔ´Ï´Ù.
+	// ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½Ô·ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½ È®ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½ï¿½Ô´Ï´ï¿½.
 	bool checkNewInput_Keyboard();
 	bool checkNewInput_Mouse();
 
-	// Å°ÀÔ·Â Å¥¿¡¼­ °ªÀ» ÇÏ³ª ²¨³»¿É´Ï´Ù.
+	// Å°ï¿½Ô·ï¿½ Å¥ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ï³ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½É´Ï´ï¿½.
 	short popInputVal_Keyboard();
 	MouseInputVal popInputVal_Mouse();
 
-	// °´Ã¼ °ªÀ» ¾ò´Â ÇÔ¼öÀÔ´Ï´Ù.
+	// ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½Ô´Ï´ï¿½.
 	XMFLOAT3 getMyPosition();
 	XMFLOAT3 getMyRightVec();
 	XMFLOAT3 getMyLookVec();
 	XMFLOAT3 getMyUpVec();
 	XMFLOAT3 getMyCameraLookVec();
 
-	// °´Ã¼ ÁÂÇ¥,º¤ÅÍ °ª ÃÖ½ÅÈ­ ÇÔ¼öÀÔ´Ï´Ù.
+	// ï¿½ï¿½Ã¼ ï¿½ï¿½Ç¥,ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö½ï¿½È­ ï¿½Ô¼ï¿½ï¿½Ô´Ï´ï¿½.
 
-	// ³ª ÀÚ½Å ÃÖ½ÅÈ­
+	// ï¿½ï¿½ ï¿½Ú½ï¿½ ï¿½Ö½ï¿½È­
 	void setPosition_Self(XMFLOAT3 pos);
 	void setVectors_Self(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 
-	// ´Ù¸¥ ÇÃ·¹ÀÌ¾î ÃÖ½ÅÈ­
+	// ï¿½Ù¸ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½Ö½ï¿½È­
 	void setPosition_SoldiarOtherPlayer(int id, XMFLOAT3 pos);
 	void setPosition_HeliOtherPlayer(XMFLOAT3 pos);
 	void setVectors_SoldiarOtherPlayer(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void setVectors_HeliOtherPlayer(XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void remove_OtherPlayer(int id);
 
-	// ÇÃ·¹ÀÌ¾î »óÅÂº¯È­
+	// ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½Âºï¿½È­
 	void HeliPlayerUnderAttack(XMFLOAT3 ToLook);
 	void MyPlayerDieMotion();
 	void FreeHumanToHeliViewMyCamera();
@@ -421,7 +423,7 @@ public:
 	void MyPlayerRespawnMotion();
 	void OtherPlayerResponeMotion(int id);
 
-	// ±ºÀÎ ÇÃ·¹ÀÌ¾î µ¿ÀÛ»óÅÂ
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ï¿½Û»ï¿½ï¿½ï¿½
 	void otherPlayerReturnToIdle(int id);
 	void otherPlayerForwardMotion(int id);
 	void otherPlayerBackwardMotion(int id);
@@ -430,18 +432,18 @@ public:
 	void otherPlayerDyingMotion(int id);
 	void otherHeliPlayerDyingMotion();
 
-	// NPC ÃÖ½ÅÈ­
+	// NPC ï¿½Ö½ï¿½È­
 	void setPosition_Npc(int id, XMFLOAT3 pos);
 	void setVectors_Npc(int id, XMFLOAT3 rightVec, XMFLOAT3 upVec, XMFLOAT3 lookVec);
 	void remove_Npcs(int id);
 
-	// NPC µ¿ÀÛ »óÅÂ
+	// NPC ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	void NpcHittingMotion(int p_id);
 	void DyingMotionNPC(int id);
 	void AttackMotionNPC(int id);
 	void MoveMotionNPC(int id);
 
-	// ÈúÆÑ ÃÖ½ÅÈ­
+	// ï¿½ï¿½ï¿½ï¿½ ï¿½Ö½ï¿½È­
 	void updateHealpack(int h_id, bool isEffectOn);
 
 	int a_id;
@@ -468,7 +470,7 @@ public:
 	BOOL m_bCollisionNpcbyPlayer = false;
 
 	//=================================================
-	// Ãæµ¹ ¸ð¼Ç°ú ÀÌÆåÆ® Ã³¸® ÇÔ¼öÀÔ´Ï´Ù.
+	// ï¿½æµ¹ ï¿½ï¿½Ç°ï¿½ ï¿½ï¿½ï¿½ï¿½Æ® Ã³ï¿½ï¿½ ï¿½Ô¼ï¿½ï¿½Ô´Ï´ï¿½.
 	BoundingOrientedBox m_mapxmoobb;
 	BoundingOrientedBox m_mapStorexmoobb;
 	BoundingOrientedBox m_npcoobb;

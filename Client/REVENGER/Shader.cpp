@@ -150,7 +150,8 @@ D3D12_STREAM_OUTPUT_DESC ShaderMgr::CreateStreamOuputState(int nPipelineState)
 }
 void ShaderMgr::SetPipelineState(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState)
 {
-	if (m_ppd3dPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
+	if (m_ppd3dPipelineStates && nPipelineState < m_nPipelineStates && m_ppd3dPipelineStates[nPipelineState])
+		pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
 }
 D3D12_SHADER_BYTECODE ShaderMgr::CompileShaderFromFile(WCHAR* pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob** ppd3dShaderBlob)
 {
@@ -161,14 +162,24 @@ D3D12_SHADER_BYTECODE ShaderMgr::CompileShaderFromFile(WCHAR* pszFileName, LPCST
 
 	ID3DBlob* pd3dErrorBlob = NULL;
 	HRESULT hResult = ::D3DCompileFromFile(pszFileName, NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE, pszShaderName, pszShaderProfile, nCompileFlags, 0, ppd3dShaderBlob, &pd3dErrorBlob);
-	char* pErrorString = NULL;
-	if (pd3dErrorBlob) pErrorString = (char*)pd3dErrorBlob->GetBufferPointer();
 
 	D3D12_SHADER_BYTECODE d3dShaderByteCode;
+	d3dShaderByteCode.BytecodeLength = 0;
+	d3dShaderByteCode.pShaderBytecode = NULL;
+
+	if (FAILED(hResult) || !ppd3dShaderBlob || !*ppd3dShaderBlob)
+	{
+		if (pd3dErrorBlob)
+		{
+			OutputDebugStringA((char*)pd3dErrorBlob->GetBufferPointer());
+			pd3dErrorBlob->Release();
+		}
+		return d3dShaderByteCode;
+	}
 	d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
 	d3dShaderByteCode.pShaderBytecode = (*ppd3dShaderBlob)->GetBufferPointer();
-
-	return(d3dShaderByteCode);
+	if (pd3dErrorBlob) pd3dErrorBlob->Release();
+	return d3dShaderByteCode;
 }
 
 #define _WITH_WFOPEN
@@ -228,7 +239,8 @@ void ShaderMgr::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12Grap
 	ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
 {
 	m_nPipelineStates = 1;
-	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];//������������ �迭�� ���⼭ �����.
+	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+	for (int i = 0; i < m_nPipelineStates; i++) m_ppd3dPipelineStates[i] = NULL;//������������ �迭�� ���⼭ �����.
 
 	ID3DBlob* pd3dVertexShaderBlob = NULL, * pd3dPixelShaderBlob = NULL, * pd3dGeometryShaderBlob = NULL;
 
@@ -260,7 +272,7 @@ void ShaderMgr::CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12Grap
 }
 void ShaderMgr::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256�� ���
+	UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256
 	m_pd3dcbFrameworkInfo = ::CreateBufResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes,
 		D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
 	m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
@@ -284,7 +296,8 @@ void ShaderMgr::ReleaseShaderVariables()
 
 void ShaderMgr::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool bPrerender)
 {
-	if (m_ppd3dPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
+	if (m_ppd3dPipelineStates && nPipelineState < m_nPipelineStates && m_ppd3dPipelineStates[nPipelineState])
+		pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
 	UpdateShaderVariables(pd3dCommandList);
 }
 

@@ -64,3 +64,26 @@ protected:
 	ID3D12Resource* m_pd3dcbDrawOptions = NULL;
 	PS_CB_DRAW_OPTIONS* m_pcbMappedDrawOptions = NULL;
 };
+
+///<summary> 화면 우상단에 그림자 뎁스 맵 디버그 표시 (전용 루트시그/힙 사용) </summary>
+class CShadowMapDebugShader : public ShaderMgr
+{
+public:
+	void CreateDebugResources(ID3D12Device* pd3dDevice);
+	void CopyDepthSliceToHeap(ID3D12Device* pd3dDevice, D3D12_CPU_DESCRIPTOR_HANDLE srcCpuHandle);
+	ID3D12RootSignature* GetDebugRootSignature() { return m_pd3dDebugRootSignature; }
+	ID3D12DescriptorHeap* GetDebugDescriptorHeap() { return m_pd3dDebugSrvHeap; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetDebugSrvGpuHandle() { return m_d3dDebugSrvGpuHandle; }
+
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
+	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState);
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool bPrerender);
+	virtual void ReleaseObjects();
+
+	ID3D12RootSignature* m_pd3dDebugRootSignature = NULL;
+	ID3D12DescriptorHeap* m_pd3dDebugSrvHeap = NULL;
+	D3D12_CPU_DESCRIPTOR_HANDLE m_d3dDebugSrvCpuHandle;
+	D3D12_GPU_DESCRIPTOR_HANDLE m_d3dDebugSrvGpuHandle;
+};

@@ -648,6 +648,9 @@ void SceneMgr::CreateSRVs(ID3D12Device* pd3dDevice, Texture* pTexture, UINT nDes
 	int nRootParameters = pTexture->GetRootParameters();
 	for (int i = 0; i < nRootParameters; i++) pTexture->SetRootParameterIndex(i, nRootParameterStartIndex + i);
 
+	if (pShadowMap == NULL && nTextures > 0)
+		m_d3dShadowGPUDescriptorHandle = pTexture->GetGpuDescriptorHandle(0);
+
 	if (nTotalTextures > nTextures)
 	{
 		D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceDsec;

@@ -107,3 +107,22 @@ float4 PSScreenRectSamplingTextured(VS_TEXTURED_OUTPUT input) : SV_Target
 		
 	return(cColor);
 }
+
+///<summary> 화면 우상단 코너에 그림자 뎁스 맵(슬라이스0=방향광) 디버그 표시 </summary>
+struct VS_DEBUG_SHADOW_OUTPUT { float4 position : SV_POSITION; float2 uv : TEXCOORD; };
+VS_DEBUG_SHADOW_OUTPUT VSDebugShadowMap(uint nVertexID : SV_VertexID)
+{
+	VS_DEBUG_SHADOW_OUTPUT output;
+	if (nVertexID == 0) { output.position = float4(0.6f, 1.0f, 0.0f, 1.0f); output.uv = float2(0.0f, 0.0f); }
+	else if (nVertexID == 1) { output.position = float4(1.0f, 1.0f, 0.0f, 1.0f); output.uv = float2(1.0f, 0.0f); }
+	else if (nVertexID == 2) { output.position = float4(1.0f, 0.6f, 0.0f, 1.0f); output.uv = float2(1.0f, 1.0f); }
+	else if (nVertexID == 3) { output.position = float4(0.6f, 1.0f, 0.0f, 1.0f); output.uv = float2(0.0f, 0.0f); }
+	else if (nVertexID == 4) { output.position = float4(1.0f, 0.6f, 0.0f, 1.0f); output.uv = float2(1.0f, 1.0f); }
+	else { output.position = float4(0.6f, 0.6f, 0.0f, 1.0f); output.uv = float2(0.0f, 1.0f); }
+	return output;
+}
+float4 PSDebugShadowMap(VS_DEBUG_SHADOW_OUTPUT input) : SV_Target
+{
+	float d = gtxtDepthTextures[0].Sample(gssClamp, input.uv);
+	return float4(d, d, d, 1.0f);
+}

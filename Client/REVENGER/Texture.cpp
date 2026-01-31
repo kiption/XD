@@ -68,6 +68,7 @@ void Texture::SetRootParameterIndex(int nIndex, UINT nRootParameterIndex)
 
 void Texture::SetGpuDescriptorHandle(int nIndex, D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGpuDescriptorHandle)
 {
+	if (!m_pd3dSrvGpuDescriptorHandles || nIndex < 0 || nIndex >= m_nTextures) return;
 	m_pd3dSrvGpuDescriptorHandles[nIndex] = d3dSrvGpuDescriptorHandle;
 }
 
@@ -82,6 +83,7 @@ void Texture::SetSampler(int nIndex, D3D12_GPU_DESCRIPTOR_HANDLE d3dSamplerGpuDe
 
 void Texture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	if (!pd3dCommandList || !m_pd3dSrvGpuDescriptorHandles || !m_pnRootParameterIndices) return;
 	if (m_nRootParameters == m_nTextures)
 	{
 		for (int i = 0; i < m_nRootParameters; i++)

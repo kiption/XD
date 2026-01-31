@@ -772,7 +772,6 @@ void CGameFramework::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPA
 				break;
 			case VK_F1:
 			case VK_F2:
-			case VK_F3:
 				if (m_ingame_role == R_RIFLE)
 					m_pCamera = ((CHumanPlayer*)((MainGameScene*)m_pScene)->m_pPlayer)->ChangeCamera((DWORD)(wParam - VK_F1 + 1), m_GameTimer.GetTimeElapsed());
 				if (m_ingame_role == R_HELI)
@@ -1259,26 +1258,23 @@ void CGameFramework::ShotDelay()
 		}
 		if (ShotKey == false && m_currbullet != 0)
 		{
-			m_pCamera->m_xmf4x4View._43 += 0.1f;
-			((MuzzleFrameBillboard*)((MainGameScene*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
-			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
+			if (m_fRecoilToRecover > 0.0f)
 			{
-				
-				m_pCamera->m_xmf4x4View._43 += 0.75f;
+				float fRestore = (m_fRecoilToRecover < 0.07f) ? m_fRecoilToRecover : 0.07f;
+				m_pCamera->m_xmf4x4View._42 += fRestore;
+				m_fRecoilToRecover -= fRestore;
 			}
+			((MuzzleFrameBillboard*)((MainGameScene*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = false;
 			((MainGameScene*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.7, 0.7, 0.7, 1.0);
 			((MainGameScene*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
 		}
 		if (ShotKey == true && m_currbullet != 0)
 		{
 			((CHumanPlayer*)m_pScene->m_pPlayer)->Rotate(-0.07, 0.0, 0.0);
-			m_pCamera->m_xmf4x4View._42 -= 0.07f;
+			float fRecoil = (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true) ? 0.75f : 0.07f;
+			m_pCamera->m_xmf4x4View._42 -= fRecoil;
+			m_fRecoilToRecover += fRecoil;
 			((MuzzleFrameBillboard*)((MainGameScene*)m_pScene)->m_pBillboardShader[6])->m_bShotActive = true;
-			if (((CHumanPlayer*)m_pScene->m_pPlayer)->m_bZoomMode == true)
-			{
-				//m_pCamera->m_xmf4x4View._42 -= 0.20f;
-				m_pCamera->m_xmf4x4View._42 -= 0.75f;
-			}
 			((MainGameScene*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
 			((MainGameScene*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
 		}
@@ -1293,13 +1289,19 @@ void CGameFramework::ShotDelay()
 		}
 		if (ShotKey == false && m_currbullet != 0)
 		{
-			m_pCamera->m_xmf4x4View._43 += 0.1f;
+			if (m_fRecoilToRecoverHeli > 0.0f)
+			{
+				float fRestore = (m_fRecoilToRecoverHeli < 0.1f) ? m_fRecoilToRecoverHeli : 0.1f;
+				m_pCamera->m_xmf4x4View._43 += fRestore;
+				m_fRecoilToRecoverHeli -= fRestore;
+			}
 			((MainGameScene*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.7, 0.7, 0.7, 1.0);
 			((MainGameScene*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
 		}
 		if (ShotKey == true && m_currbullet != 0)
 		{
 			m_pCamera->m_xmf4x4View._43 -= 0.1f;
+			m_fRecoilToRecoverHeli += 0.1f;
 			((MainGameScene*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.9, 0.4, 0.1, 1.0);
 			((MainGameScene*)m_pScene)->m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.2, 0.2, 0.2, 1.0);
 		}

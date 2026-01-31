@@ -43,7 +43,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	{
 		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
-		float3 vNormal = normalize(cNormalColor.rgb * 1.0f + 1.0f); //[0, 1] ¡æ [-1, 1]
+		float3 vNormal = normalize(cNormalColor.rgb * 1.0f + 1.0f); //[0, 1] ï¿½ï¿½ [-1, 1]
 		normalW = normalize(mul(vNormal, TBN));
 	}
 	else
@@ -52,9 +52,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	}
 
 
-	float4 uvs[MAX_LIGHTS];
-	//float4 cIllumination = Lighting(input.positionW, normalize(input.normalW));
-	float4 cIllumination = Lighting(input.positionW, input.normalW, false, uvs);
+	float4 cIllumination = Lighting(input.positionW, input.normalW, true, input.uvs);
 	return(lerp(cColor, cIllumination, 0.1f));
 }
 
@@ -110,7 +108,7 @@ float4 PSParticleStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	{
 		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
-		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
+		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ï¿½ï¿½ [-1, 1]
 		normalW = normalize(mul(vNormal, TBN));
 	}
 	else
@@ -141,7 +139,7 @@ float4 PSRiflePointingStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	{
 		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
-		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
+		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ï¿½ï¿½ [-1, 1]
 		normalW = normalize(mul(vNormal, TBN));
 	}
 	else
@@ -172,7 +170,7 @@ float4 PSBloodParticleStandard(VS_PARTICLES_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	{
 		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
-		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
+		float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] ï¿½ï¿½ [-1, 1]
 		normalW = normalize(mul(vNormal, TBN));
 	}
 	else
@@ -205,7 +203,7 @@ float4 PSBulletStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	if (gnTexturesMask & MATERIAL_NORMAL_MAP)
 	{
 		float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
-		float3 vNormal = normalize(cNormalColor.rgb * +2.0f - 1.0f); //[0, 1] ¡æ [-1, 1]
+		float3 vNormal = normalize(cNormalColor.rgb * +2.0f - 1.0f); //[0, 1] ï¿½ï¿½ [-1, 1]
 		normalW = normalize(mul(vNormal, TBN));
 	}
 	else

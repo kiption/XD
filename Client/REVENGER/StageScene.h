@@ -64,7 +64,8 @@ public:
 	static D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dCbvGPUDescriptorNextHandle;
 	static D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dSrvCPUDescriptorNextHandle;
 	static D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dSrvGPUDescriptorNextHandle;
-	static D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dShadowGPUDescriptorHandle;//????? ?????? ???????? ????????? ???
+	static D3D12_GPU_DESCRIPTOR_HANDLE	m_d3dShadowGPUDescriptorHandle;
+	static D3D12_CPU_DESCRIPTOR_HANDLE	m_d3dDepthSrvCPUHandles[8];
 public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUCbvDescriptorStartHandle() { return(m_d3dCbvCPUDescriptorStartHandle); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUCbvDescriptorStartHandle() { return(m_d3dCbvGPUDescriptorStartHandle); }
@@ -77,6 +78,8 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUSrvDescriptorNextHandle() { return(m_d3dSrvGPUDescriptorNextHandle); }
 	float m_fElapsedTime = 0.0f;
 	bool m_bPartitionEnd = false;
+	bool m_bDebugShadowMap = true;
+	CShadowMapDebugShader* m_pShadowMapDebugShader = NULL;
 	int	m_nBillboardShaders = 0;
 	int m_nSpriteBillboards = 0;
 

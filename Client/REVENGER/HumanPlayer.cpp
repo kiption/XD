@@ -87,11 +87,11 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(0.0f);
 		m_pCamera = OnChangeCamera(CLOSEUP_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
-		m_pCamera->SetOffset(XMFLOAT3(-0.8f, 0.10f, 0.5f));
+		m_pCamera->SetOffset(XMFLOAT3(-1.0f, 0.10f, -0.5f));
 		m_pCamera->SetPosition(Vector3::Add(
 			XMFLOAT3(m_pHeadFindFrame->GetPosition().x, m_pHeadFindFrame->GetPosition().y, m_pHeadFindFrame->GetPosition().z)
 			,m_pCamera->GetOffset()));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 3000.0f, ASPECT_RATIO, 70.0f);
+		m_pCamera->GenerateProjectionMatrix(0.01f, 3000.0f, ASPECT_RATIO, 70.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
@@ -102,10 +102,10 @@ CCamera* CHumanPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(0.0);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, 8.0f, -12.0f));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 8.0f, -20.0f));
 		//m_pCamera->SetPosition(Vector3::Add(XMFLOAT3(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z), m_pCamera->GetOffset()));
 		m_pCamera->SetPosition(m_xmf3Position);
-		m_pCamera->GenerateProjectionMatrix(1.01f, 4500.0f, ASPECT_RATIO, 70.0f);
+		m_pCamera->GenerateProjectionMatrix(0.1f, 4500.0f, ASPECT_RATIO, 70.0f);
 		m_pCamera->SetViewport(10, 10, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(4, 4, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;

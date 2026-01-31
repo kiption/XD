@@ -9,7 +9,7 @@ PostProcessShader::PostProcessShader()
 PostProcessShader::~PostProcessShader()
 {
 	if (m_pTexture) delete m_pTexture;
-	//if (m_ppTextures) delete[] m_ppTextures;// �迭����
+	//if (m_ppTextures) delete[] m_ppTextures;// ??????
 
 	if (m_pd3dRtvCPUDescriptorHandles) delete[] m_pd3dRtvCPUDescriptorHandles;
 }
@@ -221,7 +221,7 @@ D3D12_SHADER_BYTECODE CTextureToFullScreenShader::CreatePixelShader(ID3DBlob** p
 
 void CTextureToFullScreenShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(PS_CB_DRAW_OPTIONS) + 255) & ~255); //256�� ���
+	UINT ncbElementBytes = ((sizeof(PS_CB_DRAW_OPTIONS) + 255) & ~255); //256?? ???
 	m_pd3dcbDrawOptions = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbDrawOptions->Map(0, NULL, (void**)&m_pcbMappedDrawOptions);
 
@@ -245,4 +245,103 @@ void CTextureToFullScreenShader::ReleaseShaderVariables()
 void CTextureToFullScreenShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, void* pContext, int nPipelineStates)
 {
 	PostProcessShader::Render(pd3dCommandList, pCamera, pContext, nPipelineStates);
+}
+
+D3D12_INPUT_LAYOUT_DESC CShadowMapDebugShader::CreateInputLayout(int nPipelineState)
+{
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = NULL;
+	d3dInputLayoutDesc.NumElements = 0;
+	return d3dInputLayoutDesc;
+}
+
+D3D12_DEPTH_STENCIL_DESC CShadowMapDebugShader::CreateDepthStencilState(int nPipelineState)
+{
+	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
+	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
+	d3dDepthStencilDesc.DepthEnable = FALSE;
+	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	d3dDepthStencilDesc.StencilEnable = FALSE;
+	return d3dDepthStencilDesc;
+}
+
+void CShadowMapDebugShader::CreateDebugResources(ID3D12Device* pd3dDevice)
+{
+	D3D12_DESCRIPTOR_RANGE range = {};
+	range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	range.NumDescriptors = 1;
+	range.BaseShaderRegister = 0;
+	range.RegisterSpace = 0;
+	range.OffsetInDescriptorsFromTableStart = 0;
+
+	D3D12_ROOT_PARAMETER rootParam = {};
+	rootParam.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParam.DescriptorTable.NumDescriptorRanges = 1;
+	rootParam.DescriptorTable.pDescriptorRanges = &range;
+	rootParam.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	D3D12_STATIC_SAMPLER_DESC sampler = {};
+	sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	sampler.AddressU = sampler.AddressV = sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+	sampler.ShaderRegister = 0;
+	sampler.RegisterSpace = 0;
+	sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	D3D12_ROOT_SIGNATURE_DESC rsDesc = {};
+	rsDesc.NumParameters = 1;
+	rsDesc.pParameters = &rootParam;
+	rsDesc.NumStaticSamplers = 1;
+	rsDesc.pStaticSamplers = &sampler;
+	rsDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	ID3DBlob* pSigBlob = NULL, * pErrBlob = NULL;
+	D3D12SerializeRootSignature(&rsDesc, D3D_ROOT_SIGNATURE_VERSION_1, &pSigBlob, &pErrBlob);
+	if (pSigBlob)
+	{
+		pd3dDevice->CreateRootSignature(0, pSigBlob->GetBufferPointer(), pSigBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void**)&m_pd3dDebugRootSignature);
+		pSigBlob->Release();
+	}
+	if (pErrBlob) pErrBlob->Release();
+
+	D3D12_DESCRIPTOR_HEAP_DESC heapDesc = {};
+	heapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	heapDesc.NumDescriptors = 1;
+	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	pd3dDevice->CreateDescriptorHeap(&heapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dDebugSrvHeap);
+	if (m_pd3dDebugSrvHeap)
+	{
+		m_d3dDebugSrvCpuHandle = m_pd3dDebugSrvHeap->GetCPUDescriptorHandleForHeapStart();
+		m_d3dDebugSrvGpuHandle = m_pd3dDebugSrvHeap->GetGPUDescriptorHandleForHeapStart();
+	}
+}
+
+void CShadowMapDebugShader::CopyDepthSliceToHeap(ID3D12Device* pd3dDevice, D3D12_CPU_DESCRIPTOR_HANDLE srcCpuHandle)
+{
+	if (m_pd3dDebugSrvHeap && srcCpuHandle.ptr)
+		pd3dDevice->CopyDescriptorsSimple(1, m_d3dDebugSrvCpuHandle, srcCpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+}
+
+void CShadowMapDebugShader::ReleaseObjects()
+{
+	if (m_pd3dDebugRootSignature) { m_pd3dDebugRootSignature->Release(); m_pd3dDebugRootSignature = NULL; }
+	if (m_pd3dDebugSrvHeap) { m_pd3dDebugSrvHeap->Release(); m_pd3dDebugSrvHeap = NULL; }
+	ShaderMgr::ReleaseObjects();
+}
+
+D3D12_SHADER_BYTECODE CShadowMapDebugShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return ShaderMgr::CompileShaderFromFile(L"ShadowMapDebug.hlsl", "VSDebugShadowMap", "vs_5_1", ppd3dShaderBlob);
+}
+
+D3D12_SHADER_BYTECODE CShadowMapDebugShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return ShaderMgr::CompileShaderFromFile(L"ShadowMapDebug.hlsl", "PSDebugShadowMap", "ps_5_1", ppd3dShaderBlob);
+}
+
+void CShadowMapDebugShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool bPrerender)
+{
+	if (!m_ppd3dPipelineStates || !m_ppd3dPipelineStates[nPipelineState]) return;
+	pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
+	pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	pd3dCommandList->DrawInstanced(6, 1, 0, 0);
 }
