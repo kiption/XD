@@ -19,6 +19,7 @@ struct TOLIGHTSPACES
 	TOOBJECTSPACEINFO				m_pToLightSpaces[MAX_LIGHTS];
 };
 struct LIGHT;
+class SceneMgr;
 
 class ShaderMgr
 {
@@ -28,6 +29,10 @@ public:
 
 private:
 	int									m_nReferences = 0;
+	SceneMgr*							m_pScene = NULL;
+public:
+	void SetScene(SceneMgr* pScene) { m_pScene = pScene; }
+	SceneMgr* GetScene() { return m_pScene; }
 public:
 	bool							m_bActive = true;
 public:

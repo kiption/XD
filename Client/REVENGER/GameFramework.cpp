@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // File: CGameFramework.cpp
 //-----------------------------------------------------------------------------
 
@@ -926,7 +926,7 @@ void CGameFramework::BuildObjects()
 
 	m_pScene = new SceneMgr();
 	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList, d3dRtvCPUDescriptorHandle, m_pd3dDepthStencilBuffer);
-	HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, NULL, m_pScene->GetGraphicsRootSignature(), NULL);
+	HeliPlayer* pPlayer = new HeliPlayer(m_pd3dDevice, m_pd3dCommandList, NULL, m_pScene->GetGraphicsRootSignature(), (void*)m_pScene->m_ppShaders[0]);
 	CreateShaderVariables();
 	m_pScene->m_pPlayer = m_pScene->m_pPlayer = pPlayer;
 	m_pCamera = ((HeliPlayer*)((SceneMgr*)m_pScene)->m_pPlayer)->GetCamera();

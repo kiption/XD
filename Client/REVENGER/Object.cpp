@@ -136,7 +136,7 @@ bool GameObjectMgr::IsVisible(CCamera* pCamera)
 	OnPrepareRender();
 	bool bIsVisible = false;
 	BoundingBox xmBoundingBox = m_pMesh->GetBoundingBox();
-	//모델 좌표계의 바운딩 박스를 월드 좌표계로 변환한다. 
+	//?? ??????? ???? ????? ???? ?????? ??????. 
 	xmBoundingBox.Transform(xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
 	if (pCamera) bIsVisible = pCamera->IsInFrustum(xmBoundingBox);
 	return(bIsVisible);
@@ -273,7 +273,7 @@ void GameObjectMgr::Animate(float fTimeElapsed)
 void GameObjectMgr::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
 {
 	OnPrepareRender();
-	//UpdateBoundingBox();
+	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->AdvanceTime(fTimeElapsed, this);
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed, pxmf4x4Parent);
 	if (m_pChild) m_pChild->Animate(fTimeElapsed, &m_xmf4x4World);
 }
@@ -297,6 +297,9 @@ void GameObjectMgr::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCa
 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 	if (m_pMesh) {
+		if (m_pMesh->GetType() & VERTEXT_BONE_INDEX_WEIGHT)
+			for (int i = 0; i < m_nMaterials; i++)
+				if (m_ppMaterials[i]) m_ppMaterials[i]->SetSkinnedAnimationShader();
 		if (m_nMaterials > 0) {
 			for (int i = 0; i < m_nMaterials; i++) {
 
@@ -335,6 +338,9 @@ void GameObjectMgr::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 
 	if (m_pMesh)
 	{
+		if (m_pMesh->GetType() & VERTEXT_BONE_INDEX_WEIGHT)
+			for (int i = 0; i < m_nMaterials; i++)
+				if (m_ppMaterials[i]) m_ppMaterials[i]->SetSkinnedAnimationShader();
 		if (m_nMaterials > 0)
 		{
 			for (int i = 0; i < m_nMaterials; i++)
@@ -371,6 +377,7 @@ void GameObjectMgr::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12Graphi
 
 void GameObjectMgr::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	if (m_pMesh) m_pMesh->UpdateShaderVariables(pd3dCommandList);
 }
 
 void GameObjectMgr::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT4X4* pxmf4x4World)
@@ -754,9 +761,13 @@ GameObjectMgr* GameObjectMgr::LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevic
 			if (!strcmp(pstrToken, "<Mesh>:")) pSkinnedMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);
 
 			pGameObject->SetMesh(pSkinnedMesh);
+			if (pGameObject->m_ppMaterials && pGameObject->m_nMaterials > 0)
+				for (int i = 0; i < pGameObject->m_nMaterials; i++)
+					if (pGameObject->m_ppMaterials[i]) pGameObject->m_ppMaterials[i]->SetSkinnedAnimationShader();
 		}
 		else if (!strcmp(pstrToken, "<Materials>:"))
 		{
+			if (pShader && pShader->GetScene()) pGameObject->m_pScene = pShader->GetScene();
 			pGameObject->LoadMaterialsFromFile(pd3dDevice, pd3dCommandList, pParent, pInFile, pShader);
 		}
 		else if (!strcmp(pstrToken, "<Children>:"))
@@ -1546,13 +1557,20 @@ COpeningHuman::~COpeningHuman()
 
 void COpeningHuman::Animate(float fTimeElapsed)
 {
-
 	m_pSkinnedAnimationController->SetTrackEnable(0, false);
 	m_pSkinnedAnimationController->SetTrackEnable(1, true);
 	m_pSkinnedAnimationController->SetTrackEnable(2, false);
 	m_pSkinnedAnimationController->SetTrackPosition(0, 1);
-
 	GameObjectMgr::Animate(fTimeElapsed);
+}
+
+void COpeningHuman::Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent)
+{
+	m_pSkinnedAnimationController->SetTrackEnable(0, false);
+	m_pSkinnedAnimationController->SetTrackEnable(1, true);
+	m_pSkinnedAnimationController->SetTrackEnable(2, false);
+	m_pSkinnedAnimationController->SetTrackPosition(0, 1);
+	GameObjectMgr::Animate(fTimeElapsed, pxmf4x4Parent);
 }
 
 CInsideHelicopterHuman::CInsideHelicopterHuman(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks) : GameObjectMgr(1)

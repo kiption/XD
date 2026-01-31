@@ -9,7 +9,7 @@ PostProcessShader::PostProcessShader()
 PostProcessShader::~PostProcessShader()
 {
 	if (m_pTexture) delete m_pTexture;
-	//if (m_ppTextures) delete[] m_ppTextures;// ¹è¿­°í·Á
+	//if (m_ppTextures) delete[] m_ppTextures;// ï¿½è¿­ï¿½ï¿½ï¿½ï¿½
 
 	if (m_pd3dRtvCPUDescriptorHandles) delete[] m_pd3dRtvCPUDescriptorHandles;
 }
@@ -137,7 +137,7 @@ void PostProcessShader::CreateResourcesAndRtvsSrvs(ID3D12Device* pd3dDevice, ID3
 #ifdef _WITH_SCENE_ROOT_SIGNATURE
 	SceneManager::CreateShaderResourceViews(pd3dDevice, m_pTexture, 0, 3);
 #else
-	SceneMgr::CreateSRVs(pd3dDevice, m_pTexture, 0, 0);
+	if (GetScene()) GetScene()->CreateSRVs(pd3dDevice, m_pTexture, 0, 0);
 #endif
 
 	D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;
@@ -221,7 +221,7 @@ D3D12_SHADER_BYTECODE CTextureToFullScreenShader::CreatePixelShader(ID3DBlob** p
 
 void CTextureToFullScreenShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(PS_CB_DRAW_OPTIONS) + 255) & ~255); //256ÀÇ ¹è¼ö
+	UINT ncbElementBytes = ((sizeof(PS_CB_DRAW_OPTIONS) + 255) & ~255); //256ï¿½ï¿½ ï¿½ï¿½ï¿½
 	m_pd3dcbDrawOptions = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbDrawOptions->Map(0, NULL, (void**)&m_pcbMappedDrawOptions);
 

@@ -89,7 +89,7 @@ public:
 	void RenderBoundingBox(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 public:
-	//°ÔÀÓ °´Ã¼°¡ Ä«¸Þ¶ó¿¡ º¸ÀÎ´Â °¡¸¦ °Ë»çÇÑ´Ù.
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ï¿½ï¿½ Ä«ï¿½Þ¶ï¿½ ï¿½ï¿½ï¿½Î´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ë»ï¿½ï¿½Ñ´ï¿½.
 	bool IsVisible(CCamera* pCamera = NULL);
 public:
 	ID3D12Resource* m_pd3dcbGameObject = NULL;
@@ -343,6 +343,7 @@ public:
 	COpeningHuman(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, int nAnimationTracks);
 	virtual ~COpeningHuman();
 	virtual void Animate(float fTimeElapsed);
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent);
 
 };
 class CInsideHelicopterHuman : public GameObjectMgr

@@ -36,11 +36,11 @@ bool SceneMgr::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 
 void SceneMgr::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256의 배수
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256?? ???
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 
-	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256의 배수
+	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256?? ???
 	m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbMaterialBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbMaterials->Map(0, NULL, (void**)&m_pcbMappedMaterials);
 }
@@ -117,14 +117,14 @@ void SceneMgr::BuildDefaultLightsAndMaterials()
 
 void SceneMgr::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle, ID3D12Resource* pd3dDepthStencilBuffer)
 {
-
+	m_pd3dDevice = pd3dDevice;
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	CreateDescriptorHeaps(pd3dDevice, 0, 200);
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	BuildDefaultLightsAndMaterials();
 
-	m_pSkyBox = new COpeningBackScene(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pSkyBox = new COpeningBackScene(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, this);
 	m_pSkyBox->SetCurScene(OPENING_SCENE);
 	
 	m_nShaders = 1;
@@ -132,6 +132,7 @@ void SceneMgr::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	ObjectStore* pObjectShader = new ObjectStore();
 	pObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pObjectShader->SetCurScene(OPENING_SCENE);
+	pObjectShader->SetScene(this);
 	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 	m_ppShaders[0] = pObjectShader;
 
@@ -143,6 +144,7 @@ void SceneMgr::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList*
 	m_pShadowShader = new CShadowMapShader(pObjectShader);
 	m_pShadowShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	m_pShadowShader->SetCurScene(OPENING_SCENE);
+	m_pShadowShader->SetScene(this);
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
 
@@ -501,7 +503,8 @@ bool SceneMgr::ProcessInput(UCHAR* pKeysBuffer)
 void SceneMgr::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
+	if (m_nCurScene != OPENING_SCENE)
+		for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 	LightMotion();
 }
 void SceneMgr::LightMotion()

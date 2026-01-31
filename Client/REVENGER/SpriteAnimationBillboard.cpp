@@ -60,7 +60,7 @@ void CSpriteObjectsShader::ReleaseObjects()
 
 void CSpriteObjectsShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
+	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256ï¿½ï¿½ ï¿½ï¿½ï¿½
 	m_pd3dcbGameObjects = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes * m_nObjects, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbGameObjects->Map(0, NULL, (void**)&m_pcbMappedGameObjects);
@@ -192,12 +192,13 @@ void SpriteAnimationBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 
 
 
-	MainGameScene* pScene = NULL;
+	SceneMgr* pScene = GetScene();
+	if (!pScene) return;
 	m_nObjects = 2;
 	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	pScene->CreateSRVs(pd3dDevice, ppSpriteTextures[0], 0, 15);//+
-	pScene->CreateSRVs(pd3dDevice, ppSpriteTextures[1], 0, 15);//+
+	pScene->CreateSRVs(pd3dDevice, ppSpriteTextures[0], 0, 15);
+	pScene->CreateSRVs(pd3dDevice, ppSpriteTextures[1], 0, 15);
 	pScene->CreateCBV(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
 	m_ppObjects = new GameObjectMgr * [m_nObjects];
 	CMultiSpriteObject** pThirdObject = new CMultiSpriteObject * [m_nObjects];

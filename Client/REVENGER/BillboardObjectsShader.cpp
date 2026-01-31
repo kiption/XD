@@ -131,7 +131,7 @@ void HealPackBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 
 	m_nObjects = HEAL_EFFECTS_COUNT;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	MainGameScene::CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
+	if (GetScene()) GetScene()->CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
 	m_ppObjects = new GameObjectMgr * [m_nObjects];
 	CBillboardObject** ppParticleObject = new CBillboardObject * [m_nObjects];
 	for (int j = 0; j < m_nObjects; j++)
@@ -290,7 +290,7 @@ void BillboardParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 
 	m_nObjects = 20;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	MainGameScene::CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
+	if (GetScene()) GetScene()->CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
 
 	m_ppObjects = new GameObjectMgr * [m_nObjects];
 
@@ -450,7 +450,7 @@ void MuzzleFrameBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphics
 
 	m_nObjects = 1;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	MainGameScene::CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
+	if (GetScene()) GetScene()->CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
 
 	m_ppObjects = new GameObjectMgr * [m_nObjects];
 	CResponeObject** pResponObject = new CResponeObject * [m_nObjects];
@@ -556,7 +556,7 @@ void SparkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 	m_nObjects = EXPLOSION_SPARK;
 	m_ppObjects = new GameObjectMgr * [m_nObjects];
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	MainGameScene::CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
+	if (GetScene()) GetScene()->CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
 
 	CBillboardObject** pSparkObject = new CBillboardObject * [m_nObjects];
 	for (int j = 0; j < m_nObjects; j++)
@@ -689,7 +689,7 @@ void BloodHittingBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	m_nObjects = 10;
 	m_ppObjects = new GameObjectMgr * [m_nObjects];
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	MainGameScene::CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
+	if (GetScene()) GetScene()->CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
 
 	CBillboardObject** pSparkObject = new CBillboardObject * [m_nObjects];
 	for (int j = 0; j < m_nObjects; j++)
@@ -837,7 +837,7 @@ void BulletMarkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	pSpriteMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.5, 1.5, 0.0f, 0.0f, 0.0f, 0.0f);
 	m_nObjects = 1;
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	MainGameScene::CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
+	if (GetScene()) GetScene()->CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
 	m_ppObjects = new GameObjectMgr * [m_nObjects];
 	CBillboardObject** ppParticleObject = new CBillboardObject * [m_nObjects];
 	for (int j = 0; j < 1; j++)
@@ -958,7 +958,7 @@ void HeliHittingMarkBillboard::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Grap
 	m_nObjects = HITTINGMARKS;
 	m_ppObjects = new GameObjectMgr * [m_nObjects];
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	MainGameScene::CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
+	if (GetScene()) GetScene()->CreateSRVs(pd3dDevice, ppSpriteTextures, 0, 15);
 
 	CBillboardObject** pSparkObject = new CBillboardObject * [m_nObjects];
 	for (int j = 0; j < HITTINGMARKS; j++)

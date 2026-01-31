@@ -128,13 +128,14 @@ void MainGameScene::BuildDefaultLightsAndMaterials()
 
 void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle, ID3D12Resource* pd3dDepthStencilBuffer)
 {
+	m_pd3dDevice = pd3dDevice;
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	CreateDescriptorHeaps(pd3dDevice, 0, 350);
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	BuildDefaultLightsAndMaterials();
 
-	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, this);
 	m_pSkyBox->SetCurScene(INGAME_SCENE);
 
 	m_nBillboardShaders = 17;
@@ -143,24 +144,28 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	BillboardParticleShader* pBillboardParticleShader = new BillboardParticleShader();
 	pBillboardParticleShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pBillboardParticleShader->SetCurScene(INGAME_SCENE);
+	pBillboardParticleShader->SetScene(this);
 	pBillboardParticleShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[0] = pBillboardParticleShader;
 
 	HealPackBillboardShader* pCrossHairShader = new HealPackBillboardShader();
 	pCrossHairShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pCrossHairShader->SetCurScene(INGAME_SCENE);
+	pCrossHairShader->SetScene(this);
 	pCrossHairShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[1] = pCrossHairShader;
 
 	BloodHittingBillboard* pBloodHittingBillboard = new BloodHittingBillboard();
 	pBloodHittingBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pBloodHittingBillboard->SetCurScene(INGAME_SCENE);
+	pBloodHittingBillboard->SetScene(this);
 	pBloodHittingBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[2] = pBloodHittingBillboard;
 
 	SparkBillboard* pHelicopterSparkBillboard = new SparkBillboard();
 	pHelicopterSparkBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHelicopterSparkBillboard->SetCurScene(INGAME_SCENE);
+	pHelicopterSparkBillboard->SetScene(this);
 	pHelicopterSparkBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pHelicopterSparkBillboard->m_bActive = true;
 	m_pBillboardShader[3] = pHelicopterSparkBillboard;
@@ -168,12 +173,14 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	BulletMarkBillboard* pBulletMarkBillboard = new BulletMarkBillboard();
 	pBulletMarkBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pBulletMarkBillboard->SetCurScene(INGAME_SCENE);
+	pBulletMarkBillboard->SetScene(this);
 	pBulletMarkBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[4] = pBulletMarkBillboard;
 
 	HeliHittingMarkBillboard* pHeliHittingMarkBillboard = new HeliHittingMarkBillboard();
 	pHeliHittingMarkBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHeliHittingMarkBillboard->SetCurScene(INGAME_SCENE);
+	pHeliHittingMarkBillboard->SetScene(this);
 	pHeliHittingMarkBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pHeliHittingMarkBillboard->m_bActive = true;
 	m_pBillboardShader[5] = pHeliHittingMarkBillboard;
@@ -181,18 +188,21 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	MuzzleFrameBillboard* pMuzzleFrameBillboard = new MuzzleFrameBillboard();
 	pMuzzleFrameBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pMuzzleFrameBillboard->SetCurScene(INGAME_SCENE);
+	pMuzzleFrameBillboard->SetScene(this);
 	pMuzzleFrameBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[6] = pMuzzleFrameBillboard;
 
 	MuzzleFrameBillboard* pMuzzleFrameBillboard2 = new MuzzleFrameBillboard();
 	pMuzzleFrameBillboard2->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pMuzzleFrameBillboard2->SetCurScene(INGAME_SCENE);
+	pMuzzleFrameBillboard2->SetScene(this);
 	pMuzzleFrameBillboard2->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[7] = pMuzzleFrameBillboard2;
 
 	HeliHittingMarkBillboard* pOtherPlyHeliHittingMarkBillboard = new HeliHittingMarkBillboard();
 	pOtherPlyHeliHittingMarkBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pOtherPlyHeliHittingMarkBillboard->SetCurScene(INGAME_SCENE);
+	pOtherPlyHeliHittingMarkBillboard->SetScene(this);
 	pOtherPlyHeliHittingMarkBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pOtherPlyHeliHittingMarkBillboard->m_bActive = true;
 	m_pBillboardShader[8] = pOtherPlyHeliHittingMarkBillboard;
@@ -200,6 +210,7 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	HeliHittingMarkBillboard* pNPCHeliHittingMarkBillboard = new HeliHittingMarkBillboard();
 	pNPCHeliHittingMarkBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pNPCHeliHittingMarkBillboard->SetCurScene(INGAME_SCENE);
+	pNPCHeliHittingMarkBillboard->SetScene(this);
 	pNPCHeliHittingMarkBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pNPCHeliHittingMarkBillboard->m_bActive = true;
 	m_pBillboardShader[9] = pNPCHeliHittingMarkBillboard;
@@ -207,6 +218,7 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	HealPackBillboardShader* pHealPack1Shader = new HealPackBillboardShader();
 	pHealPack1Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHealPack1Shader->SetCurScene(INGAME_SCENE);
+	pHealPack1Shader->SetScene(this);
 	pHealPack1Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pHealPack1Shader->m_bActive = true;
 	m_pBillboardShader[10] = pHealPack1Shader;
@@ -214,6 +226,7 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	HealPackBillboardShader* pHealPack2Shader = new HealPackBillboardShader();
 	pHealPack2Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHealPack2Shader->SetCurScene(INGAME_SCENE);
+	pHealPack2Shader->SetScene(this);
 	pHealPack2Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pHealPack2Shader->m_bActive = true;
 	m_pBillboardShader[11] = pHealPack2Shader;
@@ -221,12 +234,14 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	HealPackBillboardShader* pHealPack3Shader = new HealPackBillboardShader();
 	pHealPack3Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHealPack3Shader->SetCurScene(INGAME_SCENE);
+	pHealPack3Shader->SetScene(this);
 	pHealPack3Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_pBillboardShader[12] = pHealPack3Shader;
 
 	HealPackBillboardShader* pHealPack4Shader = new HealPackBillboardShader();
 	pHealPack4Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHealPack4Shader->SetCurScene(INGAME_SCENE);
+	pHealPack4Shader->SetScene(this);
 	pHealPack4Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pHealPack4Shader->m_bActive = true;
 	m_pBillboardShader[13] = pHealPack4Shader;
@@ -234,6 +249,7 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	HealPackBillboardShader* pHealPack5Shader = new HealPackBillboardShader();
 	pHealPack5Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHealPack5Shader->SetCurScene(INGAME_SCENE);
+	pHealPack5Shader->SetScene(this);
 	pHealPack5Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pHealPack5Shader->m_bActive = true;
 	m_pBillboardShader[14] = pHealPack5Shader;
@@ -241,6 +257,7 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	HealPackBillboardShader* pHealPack6Shader = new HealPackBillboardShader();
 	pHealPack6Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHealPack6Shader->SetCurScene(INGAME_SCENE);
+	pHealPack6Shader->SetScene(this);
 	pHealPack6Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pHealPack6Shader->m_bActive = true;
 	m_pBillboardShader[15] = pHealPack6Shader;
@@ -248,6 +265,7 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	HealPackBillboardShader* pHealPack7Shader = new HealPackBillboardShader();
 	pHealPack7Shader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pHealPack7Shader->SetCurScene(INGAME_SCENE);
+	pHealPack7Shader->SetScene(this);
 	pHealPack7Shader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pHealPack7Shader->m_bActive = true;
 	m_pBillboardShader[16] = pHealPack7Shader;
@@ -257,6 +275,7 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	SpriteAnimationBillboard* pSpriteAnimationBillboard = new SpriteAnimationBillboard();
 	pSpriteAnimationBillboard->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pSpriteAnimationBillboard->SetCurScene(INGAME_SCENE);
+	pSpriteAnimationBillboard->SetScene(this);
 	pSpriteAnimationBillboard->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	pSpriteAnimationBillboard->SetActive(false);
 	m_ppSpriteBillboard[0] = pSpriteAnimationBillboard;
@@ -287,6 +306,7 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	ObjectStore* pObjectShader = new ObjectStore();
 	pObjectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pObjectShader->SetCurScene(INGAME_SCENE);
+	pObjectShader->SetScene(this);
 	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 	m_ppShaders[0] = pObjectShader;
 
@@ -298,16 +318,19 @@ void MainGameScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	m_pShadowShader = new CShadowMapShader(pObjectShader);
 	m_pShadowShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	m_pShadowShader->SetCurScene(INGAME_SCENE);
+	m_pShadowShader->SetScene(this);
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
 	m_pTreeBlendShadowShader = new TreeBlendingShader(pObjectShader);
 	m_pTreeBlendShadowShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	m_pTreeBlendShadowShader->SetCurScene(INGAME_SCENE);
+	m_pTreeBlendShadowShader->SetScene(this);
 	m_pTreeBlendShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pDepthRenderShader->GetDepthTexture());
 
 	pBCBulletEffectShader = new BulletEffectShader();
 	pBCBulletEffectShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, 0);
 	pBCBulletEffectShader->SetCurScene(INGAME_SCENE);
+	pBCBulletEffectShader->SetScene(this);
 
 	//m_pBoundingBoxShader = new BoundingWireShader(pObjectShader);
 	//m_pBoundingBoxShader->CreateGraphicsPipelineState(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE);
@@ -731,11 +754,11 @@ ID3D12RootSignature* MainGameScene::CreateGraphicsRootSignature(ID3D12Device* pd
 
 void MainGameScene::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256의 배수
+	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256?? ???
 	m_pd3dcbLights = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbLights->Map(0, NULL, (void**)&m_pcbMappedLights);
 
-	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256의 배수
+	UINT ncbMaterialBytes = ((sizeof(MATERIALS) + 255) & ~255); //256?? ???
 	m_pd3dcbMaterials = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbMaterialBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbMaterials->Map(0, NULL, (void**)&m_pcbMappedMaterials);
 }
@@ -784,6 +807,8 @@ void MainGameScene::CreateDescriptorHeaps(ID3D12Device* pd3dDevice, int nConstan
 	m_d3dCbvGPUDescriptorNextHandle = m_d3dCbvGPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	m_d3dSrvCPUDescriptorNextHandle.ptr = m_d3dSrvCPUDescriptorStartHandle.ptr = m_d3dCbvCPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * nConstantBufferViews);
 	m_d3dSrvGPUDescriptorNextHandle.ptr = m_d3dSrvGPUDescriptorStartHandle.ptr = m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * nConstantBufferViews);
+	m_d3dSrvCPUDescriptorNextHandle = m_d3dSrvCPUDescriptorStartHandle;
+	m_d3dSrvGPUDescriptorNextHandle = m_d3dSrvGPUDescriptorStartHandle;
 }
 
 void MainGameScene::CreateSRVs(ID3D12Device* pd3dDevice, Texture* pTexture, UINT nDescriptorHeapIndex, UINT nRootParameterStartIndex)
@@ -807,6 +832,17 @@ void MainGameScene::CreateSRVs(ID3D12Device* pd3dDevice, Texture* pTexture, UINT
 	}
 	int nRootParameters = pTexture->GetRootParameters();
 	for (int j = 0; j < nRootParameters; j++) pTexture->SetRootParameterIndex(j, nRootParameterStartIndex + j);
+}
+
+void MainGameScene::CreateTextureSRVAtSlotZero(Texture* pTexture, UINT nRootParameterStartIndex)
+{
+	if (!m_pd3dDevice || !pTexture || pTexture->GetTextures() <= 0) return;
+	ID3D12Resource* pRes = pTexture->GetResource(0);
+	if (!pRes) return;
+	D3D12_SHADER_RESOURCE_VIEW_DESC desc = pTexture->GetShaderResourceViewDesc(0);
+	m_pd3dDevice->CreateShaderResourceView(pRes, &desc, m_d3dSrvCPUDescriptorStartHandle);
+	pTexture->SetGpuDescriptorHandle(0, m_d3dSrvGPUDescriptorStartHandle);
+	pTexture->SetRootParameterIndex(0, nRootParameterStartIndex);
 }
 
 void MainGameScene::CreateCBV(ID3D12Device* pd3dDevice, int nConstantBufferViews, ID3D12Resource* pd3dConstantBuffers, UINT nStride)
@@ -963,7 +999,7 @@ void MainGameScene::HeliParticlesByPlayerCollisionResult()
 	BoundingOrientedBox HumanPlayeroobb = BoundingOrientedBox(HumanPos, HumanSize, Oriented);
 	BoundingOrientedBox Particleoobb[12]{ BoundingOrientedBox(XMFLOAT3(0,0,0), XMFLOAT3(0,0,0), Oriented) };
 
-	// 공중 Npc의 분해된 기체들과 플레이어들의 충돌
+	// ???? Npc?? ????? ?????? ????????? ??
 	for (int i = 12; i < 17; i++)
 	{
 		BoundingOrientedBox P1 = BoundingOrientedBox(((CHelicopterObjects*)m_ppShaders[0]->m_ppObjects[i])->m_FrameHeliglass->GetPosition(), HeliParticleSize, Oriented);
@@ -1190,7 +1226,6 @@ void MainGameScene::HealPackZoneInfo()
 
 void MainGameScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-
 	UpdateShaderVariables(pd3dCommandList);
 
 	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
@@ -1353,7 +1388,7 @@ void MainGameScene::NpcByPlayerCollsiion()
 		BoundingOrientedBox PlayerPoobb = BoundingOrientedBox(PlayerPos, BBsize, Oriented);
 
 		if (PlayerPoobb.Intersects(Npcoobb)) {
-			PlayersMoveReflect(); // 서버로 충돌 여부를 전송
+			PlayersMoveReflect(); // ?????? ?? ????? ????
 		}
 	}
 }

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Texture.h"
 #include "SceneMgr.h"
+#include "Shader.h"
 #include "Object.h"
 #include "StageScene.h"
 Texture::Texture(int nTextures, UINT nTextureType, int nSamplers, int nRootParameters, int nRows, int nCols)
@@ -85,17 +86,20 @@ void Texture::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 	{
 		for (int i = 0; i < m_nRootParameters; i++)
 		{
+			if (m_pd3dSrvGpuDescriptorHandles[i].ptr == 0) continue;
 			pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[i], m_pd3dSrvGpuDescriptorHandles[i]);
 		}
 	}
 	else
 	{
-		pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[0], m_pd3dSrvGpuDescriptorHandles[0]);
+		if (m_pd3dSrvGpuDescriptorHandles[0].ptr != 0)
+			pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[0], m_pd3dSrvGpuDescriptorHandles[0]);
 	}
 }
 
 void Texture::UpdateShaderVariable(ID3D12GraphicsCommandList* pd3dCommandList, int nParameterIndex, int nTextureIndex)
 {
+	if (m_pd3dSrvGpuDescriptorHandles[nTextureIndex].ptr == 0) return;
 	pd3dCommandList->SetGraphicsRootDescriptorTable(m_pnRootParameterIndices[nParameterIndex], m_pd3dSrvGpuDescriptorHandles[nTextureIndex]);
 }
 
@@ -373,8 +377,8 @@ void CMaterial::LoadTextureFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			*ppTexture = new Texture(1, RESOURCE_TEXTURE2D, 0, 1);
 			(*ppTexture)->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, pwstrTextureName, RESOURCE_TEXTURE2D, 0);
 			if (*ppTexture) (*ppTexture)->AddRef();
-			pScene->CreateSRVs(pd3dDevice, *ppTexture, 0, nRootParameter);
-			
+			SceneMgr* pSceneToUse = pScene ? pScene : (pShader ? pShader->GetScene() : NULL);
+			if (pSceneToUse) pSceneToUse->CreateSRVs(pd3dDevice, *ppTexture, 0, nRootParameter);
 		}
 		else
 		{
